@@ -20,12 +20,14 @@ import {
   moveGridPoint,
   rovingFocusItemProps,
   sheetClipboardCodec,
+  isWebEditingHostTarget,
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
   applyAffordance,
+  selectAllAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Field, GridCell } from "@interactive-os/json-document-ui-primitives-react";
 import { Inspector } from "../../shared/ui/inspector";
@@ -203,7 +205,20 @@ export function SheetDemo() {
             aria-label="Editable sheet"
             tabIndex={0}
             {...clipboardSurface}
-            onKeyDown={editing.getKeyDownHandler()}
+            onKeyDown={(event) => {
+              if (isWebEditingHostTarget(event.currentTarget, event.target)) {
+                applyAffordance(selectAllAffordance(event, {
+                  allSelected: editor.selectedCells.length === sheet.rows.length * sheet.columns.length,
+                }, { repeat: "preserve" }), {
+                  hand: (hand) => {
+                    if (hand.type !== "select-all") return;
+                    run(() => dispatchIntent({ type: "selection.select-all" }), "All cells selected");
+                    event.preventDefault();
+                  },
+                });
+              }
+              if (!event.defaultPrevented) editing.getKeyDownHandler()(event);
+            }}
             className={classes("min-w-0 overflow-auto", ui.state.focus)}
           >
             <table role="grid" aria-label="Project sheet" aria-multiselectable="true" className={classes("w-full min-w-[34rem]", ui.surface.table, ui.text.body)}>

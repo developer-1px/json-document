@@ -67,6 +67,7 @@ JSON 값까지 바뀌었다면 적용된 `change`도 함께 들어 있습니다.
 | `type` | 필드 | 결과 |
 | --- | --- | --- |
 | `selection.set` | `blockId`, `mode?`, `offset?` | 블록 선택 변경 |
+| `selection.select-all` | | 첫 블록 offset 0부터 마지막 블록 text 끝까지 한 번에 선택 |
 | `text.replace` | `blockId`, `text`, `offset?` | 블록 text 변경 |
 | `block.insert` | `afterId?`, `text?` | 블록 추가 |
 | `selection.remove` | | 선택한 블록 제거 |
@@ -83,6 +84,7 @@ JSON 값까지 바뀌었다면 적용된 `change`도 함께 들어 있습니다.
 | `type` | 필드 | 결과 |
 | --- | --- | --- |
 | `selection.set` | `rowId`, `columnId`, `mode?` | 셀 선택 변경 |
+| `selection.select-all` | `topology?` | 지정한 행·열 전체를 하나의 범위로 선택 |
 | `selection.fill` | `value`, `topology?` | 선택한 셀 채우기 |
 | `cell.commit` | `rowId`, `columnId`, `value` | 한 셀의 값 확정 |
 | `clipboard.paste` | `clipboard`, `topology?` | Clipboard 셀 붙여넣기 |
@@ -95,6 +97,7 @@ JSON 값까지 바뀌었다면 적용된 `change`도 함께 들어 있습니다.
 | `type` | 필드 | 결과 |
 | --- | --- | --- |
 | `selection.set` | `nodeId`, `topology`, `mode?` | 보이는 노드 선택 변경 |
+| `selection.select-all` | `topology` | 보이는 노드 전체를 하나의 범위로 선택 |
 | `selection.remove` | `topology` | 선택한 노드 제거 |
 | `clipboard.paste` | `clipboard`, `topology`, `afterId?` | 붙여넣기 |
 
@@ -121,6 +124,8 @@ JSON 값까지 바뀌었다면 적용된 `change`도 함께 들어 있습니다.
 | `type` | 필드 | 결과 |
 | --- | --- | --- |
 | `selection.set` | `itemId`, `mode?` | 항목 선택 변경 |
+| `selection.select-all` | | 전체 항목을 하나의 범위로 선택 |
+| `item.rename` | `itemId`, `label` | 레이블 확정; 실패 결과는 draft session에 전달 |
 | `selection.remove` | | 선택한 항목 제거 |
 | `clipboard.paste` | `clipboard`, `afterId?` | 붙여넣기 |
 

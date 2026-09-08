@@ -54,6 +54,24 @@ test("Object composes native and toolbar paste with the same placement Intent", 
     .toEqual([[24, 24], [48, 48], [48, 48]]);
 });
 
+test("Order repeated select-all and cancelled rename preserve selected items and document history", async ({ page }) => {
+  await page.goto("/demo/order");
+  const order = page.getByLabel("Editable order").locator("ol");
+  await order.focus();
+  for (const modifier of ["Meta", "Control"]) {
+    await order.press(`${modifier}+a`);
+    await order.press(`${modifier}+a`);
+    await expect(order.locator('[data-selected="true"]')).toHaveCount(4);
+  }
+  await order.press("F2");
+  const rename = page.getByRole("textbox", { name: "Rename Inbox" });
+  await rename.fill("Unsaved");
+  await rename.press("Escape");
+  await expect(page.getByRole("button", { name: /Inbox/ })).toBeFocused();
+  await expect(order.locator('[data-selected="true"]')).toHaveCount(4);
+  await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeDisabled();
+});
+
 test("Order typeahead jumps to the matching label and Escape clears the buffer", async ({ page }) => {
   await page.goto("/demo/order");
   await page.getByLabel("Editable order").locator("ol").focus();
@@ -245,6 +263,7 @@ test("Canvas select-all, delete, and locked objects", async ({ page }) => {
   const lock = page.getByRole("button", { name: "Lock", exact: true });
   await canvas.focus();
   await page.keyboard.press("ControlOrMeta+A");
+  await page.keyboard.press("ControlOrMeta+A");
   await expect(note).toHaveAttribute("data-selected", "true");
   await expect(page.getByRole("button", { name: "Card" })).toHaveAttribute("data-selected", "true");
   await expect(lock).toHaveAttribute("data-selected", "false");
@@ -330,6 +349,20 @@ test("Canvas copy-drag, constrain, resize, and zoom", async ({ page }) => {
     return inner ? getComputedStyle(inner).transform : "";
   });
   expect(scale).toMatch(/matrix\((1\.[1-9]|[2-9])/);
+});
+
+test("Tree repeated select-all uses the collapsed visible topology", async ({ page }) => {
+  await page.goto("/demo/tree");
+  await page.getByRole("button", { name: "Collapse Fruit" }).click();
+  const tree = page.getByLabel("Editable tree").locator("ul");
+  await tree.focus();
+  for (const modifier of ["Meta", "Control"]) {
+    await tree.press(`${modifier}+a`);
+    await tree.press(`${modifier}+a`);
+    await expect(tree.locator('[data-selected="true"]')).toHaveCount(4);
+    await expect(page.getByRole("button", { name: "Apple", exact: true })).toHaveCount(0);
+  }
+  await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeDisabled();
 });
 
 test("Tree uses host visible order and restores a cut with undo", async ({ page }) => {

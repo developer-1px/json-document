@@ -841,6 +841,7 @@ interface DocumentEditor {
 
 ```ts
 type DocumentIntent =
+  | { readonly type: "selection.select-all" }
   | { readonly type: "selection.set"; readonly blockId: string; readonly mode?: "replace" | "extend" | "toggle"; readonly offset?: number }
   | { readonly type: "text.replace"; readonly blockId: string; readonly text: string; readonly offset?: number }
   | { readonly type: "block.insert"; readonly afterId?: string; readonly text?: string }
@@ -1322,6 +1323,7 @@ interface OrderEditor {
 
 ```ts
 type OrderIntent =
+  | { readonly type: "selection.select-all" }
   | {
       readonly type: "selection.set";
       readonly itemId: string;
@@ -1454,6 +1456,7 @@ interface SheetEditor {
 
 ```ts
 type SheetIntent =
+  | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
       readonly rowId: string;
@@ -1558,6 +1561,7 @@ interface TreeEditor {
 
 ```ts
 type TreeIntent =
+  | { readonly type: "selection.select-all"; readonly topology: TreeTopology }
   | {
       readonly type: "selection.set";
       readonly nodeId: string;

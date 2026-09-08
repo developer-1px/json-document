@@ -83,37 +83,43 @@ describe("Demo definition and source discovery", () => {
     const document = await discoverDemoSources("routes/document-demo/DocumentDemoRoute.tsx");
     expect(document.map((file) => file.path)).toEqual([
       "routes/document-demo/DocumentDemoRoute.tsx",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
-      "packages/json-document-web/src/input.ts",
       "packages/json-document-editing/src/document.ts",
     ]);
     const source = await document[0]!.load();
     expect(source).toContain("export function DocumentDemoRoute()");
     expect(source).toContain('from "@interactive-os/json-document-react"');
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.path)).toEqual([
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
-      "packages/json-document-web/src/input.ts",
       "packages/json-document-editing/src/document.ts",
     ]);
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.referencePath)).toEqual([
+      "/docs/api/web",
       "/docs/api/ui-primitives-react",
       "/docs/api/ui-primitives-react",
       "/docs/api/react",
       "/docs/api/react",
+      "/docs/api/affordance",
+      "/docs/api/web",
       "/docs/api/web",
       "/docs/api/react",
-      "/docs/api/web",
       "/docs/api/editing",
     ]);
   });
@@ -144,6 +150,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-affordance/src/session.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
+      "packages/json-document-editing/src/order.ts",
     ]);
   });
 
@@ -163,10 +170,13 @@ describe("Demo definition and source discovery", () => {
     const sources = await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx");
     expect(sources.map((file) => file.path)).toEqual([
       "routes/sheet-demo/SheetDemo.tsx",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-editing/src/sheet.ts",
       "packages/json-document-react/src/use-grid-editing.ts",
@@ -211,10 +221,14 @@ describe("Demo definition and source discovery", () => {
   test("registers Tree visibility and React binding sources next to Tree usage", async () => {
     expect((await discoverDemoSources("routes/tree-demo/TreeDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/tree-demo/TreeDemoRoute.tsx",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
+      "packages/json-document-editing/src/tree.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-tree-editing.ts",
       "packages/json-document-editing/src/tree-visibility.ts",

@@ -19,12 +19,15 @@ import {
   createWebClipboardSurface,
   createWebClipboardTextWriter,
   documentClipboardCodec,
+  isWebEditingHostTarget,
   lineBoundary,
   moveLinePoint,
 } from "@interactive-os/json-document-web";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
+  applyAffordance,
+  selectAllAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { Command, Toggle, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
@@ -205,7 +208,20 @@ export function DocumentDemoRoute() {
               ref={surfaceRef}
               tabIndex={0}
               {...clipboardSurface}
-              onKeyDown={editing.getKeyDownHandler()}
+              onKeyDown={(event) => {
+                if (isWebEditingHostTarget(event.currentTarget, event.target)) {
+                  applyAffordance(selectAllAffordance(event, {
+                    allSelected: editor.selectedBlockIds.length === document.blocks.length,
+                  }, { repeat: "preserve" }), {
+                    hand: (hand) => {
+                      if (hand.type !== "select-all") return;
+                      run(() => dispatchIntent({ type: "selection.select-all" }), "All blocks selected");
+                      event.preventDefault();
+                    },
+                  });
+                }
+                if (!event.defaultPrevented) editing.getKeyDownHandler()(event);
+              }}
               className={ui.state.focus}
             >
               {document.blocks.length === 0 ? (

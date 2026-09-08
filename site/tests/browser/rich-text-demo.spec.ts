@@ -1,5 +1,27 @@
 import { expect, test, type Page } from "@playwright/test";
 
+for (const modifier of ["Meta", "Control"]) for (const backward of [false, true]) {
+  test(`Rich Text ${modifier} Undo restores ${backward ? "backward" : "forward"} range; selection movement retains Redo`, async ({ page }) => {
+    await page.goto("/editing/rich-text");
+    const before = await json(page, "rich-text-document-json");
+    const text = textNode(before, "text-editable").text;
+    await setSelection(page, "text-editable", backward ? 4 : 2, backward ? 2 : 4);
+    const selectionBefore = (await json(page, "rich-text-selection-json")).selection;
+    await page.keyboard.type("X");
+    await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-editable").text).toBe(`${text.slice(0, 2)}X${text.slice(4)}`);
+    const after = await json(page, "rich-text-document-json");
+    await page.keyboard.press(`${modifier}+z`);
+    await expect.poll(() => json(page, "rich-text-document-json")).toEqual(before);
+    await expect.poll(async () => (await json(page, "rich-text-selection-json")).selection).toEqual(selectionBefore);
+    await expect.poll(() => domSelection(page)).toEqual({ nodeId: "text-editable", anchorOffset: backward ? 4 : 2, focusOffset: backward ? 2 : 4 });
+    await setSelection(page, "text-editable", 0, 0);
+    await expect(page.getByRole("button", { name: "Redo", exact: true })).toBeEnabled();
+    await page.keyboard.press(`${modifier}+Shift+z`);
+    await expect.poll(() => json(page, "rich-text-document-json")).toEqual(after);
+    await expect.poll(() => domSelection(page)).toEqual({ nodeId: "text-editable", anchorOffset: 3, focusOffset: 3 });
+  });
+}
+
 test("Rich Text collaborative history routes DOM undo through the selective owner", async ({ page }) => {
   await page.goto("/editing/rich-text?history=collaboration");
   await setSelection(page, "text-heading", 2, 2);

@@ -11,7 +11,7 @@ import {
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import type { EditingHistoryOptions } from "./history.js";
-import { reconcileRangeSelection } from "./range-selection.js";
+import { reconcileRangeSelection, replaceRangeSelection } from "./range-selection.js";
 import { cutEditingClipboard, isClipboardJSONValue, isClipboardRecord } from "./clipboard.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds, type GridTopology } from "./topology.js";
 import { assertSheetDocument, assertUniqueSheetIds } from "./sheet-validation.js";
@@ -83,6 +83,7 @@ export const sheetClipboardFormat = {
 };
 
 export type SheetIntent =
+  | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
       readonly rowId: string;
@@ -196,6 +197,18 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
   }
 
   function dispatch(intent: SheetIntent): EditingResult<SheetSelection> {
+    if (intent.type === "selection.select-all") {
+      const { rowIds, columnIds } = resolveTopology(value(), intent.topology, index());
+      const firstRow = rowIds[0];
+      const firstColumn = columnIds[0];
+      const lastRow = rowIds.at(-1);
+      const lastColumn = columnIds.at(-1);
+      const selection = replaceRangeSelection(session.snapshot.selection,
+        firstRow !== undefined && firstColumn !== undefined && lastRow !== undefined && lastColumn !== undefined
+          ? { anchor: { rowId: firstRow, columnId: firstColumn }, focus: { rowId: lastRow, columnId: lastColumn } }
+          : null, sameSheetPoint);
+      return success(session.select(withPrimaryAliases(selection)));
+    }
     if (intent.type === "selection.set") {
       const point = resolvePoint(value(), intent.rowId, intent.columnId, index());
       if (point === null) return failure("selection.cell-not-found");

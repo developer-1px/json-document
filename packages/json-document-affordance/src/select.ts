@@ -111,13 +111,15 @@ export function resolveAffordanceKey(stroke: WebKeyboardStroke): AffordancePrevi
   return { hand: keyboard.resolve(stroke) };
 }
 
+/** Mod+A selects all. Choose preserve for repeated selection; omission retains the legacy toggle. */
 export function selectAllAffordance(
   stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey">,
   state: { readonly allSelected: boolean },
+  options: { readonly repeat?: "preserve" | "toggle" } = {},
 ): AffordancePreview {
   const mod = stroke.metaKey || stroke.ctrlKey;
   if (!mod || stroke.key.toLowerCase() !== "a") return { hand: null };
-  return { hand: { type: state.allSelected ? "clear" : "select-all" } };
+  return { hand: { type: state.allSelected && options.repeat !== "preserve" ? "clear" : "select-all" } };
 }
 
 export function typeaheadAffordance(input: {

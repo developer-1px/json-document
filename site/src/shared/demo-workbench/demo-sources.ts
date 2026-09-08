@@ -21,6 +21,7 @@ import markdownRendererSource from "../../../../packages/json-document-markdown-
 import dateValuesSource from "../../../../packages/json-document-calendar/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
+import affordanceSelectSource from "../../../../packages/json-document-affordance/src/select.ts?raw";
 import viewportPositionSource from "../../../../packages/json-document-affordance/src/viewport-position.ts?raw";
 import anchoredFloatingPositionSource from "../../../../packages/json-document-affordance/src/anchored-floating-position.ts?raw";
 import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
@@ -33,6 +34,8 @@ import virtualSelectionReactSource from "../../../../packages/json-document-reac
 import anchoredFloatingPositionReactSource from "../../../../packages/json-document-react/src/use-anchored-floating-position.ts?raw";
 import documentTextControlSource from "../../../../packages/json-document-react/src/use-document-text-control.ts?raw";
 import documentEditingSource from "../../../../packages/json-document-editing/src/document.ts?raw";
+import orderEditingSource from "../../../../packages/json-document-editing/src/order.ts?raw";
+import treeEditorSource from "../../../../packages/json-document-editing/src/tree.ts?raw";
 import sheetEditingSource from "../../../../packages/json-document-editing/src/sheet.ts?raw";
 import editingClipboardSource from "../../../../packages/json-document-editing/src/clipboard.ts?raw";
 import editingSessionSource from "../../../../packages/json-document-editing/src/session.ts?raw";
@@ -196,6 +199,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
   ["packages/json-document-react/src/use-editing.ts", editingItemSource],
   ["packages/json-document-affordance/src/session.ts", affordanceSessionSource],
+  ["packages/json-document-affordance/src/select.ts", affordanceSelectSource],
   ["packages/json-document-affordance/src/viewport-position.ts", viewportPositionSource],
   ["packages/json-document-affordance/src/anchored-floating-position.ts", anchoredFloatingPositionSource],
   ["packages/json-document-web/src/focus-item.ts", webFocusItemSource],
@@ -208,6 +212,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/use-anchored-floating-position.ts", anchoredFloatingPositionReactSource],
   ["packages/json-document-react/src/use-document-text-control.ts", documentTextControlSource],
   ["packages/json-document-editing/src/document.ts", documentEditingSource],
+  ["packages/json-document-editing/src/order.ts", orderEditingSource],
+  ["packages/json-document-editing/src/tree.ts", treeEditorSource],
   ["packages/json-document-editing/src/sheet.ts", sheetEditingSource],
   ["packages/json-document-editing/src/clipboard.ts", editingClipboardSource],
   ["packages/json-document-editing/src/session.ts", editingSessionSource],
@@ -955,6 +961,26 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-affordance",
     symbol: "createRenameSession",
     sourcePath: "packages/json-document-affordance/src/session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "selectAllAffordance",
+    sourcePath: "packages/json-document-affordance/src/select.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createDocumentEditor",
+    sourcePath: "packages/json-document-editing/src/document.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createOrderEditor",
+    sourcePath: "packages/json-document-editing/src/order.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createTreeEditor",
+    sourcePath: "packages/json-document-editing/src/tree.ts",
   },
   {
     packageName: "@interactive-os/json-document-affordance",
