@@ -1,5 +1,11 @@
 # @interactive-os/json-document-editing
 
+The [EditingSession contract](../../standards/editing-session.md) fixes the common
+state, observation, recovery and history-owner semantics, with behavior evidence
+at each owner. Implementations must preserve those rules; domain clipboard,
+input defaults and complete Hands profiles retain their own decisions. This is
+not a Stable release declaration for every export in this package.
+
 `EditingSession` observes snapshots by JSON value, not reference identity.
 Fresh-copy JSONDocument implementations retain local history until an actual
 external value change. Undo reverses each operation against its sequential

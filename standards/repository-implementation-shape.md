@@ -192,6 +192,18 @@ Site / Host product
 Kernel의 대체 구현이며 Editing의 하위 구현이 아니다. Selection은 dependency-free
 foundation으로 유지한다.
 
+### 의미를 보존하는 책임 경계
+
+이동하거나 교체하는 구현은 기존 owner의 관찰 가능한 계약을 보존한다.
+Core는 [v3 profile](json-document-v3/profile.md), Editing의 상태·관찰·복원은
+[EditingSession 계약](editing-session.md), 플랫폼 입력 수명은
+[DOM lifecycle](dom-editing-lifecycle.md)을 따른다. Domain은 자신의 유효한 연산과
+다음 선택을 결정하고 Host는 그 public API에 제품 정책 값과 외부 인스턴스를 연결한다.
+
+이 경계는 package 내부 파일 모양이나 현재 export 개수를 동결하지 않는다.
+구현 모양의 통일을 이유로 local/causal History, 선택 family, 플랫폼 입력과
+도메인 연산처럼 다른 의미를 합치거나 소비자에 공통 동작을 다시 구현하지 않는다.
+
 ## Test와 benchmark 배치
 
 - 배포 source는 `src/`, package contract test는 `tests/`, 성능 기준선은

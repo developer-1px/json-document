@@ -137,6 +137,11 @@ reconciliation까지의 DOM 편집 정본은 `standards/dom-editing-lifecycle.md
 identifier나 동작을 바꾸지 않으며, 과거 version 문서는 정본 public surface의
 Root symbol·six-member 계약을 확장하지 않습니다.
 
+EditingSession의 확정된 공통 의미는 `standards/editing-session.md`가 소유합니다.
+ES 규칙은 상태·관찰·실패 복구·History 소유권의 호환성 기준이며, 각 규칙을 owner의
+행동 테스트에 연결합니다. `docs:evaluate`는 그 증거 연결을 검사하고 package test가
+실제 행동을 검증합니다. 이 확정은 전체 Hands의 Stable 선언을 뜻하지 않습니다.
+
 편집 문법의 안정화 설계는 `standards/editing-grammar.md`에 있습니다. 공통 편집
 규칙, Hands profile의 선택, 입력 매핑의 소유자와 적합성 증거를 연결하는 Design
 Draft이며 기존 Stable profile의 권위를 변경하지 않습니다. API reference와 Usage는
