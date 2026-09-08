@@ -61,6 +61,15 @@ describe("Rich Text React locality", () => {
     expect(createRichTextRenderStore(editor).getBlockIds()).toEqual(["move-1", "move-2", "move-0"]);
     expect([...container.querySelectorAll("p[data-rich-text-node-id]")].map((node) => node.getAttribute("data-rich-text-node-id"))).toEqual(["move-1", "move-2", "move-0"]);
     await act(async () => root.unmount());
+    // UI subscriptions are gone; the one-shot local History marker remains.
+    expect(active).toBe(1);
+    const valueAfterMove = inner.value;
+    expect(inner.commit([{ op: "replace", path: "/content/0/content/0/text", value: "external" }]).ok).toBe(true);
+    expect(active).toBe(0);
+    expect(inner.commit([{ op: "replace", path: "/content/0/content/0/text", value: "x" }]).ok).toBe(true);
+    expect(inner.value).toEqual(valueAfterMove);
+    expect(editor.snapshot.canUndo).toBe(false);
+    expect(editor.undo()).toMatchObject({ ok: false, code: "history.empty" });
     expect(active).toBe(0);
   });
 

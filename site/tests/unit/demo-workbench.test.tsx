@@ -81,6 +81,9 @@ describe("Demo definition and source discovery", () => {
     const session = sources.find((file) => file.path === "packages/json-document-editing/src/session.ts");
     expect(session).toBeDefined();
     expect(await session!.load()).toContain("reconcileSelection");
+    const invalidation = sources.find((file) => file.path === "packages/json-document-editing/src/history-invalidation.ts");
+    expect(invalidation).toBeDefined();
+    expect(await invalidation!.load()).toContain("observeHistoryInvalidation");
     const renderStore = sources.find((file) => file.path === "packages/json-document-rich-text-react/src/render-store.ts");
     expect(renderStore).toBeDefined();
     expect(await renderStore!.load()).toContain("appliedOperationsFor");

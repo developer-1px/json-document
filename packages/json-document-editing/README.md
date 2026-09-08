@@ -1,5 +1,12 @@
 # @interactive-os/json-document-editing
 
+The [EditingSession contract](../../standards/editing-session.md) separates common
+state, observation, recovery and history-owner invariants from the current
+TypeScript binding and local-history policies, with behavior evidence at each
+owner. Implementations must preserve the applicable contract; domain clipboard,
+input defaults and complete Hands profiles retain their own decisions. This is
+not a Stable release declaration for every export in this package.
+
 `EditingSession` observes snapshots by JSON value, not reference identity.
 Fresh-copy JSONDocument implementations retain local history until an actual
 external value change. Undo reverses each operation against its sequential
@@ -72,8 +79,13 @@ replica. Custom `createId` injection remains supported; its provider must ensure
 uniqueness across all writers. Environments without `crypto.randomUUID` fail
 explicitly with `editing.id-provider-unavailable`; no weak random fallback is used.
 
-The session subscribes to its document only while it has observers. The last
-unsubscribe releases that connection; later reads catch up with external state.
+The last UI unsubscribe releases the session's document and external-history
+observation connections. Local undo/redo validity is independent of UI subscriptions:
+a one-shot change marker retains no session, history stack or UI callback and
+releases itself on the next document change. Later reads invalidate local history
+even if external edits returned the value to the previous snapshot. Fresh-copy
+snapshots and document no-ops do not invalidate history. This does not replay every
+unobserved intermediate selection or guarantee identical revision counts.
 Unsubscribe is idempotent: calling an old release again cannot remove a new
 subscription that reuses the same callback.
 `DocumentEditor` moves existing blocks with JSON Patch `move`, preserving their
