@@ -78,10 +78,30 @@ interface WebClipboardBindingOptions<Payload, EditingResult> {
   readonly codec: WebClipboardCodec<Payload>;
   readonly representations?: ReadonlyArray<WebClipboardRepresentation<Payload>>;
   readonly read: () => Payload | null;
-  readonly cut?: (payload: Payload) => EditingResult;
+  readonly cut?: (payload: Payload) => EditingResult | null;
   readonly paste: (payload: Payload) => EditingResult;
 }
 ```
+
+### 이벤트 소유권과 실패
+
+| 동작 | `preventDefault()` 시점 |
+| --- | --- |
+| Copy | 모든 표현을 성공적으로 쓴 뒤 |
+| Cut | cut callback·event clipboardData·payload를 확인한 뒤, 표현 인코딩/쓰기 전 |
+| Paste | 지원하는 payload를 해석한 뒤, 편집 callback 호출 전 |
+
+Cut의 표현 인코딩/쓰기가 실패하면 `clipboard.unavailable`을 반환하고 제거
+callback을 호출하지 않습니다. 이미 취소한 native Cut을 다시 위임하지 않으므로
+브라우저의 후속 삭제로 원본·선택·History가 바뀌지 않습니다. 모든 표현을 쓴
+뒤에만 제거를 호출하며, 제거가 거절되면 `editing.rejected`를 반환합니다.
+지원하는 Paste의 편집 거절도 취소한 이벤트를 다시 위임하지 않습니다.
+
+Cut 미지원, clipboardData/payload 부재, Copy 쓰기 실패, 지원하지 않거나 유효하지
+않은 Paste는 기존 native 위임을 유지합니다. 실패 전에 일부 clipboard 표현을
+썼다면 그 데이터는 남을 수 있습니다. 이 API는 OS clipboard와 문서의 원자성을
+보장하지 않습니다. [정본 owner의 계약과 검증](https://github.com/developer-1px/json-document/blob/main/packages/json-document-web/README.md#cut-failure-boundary-draft-grammar)에
+단위·실제 브라우저 검증 경계를 함께 설명합니다.
 
 ## Live Demo
 

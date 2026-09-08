@@ -134,13 +134,15 @@ export function createWebClipboardBinding<
   Payload extends WebClipboardPayload,
   EditingResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string },
 >(options: WebClipboardBindingOptions<Payload, EditingResult>): WebClipboardBinding<Payload, EditingResult> {
-  function write(event: WebClipboardEvent):
+  function write(event: WebClipboardEvent, operation: "copy" | "cut"):
     | { readonly ok: true; readonly payload: Payload }
     | Extract<WebClipboardResult<never, never>, { readonly ok: false }> {
     const data = event.clipboardData;
     if (data === null) return failure("clipboard.unavailable");
     const payload = options.read();
     if (payload === null) return failure("clipboard.empty");
+    // A failed custom Cut must not fall through to native selection deletion.
+    if (operation === "cut") event.preventDefault();
     try {
       if (options.representations === undefined) {
         data.setData(options.codec.mimeType, options.codec.encode(payload));
@@ -158,16 +160,15 @@ export function createWebClipboardBinding<
 
   return {
     copy(event) {
-      const written = write(event);
+      const written = write(event, "copy");
       if (!written.ok) return written;
       event.preventDefault();
       return { ok: true, operation: "copy", payload: written.payload };
     },
     cut(event) {
       if (options.cut === undefined) return failure("clipboard.unsupported");
-      const written = write(event);
+      const written = write(event, "cut");
       if (!written.ok) return written;
-      event.preventDefault();
       const result = options.cut(written.payload);
       if (result === null) return failure("editing.rejected", "clipboard.empty");
       if (!result.ok) return failure("editing.rejected", result.reason ?? result.code);

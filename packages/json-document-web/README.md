@@ -31,11 +31,11 @@ ARIA projection, composite focus, and text input. It translates native `Clipboar
 conventional keyboard chords without rendering UI or deciding product
 keyboard policy.
 
-Once a supported cut has written its payload or a paste has decoded a supported
-payload, the binding cancels the native event before calling the editor. A
-rejected edit remains `editing.rejected` and cannot fall through to a browser
-mutation. Unsupported or undecodable paste data keeps its existing pass-through
-behavior.
+Once a supported cut has captured a payload and has event clipboard data, the
+binding cancels native Cut before encoding or writing representations. Paste
+cancels its event after decoding a supported payload. A failed Cut write or a
+rejected edit cannot fall through to a browser mutation. Unsupported or
+undecodable paste data keeps its existing pass-through behavior.
 
 `registerWebVirtualSelectionScope` coordinates native Select All and copy when a
 surface mounts only part of its model. It selects the mounted root with a real
@@ -155,11 +155,19 @@ semantic command or `null`; `moveLinePoint` and `moveGridPoint` locate the
 visible neighbor. The host still decides when a command applies and which
 domain Intent to dispatch.
 
-The clipboard binding calls `preventDefault()` only after a successful copy,
-canonical cut, or canonical paste. Cut writes the selected payload before
-asking the Editing companion to remove it. Missing clipboard data, malformed
-payloads, unsupported cut, and rejected editing results leave native handling
-available.
+Clipboard event ownership is independent of the editing result:
+
+| Operation | When native handling is canceled |
+| --- | --- |
+| Copy | After every enabled representation is written successfully. |
+| Cut | After confirming a cut callback, event clipboard data, and a non-null payload; before encoding or writing. |
+| Paste | After decoding a supported payload; before calling the editor. |
+
+Cut calls the Editing companion to remove the selection only after every write
+succeeds. Failed Cut encoding or writing returns `clipboard.unavailable`;
+rejected Cut/Paste edits return `editing.rejected`. These failures retain event
+ownership. Missing clipboard data, an empty payload, unsupported Cut, and
+unsupported or invalid Paste leave native handling available.
 
 `createWebClipboardSurface` is the public surface-level orchestration API. It
 projects one binding into `onCopy`, `onCut`, and `onPaste` handlers and reports
@@ -205,9 +213,10 @@ so non-browser tooling can load it safely.
 
 ## Cut failure boundary (Draft grammar)
 
-`createWebClipboardBinding` captures the editor payload and writes its
-representations before calling `cut`. A failed write leaves removal uncalled;
-a rejected removal reports `editing.rejected` after native event cancellation.
+`createWebClipboardBinding` captures the editor payload, cancels native Cut,
+then writes its representations before calling `cut`. A failed encoding or
+write leaves removal uncalled and native deletion canceled; a rejected removal
+reports `editing.rejected` while retaining event ownership.
 Previously written clipboard data can remain in either failure case: the OS
 clipboard and JSONDocument are not one transaction. Headless `editor.cut()`
 returns its captured payload alongside the editing result.
@@ -215,8 +224,17 @@ returns its captured payload alongside the editing result.
 [EG-CUT integration cases](tests/clipboard-rejection.test.ts) use a real
 Document editor to check each write failure, schema-rejected removal, successful
 capture-before-removal, and selection-restoring Undo. Existing unsupported-format
-cases retain their event ownership behavior. These tests exercise the Web event
-port; they do not certify browser-specific clipboard permissions or transport.
+cases retain their event ownership behavior.
+
+[Rich Text browser cases](../../site/tests/browser/rich-text-demo.spec.ts) inject
+a `setData` exception at each of the three representations and invoke native Cut
+with a real keyboard shortcut in Chrome, Firefox, and WebKit. They observe event
+cancellation, absence of subsequent native `deleteByCut`, unchanged document and
+backward DOM selection, retained Redo, and successful retry followed by Undo.
+These fixtures verify the observable failure path, not OS permissions or
+clipboard transport success. The [W3C Cut processing model](https://www.w3.org/TR/clipboard-apis/#cut-action)
+explains why returning a failure result without canceling the event leaves native
+deletion available.
 
 ## Native text selection
 
