@@ -69,10 +69,11 @@ export {
   isCalendarAllDay,
   parseCalendarView,
 } from "./calendar-validation.js";
-export { ANNOTATION_PROFILE_V1, createAnnotationEditor } from "./annotation.js";
+export { ANNOTATION_PROFILE_V1, annotationResizeHandle, annotationSelectorBounds, createAnnotationEditor, transformAnnotationSelector } from "./annotation.js";
 export { assertAnnotationDocument } from "./annotation-validation.js";
 export type {
   Annotation,
+  AnnotationBounds,
   AnnotationDocument,
   AnnotationEditor,
   AnnotationIntent,
@@ -80,6 +81,7 @@ export type {
   AnnotationPresentation,
   AnnotationSelection,
   AnnotationSelector,
+  AnnotationSelectorTransform,
   AnnotationSource,
 } from "./annotation.js";
 export type {

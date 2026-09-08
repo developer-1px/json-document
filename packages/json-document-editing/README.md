@@ -244,3 +244,11 @@ preserves document values and existing Undo/Redo records; Undo after an edit
 restores the recorded offset range. These contracts are exercised by
 [Document editor tests](tests/document-editor.test.ts) and the existing
 [Document Usage](https://developer-1px.github.io/json-document/demo).
+
+
+Annotation selection preserves its public `{ kind: "annotation", ids, primaryId }`
+shape and the order in which IDs were selected. Membership and primary fallback
+are owned by Key Selection; document reconciliation retains surviving IDs in
+that order. Undo/Redo restores both the document and the associated selection.
+`transformAnnotationSelector`, `annotationSelectorBounds`, and
+`annotationResizeHandle` are the canonical geometry APIs for preview and commit.

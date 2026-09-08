@@ -123,6 +123,7 @@ const surfaces = {
   ajvReadme: read("packages/json-document-ajv/README.md"),
   zodReadme: read("packages/json-document-zod/README.md"),
   databaseReadme: read("packages/json-document-database/README.md"),
+  annotationReadme: read("packages/json-document-annotation/README.md"),
   tanstackTableReadme: read("packages/json-document-tanstack-table/README.md"),
   webReadme: read("packages/json-document-web/README.md"),
   contenteditableReadme: read("packages/json-document-contenteditable/README.md"),

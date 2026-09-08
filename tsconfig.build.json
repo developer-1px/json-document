@@ -15,6 +15,7 @@
     { "path": "./packages/json-document-markdown-react" },
     { "path": "./packages/json-document-zod" },
     { "path": "./packages/json-document-database" },
+    { "path": "./packages/json-document-annotation" },
     { "path": "./packages/json-document-calendar" },
     { "path": "./packages/json-document-tanstack-table" },
     { "path": "./packages/json-document-web" },

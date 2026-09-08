@@ -9,7 +9,7 @@ const sources = {
   calendar: read("packages/json-document-calendar/src/use-calendar-pointer-interactions.ts"),
   canvas: read("site/src/routes/canvas-demo/CanvasDemoRoute.tsx"),
   database: read("packages/json-document-database/src/database-hand.tsx"),
-  annotation: read("site/src/routes/annotation-demo/AnnotationDemoRoute.tsx"),
+  annotation: read("packages/json-document-annotation/src/annotation-hand.tsx"),
 };
 
 requireText("owner", sources.owner, "createInteractionHandleSession");
