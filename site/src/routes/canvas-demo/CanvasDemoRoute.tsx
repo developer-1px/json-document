@@ -555,15 +555,11 @@ export function CanvasDemoRoute() {
     applyAffordance(
       selectAllAffordance(event, {
         allSelected: editor.selectedObjects.length === unlockedIds.length && unlockedIds.length > 0,
-      }),
+      }, { repeat: "preserve" }),
       {
         hand: (hand) => {
           if (hand.type === "select-all") {
             editor.dispatch({ type: "selection.set", objectIds: unlockedIds, mode: "replace" });
-            event.preventDefault();
-          }
-          if (hand.type === "clear") {
-            editor.dispatch({ type: "selection.set", objectIds: [], mode: "replace" });
             event.preventDefault();
           }
         },

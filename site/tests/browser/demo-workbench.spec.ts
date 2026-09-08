@@ -1,5 +1,23 @@
 import { expect, test } from "@playwright/test";
 
+for (const { route, entry, owner } of [
+  { route: "/demo/order", entry: "OrderDemoRoute.tsx", owner: "order.ts" },
+  { route: "/demo/tree", entry: "TreeDemoRoute.tsx", owner: "tree.ts" },
+  { route: "/demo/sheet", entry: "SheetDemoRoute.tsx", owner: "sheet.ts" },
+  { route: "/demo", entry: "DocumentDemoRoute.tsx", owner: "document.ts" },
+]) {
+  test(`${route} Usage links select-all to its canonical owner`, async ({ page }) => {
+    await page.goto(route);
+    const workbench = page.getByRole("region", { name: "Demo workbench" });
+    await workbench.getByRole("tab", { name: entry, exact: true }).click();
+    await workbench.getByRole("tab", { name: owner, exact: true }).click();
+    await expect(workbench.getByRole("tabpanel").locator("pre")).toContainText('"selection.select-all"');
+    await expect(workbench.getByRole("link", { name: "API Reference" })).toHaveAttribute("href", "/docs/api/editing");
+    await workbench.getByRole("tab", { name: "select.ts", exact: true }).click();
+    await expect(workbench.getByRole("tabpanel").locator("pre")).toContainText('"preserve"');
+  });
+}
+
 test("switches between the live demo and its actual full source without resetting demo state", async ({ page }) => {
   await page.goto("/demo");
 

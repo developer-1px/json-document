@@ -11,10 +11,13 @@ import { useEditingObservation, useTreeEditing } from "@interactive-os/json-docu
 import {
   createWebClipboardSurface,
   treeClipboardCodec,
+  isWebEditingHostTarget,
 } from "@interactive-os/json-document-web";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
+  applyAffordance,
+  selectAllAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
@@ -152,7 +155,20 @@ export function TreeDemoRoute() {
             className="m-0 grid list-none gap-1 p-0"
             tabIndex={0}
             {...clipboardSurface}
-            onKeyDown={editing.getKeyDownHandler()}
+            onKeyDown={(event) => {
+              if (isWebEditingHostTarget(event.currentTarget, event.target)) {
+                applyAffordance(selectAllAffordance(event, {
+                  allSelected: editor.selectedNodeIdsIn(topology).length === topology.visibleIds.length,
+                }, { repeat: "preserve" }), {
+                  hand: (hand) => {
+                    if (hand.type !== "select-all") return;
+                    run({ type: "selection.select-all", topology }, "All visible nodes selected");
+                    event.preventDefault();
+                  },
+                });
+              }
+              if (!event.defaultPrevented) editing.getKeyDownHandler()(event);
+            }}
           >
             {rows.map((row) => {
               return (

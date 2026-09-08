@@ -1,5 +1,23 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test("Document repeated select-all preserves blocks and leaves native text selection owned by the field", async ({ page }) => {
+  await page.goto("/demo");
+  const surface = page.getByRole("region", { name: "Editable document" }).locator('[tabindex="0"]');
+  await surface.focus();
+  for (const modifier of ["Meta", "Control"]) {
+    await surface.press(`${modifier}+a`);
+    await surface.press(`${modifier}+a`);
+    await expect(page.locator('article[data-block-id][data-selected="true"]')).toHaveCount(4);
+  }
+  await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeDisabled();
+  const field = page.getByRole("textbox", { name: "Block 1 text" });
+  await field.click();
+  await field.press("ControlOrMeta+a");
+  await expect.poll(() => field.evaluate((node: HTMLTextAreaElement) => [node.selectionStart, node.selectionEnd]))
+    .toEqual([0, (await field.inputValue()).length]);
+  await expect(page.locator('article[data-block-id][data-selected="true"]')).toHaveCount(1);
+});
+
 test("Document keeps native caret and directional range offsets in the editor", async ({ page }) => {
   await page.goto("/demo");
   await page.getByText("Inspect editing state", { exact: true }).click();

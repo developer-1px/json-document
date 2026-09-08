@@ -10,6 +10,7 @@ import {
 import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
   focusWebItem,
+  isWebEditingHostTarget,
   createWebClipboardSurface,
   lineBoundary,
   moveLinePoint,
@@ -25,6 +26,7 @@ import {
   applyAffordance,
   escapeAffordance,
   renameAffordance,
+  selectAllAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { Command, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
@@ -71,7 +73,7 @@ export function OrderDemoRoute() {
     },
   }));
   const [renameSession] = useState(() => createRenameSession<string>({
-    onCommit: (itemId, label) => run({ type: "item.rename", itemId, label }, "Item renamed"),
+    tryCommit: (itemId, label) => run({ type: "item.rename", itemId, label }, "Item renamed").ok,
     onFinish: (itemId) => requestAnimationFrame(() => focusWebItem<HTMLElement>(orderRef.current, itemId)),
     onSnapshot: (snapshot) => setRenaming(snapshot === null ? null : { id: snapshot.key, draft: snapshot.draft }),
   }));
@@ -133,6 +135,18 @@ export function OrderDemoRoute() {
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLOListElement>) {
+    if (isWebEditingHostTarget(event.currentTarget, event.target)) {
+      applyAffordance(selectAllAffordance(event, {
+        allSelected: editor.selectedItemIds.length === document.items.length,
+      }, { repeat: "preserve" }), {
+        hand: (hand) => {
+          if (hand.type !== "select-all") return;
+          run({ type: "selection.select-all" }, "All items selected");
+          event.preventDefault();
+        },
+      });
+      if (event.defaultPrevented) return;
+    }
     if (focusSession.handle(event, ids())) {
       event.preventDefault();
       const next = focusSession.getFocusKey();

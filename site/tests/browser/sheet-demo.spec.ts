@@ -1,5 +1,22 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test("Sheet repeated select-all preserves the rectangle and native field select-all", async ({ page }) => {
+  await page.goto("/demo/sheet");
+  const surface = page.getByLabel("Editable sheet");
+  await surface.focus();
+  for (const modifier of ["Meta", "Control"]) {
+    await surface.press(`${modifier}+a`);
+    await surface.press(`${modifier}+a`);
+    await expect(page.locator('td[data-selected="true"]')).toHaveCount(12);
+  }
+  await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeDisabled();
+  const field = page.getByRole("textbox", { name: "Name row 1" });
+  await field.click();
+  await field.press("ControlOrMeta+a");
+  await expect.poll(() => field.evaluate((node: HTMLInputElement) => [node.selectionStart, node.selectionEnd])).toEqual([0, 5]);
+  await expect(page.locator('td[data-selected="true"]')).toHaveCount(1);
+});
+
 test("Sheet demo completes rectangular selection, clipboard, edit, undo, and redo", async ({ page }) => {
   const consoleProblems: string[] = [];
   page.on("console", (message) => {
