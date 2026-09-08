@@ -94,8 +94,8 @@ open/focus semantics remain outside this geometry contract.
 Usage: [Affordance](https://developer-1px.github.io/json-document/docs/affordance)
 
 `selectAllAffordance(stroke, state, { repeat: "preserve" })` emits `select-all`
-for Mod+A even when everything is selected. The default editing Usage chooses
-this policy. Omission or `{ repeat: "toggle" }` retains the existing behavior:
+for Mod+A without Alt or Shift, even when everything is selected. The default
+editing Usage chooses this policy. Omission or `{ repeat: "toggle" }` retains the existing behavior:
 emit `clear` when `state.allSelected`, otherwise `select-all`. This is an input
 policy; domain editors own the selected universe and its semantic transition.
 
@@ -105,3 +105,10 @@ Document's `selection.move`. Structural preview and cancellation leave committed
 value/history unchanged; commit dispatches the latest preview once. This proves
 the tested composition, not every Host callback. IME composition has a separate
 [DOM editing lifecycle](../../standards/dom-editing-lifecycle.md) contract.
+
+`deleteAffordance(stroke)` consumes the Web default structural keymap: bare
+Delete/Backspace delete; modified variants return no hand. Omitted modifiers
+remain false for existing partial-input calls. Pass the full event to preserve
+modifier facts. `selectAllAffordance` uses Web `chordFromStroke` for the same
+normalization, then applies its own select-all repetition policy. Text word or
+line deletion belongs to the text input adapter.

@@ -71,6 +71,9 @@ describe("Agent Chat Composer Hands", () => {
     expect(screen.getByTestId("composer-draft-json").textContent).toContain("요구사항.md");
     expect(screen.getByRole("button", { name: "전송 (Enter)" }).hasAttribute("disabled")).toBe(false);
 
+    const draftBefore = screen.getByTestId("composer-draft-json").textContent;
+    expect(fireEvent.keyDown(screen.getByTestId("agent-chat-composer"), { key: "z", metaKey: true, altKey: true })).toBe(true);
+    expect(screen.getByTestId("composer-draft-json").textContent).toBe(draftBefore);
     fireEvent.keyDown(screen.getByTestId("agent-chat-composer"), { key: "z", metaKey: true });
     expect(screen.queryByText("요구사항.md")).toBeNull();
     fireEvent.keyDown(screen.getByTestId("agent-chat-composer"), { key: "z", metaKey: true, shiftKey: true });

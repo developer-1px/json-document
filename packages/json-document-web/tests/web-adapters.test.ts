@@ -646,6 +646,24 @@ describe("Web keyboard Adapter", () => {
     expect(adapter.resolve({ key: "c", shiftKey: false, metaKey: true, ctrlKey: false })).toBeNull();
   });
 
+  test("preserves modifiers while allowing explicit product chord assignments", () => {
+    const product = createWebKeyboardAdapter({
+      defaults: false,
+      keymap: { "Mod-Alt-z": { type: "undo" }, "Mod-Backspace": { type: "delete" } },
+    });
+    for (const modifiers of [{ metaKey: true, ctrlKey: false }, { metaKey: false, ctrlKey: true }]) {
+      const undo = { key: "Z", shiftKey: false, altKey: true, ...modifiers };
+      const remove = { key: "Backspace", shiftKey: false, ...modifiers };
+      expect(adapter.resolve(undo)).toBeNull();
+      expect(adapter.resolve(remove)).toBeNull();
+      expect(product.resolve(undo)).toEqual({ type: "undo" });
+      expect(product.resolve(remove)).toEqual({ type: "delete" });
+      expect(product.resolve({ ...undo, altKey: false })).toBeNull();
+      expect(adapter.resolve({ ...undo, altKey: false })).toEqual({ type: "undo" });
+      expect(adapter.resolve({ ...undo, altKey: false, shiftKey: true })).toEqual({ type: "redo" });
+    }
+  });
+
   test("lets the host replace chords without inventing editing commands", () => {
     const custom = createWebKeyboardAdapter({
       keymap: { ...defaultWebKeymap, Enter: { type: "toggle" } },

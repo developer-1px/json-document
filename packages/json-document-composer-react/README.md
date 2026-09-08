@@ -20,3 +20,8 @@ composed from the canonical suggestion packages.
 Product copy, styling, layout, suggestions, and concrete ports remain Host-owned.
 Draft/editor subscription, suggestion integration, keyboard/history execution, Web file
 intake, focus recovery, and submit lifecycle remain canonical across Host replacements.
+
+`useComposer` preserves Alt when translating key events to Composer interaction
+meaning. Its history capture handler consumes only the default Undo/Redo chord;
+Alt-modified variants leave the event and canonical history untouched. Submit
+and command-menu handling retain the configured Composer policy.

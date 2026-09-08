@@ -200,6 +200,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-composer/src/commands.ts",
       "packages/json-document-composer/src/host-config.ts",
       "packages/json-document-composer/src/interaction.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-rich-text-suggestion/src/index.ts",
       "packages/json-document-rich-text-suggestion-react/src/index.ts",
       "packages/json-document-composer-react/src/use-composer.tsx",
