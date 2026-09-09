@@ -12,6 +12,7 @@ import zodApiMarkdown from "../../../../docs/api-reference/zod.md?raw";
 import tanStackTableApiMarkdown from "../../../../docs/api-reference/tanstack-table.md?raw";
 import affordanceApiMarkdown from "../../../../docs/api-reference/affordance.md?raw";
 import planeSelectContractMarkdown from "../../../../packages/json-document-affordance/docs/plane-select.md?raw";
+import resizeContractMarkdown from "../../../../packages/json-document-affordance/docs/resize.md?raw";
 import objectSelectionContractMarkdown from "../../../../packages/json-document-editing/docs/object-selection.md?raw";
 import uiPrimitivesApiMarkdown from "../../../../docs/api-reference/ui-primitives-react.md?raw";
 import animationApiMarkdown from "../../../../docs/api-reference/animation-react.md?raw";
@@ -194,7 +195,7 @@ export const docPages = {
   connectorA2ui: docPage("/docs/connector-a2ui", connectorA2uiMarkdown),
   zodApi: docPage("/docs/api/zod", zodApiMarkdown),
   tanStackTableApi: docPage("/docs/api/tanstack-table", tanStackTableApiMarkdown),
-  affordanceApi: docPage("/docs/api/affordance", `${planeSelectContractMarkdown}\n\n${affordanceApiMarkdown}`),
+  affordanceApi: docPage("/docs/api/affordance", `${planeSelectContractMarkdown}\n\n${resizeContractMarkdown}\n\n${affordanceApiMarkdown}`),
   uiPrimitivesApi: docPage("/docs/api/ui-primitives-react", uiPrimitivesApiMarkdown),
   animationApi: docPage("/docs/api/animation-react", animationApiMarkdown),
   markdownReactApi: docPage("/docs/api/markdown-react", markdownReactApiMarkdown),

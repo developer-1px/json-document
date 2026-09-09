@@ -147,36 +147,42 @@ export function resizeAffordance(
   point: Point,
   edge: ResizeEdge,
   modifiers?: { readonly shiftKey?: boolean; readonly altKey?: boolean },
+  size?: Pick<Rect, "width" | "height">,
 ): AffordancePreview {
   let dx = point.x - origin.x;
   let dy = point.y - origin.y;
   const corner = edge.length === 2;
-  if (modifiers?.shiftKey && corner) {
+  if (modifiers?.shiftKey && corner && !size) {
     const mag = Math.max(Math.abs(dx), Math.abs(dy));
     dx = (dx === 0 ? 1 : Math.sign(dx)) * mag;
     dy = (dy === 0 ? 1 : Math.sign(dy)) * mag;
   }
-  let left = 0;
-  let top = 0;
-  let right = 0;
-  let bottom = 0;
-  if (edge.includes("e")) right = dx;
-  if (edge.includes("w")) left = dx;
-  if (edge.includes("s")) bottom = dy;
-  if (edge.includes("n")) top = dy;
-  if (modifiers?.altKey) {
-    if (edge.includes("e")) left = -dx;
-    if (edge.includes("w")) right = -dx;
-    if (edge.includes("s")) top = -dy;
-    if (edge.includes("n")) bottom = -dy;
+  const west = edge.includes("w"), north = edge.includes("n");
+  const horizontal = west || edge.includes("e"), vertical = north || edge.includes("s");
+  const centered = modifiers?.altKey ?? false, factor = centered ? 2 : 1;
+  let dw = (west ? -dx : horizontal ? dx : 0) * factor;
+  let dh = (north ? -dy : vertical ? dy : 0) * factor;
+  if (size) {
+    const { width, height } = size;
+    if (![width, height].every((value) => Number.isFinite(value) && value > 0)) throw new RangeError("Resize dimensions must be finite and positive.");
+    // A stationary grab is a no-op, including valid imported sub-unit objects.
+    if ((dw !== 0 || dh !== 0) && modifiers?.shiftKey) {
+      const sx = dw / width, sy = dh / height;
+      const growth = horizontal && (!vertical || Math.abs(sx) >= Math.abs(sy)) ? sx : sy;
+      const scaleDelta = Math.max(1 / width - 1, 1 / height - 1, growth);
+      dw = width * scaleDelta; dh = height * scaleDelta;
+    } else if (dw !== 0 || dh !== 0) {
+      dw = Math.max(1 - width, dw); dh = Math.max(1 - height, dh);
+    }
   }
+  // Derive translation from the constrained size so the opposite edge or center stays fixed.
   return {
     hand: {
       type: "resize",
-      dx: left,
-      dy: top,
-      dw: right - left,
-      dh: bottom - top,
+      dx: dw === 0 ? 0 : centered || !horizontal ? -dw / 2 : west ? -dw : 0,
+      dy: dh === 0 ? 0 : centered || !vertical ? -dh / 2 : north ? -dh : 0,
+      dw,
+      dh,
       edge,
     },
     cursor: interactionHandleCursor({ kind: "resize", edge }),

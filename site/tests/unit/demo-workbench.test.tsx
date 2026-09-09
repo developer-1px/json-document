@@ -360,8 +360,11 @@ describe("Demo definition and source discovery", () => {
         "packages/json-document-object-document/src/object-projection.ts",
         "packages/json-document-editing/src/object.ts",
         "packages/json-document-affordance/src/gesture-session.ts",
+        "packages/json-document-affordance/src/drag.ts",
         "packages/json-document-react/src/editing-snapshot.ts",
       ]));
+      const hand = (await discoverDemoSources(entry)).find((file) => file.path === "packages/json-document-canvas/src/use-canvas-hand.ts")!;
+      expect(await hand.load()).toContain("resizeAffordance(gesture.start, gesture.point, gesture.edge, gesture, gesture.object)");
     }
   });
 

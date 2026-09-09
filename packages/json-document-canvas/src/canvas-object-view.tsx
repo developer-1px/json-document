@@ -55,6 +55,13 @@ export function CanvasResizeTarget(props: {
   const { object, edge } = props;
   const x = object.x + (edge.includes("w") ? 0 : edge.includes("e") ? object.width : object.width / 2);
   const y = object.y + (edge.includes("n") ? 0 : edge.includes("s") ? object.height : object.height / 2);
+  if (edge.length === 1) {
+    const horizontal = edge === "n" || edge === "s";
+    return <rect {...binding.handleProps} data-resize-edge={edge}
+      x={horizontal ? object.x : x - 6} y={horizontal ? y - 6 : object.y}
+      width={horizontal ? object.width : 12} height={horizontal ? 12 : object.height}
+      fill="transparent" style={{ cursor: binding.cursor }} />;
+  }
   return <rect {...binding.handleProps} data-resize-edge={edge} x={x - 6} y={y - 6} width={12} height={12}
     fill="rgb(var(--color-background-canvas))" stroke="rgb(var(--color-border-accent))" strokeWidth={2} style={{ cursor: binding.cursor }} />;
 }
