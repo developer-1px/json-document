@@ -20,7 +20,7 @@ export { createPlaneSelectProfile } from "./plane-select.js";
 export type {
   PlaneSelectCommit, PlaneSelectContext, PlaneSelectInput, PlaneSelectKeyResult,
   PlaneSelectPreview, PlaneSelectProfile, PlaneSelectProfileOptions, PlaneSelectSelection,
-  PlaneSelectTranslation,
+  PlaneSelectTranslation, PlaneSelectModifiers,
 } from "./plane-select.js";
 export {
   createInteractionHandleSession,

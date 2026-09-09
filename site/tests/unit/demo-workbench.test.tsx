@@ -65,6 +65,7 @@ describe("Demo definition and source discovery", () => {
       ["packages/json-document-affordance/src/gesture-session.ts", "/docs/api/affordance"],
       ["packages/json-document-selection/src/key/index.ts", "/docs/api/selection"],
       ["packages/json-document-editing/src/object.ts", "/docs/api/editing"],
+      ["packages/json-document-web/src/clipboard.ts", "/docs/api/web"],
       ["packages/json-document-canvas/src/use-canvas-hand.ts", "/docs/api/canvas"],
     ]) {
       const file = sources.find((source) => source.path === path);

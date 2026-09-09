@@ -47,6 +47,115 @@ function pick(container: HTMLElement, key: string, shiftKey = false) {
   fireEvent.pointerUp(window, { ...event(70, 70), shiftKey });
 }
 
+function clipboardData() {
+  const data = new Map<string, string>();
+  return { get types() { return [...data.keys()]; }, getData: (format: string) => data.get(format) ?? "", setData: (format: string, value: string) => { data.set(format, value); } };
+}
+function clipboardEvent(target: Element, operation: "copy" | "cut" | "paste", data: ReturnType<typeof clipboardData> | null) {
+  const event = new Event(operation, { bubbles: true, cancelable: true });
+  Object.defineProperty(event, "clipboardData", { value: data });
+  fireEvent(target, event);
+  return event;
+}
+
+test("Alt+Shift drag previews originals and copies, switches live modifiers, then commits the set once", () => {
+  const { container, svg, editor, value, commits } = setup(populated);
+  pick(container, "b", true);
+  const before = value(), target = container.querySelector('[data-canvas-object="a"]')!;
+  fireEvent.pointerDown(target, { ...event(70, 70), altKey: true, shiftKey: true });
+  fireEvent.pointerMove(window, { ...event(120, 90), altKey: true, shiftKey: true });
+  expect(value()).toBe(before); expect(commits).not.toHaveBeenCalled();
+  expect(container.querySelectorAll("[data-canvas-copy-original]")).toHaveLength(2);
+  expect(container.querySelector('[data-canvas-copy-original="a"] foreignObject')?.getAttribute("x")).toBe("100");
+  expect(container.querySelector('[data-canvas-copy-preview] foreignObject')?.getAttribute("x")).toBe("200");
+  expect(target.getAttribute("y")).toBe("100"); expect((target as SVGElement).style.cursor).toBe("copy");
+  fireEvent.keyUp(svg, { key: "Alt", shiftKey: true });
+  expect(container.querySelector("[data-canvas-copy-preview]")).toBeNull();
+  fireEvent.keyDown(svg, { key: "Alt", altKey: true, shiftKey: true });
+  expect(container.querySelector("[data-canvas-copy-preview]")).not.toBeNull();
+  fireEvent.pointerUp(window, { ...event(120, 90), altKey: true, shiftKey: true });
+  expect(value().objects.slice(0, 3)).toEqual(populated.objects);
+  expect(value().objects.slice(3).map((object) => [object.id, object.x, object.y])).toEqual([["object-1", 200, 100], ["object-2", 400, 100]]);
+  expect(editor.snapshot.selection).toMatchObject({ keys: ["object-1", "object-2"], primaryKey: "object-1" });
+  expect(commits).toHaveBeenCalledOnce();
+  fireEvent.keyDown(svg, { key: "z", metaKey: true }); expect(value()).toEqual(before);
+  expect(editor.snapshot.selection).toMatchObject({ keys: ["a", "b"], primaryKey: "a" });
+});
+
+test.each(["Escape", "pointercancel"])("cancelled Alt duplication (%s) does not allocate IDs or commit", (reason) => {
+  const { container, svg, editor, value, commits } = setup(populated);
+  const target = container.querySelector('[data-canvas-object="a"]')!;
+  fireEvent.pointerDown(target, { ...event(70, 70), altKey: true });
+  fireEvent.pointerMove(window, { ...event(120, 90), altKey: true });
+  if (reason === "Escape") fireEvent.keyDown(svg, { key: "Escape" }); else fireEvent.pointerCancel(window, event(120, 90));
+  fireEvent.pointerUp(window, { ...event(120, 90), altKey: true });
+  expect(container.querySelector("[data-canvas-copy-preview]")).toBeNull();
+  expect(value()).toEqual(populated); expect(commits).not.toHaveBeenCalled();
+  fireEvent.keyDown(svg, { key: "d", ctrlKey: true });
+  expect(editor.snapshot.selection.keys).toEqual(["object-1"]);
+});
+
+test("duplicate keyboard/toolbar and nudge reuse Editing with selection-preserving Undo", () => {
+  const { container, svg, editor, value } = setup(populated);
+  pick(container, "b", true);
+  fireEvent.keyDown(svg, { key: "d", metaKey: true });
+  expect(editor.snapshot.selection.keys).toEqual(["object-1", "object-2"]);
+  expect(value().objects[3]!.x).toBe(124);
+  fireEvent.click(screen.getByRole("button", { name: "복제" }));
+  expect(editor.snapshot.selection.keys).toEqual(["object-3", "object-4"]);
+  expect(value().objects[5]!.x).toBe(148);
+  fireEvent.keyDown(svg, { key: "ArrowRight" }); fireEvent.keyDown(svg, { key: "ArrowUp", shiftKey: true });
+  expect(value().objects[5]).toMatchObject({ x: 149, y: 138 });
+  expect(value().objects[6]).toMatchObject({ x: 349, y: 138 });
+  fireEvent.keyDown(svg, { key: "z", metaKey: true });
+  expect(value().objects[5]).toMatchObject({ x: 149, y: 148 });
+  expect(editor.snapshot.selection.keys).toEqual(["object-3", "object-4"]);
+});
+
+test("native structured copy/cut/paste crosses Hand instances with text and primary, and one Undo per edit", () => {
+  const first = setup(populated);
+  act(() => { first.editor.dispatch({ type: "selection.set", objectIds: ["a", "c"], primaryKey: "a" }); });
+  const data = clipboardData();
+  expect(clipboardEvent(first.svg, "copy", data).defaultPrevented).toBe(true);
+  expect(data.getData("text/plain")).toBe("Title\nCircle"); expect(first.commits).not.toHaveBeenCalled();
+  expect(clipboardEvent(first.svg, "cut", data).defaultPrevented).toBe(true);
+  expect(first.value().objects.map((object) => object.id)).toEqual(["b"]); expect(first.commits).toHaveBeenCalledOnce();
+  act(() => { first.editor.undo(); }); expect(first.value()).toEqual(populated);
+  first.unmount();
+  const second = setup();
+  expect(clipboardEvent(second.svg, "paste", data).defaultPrevented).toBe(true);
+  expect(second.value().objects.map((object) => [object.id, object.kind, object.x])).toEqual([["object-1", "text", 124], ["object-2", "ellipse", 624]]);
+  expect(second.editor.snapshot.selection).toMatchObject({ keys: ["object-1", "object-2"], primaryKey: "object-1" });
+  expect(second.commits).toHaveBeenCalledOnce();
+  act(() => { second.editor.undo(); }); expect(second.value()).toEqual(blank);
+});
+
+test("failed cut and invalid paste are observable and cannot delete or partially insert objects", () => {
+  const { svg, value, commits } = setup(populated);
+  const refused = { ...clipboardData(), setData() { throw new Error("write refused"); } };
+  expect(clipboardEvent(svg, "cut", refused).defaultPrevented).toBe(true);
+  expect(screen.getByRole("alert").textContent).toBe("write refused");
+  const data = clipboardData(); data.setData("application/vnd.interactive-os.objects+json", "{}");
+  clipboardEvent(svg, "paste", data);
+  expect(screen.getByRole("alert").textContent).toBe("clipboard.invalid");
+  expect(value()).toEqual(populated); expect(commits).not.toHaveBeenCalled();
+});
+
+test("native clipboard chords, text input, JSON input and IME are not stolen by object editing", () => {
+  const { svg, value, commits } = setup(populated);
+  for (const key of ["c", "x", "v"]) expect(fireEvent.keyDown(svg, { key, metaKey: true })).toBe(true);
+  fireEvent.keyDown(svg, { key: "d", ctrlKey: true, isComposing: true });
+  fireEvent.keyDown(svg, { key: "F2" });
+  const text = screen.getByRole("textbox", { name: "Canvas text" });
+  for (const operation of ["copy", "cut", "paste"] as const) expect(clipboardEvent(text, operation, clipboardData()).defaultPrevented).toBe(false);
+  fireEvent.keyDown(text, { key: "d", metaKey: true }); fireEvent.keyDown(text, { key: "ArrowRight" });
+  fireEvent.keyDown(text, { key: "Escape" });
+  fireEvent.click(screen.getByRole("button", { name: "JSON" }));
+  const json = screen.getByRole("textbox", { name: "Canvas JSON document" });
+  expect(clipboardEvent(json, "cut", clipboardData()).defaultPrevented).toBe(false);
+  expect(value()).toEqual(populated); expect(commits).not.toHaveBeenCalled();
+});
+
 test("Canvas consumes an injected profile for click/Shift/keyboard while focus remains independent", () => {
   const profile = createPlaneSelectProfile();
   const begin = vi.spyOn(profile, "begin"), keyDown = vi.spyOn(profile, "keyDown");
@@ -172,7 +281,7 @@ test("external selection changes supersede a pending preview without a stale sel
 test("every toolbar control shares icon, accessible name and canonical tooltip without losing state", () => {
   const { svg } = setup();
   const toolbar = within(screen.getByRole("toolbar", { name: "Canvas tools" }));
-  const labels = ["선택", "글자", "사각형", "타원", "그리기", "실행 취소", "다시 실행", "삭제", "JSON"];
+  const labels = ["선택", "글자", "사각형", "타원", "그리기", "실행 취소", "다시 실행", "복제", "삭제", "JSON"];
   expect(toolbar.getAllByRole("button")).toHaveLength(labels.length);
   for (const label of labels) {
     const button = toolbar.getByRole("button", { name: label });

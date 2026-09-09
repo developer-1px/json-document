@@ -21,6 +21,7 @@ export function CanvasObjectTarget(props: {
   readonly object: CanvasObject;
   readonly selected: boolean;
   readonly enabled: boolean;
+  readonly copying?: boolean;
   readonly onSelect: (shiftKey: boolean) => void;
   readonly onEdit: () => void;
   readonly onHandle: (interaction: InteractionHandleEvent, event: PointerEvent<SVGElement>) => void;
@@ -32,7 +33,7 @@ export function CanvasObjectTarget(props: {
       fill="transparent" role="button" aria-label={object.label || object.kind} aria-pressed={props.selected}
       {...contentInteractionAttributes({ role: "content", selected: props.selected, dragging: binding.active })}
       tabIndex={props.enabled ? 0 : -1} data-canvas-object={object.id} data-kind={object.kind}
-      pointerEvents={props.enabled ? "all" : "none"} style={{ cursor: binding.cursor, transform: "none" }}
+      pointerEvents={props.enabled ? "all" : "none"} style={{ cursor: props.copying ? "copy" : binding.cursor, transform: "none" }}
       onDoubleClick={props.onEdit}
       onKeyDown={(event) => {
         if (event.nativeEvent.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;

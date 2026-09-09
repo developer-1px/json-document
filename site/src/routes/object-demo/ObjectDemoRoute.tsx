@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { ClipboardPaste, Copy, Redo2, Scissors, Trash2, Undo2 } from "lucide-react";
+import { CopyPlus, Redo2, Trash2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createObjectEditor,
-  type ObjectClipboard,
   type ObjectDocument,
   type ObjectIntent,
 } from "@interactive-os/json-document-editing";
@@ -24,12 +23,11 @@ import { editingItemProps } from "@interactive-os/json-document-react";
 
 export function ObjectDemoRoute() {
   const [editor] = useState(() => createObjectEditor(initialObjectDemoDocument));
-  const [clipboard, setClipboard] = useState<ObjectClipboard | null>(null);
   const observation = useEditingObservation<ObjectIntent>("Ready");
   const [clipboardSurface] = useState(() => createWebClipboardSurface({
     codec: objectClipboardCodec,
     read: () => editor.copy(),
-    cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
+    cut: (payload) => editor.dispatch({ type: "object.remove", objectIds: payload.objects.map((object) => object.id) }),
     paste: (payload) => editor.dispatch({
       type: "clipboard.paste",
       clipboard: payload,
@@ -37,7 +35,6 @@ export function ObjectDemoRoute() {
     }),
     onResult(result) {
       if (!result.ok) return observation.announce(result.code);
-      if (result.operation !== "paste") setClipboard(result.payload);
       const verb = result.operation === "copy" ? "Copied" : result.operation === "cut" ? "Cut" : "Pasted";
       observation.announce(`${verb} ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`);
     },
@@ -70,20 +67,6 @@ export function ObjectDemoRoute() {
   const document = snapshot.value as ObjectDocument;
   const commands = historyAffordance(snapshot).hand;
 
-  function copySelection() {
-    const next = editor.copy();
-    if (!next) return observation.announce("Select an object first");
-    setClipboard(next);
-    observation.announce(`Copied ${next.objects.length} object${next.objects.length === 1 ? "" : "s"}`);
-  }
-
-  function cutSelection() {
-    const result = editor.cut();
-    if (!result) return observation.announce("Select an object first");
-    setClipboard(result.clipboard);
-    observation.announce(`Cut ${result.clipboard.objects.length} object${result.clipboard.objects.length === 1 ? "" : "s"}`);
-  }
-
   return (
     <DemoPage documentation={(
       <PageHeader
@@ -115,21 +98,9 @@ export function ObjectDemoRoute() {
               </Command>
             ))}
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <Command label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></Command>
-            <Command label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></Command>
-            <Command label="Paste"
-              disabled={!clipboard}
-              onClick={() => {
-                if (!clipboard) return;
-                run({
-                  type: "clipboard.paste",
-                  clipboard,
-                  placement: { type: "offset", dx: 24, dy: 24 },
-                }, `Pasted ${clipboard.objects.length} object${clipboard.objects.length === 1 ? "" : "s"}`);
-              }}
-            >
-              <ClipboardPaste aria-hidden="true" size={16} />
-            </Command>
+            <Command label="Duplicate" disabled={editor.selectedObjects.length === 0}
+              onClick={() => run({ type: "object.duplicate", objectIds: snapshot.selection.keys }, "Selection duplicated")}
+            ><CopyPlus aria-hidden="true" size={16} /></Command>
             <Command label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></Command>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
             <Command label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></Command>
@@ -168,7 +139,7 @@ export function ObjectDemoRoute() {
               {object.label}
             </SelectableItem>
           ))}
-          <p className={classes("absolute bottom-3 left-3 mb-0", ui.text.meta)}>Click a box. Mod-click toggles. Fill uses the selected IDs only.</p>
+          <p className={classes("absolute bottom-3 left-3 mb-0", ui.text.meta)}>Click a box. Mod-click toggles. Mod+C/X/V uses the system clipboard.</p>
         </section>
       </ProductShell>
     </DemoPage>

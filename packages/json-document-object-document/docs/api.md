@@ -59,6 +59,6 @@ clip합니다. 위치를 자동 보정하거나 snap하지 않습니다.
 정본을 소비합니다. [Object 소유권 감사](/docs/document-types/object)는 영향을 받는
 모델·연산·Editing·Hand·두 Canvas Host의 소유자를 기록합니다.
 
-페이지·줌·팬·다중 선택 UI·그룹·회전·정렬·snap·레이어 패널·PPTX·협업은 이
+페이지·줌·팬·그룹·회전·정렬·snap·레이어 패널·PPTX·협업은 이
 Canvas slice 범위 밖입니다. 이 RC 프로파일은 독립 구현 간 Stable wire conformance를
 선언하지 않습니다. Annotation의 source/selector/body 모델도 Canvas에 통합하지 않습니다.

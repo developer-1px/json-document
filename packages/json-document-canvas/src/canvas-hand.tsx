@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Braces, Circle, MousePointer2, Pencil, RectangleHorizontal, Redo2, Trash2, Type, Undo2, type LucideIcon } from "lucide-react";
+import { Braces, Circle, CopyPlus, MousePointer2, Pencil, RectangleHorizontal, Redo2, Trash2, Type, Undo2, type LucideIcon } from "lucide-react";
 import type { ObjectEditor } from "@interactive-os/json-document-editing";
 import type { PlaneSelectProfile } from "@interactive-os/json-document-affordance";
 import { serializeCanvasDocument } from "@interactive-os/json-document-object-document";
@@ -27,12 +27,14 @@ export function CanvasHand(props: CanvasHandProps) {
   const [json, setJSON] = useState<string | null>(null);
   const selected = hand.objects.find((object) => object.id === hand.selection.primaryKey);
   const selectedKeys = new Set(hand.selection.keys);
+  const copyOriginals = new Map(hand.copyOriginals.map((object) => [object.id, object]));
   return (
     <ProductShell className={props.className} toolbarLabel="Canvas tools" toolbar={<ToolbarGroup style={{ flexWrap: "wrap" }}>
       <ToolbarGroup>{tools.map((tool) => <Toggle key={tool.id} label={tool.label} pressed={hand.tool === tool.id} onClick={() => hand.choose(tool.id)}><tool.icon aria-hidden="true" size={16} /></Toggle>)}</ToolbarGroup>
       <ToolbarGroup>
         <Command label="실행 취소" disabled={!hand.snapshot.canUndo} onClick={() => hand.history("undo")}><Undo2 aria-hidden="true" size={16} /></Command>
         <Command label="다시 실행" disabled={!hand.snapshot.canRedo} onClick={() => hand.history("redo")}><Redo2 aria-hidden="true" size={16} /></Command>
+        <Command label="복제" disabled={!selected} onClick={() => hand.duplicate()}><CopyPlus aria-hidden="true" size={16} /></Command>
         <Command label="삭제" disabled={!selected} onClick={hand.remove}><Trash2 aria-hidden="true" size={16} /></Command>
       </ToolbarGroup>
       <Command label="JSON" onClick={() => { hand.commitText(); hand.cancel(); setJSON(json === null ? serializeCanvasDocument(props.editor.snapshot.value as typeof hand.document) : null); }}><Braces aria-hidden="true" size={16} /></Command>
@@ -40,11 +42,13 @@ export function CanvasHand(props: CanvasHandProps) {
       <svg ref={hand.surface} {...hand.surfaceProps} tabIndex={0} role="group" aria-label={props.label ?? "Canvas slide"}
         data-canvas-slide="true" data-tool={hand.tool} viewBox={`0 0 ${hand.document.width} ${hand.document.height}`} preserveAspectRatio="none"
         style={{ display: "block", width: "100%", aspectRatio: `${hand.document.width} / ${hand.document.height}`, touchAction: "none", userSelect: "none", overflow: "hidden", ...props.slideStyle }}>
-        {hand.objects.map((object) => <g key={object.id}>
-          {hand.draft?.id !== object.id && <CanvasObjectView object={object} />}
+        {hand.objects.map((object) => <g key={object.id} data-canvas-copy-original={copyOriginals.has(object.id) ? object.id : undefined}>
+          {hand.draft?.id !== object.id && <CanvasObjectView object={copyOriginals.get(object.id) ?? object} />}
           <CanvasObjectTarget object={object} selected={selectedKeys.has(object.id)} enabled={hand.tool === "select" && hand.draft?.id !== object.id}
+            copying={hand.copyOriginals.length > 0 && selectedKeys.has(object.id)}
             onSelect={(shiftKey) => hand.select(object.id, shiftKey)} onEdit={() => hand.editText(object.id)} onHandle={(interaction, event) => hand.interaction(interaction, event, object, "drag")} />
         </g>)}
+        {copyOriginals.size > 0 && <g data-canvas-copy-preview="" pointerEvents="none">{hand.objects.filter((object) => selectedKeys.has(object.id)).map((object) => <CanvasObjectView key={object.id} object={object} />)}</g>}
         {hand.preview && <g pointerEvents="none" opacity={0.65}><CanvasObjectView object={{ ...hand.preview, id: "preview" }} /></g>}
         {hand.tool === "select" && hand.objects.filter((object) => selectedKeys.has(object.id)).map((object) =>
           <rect key={object.id} data-selection-outline={object.id} x={object.x} y={object.y} width={object.width} height={object.height} fill="none" stroke="rgb(var(--color-border-accent))" strokeWidth={object.id === selected?.id ? 2 : 1} pointerEvents="none" />)}

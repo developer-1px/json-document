@@ -13,8 +13,8 @@ test("press retains a selected set, release collapses a click, and drag produces
   expect(profile.begin(context(), { point, hitKey: "node:a" }).selection).toEqual(selected(["node:a", "node:b"], "node:a"));
   expect(profile.commit({ x: 12, y: 31 })).toEqual({ selection: selected(["node:a"]), translation: null });
   profile.begin(context(), { point, hitKey: "node:a" });
-  expect(profile.preview({ x: 40, y: 50 })?.translation).toEqual({ keys: ["node:a", "node:b"], dx: 30, dy: 20 });
-  expect(profile.commit({ x: 50, y: 60 })?.translation).toEqual({ keys: ["node:a", "node:b"], dx: 40, dy: 30 });
+  expect(profile.preview({ x: 40, y: 50 })?.translation).toEqual({ operation: "move", keys: ["node:a", "node:b"], dx: 30, dy: 20 });
+  expect(profile.commit({ x: 50, y: 60 })?.translation).toEqual({ operation: "move", keys: ["node:a", "node:b"], dx: 40, dy: 30 });
   expect(profile.commit(point)).toBeNull();
 });
 
@@ -25,7 +25,7 @@ test("an unselected hit replaces the drag source; Shift activation toggles witho
   expect(profile.select(context(["node:a"]), "node:c", true)).toEqual(selected(["node:a", "node:c"]));
   expect(profile.select(context(), "node:b", true)).toEqual(selected(["node:a"]));
   profile.begin(context(), { point, hitKey: "node:b", shiftKey: true });
-  expect(profile.commit({ x: 40, y: 40 })).toEqual({ selection: selected(["node:a"]), translation: null });
+  expect(profile.commit({ x: 40, y: 40 })).toEqual({ selection: selected(["node:a", "node:b"]), translation: { operation: "move", keys: ["node:a", "node:b"], dx: 30, dy: 0 } });
 });
 
 test.each([false, true])("marquee is transient and uses base selection for every preview (Shift=%s)", (shiftKey) => {
@@ -80,8 +80,47 @@ test("Delete targets the set, edit targets primary only, unrelated/modified keys
   expect(profile.keyDown(stroke("Delete"), context())).toEqual({ type: "delete", keys: ["node:a", "node:b"] });
   for (const key of ["Enter", "F2"]) expect(profile.keyDown(stroke(key), context())).toEqual({ type: "edit", key: "node:b" });
   for (const key of ["Delete", "Enter", "F2"]) expect(profile.keyDown(stroke(key), context([]))).toBeNull();
-  for (const key of ["ArrowLeft", "Home", "z"]) expect(profile.keyDown(stroke(key), context())).toBeNull();
+  for (const key of ["Home", "z"]) expect(profile.keyDown(stroke(key), context())).toBeNull();
   expect(profile.keyDown(stroke("Enter", true), context())).toBeNull();
+});
+
+test("Alt-copy and Shift-axis lock reproject the same source, including stationary modifier changes", () => {
+  const profile = createPlaneSelectProfile();
+  const base = context();
+  profile.begin(base, { point, hitKey: "node:a", altKey: true, shiftKey: true });
+  const modifiers = Object.create({ get shiftKey() { return true; }, get altKey() { return true; } });
+  expect(profile.preview({ x: 40, y: 50 }, modifiers)?.translation).toEqual({ operation: "copy", keys: ["node:a", "node:b"], dx: 30, dy: 0 });
+  expect(profile.updateModifiers({ altKey: false })?.translation).toEqual({ operation: "move", keys: ["node:a", "node:b"], dx: 30, dy: 20 });
+  expect(profile.updateModifiers({ altKey: true, shiftKey: true })?.translation?.operation).toBe("copy");
+  expect(profile.commit({ x: 40, y: 90 })?.translation).toEqual({ operation: "copy", keys: ["node:a", "node:b"], dx: 0, dy: 60 });
+  expect(base.selection).toEqual(selected(["node:a", "node:b"]));
+  expect(profile.updateModifiers({})).toBeNull();
+});
+
+test("Alt-click, zero-distance return and cancellation never request duplication", () => {
+  const profile = createPlaneSelectProfile();
+  profile.begin(context(), { point, hitKey: "node:a", altKey: true });
+  expect(profile.commit(point)?.translation).toBeNull();
+  profile.begin(context(), { point, hitKey: "node:a", altKey: true });
+  profile.preview({ x: 40, y: 50 });
+  expect(profile.commit(point)?.translation).toBeNull();
+  profile.begin(context(), { point, hitKey: "node:c", altKey: true });
+  expect(profile.preview({ x: 40, y: 50 })?.translation?.keys).toEqual(["node:c"]);
+  profile.cancel(); expect(profile.commit({ x: 40, y: 50 })).toBeNull();
+});
+
+test("nudge and duplicate target the set, and native clipboard chords remain available", () => {
+  const profile = createPlaneSelectProfile();
+  expect(profile.keyDown(stroke("ArrowRight"), context())).toEqual({ type: "translate", keys: ["node:a", "node:b"], dx: 1, dy: 0 });
+  expect(profile.keyDown({ ...stroke("ArrowUp"), shiftKey: true }, context())).toEqual({ type: "translate", keys: ["node:a", "node:b"], dx: 0, dy: -10 });
+  for (const modifiers of [{ metaKey: true }, { ctrlKey: true }]) {
+    expect(profile.keyDown({ ...stroke("d"), ...modifiers }, context())).toEqual({ type: "duplicate", keys: ["node:a", "node:b"] });
+    for (const key of ["c", "x", "v", "ArrowLeft"]) expect(profile.keyDown({ ...stroke(key), ...modifiers }, context())).toBeNull();
+  }
+  for (const key of ["d", "ArrowLeft"]) {
+    expect(profile.keyDown({ ...stroke(key), altKey: true }, context())).toBeNull();
+    expect(profile.keyDown(stroke(key, key === "d"), context([]))).toBeNull();
+  }
 });
 
 test("keys and primary reconcile through Selection; geometry and input are captured, and instances are independent", () => {

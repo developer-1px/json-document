@@ -397,7 +397,7 @@ describe("Web clipboard Adapter", () => {
 
     const unavailable = event(null);
     expect(binding.cut(unavailable)).toMatchObject({ ok: false, code: "clipboard.unavailable" });
-    expect(unavailable.defaultPrevented).toBe(false);
+    expect(unavailable.defaultPrevented).toBe(true);
     expect(cutAttempts).toBe(0);
     expect((editor.snapshot.value as BlockDocument).blocks.map((block) => block.id)).toEqual(["a", "b"]);
 

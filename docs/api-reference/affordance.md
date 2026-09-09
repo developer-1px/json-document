@@ -714,10 +714,9 @@ interface PlaneSelectContext {
 ## `PlaneSelectInput`
 
 ```ts
-interface PlaneSelectInput {
+interface PlaneSelectInput extends PlaneSelectModifiers {
   readonly point: Point;
   readonly hitKey: string | null;
-  readonly shiftKey?: boolean;
 }
 ```
 ## `PlaneSelectKeyResult`
@@ -726,8 +725,18 @@ interface PlaneSelectInput {
 type PlaneSelectKeyResult =
   | { readonly type: "selection"; readonly selection: PlaneSelectSelection }
   | { readonly type: "delete"; readonly keys: readonly string[] }
+  | { readonly type: "duplicate"; readonly keys: readonly string[] }
+  | { readonly type: "translate"; readonly keys: readonly string[]; readonly dx: number; readonly dy: number }
   | { readonly type: "edit"; readonly key: string }
   | { readonly type: "cancel" };
+```
+## `PlaneSelectModifiers`
+
+```ts
+interface PlaneSelectModifiers {
+  readonly shiftKey?: boolean;
+  readonly altKey?: boolean;
+}
 ```
 ## `PlaneSelectPreview`
 
@@ -743,8 +752,10 @@ interface PlaneSelectPreview {
 ```ts
 interface PlaneSelectProfile {
   begin(context: PlaneSelectContext, input: PlaneSelectInput): PlaneSelectPreview;
-  preview(point: Point): PlaneSelectPreview | null;
-  commit(point: Point): PlaneSelectCommit | null;
+  preview(point: Point, modifiers?: PlaneSelectModifiers): PlaneSelectPreview | null;
+  commit(point: Point, modifiers?: PlaneSelectModifiers): PlaneSelectCommit | null;
+  /** Reproject a stationary drag when a modifier changes; omitted preview modifiers retain this state. */
+  updateModifiers(modifiers: PlaneSelectModifiers): PlaneSelectPreview | null;
   cancel(reason?: GestureCancelReason): void;
   getPreview(): PlaneSelectPreview | null;
   /** Discrete activation (e.g. Space), not focus. Shift toggles, plain activation replaces. */
@@ -771,6 +782,7 @@ type PlaneSelectSelection = Extract<KeySelection, { readonly kind: "explicit" }>
 
 ```ts
 interface PlaneSelectTranslation {
+  readonly operation: "move" | "copy";
   readonly keys: readonly string[];
   readonly dx: number;
   readonly dy: number;

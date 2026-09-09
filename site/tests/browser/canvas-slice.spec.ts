@@ -5,7 +5,7 @@ for (const route of ["/demo/canvas", "/widgets/canvas"]) {
     await page.goto(route);
     const toolbar = page.getByRole("toolbar", { name: "Canvas tools" });
     const buttons = toolbar.getByRole("button");
-    await expect(buttons).toHaveCount(9);
+    await expect(buttons).toHaveCount(10);
     for (const button of await buttons.all()) {
       await expect(button).toHaveAttribute("data-ui-presentation", "icon");
       await expect(button.locator('svg[aria-hidden="true"]')).toHaveCount(1);
@@ -66,6 +66,33 @@ test("Canvas composes one slide and reopens the same JSON through the canonical 
   await expect(page.locator("[data-canvas-object]")).toHaveCount(0);
   await page.getByRole("button", { name: "다시 실행" }).click();
   await expect(page.locator("[data-canvas-object]")).toHaveCount(4);
+});
+
+test("Canvas Alt-copy, nudge, duplicate and native selected clipboard share atomic Editing", async ({ page }) => {
+  await page.goto("/widgets/canvas");
+  await page.locator('[data-canvas-object="rectangle"]').click();
+  await page.locator('[data-canvas-object="ellipse"]').click({ modifiers: ["Shift"] });
+  const start = await point(page, 200, 350), end = await point(page, 300, 390);
+  await page.keyboard.down("Alt"); await page.keyboard.down("Shift");
+  await page.mouse.move(start.x, start.y); await page.mouse.down(); await page.mouse.move(end.x, end.y);
+  await expect(page.locator("[data-canvas-copy-original]")).toHaveCount(2);
+  await expect(page.locator("[data-canvas-object]")).toHaveCount(3);
+  await page.mouse.up(); await page.keyboard.up("Alt"); await page.keyboard.up("Shift");
+  await expect(page.locator("[data-canvas-object]")).toHaveCount(5);
+  await expect(page.locator('[data-canvas-object="rectangle"]')).toHaveAttribute("x", "96");
+  const selected = page.locator('[data-canvas-object][aria-pressed="true"]');
+  expect(Number(await selected.first().getAttribute("y"))).toBeCloseTo(264);
+  await page.keyboard.press("ArrowRight"); await page.keyboard.press("Shift+ArrowDown");
+  expect(Number(await selected.first().getAttribute("x"))).toBeCloseTo(197);
+  expect(Number(await selected.first().getAttribute("y"))).toBeCloseTo(274);
+  await page.keyboard.press("ControlOrMeta+d");
+  await expect(page.locator("[data-canvas-object]")).toHaveCount(7);
+  await page.keyboard.press("ControlOrMeta+c"); await page.keyboard.press("ControlOrMeta+v");
+  await expect(page.locator("[data-canvas-object]")).toHaveCount(9);
+  await expect(selected).toHaveCount(2);
+  await page.keyboard.press("ControlOrMeta+x"); await expect(page.locator("[data-canvas-object]")).toHaveCount(7);
+  await page.keyboard.press("ControlOrMeta+z"); await expect(page.locator("[data-canvas-object]")).toHaveCount(9);
+  await expect(selected).toHaveCount(2);
 });
 
 test("Canvas move and resize are single history steps and Escape cancels a gesture", async ({ page }) => {

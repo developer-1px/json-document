@@ -1,7 +1,7 @@
 ## Canvas Hand 계약 · RC
 
 `CanvasHand`는 `ObjectEditor`와 `CanvasCreationStyle`을 받아 글자·사각형·타원·자유
-그리기, 다중 선택, 집합 이동·삭제, primary resize, Undo/Redo, JSON 재열기를 연결합니다.
+그리기, 다중 선택, 집합 이동·복제·삭제, native Clipboard, primary resize, Undo/Redo, JSON 재열기를 연결합니다.
 `useCanvasHand`는 같은 입력 조합을 custom UI에서 사용할 수 있게 공개합니다.
 
 툴바의 모든 도구·명령은 Lucide 아이콘과 공통 `Toggle`/`Command`의 `label`을
@@ -13,7 +13,7 @@
 Host: 한 장 fixture, 크기·색상 정책, 레이아웃
   └─ Canvas Hand: 도구, 조작 preview, plain-text draft, UI 조합
       ├─ React Connector: Editing snapshot 구독
-      ├─ Web Adapter: SVG 좌표, pointer capture, keyboard 해석
+      ├─ Web Adapter: SVG 좌표, pointer capture, keyboard·Clipboard 해석
       ├─ Affordance: createPlaneSelectProfile, gesture, resize
       │   └─ Selection: key 집합·primaryKey 전이
       ├─ UI Primitives: handle, icon controls·tooltips
@@ -40,6 +40,12 @@ Host: 한 장 fixture, 크기·색상 정책, 레이아웃
 - 글자는 생성 직후 또는 더블클릭/F2/Enter로 편집합니다. 줄바꿈·IME·선택·native
   입력 Undo는 textarea에 남습니다. blur 또는 Mod+Enter가 전체 draft를 한 번 commit하고
   Escape는 draft만 버립니다. 객체의 label이 실제 문자열 값입니다.
+- Alt/Option+drag는 선택 집합을 복제합니다. 원본을 남기고 사본 위치를 preview하며
+  release에 새 ID를 할당합니다. Alt를 도중에 누르거나 놓으면 copy/move가 전환됩니다.
+  Shift+drag는 큰 delta 축을 고정하며 Shift+click toggle과 구분합니다.
+  Mod+D 또는 아이콘 툴바의 복제는 24단위 offset으로 복제하고 사본 집합·대응 primary를 선택합니다.
+- 방향키는 선택 집합을 1단위, Shift+방향키는 10단위 이동합니다. 수정 키 없는 입력만
+  처리하며 text/JSON 입력과 IME의 키보드 소유권은 보존합니다.
 - 이동·resize·생성 중에는 문서를 변경하지 않습니다. pointerup의 최종 좌표로 한 번
   commit합니다. Escape, pointercancel, capture loss, 외부 문서 변경, unmount는 preview를
   버립니다. 다른 pointer의 release는 조작을 완료하지 못합니다. marquee 선택 preview도
@@ -47,6 +53,21 @@ Host: 한 장 fixture, 크기·색상 정책, 레이아웃
 - 선택만 바꾸거나 0 거리로 움직이면 History가 생기지 않습니다. commit된 편집은
   한 번의 Undo로 되돌리며 삭제 Undo는 객체와 선택을 함께 복원합니다. Mod+Z/Mod+Shift+Z는
   입력 필드 밖에서 문서 Undo/Redo를 실행합니다.
+
+### Native Clipboard
+
+선택 객체의 Mod+C/X/V 또는 브라우저 native copy/cut/paste 이벤트를 Web Clipboard
+binding에 연결합니다. 구조화 MIME과 label의 `text/plain`을 함께 쓰므로 다른 Canvas
+instance로 객체를 복사하거나 다른 앱에 문자열을 붙일 수 있습니다. 앱 내부 가상
+clipboard는 만들지 않습니다. 복제 버튼은 OS clipboard를 바꾸지 않는 별도 명령입니다.
+
+cut은 쓰기에 성공한 캡처 대상만 제거합니다. 쓰기 실패나 Editing 거절은 오류로 드러내고
+문서 삭제나 브라우저 fallback 삭제를 허용하지 않습니다. paste는 새 ID·대응 primary로
+선택하고 원래 좌표에서 x/y 각각 24만큼 offset합니다. 같은 payload를 반복 paste하면
+같은 offset 위치에 새 사본을 만듭니다. text/JSON textarea의 native clipboard는 가로채지 않습니다.
+
+Canvas 표면으로의 외부 plain text/HTML/image paste와 async clipboard 툴바는 아직 지원하지
+않습니다. 지원 MIME이 없거나 payload가 잘못되면 문서를 바꾸지 않고 실패를 표시합니다.
 
 ### JSON
 
@@ -59,7 +80,7 @@ JSON 버튼은 현재 문서 문자열을 노출합니다. 이 문자열을 저�
 ### 범위와 Usage
 
 단일 슬라이드를 컨테이너에 맞춰 표시합니다. 확대/축소·페이지·팬·다중 resize·그룹·회전·
-snap·레이어·Clipboard UI·PPTX·collaboration은 이번 Hand의 지원 범위가 아닙니다.
+snap·레이어·PPTX·collaboration은 이번 Hand의 지원 범위가 아닙니다.
 `creationStyle`은 새 객체에만 적용하는 제품 기본값이며 저장 객체의 스타일을 덮어쓰지 않습니다.
 
 선택은 Affordance의 [평면 Select 프로파일](/docs/api/affordance)을 소비합니다.

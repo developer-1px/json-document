@@ -29,18 +29,24 @@ export interface ObjectSelection extends Record<string, JSONValue> {
 
 export type ObjectSelectionMode = "replace" | "extend" | "add" | "subtract" | "toggle";
 
-export interface ObjectClipboard extends Record<string, JSONValue> {
+export type ObjectClipboard = Record<string, JSONValue> & {
   readonly type: "application/vnd.interactive-os.objects+json";
   readonly objects: ReadonlyArray<DocumentObject>;
   readonly text: string;
-}
+  /** Optional for legacy payloads; remapped to the corresponding new ID on paste. */
+  readonly primaryKey?: string | null;
+};
 
 export const objectClipboardFormat = {
   mimeType: "application/vnd.interactive-os.objects+json" as const,
   parse(value: unknown): ObjectClipboard | null {
     if (!isClipboardRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
     if (!Array.isArray(value.objects) || value.objects.some((object) => !isClipboardRecord(object) || typeof object.color !== "string")) return null;
-    try { assertObjectDocument(value); return value as ObjectClipboard; } catch { return null; }
+    try {
+      assertObjectDocument(value);
+      if (value.primaryKey !== undefined && value.primaryKey !== null && !value.objects.some((object) => object.id === value.primaryKey)) return null;
+      return value as ObjectClipboard;
+    } catch { return null; }
   },
 };
 
@@ -52,6 +58,8 @@ export interface ObjectPastePlacement {
 
 export type ObjectIntent =
   | { readonly type: "object.create"; readonly object: ObjectDraft }
+  | { readonly type: "object.duplicate"; readonly objectIds: ReadonlyArray<string>; readonly placement?: ObjectPastePlacement }
+  | { readonly type: "object.remove"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "object.text"; readonly objectId: string; readonly text: string }
   | { readonly type: "document.replace"; readonly document: ObjectDocument }
   | {
@@ -180,15 +188,20 @@ export function createObjectEditor(
       return apply({ type: "transform", objectIds: intent.objectIds, transform: { dx: intent.dx, dy: intent.dy, dw: intent.dw, dh: intent.dh } }, selectionForTargets(intent.objectIds), intent.type);
     }
 
+    if (intent.type === "object.remove") return removeSelected(intent.objectIds, intent.type);
+
+    if (intent.type === "object.duplicate") {
+      const ids = new Set(intent.objectIds);
+      const source = value().objects.filter((object) => ids.has(object.id));
+      if (source.length !== ids.size) return failure("selection.object-not-found");
+      if (source.length === 0) return failure("selection.empty");
+      return insertCopies(source, session.snapshot.selection.primaryKey, intent.placement ?? { type: "offset", dx: 24, dy: 24 }, intent.type);
+    }
+
     if (intent.type === "clipboard.paste") {
-      const objects = value().objects;
       if (!objectClipboardFormat.parse(intent.clipboard)) return failure("clipboard.invalid");
-      const dx = intent.placement?.dx ?? 0, dy = intent.placement?.dy ?? 0;
-      if (![dx, dy].every(Number.isFinite)) return failure("object.invalid");
-      const pasted = cloneObjectsWithUniqueIds(intent.clipboard.objects, objects, createId)
-        .map((object) => transformObject(object, { dx, dy }));
-      if (pasted.length === 0) return failure("clipboard.empty");
-      return apply({ type: "insert", objects: pasted }, selectionFor(pasted.map((object) => object.id)), intent.type);
+      if (intent.clipboard.objects.length === 0) return failure("clipboard.empty");
+      return insertCopies(intent.clipboard.objects, intent.clipboard.primaryKey ?? null, intent.placement, intent.type);
     }
 
     const selected = selectedObjects();
@@ -206,6 +219,19 @@ export function createObjectEditor(
     return ids.length > 0 && ids.every((id) => selected.has(id)) ? selection : selectionFor(ids);
   }
 
+  function insertCopies(source: readonly DocumentObject[], primaryKey: string | null, placement: ObjectPastePlacement | undefined, origin: string): EditingResult<ObjectSelection> {
+    const dx = placement?.dx ?? 0, dy = placement?.dy ?? 0;
+    if (![dx, dy].every(Number.isFinite)) return failure("object.invalid");
+    let copies: DocumentObject[];
+    try {
+      copies = cloneObjectsWithUniqueIds(source, value().objects, createId).map((object) => transformObject(object, { dx, dy }));
+    } catch (error) {
+      return { ok: false, code: "object.identity-unavailable", reason: error instanceof Error ? error.message : String(error) };
+    }
+    const primary = copies[source.findIndex((object) => object.id === primaryKey)]?.id ?? copies.at(-1)!.id;
+    return apply({ type: "insert", objects: copies }, selectionFor(copies.map((object) => object.id), primary), origin);
+  }
+
   function apply(operation: ObjectOperation, selectionAfter: ObjectSelection, origin: string): EditingResult<ObjectSelection> {
     const plan = planObjectOperation(value(), operation);
     return plan.ok ? session.apply({ operations: plan.operations, selectionAfter, origin }) : plan;
@@ -218,13 +244,15 @@ export function createObjectEditor(
       type: "application/vnd.interactive-os.objects+json",
       objects,
       text: objects.map((object) => object.label).join("\n"),
+      primaryKey: session.snapshot.selection.primaryKey,
     };
   }
 
-  function removeSelected(ids: ReadonlyArray<string>): EditingResult<ObjectSelection> {
+  function removeSelected(ids: ReadonlyArray<string>, origin = "selection.remove"): EditingResult<ObjectSelection> {
     const objects = value().objects;
     if (ids.length === 0) return failure("selection.empty");
     const selectedIds = new Set(ids);
+    if (ids.some((id) => !objects.some((object) => object.id === id))) return failure("selection.object-not-found");
     const indices = objects
       .map((object, index) => selectedIds.has(object.id) ? index : -1)
       .filter((index) => index >= 0)
@@ -232,7 +260,7 @@ export function createObjectEditor(
     const remaining = objects.filter((object) => !selectedIds.has(object.id));
     const firstRemoved = Math.min(...indices);
     const next = remaining[Math.min(firstRemoved, remaining.length - 1)];
-    return apply({ type: "remove", objectIds: ids }, selectionFor(next ? [next.id] : []), "selection.remove");
+    return apply({ type: "remove", objectIds: [...selectedIds] }, selectionFor(next ? [next.id] : []), origin);
   }
 
   return {
@@ -240,7 +268,7 @@ export function createObjectEditor(
     get selectedObjects() { return selectedObjects(); },
     dispatch,
     copy,
-    cut: () => cutEditingClipboard(copy, () => removeSelected(selectedObjects().map((object) => object.id))),
+    cut: () => cutEditingClipboard(copy, (clipboard) => removeSelected(clipboard.objects.map((object) => object.id))),
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),
@@ -252,7 +280,7 @@ function cloneObjectsWithUniqueIds(
   existing: ReadonlyArray<DocumentObject>,
   createId: () => string,
 ): DocumentObject[] {
-  const allocateId = createEditingIdAllocator(existing.map((object) => object.id), createId, "object");
+  const allocateId = createEditingIdAllocator([...existing, ...source].map((object) => object.id), createId, "object");
   return source.map((object) => ({ ...object, id: allocateId() }));
 }
 

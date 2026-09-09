@@ -13,7 +13,7 @@ test("Object routes platform history shortcuts from its editing surface", async 
   await expect(note).toHaveCSS("background-color", "rgb(77, 106, 138)");
 });
 
-test("Object composes native and toolbar paste with the same placement Intent", async ({ page }) => {
+test("Object uses native clipboard and a separate canonical duplicate command", async ({ page }) => {
   await page.goto("/demo/object");
   const note = page.getByRole("button", { name: "Note" });
   await note.click();
@@ -21,12 +21,12 @@ test("Object composes native and toolbar paste with the same placement Intent", 
   await page.getByRole("button", { name: "Card" }).click();
   await page.keyboard.press("ControlOrMeta+V");
   await expect(page.getByRole("button", { name: "Note" })).toHaveCount(2);
-  await page.getByRole("button", { name: "Paste", exact: true }).click();
+  await page.getByRole("button", { name: "Duplicate", exact: true }).click();
   await expect(page.getByRole("button", { name: "Note" })).toHaveCount(3);
   const notes = (await json(page, "object-demo-document")).objects
     .filter((object: { readonly label: string }) => object.label === "Note");
   expect(notes.map((object: { readonly x: number; readonly y: number }) => [object.x, object.y]))
-    .toEqual([[24, 24], [48, 48], [48, 48]]);
+    .toEqual([[24, 24], [48, 48], [72, 72]]);
 });
 
 test("Order repeated select-all and cancelled rename preserve selected items and document history", async ({ page }) => {

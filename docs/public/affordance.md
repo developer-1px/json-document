@@ -96,7 +96,8 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 
 최소 평면 문법은 [`createPlaneSelectProfile`](/docs/api/affordance)로 조합되어
 [Canvas Usage](/demo/canvas)에서 실행됩니다. 아래 표에는 단일 Affordance로만 제공되는
-더 넓은 기능도 포함됩니다. 그룹·중첩 선택·축 구속·복제·snap·zoom/pan은 이 최소 프로파일의
+더 넓은 기능도 포함됩니다. 축 고정·Alt 복제·Mod+D·nudge는 프로파일에 연결되어 있습니다.
+그룹·중첩 선택·snap·zoom/pan은 이 최소 프로파일의
 지원 범위가 아닙니다.
 
 근거 축: [Figma 레이어 선택](https://help.figma.com/hc/en-us/articles/360040449873-Select-layers-and-objects),

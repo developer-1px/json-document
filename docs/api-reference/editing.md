@@ -1189,11 +1189,13 @@ nextDatabasePropertySort(sort: DatabaseSort | null, propertyId: string): Databas
 ## `ObjectClipboard`
 
 ```ts
-interface ObjectClipboard extends Record<string, JSONValue> {
+type ObjectClipboard = Record<string, JSONValue> & {
   readonly type: "application/vnd.interactive-os.objects+json";
   readonly objects: ReadonlyArray<DocumentObject>;
   readonly text: string;
-}
+  /** Optional for legacy payloads; remapped to the corresponding new ID on paste. */
+  readonly primaryKey?: string | null;
+};
 ```
 ## `objectClipboardFormat`
 
@@ -1226,6 +1228,8 @@ interface ObjectEditor {
 ```ts
 type ObjectIntent =
   | { readonly type: "object.create"; readonly object: ObjectDraft }
+  | { readonly type: "object.duplicate"; readonly objectIds: ReadonlyArray<string>; readonly placement?: ObjectPastePlacement }
+  | { readonly type: "object.remove"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "object.text"; readonly objectId: string; readonly text: string }
   | { readonly type: "document.replace"; readonly document: ObjectDocument }
   | {

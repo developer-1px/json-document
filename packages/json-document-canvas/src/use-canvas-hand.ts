@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useReducer, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState, type ClipboardEvent, type KeyboardEvent, type PointerEvent } from "react";
 import { createGestureSession, createPlaneSelectProfile, resizeAffordance, type InteractionHandleEvent, type PlaneSelectProfile, type PlaneSelectSelection, type ResizeEdge } from "@interactive-os/json-document-affordance";
 import { assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, transformObject, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint } from "@interactive-os/json-document-object-document";
 import type { EditingResult, ObjectEditor, ObjectIntent, ObjectSelection } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { createWebKeyboardAdapter, createWebPointerSession, isWebEditableTarget, projectWebClientPointToSVG, webSVGViewportFromElement } from "@interactive-os/json-document-web";
+import { createWebClipboardBinding, createWebKeyboardAdapter, createWebPointerSession, isWebEditableTarget, objectClipboardCodec, projectWebClientPointToSVG, webSVGViewportFromElement } from "@interactive-os/json-document-web";
 
 export type CanvasTool = "select" | CanvasObjectKind;
 export interface CanvasCreationStyle {
@@ -34,6 +34,12 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   const draft = useRef<TextDraft | null>(null);
   const selecting = useRef<{ readonly base: CanvasDocument; readonly selection: ObjectSelection; readonly pointerId: number; readonly key: string | null } | null>(null);
   const profile = useMemo(() => selectProfile ?? createPlaneSelectProfile(), [editor, selectProfile]);
+  const clipboard = useMemo(() => createWebClipboardBinding({
+    codec: objectClipboardCodec,
+    read: () => editor.copy(),
+    cut: (payload) => editor.dispatch({ type: "object.remove", objectIds: payload.objects.map((object) => object.id) }),
+    paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload, placement: { type: "offset", dx: 24, dy: 24 } }),
+  }), [editor]);
   const gestures = useMemo(() => createGestureSession<Gesture>({ onBegin: redraw, onPreview: redraw, onCommit: redraw, onCancel: redraw }), [editor]);
   const pointer = useMemo(() => createWebPointerSession<true>({ onCancel: (_, reason) => {
     gestures.cancel(reason === "lost-capture" ? "lost-capture" : "pointer-cancel");
@@ -84,19 +90,21 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   }
   function select(id: string | null, shiftKey = false) { cancel(); applySelection(profile.select(selectContext(), id, shiftKey)); }
 
-  function beginSelect(point: ObjectPoint, key: string | null, event: { readonly pointerId: number; readonly shiftKey: boolean }) {
+  function beginSelect(point: ObjectPoint, key: string | null, event: { readonly pointerId: number; readonly shiftKey: boolean; readonly altKey: boolean }) {
     selecting.current = { base: current(), selection: editor.snapshot.selection, pointerId: event.pointerId, key };
-    profile.begin(selectContext(), { point, hitKey: key, shiftKey: event.shiftKey }); redraw();
+    profile.begin(selectContext(), { point, hitKey: key, shiftKey: event.shiftKey, altKey: event.altKey }); redraw();
   }
 
-  function commitSelect(point: ObjectPoint) {
+  function commitSelect(point: ObjectPoint, modifiers: { readonly shiftKey: boolean; readonly altKey: boolean }) {
     const base = selecting.current?.base;
     selecting.current = null;
-    const result = profile.commit(point); redraw();
+    const result = profile.commit(point, modifiers); redraw();
     if (!result || base !== current()) return;
     if (!applySelection(result.selection).ok || !result.translation) return;
-    const { keys, dx, dy } = result.translation;
-    dispatch({ type: "object.translate", objectIds: keys, dx, dy });
+    const { keys, dx, dy, operation } = result.translation;
+    dispatch(operation === "copy"
+      ? { type: "object.duplicate", objectIds: keys, placement: { type: "offset", dx, dy } }
+      : { type: "object.translate", objectIds: keys, dx, dy });
   }
 
   function editText(id: string) {
@@ -179,7 +187,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   function pointerMove(event: PointerEvent<SVGSVGElement>) {
     if (pointer.getSnapshot()?.pointerId !== event.pointerId) return;
     const point = eventPoint(event), active = gestures.getActive();
-    if (point && selecting.current) { profile.preview(point); redraw(); return; }
+    if (point && selecting.current) { profile.preview(point, event); redraw(); return; }
     if (!point || !active) return;
     if (active.type === "draw") {
       const last = active.points.at(-1)!;
@@ -203,7 +211,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     } else {
       if (type === "drag") {
         if (selecting.current?.key !== object.id || selecting.current.pointerId !== event.pointerId) return;
-        if (interaction.phase === "commit") commitSelect(point); else { profile.preview(point); redraw(); }
+        if (interaction.phase === "commit") commitSelect(point, event); else { profile.preview(point, event); redraw(); }
         return;
       }
       const active = gestures.getActive();
@@ -214,16 +222,32 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   }
 
   function remove() { commitText(); cancel(); dispatch({ type: "selection.remove" }); surface.current?.focus(); }
+  function duplicate(keys = editor.snapshot.selection.keys) { commitText(); cancel(); dispatch({ type: "object.duplicate", objectIds: keys }); surface.current?.focus(); }
   function history(direction: "undo" | "redo") { commitText(); cancel(); report(editor[direction]()); surface.current?.focus(); }
+
+  function handleClipboard(operation: "copy" | "cut" | "paste", event: ClipboardEvent) {
+    if (isWebEditableTarget(event.target)) return;
+    cancel();
+    const result = clipboard[operation](event);
+    setError(result.ok ? null : result.reason ?? result.code);
+    if (result.ok) setTool("select");
+  }
+
+  function updateModifiers(event: KeyboardEvent) {
+    if (!event.nativeEvent.isComposing && !isWebEditableTarget(event.target) && profile.updateModifiers(event)) redraw();
+  }
 
   function keyDown(event: KeyboardEvent) {
     if (event.nativeEvent.isComposing || isWebEditableTarget(event.target)) return;
+    updateModifiers(event);
     const selectedAction = profile.keyDown(event, selectContext(), gestures.getActive() !== null || draft.current !== null);
     if (selectedAction) {
       event.preventDefault();
       cancel();
       if (selectedAction.type === "selection") applySelection(selectedAction.selection);
       else if (selectedAction.type === "delete") remove();
+      else if (selectedAction.type === "duplicate") duplicate(selectedAction.keys);
+      else if (selectedAction.type === "translate") dispatch({ type: "object.translate", objectIds: selectedAction.keys, dx: selectedAction.dx, dy: selectedAction.dy });
       else if (selectedAction.type === "edit") editText(selectedAction.key);
       setTool("select"); return;
     }
@@ -241,11 +265,12 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     if (translation && translating.has(object.id)) return transformObject(object, translation);
     return gesture?.type === "resize" && gesture.object.id === object.id ? transformObject(object, transform(gesture)) : object;
   });
+  const copyOriginals = translation?.operation === "copy" ? document.objects.filter((object) => translating.has(object.id)) : [];
   const preview = gesture && (gesture.type === "create" || gesture.type === "draw") ? createPreview(gesture) : null;
 
   return {
-    document, snapshot, selection, marquee: selectionPreview?.marquee ?? null, objects, preview, surface, tool, error, draft: draft.current,
-    choose, select, interaction, editText, commitText, cancel, remove, history,
+    document, snapshot, selection, marquee: selectionPreview?.marquee ?? null, objects, copyOriginals, preview, surface, tool, error, draft: draft.current,
+    choose, select, interaction, editText, commitText, cancel, remove, duplicate, history,
     changeText(text: string) { if (draft.current) { draft.current = { ...draft.current, text }; redraw(); } },
     openJSON(json: string) {
       try {
@@ -262,11 +287,14 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
         pointerMove(event);
         if (pointer.commit(event.pointerId) === null) return;
         const point = eventPoint(event);
-        if (selecting.current && point) commitSelect(point); else commitGesture();
+        if (selecting.current && point) commitSelect(point, event); else commitGesture();
       },
       onPointerCancel(event: PointerEvent<SVGSVGElement>) { pointer.cancel(event.pointerId); },
       onLostPointerCapture(event: PointerEvent<SVGSVGElement>) { pointer.cancel(event.pointerId, "lost-capture"); },
-      onKeyDown: keyDown,
+      onKeyDown: keyDown, onKeyUp: updateModifiers,
+      onCopy: (event: ClipboardEvent) => handleClipboard("copy", event),
+      onCut: (event: ClipboardEvent) => handleClipboard("cut", event),
+      onPaste: (event: ClipboardEvent) => handleClipboard("paste", event),
     },
   };
 }

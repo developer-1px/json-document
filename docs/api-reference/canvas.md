@@ -42,5 +42,5 @@ type CanvasTool = "select" | CanvasObjectKind;
 ## `useCanvasHand`
 
 ```ts
-useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile): { document: CanvasDocument; snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<ObjectSelection>; ... 18 more ...; surfaceProps: { ...; }; }
+useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile): { document: CanvasDocument; snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<ObjectSelection>; ... 20 more ...; surfaceProps: { ...; }; }
 ```

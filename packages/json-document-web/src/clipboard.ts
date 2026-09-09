@@ -165,9 +165,11 @@ export function createWebClipboardBinding<
     },
     cut(event) {
       if (options.cut === undefined) return failure("clipboard.unsupported");
+      // The binding owns this cut, including write failure. Never allow native
+      // fallback deletion after a refused/partial structured clipboard write.
+      event.preventDefault();
       const written = write(event);
       if (!written.ok) return written;
-      event.preventDefault();
       const result = options.cut(written.payload);
       if (result === null) return failure("editing.rejected", "clipboard.empty");
       if (!result.ok) return failure("editing.rejected", result.reason ?? result.code);

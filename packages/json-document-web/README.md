@@ -31,11 +31,15 @@ ARIA projection, composite focus, and text input. It translates native `Clipboar
 conventional keyboard chords without rendering UI or deciding product
 keyboard policy.
 
-Once a supported cut has written its payload or a paste has decoded a supported
-payload, the binding cancels the native event before calling the editor. A
+When a cut callback is configured, the binding cancels native cut before attempting
+to write, including unavailable/failed/partial writes. It calls the editor only after
+every representation is written. A supported paste is cancelled after decoding and before editing. A
 rejected edit remains `editing.rejected` and cannot fall through to a browser
 mutation. Unsupported or undecodable paste data keeps its existing pass-through
 behavior.
+
+See the owning [Clipboard event contract](docs/clipboard.md) for captured targets,
+native editable ownership and observable failure semantics.
 
 `registerWebVirtualSelectionScope` coordinates native Select All and copy when a
 surface mounts only part of its model. It selects the mounted root with a real

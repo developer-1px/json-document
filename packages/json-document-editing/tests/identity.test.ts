@@ -54,7 +54,7 @@ describe("default domain identities", () => {
     expect(allocateId()).toBe("next");
   });
 
-  test.each(cases)("$name preserves the collision limit and document on failure", ({ initial, insert }) => {
+  test.each(cases)("$name preserves the collision limit and document on failure", ({ name, initial, insert }) => {
     const randomUUID = vi.fn(() => "collision");
     vi.stubGlobal("crypto", { randomUUID });
     try {
@@ -62,7 +62,9 @@ describe("default domain identities", () => {
       expect(insert(document)).toBe(true);
       const before = document.value;
       randomUUID.mockClear();
-      expect(() => insert(document)).toThrow("createId did not produce a unique");
+      // Object reports identity exhaustion as an EditingResult for native clipboard consumers.
+      if (name === "Object") expect(insert(document)).toBe(false);
+      else expect(() => insert(document)).toThrow("createId did not produce a unique");
       expect(randomUUID).toHaveBeenCalledTimes(100);
       expect(document.value).toBe(before);
     } finally { vi.unstubAllGlobals(); }

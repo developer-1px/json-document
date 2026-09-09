@@ -1158,6 +1158,16 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-web",
+    symbol: "createWebClipboardBinding",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "objectClipboardCodec",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
     symbol: "createWebJSONClipboardRepresentation",
     sourcePath: "packages/json-document-web/src/clipboard.ts",
   },

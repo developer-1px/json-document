@@ -39,16 +39,18 @@ describe("clipboard event ownership", () => {
     const published: unknown[] = [];
     const release = editor.subscribe((snapshot) => published.push(snapshot));
     const written = new Map<string, string>();
+    const preventDefault = vi.fn();
     try {
       const result = binding.cut({
         clipboardData: { types: [], getData: () => "", setData(format, data) {
           if (format === (failedWrite === "structured" ? payload.type : "text/plain")) throw new Error("Clipboard write refused");
           written.set(format, data);
         } },
-        preventDefault() {},
+        preventDefault,
       });
       expect(result).toMatchObject({ ok: false, code: "clipboard.unavailable" });
       expect(remove).not.toHaveBeenCalled();
+      expect(preventDefault).toHaveBeenCalledOnce();
       expect(document.value).toEqual(before.value);
       expect(editor.snapshot).toMatchObject(before);
       expect(published).toEqual([]);

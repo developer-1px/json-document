@@ -26,6 +26,7 @@ import objectDocumentContractMarkdown from "../../../../packages/json-document-o
 import canvasApiMarkdown from "../../../../docs/api-reference/canvas.md?raw";
 import canvasContractMarkdown from "../../../../packages/json-document-canvas/docs/api.md?raw";
 import webApiMarkdown from "../../../../docs/api-reference/web.md?raw";
+import webClipboardContractMarkdown from "../../../../packages/json-document-web/docs/clipboard.md?raw";
 import contenteditableApiMarkdown from "../../../../docs/api-reference/contenteditable.md?raw";
 import richTextApiMarkdown from "../../../../docs/api-reference/rich-text.md?raw";
 import fileIntakeApiMarkdown from "../../../../docs/api-reference/file-intake.md?raw";
@@ -203,7 +204,7 @@ export const docPages = {
   calendarDocumentApi: docPage("/docs/api/calendar-document", `${calendarDocumentContractMarkdown}\n\n${calendarDocumentApiMarkdown}`),
   objectDocumentApi: docPage("/docs/api/object-document", `${objectDocumentContractMarkdown}\n\n${objectDocumentApiMarkdown}`),
   canvasApi: docPage("/docs/api/canvas", `${canvasContractMarkdown}\n\n${canvasApiMarkdown}`),
-  webApi: docPage("/docs/api/web", webApiMarkdown),
+  webApi: docPage("/docs/api/web", `${webClipboardContractMarkdown}\n\n${webApiMarkdown}`),
   contenteditableApi: docPage("/docs/api/contenteditable", contenteditableApiMarkdown),
   richTextApi: docPage("/docs/api/rich-text", richTextApiMarkdown),
   fileIntakeApi: docPage("/docs/api/file-intake", fileIntakeApiMarkdown),
