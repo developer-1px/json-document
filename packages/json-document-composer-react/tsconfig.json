@@ -8,6 +8,8 @@
   "references": [
     { "path": "../json-document" },
     { "path": "../json-document-composer" },
+    { "path": "../json-document-editing" },
+    { "path": "../json-document-file-intake" },
     { "path": "../json-document-rich-text" },
     { "path": "../json-document-rich-text-mention" },
     { "path": "../json-document-rich-text-mention-react" },

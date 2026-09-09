@@ -150,20 +150,29 @@ the formats it enables and their priority, while
 `createWebJSONClipboardRepresentation` owns JSON serialization. The legacy
 named codecs remain compatibility aliases over those domain formats. Clipboard
 surfaces write both the structured json-document MIME payload and its
-`text/plain` projection. Paste
-consumes only a valid structured payload. Parsing arbitrary external plain text
-into domain records or cells remains a host policy.
+`text/plain` projection. `captureWebClipboardPaste` captures an enabled structured
+representation, files, or literal text before the event expires. Its codec is
+optional for file-only consumers. Domain conversion belongs to the canonical
+Editing or Hand API; the Host supplies product policy.
+
+`readWebRasterFiles` validates a PNG/JPEG/WebP batch and prepares its embedded
+content and intrinsic dimensions through `readWebRasterFile`. Canvas and Composer
+share this path. File Intake owns `RasterImageContent`; Web owns reading and
+decoding, not document mutation or server upload. See the
+[Clipboard API and remaining TBD](docs/clipboard.md).
 
 The official keyboard adapter owns `defaultWebKeymap`. `resolve` returns a
 semantic command or `null`; `moveLinePoint` and `moveGridPoint` locate the
 visible neighbor. The host still decides when a command applies and which
 domain Intent to dispatch.
 
-The clipboard binding calls `preventDefault()` only after a successful copy,
-canonical cut, or canonical paste. Cut writes the selected payload before
-asking the Editing companion to remove it. Missing clipboard data, malformed
-payloads, unsupported cut, and rejected editing results leave native handling
-available.
+The clipboard binding cancels cut before attempting a write, and only removes
+the captured selection after the write succeeds. Copy cancels after writing;
+its synchronous paste cancels after decoding a supported representation and
+before invoking Editing. Decode failures retain that binding's existing
+pass-through. In contrast, `captureWebClipboardPaste` claims a recognized
+representation before decoding, so an invalid structured payload cannot fall
+back to other content. Missing or unrecognized content remains unclaimed.
 
 `createWebClipboardSurface` is the public surface-level orchestration API. It
 projects one binding into `onCopy`, `onCut`, and `onPaste` handlers and reports
@@ -195,7 +204,8 @@ The host owns:
 - DOM/canvas geometry and hit testing;
 - external plain-text interpretation and product-specific paste policy;
 - enabled representations and their priority;
-- native text selection, IME, drag/drop, persistence, and remote protocols.
+- composition of canonical text-selection, IME and drag/drop bindings;
+- injection of persistence and remote-system instances.
 
 The module does not access `window`, `document`, or `navigator` during import,
 so non-browser tooling can load it safely.

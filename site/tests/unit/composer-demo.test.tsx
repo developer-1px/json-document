@@ -6,7 +6,9 @@ import composerCommandsSource from "../../../packages/json-document-composer/src
 import composerSchemaSource from "../../../packages/json-document-composer/src/schema.ts?raw";
 import composerReferenceAtomSource from "../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";
 import composerLifecycleSource from "../../../packages/json-document-composer-react/src/use-composer.tsx?raw";
+import composerAttachmentsSource from "../../../packages/json-document-composer-react/src/attachments.ts?raw";
 import composerCommandMenuSource from "../../../packages/json-document-composer-react/src/command-menu.ts?raw";
+import { discoverDemoSources } from "../../src/shared/demo-workbench/demo-sources";
 
 afterEach(cleanup);
 
@@ -35,11 +37,30 @@ describe("Agent Chat Composer Hands", () => {
     expect(composerDemoSource).not.toContain('id === "skill"');
     expect(composerDemoSource).not.toContain('id === "agent"');
     expect(composerDemoSource).toContain("addActions.find((action) => action.id === id)?.run()");
-    expect(composerLifecycleSource).toContain("addComposerAttachments(");
-    expect(composerLifecycleSource).toContain("fileCandidatesFromWebFiles(");
+    expect(composerLifecycleSource).toContain("useComposerAttachments(");
+    expect(composerAttachmentsSource).toContain("addComposerAttachments(");
+    expect(composerAttachmentsSource).toContain("fileCandidatesFromWebFiles(");
+    expect(composerAttachmentsSource).toContain("readWebRasterFiles(");
+    expect(composerAttachmentsSource).toContain("createEditingPreparationQueue<");
     expect(composerCommandMenuSource).toContain("useRichTextSuggestion(");
     expect(composerCommandMenuSource).toContain("useRichTextMentionSuggestions(");
     expect(composerLifecycleSource).toContain("<ComposerReferenceAtom");
+  });
+
+  test("exposes the attachment preparation owners with API references in Source", async () => {
+    const sources = await discoverDemoSources("routes/composer-demo/ComposerDemoRoute.tsx");
+    for (const path of [
+      "packages/json-document-composer-react/src/attachments.ts",
+      "packages/json-document-composer/src/commands.ts",
+      "packages/json-document-file-intake/src/raster-content.ts",
+      "packages/json-document-web/src/raster-files.ts",
+      "packages/json-document-editing/src/preparation-queue.ts",
+    ]) {
+      const source = sources.find((entry) => entry.path === path);
+      expect(source, path).toBeDefined();
+      expect(source?.referencePath).toMatch(/^\/docs\/api\//);
+      expect(await source?.load()).toBeTruthy();
+    }
   });
 
   test("delegates file intake and mention responsibilities to their canonical owners", () => {
@@ -84,7 +105,7 @@ describe("Agent Chat Composer Hands", () => {
   test("opens the Cstar-shaped add and model layers from real controls", () => {
     render(<ComposerDemoRoute />);
     fireEvent.click(screen.getByRole("button", { name: "추가" }));
-    expect(screen.getByRole("menuitem", { name: /파일 업로드/ })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: /파일 첨부/ })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: /스킬/ })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: /에이전트/ })).toBeTruthy();
 

@@ -39,7 +39,7 @@ calendarMinutesFromWebGrid(clientY: number, bounds: { readonly top: number; read
 ## `captureWebClipboardPaste`
 
 ```ts
-captureWebClipboardPaste<Payload extends WebClipboardPayload>(event: WebClipboardEvent, options: { readonly codec: WebClipboardCodec<Payload>; readonly files?: boolean; readonly text?: boolean; }): WebClipboardPaste<Payload>
+captureWebClipboardPaste<Payload extends WebClipboardPayload = WebClipboardPayload>(event: WebClipboardEvent, options: { readonly codec?: WebClipboardCodec<Payload>; readonly files?: boolean; readonly text?: boolean; }): WebClipboardPaste<Payload>
 ```
 ## `chordFromStroke`
 
@@ -222,6 +222,11 @@ projectWebWidgetState(state: WebWidgetState): WebWidgetARIA
 
 ```ts
 readWebRasterFile(file: WebRasterFile, options?: { readonly signal?: WebRasterReadSignal; }): Promise<WebRasterSourceResult>
+```
+## `readWebRasterFiles`
+
+```ts
+readWebRasterFiles(files: ReadonlyArray<WebFileCandidate>, options: { readonly policy: FileAcceptancePolicy; readonly maxImagePixels: number; readonly signal?: WebRasterReadSignal; readonly readRaster?: typeof readWebRasterFile; }): Promise<WebRasterFilesResult>
 ```
 ## `registerWebVirtualSelectionScope`
 
@@ -783,6 +788,21 @@ interface WebRasterFile {
   readonly name: string;
   readonly type: string;
 }
+```
+## `WebRasterFileContent`
+
+```ts
+interface WebRasterFileContent {
+  readonly candidate: FileCandidate;
+  readonly image: RasterImageContent;
+}
+```
+## `WebRasterFilesResult`
+
+```ts
+type WebRasterFilesResult =
+  | { readonly ok: true; readonly files: ReadonlyArray<WebRasterFileContent> }
+  | { readonly ok: false; readonly code: string; readonly reason?: string };
 ```
 ## `WebRasterReadSignal`
 

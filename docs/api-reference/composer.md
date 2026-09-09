@@ -34,18 +34,20 @@ const COMPOSER_SKILL_NODE: "os.interactive/skill"
 ## `ComposerAttachment`
 
 ```ts
-interface ComposerAttachment extends Record<string, JSONValue> {
+type ComposerAttachment = Record<string, JSONValue> & {
   readonly id: string;
   readonly kind: "document" | "image";
   readonly name: string;
   readonly size: number;
   readonly mediaType: string | null;
-}
+  /** Absent for metadata-only attachments. Presence retains actual embedded raster content. */
+  readonly image?: RasterImageContent;
+};
 ```
 ## `ComposerAttachmentCandidate`
 
 ```ts
-type ComposerAttachmentCandidate = FileCandidate;
+type ComposerAttachmentCandidate = FileCandidate & { readonly image?: RasterImageContent };
 ```
 ## `ComposerAttachmentPolicy`
 

@@ -1,5 +1,5 @@
 import type { JSONValue } from "@interactive-os/json-document";
-import type { FileCandidate } from "@interactive-os/json-document-file-intake";
+import type { FileCandidate, RasterImageContent } from "@interactive-os/json-document-file-intake";
 import type { RichTextDocument } from "@interactive-os/json-document-rich-text";
 import { RICH_TEXT_MENTION_NODE, type RichTextMention } from "@interactive-os/json-document-rich-text-mention";
 
@@ -11,15 +11,17 @@ export type ComposerReference =
   | ({ readonly kind: "mention" } & RichTextMention)
   | { readonly kind: "skill"; readonly id: string; readonly label: string };
 
-export interface ComposerAttachment extends Record<string, JSONValue> {
+export type ComposerAttachment = Record<string, JSONValue> & {
   readonly id: string;
   readonly kind: "document" | "image";
   readonly name: string;
   readonly size: number;
   readonly mediaType: string | null;
-}
+  /** Absent for metadata-only attachments. Presence retains actual embedded raster content. */
+  readonly image?: RasterImageContent;
+};
 
-export type ComposerAttachmentCandidate = FileCandidate;
+export type ComposerAttachmentCandidate = FileCandidate & { readonly image?: RasterImageContent };
 
 export interface ComposerDraft<Model extends string = string> extends Record<string, JSONValue> {
   readonly id: string;

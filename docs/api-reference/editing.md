@@ -588,6 +588,11 @@ createEditingId(prefix: string): string
 ```ts
 createEditingIdAllocator(existingIds: Iterable<string>, createId: () => string, subject: string): () => string
 ```
+## `createEditingPreparationQueue`
+
+```ts
+createEditingPreparationQueue<Value, Result extends { readonly ok: boolean; }>(options: { readonly apply: (value: Value) => Result; readonly onResult?: (result: Result | EditingPreparationFailure) => void; readonly onPendingChange?: (pending: boolean) => void; readonly cancelCode?: string; readonly errorCode?: string; }): EditingPreparationQueue<Value, Result>
+```
 ## `createEditingSession`
 
 ```ts
@@ -993,6 +998,25 @@ interface EditingPlan<Selection extends JSONValue> {
   readonly history?: "record" | "ignore";
   /** Groups local inverse history. An external history owner defines its own steps. */
   readonly historyGroup?: string;
+}
+```
+## `EditingPreparation`
+
+```ts
+type EditingPreparation<Value> = { readonly ok: true; readonly value: Value } | EditingPreparationFailure;
+```
+## `EditingPreparationFailure`
+
+```ts
+type EditingPreparationFailure = { readonly ok: false; readonly code: string; readonly reason?: string };
+```
+## `EditingPreparationQueue`
+
+```ts
+interface EditingPreparationQueue<Value, Result> {
+  readonly isPending: boolean;
+  enqueue(prepare: () => EditingPreparation<Value> | Promise<EditingPreparation<Value>>, cancelPreparation?: () => void): Promise<Result | EditingPreparationFailure>;
+  cancel(): void;
 }
 ```
 ## `EditingResult`

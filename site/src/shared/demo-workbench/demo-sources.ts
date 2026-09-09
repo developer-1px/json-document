@@ -9,6 +9,7 @@ import canvasObjectViewSource from "../../../../packages/json-document-canvas/sr
 import canvasClipboardSource from "../../../../packages/json-document-canvas/src/canvas-clipboard.ts?raw";
 import canvasClipboardEditingSource from "../../../../packages/json-document-editing/src/canvas-clipboard.ts?raw";
 import objectPasteSessionSource from "../../../../packages/json-document-editing/src/object-paste-session.ts?raw";
+import editingPreparationQueueSource from "../../../../packages/json-document-editing/src/preparation-queue.ts?raw";
 import editingSnapshotSource from "../../../../packages/json-document-react/src/editing-snapshot.ts?raw";
 import pointerTrackingSource from "../../../../packages/json-document/src/foundation/patch/track.ts?raw";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
@@ -91,6 +92,7 @@ import annotationHandSource from "../../../../packages/json-document-annotation/
 import annotationEditingSource from "../../../../packages/json-document-editing/src/annotation.ts?raw";
 import webSVGCoordinateSource from "../../../../packages/json-document-web/src/svg-coordinate.ts?raw";
 import webRasterSource from "../../../../packages/json-document-web/src/raster-source.ts?raw";
+import webRasterFilesSource from "../../../../packages/json-document-web/src/raster-files.ts?raw";
 import webAnnotationRasterSource from "../../../../packages/json-document-web/src/annotation-raster.ts?raw";
 import uiMenuSource from "../../../../packages/json-document-ui-primitives-react/src/menu.tsx?raw";
 import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
@@ -114,8 +116,10 @@ import composerInteractionSource from "../../../../packages/json-document-compos
 import composerSuggestionsSource from "../../../../packages/json-document-composer/src/suggestions.ts?raw";
 import composerReferenceAtomSource from "../../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";
 import composerReactLifecycleSource from "../../../../packages/json-document-composer-react/src/use-composer.tsx?raw";
+import composerAttachmentsSource from "../../../../packages/json-document-composer-react/src/attachments.ts?raw";
 import composerCommandMenuSource from "../../../../packages/json-document-composer-react/src/command-menu.ts?raw";
 import fileIntakeSource from "../../../../packages/json-document-file-intake/src/index.ts?raw";
+import rasterContentSource from "../../../../packages/json-document-file-intake/src/raster-content.ts?raw";
 import suggestionSource from "../../../../packages/json-document-rich-text-suggestion/src/index.ts?raw";
 import suggestionReactSource from "../../../../packages/json-document-rich-text-suggestion-react/src/index.ts?raw";
 import mentionSource from "../../../../packages/json-document-rich-text-mention/src/index.ts?raw";
@@ -205,6 +209,10 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-editing/src/preparation-queue.ts", editingPreparationQueueSource],
+  ["packages/json-document-web/src/raster-files.ts", webRasterFilesSource],
+  ["packages/json-document-file-intake/src/raster-content.ts", rasterContentSource],
+  ["packages/json-document-composer-react/src/attachments.ts", composerAttachmentsSource],
   ["packages/json-document-object-document/src/object-model.ts", objectModelSource],
   ["packages/json-document-object-document/src/object-validation.ts", objectValidationSource],
   ["packages/json-document-object-document/src/object-operation.ts", objectOperationSource],
@@ -352,6 +360,11 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredPublicUsages = [
+  { packageName: "@interactive-os/json-document-editing", symbol: "createEditingPreparationQueue", sourcePath: "packages/json-document-editing/src/preparation-queue.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createObjectPasteSession", sourcePath: "packages/json-document-editing/src/preparation-queue.ts" },
+  { packageName: "@interactive-os/json-document-web", symbol: "readWebRasterFiles", sourcePath: "packages/json-document-web/src/raster-files.ts" },
+  ...["assertRasterImageSource", "assertRasterImageContent", "RasterImageContent"].map((symbol) => ({ packageName: "@interactive-os/json-document-file-intake", symbol, sourcePath: "packages/json-document-file-intake/src/raster-content.ts" })),
+  { packageName: "@interactive-os/json-document-composer-react", symbol: "useComposer", sourcePath: "packages/json-document-composer-react/src/attachments.ts" },
   ...(["CanvasHand", "useCanvasHand", "createCanvasClipboardBinding"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-canvas", symbol, sourcePath: "packages/json-document-canvas/src/canvas-clipboard.ts" })),
   { packageName: "@interactive-os/json-document-editing", symbol: "createCanvasClipboard", sourcePath: "packages/json-document-editing/src/canvas-clipboard.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createObjectPasteSession", sourcePath: "packages/json-document-editing/src/object-paste-session.ts" },

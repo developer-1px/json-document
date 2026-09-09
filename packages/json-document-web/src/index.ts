@@ -31,6 +31,7 @@ export { createWebViewportPositionPorts } from "./viewport-position.js";
 export { createWebAnchoredFloatingPositionPorts } from "./anchored-floating-position.js";
 export { projectWebClientPointToSVG, webSVGViewportFromElement } from "./svg-coordinate.js";
 export { readWebRasterFile } from "./raster-source.js";
+export { readWebRasterFiles, type WebRasterFileContent, type WebRasterFilesResult } from "./raster-files.js";
 export { composerAttachmentCandidateFromWebFile, composerAttachmentCandidatesFromWebClipboard, composerAttachmentCandidatesFromWebFiles, fileCandidateFromWebFile, fileCandidatesFromWebClipboard, fileCandidatesFromWebFiles } from "./file-intake.js";
 export { renderWebAnnotationRaster } from "./annotation-raster.js";
 export { registerWebVirtualSelectionScope } from "./virtual-selection-scope.js";

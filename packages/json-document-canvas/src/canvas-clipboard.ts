@@ -1,7 +1,7 @@
 import { createCanvasClipboard, createObjectPasteSession, type CanvasClipboardOptions, type EditingResult, type ObjectEditor, type ObjectPastePreparation, type ObjectSelection } from "@interactive-os/json-document-editing";
-import { validateFileCandidates, type FileAcceptancePolicy } from "@interactive-os/json-document-file-intake";
+import type { FileAcceptancePolicy } from "@interactive-os/json-document-file-intake";
 import { assertCanvasDocument } from "@interactive-os/json-document-object-document";
-import { captureWebClipboardPaste, createWebClipboardBinding, fileCandidatesFromWebFiles, objectClipboardCodec, readWebRasterFile, type WebClipboardEvent, type WebFileCandidate } from "@interactive-os/json-document-web";
+import { captureWebClipboardPaste, createWebClipboardBinding, objectClipboardCodec, readWebRasterFile, readWebRasterFiles, type WebClipboardEvent, type WebFileCandidate } from "@interactive-os/json-document-web";
 
 export interface CanvasClipboardPolicy {
   readonly textColor: string;
@@ -34,18 +34,10 @@ export function createCanvasClipboardBinding(editor: ObjectEditor, policy: Canva
     return { bounds: { x: 0, y: 0, width: document.width * 0.75, height: document.height * 0.75 }, textColor: policy.textColor, fontSize: policy.fontSize };
   }
   async function images(candidates: readonly WebFileCandidate[], content: CanvasClipboardOptions, signal: AbortSignal): Promise<ObjectPastePreparation> {
-    const accepted = validateFileCandidates(fileCandidatesFromWebFiles(candidates), files);
-    if (!accepted.ok) return accepted;
-    const decoded = [];
-    // Decode a batch sequentially to bound peak memory; adoption remains atomic.
-    for (const file of candidates) {
-      const image = await (options.readRaster ?? readWebRasterFile)(file, { signal });
-      if (!image.ok) return image;
-      if (signal.aborted) return { ok: false, code: "clipboard.cancelled" };
-      if (!Number.isFinite(image.width * image.height) || image.width * image.height > maxPixels) return { ok: false, code: "raster.pixel-limit" };
-      decoded.push({ source: image.dataURL, width: image.width, height: image.height, label: file.name });
-    }
-    return { ok: true, clipboard: createCanvasClipboard({ type: "images", images: decoded }, content) };
+    const prepared = await readWebRasterFiles(candidates, { policy: files, maxImagePixels: maxPixels, signal, readRaster: options.readRaster ?? readWebRasterFile });
+    return prepared.ok
+      ? { ok: true, clipboard: createCanvasClipboard({ type: "images", images: prepared.files.map(({ candidate, image }) => ({ ...image, label: candidate.name })) }, content) }
+      : prepared;
   }
   return {
     get pending() { return session.pending; },

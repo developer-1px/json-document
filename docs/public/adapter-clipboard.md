@@ -43,8 +43,21 @@ interface WebClipboardSurface<Payload, EditingResult> {
 ```
 
 모든 handler는 같은 binding lifecycle을 사용하고 결과를 `onResult`에 한 번
-전달한 뒤 그 결과를 반환합니다. payload 의미, paste policy, 사용자 메시지와
-관찰 상태는 Host 책임입니다.
+전달한 뒤 그 결과를 반환합니다. payload 의미와 문서 반영은 정본 Editing·Hand가
+소유하며 Host는 제품 policy 값, 사용자 메시지와 관찰 표현을 주입합니다.
+
+## 외부 이미지 입력 준비
+
+`captureWebClipboardPaste(event, { codec?, files?, text? })`는 event가 끝나기 전에
+활성화한 표현을 한 번만 선택합니다. Codec을 생략한 `{ files: true }`는 이미지 첨부를
+처리하고, 파일이 없는 text·HTML은 기존 Rich Text binding에 남깁니다.
+`readWebRasterFiles`는 선택한 파일 batch의 정책·PNG/JPEG/WebP decode를 검증하고
+실제 내용과 크기를 반환합니다. 이 단계는 문서나 History를 변경하지 않습니다.
+
+API 계약은 소유 패키지의 [Web API](/docs/api/web)에 있으며
+[Canvas](/demo/canvas)와 [Composer](/demo/composer)가 같은 준비 경로를 사용합니다.
+HTML 이미지·혼합 입력과 외부 앱 왕복은 [Paste × Image TBD](clipboard.md#paste--image-기본기--tbd)에
+구현 범위와 구분해 공개합니다.
 
 ## `createWebClipboardTextWriter`
 

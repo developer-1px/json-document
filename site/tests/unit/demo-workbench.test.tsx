@@ -70,7 +70,10 @@ describe("Demo definition and source discovery", () => {
       ["packages/json-document-canvas/src/canvas-clipboard.ts", "/docs/api/canvas"],
       ["packages/json-document-editing/src/canvas-clipboard.ts", "/docs/api/editing"],
       ["packages/json-document-editing/src/object-paste-session.ts", "/docs/api/editing"],
+      ["packages/json-document-editing/src/preparation-queue.ts", "/docs/api/editing"],
       ["packages/json-document-web/src/raster-source.ts", "/docs/api/web"],
+      ["packages/json-document-web/src/raster-files.ts", "/docs/api/web"],
+      ["packages/json-document-file-intake/src/raster-content.ts", "/docs/api/file-intake"],
       ["packages/json-document-file-intake/src/index.ts", "/docs/api/file-intake"],
     ]) {
       const file = sources.find((source) => source.path === path);
@@ -237,6 +240,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-editing/src/object.ts",
       "packages/json-document-object-document/src/object-model.ts",
       "packages/json-document-object-document/src/object-validation.ts",
+      "packages/json-document-file-intake/src/raster-content.ts",
       "packages/json-document/src/application/document/create.ts",
       "packages/json-document-object-document/src/object-projection.ts",
       "packages/json-document-object-document/src/object-operation.ts",

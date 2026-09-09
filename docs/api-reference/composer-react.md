@@ -18,6 +18,10 @@ interface ComposerBinding<Model extends string, Suggestion extends ComposerHostS
   readonly attachments: ComposerDraft<Model>["attachments"];
   readonly model: Model;
   readonly hasContent: boolean;
+  readonly isPreparingAttachments: boolean;
+  readonly attachmentError: EditingPreparationFailure | null;
+  readonly canSubmit: boolean;
+  cancelAttachments(): void;
   readonly commandKind: "mention" | "skill" | null;
   readonly commandMenu: RichTextSuggestionBinding<Suggestion>;
   readonly commandOpen: boolean;
@@ -61,6 +65,8 @@ interface UseComposerOptions<Model extends string, Suggestion extends ComposerHo
   readonly id: string;
   readonly config: ComposerHostConfig<Model> & { readonly suggestions: ReadonlyArray<Suggestion> };
   readonly ports: ComposerHostPorts<Model>;
+  readonly maxImagePixels?: number;
+  readonly readRaster?: typeof readWebRasterFile;
   readonly labels: {
     readonly mentionSuggestions: string;
     readonly skillSuggestions: string;

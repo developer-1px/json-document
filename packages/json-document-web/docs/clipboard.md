@@ -37,7 +37,8 @@ const clipboard = createWebClipboardBinding({
 `captureWebClipboardPaste(event, { codec, files: true, text: true })`는 이벤트가 끝나기 전에
 구조화 MIME → 파일 → `text/plain` 순서로 하나의 표현을 캡처합니다. 성공은 `type`이
 `structured`(payload), `files`(파일 배열), `text`(문자열)인 결과입니다. files/text는 명시한
-경우만 처리하며 기본은 구조화 표현뿐입니다. 파일 메타데이터는 별도 `fileCandidatesFromWebFiles`
+경우만 처리합니다. `codec`을 생략한 `{ files: true }`는 Composer 같은 file-only 소비자를
+지원하며 텍스트/HTML의 native 처리를 소유하지 않습니다. 파일 메타데이터는 별도 `fileCandidatesFromWebFiles`
 API로 File Intake에 전달하고, 파일 참조는 실제 browser File이어야 읽을 수 있습니다.
 
 캡처한 파일 배열과 문자열을 비동기 작업에 넘기며 ClipboardEvent/DataTransfer를 나중에 다시
@@ -52,4 +53,18 @@ decode 실패도 소유한 실패이며 다른 표현으로 떨어지지 않습�
 호환되며 read/decode 중 취소하면 리스너를 해제하고 읽기/이미지 요청을 중단합니다.
 파일 형식·크기·개수·픽셀 제한이나 문서 객체 생성은 이 플랫폼 API의 책임이 아닙니다.
 
-실제 텍스트·이미지 입력 및 순서/취소 연결: [Canvas Usage/Source](/demo/canvas).
+### 이미지 batch 준비
+
+`readWebRasterFiles(files, { policy, maxImagePixels, signal?, readRaster? })`는 File Intake의
+정책 검사를 먼저 실행한 뒤 PNG/JPEG/WebP를 순서대로 decode합니다. 성공은
+`{ ok: true, files: [{ candidate, image }] }`이며 image는 File Intake의 `RasterImageContent`입니다.
+한 파일이라도 실패하면 전체 batch의 실패만 반환합니다. 파일 정책 실패, `raster.unsupported`,
+읽기/decode 실패, `raster.pixel-limit`, `raster.cancelled`를 구별합니다.
+
+`policy`와 `maxImagePixels`는 소비자가 결정합니다. 이 함수는 실제 DOM 읽기를
+순차화하지만 문서를 변경하거나 Undo 단위·삽입 위치를 결정하지 않습니다. 준비한
+batch를 어떻게 적용하고 언제 취소할지는 Editing과 각 Hand가 소유합니다.
+
+실제 텍스트·이미지 입력 및 순서/취소 연결: [Canvas Usage/Source](/demo/canvas),
+[Composer Usage/Source](/demo/composer). HTML 이미지, 명시적인 plain paste, 이미지 쓰기와
+OS-native 왕복의 남은 범위는 [Clipboard 기본기 TBD](/docs/clipboard)에 공개합니다.

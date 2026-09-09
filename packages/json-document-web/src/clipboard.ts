@@ -32,15 +32,15 @@ export type WebClipboardPaste<Payload extends WebClipboardPayload> =
   | Extract<WebClipboardResult<never, never>, { readonly ok: false }>;
 
 /** Captures native data before the event ends: structured → files → literal text. An owned invalid format never falls through. */
-export function captureWebClipboardPaste<Payload extends WebClipboardPayload>(event: WebClipboardEvent, options: {
-  readonly codec: WebClipboardCodec<Payload>;
+export function captureWebClipboardPaste<Payload extends WebClipboardPayload = WebClipboardPayload>(event: WebClipboardEvent, options: {
+  readonly codec?: WebClipboardCodec<Payload>;
   readonly files?: boolean;
   readonly text?: boolean;
 }): WebClipboardPaste<Payload> {
   const data = event.clipboardData;
   if (data === null) return failure("clipboard.unavailable");
   try {
-    if (Array.from(data.types).includes(options.codec.mimeType)) {
+    if (options.codec && Array.from(data.types).includes(options.codec.mimeType)) {
       event.preventDefault();
       const result = readRepresentations(data, [options.codec]);
       return result.ok ? { ok: true, type: "structured", payload: result.payload } : result;

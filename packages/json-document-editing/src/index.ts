@@ -30,6 +30,7 @@ export { acceptsDatabaseValue, databaseValueFromText, defaultDatabaseValue } fro
 export { createObjectEditor, objectClipboardFormat } from "./object.js";
 export { createCanvasClipboard, type CanvasClipboardContent, type CanvasClipboardOptions } from "./canvas-clipboard.js";
 export { createObjectPasteSession, type ObjectPasteSession, type ObjectPastePreparation } from "./object-paste-session.js";
+export { createEditingPreparationQueue, type EditingPreparationQueue, type EditingPreparation, type EditingPreparationFailure } from "./preparation-queue.js";
 export { createOrderEditor, orderClipboardFormat } from "./order.js";
 export { createEditingSession } from "./session.js";
 export { createEditingId, createEditingIdAllocator } from "./identity.js";

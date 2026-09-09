@@ -73,6 +73,24 @@ Further commands cannot author until restoration succeeds. Fix the callback or
 recreate the editor; do not retry the history operation as if it were rejected.
 Callback exceptions are programming errors, not `{ ok: false }` commit rejections.
 
+## 비동기 준비 순서
+
+`createEditingPreparationQueue<Value, Result>({ apply, onResult?, onPendingChange?, cancelCode?, errorCode? })`는
+`enqueue(prepare, cancelPreparation?)`, `cancel()`, `isPending`을 제공합니다.
+`prepare`는 `{ ok: true, value }` 또는 `{ ok: false, code, reason? }`를 즉시/Promise로
+반환합니다. 준비는 병행할 수 있지만 `apply`는 입력 순서대로 동기 실행합니다.
+준비 실패는 apply를 호출하지 않고, 취소는 대기 Promise를 settle하며 늦은 결과를 무시합니다.
+기본 오류 코드는 `editing.preparation-cancelled`, `editing.preparation-failed`입니다. 기존 public binding은
+`cancelCode/errorCode`로 자신의 오류 어휘를 유지할 수 있습니다.
+
+queue는 문서·selection을 모르며 원자적 편집은 `apply`가 호출하는 정본 editor의 책임입니다.
+이미 완료한 편집을 취소로 되돌리지 않습니다. Object의 `createObjectPasteSession`은
+외부 문서/선택 변경에 취소하고, Composer의 첨부 준비는 typing 중 유지합니다.
+각 요청의 History 단위도 실제 domain apply가 정합니다.
+Usage·Source: [Canvas](/demo/canvas), [Composer](/demo/composer).
+
+## Editing identity and observation
+
 `createEditingId(prefix)` supplies opaque UUID-based identities for Document,
 Order, Object, Tree, Calendar and Rich Text. IDs do not restart per editor or
 replica. Custom `createId` injection remains supported; its provider must ensure
