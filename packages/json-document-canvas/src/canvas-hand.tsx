@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from "react";
+import { Braces, Circle, MousePointer2, Pencil, RectangleHorizontal, Redo2, Trash2, Type, Undo2, type LucideIcon } from "lucide-react";
 import type { ObjectEditor } from "@interactive-os/json-document-editing";
 import { serializeCanvasDocument } from "@interactive-os/json-document-object-document";
 import { Command, Field, ProductShell, Toggle, ToolbarGroup } from "@interactive-os/json-document-ui-primitives-react";
@@ -13,9 +14,9 @@ export interface CanvasHandProps {
   readonly label?: string;
 }
 
-const tools: ReadonlyArray<{ readonly id: CanvasTool; readonly label: string }> = [
-  { id: "select", label: "선택" }, { id: "text", label: "글자" },
-  { id: "rectangle", label: "사각형" }, { id: "ellipse", label: "타원" }, { id: "path", label: "그리기" },
+const tools: ReadonlyArray<{ readonly id: CanvasTool; readonly label: string; readonly icon: LucideIcon }> = [
+  { id: "select", label: "선택", icon: MousePointer2 }, { id: "text", label: "글자", icon: Type },
+  { id: "rectangle", label: "사각형", icon: RectangleHorizontal }, { id: "ellipse", label: "타원", icon: Circle }, { id: "path", label: "그리기", icon: Pencil },
 ];
 
 export function CanvasHand(props: CanvasHandProps) {
@@ -24,13 +25,13 @@ export function CanvasHand(props: CanvasHandProps) {
   const selected = hand.objects.find((object) => object.id === hand.snapshot.selection.primaryKey);
   return (
     <ProductShell className={props.className} toolbarLabel="Canvas tools" toolbar={<ToolbarGroup style={{ flexWrap: "wrap" }}>
-      <ToolbarGroup>{tools.map((tool) => <Toggle key={tool.id} pressed={hand.tool === tool.id} onClick={() => hand.choose(tool.id)}>{tool.label}</Toggle>)}</ToolbarGroup>
+      <ToolbarGroup>{tools.map((tool) => <Toggle key={tool.id} label={tool.label} pressed={hand.tool === tool.id} onClick={() => hand.choose(tool.id)}><tool.icon aria-hidden="true" size={16} /></Toggle>)}</ToolbarGroup>
       <ToolbarGroup>
-        <Command disabled={!hand.snapshot.canUndo} onClick={() => hand.history("undo")}>실행 취소</Command>
-        <Command disabled={!hand.snapshot.canRedo} onClick={() => hand.history("redo")}>다시 실행</Command>
-        <Command disabled={!selected} onClick={hand.remove}>삭제</Command>
+        <Command label="실행 취소" disabled={!hand.snapshot.canUndo} onClick={() => hand.history("undo")}><Undo2 aria-hidden="true" size={16} /></Command>
+        <Command label="다시 실행" disabled={!hand.snapshot.canRedo} onClick={() => hand.history("redo")}><Redo2 aria-hidden="true" size={16} /></Command>
+        <Command label="삭제" disabled={!selected} onClick={hand.remove}><Trash2 aria-hidden="true" size={16} /></Command>
       </ToolbarGroup>
-      <Command onClick={() => { hand.commitText(); hand.cancel(); setJSON(json === null ? serializeCanvasDocument(props.editor.snapshot.value as typeof hand.document) : null); }}>JSON</Command>
+      <Command label="JSON" onClick={() => { hand.commitText(); hand.cancel(); setJSON(json === null ? serializeCanvasDocument(props.editor.snapshot.value as typeof hand.document) : null); }}><Braces aria-hidden="true" size={16} /></Command>
     </ToolbarGroup>}>
       <svg ref={hand.surface} {...hand.surfaceProps} tabIndex={0} role="group" aria-label={props.label ?? "Canvas slide"}
         data-canvas-slide="true" data-tool={hand.tool} viewBox={`0 0 ${hand.document.width} ${hand.document.height}`} preserveAspectRatio="none"

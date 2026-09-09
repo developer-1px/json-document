@@ -1,5 +1,30 @@
 import { expect, test, type Page } from "@playwright/test";
 
+for (const route of ["/demo/canvas", "/widgets/canvas"]) {
+  test(`${route} uses shared icon toolbar and hover/focus tooltips`, async ({ page }) => {
+    await page.goto(route);
+    const toolbar = page.getByRole("toolbar", { name: "Canvas tools" });
+    const buttons = toolbar.getByRole("button");
+    await expect(buttons).toHaveCount(9);
+    for (const button of await buttons.all()) {
+      await expect(button).toHaveAttribute("data-ui-presentation", "icon");
+      await expect(button.locator('svg[aria-hidden="true"]')).toHaveCount(1);
+      await expect(button).toHaveCSS("border-top-width", "0px");
+      const box = await button.boundingBox();
+      expect(box?.width).toBe(32); expect(box?.height).toBe(32);
+    }
+    const draw = toolbar.getByRole("button", { name: "그리기", exact: true });
+    const tooltip = toolbar.getByRole("tooltip", { name: "그리기", exact: true });
+    await expect(tooltip).toBeHidden();
+    await draw.hover(); await expect(tooltip).toBeVisible();
+    await page.mouse.move(0, 0); await expect(tooltip).toBeHidden();
+    await draw.focus(); await expect(tooltip).toBeVisible();
+    await expect(draw).not.toHaveCSS("box-shadow", "none");
+    await draw.press("Enter"); await expect(draw).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("[data-canvas-slide]")).toHaveAttribute("data-tool", "path");
+  });
+}
+
 async function point(page: Page, x: number, y: number) {
   const box = await page.locator("[data-canvas-slide]").boundingBox();
   if (!box) throw new Error("Missing Canvas slide");

@@ -367,7 +367,6 @@
   [data-ui-component="contextual-controls"] :is(
     [data-ui-control="command"],
     [data-ui-control="toggle"],
-    [data-ui-control="command"][data-ui-presentation="icon"],
     [data-ui-segment="true"]
   ) {
     @apply rounded-control border-transparent bg-background-subtle/60 shadow-none hover:border-line-subtle hover:bg-background-subtle;
@@ -380,7 +379,6 @@
   [data-ui-toolbar="product"] :is(
     [data-ui-control="command"],
     [data-ui-control="toggle"],
-    [data-ui-control="command"][data-ui-presentation="icon"],
     [data-ui-segment="true"]
   ) {
     @apply rounded-control border-line-subtle/60 bg-background-canvas shadow-none hover:border-line-default hover:bg-background-canvas;
@@ -474,8 +472,12 @@
     transform: rotate(180deg);
   }
 
-  [data-ui-control="command"][data-ui-presentation="icon"] {
+  :is([data-ui-control="command"], [data-ui-control="toggle"])[data-ui-presentation="icon"] {
     @apply flex size-8 min-h-8 cursor-pointer items-center justify-center rounded-control border-0 bg-transparent p-0 text-foreground-default outline-none transition-colors hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-foreground-muted;
+  }
+
+  [data-ui-control="toggle"][data-ui-presentation="icon"][aria-pressed="true"] {
+    @apply bg-background-subtle text-foreground-strong disabled:bg-transparent disabled:text-foreground-muted;
   }
 
   :is([data-ui-component="command-presentation"], [data-ui-component="toggle-presentation"]) {

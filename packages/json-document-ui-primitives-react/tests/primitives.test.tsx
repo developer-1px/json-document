@@ -270,6 +270,22 @@ describe("UI Primitives", () => {
     expect(screen.getByRole("button", { name: "Details" }).getAttribute("aria-expanded")).toBe("true");
   });
 
+  test("Toggle labels default to icon presentation while text tooltips and explicit presentations remain intact", () => {
+    render(<>
+      <Toggle label="Draw" pressed><svg aria-hidden="true" /></Toggle>
+      <Toggle tooltip="Show details" pressed={false}>Details</Toggle>
+      <Toggle label="Full label" presentation="button" pressed={false}>Full label</Toggle>
+    </>);
+    const icon = screen.getByRole("button", { name: "Draw" });
+    expect(icon.getAttribute("data-ui-presentation")).toBe("icon");
+    expect(icon.getAttribute("aria-pressed")).toBe("true");
+    expect(icon.getAttribute("aria-describedby")).toBe(screen.getByRole("tooltip", { name: "Draw" }).id);
+    const text = screen.getByRole("button", { name: "Details" });
+    expect(text.getAttribute("data-ui-presentation")).toBe("button");
+    expect(text.getAttribute("aria-describedby")).toBe(screen.getByRole("tooltip", { name: "Show details" }).id);
+    expect(screen.getByRole("button", { name: "Full label" }).getAttribute("data-ui-presentation")).toBe("button");
+  });
+
   test("Command can preserve an editing surface focus during pointer activation", () => {
     render(<><div contentEditable role="textbox" /><Command preserveFocus>Format</Command></>);
     const editor = screen.getByRole("textbox");

@@ -4,6 +4,11 @@
 그리기, 단일 선택, 이동·resize·삭제, Undo/Redo, JSON 재열기를 연결합니다.
 `useCanvasHand`는 같은 입력 조합을 custom UI에서 사용할 수 있게 공개합니다.
 
+툴바의 모든 도구·명령은 Lucide 아이콘과 공통 `Toggle`/`Command`의 `label`을
+사용합니다. label이 접근성 이름과 hover/focus 툴팁의 정본이며, 별도 툴팁이나
+버튼 구현을 두지 않습니다. 선택 도구는 `aria-pressed`, 실행 불가 명령은
+`disabled`로 상태를 전달합니다.
+
 ```text
 Host: 한 장 fixture, 크기·색상 정책, 레이아웃
   └─ Canvas Hand: 도구, 조작 preview, plain-text draft, UI 조합

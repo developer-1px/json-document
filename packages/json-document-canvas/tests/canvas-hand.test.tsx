@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeAll, expect, test, vi } from "vitest";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createObjectEditor } from "@interactive-os/json-document-editing";
@@ -34,6 +34,27 @@ function rectangle(svg: Element) {
   fireEvent.click(screen.getByRole("button", { name: "사각형" }));
   fireEvent.pointerDown(svg, event(40, 50)); fireEvent.pointerMove(svg, event(140, 100)); fireEvent.pointerUp(svg, event(140, 100));
 }
+
+test("every toolbar control shares icon, accessible name and canonical tooltip without losing state", () => {
+  const { svg } = setup();
+  const toolbar = within(screen.getByRole("toolbar", { name: "Canvas tools" }));
+  const labels = ["선택", "글자", "사각형", "타원", "그리기", "실행 취소", "다시 실행", "삭제", "JSON"];
+  expect(toolbar.getAllByRole("button")).toHaveLength(labels.length);
+  for (const label of labels) {
+    const button = toolbar.getByRole("button", { name: label });
+    expect(button.textContent).toBe("");
+    expect(button.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+    expect(button.getAttribute("data-ui-presentation")).toBe("icon");
+    expect(button.getAttribute("aria-describedby")).toBe(toolbar.getByRole("tooltip", { name: label }).id);
+    expect(button.hasAttribute("title")).toBe(false);
+  }
+  expect(toolbar.getByRole("button", { name: "선택" }).getAttribute("aria-pressed")).toBe("true");
+  expect((toolbar.getByRole("button", { name: "삭제" }) as HTMLButtonElement).disabled).toBe(true);
+  fireEvent.click(toolbar.getByRole("button", { name: "그리기" }));
+  expect(svg.getAttribute("data-tool")).toBe("path");
+  expect(toolbar.getByRole("button", { name: "그리기" }).getAttribute("aria-pressed")).toBe("true");
+  expect(toolbar.getByRole("button", { name: "선택" }).getAttribute("aria-pressed")).toBe("false");
+});
 
 test("creation is transient until release, scales coordinates and selects the result with one undo step", () => {
   const { svg, value, editor, commits } = setup();
