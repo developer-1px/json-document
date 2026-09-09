@@ -296,7 +296,7 @@
   }
 
   .canvas-style-panel {
-    @apply grid w-64 gap-3 rounded-control border border-line-subtle bg-background-canvas p-3 text-xs text-foreground-default shadow-overlay;
+    @apply grid w-64 gap-3 rounded-control border border-line-subtle bg-background-canvas p-3 text-xs text-foreground-default shadow-overlay outline-none;
   }
 
   [data-ui-presentation="dialog-backdrop"] {

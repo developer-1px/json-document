@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlignCenter, AlignLeft, AlignRight, Bold, Check, Palette, Square, type LucideIcon } from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, Bold, Check, Palette, Square, SquareDashed, type LucideIcon } from "lucide-react";
 import type { ObjectStyle, ObjectStyleSelection } from "@interactive-os/json-document-object-document";
 import { Command, Field, Popover, Toggle, ToolbarGroup } from "@interactive-os/json-document-ui-primitives-react";
 
@@ -51,9 +51,9 @@ function StyleValue(props: {
   }
   return <div style={{ display: "grid", gap: 4 }}>
     <span>{props.label}</span>
-    {props.color && <ToolbarGroup label={`${props.label} 팔레트`} style={{ flexWrap: "wrap" }}>
+    {props.color && <ToolbarGroup label={`${props.label} 팔레트`} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)" }}>
       {colors.map(([label, color]) => <Toggle key={color} label={`${props.label}: ${label}`} pressed={props.value === color} onClick={() => { props.onApply(color); setDraft(color); setError(null); }}>
-        <Square aria-hidden="true" size={16} fill={color} stroke={color === "transparent" || color === "#ffffff" ? "currentColor" : color} />
+        {color === "transparent" ? <SquareDashed aria-hidden="true" size={16} /> : <Square aria-hidden="true" size={16} fill={color} stroke={color === "#ffffff" ? "currentColor" : color} />}
       </Toggle>)}
     </ToolbarGroup>}
     <form style={{ display: "flex", gap: 4 }} onSubmit={(event) => { event.preventDefault(); apply(); }}>
