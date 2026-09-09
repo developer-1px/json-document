@@ -1,27 +1,62 @@
 import { buildPointer, type JSONPatchOperation } from "@interactive-os/json-document";
-import type { CalendarEvent, CalendarIntent, CalendarOccurrencePoint } from "./calendar.js";
+import type { CalendarDocument, CalendarEvent, CalendarOccurrencePoint, CalendarRecurrence } from "./calendar-model.js";
 import { calendarEventExcludeDates, calendarEventRecurrence, resolveCalendarOccurrence } from "./calendar-occurrence.js";
 import {
   addCalendarDate, calendarAllDaySpan, calendarDatePart, calendarDaysBetween,
-  calendarEventIntervalAt, calendarMinutesBetween, formatCalendarInstant,
+  calendarDocumentCalendars, calendarEventIntervalAt, calendarMinutesBetween, formatCalendarInstant,
   parseCalendarDate, parseCalendarInstant, validateCalendarEvent,
 } from "./calendar-validation.js";
 
-type CalendarEventIntent = Extract<CalendarIntent, { type:
-  "event.create" | "event.update" | "event.move" | "event.move-day" | "event.resize" | "occurrence.edit"
-}>;
+export type CalendarEventOperation =
+  | {
+      readonly type: "event.create";
+      readonly start: string;
+      readonly end: string;
+      readonly title?: string;
+      readonly allDay?: boolean;
+      readonly calendarId?: string;
+      readonly recurrence?: CalendarRecurrence | null;
+    }
+  | { readonly type: "event.move"; readonly eventId: string; readonly start: string }
+  | { readonly type: "event.resize"; readonly eventId: string; readonly edge: "start" | "end"; readonly instant: string }
+  | { readonly type: "event.move-day"; readonly eventId: string; readonly day: string }
+  | {
+      readonly type: "event.update";
+      readonly eventId: string;
+      readonly title?: string;
+      readonly start?: string;
+      readonly end?: string;
+      readonly allDay?: boolean;
+      readonly calendarId?: string;
+      readonly recurrence?: CalendarRecurrence | null;
+    }
+  | {
+      readonly type: "occurrence.edit";
+      readonly eventId: string;
+      readonly occurrenceStart: string;
+      readonly scope: "this" | "this-and-following" | "all";
+      readonly title?: string;
+      readonly start?: string;
+      readonly end?: string;
+    };
 
-type CalendarEventPlan = {
+export type CalendarOccurrenceRemoval = {
+  readonly eventId: string;
+  readonly occurrenceStart: string;
+  readonly scope: "this" | "this-and-following" | "all";
+};
+
+export type CalendarEventPlan = {
   readonly ok: true;
   readonly events: ReadonlyArray<CalendarEvent>;
   readonly operations: ReadonlyArray<JSONPatchOperation>;
-  readonly selected: CalendarOccurrencePoint;
+  readonly affectedOccurrence: CalendarOccurrencePoint;
 } | { readonly ok: false; readonly code: string; readonly reason?: string };
 
 /** Calendar's single event/series semantics, shared by commit, preview and group moves. */
 export function planCalendarEventEdit(
   events: ReadonlyArray<CalendarEvent>,
-  intent: CalendarEventIntent,
+  intent: CalendarEventOperation,
   options: { readonly allocateId: () => string; readonly calendarIds?: ReadonlySet<string>; readonly defaultCalendarId?: string },
 ): CalendarEventPlan {
   const index = intent.type === "event.create" ? -1 : events.findIndex((event) => event.id === intent.eventId);
@@ -36,13 +71,14 @@ export function planCalendarEventEdit(
       operations: fields === undefined
         ? [{ op: "replace", path: buildPointer(["events", index]), value: next }]
         : fields.map((field) => ({ op: "replace", path: buildPointer(["events", index, field]), value: next[field] })),
-      selected: { eventId: next.id, occurrenceStart: selectedStart },
+      affectedOccurrence: { eventId: next.id, occurrenceStart: selectedStart },
     };
   }
 
   function append(next: CalendarEvent, preceding: ReadonlyArray<JSONPatchOperation> = [], previous?: CalendarEvent): CalendarEventPlan {
     const validation = validateCalendarEvent(next, options.calendarIds);
     if (!validation.ok) return validation;
+    if (events.some((event) => event.id === next.id)) return failure("event.duplicate-id");
     if (previous !== undefined) {
       const previousValidation = validateCalendarEvent(previous, options.calendarIds);
       if (!previousValidation.ok) return previousValidation;
@@ -53,7 +89,7 @@ export function planCalendarEventEdit(
       ok: true,
       events: [...events.map((item, position) => position === index && previous !== undefined ? previous : item), appended],
       operations: [...preceding, { op: "add", path: `/events/${events.length}`, value: appended }],
-      selected: { eventId: next.id, occurrenceStart: next.start },
+      affectedOccurrence: { eventId: next.id, occurrenceStart: next.start },
     };
   }
 
@@ -99,6 +135,7 @@ export function planCalendarEventEdit(
       recurrence: intent.recurrence === undefined ? event.recurrence : intent.recurrence });
   }
 
+  if (intent.type !== "occurrence.edit") return failure("operation.unsupported");
   if (intent.scope !== "this" && intent.scope !== "this-and-following" && intent.scope !== "all") return failure("occurrence.invalid-scope");
   const occurrence = resolveCalendarOccurrence(events, { eventId: event.id, occurrenceStart: intent.occurrenceStart });
   if (occurrence === null) return failure("selection.stale-occurrence");
@@ -119,7 +156,7 @@ export function planCalendarEventEdit(
     const shifted = shiftRecurrence(event, occurrence.start, interval.start);
     const plan = replace({ ...next, start, end, ...shifted }, interval.start);
     if (!plan.ok) return plan;
-    return resolveCalendarOccurrence(plan.events, plan.selected)?.end === interval.end
+    return resolveCalendarOccurrence(plan.events, plan.affectedOccurrence)?.end === interval.end
       ? plan : failure("selection.unrepresentable-series-move");
   }
   const day = calendarDatePart(occurrence.start);
@@ -156,4 +193,53 @@ function shiftRecurrence(event: CalendarEvent, origin: string, next: string): Pi
   };
 }
 
-function failure(code: string): CalendarEventPlan { return { ok: false, code }; }
+export type CalendarPatchPlan = { readonly ok: true; readonly operations: ReadonlyArray<JSONPatchOperation> }
+  | { readonly ok: false; readonly code: string; readonly reason?: string };
+export type CalendarEventsPlan = (Extract<CalendarPatchPlan, { ok: true }> & { readonly events: ReadonlyArray<CalendarEvent> })
+  | Extract<CalendarPatchPlan, { ok: false }>;
+
+/** Remove document records; choosing the next selection belongs to Editing. */
+export function planCalendarEventRemoval(events: ReadonlyArray<CalendarEvent>, eventIds: ReadonlyArray<string>): CalendarEventsPlan {
+  const removing = new Set(eventIds);
+  const knownIds = new Set(events.map((event) => event.id));
+  if (removing.size === 0 || eventIds.some((id) => !knownIds.has(id))) return failure("selection.event-not-found");
+  return {
+    ok: true,
+    events: events.filter((event) => !removing.has(event.id)),
+    operations: events.flatMap((event, index): JSONPatchOperation[] => removing.has(event.id)
+      ? [{ op: "remove", path: buildPointer(["events", index]) }] : []).reverse(),
+  };
+}
+
+/** Exclusion and recurrence truncation have the same meaning without an editor. */
+export function planCalendarOccurrenceRemoval(events: ReadonlyArray<CalendarEvent>, removal: CalendarOccurrenceRemoval): CalendarEventsPlan {
+  const index = events.findIndex((event) => event.id === removal.eventId);
+  const event = events[index];
+  if (event === undefined) return failure("selection.event-not-found");
+  if (removal.scope !== "this" && removal.scope !== "this-and-following" && removal.scope !== "all") return failure("occurrence.invalid-scope");
+  if (resolveCalendarOccurrence(events, removal) === null) return failure("selection.stale-occurrence");
+  const recurrence = calendarEventRecurrence(event);
+  if (recurrence === null || removal.scope === "all") return planCalendarEventRemoval(events, [event.id]);
+  const day = calendarDatePart(removal.occurrenceStart);
+  const until = addCalendarDate(day, -1);
+  if (removal.scope === "this-and-following" && (until === null || until < calendarDatePart(event.start))) {
+    return planCalendarEventRemoval(events, [event.id]);
+  }
+  const field = removal.scope === "this" ? "excludeDates" : "recurrence";
+  const value = removal.scope === "this" ? [...calendarEventExcludeDates(event), day] : { ...recurrence, until: until! };
+  return {
+    ok: true,
+    events: events.map((item, position) => position === index ? { ...item, [field]: value } : item),
+    operations: [{ op: field === "excludeDates" ? "add" : "replace", path: buildPointer(["events", index, field]), value }],
+  };
+}
+
+export function planCalendarVisibility(document: CalendarDocument, calendarId: string, hidden: boolean): CalendarPatchPlan {
+  if (typeof hidden !== "boolean") return failure("calendar.invalid-hidden");
+  const index = calendarDocumentCalendars(document).findIndex((calendar) => calendar.id === calendarId);
+  return index < 0 ? failure("calendar.not-found") : {
+    ok: true, operations: [{ op: "replace", path: buildPointer(["calendars", index, "hidden"]), value: hidden }],
+  };
+}
+
+function failure(code: string): { readonly ok: false; readonly code: string } { return { ok: false, code }; }

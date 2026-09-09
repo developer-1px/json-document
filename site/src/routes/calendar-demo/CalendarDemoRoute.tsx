@@ -3,22 +3,24 @@ import { ArrowUp, CalendarDays, ChevronLeft, ChevronRight, Clock3, Pencil, Repea
 import { Temporal } from "@js-temporal/polyfill";
 
 import {
+  calendarOccurrenceTopology,
+  calendarClipboardFormat,
+  createCalendarEditor,
+  type CalendarView,
+} from "@interactive-os/json-document-editing";
+import {
   calendarBusyDates,
   calendarDatePart,
   calendarDocumentCalendar,
   calendarDocumentCalendars,
   calendarInstantAt,
-  calendarOccurrenceTopology,
   calendarShiftInstant,
   calendarVisibleEvents,
-  calendarClipboardFormat,
-  createCalendarEditor,
   formatCalendarInstant,
   type CalendarDocument,
   type CalendarEvent,
   type CalendarRecurrence,
-  type CalendarView,
-} from "@interactive-os/json-document-editing";
+} from "@interactive-os/json-document-calendar-document";
 import { useAnchoredFloatingPosition } from "@interactive-os/json-document-react";
 import { createWebClipboardSurface, createWebJSONClipboardRepresentation, isWebEditableTarget } from "@interactive-os/json-document-web";
 import {

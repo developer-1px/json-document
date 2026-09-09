@@ -2,20 +2,16 @@ import { useRef, useState } from "react";
 import { createRenameSession, type RenameSessionSnapshot } from "@interactive-os/json-document-affordance";
 import {
   calendarClipboardFormat,
-  calendarOccurrenceAfterIntent,
   calendarOccurrenceForInspector,
   calendarOccurrenceFromSelection,
   calendarUpdateIntent,
-  calendarVisibleEvents,
   previewCalendarAllDay,
   previewCalendarMonth,
   previewCalendarTimeGrid,
   planCalendarSelectionMove,
   type CalendarAllDayPointerRelease,
-  type CalendarDocument,
   type CalendarClipboard,
   type CalendarEditor,
-  type CalendarEvent,
   type CalendarEventPatch,
   type CalendarIntent,
   type CalendarSelection,
@@ -28,6 +24,11 @@ import {
   type CalendarOccurrenceTopologySnapshot,
   type CalendarTimeGridPointerRelease,
 } from "@interactive-os/json-document-editing";
+import {
+  calendarVisibleEvents,
+  type CalendarDocument,
+  type CalendarEvent,
+} from "@interactive-os/json-document-calendar-document";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 
 type OccurrenceScope = Extract<CalendarIntent, { type: "occurrence.edit" }>["scope"];
@@ -100,15 +101,19 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
   optionsRef.current = options;
   const selectedEvent = editor.selectedEvents[0] ?? null;
   const selectedOccurrences = editor.selectedOccurrences;
-  const [occurrence, setOccurrence] = useState<CalendarOccurrenceRange>(
-    options.initialOccurrence ?? calendarOccurrenceFromSelection(selectedEvent),
-  );
+  // A cursor in an empty slot is an explicit paste destination, not a copy of selection.
+  type PasteTarget = { readonly editor: CalendarEditor; readonly revision: number; readonly range: CalendarOccurrenceRange };
+  const [pasteTarget, setPasteTarget] = useState<PasteTarget | null>(() => options.initialOccurrence === undefined
+    ? null : { editor, revision: editor.snapshot.revision, range: options.initialOccurrence });
+  const pasteTargetRef = useRef(pasteTarget);
+  pasteTargetRef.current = pasteTarget;
+  const primaryOccurrence = editor.primaryOccurrence;
+  const occurrence = primaryOccurrence !== null ? calendarOccurrenceFromSelection(primaryOccurrence)
+    : pasteTarget?.editor === editor && pasteTarget.revision === snapshot.revision ? pasteTarget.range : { start: null, end: null };
   const [scope, setScope] = useState<OccurrenceScope>("this");
   const [renameSnapshot, setRenameSnapshot] = useState<RenameSessionSnapshot<string> | null>(null);
-  const occurrenceRef = useRef(occurrence);
   const scopeRef = useRef(scope);
   const createdRenameKeyRef = useRef<string | null>(null);
-  occurrenceRef.current = occurrence;
   scopeRef.current = scope;
   const [renameSession] = useState(() => createRenameSession<string>({
     onCommit(key, draft) {
@@ -116,7 +121,7 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
       if (current === undefined) return;
       const next = draft.trim() || (options.defaultTitle ?? "Event");
       if (next !== current.title) {
-        if (dispatch(calendarUpdateIntent(current, occurrenceRef.current.start, scopeRef.current, { title: next }))) rememberSelection();
+        if (dispatch(calendarUpdateIntent(current, editor.primaryOccurrence?.start ?? null, scopeRef.current, { title: next }))) rememberSelection();
       }
     },
     onCancel(key, draft) {
@@ -167,7 +172,14 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
   }
 
   function rememberSelection(): void {
-    setOccurrence(calendarOccurrenceFromSelection(editor.primaryOccurrence));
+    pasteTargetRef.current = null;
+    setPasteTarget(null);
+  }
+
+  function setOccurrence(range: CalendarOccurrenceRange): void {
+    const target = { editor, revision: editor.snapshot.revision, range };
+    pasteTargetRef.current = target;
+    setPasteTarget(target);
   }
 
   function commitIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): boolean {
@@ -176,9 +188,8 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     return true;
   }
 
-  function rememberIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): void {
-    const committed = calendarOccurrenceFromSelection(editor.primaryOccurrence);
-    setOccurrence(calendarOccurrenceAfterIntent(intent, origin, committed));
+  function rememberIntent(intent: CalendarIntent | null, _origin: CalendarOccurrenceRange): void {
+    rememberSelection();
     if (intent?.type === "event.create") {
       setScope("this");
       const created = editor.selectedEvents[0] ?? null;
@@ -192,8 +203,9 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
   }
 
   function applySelectedPatch(patch: CalendarEventPatch): boolean {
-    if (selectedEvent === null) return false;
-    if (!dispatch(calendarUpdateIntent(selectedEvent, occurrence.start, scope, patch))) return false;
+    const current = editor.selectedEvents[0];
+    if (current === undefined) return false;
+    if (!dispatch(calendarUpdateIntent(current, editor.primaryOccurrence?.start ?? null, scopeRef.current, patch))) return false;
     rememberSelection();
     return true;
   }
@@ -225,8 +237,7 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
       return point?.eventId === eventId && point.occurrenceStart === occurrenceStart;
     }
     const primary = editor.primaryOccurrence ?? editor.selectedOccurrences[0] ?? null;
-    return (primary?.eventId === eventId && primary.start === occurrenceStart)
-      || (selectedEvent?.id === eventId && occurrence.start === occurrenceStart);
+    return primary?.eventId === eventId && primary.start === occurrenceStart;
   }
 
   function selectOccurrence(
@@ -242,8 +253,7 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
       mode,
       ...(topology === undefined ? {} : { topology }),
     })) return false;
-    const primary = editor.primaryOccurrence ?? editor.selectedOccurrences[0] ?? null;
-    setOccurrence(primary === null ? { start: null, end: null } : { start: primary.start, end: primary.end });
+    rememberSelection();
     return true;
   }
 
@@ -265,9 +275,11 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
   }
 
   function removeSelected(): boolean {
-    if (selectedEvent === null) return false;
-    const intent: CalendarIntent = selectedEvent.recurrence !== null && occurrence.start !== null
-      ? { type: "occurrence.remove", eventId: selectedEvent.id, occurrenceStart: occurrence.start, scope }
+    const current = editor.selectedEvents[0];
+    if (current === undefined) return false;
+    const primary = editor.primaryOccurrence;
+    const intent: CalendarIntent = current.recurrence !== null && primary !== null
+      ? { type: "occurrence.remove", eventId: current.id, occurrenceStart: primary.start, scope: scopeRef.current }
       : { type: "selection.remove" };
     if (!dispatch(intent)) return false;
     rememberSelection();
@@ -316,7 +328,8 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
   }
 
   function paste(clipboard: CalendarClipboard): EditingResult<CalendarSelection> {
-    const result = observe(editor.paste(clipboard, occurrence.start ?? selectedEvent?.start));
+    const target = pasteTargetRef.current;
+    const result = observe(editor.paste(clipboard, target?.editor === editor && target.revision === editor.snapshot.revision ? target.range.start ?? undefined : undefined));
     if (result.ok) rememberSelection();
     return result;
   }

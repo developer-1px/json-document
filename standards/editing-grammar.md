@@ -208,6 +208,13 @@ Object identity, 내부 cache, snapshot 객체의 정확한 key 집합은 적합
 
 ### 실행 가능한 대표 증거
 
+Calendar는 [materialized occurrence binding](../packages/json-document-editing/tests/conformance/calendar-grammar.test.ts)을
+같은 공용 runner에 연결한다. 반복 회차 범위 선택·copy/cut·primary 회차 기본 paste·
+거절·외부 삭제·local Undo/Redo를 검사한다. 아래 기존 세 editor의 대표 표와 함께
+읽으며, Calendar의 문서 규칙은 독립 Document Type 공개 API를 소비한다.
+Hand와 직접 호출의 선택 대상 일치는 [Calendar 경로 회귀](../packages/json-document-calendar/tests/calendar-protocol.test.tsx)로
+검증한다. 이는 Calendar profile의 Stable 또는 독립 구현 간 conformance 선언이 아니다.
+
 [Editing의 공용 runner](../packages/json-document-editing/tests/conformance/editing-grammar.ts)는
 각 editor의 공개 entrypoint만 호출한다. [Document·Sheet binding](../packages/json-document-editing/tests/conformance/editing-grammar.test.ts)과
 [Rich Text binding](../packages/json-document-rich-text/tests/conformance/editing-grammar.test.ts)은

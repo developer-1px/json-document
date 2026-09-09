@@ -8,7 +8,7 @@ import {
   calendarRecurrenceWithInterval,
   calendarRecurrenceWithUntil,
   type CalendarCalendar,
-} from "@interactive-os/json-document-editing";
+} from "@interactive-os/json-document-calendar-document";
 import {
   Choice,
   Command,

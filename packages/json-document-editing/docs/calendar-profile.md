@@ -1,40 +1,25 @@
 ## Calendar protocol profile (RC)
 
-정본 소유자는 `@interactive-os/json-document-editing`이다. 이 문서는 현재
+Editing lifecycle의 소유자는 `@interactive-os/json-document-editing`이다. 문서 모델·검증·연산·projection은
+`@interactive-os/json-document-calendar-document`가 소유한다. 이 문서는 현재
 `0.1.0-rc.0` Calendar 구현의 계약과 한계를 명시한다. Core Stable 프로파일이나
 EditingSession 계약을 변경하지 않으며, Draft인 Official Hands / Editing Grammar를
 동결된 wire 표준으로 승격하지 않는다. Calendar Hands는 이 계약을 입력과 화면에 연결한다.
 
-### 값과 시간
+### 문서 규칙의 소유자
 
-- 일정은 고유한 비어 있지 않은 `id`, 문자열 `title`, `start < end`인 구간을 갖는다.
-- timed 값은 정확히 `YYYY-MM-DDTHH:mm`인 local date-time이다. UTC Instant,
-  offset, timezone, 초 단위는 이 프로파일에 포함하지 않는다.
-- all-day 값은 `YYYY-MM-DD`이다. timed와 all-day 모두 종료는 exclusive이다.
-  8월 1일 하루는 `start: "2026-08-01", end: "2026-08-02"`다.
-- 현재 문서에 calendars가 있으면 비어 있지 않은 `calendarId`는 실제 calendar를
-  참조해야 한다. 기존 간단한 문서의 생략된 calendars / allDay / calendarId /
-  recurrence / excludeDates는 각각 빈 목록 / timed / 미지정 / 반복 없음 / 제외 없음으로
-  읽는 호환 경로를 유지한다. 새 clipboard 출력은 완전한 필드를 갖는다.
-- recurrence의 `freq`는 daily / weekly / monthly / yearly, `interval`은 양의
-  safe integer다. `until: ""`은 무기한, 그 외에는 발생 시작일 기준 inclusive 날짜다.
-  `excludeDates`는 발생 시작일을 제외한다. 월말·윤년의 발생 시작은 Temporal constrain
-  규칙을 따르고, 종료는 원본의 local duration을 보존한다. 시작·종료를 따로 constrain해
-  구간 길이가 0이나 음수가 되지 않는다.
-- projection은 요청한 `[rangeStart, rangeEnd)`와 겹치는 발생분을 계산한다. 과거
-  발생분을 처음부터 순회하거나 400회에서 수명을 잘라내지 않고 요청 구간 근처로 이동한다.
-  매우 넓은 조회의 출력량 자체를 제한하는 pagination 계약은 아직 없다.
+시간 값, recurrence, legacy 필드와 calendar 검증은
+[Calendar Document Type API](/docs/api/calendar-document)의 RC 계약을 소비한다.
+생성자도 같은 공개 `assertCalendarDocument`를 사용한다. 잘못된 calendars 타입,
+calendar id/title/hidden/color와 event 규칙을 각 소비자가 별도로 판단하지 않는다.
 
 ### 선택, 범위와 편집
 
 `{ eventId, occurrenceStart }`가 발생분의 정체성이다. Selection 정본의 materialized
 targets를 사용하며, 화면 밖에 있어도 현재 반복 규칙에 존재하는 선택은 유지된다.
 
-| scope | 의미 |
-| --- | --- |
-| this | 해당 발생분만 제외하고 독립 일정으로 분리 |
-| this-and-following | 이전 시리즈를 기준 발생일 전날까지 자르고 이후를 새 시리즈로 분리 |
-| all | 선택한 발생분의 변경량을 원본 시리즈 구간에 적용 |
+`this` / `this-and-following` / `all`의 event/series 의미와 문서 연산은
+Document Type이 소유한다. Editing은 공개 계획의 `affectedOccurrence`를 후속 선택으로 연결한다.
 
 시작만 바꾸면 해당 발생분의 길이를 보존한다. resize는 지정한 경계만 바꾸며
 반복 시리즈의 원본 날짜와 선택 발생 날짜를 혼동하지 않는다. Inspector, 포인터,
@@ -84,6 +69,10 @@ anchor가 생략된 기존 payload는 첫 occurrence를 anchor로 읽는다.
 않은 내용 변경이나 사라진 발생분이 있으면 거절한다. Web은 기록 실패 시 cut을
 호출하지 않는다. Web의 별도 이벤트 기본 동작 정책은 이 프로파일을 확장하지 않는다.
 
+`paste(clipboard)`의 기본 목적지는 `primaryOccurrence.start`다. 빈 선택에서는
+명시적인 target이 필요하다. 원본 반복 시리즈의 시작일로 되돌아가지 않는다.
+Hand의 빈 슬롯 cursor는 명시적 target이며 해당 Editing revision에서만 유효하다.
+
 paste는 길이와 상대 위치를 보존하고 새 ID를 부여한다. 외부 문서의 calendarId를
 자동으로 다른 calendar로 치환하지 않는다. 명시적 재배치가 필요하면 기존 Editing API로
 목적지를 지정한다.
@@ -100,6 +89,8 @@ timezone/DST 변환, 서버 저장·동기화의 revision/충돌/재시도, AI c
 외부 calendar connector, recurrence의 범용 RRULE 호환, 프로파일 버전 협상과
 독립 구현 conformance는 **TBD**다. 현재 앱에서 검증한 로컬 계약과 구분한다.
 
-Usage는 [Calendar](/demo/calendar), public API는 [Editing API](/docs/api/editing)와
-[Calendar Hands API](/docs/api/calendar)에 있다. Usage Source는 Editing의 validation,
-event/series plan, selection move, projection과 Calendar Hands의 입력 연결까지 추적한다.
+Usage 및 Source는 [Calendar](/editors#calendar-editor), public API는 [Editing API](/docs/api/editing)와
+[Calendar Hands API](/docs/api/calendar)에 있다. Usage Source는 Document Type의 validation·event/series plan·projection,
+Editing의 selection move와 Calendar Hands의 입력 연결까지 추적한다. 공통 적합성 검사는
+`tests/conformance/calendar-grammar.test.ts`, 직접 API/Hand 경로 회귀는
+Calendar package의 `tests/calendar-protocol.test.tsx`에 있다.

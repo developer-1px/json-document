@@ -4,6 +4,7 @@
   "references": [
     { "path": "./packages/json-document" },
     { "path": "./packages/json-document-selection" },
+    { "path": "./packages/json-document-calendar-document" },
     { "path": "./packages/json-document-editing" },
     { "path": "./packages/json-document-react" },
     { "path": "./packages/json-document-react-hook-form" },

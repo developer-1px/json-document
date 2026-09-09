@@ -24,6 +24,50 @@ function surface(width: number, day: string) {
 }
 
 describe("Calendar Hand protocol composition", () => {
+  test.each(["hand", "editor", "initial"] as const)("uses canonical occurrence after %s selection, including the README patch/paste path", (path) => {
+    let id = 0;
+    const editor = createCalendarEditor({ ...initial, events: [{ ...initial.events[0]!, recurrence: { freq: "daily", interval: 1, until: "2026-08-08" } }] }, { createId: () => `new-${++id}` });
+    const intent = { type: "selection.set", point: { eventId: "a", occurrenceStart: "2026-08-03T09:00" } } as const;
+    if (path === "initial") editor.dispatch(intent);
+    const { result } = renderHook(() => useCalendarHand(editor));
+    if (path !== "initial") act(() => path === "hand" ? result.current.dispatch(intent) : editor.dispatch(intent));
+    expect(result.current.occurrence).toEqual({ start: "2026-08-03T09:00", end: "2026-08-03T10:00" });
+    expect(result.current.inspectedInterval).toEqual(result.current.occurrence);
+    expect(result.current.isPrimaryOccurrence("a", "2026-08-01T09:00")).toBe(false);
+    expect(result.current.isPrimaryOccurrence("a", "2026-08-03T09:00")).toBe(true);
+    act(() => { expect(result.current.applySelectedPatch({ title: "Planning" })).toBe(true); });
+    expect(result.current.selectedEvent).toMatchObject({ title: "Planning", start: "2026-08-03T09:00", recurrence: null });
+    const payload = result.current.copy()!;
+    act(() => { expect(result.current.paste(payload).ok).toBe(true); });
+    expect(result.current.selectedEvent?.start).toBe("2026-08-03T09:00");
+    act(() => result.current.undo());
+    act(() => result.current.undo());
+    expect(result.current.occurrence.start).toBe("2026-08-03T09:00");
+  });
+
+  test("an explicit empty-slot paste target does not become a stale selected occurrence", () => {
+    const editor = createCalendarEditor(initial);
+    const { result } = renderHook(() => useCalendarHand(editor));
+    act(() => result.current.setOccurrence({ start: "2026-08-04T11:00", end: "2026-08-04T12:00" }));
+    act(() => editor.dispatch({ type: "selection.clear" }));
+    act(() => editor.dispatch({ type: "selection.set", point: { eventId: "a", occurrenceStart: "2026-08-01T09:00" } }));
+    expect(result.current.occurrence.start).toBe("2026-08-01T09:00");
+    act(() => result.current.removeSelected());
+    expect(result.current.selectedEvent).toBeNull();
+    expect(result.current.occurrence).toEqual({ start: null, end: null });
+  });
+
+  test("selection and patch in one event use the live canonical occurrence", () => {
+    const editor = createCalendarEditor({ ...initial, events: [{ ...initial.events[0]!, recurrence: { freq: "daily", interval: 1, until: "2026-08-08" } }] });
+    const { result } = renderHook(() => useCalendarHand(editor));
+    act(() => {
+      result.current.dispatch({ type: "selection.set", point: { eventId: "a", occurrenceStart: "2026-08-03T09:00" } });
+      expect(result.current.applySelectedPatch({ title: "Same event" })).toBe(true);
+    });
+    expect(result.current.selectedEvent).toMatchObject({ title: "Same event", start: "2026-08-03T09:00", recurrence: null });
+    expect((editor.snapshot.value as CalendarDocument).events[0]?.title).toBe("A");
+  });
+
   test.each(["time", "allDay", "month"] as const)("returning a %s drag to its origin clears preview and does not commit", (kind) => {
     const sourceEvent = kind === "time" ? initial.events[0]! : { ...initial.events[0]!, start: "2026-08-01", end: "2026-08-02", allDay: true };
     const editor = createCalendarEditor({ ...initial, events: [sourceEvent] });

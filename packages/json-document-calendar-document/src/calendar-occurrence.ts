@@ -1,5 +1,5 @@
 import { Temporal } from "@js-temporal/polyfill";
-import type { CalendarEvent, CalendarOccurrencePoint, CalendarOccurrenceSelection, CalendarRecurrence } from "./calendar.js";
+import type { CalendarEvent, CalendarOccurrencePoint, CalendarOccurrenceInterval, CalendarRecurrence } from "./calendar-model.js";
 import {
   addCalendarDate,
   calendarDatePart,
@@ -108,7 +108,7 @@ export function projectCalendarOccurrences(
 export function resolveCalendarOccurrence(
   events: ReadonlyArray<CalendarEvent>,
   point: CalendarOccurrencePoint,
-): CalendarOccurrenceSelection | null {
+): CalendarOccurrenceInterval | null {
   const event = events.find((candidate) => candidate.id === point.eventId);
   if (event === undefined || typeof point.occurrenceStart !== "string") return null;
   const day = calendarDatePart(point.occurrenceStart);

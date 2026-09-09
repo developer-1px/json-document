@@ -126,29 +126,33 @@ test("Document Types publishes a TBD responsibility boundary", async ({ page }) 
   await expect(page).toHaveTitle("Document Types · TBD - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "Document Types · TBD" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "책임", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "후보 · TBD" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "현재 소유자와 후보" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "Foundation" })).toHaveAttribute("href", "/docs/foundation");
   await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByText("Overview · TBD")).toBeVisible();
 });
 
-test("Document Type candidate submenu keeps ownership explicitly TBD", async ({ page }) => {
+test("Calendar Document Type exposes its RC owner while unrelated candidates remain TBD", async ({ page }) => {
   await page.goto("/docs/document-types/calendar");
 
-  await expect(page).toHaveTitle("Calendar Document Type · TBD - json-document");
-  await expect(page.getByRole("heading", { level: 1, name: "Calendar Document Type · TBD" })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "확정에 필요한 증거" })).toBeVisible();
+  await expect(page).toHaveTitle("Calendar Document Type · RC - json-document");
+  await expect(page.getByRole("heading", { level: 1, name: "Calendar Document Type · RC" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "확정 증거와 남은 범위" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "소스 기반 감사 현황" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "왜 필요한가" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "무엇을 하는가" })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "현재 관찰된 schema · TBD" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "현재 RC 모델" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 3, name: "필드 설명" })).toBeVisible();
   await expect(page.getByRole("cell", { name: "start / end / allDay", exact: true })).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "On this page" }).getByRole("link", { name: "현재 관찰된 schema · TBD" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "On this page" }).getByRole("link", { name: "현재 RC 모델" })).toBeVisible();
   await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await expect(page.getByText("packages/json-document-editing/src/calendar.ts", { exact: true })).toBeVisible();
-  await expect(page.getByText("10개 책임 occurrence", { exact: false })).toBeVisible();
-  await expect(page.getByRole("cell", { name: "mislocated module", exact: true }).first()).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "Calendar · TBD" })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByText("packages/json-document-calendar-document/src/calendar-model.ts", { exact: true })).toBeVisible();
+  await expect(page.getByText("12개 책임 occurrence", { exact: false })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "mislocated module", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "Calendar · RC" })).toHaveAttribute("aria-current", "page");
+  await page.getByRole("link", { name: "소유자 API 계약", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Calendar Document Type 계약 · RC", exact: true })).toBeVisible();
+  await page.goto("/docs/document-types/sheet");
+  await expect(page.getByRole("heading", { level: 1, name: "Sheet Document Type · TBD" })).toBeVisible();
 });
 
 test("official docs routes render with route metadata in a real browser", async ({ page }) => {

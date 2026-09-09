@@ -5,6 +5,7 @@
   "workspaces": [
     "packages/json-document",
     "packages/json-document-selection",
+    "packages/json-document-calendar-document",
     "packages/json-document-editing",
     "packages/json-document-react",
     "packages/json-document-react-hook-form",

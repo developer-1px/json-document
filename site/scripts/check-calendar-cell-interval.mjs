@@ -18,7 +18,7 @@ requireText(navigator, "calendarCellInterval(cells)");
 forbid(calendar, /addCalendarDate\(yearStart,\s*-7\)/);
 forbid(calendar, /addCalendarDate\(yearEnd,\s*14\)/);
 forbid(navigator, /cells\[0\]\?\.date|cells\.at\(-1\)\?\.date/);
-requireText(usage, "UI Primitives `calendarCellInterval`");
+requireText(usage, "`calendarCellInterval`");
 requireText(sources, 'symbol: "calendarCellInterval"');
 requireText(sources, 'sourcePath: "packages/json-document-calendar/src/date-values.ts"');
 

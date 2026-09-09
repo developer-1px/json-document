@@ -1,15 +1,17 @@
 import { type MouseEvent, type ReactNode, type Ref } from "react";
 import {
+  calendarVisibleHourBand,
+  type CalendarOccurrenceTopologySnapshot,
+} from "@interactive-os/json-document-editing";
+import {
   calendarAllDayLayout,
   calendarAllDaySpan,
   calendarIntervalLastDate,
   calendarNowMarker,
   calendarShiftInstant,
   calendarTimedLayout,
-  calendarVisibleHourBand,
   type CalendarEvent,
-  type CalendarOccurrenceTopologySnapshot,
-} from "@interactive-os/json-document-editing";
+} from "@interactive-os/json-document-calendar-document";
 import { selectionModeFromModifiers } from "@interactive-os/json-document-react";
 import { contentInteractionAttributes, ResizeHandle, SelectableItem, type ControlAffordance } from "@interactive-os/json-document-ui-primitives-react";
 import { calendarTimeLabel, type CalendarCell } from "./date-values.js";

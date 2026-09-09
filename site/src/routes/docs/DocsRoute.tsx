@@ -87,6 +87,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   databaseApi: "database",
   annotationApi: "cursor",
   calendarApi: "database",
+  calendarDocumentApi: "database",
   webApi: "terminal",
   contenteditableApi: "cursor",
   richTextApi: "terminal",

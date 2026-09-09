@@ -306,37 +306,7 @@ type CalendarIntent =
       readonly target: CalendarSelectionMoveTarget;
       readonly scope?: "this" | "this-and-following" | "all";
     }
-  | {
-      readonly type: "event.create";
-      readonly start: string;
-      readonly end: string;
-      readonly title?: string;
-      readonly allDay?: boolean;
-      readonly calendarId?: string;
-      readonly recurrence?: CalendarRecurrence | null;
-    }
-  | { readonly type: "event.move"; readonly eventId: string; readonly start: string }
-  | { readonly type: "event.resize"; readonly eventId: string; readonly edge: "start" | "end"; readonly instant: string }
-  | { readonly type: "event.move-day"; readonly eventId: string; readonly day: string }
-  | {
-      readonly type: "event.update";
-      readonly eventId: string;
-      readonly title?: string;
-      readonly start?: string;
-      readonly end?: string;
-      readonly allDay?: boolean;
-      readonly calendarId?: string;
-      readonly recurrence?: CalendarRecurrence | null;
-    }
-  | {
-      readonly type: "occurrence.edit";
-      readonly eventId: string;
-      readonly occurrenceStart: string;
-      readonly scope: "this" | "this-and-following" | "all";
-      readonly title?: string;
-      readonly start?: string;
-      readonly end?: string;
-    }
+  | CalendarEventOperation
   | {
       readonly type: "occurrence.remove";
       readonly eventId: string;
@@ -427,11 +397,7 @@ type CalendarOccurrenceRange = {
 ## `CalendarOccurrenceSelection`
 
 ```ts
-interface CalendarOccurrenceSelection {
-  readonly eventId: string;
-  readonly start: string;
-  readonly end: string;
-}
+type CalendarOccurrenceSelection = CalendarOccurrenceInterval;
 ```
 ## `calendarOccurrenceTopology`
 

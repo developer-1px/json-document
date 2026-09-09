@@ -12,6 +12,7 @@ import { readJson, repositoryRoot } from "./workspace-graph.mjs";
 const kitWorkspaces = [
   "@interactive-os/json-document",
   "@interactive-os/json-document-selection",
+  "@interactive-os/json-document-calendar-document",
   "@interactive-os/json-document-editing",
   "@interactive-os/json-document-rich-text",
   "@interactive-os/json-document-file-intake",

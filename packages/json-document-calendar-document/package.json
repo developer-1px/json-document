@@ -1,0 +1,24 @@
+{
+  "name": "@interactive-os/json-document-calendar-document",
+  "version": "0.1.0-rc.0",
+  "description": "Calendar Document Type: model, validation, semantic operations and projections without an editor or UI.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": { "type": "git", "url": "git+https://github.com/developer-1px/json-document.git", "directory": "packages/json-document-calendar-document" },
+  "publishConfig": { "access": "public", "provenance": true, "tag": "next" },
+  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "docs", "LICENSE"],
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsc -b tsconfig.json",
+    "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "verify": "npm run typecheck && npm test && npm run build"
+  },
+  "peerDependencies": { "@interactive-os/json-document": "^3.0.0" },
+  "dependencies": { "@js-temporal/polyfill": "^0.5.1" },
+  "devDependencies": { "@interactive-os/json-document": "*", "@types/node": "^25.9.0", "typescript": "^5.0.0", "vitest": "^4.1.7" }
+}

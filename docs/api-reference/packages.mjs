@@ -1,4 +1,5 @@
 export const apiReferencePackages = [
+  ["calendar-document", "@interactive-os/json-document-calendar-document", "packages/json-document-calendar-document/src/index.ts", "Document Types", "Calendar 문서 모델·검증·의미 연산·projection 계약"],
   ["a2ui", "@interactive-os/json-document-a2ui", "packages/json-document-a2ui/src/index.ts", "Connector", "A2UI streaming document connector"],
   ["json-document", "@interactive-os/json-document", "packages/json-document/src/application/document/index.ts", "JSON Document", "Core document 값·주소·patch 계약"],
   ["selection", "@interactive-os/json-document-selection", "packages/json-document-selection/src/index.ts", "Editing", "구조적 selection과 topology 계약"],

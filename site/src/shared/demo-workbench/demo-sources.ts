@@ -1,16 +1,18 @@
 import type { CodeLanguage } from "../ui/code-tokens";
 import pointerTrackingSource from "../../../../packages/json-document/src/foundation/patch/track.ts?raw";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
+import calendarDocumentModelSource from "../../../../packages/json-document-calendar-document/src/calendar-model.ts?raw";
+import calendarDocumentProjectionSource from "../../../../packages/json-document-calendar-document/src/calendar-projection.ts?raw";
 import calendarEditingSource from "../../../../packages/json-document-editing/src/calendar.ts?raw";
-import calendarEventPlanSource from "../../../../packages/json-document-editing/src/calendar-event-plan.ts?raw";
+import calendarEventPlanSource from "../../../../packages/json-document-calendar-document/src/calendar-operation.ts?raw";
 import calendarAllDayPointerSource from "../../../../packages/json-document-editing/src/calendar-allday-pointer.ts?raw";
 import calendarMonthPointerSource from "../../../../packages/json-document-editing/src/calendar-month-pointer.ts?raw";
 import calendarTimeGridPointerSource from "../../../../packages/json-document-editing/src/calendar-time-grid-pointer.ts?raw";
-import calendarOccurrenceSource from "../../../../packages/json-document-editing/src/calendar-occurrence.ts?raw";
+import calendarOccurrenceSource from "../../../../packages/json-document-calendar-document/src/calendar-occurrence.ts?raw";
 import calendarPreviewSource from "../../../../packages/json-document-editing/src/calendar-preview.ts?raw";
 import calendarSelectionSource from "../../../../packages/json-document-editing/src/calendar-selection.ts?raw";
 import calendarSelectionMoveSource from "../../../../packages/json-document-editing/src/calendar-selection-move.ts?raw";
-import calendarValidationSource from "../../../../packages/json-document-editing/src/calendar-validation.ts?raw";
+import calendarValidationSource from "../../../../packages/json-document-calendar-document/src/calendar-validation.ts?raw";
 import calendarEventLabelSource from "../../../../packages/json-document-calendar/src/calendar-event-label.ts?raw";
 import dateControlsSource from "../../../../packages/json-document-calendar/src/date-controls.tsx?raw";
 import dateGridSource from "../../../../packages/json-document-calendar/src/date-grid.tsx?raw";
@@ -142,6 +144,7 @@ const packageReferencePaths = new Map([
   ["packages/json-document-selection/", "/docs/api/selection"],
   ["packages/json-document-editing/", "/docs/api/editing"],
   ["packages/json-document-calendar/", "/docs/api/calendar"],
+  ["packages/json-document-calendar-document/", "/docs/api/calendar-document"],
   ["packages/json-document-react/", "/docs/api/react"],
   ["packages/json-document-react-hook-form/", "/docs/api/react-hook-form"],
   ["packages/json-document-ajv/", "/docs/api/ajv"],
@@ -188,16 +191,18 @@ const excludedSources = new Set([
 ]);
 const registeredUsageSources = new Map<string, string>([
   ["packages/json-document/src/foundation/patch/track.ts", pointerTrackingSource],
+  ["packages/json-document-calendar-document/src/calendar-model.ts", calendarDocumentModelSource],
+  ["packages/json-document-calendar-document/src/calendar-projection.ts", calendarDocumentProjectionSource],
   ["packages/json-document-editing/src/calendar.ts", calendarEditingSource],
   ["packages/json-document-editing/src/calendar-allday-pointer.ts", calendarAllDayPointerSource],
   ["packages/json-document-editing/src/calendar-month-pointer.ts", calendarMonthPointerSource],
   ["packages/json-document-editing/src/calendar-time-grid-pointer.ts", calendarTimeGridPointerSource],
-  ["packages/json-document-editing/src/calendar-occurrence.ts", calendarOccurrenceSource],
+  ["packages/json-document-calendar-document/src/calendar-occurrence.ts", calendarOccurrenceSource],
   ["packages/json-document-editing/src/calendar-preview.ts", calendarPreviewSource],
-  ["packages/json-document-editing/src/calendar-event-plan.ts", calendarEventPlanSource],
+  ["packages/json-document-calendar-document/src/calendar-operation.ts", calendarEventPlanSource],
   ["packages/json-document-editing/src/calendar-selection.ts", calendarSelectionSource],
   ["packages/json-document-editing/src/calendar-selection-move.ts", calendarSelectionMoveSource],
-  ["packages/json-document-editing/src/calendar-validation.ts", calendarValidationSource],
+  ["packages/json-document-calendar-document/src/calendar-validation.ts", calendarValidationSource],
   ["packages/json-document-calendar/src/calendar-event-label.ts", calendarEventLabelSource],
   ["packages/json-document-calendar/src/date-controls.tsx", dateControlsSource],
   ["packages/json-document-calendar/src/date-grid.tsx", dateGridSource],
@@ -395,14 +400,44 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-web/src/point-target.ts",
   },
   {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "CalendarDocument",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-model.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "validateCalendarDocument",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "assertCalendarDocument",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "planCalendarEventRemoval",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-operation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "planCalendarOccurrenceRemoval",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-operation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "planCalendarVisibility",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-operation.ts",
+  },
+  {
     packageName: "@interactive-os/json-document-editing",
     symbol: "createCalendarEditor",
     sourcePath: "packages/json-document-editing/src/calendar.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
-    symbol: "createCalendarEditor",
-    sourcePath: "packages/json-document-editing/src/calendar-event-plan.ts",
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "planCalendarEventEdit",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-operation.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",
@@ -410,19 +445,19 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-editing/src/calendar.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarMonthDayLayout",
-    sourcePath: "packages/json-document-editing/src/calendar.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-projection.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarMonthWeekLayout",
-    sourcePath: "packages/json-document-editing/src/calendar.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-projection.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarBusyDates",
-    sourcePath: "packages/json-document-editing/src/calendar.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-projection.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",
@@ -440,24 +475,24 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-editing/src/calendar-time-grid-pointer.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "projectCalendarOccurrences",
-    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-occurrence.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarRecurrenceWithFrequency",
-    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-occurrence.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarRecurrenceWithInterval",
-    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-occurrence.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarRecurrenceWithUntil",
-    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-occurrence.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",
@@ -485,39 +520,39 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-editing/src/calendar-selection.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarAllDaySpan",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarDocumentCalendars",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarDocumentCalendar",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarDatePart",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarIntervalLastDate",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "parseCalendarView",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-editing/src/calendar.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "formatCalendarInstant",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
     packageName: "@interactive-os/json-document-web",
