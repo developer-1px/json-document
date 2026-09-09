@@ -855,7 +855,7 @@ interface RenameSessionSnapshot<Key> {
 ## `resizeAffordance`
 
 ```ts
-resizeAffordance(origin: Point, point: Point, edge: ResizeEdge, modifiers?: { readonly shiftKey?: boolean; readonly altKey?: boolean; }): AffordancePreview
+resizeAffordance(origin: Point, point: Point, edge: ResizeEdge, modifiers?: { readonly shiftKey?: boolean; readonly altKey?: boolean; }, size?: Pick<Rect, "width" | "height">): AffordancePreview
 ```
 ## `ResizeEdge`
 

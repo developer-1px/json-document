@@ -48,6 +48,11 @@ useEditing({
 `historyAffordance(snapshot).hand` exposes the typed Undo/Redo availability map
 directly. The editing runtime still owns history state and execution.
 
+`resizeAffordance(origin, point, edge, modifiers?, size?)` owns eight-direction
+anchored resizing. Supply the initial size for true Shift aspect-ratio locking,
+Alt center resizing and anchor-preserving minimum bounds. See the
+[Resize API contract](docs/resize.md) and its Canvas Usage/Source.
+
 `contentInteractionAffordance` is the canonical product-content state model.
 It distinguishes persistent selection, transient active feedback, movement,
 drop targets, and insertion positions without owning DOM or product color.
