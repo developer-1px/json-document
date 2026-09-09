@@ -1,6 +1,11 @@
-import type { CalendarEvent, CalendarIntent } from "./calendar.js";
-import { calendarEventRecurrence } from "./calendar-occurrence.js";
-import { addCalendarDate, calendarAllDaySpan, calendarDatePart, calendarDaysBetween, isCalendarAllDay, parseCalendarDate } from "./calendar-validation.js";
+import type {
+  CalendarIntent,
+} from "./calendar.js";
+import type {
+  CalendarEvent,
+} from "@interactive-os/json-document-calendar-document";
+import { calendarEventRecurrence } from "@interactive-os/json-document-calendar-document";
+import { addCalendarDate, calendarAllDaySpan, calendarDatePart, calendarDaysBetween, isCalendarAllDay, parseCalendarDate } from "@interactive-os/json-document-calendar-document";
 
 export type CalendarMonthPointerRelease = {
   readonly originDay: string;

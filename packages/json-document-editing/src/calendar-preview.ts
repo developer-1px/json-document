@@ -1,5 +1,10 @@
-import type { CalendarEvent, CalendarIntent } from "./calendar.js";
-import { planCalendarEventEdit } from "./calendar-event-plan.js";
+import type {
+  CalendarIntent,
+} from "./calendar.js";
+import type {
+  CalendarEvent,
+} from "@interactive-os/json-document-calendar-document";
+import { planCalendarEventEdit } from "@interactive-os/json-document-calendar-document";
 import { createEditingIdAllocator } from "./identity.js";
 import { bindCalendarAllDayIntent, interpretCalendarAllDayPointer, type CalendarAllDayPointerRelease } from "./calendar-allday-pointer.js";
 import { bindCalendarMonthIntent, interpretCalendarMonthPointer, type CalendarMonthPointerRelease } from "./calendar-month-pointer.js";

@@ -1,7 +1,12 @@
-import type { CalendarEvent, CalendarIntent } from "./calendar.js";
-import { calendarEventRecurrence, resolveCalendarOccurrence } from "./calendar-occurrence.js";
+import type {
+  CalendarIntent,
+} from "./calendar.js";
+import type {
+  CalendarEvent,
+} from "@interactive-os/json-document-calendar-document";
+import { calendarEventRecurrence, resolveCalendarOccurrence } from "@interactive-os/json-document-calendar-document";
 import { bindCalendarMonthIntent } from "./calendar-month-pointer.js";
-import { addCalendarDate, calendarAllDaySpan, calendarDaysBetween, parseCalendarDate } from "./calendar-validation.js";
+import { addCalendarDate, calendarAllDaySpan, calendarDaysBetween, parseCalendarDate } from "@interactive-os/json-document-calendar-document";
 
 export type CalendarAllDayHandle = "body" | "start" | "end";
 

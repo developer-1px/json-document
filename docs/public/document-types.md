@@ -2,7 +2,8 @@
 
 Document Type은 특정 JSON Document가 무엇을 의미하고 어떤 상태와 변경이
 유효한지를 정의하는 생태계 위치입니다. 이 페이지는 책임 이름과 경계만
-확정하며, 기존 package와 Hands의 실제 소유권 재배치는 아직 결정하지 않습니다.
+확정합니다. Calendar는 공개 소유자와 소비 경계를 확정했고, 나머지 후보의 실제
+소유권 재배치는 아직 결정하지 않았습니다.
 
 ```text
 Document Type
@@ -57,7 +58,16 @@ Document Type은 DOM event, pointer gesture, React lifecycle, 화면 layout과 �
 `Domain`은 business bounded context와 혼동되고, `Genre`는 제품 설명과 기술 계약의
 경계를 드러내지 않으므로 이 생태계 위치의 정본 이름으로 사용하지 않습니다.
 
-## 후보 · TBD
+## 현재 소유자와 후보
+
+Calendar의 정본 소유자는 `@interactive-os/json-document-calendar-document`입니다.
+모델·검증·의미 연산·projection은 이 package에, 선택·Clipboard·History는 Editing에,
+입력과 UI 조합은 Calendar Hands에 둡니다. Editing의 기존 문서 관련 export는
+동일 구현을 가리키는 호환 경로입니다.
+
+[Calendar Document Type](/docs/document-types/calendar)에서 공개 API, Usage/Source와
+책임 감사 증거를 확인할 수 있습니다. 이 소유권 확정은 RC 계약을 Stable wire
+프로파일로 승격하거나 나머지 후보의 완료를 선언하지 않습니다.
 
 현재 사이트에서 다음 항목이 Document Type 후보입니다.
 
@@ -68,18 +78,18 @@ Document Types · TBD
 ├── Object
 ├── Tree
 ├── Database
-├── Calendar
+├── Calendar · RC 공개 소유자 확정
 ├── Sheet
 ├── Kanban
 └── Annotation
 ```
 
-이 목록은 분류 후보이지 완료 선언이 아닙니다. 각 후보는 모델, invariant,
+Calendar 이외의 목록은 분류 후보이지 완료 선언이 아닙니다. 각 후보는 모델, invariant,
 operation과 projection의 실제 owner를 감사한 뒤에만 이 위치로 이동할 수
 있습니다. 그때까지 기존 package/API 이름, 모듈 배치와 Hands 내비게이션은
 유지합니다.
 
-## 완료 조건 · TBD
+## 소유권 확정 조건
 
 각 Document Type의 분류를 확정할 때는 다음 증거가 모두 필요합니다.
 

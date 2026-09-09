@@ -1,14 +1,9 @@
 import { Temporal } from "@js-temporal/polyfill";
-import type { CalendarCalendar, CalendarDocument, CalendarEvent, CalendarRecurrence, CalendarView } from "./calendar.js";
+import { isJSONValue } from "@interactive-os/json-document";
+import type { CalendarCalendar, CalendarDocument, CalendarEvent, CalendarRecurrence } from "./calendar-model.js";
 
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DATETIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
-const CALENDAR_VIEWS: ReadonlySet<string> = new Set(["day", "week", "month", "year"]);
-
-export function parseCalendarView(value: unknown): CalendarView | null {
-  return typeof value === "string" && CALENDAR_VIEWS.has(value) ? value as CalendarView : null;
-}
-
 export function calendarDocumentCalendars(document: CalendarDocument): ReadonlyArray<CalendarCalendar> {
   return Array.isArray(document.calendars) ? document.calendars : [];
 }
@@ -21,27 +16,51 @@ export function calendarDocumentEvents(document: CalendarDocument): ReadonlyArra
   return Array.isArray(document.events) ? document.events : [];
 }
 
-export function assertCalendarDocument(document: CalendarDocument): void {
-  if (!Array.isArray(document.events)) throw new TypeError("Calendar events must be an array.");
+export function assertCalendarDocument(value: unknown): void {
+  const result = validateCalendarDocument(value);
+  if (!result.ok) throw new TypeError(result.reason);
+}
+
+/** Validate canonical JSON and Calendar invariants without creating an Editing session. */
+export function validateCalendarDocument(value: unknown): CalendarValidationResult {
+  if (!isJSONValue(value) || typeof value !== "object" || value === null || Array.isArray(value)) {
+    return invalidCalendar("Calendar documents must be JSON objects.");
+  }
+  const document = value as unknown as CalendarDocument;
+  if (!Array.isArray(document.events)) return invalidCalendar("Calendar events must be an array.");
+  if (document.calendars !== undefined && !Array.isArray(document.calendars)) {
+    return invalidCalendar("Calendar calendars must be an array when present.");
+  }
   const calendarIds = new Set<string>();
   for (const calendar of calendarDocumentCalendars(document)) {
-    if (calendar.id.length === 0) throw new Error("Calendar ids must not be empty.");
-    if (calendarIds.has(calendar.id)) throw new Error(`Calendar id must be unique: ${JSON.stringify(calendar.id)}.`);
+    if (typeof calendar !== "object" || calendar === null || Array.isArray(calendar)
+      || typeof calendar.id !== "string" || calendar.id.length === 0) {
+      return invalidCalendar("Calendar ids must be nonempty strings.");
+    }
+    if (calendarIds.has(calendar.id)) return invalidCalendar(`Calendar id must be unique: ${JSON.stringify(calendar.id)}.`);
+    if (typeof calendar.title !== "string" || typeof calendar.hidden !== "boolean") {
+      return invalidCalendar("Calendar title must be a string and hidden must be a boolean.");
+    }
     if (typeof calendar.color !== "string" || calendar.color.length === 0) {
-      throw new Error(`Calendar color must not be empty: ${JSON.stringify(calendar.id)}.`);
+      return invalidCalendar(`Calendar color must not be empty: ${JSON.stringify(calendar.id)}.`);
     }
     calendarIds.add(calendar.id);
   }
   const ids = new Set<string>();
   for (const event of calendarDocumentEvents(document)) {
     const result = validateCalendarEvent(event, calendarIds);
-    if (!result.ok) throw new TypeError(result.reason);
-    if (ids.has(event.id)) throw new Error(`Calendar event id must be unique: ${JSON.stringify(event.id)}.`);
+    if (!result.ok) return result;
+    if (ids.has(event.id)) return invalidCalendar(`Calendar event id must be unique: ${JSON.stringify(event.id)}.`);
     ids.add(event.id);
   }
+  return { ok: true };
 }
 
-type CalendarValidationResult = { readonly ok: true } | {
+function invalidCalendar(reason: string): CalendarValidationResult {
+  return { ok: false, code: "calendar.invalid-document", reason };
+}
+
+export type CalendarValidationResult = { readonly ok: true } | {
   readonly ok: false; readonly code: string; readonly reason: string;
 };
 

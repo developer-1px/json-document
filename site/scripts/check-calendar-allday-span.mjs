@@ -2,11 +2,11 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
-const owner = read("packages/json-document-editing/src/calendar-validation.ts");
-const ownerIndex = read("packages/json-document-editing/src/index.ts");
+const owner = read("packages/json-document-calendar-document/src/calendar-validation.ts");
+const ownerIndex = read("packages/json-document-calendar-document/src/index.ts");
 const ownerTest = read("packages/json-document-editing/tests/calendar-validation.test.ts");
 const editor = read("packages/json-document-editing/src/calendar.ts");
-const eventPlan = read("packages/json-document-editing/src/calendar-event-plan.ts");
+const eventPlan = read("packages/json-document-calendar-document/src/calendar-operation.ts");
 const allDayPointer = read("packages/json-document-editing/src/calendar-allday-pointer.ts");
 const monthPointer = read("packages/json-document-editing/src/calendar-month-pointer.ts");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
@@ -28,7 +28,7 @@ forbid(allDayPointer, /addCalendarDate\(release\.targetDay, 1\)/);
 forbid(eventPlan, /addCalendarDate\(start, 1\)/);
 forbid(host, /addCalendarDate\((?:day|value), 1\)/);
 requireText(usage, 'symbol: "calendarAllDaySpan"');
-requireText(usage, 'sourcePath: "packages/json-document-editing/src/calendar-validation.ts"');
+requireText(usage, 'sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts"');
 
 console.log("Calendar all-day span guard ok; owner, pointer consumers, editor, Host, CalendarTimeGrid, and Usage checked.");
 

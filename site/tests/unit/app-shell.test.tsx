@@ -115,16 +115,25 @@ describe("official site shell", () => {
     )).toBeTruthy();
   }, 10000);
 
-  test("exposes the Document Types TBD boundary", async () => {
+  test("exposes the Calendar owner without closing the other Document Types TBD boundary", async () => {
     resetDocument("/docs/document-types");
     render(<App />);
 
     expect(await screen.findByRole("heading", { level: 1, name: "Document Types · TBD" })).toBeTruthy();
     expect(screen.getByRole("heading", { level: 2, name: "책임" })).toBeTruthy();
-    expect(screen.getByText(/기존 package와 Hands의 실제 소유권 재배치는 아직 결정하지 않습니다/)).toBeTruthy();
+    expect(screen.getByText(/Calendar는 공개 소유자와 소비 경계를 확정했고/)).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "현재 소유자와 후보" })).toBeTruthy();
     const breadcrumb = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
     expect(breadcrumb.getByRole("link", { name: "Foundation" }).getAttribute("href")).toBe("/docs/foundation");
     expect(breadcrumb.getByText("Overview · TBD")).toBeTruthy();
+  });
+
+  test("renders the Calendar owner API reference and package-owned contract", async () => {
+    resetDocument("/docs/api/calendar-document");
+    render(<App />);
+    expect(await screen.findByRole("heading", { level: 1, name: "API · Calendar Document" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Calendar Document Type 계약 · RC" })).toBeTruthy();
+    expect(screen.getAllByRole("link", { name: "validateCalendarDocument", exact: true }).length).toBeGreaterThan(0);
   });
 
   test("keeps the site chrome mounted across interior routes", async () => {

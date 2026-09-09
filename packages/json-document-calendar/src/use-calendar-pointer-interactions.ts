@@ -1,13 +1,24 @@
 import { useRef, useState, type PointerEvent, type RefObject } from "react";
 import { createGestureSession } from "@interactive-os/json-document-affordance";
 import {
-  addCalendarDate, bindCalendarAllDayIntent, bindCalendarMonthIntent, bindCalendarTimeGridIntent,
-  calendarEventsOnDay, calendarInstantAt, calendarShiftInstant, calendarVisibleEvents,
-  interpretCalendarAllDayPointer, interpretCalendarMonthPointer, interpretCalendarTimeGridPointer,
-  type CalendarAllDayPointerRelease, type CalendarTimeGridHandle,
+  bindCalendarAllDayIntent,
+  bindCalendarMonthIntent,
+  bindCalendarTimeGridIntent,
+  interpretCalendarAllDayPointer,
+  interpretCalendarMonthPointer,
+  interpretCalendarTimeGridPointer,
+  type CalendarAllDayPointerRelease,
+  type CalendarTimeGridHandle,
   type CalendarTimeGridPointerRelease,
   type CalendarSelectionDragSource,
 } from "@interactive-os/json-document-editing";
+import {
+  addCalendarDate,
+  calendarEventsOnDay,
+  calendarInstantAt,
+  calendarShiftInstant,
+  calendarVisibleEvents,
+} from "@interactive-os/json-document-calendar-document";
 import {
   calendarDayDeltaFromWebWidth, calendarKeyFromWebRow, calendarMinutesFromWebGrid,
   createWebPointerSession, findWebPointTarget,

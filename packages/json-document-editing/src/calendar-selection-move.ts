@@ -1,12 +1,14 @@
-import { calendarEventRecurrence, resolveCalendarOccurrence } from "./calendar-occurrence.js";
-import { planCalendarEventEdit } from "./calendar-event-plan.js";
+import { calendarEventRecurrence, resolveCalendarOccurrence } from "@interactive-os/json-document-calendar-document";
+import { planCalendarEventEdit } from "@interactive-os/json-document-calendar-document";
 import { createEditingIdAllocator } from "./identity.js";
 import type {
-  CalendarEvent,
-  CalendarOccurrencePoint,
   CalendarOccurrenceSelection,
   CalendarSelection,
 } from "./calendar.js";
+import type {
+  CalendarEvent,
+  CalendarOccurrencePoint,
+} from "@interactive-os/json-document-calendar-document";
 import {
   calendarDatePart,
   calendarDaysBetween,
@@ -16,7 +18,7 @@ import {
   isCalendarAllDay,
   parseCalendarDate,
   parseCalendarInstant,
-} from "./calendar-validation.js";
+} from "@interactive-os/json-document-calendar-document";
 
 export type CalendarSelectionMoveTarget =
   | { readonly type: "instant"; readonly instant: string }
@@ -84,7 +86,7 @@ export function planCalendarSelectionMove(
       } : { type: "event.update", eventId: event.id, ...shifted }, { allocateId });
       if (!plan.ok) return plan;
       next = plan.events;
-      eventId = plan.selected.eventId;
+      eventId = plan.affectedOccurrence.eventId;
       if (recurring && scope !== "this") seriesIds.set(event.id, eventId);
     }
     moved[index] = { eventId, ...shifted };

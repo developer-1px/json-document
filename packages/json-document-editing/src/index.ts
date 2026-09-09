@@ -1,3 +1,15 @@
+// Published compatibility exports; implementations belong to Calendar Document Type.
+export {
+  calendarAllDayLayout,
+  calendarBusyDates,
+  calendarEventsInMonth,
+  calendarEventsOnDay,
+  calendarMonthDayLayout,
+  calendarMonthWeekLayout,
+  calendarNowMarker,
+  calendarTimedLayout,
+  calendarVisibleEvents,
+} from "@interactive-os/json-document-calendar-document";
 export { createDocumentEditor, documentClipboardFormat, documentSelectionFocus } from "./document.js";
 export { cutEditingClipboard } from "./clipboard.js";
 export type { EditingClipboardCut } from "./clipboard.js";
@@ -25,17 +37,9 @@ export { createTreeEditor, treeClipboardFormat } from "./tree.js";
 export { projectTreeVisibility, treeVisibilityNeighbor } from "./tree-visibility.js";
 export { createKanbanEditor } from "./kanban.js";
 export {
-  calendarAllDayLayout,
-  calendarBusyDates,
-  calendarEventsInMonth,
-  calendarEventsOnDay,
-  calendarMonthDayLayout,
-  calendarMonthWeekLayout,
-  calendarNowMarker,
   calendarOccurrenceTopology,
-  calendarTimedLayout,
-  calendarVisibleEvents,
   createCalendarEditor,
+  parseCalendarView,
   calendarClipboardFormat,
 } from "./calendar.js";
 export {
@@ -43,7 +47,7 @@ export {
   calendarRecurrenceWithInterval,
   calendarRecurrenceWithUntil,
   projectCalendarOccurrences,
-} from "./calendar-occurrence.js";
+} from "@interactive-os/json-document-calendar-document";
 export {
   calendarOccurrenceAfterIntent,
   calendarOccurrenceForInspector,
@@ -67,8 +71,7 @@ export {
   calendarShiftInstant,
   formatCalendarInstant,
   isCalendarAllDay,
-  parseCalendarView,
-} from "./calendar-validation.js";
+} from "@interactive-os/json-document-calendar-document";
 export { ANNOTATION_PROFILE_V1, annotationResizeHandle, annotationSelectorBounds, createAnnotationEditor, transformAnnotationSelector } from "./annotation.js";
 export { assertAnnotationDocument } from "./annotation-validation.js";
 export type {
@@ -201,7 +204,7 @@ export type {
   CalendarSelectionMovePlan,
   CalendarSelectionMoveTarget,
 } from "./calendar-selection-move.js";
-export type { CalendarOccurrence } from "./calendar-occurrence.js";
+export type { CalendarOccurrence } from "@interactive-os/json-document-calendar-document";
 export type {
   CalendarAllDayHandle,
   CalendarAllDayPointerIntent,

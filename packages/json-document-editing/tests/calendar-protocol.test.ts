@@ -1,4 +1,6 @@
 import { describe, expect, test } from "vitest";
+import * as calendarDocument from "@interactive-os/json-document-calendar-document";
+import * as editing from "../src/index.js";
 import {
   addCalendarDate, bindCalendarAllDayIntent, bindCalendarMonthIntent, bindCalendarTimeGridIntent,
   calendarClipboardFormat, calendarOccurrenceTopology, calendarUpdateIntent, createCalendarEditor,
@@ -36,6 +38,41 @@ function visible(events: ReadonlyArray<CalendarEvent>) {
 }
 
 describe("Calendar protocol rejection", () => {
+  test("legacy Editing exports resolve to the canonical Document Type implementation", () => {
+    for (const symbol of [
+      "addCalendarDate", "calendarDocumentCalendars", "calendarVisibleEvents", "calendarNowMarker",
+      "calendarTimedLayout", "calendarAllDayLayout", "calendarMonthDayLayout", "calendarMonthWeekLayout",
+      "calendarEventsOnDay", "calendarEventsInMonth", "calendarBusyDates", "projectCalendarOccurrences",
+      "calendarRecurrenceWithFrequency", "calendarRecurrenceWithInterval", "calendarRecurrenceWithUntil",
+    ] as const) {
+      expect(editing[symbol]).toBe(calendarDocument[symbol]);
+    }
+  });
+
+  test.each([
+    "work",
+    null,
+    [{ id: 123, title: "Work", hidden: false, color: "accent" }],
+    [{ id: "work", title: 123, hidden: false, color: "accent" }],
+    [{ id: "work", title: "Work", hidden: "false", color: "accent" }],
+  ])("rejects malformed calendars instead of taking the legacy omission path: %j", (calendars) => {
+    expect(() => createCalendarEditor({ calendars, events: [] } as unknown as CalendarDocument)).toThrow();
+  });
+
+  test.each([false, true])("default paste uses the primary recurring occurrence, allDay=%s", (allDay) => {
+    const instance = editor([recurring(allDay)]);
+    const start = allDay ? "2026-08-03" : "2026-08-03T09:00";
+    capture(instance, start);
+    const payload = instance.copy()!;
+    const before = instance.snapshot;
+    expect(instance.paste(payload).ok).toBe(true);
+    expect(instance.primaryOccurrence?.start).toBe(start);
+    expect(instance.selectedEvents[0]?.start).toBe(start);
+    expect(instance.undo().ok).toBe(true);
+    expect(instance.snapshot.value).toEqual(before.value);
+    expect(instance.snapshot.selection).toEqual(before.selection);
+  });
+
   test.each([
     { type: "event.typo" },
     { type: "event.update", eventId: "a", end: "zz" },

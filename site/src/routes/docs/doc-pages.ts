@@ -17,6 +17,8 @@ import markdownReactApiMarkdown from "../../../../docs/api-reference/markdown-re
 import databaseApiMarkdown from "../../../../docs/api-reference/database.md?raw";
 import annotationApiMarkdown from "../../../../docs/api-reference/annotation.md?raw";
 import calendarApiMarkdown from "../../../../docs/api-reference/calendar.md?raw";
+import calendarDocumentApiMarkdown from "../../../../docs/api-reference/calendar-document.md?raw";
+import calendarDocumentContractMarkdown from "../../../../packages/json-document-calendar-document/docs/api.md?raw";
 import webApiMarkdown from "../../../../docs/api-reference/web.md?raw";
 import contenteditableApiMarkdown from "../../../../docs/api-reference/contenteditable.md?raw";
 import richTextApiMarkdown from "../../../../docs/api-reference/rich-text.md?raw";
@@ -192,6 +194,7 @@ export const docPages = {
   databaseApi: docPage("/docs/api/database", databaseApiMarkdown),
   annotationApi: docPage("/docs/api/annotation", annotationApiMarkdown),
   calendarApi: docPage("/docs/api/calendar", `[시간·반복·거절 계약: Editing의 Calendar protocol profile](/docs/api/editing#calendar-protocol-profile-rc)\n\n${calendarApiMarkdown}`),
+  calendarDocumentApi: docPage("/docs/api/calendar-document", `${calendarDocumentContractMarkdown}\n\n${calendarDocumentApiMarkdown}`),
   webApi: docPage("/docs/api/web", webApiMarkdown),
   contenteditableApi: docPage("/docs/api/contenteditable", contenteditableApiMarkdown),
   richTextApi: docPage("/docs/api/rich-text", richTextApiMarkdown),

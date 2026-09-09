@@ -181,6 +181,13 @@ It publishes rows with hierarchy/ARIA facts and the matching `TreeTopology`.
 identity when a selection or rendering adapter needs to key a `GridPoint`.
 
 `Calendar` follows the owner-local [Calendar protocol profile](docs/calendar-profile.md).
+
+The document model, validation, semantic operations and projections are owned by
+`@interactive-os/json-document-calendar-document`; the existing exports here are
+compatibility paths to that implementation. Editing owns selection, clipboard,
+Intent execution and history, and consumes the Document Type's public plans.
+`paste(clipboard)` defaults to `primaryOccurrence.start`, including later recurring
+occurrences. The shared grammar binding is `tests/conformance/calendar-grammar.test.ts`.
 The profile is also rendered on the site's Editing API page; it documents the
 current RC implementation, not a frozen Official Hands wire standard.
 `Calendar` keeps interval events `{ id, title, start, end, allDay }`. Timed

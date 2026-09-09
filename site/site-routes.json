@@ -127,9 +127,9 @@
   },
   {
     "path": "/docs/document-types/calendar",
-    "label": "Calendar · TBD",
-    "title": "Calendar Document Type · TBD - json-document",
-    "description": "Calendar의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "label": "Calendar · RC",
+    "title": "Calendar Document Type · RC - json-document",
+    "description": "Calendar 문서 모델·검증·의미 연산·projection의 공개 소유자와 RC 계약을 설명합니다.",
     "language": "ko",
     "navigationGroup": "Document Types"
   },
@@ -411,6 +411,14 @@
     "description": "@interactive-os/json-document-annotation의 전체 public API입니다.",
     "language": "ko",
     "navigationGroup": "Hands"
+  },
+  {
+    "path": "/docs/api/calendar-document",
+    "label": "API · Calendar Document",
+    "title": "Calendar Document Type API - json-document",
+    "description": "@interactive-os/json-document-calendar-document의 문서 계약과 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
   },
   {
     "path": "/docs/api/calendar",

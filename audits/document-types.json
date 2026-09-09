@@ -86,7 +86,7 @@
         { "name": "recurrence.freq / interval / until", "description": "반복 주기, 양의 간격과 반복 종료 경계를 정의합니다." },
         { "name": "excludeDates", "description": "반복 projection에서 제외할 occurrence date 목록입니다." }
       ],
-      "sourcePath": "packages/json-document-editing/src/calendar.ts",
+      "sourcePath": "packages/json-document-calendar-document/src/calendar-model.ts",
       "symbol": "CalendarDocument"
     },
     "sheet": {
@@ -135,16 +135,17 @@
   },
   "audits": {
     "calendar": {
-      "status": "audited-tbd",
-      "denominator": 10,
+      "status": "owner-closed",
+      "denominator": 12,
       "horizon": {
         "enumerators": [
+          "packages/json-document-calendar-document/src/index.ts",
           "packages/json-document-editing/src/index.ts",
           "packages/json-document-calendar/src/index.ts",
           "site/src/shared/demo-workbench/demo-sources.ts",
           "site/src/app/live-demo-registry.tsx"
         ],
-        "predicate": "Calendar의 model, invariant, semantic operation, projection, Editing lifecycle, platform translation, affordance, Hand와 reusable UI 책임",
+        "predicate": "Calendar의 model, invariant, semantic operation, projection, Editing lifecycle, platform translation, affordance, Hand와 reusable UI 책임; 정본 선택 대상과 명시적 paste cursor, Calendar Intent binding과 generic gesture lifecycle을 구분",
         "excluded": "fixtures, copy, layout-only CSS, tests and generated route files"
       },
       "occurrences": [
@@ -156,13 +157,13 @@
           "changeReason": "Calendar document vocabulary changes",
           "stateLifecycle": "immutable document value",
           "inputsOutputs": "CalendarDocument and nested JSON values",
-          "currentOwner": "@interactive-os/json-document-editing",
-          "canonicalEvidence": "Document Type boundary: model survives without Editing and UI",
-          "sourcePath": "packages/json-document-editing/src/calendar.ts",
+          "currentOwner": "@interactive-os/json-document-calendar-document",
+          "canonicalEvidence": "Calendar Document Type의 public API, 소유자 docs/api.md, Calendar Usage/Source와 독립 계약 테스트",
+          "sourcePath": "packages/json-document-calendar-document/src/calendar-model.ts",
           "symbol": "CalendarDocument",
-          "disposition": "mislocated module",
-          "intendedOwner": "Calendar Document Type canonical module (missing)",
-          "nextCheck": "admit and name the Calendar Document Type owner before moving the public type"
+          "disposition": "canonical consumer",
+          "intendedOwner": "@interactive-os/json-document-calendar-document",
+          "nextCheck": "기존 Editing type export는 호환 경로이며 새 소비자는 Document Type API를 사용"
         },
         {
           "id": "calendar-invariant",
@@ -172,13 +173,13 @@
           "changeReason": "Calendar validity rules change",
           "stateLifecycle": "stateless validation",
           "inputsOutputs": "CalendarDocument to validation failure or success",
-          "currentOwner": "@interactive-os/json-document-editing",
-          "canonicalEvidence": "Document Type boundary owns schema and invariants",
-          "sourcePath": "packages/json-document-editing/src/calendar-validation.ts",
-          "symbol": "assertCalendarDocument",
-          "disposition": "mislocated module",
-          "intendedOwner": "Calendar Document Type canonical module (missing)",
-          "nextCheck": "define a stable validation contract at the admitted owner"
+          "currentOwner": "@interactive-os/json-document-calendar-document",
+          "canonicalEvidence": "Calendar Document Type의 public API, 소유자 docs/api.md, Calendar Usage/Source와 독립 계약 테스트",
+          "sourcePath": "packages/json-document-calendar-document/src/calendar-validation.ts",
+          "symbol": "validateCalendarDocument",
+          "disposition": "canonical consumer",
+          "intendedOwner": "@interactive-os/json-document-calendar-document",
+          "nextCheck": "독립 validator와 Editing 생성자의 malformed/legacy 회귀 검사"
         },
         {
           "id": "calendar-occurrence-projection",
@@ -188,13 +189,13 @@
           "changeReason": "Calendar recurrence semantics change",
           "stateLifecycle": "stateless projection",
           "inputsOutputs": "CalendarEvent and range to CalendarOccurrence list",
-          "currentOwner": "@interactive-os/json-document-editing",
-          "canonicalEvidence": "Document Type boundary owns projections independent of Editing",
-          "sourcePath": "packages/json-document-editing/src/calendar-occurrence.ts",
+          "currentOwner": "@interactive-os/json-document-calendar-document",
+          "canonicalEvidence": "Calendar Document Type의 public API, 소유자 docs/api.md, Calendar Usage/Source와 독립 계약 테스트",
+          "sourcePath": "packages/json-document-calendar-document/src/calendar-occurrence.ts",
           "symbol": "projectCalendarOccurrences",
-          "disposition": "mislocated module",
-          "intendedOwner": "Calendar Document Type canonical module (missing)",
-          "nextCheck": "separate recurrence projection from occurrence editing transitions"
+          "disposition": "canonical consumer",
+          "intendedOwner": "@interactive-os/json-document-calendar-document",
+          "nextCheck": "독립 projection과 Editing 호환 export가 같은 구현을 소비"
         },
         {
           "id": "calendar-semantic-operation",
@@ -202,15 +203,15 @@
           "knowledge": "Calendar event and recurrence mutation meaning",
           "decision": "the semantic event update represented by a Calendar operation",
           "changeReason": "Calendar mutation semantics change",
-          "stateLifecycle": "operation value interpreted by Editing",
-          "inputsOutputs": "CalendarIntent event cases to document patch",
-          "currentOwner": "@interactive-os/json-document-editing",
-          "canonicalEvidence": "CalendarIntent currently mixes document operations with selection and clipboard intents",
-          "sourcePath": "packages/json-document-editing/src/calendar.ts",
-          "symbol": "CalendarIntent",
-          "disposition": "missing canonical module",
-          "intendedOwner": "Calendar Document Type canonical module (missing)",
-          "nextCheck": "split input-independent Calendar operations from Editing-only intents"
+          "stateLifecycle": "stateless document operation plan",
+          "inputsOutputs": "CalendarEventOperation to events, JSON Patch and affected occurrence; no Editing selection",
+          "currentOwner": "@interactive-os/json-document-calendar-document",
+          "canonicalEvidence": "Calendar Document Type의 public API, 소유자 docs/api.md, Calendar Usage/Source와 독립 계약 테스트",
+          "sourcePath": "packages/json-document-calendar-document/src/calendar-operation.ts",
+          "symbol": "planCalendarEventEdit",
+          "disposition": "canonical consumer",
+          "intendedOwner": "@interactive-os/json-document-calendar-document",
+          "nextCheck": "편집·preview·그룹 이동 및 발생분/원본 제거·visibility는 Document Type 공개 계획을 소비"
         },
         {
           "id": "calendar-editor",
@@ -221,28 +222,28 @@
           "stateLifecycle": "stateful Editing session",
           "inputsOutputs": "EditingDocumentSource and Calendar Intent to EditingResult",
           "currentOwner": "@interactive-os/json-document-editing",
-          "canonicalEvidence": "repository naming standard assigns Intent, Selection, Clipboard and History to Editing",
+          "canonicalEvidence": "EditingSession이 Document Type 공개 연산을 실행하며 primaryOccurrence를 기본 paste target으로 소비",
           "sourcePath": "packages/json-document-editing/src/calendar.ts",
           "symbol": "createCalendarEditor",
-          "disposition": "canonical API gap",
+          "disposition": "canonical consumer",
           "intendedOwner": "@interactive-os/json-document-editing",
-          "nextCheck": "consume the future Calendar Document Type API instead of locally owning its model and rules"
+          "nextCheck": "공통 Calendar Editing Grammar와 API/Hand/초기/외부 selection 경로 회귀 검사"
         },
         {
           "id": "calendar-pointer-interpretation",
-          "role": "Affordance",
-          "knowledge": "input-independent pointer release gesture meaning",
-          "decision": "which Calendar resize or move intent a gesture means",
-          "changeReason": "Calendar gesture grammar changes",
+          "role": "Editing intent binding",
+          "knowledge": "Calendar interval geometry, scope and CalendarIntent",
+          "decision": "bind normalized release values to Calendar-specific Intent",
+          "changeReason": "Calendar intent mapping changes",
           "stateLifecycle": "pointer gesture release",
           "inputsOutputs": "pointer release value to Calendar intent",
           "currentOwner": "@interactive-os/json-document-editing",
-          "canonicalEvidence": "repository naming standard assigns human manipulation grammar to Affordance",
+          "canonicalEvidence": "generic gesture lifecycle은 Affordance, Calendar별 Intent binding은 Editing, DOM capture/좌표는 Web",
           "sourcePath": "packages/json-document-editing/src/calendar-time-grid-pointer.ts",
           "symbol": "interpretCalendarTimeGridPointer",
-          "disposition": "mislocated module",
-          "intendedOwner": "@interactive-os/json-document-affordance",
-          "nextCheck": "compare all-day and month pointer interpreters before choosing one Calendar affordance module"
+          "disposition": "canonical consumer",
+          "intendedOwner": "@interactive-os/json-document-editing",
+          "nextCheck": "time/all-day/month의 bind/interpret가 Document Type 시간 규칙을 소비하는지 확인"
         },
         {
           "id": "calendar-web-input",
@@ -274,7 +275,7 @@
           "symbol": "useCalendarHand",
           "disposition": "canonical consumer",
           "intendedOwner": "@interactive-os/json-document-calendar",
-          "nextCheck": "keep composition only after Document Type capabilities move behind a public API"
+          "nextCheck": "선택 회차는 editor.primaryOccurrence를 읽고 빈 슬롯 paste target만 해당 Editing revision에 묶어 보존"
         },
         {
           "id": "calendar-month-grid",
@@ -290,7 +291,7 @@
           "symbol": "CalendarMonthGrid",
           "disposition": "canonical consumer",
           "intendedOwner": "@interactive-os/json-document-calendar",
-          "nextCheck": "ensure projection inputs come from the future Document Type API"
+          "nextCheck": "Calendar UI는 Document Type의 공개 기간/occurrence projection을 직접 소비"
         },
         {
           "id": "calendar-host",
@@ -306,9 +307,55 @@
           "symbol": "CalendarDemoRoute",
           "disposition": "Host composition",
           "intendedOwner": "site Calendar route",
-          "nextCheck": "audit the runtime import closure for local model, schema, operation or projection implementations"
+          "nextCheck": "CalendarDemoRoute와 navigator는 공개 model/projection/Editing/Hand를 사용하며 fixture·copy·layout·제품 정책만 유지"
+        },
+        {
+          "id": "calendar-selection-target",
+          "role": "Selection target consumption",
+          "knowledge": "canonical occurrence and explicit paste destination",
+          "decision": "derive edit targets from primaryOccurrence; keep only an explicit paste cursor",
+          "changeReason": "Editing selection or paste destination changes",
+          "stateLifecycle": "derived selection and revision-scoped paste cursor",
+          "inputsOutputs": "CalendarEditor primaryOccurrence to inspector/edit/delete/default paste",
+          "currentOwner": "@interactive-os/json-document-calendar",
+          "canonicalEvidence": "Calendar protocol identity and direct API/Hand/initial/external selection regression tests",
+          "sourcePath": "packages/json-document-calendar/src/use-calendar-hand.ts",
+          "symbol": "useCalendarHand",
+          "disposition": "canonical consumer",
+          "intendedOwner": "@interactive-os/json-document-calendar",
+          "nextCheck": "같은 회차를 수정하고 explicit paste target은 상태 변경 후 재사용하지 않음"
+        },
+        {
+          "id": "calendar-gesture-lifecycle",
+          "role": "Affordance",
+          "knowledge": "input-independent gesture lifecycle",
+          "decision": "begin/preview/commit/cancel without Calendar model or DOM capture",
+          "changeReason": "generic gesture lifecycle changes",
+          "stateLifecycle": "GestureSession",
+          "inputsOutputs": "generic data to preview or committed/cancelled result",
+          "currentOwner": "@interactive-os/json-document-affordance",
+          "canonicalEvidence": "Calendar useCalendarPointerInteractions consumes public createGestureSession",
+          "sourcePath": "packages/json-document-affordance/src/gesture-session.ts",
+          "symbol": "createGestureSession",
+          "disposition": "canonical consumer",
+          "intendedOwner": "@interactive-os/json-document-affordance",
+          "nextCheck": "Calendar protocol tests preserve cancellation and one Editing transaction"
         }
-      ]
+      ],
+      "closure": {
+        "owner": "@interactive-os/json-document-calendar-document",
+        "publicEntry": "packages/json-document-calendar-document/src/index.ts",
+        "referencePath": "packages/json-document-calendar-document/docs/api.md",
+        "apiPath": "/docs/api/calendar-document",
+        "usagePath": "/demo/calendar",
+        "usagePagePath": "/editors#calendar-editor",
+        "sourceRegistration": "site/src/shared/demo-workbench/demo-sources.ts",
+        "verification": [
+          "packages/json-document-calendar-document/tests/calendar-document.test.ts",
+          "packages/json-document-editing/tests/conformance/calendar-grammar.test.ts",
+          "packages/json-document-calendar/tests/calendar-protocol.test.tsx"
+        ]
+      }
     }
   }
 }

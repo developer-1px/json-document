@@ -1,6 +1,11 @@
-import type { CalendarEvent, CalendarIntent } from "./calendar.js";
-import { calendarEventRecurrence, resolveCalendarOccurrence } from "./calendar-occurrence.js";
-import { calendarDatePart, calendarMinutesBetween, calendarShiftInstant, parseCalendarInstant } from "./calendar-validation.js";
+import type {
+  CalendarIntent,
+} from "./calendar.js";
+import type {
+  CalendarEvent,
+} from "@interactive-os/json-document-calendar-document";
+import { calendarEventRecurrence, resolveCalendarOccurrence } from "@interactive-os/json-document-calendar-document";
+import { calendarDatePart, calendarMinutesBetween, calendarShiftInstant, parseCalendarInstant } from "@interactive-os/json-document-calendar-document";
 
 export type CalendarTimeGridHandle = "body" | "start" | "end";
 
