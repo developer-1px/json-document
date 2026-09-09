@@ -124,3 +124,35 @@ npm test -w @interactive-os/json-document
 npm run typecheck -w @interactive-os/json-document
 npm run build -w @interactive-os/json-document
 ```
+
+### 검증 운영
+
+1인 개발과 agent의 로컬 검증을 기본으로 합니다. 개발·PR에서는 변경 범위에 맞는
+테스트·타입·빌드·브라우저 검증을 수행하고, 실행 명령과 결과를 인계합니다.
+실행하지 못한 검사와 실패한 검사는 통과와 구분합니다. 자동 CI가 없다는 사실을
+검증 완료로 간주하지 않습니다.
+
+| 시점 | 원격 실행 |
+| --- | --- |
+| PR 생성·갱신 | 자동 전체 CI 없음 |
+| main push | Pages 빌드·배포와 live 확인 |
+| 릴리스 tag | 깨끗한 runner에서 기존 패키지 검증 후 publish |
+| 필요 시 | 전체 CI와 장시간 collaboration soak 수동 실행 |
+
+전체 검증이 필요하면 기존 명령을 사용합니다. 제품 테스트와 검사 CLI는 유지하며,
+변경 영향도 선택기 CLI는 자동 CI의 gate로 사용하지 않습니다.
+
+```sh
+npm run verify
+npm run release:check
+npm run external-kit:verify
+npm run test:collaboration:soak
+```
+
+원격의 깨끗한 환경에서 확인하려면 GitHub Actions의 해당 workflow에서
+`Run workflow`를 선택하거나 아래 명령으로 명시적으로 실행합니다.
+
+```sh
+gh workflow run ci.yml --ref main
+gh workflow run collaboration-soak.yml --ref main
+```
