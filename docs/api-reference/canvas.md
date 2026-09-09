@@ -24,6 +24,8 @@ interface CanvasCreationStyle {
   readonly textColor: string;
   readonly fontSize: number;
   readonly strokeWidth: number;
+  /** Sticky-note fill; omitted hosts reuse their ordinary object fill. */
+  readonly stickyNoteColor?: string;
 }
 ```
 ## `CanvasHand`

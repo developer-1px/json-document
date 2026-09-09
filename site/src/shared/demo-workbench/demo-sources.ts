@@ -412,10 +412,10 @@ const registeredPublicUsages = [
     symbol: "useEditingSnapshot",
     sourcePath: "packages/json-document-react/src/editing-snapshot.ts",
   },
-  ...(["ObjectDocument", "CanvasDocument", "DocumentObject", "CanvasObject"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-model.ts" })),
+  ...(["ObjectDocument", "CanvasDocument", "DocumentObject", "CanvasObject", "CanvasObjectKind", "CanvasTextFormat"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-model.ts" })),
   ...(["getObjectStyle", "readObjectStyle", "assertObjectStyle", "ObjectStyle", "ObjectStyleSelection"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-style.ts" })),
   ...(["assertObjectDocument", "assertCanvasDocument", "assertCanvasImageSource", "parseCanvasDocument", "serializeCanvasDocument"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-validation.ts" })),
-  ...(["createCanvasObject", "createCanvasPath", "createCanvasImage", "projectObject", "transformObject"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-projection.ts" })),
+  ...(["createCanvasObject", "createCanvasPath", "createCanvasImage", "projectObject", "projectObjectText", "ObjectTextProjection", "transformObject"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-projection.ts" })),
   {
     packageName: "@interactive-os/json-document-object-document",
     symbol: "planObjectOperation",

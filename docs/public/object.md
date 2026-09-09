@@ -7,6 +7,9 @@ Object는 안정된 ID를 가진 객체를 집는 편집기입니다. 줄 번호
 
 생성·글자 편집·색 채우기·이동·resize·삭제는 Intent로 들어갑니다. 문서의 기하
 규칙은 Document Type이, 화면 좌표와 hit target은 Adapter와 Hand가 소유합니다.
+Canvas의 스티커 노트와 도형 내부 글도 별도 편집기 없이 같은 `object.text`로
+label을 바꿉니다. 채워진 객체의 본문 글자색은 `selection.style`의 `style.textColor`로,
+채우기는 기존 `color`로 구분합니다.
 
 ## API Reference
 

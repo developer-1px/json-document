@@ -13,7 +13,7 @@ const document: CanvasDocument = { profile: "canvas/1", width: 1280, height: 720
 
 test("effective styles preserve old documents and expose kind-specific capabilities", () => {
   expect(getObjectStyle(document.objects[0]!)).toEqual({ color: "blue", fontSize: 32, fontWeight: 400, textAlign: "left" });
-  expect(getObjectStyle(document.objects[1]!)).toEqual({ color: "blue", strokeColor: "#000000", strokeWidth: 0 });
+  expect(getObjectStyle(document.objects[1]!)).toEqual({ color: "blue", textColor: "#253044", fontSize: 24, fontWeight: 400, textAlign: "center", strokeColor: "#000000", strokeWidth: 0 });
   expect(getObjectStyle(document.objects[3]!)).toEqual({ color: "blue", strokeWidth: 4 });
   expect(getObjectStyle(document.objects[4]!)).toEqual({});
   expect(getObjectStyle({ ...bounds, id: "legacy" })).toEqual({ color: "blue" });
@@ -23,7 +23,7 @@ test("effective styles preserve old documents and expose kind-specific capabilit
 
 test("mixed values only compare supporting targets and retain unsupported as absent", () => {
   expect(readObjectStyle([])).toEqual({});
-  expect(readObjectStyle(document.objects)).toEqual({ color: null, fontSize: 32, fontWeight: 400, textAlign: "left", strokeColor: null, strokeWidth: null });
+  expect(readObjectStyle(document.objects)).toEqual({ color: null, textColor: "#253044", fontSize: null, fontWeight: 400, textAlign: null, strokeColor: null, strokeWidth: null });
   expect(readObjectStyle([document.objects[0]!, document.objects[4]!])).toEqual(getObjectStyle(document.objects[0]!));
   expect(readObjectStyle([document.objects[0]!, { ...document.objects[0]!, id: "bold", fontWeight: 700, textAlign: "right" }])).toMatchObject({ fontWeight: null, textAlign: null });
 });
@@ -38,7 +38,7 @@ test("one atomic style plan changes only applicable fields without replacing ext
   if (!result.ok) return;
   const next = result.value as CanvasDocument;
   expect(next.objects[0]).toEqual({ ...document.objects[0], color: "purple", fontSize: 48, fontWeight: 700, textAlign: "center" });
-  expect(next.objects[1]).toEqual({ ...document.objects[1], color: "purple", strokeColor: "orange", strokeWidth: 6 });
+  expect(next.objects[1]).toEqual({ ...document.objects[1], color: "purple", fontSize: 48, fontWeight: 700, strokeColor: "orange", strokeWidth: 6 });
   expect(next.objects[3]).toEqual({ ...document.objects[3], color: "purple", strokeWidth: 6 });
   expect(next.objects[4]).toEqual(document.objects[4]);
   expect(parseCanvasDocument(serializeCanvasDocument(next))).toEqual(next);

@@ -10,6 +10,11 @@
 선택합니다. 따라서 전체 선택 이동, primary만 resize/text 편집을 같은 ObjectEditor로
 실행할 수 있습니다. 문서 연산·검증은 Object Document Type이 소유합니다.
 
+`object.text`는 독립 text뿐 아니라 rectangle·ellipse·sticky-note의 `label` 본문을
+편집합니다. 지원 여부는 `projectObjectText`가 정의하며 image·path·legacy Object의
+메타데이터 label은 편집 대상으로 승격하지 않습니다. 같은 본문은 no-op, 빈 문자열은
+유효한 편집입니다. 도형/노트도 기존 선택·복제·Clipboard·History 경로를 그대로 씁니다.
+
 ```ts
 editor.dispatch({ type: "selection.set", objectIds: ["a", "b"], primaryKey: "a" });
 editor.dispatch({ type: "object.translate", objectIds: ["a", "b"], dx: 20, dy: 10 });
@@ -27,7 +32,8 @@ Intent를 사용합니다. Undo/Redo는 해당 문서 변경과 함께 원인 �
 `selection.style`은 `{ style: Partial<ObjectStyle> }`을 받아 선택한 객체에 한 번 적용합니다.
 스타일의 값·기본값·종류별 지원 여부·검증은 [Object Document Type](/docs/api/object-document)의
 `style` 연산에 위임합니다. 예를 들어 글자·도형·이미지를 함께 선택한 뒤 fontSize를 바꾸면
-글자만 바뀌며 이미지와 선택 집합·primary는 유지됩니다.
+글자와 도형 본문이 바뀌며 이미지와 선택 집합·primary는 유지됩니다.
+`textColor`는 도형·노트의 본문 글자색이고 `color`는 기존대로 종류별 주 색상입니다.
 
 ```ts
 editor.dispatch({ type: "selection.style", style: { color: "#3b82f6", fontSize: 48, fontWeight: 700 } });

@@ -21,8 +21,9 @@ Object도 계속 유효합니다. legacy Object의 생략된 color는 계속 수
 | kind | 추가 문서 값 | 표현 |
 | --- | --- | --- |
 | text | 양의 유한수 fontSize, 선택적 fontWeight·textAlign | label이 실제 내용인 plain text. 별도의 text 복사본 없음 |
-| rectangle | 선택적 strokeColor·strokeWidth | color로 채운 사각형 |
-| ellipse | 선택적 strokeColor·strokeWidth | 경계 상자에 내접하는 타원 |
+| rectangle | 선택적 textColor·fontSize·fontWeight·textAlign·strokeColor·strokeWidth | color로 채운 사각형, label 본문 |
+| ellipse | 같은 선택적 서식 | 경계 상자에 내접하는 타원, label 본문 |
+| sticky-note | 같은 선택적 서식 | 여백을 둔 노트, color 채우기와 label 본문 |
 | path | points, 양의 유한수 strokeWidth | color로 그린 열린 선 |
 | image | source | 문서에 포함한 PNG/JPEG/WebP의 base64 data URL |
 
@@ -30,7 +31,10 @@ path points는 최소 두 개의 `{ x, y }`이며 각 좌표는 `[0, 1]`입니�
 대한 정규화 좌표이므로 이동·resize는 상자만 바꾸고 점과 strokeWidth를 보존합니다.
 `createCanvasPath`는 슬라이드 좌표의 점을 이 표현으로 변환합니다. 수평·수직 선의
 퇴화한 축은 최소 1 단위의 상자로 표현합니다. `createCanvasObject`는 도형/글자 초안을
-만들며 ID는 Editing의 `object.create`에서 할당합니다.
+만들며 ID는 Editing의 `object.create`에서 할당합니다. `sticky-note`도 같은 생성 API를
+씁니다. 선택적인 `fontSize`와 `textColor`는 채워진 객체의 본문 서식으로 보존하며,
+독립 text는 기존대로 `color`를 글자색으로 사용합니다. `CanvasTextFormat`은 객체 전체의
+글자 크기·굵기·가로 정렬 계약이며 text만 fontSize가 필수입니다.
 
 `createCanvasImage({ source, width, height, label }, bounds)`는 decode된 자연 크기를
 주어진 상자에 비율을 유지해 맞추며 확대하지 않습니다. image의 color는 공통 모델 호환을
@@ -64,16 +68,33 @@ text, replace를 검증된 JSON Patch로 계획합니다. 성공은 `{ ok: true,
 반대쪽을 통과해도 뒤집지 않습니다. 화면 바깥 좌표는 허용하며 Hand가 슬라이드 밖을
 clip합니다. 위치를 자동 보정하거나 snap하지 않습니다.
 
+`projectObjectText(object): ObjectTextProjection | null`은 본문 편집 가능 여부와 표시·입력의
+공통 projection입니다. text·rectangle·ellipse·sticky-note는 `label`을 `text`로 읽고,
+유효한 글자색·크기·굵기·정렬, 본문 상자(x/y/width/height), `verticalAlign`을 반환합니다.
+image·path·kind 없는 legacy Object에는 null입니다. 확장 필드에 fontSize가 있어도
+본문 capability를 얻지 않습니다. 입력은 검증된 Object 값이어야 합니다.
+
+text는 전체 상자·상단, 사각형은 12단위 여백·중앙, 타원은 내접 사각형·중앙,
+노트는 16단위 여백·상단입니다. 사각형/노트의 여백은 각 축 크기의 1/4 이하로
+제한하여 작은 상자도 양수로 남습니다. resize는 글자 크기를 바꾸지 않으며 넘친 글은
+본문 상자에서 clip합니다. projection은 문서를 변경하지 않습니다.
+
+`text` 연산과 Editing의 `object.text`는 이 capability를 공유합니다. 도형과 노트에 별도
+문자열 필드나 자식 text 객체를 만들지 않습니다. 빈 문자열도 유효하며 지원하지 않는
+객체는 기존 `object.not-text`로 거절합니다.
+
 ### 객체 스타일
 
 `getObjectStyle(object)`는 적용 가능한 속성의 유효값을 반환합니다. 글자의 생략된
-`fontWeight`는 400, `textAlign`은 `left`입니다. 굵기는 400/700, 정렬은
+`fontWeight`는 400, `textAlign`은 `left`입니다. 도형·노트는 생략된 fontSize 24,
+textColor `#253044`, fontWeight 400을 사용하고 정렬은 도형 `center`, 노트 `left`입니다. 굵기는 400/700, 정렬은
 `left`/`center`/`right`를 지원합니다. 도형의 생략된 `strokeColor`는 `#000000`,
 `strokeWidth`는 0이므로 기존 문서는 테두리 없이 그대로 열립니다. 기본값을 읽는 것만으로
 문서를 바꾸지 않으며, 기존 kind 없는 Object는 color만 지원합니다.
 
-`ObjectStyle`의 color는 도형의 채우기·글자색·path의 선 색입니다. strokeColor는
-사각형·타원의 테두리색이며 strokeWidth는 도형과 path의 선 굵기입니다. 이미지에는
+`ObjectStyle`의 color는 도형·노트의 채우기·독립 글자색·path의 선 색입니다. textColor는
+도형·노트의 본문만 칠하며 채우기를 바꾸지 않습니다. 독립 text에 textColor를 적용하지
+않습니다. strokeColor는 사각형·타원·노트의 테두리색이며 strokeWidth는 도형과 path의 선 굵기입니다. 이미지에는
 스타일 속성이 없습니다. 새 스타일의 색 값은 비어 있지 않은 문자열이고, 도형의 굵기는
 0 이상, path의 굵기와 글자 크기는 양의 유한수여야 합니다. 색 문자열의 CSS 해석은
 렌더링 플랫폼의 책임입니다. 부분 문자열 서식이나 Rich Text 모델은 아닙니다.

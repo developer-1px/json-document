@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type ClipboardEvent, type KeyboardEvent, type PointerEvent } from "react";
 import { commitAffordance, createGestureSession, createPlaneSelectProfile, resizeAffordance, type InteractionHandleEvent, type PlaneSelectProfile, type PlaneSelectSelection, type ResizeEdge } from "@interactive-os/json-document-affordance";
-import { assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, readObjectStyle, transformObject, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint, type ObjectStyle } from "@interactive-os/json-document-object-document";
+import { assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, projectObjectText, readObjectStyle, transformObject, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint, type ObjectStyle } from "@interactive-os/json-document-object-document";
 import type { EditingResult, ObjectEditor, ObjectIntent, ObjectSelection } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { createWebKeyboardAdapter, createWebPointerSession, isWebEditableTarget, projectWebClientPointToSVG, webSVGViewportFromElement } from "@interactive-os/json-document-web";
@@ -12,6 +12,8 @@ export interface CanvasCreationStyle {
   readonly textColor: string;
   readonly fontSize: number;
   readonly strokeWidth: number;
+  /** Sticky-note fill; omitted hosts reuse their ordinary object fill. */
+  readonly stickyNoteColor?: string;
 }
 
 type Gesture = { readonly base: CanvasDocument } & (
@@ -114,7 +116,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   function editText(id: string) {
     const base = current();
     const object = base.objects.find((item) => item.id === id);
-    if (object?.kind !== "text") return;
+    if (!object || !projectObjectText(object)) return;
     cancel();
     if (editor.snapshot.selection.primaryKey !== id) applySelection(profile.select(selectContext(), id));
     draft.current = { id, text: object.label, base };
@@ -149,9 +151,10 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     if (!click && start.x === point.x && start.y === point.y) return null;
     return createCanvasObject(gesture.tool, {
       x: click ? start.x : Math.min(start.x, point.x), y: click ? start.y : Math.min(start.y, point.y),
-      width: click ? (gesture.tool === "text" ? 280 : 160) : Math.abs(point.x - start.x),
-      height: click ? (gesture.tool === "text" ? 64 : 100) : Math.abs(point.y - start.y),
-    }, { color: gesture.tool === "text" ? style.textColor : style.color, label: gesture.tool === "text" ? "Text" : "", fontSize: style.fontSize });
+      width: click ? (gesture.tool === "text" ? 280 : gesture.tool === "sticky-note" ? 200 : 160) : Math.abs(point.x - start.x),
+      height: click ? (gesture.tool === "text" ? 64 : gesture.tool === "sticky-note" ? 200 : 100) : Math.abs(point.y - start.y),
+    }, { color: gesture.tool === "text" ? style.textColor : gesture.tool === "sticky-note" ? style.stickyNoteColor ?? style.color : style.color,
+      label: gesture.tool === "text" ? "Text" : "", fontSize: style.fontSize, textColor: style.textColor });
   }
 
   function transform(gesture: Extract<Gesture, { type: "resize" }>) {
@@ -170,7 +173,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
       if (result.ok) {
         setTool("select");
         const id = result.snapshot.selection.primaryKey;
-        if (active.type === "create" && active.tool === "text" && id) editText(id);
+        if (active.type === "create" && (active.tool === "text" || active.tool === "sticky-note") && id) editText(id);
       }
     } else {
       const delta = transform(active);

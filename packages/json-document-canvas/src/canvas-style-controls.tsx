@@ -24,6 +24,7 @@ export function CanvasStyleControls(props: {
   return <Popover label="스타일" trigger={<Palette aria-hidden="true" size={16} />} triggerPresentation="icon"
     open={open} onOpenChange={(next) => { if (next) props.onOpen(); setOpen(next); }} panelClassName="canvas-style-panel">
     {value.color !== undefined && <StyleValue key={`color:${value.color}`} label="색상" value={value.color} color onApply={(color) => apply({ color })} />}
+    {value.textColor !== undefined && <StyleValue key={`text:${value.textColor}`} label="글자색" value={value.textColor} color onApply={(textColor) => apply({ textColor })} />}
     {value.strokeColor !== undefined && <StyleValue key={`stroke:${value.strokeColor}`} label="테두리 색" value={value.strokeColor} color
       onApply={(strokeColor) => apply({ strokeColor, ...(value.strokeWidth === 0 && strokeColor !== "transparent" ? { strokeWidth: 2 } : {}) })} />}
     {value.fontSize !== undefined && <StyleValue key={`size:${value.fontSize}`} label="글자 크기" value={value.fontSize} onApply={(fontSize) => apply({ fontSize: Number(fontSize) })} />}

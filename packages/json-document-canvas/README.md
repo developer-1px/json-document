@@ -1,7 +1,8 @@
 # Canvas Hand
 
 `@interactive-os/json-document-canvas`는 한 장의 Object Canvas 프로파일에서
-글자·사각형·타원·그리기를 완성하는 React Hand입니다. 별도 Canvas editor나
+글자·사각형·타원·스티커 노트·그리기를 완성하는 React Hand입니다. 도형과 노트의
+본문도 같은 plain-text 입력과 스타일 API로 편집합니다. 별도 Canvas editor나
 selection/history 구현을 만들지 않고 기존 `createObjectEditor`를 사용합니다.
 재사용 가능한 Plane Select profile로 다중 선택·Alt 복제·Shift 축 고정·방향키 이동을,
 Object Editing과 Web Clipboard로 선택 copy/cut/paste·Mod+D·Undo/Redo를 연결합니다.
@@ -15,7 +16,7 @@ import { CanvasHand } from "@interactive-os/json-document-canvas";
 
 function Slide() {
   const [editor] = useState(() => createObjectEditor({ profile: "canvas/1", width: 1280, height: 720, objects: [] }));
-  return <CanvasHand editor={editor} creationStyle={{ color: "#b6c8e8", textColor: "#253044", fontSize: 36, strokeWidth: 4 }} />;
+  return <CanvasHand editor={editor} creationStyle={{ color: "#b6c8e8", textColor: "#253044", stickyNoteColor: "#fff2a8", fontSize: 36, strokeWidth: 4 }} />;
 }
 ```
 

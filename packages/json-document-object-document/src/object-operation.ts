@@ -1,6 +1,6 @@
 import { applyPatch, buildPointer, jsonEqual, type JSONPatchOperation } from "@interactive-os/json-document";
 import type { DocumentObject, ObjectDocument } from "./object-model.js";
-import { transformObject, type ObjectTransform } from "./object-projection.js";
+import { projectObjectText, transformObject, type ObjectTransform } from "./object-projection.js";
 import { assertObjectDocument } from "./object-validation.js";
 import { assertObjectStyle, getObjectStyle, type ObjectStyle } from "./object-style.js";
 
@@ -52,7 +52,7 @@ export function planObjectOperation(document: ObjectDocument, operation: ObjectO
             if (effective !== undefined && effective !== value) operations.push({ op: "add", path: buildPointer(["objects", index, key]), value });
           }
         } else if (operation.type === "text") {
-          if (object.kind !== "text") return { ok: false, code: "object.not-text" };
+          if (!projectObjectText(object)) return { ok: false, code: "object.not-text" };
           if (operation.text !== object.label) operations.push({ op: "replace", path: buildPointer(["objects", index, "label"]), value: operation.text });
         }
       }
