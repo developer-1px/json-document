@@ -111,6 +111,25 @@ describe("UI Primitives", () => {
     expect(screen.queryByRole("dialog", { name: "Delete document" })).toBeNull();
   });
 
+  test("icon Popover reuses Command tooltips, dismisses outside, and restores focus only on Escape", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [open, setOpen] = useState(false);
+      return <><Popover label="Style" trigger={<span aria-hidden="true">◇</span>} triggerPresentation="icon" open={open} onOpenChange={setOpen}><button>Inside</button></Popover><button>Outside</button></>;
+    }
+    render(<Harness />);
+    const trigger = screen.getByRole("button", { name: "Style" });
+    expect(trigger.getAttribute("data-ui-control")).toBe("command");
+    expect(document.getElementById(trigger.getAttribute("aria-describedby")!)?.textContent).toBe("Style");
+    await user.click(trigger); await user.click(screen.getByRole("button", { name: "Inside" }));
+    expect(screen.getByRole("dialog", { name: "Style" })).toBeTruthy();
+    await user.keyboard("{Escape}"); expect(document.activeElement).toBe(trigger);
+    await user.click(trigger); const outside = screen.getByRole("button", { name: "Outside" }); await user.click(outside);
+    expect(screen.queryByRole("dialog", { name: "Style" })).toBeNull(); expect(document.activeElement).toBe(outside);
+    await user.click(trigger); await user.tab(); await user.tab();
+    expect(screen.queryByRole("dialog", { name: "Style" })).toBeNull(); expect(document.activeElement).toBe(outside);
+  });
+
   test("Dialog moves focus inside, traps Tab, and restores the invoking control", async () => {
     const user = userEvent.setup();
     function Harness() {

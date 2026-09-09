@@ -1,7 +1,7 @@
 ## Canvas Hand 계약 · RC
 
 `CanvasHand`는 `ObjectEditor`와 `CanvasCreationStyle`을 받아 글자·사각형·타원·자유
-그리기, 이미지·텍스트 붙여넣기, 다중 선택, 집합 이동·복제·삭제, native Clipboard, primary resize, Undo/Redo, JSON 재열기를 연결합니다.
+그리기, 이미지·텍스트 붙여넣기, 다중 선택, 선택 스타일, 집합 이동·복제·삭제, native Clipboard, primary resize, Undo/Redo, JSON 재열기를 연결합니다.
 `useCanvasHand`는 같은 입력 조합을 custom UI에서 사용할 수 있게 공개합니다.
 
 툴바의 모든 도구·명령은 Lucide 아이콘과 공통 `Toggle`/`Command`의 `label`을
@@ -66,6 +66,29 @@ Host: 한 장 fixture, 크기·색상 정책, 레이아웃
 - 선택만 바꾸거나 0 거리로 움직이면 History가 생기지 않습니다. commit된 편집은
   한 번의 Undo로 되돌리며 삭제 Undo는 객체와 선택을 함께 복원합니다. Mod+Z/Mod+Shift+Z는
   입력 필드 밖에서 문서 Undo/Redo를 실행합니다.
+
+### 선택 스타일
+
+Select 도구에서 스타일을 지원하는 객체가 선택되면 팔레트 아이콘 하나가 나타납니다.
+공통 Popover와 Command 툴팁을 사용하며, 선택한 종류에 필요한 속성만 엽니다.
+색상 팔레트와 굵게·정렬 버튼은 즉시 확정합니다. 직접 입력한 CSS 색·글자 크기·선 굵기는
+Enter 또는 적용 아이콘으로 확정하고, Escape·바깥 클릭으로 닫으면 미확정 입력은 버립니다.
+이미지만 선택한 경우에는 스타일 컨트롤이 없습니다.
+
+혼합 선택은 `readObjectStyle`의 `null`을 `혼합`으로 드러냅니다. 색·크기·정렬을 임의의
+primary 값으로 표시하지 않습니다. 속성은 이를 지원하는 선택 객체에만 적용하고 전체
+선택과 primary를 보존합니다. 굵기가 모두 0인 도형에 테두리색을 고르면 2 단위로 함께
+켭니다. 투명한 테두리색이나 도형의 0 굵기로 테두리를 없앨 수 있습니다. path는 양의
+굵기가 필요하므로 path가 포함된 선택에 0을 입력하면 전체를 거절합니다.
+
+`useCanvasHand`의 `selectedStyle`과 `setStyle(style)`로 같은 기능을 custom UI에 연결할
+수 있습니다. `setStyle`은 `selection.style` Intent의 결과를 반환합니다. 스타일을 열거나
+적용할 때 글자 draft는 먼저 확정하고 진행 중인 gesture·paste는 취소합니다. 글자 편집
+textarea도 표시와 같은 크기·굵기·정렬을 사용합니다. 스타일 확정당 한 번의 Undo이며
+기본값·동일값은 문서와 History를 바꾸지 않습니다.
+
+스타일은 저장 객체에만 적용하며 `creationStyle`의 제품 생성 기본값을 변경하지 않습니다.
+글자 자동 크기, 부분 문자열 서식, 상시 inspector는 이번 범위 밖입니다.
 
 ### Native Clipboard
 

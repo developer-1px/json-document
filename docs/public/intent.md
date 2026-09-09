@@ -116,6 +116,7 @@ commit은 되돌아가지 않습니다. Selection mapping/reconciliation callbac
 | `selection.set` | `objectIds`, `mode?` | 객체 선택 변경 |
 | `selection.remove` | | 선택한 객체 제거 |
 | `selection.fill` | `color` | 선택한 객체 색 변경 |
+| `selection.style` | `style` | 지원하는 선택 객체의 색·글자 서식·테두리를 한 번 변경 |
 | `object.translate` | `objectIds`, `dx`, `dy` | 선택한 객체 위치 이동 |
 | `object.resize` | `objectIds`, `dx`, `dy`, `dw`, `dh` | 선택한 객체 크기 |
 | `clipboard.paste` | `clipboard` | 붙여넣기 |

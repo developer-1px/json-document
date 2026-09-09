@@ -2,11 +2,13 @@ import { applyPatch, buildPointer, jsonEqual, type JSONPatchOperation } from "@i
 import type { DocumentObject, ObjectDocument } from "./object-model.js";
 import { transformObject, type ObjectTransform } from "./object-projection.js";
 import { assertObjectDocument } from "./object-validation.js";
+import { assertObjectStyle, getObjectStyle, type ObjectStyle } from "./object-style.js";
 
 export type ObjectOperation =
   | { readonly type: "insert"; readonly objects: ReadonlyArray<DocumentObject> }
   | { readonly type: "transform"; readonly objectIds: ReadonlyArray<string>; readonly transform: ObjectTransform }
   | { readonly type: "fill"; readonly objectIds: ReadonlyArray<string>; readonly color: string }
+  | { readonly type: "style"; readonly objectIds: ReadonlyArray<string>; readonly style: Partial<ObjectStyle> }
   | { readonly type: "remove"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "text"; readonly objectId: string; readonly text: string }
   | { readonly type: "replace"; readonly document: ObjectDocument };
@@ -19,6 +21,7 @@ export type ObjectOperationPlan =
 export function planObjectOperation(document: ObjectDocument, operation: ObjectOperation): ObjectOperationPlan {
   try {
     assertObjectDocument(document);
+    if (operation.type === "style") assertObjectStyle(operation.style);
     const objects = document.objects;
     const operations: JSONPatchOperation[] = [];
     if (operation.type === "replace") {
@@ -42,6 +45,12 @@ export function planObjectOperation(document: ObjectDocument, operation: ObjectO
           }
         } else if (operation.type === "fill") {
           if (operation.color !== object.color) operations.push({ op: "replace", path: buildPointer(["objects", index, "color"]), value: operation.color });
+        } else if (operation.type === "style") {
+          const current = getObjectStyle(object);
+          for (const [key, value] of Object.entries(operation.style)) {
+            const effective = current[key as keyof ObjectStyle];
+            if (effective !== undefined && effective !== value) operations.push({ op: "add", path: buildPointer(["objects", index, key]), value });
+          }
         } else if (operation.type === "text") {
           if (object.kind !== "text") return { ok: false, code: "object.not-text" };
           if (operation.text !== object.label) operations.push({ op: "replace", path: buildPointer(["objects", index, "label"]), value: operation.text });

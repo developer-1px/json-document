@@ -13,7 +13,7 @@
     "directory": "packages/json-document-ui-primitives-react"
   },
   "publishConfig": { "access": "public", "provenance": true, "tag": "next" },
-  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "LICENSE"],
+  "files": ["dist", "!dist/.tsbuildinfo", "docs", "README.md", "LICENSE"],
   "exports": {
     ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
     "./content-interaction.css": "./dist/content-interaction.css"

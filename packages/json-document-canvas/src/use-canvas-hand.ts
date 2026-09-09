@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type ClipboardEvent, type KeyboardEvent, type PointerEvent } from "react";
 import { commitAffordance, createGestureSession, createPlaneSelectProfile, resizeAffordance, type InteractionHandleEvent, type PlaneSelectProfile, type PlaneSelectSelection, type ResizeEdge } from "@interactive-os/json-document-affordance";
-import { assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, transformObject, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint } from "@interactive-os/json-document-object-document";
+import { assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, readObjectStyle, transformObject, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint, type ObjectStyle } from "@interactive-os/json-document-object-document";
 import type { EditingResult, ObjectEditor, ObjectIntent, ObjectSelection } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { createWebKeyboardAdapter, createWebPointerSession, isWebEditableTarget, projectWebClientPointToSVG, webSVGViewportFromElement } from "@interactive-os/json-document-web";
@@ -237,6 +237,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   function remove() { commitText(); cancel(); dispatch({ type: "selection.remove" }); surface.current?.focus(); }
   function duplicate(keys = editor.snapshot.selection.keys) { commitText(); cancel(); dispatch({ type: "object.duplicate", objectIds: keys }); surface.current?.focus(); }
   function history(direction: "undo" | "redo") { commitText(); cancel(); report(editor[direction]()); surface.current?.focus(); }
+  function setStyle(style: Partial<ObjectStyle>) { commitText(); cancel(); return dispatch({ type: "selection.style", style }); }
 
   function handleClipboard(operation: "copy" | "cut" | "paste", event: ClipboardEvent) {
     if (isWebEditableTarget(event.target)) return;
@@ -287,7 +288,8 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
 
   return {
     document, snapshot, selection, marquee: selectionPreview?.marquee ?? null, objects, copyOriginals, preview, surface, tool, error, pastePending: clipboard.pending, draft: draft.current,
-    choose, select, interaction, editText, commitText, cancel, remove, duplicate, history,
+    choose, select, interaction, editText, commitText, cancel, remove, duplicate, history, setStyle,
+    selectedStyle: readObjectStyle(editor.selectedObjects),
     changeText(text: string) { if (draft.current) { draft.current = { ...draft.current, text }; redraw(); } },
     openJSON(json: string) {
       try {

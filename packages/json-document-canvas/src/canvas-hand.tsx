@@ -6,6 +6,7 @@ import { serializeCanvasDocument } from "@interactive-os/json-document-object-do
 import { Command, Field, ProductShell, Toggle, ToolbarGroup } from "@interactive-os/json-document-ui-primitives-react";
 import { CanvasObjectTarget, CanvasObjectView, CanvasResizeTarget, CanvasTextInput } from "./canvas-object-view.js";
 import { useCanvasHand, type CanvasCreationStyle, type CanvasTool } from "./use-canvas-hand.js";
+import { CanvasStyleControls } from "./canvas-style-controls.js";
 
 export interface CanvasHandProps {
   readonly editor: ObjectEditor;
@@ -37,6 +38,7 @@ export function CanvasHand(props: CanvasHandProps) {
         <Command label="복제" disabled={!selected} onClick={() => hand.duplicate()}><CopyPlus aria-hidden="true" size={16} /></Command>
         <Command label="삭제" disabled={!selected} onClick={hand.remove}><Trash2 aria-hidden="true" size={16} /></Command>
       </ToolbarGroup>
+      {hand.tool === "select" && <CanvasStyleControls key={JSON.stringify(hand.snapshot.selection)} value={hand.selectedStyle} onStyle={hand.setStyle} onOpen={() => { hand.commitText(); hand.cancel(); }} />}
       <Command label="JSON" onClick={() => { hand.commitText(); hand.cancel(); setJSON(json === null ? serializeCanvasDocument(props.editor.snapshot.value as typeof hand.document) : null); }}><Braces aria-hidden="true" size={16} /></Command>
     </ToolbarGroup>}>
       <svg ref={hand.surface} {...hand.surfaceProps} tabIndex={0} role="group" aria-label={props.label ?? "Canvas slide"}

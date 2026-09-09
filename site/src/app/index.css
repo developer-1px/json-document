@@ -295,6 +295,10 @@
     @apply absolute left-0 top-full z-20 mt-1 min-w-40;
   }
 
+  .canvas-style-panel {
+    @apply grid w-64 gap-3 rounded-control border border-line-subtle bg-background-canvas p-3 text-xs text-foreground-default shadow-overlay;
+  }
+
   [data-ui-presentation="dialog-backdrop"] {
     @apply fixed inset-0 z-40 grid place-items-center bg-foreground-strong/10;
   }

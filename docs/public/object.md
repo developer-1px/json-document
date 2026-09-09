@@ -21,7 +21,7 @@ ID 정책을 Host가 주입하는 자리입니다.
 ### `ObjectIntent`
 
 `dispatch`가 받는 Object domain command입니다. 공개 variant는
-`selection.set`, `selection.remove`, `selection.fill`, `object.create`, `object.text`,
+`selection.set`, `selection.remove`, `selection.fill`, `selection.style`, `object.create`, `object.text`,
 `object.translate`, `object.resize`, `object.duplicate`, `object.remove`, `document.replace`, `clipboard.paste`입니다. DOM event, pointer 좌표, clipboard
 event를 Intent에 넣지 않습니다.
 

@@ -241,6 +241,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-editing/src/object.ts",
       "packages/json-document-object-document/src/object-model.ts",
+      "packages/json-document-object-document/src/object-style.ts",
       "packages/json-document-object-document/src/object-validation.ts",
       "packages/json-document-file-intake/src/raster-content.ts",
       "packages/json-document/src/application/document/create.ts",
@@ -352,9 +353,11 @@ describe("Demo definition and source discovery", () => {
       const paths = (await discoverDemoSources(entry)).map((file) => file.path);
       expect(paths).toEqual(expect.arrayContaining([
         "packages/json-document-canvas/src/canvas-hand.tsx",
+        "packages/json-document-canvas/src/canvas-style-controls.tsx",
         "packages/json-document-canvas/src/use-canvas-hand.ts",
         "packages/json-document-canvas/src/canvas-object-view.tsx",
         "packages/json-document-object-document/src/object-model.ts",
+        "packages/json-document-object-document/src/object-style.ts",
         "packages/json-document-object-document/src/object-validation.ts",
         "packages/json-document-object-document/src/object-operation.ts",
         "packages/json-document-object-document/src/object-projection.ts",
@@ -365,6 +368,9 @@ describe("Demo definition and source discovery", () => {
       ]));
       const hand = (await discoverDemoSources(entry)).find((file) => file.path === "packages/json-document-canvas/src/use-canvas-hand.ts")!;
       expect(await hand.load()).toContain("resizeAffordance(gesture.start, gesture.point, gesture.edge, gesture, gesture.object)");
+      const style = (await discoverDemoSources(entry)).find((file) => file.path === "packages/json-document-object-document/src/object-style.ts")!;
+      expect(style.referencePath).toBe("/docs/api/object-document");
+      expect(await style.load()).toContain("export function readObjectStyle");
     }
   });
 

@@ -11,7 +11,7 @@ export function CanvasDemoRoute() {
   const [editor] = useState(() => createObjectEditor(emptyCanvasDocument));
   const [selectProfile] = useState(() => createPlaneSelectProfile());
   return (
-    <DemoPage documentation={<PageHeader illustration="peek" title="Canvas">한 장에 글자·도형·그리기. Shift+클릭으로 다중 선택하고 Alt+드래그로 복제합니다. 복사한 텍스트·이미지도 붙여넣을 수 있으며, 글자는 더블클릭으로 편집합니다.</PageHeader>}>
+    <DemoPage documentation={<PageHeader illustration="peek" title="Canvas">한 장에 글자·도형·그리기. Shift+클릭으로 다중 선택하고 Alt+드래그로 복제합니다. 선택한 객체의 스타일 아이콘에서 색·글자 서식·테두리를 바꾸고, 복사한 텍스트·이미지를 붙여넣습니다.</PageHeader>}>
       <CanvasHand className={ui.product.embedded} editor={editor} selectProfile={selectProfile} creationStyle={canvasCreationStyle} slideStyle={{ background: "rgb(var(--color-background-canvas))" }} />
     </DemoPage>
   );

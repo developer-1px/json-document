@@ -1,11 +1,13 @@
 import type { CodeLanguage } from "../ui/code-tokens";
 import objectModelSource from "../../../../packages/json-document-object-document/src/object-model.ts?raw";
+import objectStyleSource from "../../../../packages/json-document-object-document/src/object-style.ts?raw";
 import objectValidationSource from "../../../../packages/json-document-object-document/src/object-validation.ts?raw";
 import objectOperationSource from "../../../../packages/json-document-object-document/src/object-operation.ts?raw";
 import objectProjectionSource from "../../../../packages/json-document-object-document/src/object-projection.ts?raw";
 import canvasHandSource from "../../../../packages/json-document-canvas/src/canvas-hand.tsx?raw";
 import canvasInteractionSource from "../../../../packages/json-document-canvas/src/use-canvas-hand.ts?raw";
 import canvasObjectViewSource from "../../../../packages/json-document-canvas/src/canvas-object-view.tsx?raw";
+import canvasStyleControlsSource from "../../../../packages/json-document-canvas/src/canvas-style-controls.tsx?raw";
 import canvasClipboardSource from "../../../../packages/json-document-canvas/src/canvas-clipboard.ts?raw";
 import canvasClipboardEditingSource from "../../../../packages/json-document-editing/src/canvas-clipboard.ts?raw";
 import objectPasteSessionSource from "../../../../packages/json-document-editing/src/object-paste-session.ts?raw";
@@ -218,12 +220,14 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-file-intake/src/raster-content.ts", rasterContentSource],
   ["packages/json-document-composer-react/src/attachments.ts", composerAttachmentsSource],
   ["packages/json-document-object-document/src/object-model.ts", objectModelSource],
+  ["packages/json-document-object-document/src/object-style.ts", objectStyleSource],
   ["packages/json-document-object-document/src/object-validation.ts", objectValidationSource],
   ["packages/json-document-object-document/src/object-operation.ts", objectOperationSource],
   ["packages/json-document-object-document/src/object-projection.ts", objectProjectionSource],
   ["packages/json-document-canvas/src/canvas-hand.tsx", canvasHandSource],
   ["packages/json-document-canvas/src/use-canvas-hand.ts", canvasInteractionSource],
   ["packages/json-document-canvas/src/canvas-object-view.tsx", canvasObjectViewSource],
+  ["packages/json-document-canvas/src/canvas-style-controls.tsx", canvasStyleControlsSource],
   ["packages/json-document-canvas/src/canvas-clipboard.ts", canvasClipboardSource],
   ["packages/json-document-editing/src/canvas-clipboard.ts", canvasClipboardEditingSource],
   ["packages/json-document-editing/src/object-paste-session.ts", objectPasteSessionSource],
@@ -395,6 +399,11 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-canvas",
+    symbol: "CanvasHand",
+    sourcePath: "packages/json-document-canvas/src/canvas-style-controls.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-canvas",
     symbol: "useCanvasHand",
     sourcePath: "packages/json-document-canvas/src/use-canvas-hand.ts",
   },
@@ -404,6 +413,7 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-react/src/editing-snapshot.ts",
   },
   ...(["ObjectDocument", "CanvasDocument", "DocumentObject", "CanvasObject"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-model.ts" })),
+  ...(["getObjectStyle", "readObjectStyle", "assertObjectStyle", "ObjectStyle", "ObjectStyleSelection"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-style.ts" })),
   ...(["assertObjectDocument", "assertCanvasDocument", "assertCanvasImageSource", "parseCanvasDocument", "serializeCanvasDocument"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-validation.ts" })),
   ...(["createCanvasObject", "createCanvasPath", "createCanvasImage", "projectObject", "transformObject"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-projection.ts" })),
   {

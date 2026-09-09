@@ -1,21 +1,22 @@
 import { useEffect, useRef, type PointerEvent, type ReactNode } from "react";
-import type { CanvasObject } from "@interactive-os/json-document-object-document";
+import { getObjectStyle, type CanvasObject } from "@interactive-os/json-document-object-document";
 import type { InteractionHandleEvent, ResizeEdge } from "@interactive-os/json-document-affordance";
 import { contentInteractionAttributes, Field, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 
 export function CanvasObjectView({ object }: { readonly object: CanvasObject }): ReactNode {
+  const style = getObjectStyle(object);
   if (object.kind === "image") return <image href={object.source} x={object.x} y={object.y} width={object.width} height={object.height} preserveAspectRatio="none" />;
   if (object.kind === "path") {
     return <polyline points={object.points.map((point) => `${object.x + point.x * object.width},${object.y + point.y * object.height}`).join(" ")} fill="none" stroke={object.color} strokeWidth={object.strokeWidth} strokeLinecap="round" strokeLinejoin="round" />;
   }
   if (object.kind === "text") return (
     <foreignObject x={object.x} y={object.y} width={object.width} height={object.height}>
-      <div style={{ color: object.color, fontSize: object.fontSize, lineHeight: 1.2, whiteSpace: "pre-wrap", overflowWrap: "anywhere", width: "100%", height: "100%", overflow: "hidden" }}>{object.label}</div>
+      <div style={{ color: style.color, fontSize: style.fontSize, fontWeight: style.fontWeight, textAlign: style.textAlign, lineHeight: 1.2, whiteSpace: "pre-wrap", overflowWrap: "anywhere", width: "100%", height: "100%", overflow: "hidden" }}>{object.label}</div>
     </foreignObject>
   );
   return object.kind === "ellipse"
-    ? <ellipse cx={object.x + object.width / 2} cy={object.y + object.height / 2} rx={object.width / 2} ry={object.height / 2} fill={object.color} />
-    : <rect x={object.x} y={object.y} width={object.width} height={object.height} fill={object.color} />;
+    ? <ellipse cx={object.x + object.width / 2} cy={object.y + object.height / 2} rx={object.width / 2} ry={object.height / 2} fill={object.color} stroke={style.strokeColor} strokeWidth={style.strokeWidth} />
+    : <rect x={object.x} y={object.y} width={object.width} height={object.height} fill={object.color} stroke={style.strokeColor} strokeWidth={style.strokeWidth} />;
 }
 
 export function CanvasObjectTarget(props: {
@@ -76,10 +77,11 @@ export function CanvasTextInput(props: {
   const input = useRef<HTMLTextAreaElement>(null);
   useEffect(() => { input.current?.focus(); input.current?.select(); }, [props.object.id]);
   const { object } = props;
+  const style = getObjectStyle(object);
   return (
     <foreignObject x={object.x} y={object.y} width={object.width} height={object.height}>
       <Field multiline presentation="seamless" label="Canvas text" controlRef={input} value={props.text} onValueChange={props.onChange}
-        style={{ color: object.color, fontSize: object.fontSize, lineHeight: 1.2, padding: 0, margin: 0, border: 0, width: "100%", height: "100%", resize: "none", background: "transparent", boxSizing: "border-box" }}
+        style={{ color: style.color, fontSize: style.fontSize, fontWeight: style.fontWeight, textAlign: style.textAlign, lineHeight: 1.2, padding: 0, margin: 0, border: 0, width: "100%", height: "100%", resize: "none", background: "transparent", boxSizing: "border-box" }}
         onBlur={props.onCommit}
         onKeyDown={(event) => {
           event.stopPropagation();

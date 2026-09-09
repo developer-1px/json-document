@@ -29,8 +29,8 @@ export interface ObjectDocument extends Record<string, JSONValue> {
 export type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "path" | "image";
 
 export type CanvasObjectDraft = ObjectDraft & (
-  | { readonly kind: "text"; readonly fontSize: number }
-  | { readonly kind: "rectangle" | "ellipse" }
+  | { readonly kind: "text"; readonly fontSize: number; readonly fontWeight?: 400 | 700; readonly textAlign?: "left" | "center" | "right" }
+  | { readonly kind: "rectangle" | "ellipse"; readonly strokeColor?: string; readonly strokeWidth?: number }
   | { readonly kind: "path"; readonly points: ReadonlyArray<ObjectPoint>; readonly strokeWidth: number }
   | { readonly kind: "image"; readonly source: string }
 );

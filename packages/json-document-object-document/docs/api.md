@@ -20,9 +20,9 @@ Object도 계속 유효합니다. legacy Object의 생략된 color는 계속 수
 
 | kind | 추가 문서 값 | 표현 |
 | --- | --- | --- |
-| text | 양의 유한수 fontSize | label이 실제 내용인 plain text. 별도의 text 복사본 없음 |
-| rectangle | 없음 | color로 채운 사각형 |
-| ellipse | 없음 | 경계 상자에 내접하는 타원 |
+| text | 양의 유한수 fontSize, 선택적 fontWeight·textAlign | label이 실제 내용인 plain text. 별도의 text 복사본 없음 |
+| rectangle | 선택적 strokeColor·strokeWidth | color로 채운 사각형 |
+| ellipse | 선택적 strokeColor·strokeWidth | 경계 상자에 내접하는 타원 |
 | path | points, 양의 유한수 strokeWidth | color로 그린 열린 선 |
 | image | source | 문서에 포함한 PNG/JPEG/WebP의 base64 data URL |
 
@@ -53,7 +53,7 @@ path points는 최소 두 개의 `{ x, y }`이며 각 좌표는 `[0, 1]`입니�
 
 ### 의미 연산과 projection
 
-`planObjectOperation(document, operation)`은 insert, transform, fill, remove,
+`planObjectOperation(document, operation)`은 insert, transform, fill, style, remove,
 text, replace를 검증된 JSON Patch로 계획합니다. 성공은 `{ ok: true, operations }`,
 실패는 `{ ok: false, code, reason? }`입니다. 계획은 입력을 변경하거나 commit하지
 않으며 선택과 History를 알지 못합니다. 없는 대상·중복 ID·유효하지 않은 결과는
@@ -63,6 +63,41 @@ text, replace를 검증된 JSON Patch로 계획합니다. 성공은 `{ ok: true,
 유지하고 resize는 결과 크기를 최소 1로 제한합니다. Canvas Hand는 현재 모서리가
 반대쪽을 통과해도 뒤집지 않습니다. 화면 바깥 좌표는 허용하며 Hand가 슬라이드 밖을
 clip합니다. 위치를 자동 보정하거나 snap하지 않습니다.
+
+### 객체 스타일
+
+`getObjectStyle(object)`는 적용 가능한 속성의 유효값을 반환합니다. 글자의 생략된
+`fontWeight`는 400, `textAlign`은 `left`입니다. 굵기는 400/700, 정렬은
+`left`/`center`/`right`를 지원합니다. 도형의 생략된 `strokeColor`는 `#000000`,
+`strokeWidth`는 0이므로 기존 문서는 테두리 없이 그대로 열립니다. 기본값을 읽는 것만으로
+문서를 바꾸지 않으며, 기존 kind 없는 Object는 color만 지원합니다.
+
+`ObjectStyle`의 color는 도형의 채우기·글자색·path의 선 색입니다. strokeColor는
+사각형·타원의 테두리색이며 strokeWidth는 도형과 path의 선 굵기입니다. 이미지에는
+스타일 속성이 없습니다. 새 스타일의 색 값은 비어 있지 않은 문자열이고, 도형의 굵기는
+0 이상, path의 굵기와 글자 크기는 양의 유한수여야 합니다. 색 문자열의 CSS 해석은
+렌더링 플랫폼의 책임입니다. 부분 문자열 서식이나 Rich Text 모델은 아닙니다.
+
+`readObjectStyle(objects)`는 속성을 지원하는 객체끼리만 비교합니다. 공통 값이면 그 값,
+서로 다르면 `null`, 지원하는 객체가 없으면 속성을 생략합니다. `null`은 저장값이 아니라
+혼합 선택의 읽기 결과입니다.
+
+```ts
+import { readObjectStyle, planObjectOperation } from "@interactive-os/json-document-object-document";
+
+const style = readObjectStyle(document.objects);
+const plan = planObjectOperation(document, {
+  type: "style", objectIds: ["title", "rectangle"],
+  style: { color: "#3b82f6", fontWeight: 700, strokeWidth: 2 },
+});
+```
+
+`style` 연산은 `Partial<ObjectStyle>`을 받아 지원하는 대상 필드에만 적용합니다.
+`assertObjectStyle`로 전체 요청을 먼저 검증하므로 지원하지 않는 속성도 잘못된 값이면
+전체 거절합니다. 없는 ID와 잘못된 결과도 전체 거절합니다. 특히 path가 섞인 집합에
+strokeWidth 0을 적용하면 도형만 바꾸지 않고 전체를 거절합니다. 같은 유효값, 빈 요청,
+지원 대상이 없는 요청은 빈 patch이며 생략된 기본값을 저장하지 않습니다.
+기존 `fill`은 이미지의 color 메타데이터를 포함한 기존 동작을 유지하는 호환 명령입니다.
 
 ### Usage와 남은 범위
 

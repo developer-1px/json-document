@@ -21,6 +21,11 @@ assertCanvasImageSource(source: unknown): asserts source is string
 ```ts
 assertObjectDocument(value: unknown): void
 ```
+## `assertObjectStyle`
+
+```ts
+assertObjectStyle(value: unknown): asserts value is Partial<ObjectStyle>
+```
 ## `CanvasDocument`
 
 ```ts
@@ -40,8 +45,8 @@ type CanvasObject = CanvasObjectDraft & { readonly id: string };
 
 ```ts
 type CanvasObjectDraft = ObjectDraft & (
-  | { readonly kind: "text"; readonly fontSize: number }
-  | { readonly kind: "rectangle" | "ellipse" }
+  | { readonly kind: "text"; readonly fontSize: number; readonly fontWeight?: 400 | 700; readonly textAlign?: "left" | "center" | "right" }
+  | { readonly kind: "rectangle" | "ellipse"; readonly strokeColor?: string; readonly strokeWidth?: number }
   | { readonly kind: "path"; readonly points: ReadonlyArray<ObjectPoint>; readonly strokeWidth: number }
   | { readonly kind: "image"; readonly source: string }
 );
@@ -72,6 +77,11 @@ createCanvasPath(points: ReadonlyArray<ObjectPoint>, style: { readonly color: st
 interface DocumentObject extends ObjectDraft {
   readonly id: string;
 }
+```
+## `getObjectStyle`
+
+```ts
+getObjectStyle(object: DocumentObject): Partial<ObjectStyle>
 ```
 ## `ObjectBounds`
 
@@ -105,6 +115,7 @@ type ObjectOperation =
   | { readonly type: "insert"; readonly objects: ReadonlyArray<DocumentObject> }
   | { readonly type: "transform"; readonly objectIds: ReadonlyArray<string>; readonly transform: ObjectTransform }
   | { readonly type: "fill"; readonly objectIds: ReadonlyArray<string>; readonly color: string }
+  | { readonly type: "style"; readonly objectIds: ReadonlyArray<string>; readonly style: Partial<ObjectStyle> }
   | { readonly type: "remove"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "text"; readonly objectId: string; readonly text: string }
   | { readonly type: "replace"; readonly document: ObjectDocument };
@@ -123,6 +134,23 @@ interface ObjectPoint extends Record<string, JSONValue> {
   readonly x: number;
   readonly y: number;
 }
+```
+## `ObjectStyle`
+
+```ts
+interface ObjectStyle {
+  readonly color: string;
+  readonly fontSize: number;
+  readonly fontWeight: 400 | 700;
+  readonly textAlign: "left" | "center" | "right";
+  readonly strokeColor: string;
+  readonly strokeWidth: number;
+}
+```
+## `ObjectStyleSelection`
+
+```ts
+type ObjectStyleSelection = { readonly [Key in keyof ObjectStyle]?: ObjectStyle[Key] | null };
 ```
 ## `ObjectTransform`
 
@@ -148,6 +176,11 @@ planObjectOperation(document: ObjectDocument, operation: ObjectOperation): Objec
 
 ```ts
 projectObject(object: DocumentObject): CanvasObject
+```
+## `readObjectStyle`
+
+```ts
+readObjectStyle(objects: ReadonlyArray<DocumentObject>): ObjectStyleSelection
 ```
 ## `serializeCanvasDocument`
 

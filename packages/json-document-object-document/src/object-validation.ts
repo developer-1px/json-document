@@ -1,6 +1,7 @@
 import { createJSONDocument, type JSONValue } from "@interactive-os/json-document";
 import { assertRasterImageSource as assertCanvasImageSource } from "@interactive-os/json-document-file-intake";
 import type { CanvasDocument, ObjectDocument } from "./object-model.js";
+import { assertObjectStyle } from "./object-style.js";
 
 function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -29,6 +30,8 @@ export function assertObjectDocument(value: unknown): void {
       if (!["text", "rectangle", "ellipse", "path", "image"].includes(object.kind as string)) throw new TypeError("Unknown Object kind.");
       if (!positive(object.width) || !positive(object.height)) throw new TypeError("Canvas object dimensions must be positive.");
       if (object.kind === "text" && !positive(object.fontSize)) throw new TypeError("Text fontSize must be positive and finite.");
+      const styleKeys = object.kind === "text" ? ["fontWeight", "textAlign"] : object.kind === "rectangle" || object.kind === "ellipse" ? ["strokeColor", "strokeWidth"] : [];
+      assertObjectStyle(Object.fromEntries(styleKeys.filter((key) => Object.hasOwn(object, key)).map((key) => [key, object[key]])));
       if (object.kind === "image") assertCanvasImageSource(object.source);
       if (object.kind === "path") {
         if (!positive(object.strokeWidth) || !Array.isArray(object.points) || object.points.length < 2) throw new TypeError("Path requires a positive strokeWidth and at least two points.");
