@@ -73,6 +73,8 @@ describe("Demo definition and source discovery", () => {
       ["packages/json-document-editing/src/preparation-queue.ts", "/docs/api/editing"],
       ["packages/json-document-web/src/raster-source.ts", "/docs/api/web"],
       ["packages/json-document-web/src/raster-files.ts", "/docs/api/web"],
+      ["packages/json-document-web/src/html-clipboard.ts", "/docs/api/web"],
+      ["packages/json-document-web/src/html-fragment.ts", "/docs/api/web"],
       ["packages/json-document-file-intake/src/raster-content.ts", "/docs/api/file-intake"],
       ["packages/json-document-file-intake/src/index.ts", "/docs/api/file-intake"],
     ]) {

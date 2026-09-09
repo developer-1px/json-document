@@ -69,13 +69,20 @@ cut은 쓰기에 성공한 캡처 대상만 제거합니다. 쓰기 실패나 Ed
 text/JSON textarea의 native clipboard는 가로채지 않습니다.
 
 `createCanvasClipboardBinding(editor, policy, options?)`가 이 연결의 공개 API입니다.
-구조화 Object → 이미지 파일 → 일반 텍스트 순서로 처리하며 잘못된 Object MIME은 문자열로
-조용히 변환하지 않습니다. 외부 문자열은 한 text 객체가 되며 HTML을 실행/보존하지 않고
+구조화 Object → 이미지 파일 → 이미지가 포함된 HTML → 일반 텍스트 순서로 처리하며 잘못된 Object MIME은 문자열로
+조용히 변환하지 않습니다. 외부 문자열은 한 text 객체가 되며 HTML 서식을 보존하지 않고
 줄바꿈·Unicode를 그대로 보존합니다. PNG/JPEG/WebP는 문서 내부 base64 image 객체로 넣습니다.
 기본은 한 paste당 최대 4개, 파일당 10 MiB, decode 후 이미지당 16,000,000픽셀입니다.
 이미지는 비율을 유지해 슬라이드 75% 상자에 맞추고 확대하지 않습니다. 후속 resize는 일반
 객체와 같은 자유 상자 변환입니다. `policy.files`와 `maxImagePixels`로 입력 정책을 지정할 수
 있지만 Object 모델이 지원하지 않는 이미지 표현까지 허용되는 것은 아닙니다.
+
+HTML은 Web의 inert parser와 이미지 준비 API를 사용합니다. 포함된 PNG/JPEG/WebP data URL과
+글을 HTML 내부 순서대로 text/image 객체로 바꿉니다. Editing의 `createCanvasClipboard`가
+간격을 둔 세로 흐름으로 배치하고, 전체 높이가 넘으면 이미지 비율·글자 크기·간격을 함께
+줄여 상자 안에 맞춥니다. 긴 내용을 원래 글자 크기로 읽거나 CSS·Office 배치를 재현하는
+기능은 아닙니다. source가 없거나 외부·상대·blob·cid URL이면 글만 남기지 않고 전체를 거절합니다.
+HTML과 native 파일이 함께 있으면 파일을 우선하고, 두 표현을 합치거나 중복 삽입하지 않습니다.
 
 같은 batch는 순차 decode로 준비하고 모두 성공한 경우만 한 번 삽입합니다. 연속 paste는
 Editing paste session을 통해 입력 순서대로 각각 commit/Undo를 만듭니다. 진행 상태를 표시하고
@@ -84,7 +91,7 @@ Escape·다른 도구/편집·외부 문서/선택·unmount는 준비를 취소�
 `readRaster`에는 Web API와 호환되는 구체 환경 인스턴스를 주입할 수 있습니다.
 
 이미지도 기존 다중 선택·이동·복제·copy/cut/paste·삭제·Undo/Redo와 JSON 재열기를 사용합니다.
-이미지용 별도 생성 도구, 외부 URL/SVG/HTML import, 이미지 파일 export, asset 서버,
+이미지용 별도 생성 도구, 외부 URL/SVG·전체 HTML layout import, 이미지 파일 export, asset 서버,
 async clipboard 툴바는 아직 지원하지 않습니다. 표준 MIME이 없는 입력이나 실패는 오류로 드러냅니다.
 
 ### JSON

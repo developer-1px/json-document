@@ -14,7 +14,7 @@ import {
   type RichTextParagraph,
   type RichTextSchema,
 } from "@interactive-os/json-document-rich-text";
-import type { WebClipboardCodec, WebClipboardRepresentation } from "@interactive-os/json-document-web";
+import { parseWebHTMLFragment, type WebClipboardCodec, type WebClipboardRepresentation } from "@interactive-os/json-document-web";
 
 export function createRichTextClipboardCodec(schema: RichTextSchema = richTextSchemaV1): WebClipboardCodec<RichTextClipboard> {
   return {
@@ -59,10 +59,10 @@ export function serializeRichTextSlice(slice: RichTextSlice): string {
 }
 
 export function parseRichTextHTML(html: string, createId: () => string, profile: string = RICH_TEXT_PROFILE_V1): RichTextClipboard | null {
-  if (html.length === 0 || typeof DOMParser === "undefined") return null;
-  const document = new DOMParser().parseFromString(html, "text/html");
+  const fragment = parseWebHTMLFragment(html);
+  if (!fragment) return null;
   const blocks: RichTextNode[] = [];
-  for (const child of Array.from(document.body.childNodes)) {
+  for (const child of Array.from(fragment.childNodes)) {
     if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
       blocks.push(paragraph([textNode(child.textContent, [], createId)], createId));
       continue;

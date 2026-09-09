@@ -19,6 +19,8 @@ describe("Agent Chat Composer Hands", () => {
     expect(composerDemoSource).toContain("useComposer(");
     expect(composerDemoSource).not.toContain("addComposerAttachments(");
     expect(composerDemoSource).not.toContain("fileCandidatesFromWebFiles(");
+    expect(composerDemoSource).not.toContain("parseWebClipboardHTML(");
+    expect(composerDemoSource).not.toContain("readWebHTMLClipboard(");
     expect(composerDemoSource).not.toContain("composerAttachmentCandidatesFromWebFiles(");
     expect(composerDemoSource).not.toContain("composer-placeholder-box");
     expect(composerDemoSource).toContain('placeholder="작업을 입력하세요"');
@@ -41,6 +43,7 @@ describe("Agent Chat Composer Hands", () => {
     expect(composerAttachmentsSource).toContain("addComposerAttachments(");
     expect(composerAttachmentsSource).toContain("fileCandidatesFromWebFiles(");
     expect(composerAttachmentsSource).toContain("readWebRasterFiles(");
+    expect(composerAttachmentsSource).toContain("readWebHTMLClipboard(");
     expect(composerAttachmentsSource).toContain("createEditingPreparationQueue<");
     expect(composerCommandMenuSource).toContain("useRichTextSuggestion(");
     expect(composerCommandMenuSource).toContain("useRichTextMentionSuggestions(");
@@ -54,6 +57,8 @@ describe("Agent Chat Composer Hands", () => {
       "packages/json-document-composer/src/commands.ts",
       "packages/json-document-file-intake/src/raster-content.ts",
       "packages/json-document-web/src/raster-files.ts",
+      "packages/json-document-web/src/html-clipboard.ts",
+      "packages/json-document-web/src/html-fragment.ts",
       "packages/json-document-editing/src/preparation-queue.ts",
     ]) {
       const source = sources.find((entry) => entry.path === path);
@@ -114,6 +119,17 @@ describe("Agent Chat Composer Hands", () => {
     expect(screen.getByRole("option", { name: /GPT-5.6/ })).toBeTruthy();
     expect(screen.getByRole("option", { name: /Claude Sonnet/ })).toBeTruthy();
     expect(screen.queryByText(/HCX/)).toBeNull();
+  });
+
+  test("shows mixed HTML as unsupported without silently dropping part of the draft", async () => {
+    render(<ComposerDemoRoute />);
+    const before = screen.getByTestId("composer-draft-json").textContent;
+    fireEvent.paste(screen.getByLabelText("Agent Chat Composer"), { clipboardData: {
+      types: ["text/html", "text/plain"], files: [],
+      getData: (type: string) => type === "text/html" ? '<p>보존할 글</p><img src="data:image/png;base64,AQID">' : "보존할 글",
+    } });
+    expect(await screen.findByText("글과 이미지가 함께 있는 HTML 붙여넣기는 아직 지원하지 않습니다. 내용을 나누어 붙여넣어 주세요.")).toBeTruthy();
+    expect(screen.getByTestId("composer-draft-json").textContent).toBe(before);
   });
 
   test("routes dropped files through the same canonical attachment context", () => {

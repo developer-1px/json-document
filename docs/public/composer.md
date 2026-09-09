@@ -86,7 +86,12 @@ Composer가 소유하지 않습니다.
 
 ## 이미지와 Clipboard의 남은 기본기
 
-[Paste × Image TBD](clipboard.md#paste--image-기본기--tbd)에 HTML 이미지·혼합 입력,
+이미지-only HTML은 Web의 inert parser와 준비 API를 통해 포함된 PNG/JPEG/WebP를
+실제 첨부로 읽습니다. 내부 Rich Text 구조화 복사는 기존 binding에 우선 위임하며,
+파일이 함께 있으면 파일 표현만 처리합니다. 글+이미지 HTML은 일부 내용을 버리는 대신
+전체를 미지원 오류로 알립니다. 외부·상대·blob·cid 이미지 주소는 다운로드하지 않습니다.
+
+[Paste × Image TBD](clipboard.md#paste--image-기본기--tbd)에 HTML의 남은 source·혼합 입력,
 명시적인 plain paste, 이미지로 복사와 OS-native round-trip의 소유자·기대 결과를
 미리 공개합니다. 현재 Composer 이미지 slice는 별도 첨부 목록에 내용을 보존하는
 단계이며 inline 혼합 입력을 구현한 것은 아닙니다. 서버 업로드와 자산 저장소는

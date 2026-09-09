@@ -4,6 +4,7 @@ import { COMPOSER_HOST_PROFILE_V1, composerText, type ComposerHostConfig } from 
 import type { readWebRasterFile, WebRasterSourceResult } from "@interactive-os/json-document-web";
 import { useComposer } from "../src/index.js";
 import type { ClipboardEvent, KeyboardEvent } from "react";
+import { RICH_TEXT_CLIPBOARD_MIME } from "@interactive-os/json-document-rich-text";
 
 afterEach(cleanup);
 const file = { name: "image.png", size: 3, type: "image/png" };
@@ -25,6 +26,11 @@ function setup(readRaster: typeof readWebRasterFile = vi.fn(async () => image), 
 }
 function key(key: string, metaKey = false) {
   return { key, metaKey, preventDefault: vi.fn(), stopPropagation: vi.fn(), nativeEvent: { isComposing: false, stopImmediatePropagation: vi.fn() } } as unknown as KeyboardEvent<HTMLElement>;
+}
+
+function htmlEvent(html: string) {
+  const preventDefault = vi.fn(), stopPropagation = vi.fn();
+  return { clipboardData: { files: [], types: ["text/html", "text/plain"], getData: (type: string) => type === "text/html" ? html : "Fallback", setData() {} }, preventDefault, stopPropagation } as unknown as ClipboardEvent<HTMLElement>;
 }
 
 test("PI-CONTENT: decoded images survive draft serialization, submit, removal, and Undo/Redo", async () => {
@@ -107,4 +113,63 @@ test("file-only native paste consumes images once and delegates text/HTML to Ric
   expect(preventDefault).not.toHaveBeenCalled(); expect(stopPropagation).not.toHaveBeenCalled();
   await act(async () => { result.current.handlePaste(event([file], ["Files", "text/html"])); });
   expect(result.current.attachments).toHaveLength(1); expect(preventDefault).toHaveBeenCalledOnce(); expect(stopPropagation).toHaveBeenCalledOnce();
+});
+
+test("HTML image-only input shares actual attachment content, History and submit", async () => {
+  const { result, submit } = setup();
+  const input = htmlEvent(`<p><img src="${image.dataURL}" alt="HTML image"></p>`);
+  await act(async () => { result.current.handlePaste(input); });
+  expect(input.preventDefault).toHaveBeenCalledOnce(); expect(input.stopPropagation).toHaveBeenCalledOnce();
+  expect(result.current.attachments[0]).toMatchObject({ name: "HTML image", size: 3, image: { source: image.dataURL, width: 100, height: 50 } });
+  expect(composerText(result.current.draft.instruction)).toBe("");
+  act(() => { result.current.submit(); }); expect(submit).toHaveBeenCalledWith(result.current.draft);
+  act(() => { result.current.handleHistoryKeyDown(key("z", true)); }); expect(result.current.attachments).toEqual([]);
+});
+
+test("Composer leaves structured Rich Text to its original binding before considering HTML", () => {
+  const { result, readRaster } = setup();
+  const input = htmlEvent(`<img src="${image.dataURL}">`);
+  Object.defineProperty(input.clipboardData, "types", { value: [RICH_TEXT_CLIPBOARD_MIME, "text/html"] });
+  act(() => { result.current.handlePaste(input); });
+  expect(input.preventDefault).not.toHaveBeenCalled(); expect(input.stopPropagation).not.toHaveBeenCalled();
+  expect(result.current.attachments).toEqual([]); expect(readRaster).not.toHaveBeenCalled();
+});
+
+test("unsupported HTML mixed content stays an owned atomic failure without dropping text", async () => {
+  const { result, readRaster } = setup();
+  act(() => { result.current.insertText("Existing draft"); });
+  const before = result.current.draft, revision = result.current.editor.snapshot.revision;
+  const input = htmlEvent(`<p>Before<img src="${image.dataURL}">After</p>`);
+  await act(async () => { result.current.handlePaste(input); });
+  expect(input.preventDefault).toHaveBeenCalledOnce(); expect(input.stopPropagation).toHaveBeenCalledOnce();
+  expect(result.current.attachmentError?.code).toBe("composer.clipboard.mixed-unsupported");
+  expect(result.current.draft).toEqual(before); expect(result.current.editor.snapshot.revision).toBe(revision);
+  expect(readRaster).not.toHaveBeenCalled();
+});
+
+test("HTML and file inputs use the same queue even when later preparation finishes first", async () => {
+  const first = waiting(), second = waiting();
+  const readRaster = vi.fn<typeof readWebRasterFile>().mockImplementationOnce(() => first.promise).mockImplementationOnce(() => second.promise);
+  const { result } = setup(readRaster);
+  act(() => { result.current.handlePaste(htmlEvent(`<img src="${image.dataURL}" alt="First HTML">`)); result.current.addWebFiles([file]); result.current.insertText("Typing"); });
+  await act(async () => { second.resolve(image); }); expect(result.current.attachments).toEqual([]);
+  await act(async () => { first.resolve(image); });
+  expect(result.current.attachments.map((attachment) => attachment.name)).toEqual(["First HTML", file.name]);
+  expect(composerText(result.current.draft.instruction)).toBe("Typing");
+});
+
+test("HTML observes the current attachment limit before decoding", async () => {
+  const { result, readRaster } = setup();
+  act(() => { result.current.addWebFiles(Array.from({ length: 4 }, (_, index) => ({ name: `note-${index}`, size: 1, type: "text/plain" }))); });
+  await act(async () => { result.current.handlePaste(htmlEvent(`<img src="${image.dataURL}">`)); });
+  expect(result.current.attachmentError?.code).toBe("file-intake.limit"); expect(result.current.attachments).toHaveLength(4);
+  expect(readRaster).not.toHaveBeenCalled();
+});
+
+test("HTML cancellation aborts its reader and ignores later completion", async () => {
+  const pending = waiting(), readRaster = vi.fn<typeof readWebRasterFile>(() => pending.promise);
+  const { result } = setup(readRaster);
+  act(() => { result.current.handlePaste(htmlEvent(`<img src="${image.dataURL}">`)); result.current.cancelAttachments(); });
+  expect(readRaster.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
+  await act(async () => { pending.resolve(image); }); expect(result.current.attachments).toEqual([]);
 });

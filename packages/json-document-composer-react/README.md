@@ -50,9 +50,16 @@ Escape, `cancelAttachments`, `handleHistoryKeyDown`의 Undo/Redo, unmount는 준
 React Host는 `handlePaste`와 `handleHistoryKeyDown`을 감싸는 surface의 capture handler에,
 `handleKeyDown`은 editor에 연결하고 상태/실패를 표시합니다.
 
-파일이 있는 paste는 Web에서 동기 캡처하고 한 번만 처리합니다. 파일이 없는 텍스트/HTML은
-기존 Rich Text 경로에 위임합니다. HTML 이미지·글+이미지 변환은 아직 TBD이며,
-파일과 HTML 양쪽의 내용을 모두 별개로 추가하지 않습니다.
+내부 Rich Text 구조화 MIME은 기존 binding에 먼저 위임합니다. 나머지는 파일 → 이미지가
+포함된 HTML 순으로 Web에서 동기 캡처하고 한 번만 처리합니다. 이미지가 없는 텍스트/HTML은
+기존 Rich Text 경로에 남깁니다. 이미지-only HTML은 `readWebHTMLClipboard`로 포함된
+PNG/JPEG/WebP data URL을 읽고 기존 첨부와 같은 queue·정책·취소·History를 사용합니다.
+외부·상대·blob·cid source는 가져오지 않고 `raster.source-unsupported`로 실패합니다.
+
+글+이미지 HTML은 inline 위치를 표현할 모델이 아직 없으므로
+`composer.clipboard.mixed-unsupported`로 전체를 거절하고 draft/History를 유지합니다.
+파일과 HTML 양쪽의 내용을 별개로 추가하거나 대응을 추측하지 않습니다. native 파일과
+HTML의 혼합 의미 보존 및 inline 이미지 profile은 TBD입니다.
 
 Usage와 Source: [Composer](/demo/composer). PNG/JPEG/WebP의 내용·미리보기·삭제·Undo/Redo와
 submit payload를 확인할 수 있습니다. 서버 upload와 OS-native Clipboard 호환성 완료를

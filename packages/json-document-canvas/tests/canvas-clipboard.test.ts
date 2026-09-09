@@ -84,3 +84,49 @@ test("cancellation aborts platform preparation; later resolution cannot commit o
   resolve({ ok: true, dataURL: png, width: 100, height: 100 }); await Promise.resolve();
   expect(value()).toEqual(blank); expect(onResult).not.toHaveBeenCalled();
 });
+
+test("HTML mixed paste preserves order and content in one commit, copy, JSON round-trip and Undo", async () => {
+  const { binding, editor, value, commits } = setup();
+  const input = event([], { "text/html": `<p>Before<img src="${png}" alt="Figure">After</p>`, "text/plain": "Must not also paste" });
+  expect((await binding.paste(input)).ok).toBe(true);
+  expect(input.preventDefault).toHaveBeenCalledOnce(); expect(commits).toHaveBeenCalledOnce();
+  expect(value().objects.map((object) => [object.kind, object.label])).toEqual([["text", "Before"], ["image", "Figure"], ["text", "After"]]);
+  expect(value().objects[0]!.y + value().objects[0]!.height).toBeLessThan(value().objects[1]!.y);
+  expect(value().objects[1]!.y + value().objects[1]!.height).toBeLessThan(value().objects[2]!.y);
+  expect(value().objects.at(-1)!.y + value().objects.at(-1)!.height).toBeLessThanOrEqual(565);
+  expect(value().objects[1]!.source).toBe(png);
+  expect(parseCanvasDocument(serializeCanvasDocument(value()))).toEqual(value());
+  const copied = event(); binding.copy(copied);
+  editor.undo(); expect(value()).toEqual(blank);
+  await binding.paste(copied);
+  expect(value().objects.map((object) => object.id)).toEqual(["image-4", "image-5", "image-6"]);
+  expect(value().objects[1]!.source).toBe(png);
+});
+
+test("unavailable HTML images reject the whole paste without text fallback or consumed IDs", async () => {
+  const { binding, value, editor, readRaster } = setup();
+  expect(await binding.paste(event([], { "text/html": '<p>Before<img src="https://example.invalid/image">After</p>', "text/plain": "Fallback" }))).toMatchObject({ ok: false, code: "raster.source-unsupported" });
+  expect(value()).toEqual(blank); expect(editor.snapshot.canUndo).toBe(false); expect(readRaster).not.toHaveBeenCalled();
+  await binding.paste(event([], { "text/plain": "After failure" })); expect(value().objects[0]!.id).toBe("image-1");
+});
+
+test("HTML and subsequent text requests share ordered adoption", async () => {
+  let resolve!: (value: WebRasterSourceResult) => void;
+  const { binding, value } = setup(() => new Promise((done) => { resolve = done; }));
+  const first = binding.paste(event([], { "text/html": `<p>Before<img src="${png}" alt="Figure">After</p>` }));
+  const next = binding.paste(event([], { "text/plain": "Next paste" }));
+  expect(value()).toEqual(blank);
+  resolve({ ok: true, dataURL: png, width: 100, height: 50 }); await Promise.all([first, next]);
+  expect(value().objects.map((object) => object.label)).toEqual(["Before", "Figure", "After", "Next paste"]);
+});
+
+test("cancelled HTML preparation cannot revive a late image or its surrounding text", async () => {
+  let resolve!: (value: WebRasterSourceResult) => void;
+  const readRaster = vi.fn<typeof readWebRasterFile>(() => new Promise((done) => { resolve = done; }));
+  const { binding, value } = setup(readRaster);
+  const pending = binding.paste(event([], { "text/html": `<p>Before<img src="${png}">After</p>` }));
+  binding.cancel(); expect(await pending).toMatchObject({ code: "clipboard.cancelled" });
+  expect(readRaster.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
+  resolve({ ok: true, dataURL: png, width: 100, height: 50 }); await Promise.resolve();
+  expect(value()).toEqual(blank);
+});

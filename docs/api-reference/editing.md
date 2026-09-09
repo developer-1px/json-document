@@ -541,7 +541,14 @@ calendarVisibleHourBand(startMinutes: number, endMinutes: number, hourStart: num
 ```ts
 type CanvasClipboardContent =
   | { readonly type: "text"; readonly text: string }
-  | { readonly type: "images"; readonly images: ReadonlyArray<{ readonly source: string; readonly width: number; readonly height: number; readonly label: string }> };
+  | { readonly type: "images"; readonly images: ReadonlyArray<{ readonly source: string; readonly width: number; readonly height: number; readonly label: string }> }
+  | { readonly type: "mixed"; readonly items: ReadonlyArray<CanvasClipboardItem> };
+```
+## `CanvasClipboardItem`
+
+```ts
+type CanvasClipboardItem = { readonly type: "text"; readonly text: string }
+  | ({ readonly type: "image" } & Parameters<typeof createCanvasImage>[0]);
 ```
 ## `CanvasClipboardOptions`
 
@@ -551,6 +558,7 @@ interface CanvasClipboardOptions {
   readonly textColor: string;
   readonly fontSize: number;
   readonly imageOffset?: number;
+  readonly contentGap?: number;
 }
 ```
 ## `createAnnotationEditor`

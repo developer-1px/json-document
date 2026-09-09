@@ -28,7 +28,7 @@ export type { GridPoint, GridRangeBounds, GridTopology, LineTopology } from "./t
 export { createDatabaseEditor, databaseClipboardFormat, nextDatabasePropertySort } from "./database.js";
 export { acceptsDatabaseValue, databaseValueFromText, defaultDatabaseValue } from "./database-property-value.js";
 export { createObjectEditor, objectClipboardFormat } from "./object.js";
-export { createCanvasClipboard, type CanvasClipboardContent, type CanvasClipboardOptions } from "./canvas-clipboard.js";
+export { createCanvasClipboard, type CanvasClipboardContent, type CanvasClipboardItem, type CanvasClipboardOptions } from "./canvas-clipboard.js";
 export { createObjectPasteSession, type ObjectPasteSession, type ObjectPastePreparation } from "./object-paste-session.js";
 export { createEditingPreparationQueue, type EditingPreparationQueue, type EditingPreparation, type EditingPreparationFailure } from "./preparation-queue.js";
 export { createOrderEditor, orderClipboardFormat } from "./order.js";

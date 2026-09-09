@@ -7,6 +7,7 @@ import {
   treeClipboardFormat,
 } from "@interactive-os/json-document-editing";
 import type { WebFileCandidate, WebFileCandidateList } from "./file-intake.js";
+import { parseWebClipboardHTML, type WebHTMLClipboardContent } from "./html-clipboard.js";
 
 export interface WebClipboardPayload {
   readonly type: string;
@@ -31,15 +32,28 @@ export type WebClipboardPaste<Payload extends WebClipboardPayload> =
   | { readonly ok: true; readonly type: "text"; readonly text: string }
   | Extract<WebClipboardResult<never, never>, { readonly ok: false }>;
 
-/** Captures native data before the event ends: structured → files → literal text. An owned invalid format never falls through. */
+export type WebHTMLClipboardPaste<Payload extends WebClipboardPayload> = WebClipboardPaste<Payload>
+  | { readonly ok: true; readonly type: "html"; readonly content: WebHTMLClipboardContent };
+
+/** Existing callers retain the original result union; HTML image capture is opt-in. */
+export function captureWebClipboardPaste<Payload extends WebClipboardPayload = WebClipboardPayload>(event: WebClipboardEvent, options: {
+  readonly codec?: WebClipboardCodec<Payload>; readonly files?: boolean; readonly text?: boolean; readonly html?: never; readonly delegatedMimeTypes?: ReadonlyArray<string>;
+}): WebClipboardPaste<Payload>;
+export function captureWebClipboardPaste<Payload extends WebClipboardPayload = WebClipboardPayload>(event: WebClipboardEvent, options: {
+  readonly codec?: WebClipboardCodec<Payload>; readonly files?: boolean; readonly text?: boolean; readonly html?: "images"; readonly delegatedMimeTypes?: ReadonlyArray<string>;
+}): WebHTMLClipboardPaste<Payload>;
+/** Captures one enabled representation: structured → files → HTML with images → literal text. */
 export function captureWebClipboardPaste<Payload extends WebClipboardPayload = WebClipboardPayload>(event: WebClipboardEvent, options: {
   readonly codec?: WebClipboardCodec<Payload>;
   readonly files?: boolean;
   readonly text?: boolean;
-}): WebClipboardPaste<Payload> {
+  readonly html?: "images";
+  readonly delegatedMimeTypes?: ReadonlyArray<string>;
+}): WebHTMLClipboardPaste<Payload> {
   const data = event.clipboardData;
   if (data === null) return failure("clipboard.unavailable");
   try {
+    if (options.delegatedMimeTypes && Array.from(data.types).some((type) => options.delegatedMimeTypes!.includes(type))) return failure("clipboard.empty");
     if (options.codec && Array.from(data.types).includes(options.codec.mimeType)) {
       event.preventDefault();
       const result = readRepresentations(data, [options.codec]);
@@ -48,6 +62,15 @@ export function captureWebClipboardPaste<Payload extends WebClipboardPayload = W
     if (options.files && data.files && data.files.length > 0) {
       event.preventDefault();
       return { ok: true, type: "files", files: Array.from(data.files) };
+    }
+    if (options.html === "images" && Array.from(data.types).includes("text/html")) {
+      let content: WebHTMLClipboardContent | null;
+      try { content = parseWebClipboardHTML(data.getData("text/html")); }
+      catch (error) { event.preventDefault(); return failure("clipboard.invalid", errorMessage(error)); }
+      if (content?.parts.some((part) => part.type === "image")) {
+        event.preventDefault();
+        return { ok: true, type: "html", content };
+      }
     }
     if (options.text && Array.from(data.types).includes("text/plain")) {
       event.preventDefault();

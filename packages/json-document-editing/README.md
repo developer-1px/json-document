@@ -89,6 +89,24 @@ queue는 문서·selection을 모르며 원자적 편집은 `apply`가 호출하
 각 요청의 History 단위도 실제 domain apply가 정합니다.
 Usage·Source: [Canvas](/demo/canvas), [Composer](/demo/composer).
 
+## Canvas 외부 내용 변환
+
+`createCanvasClipboard(content, { bounds, textColor, fontSize, imageOffset?, contentGap? })`는
+일반 텍스트, 이미지 목록, 순서 있는 글·이미지를 Object clipboard로 변환합니다.
+`{ type: "mixed", items: CanvasClipboardItem[] }`의 item은 `{ type: "text", text }` 또는
+`{ type: "image", source, width, height, label }`입니다. HTML parsing·이미지 decode는
+Web 소유이며 이 API는 DOM이나 File을 받지 않습니다.
+
+mixed는 입력 순서의 세로 흐름으로 배치합니다. `contentGap`의 기본값은 24이며 유한한
+0 이상 값입니다. 전체 높이가 `bounds.height`를 넘으면 객체·글자 크기·간격을 같은 비율로
+축소합니다. 이미지 비율은 유지하며 원본 CSS·Office layout이나 긴 글의 가독성을 보장하지
+않습니다. 기존 text는 단일 객체, images는 `imageOffset`(기본 24)의 cascade를 유지합니다.
+빈 입력·유효하지 않은 geometry는 예외로 거절합니다.
+
+결과의 ID는 clipboard 내부 참조입니다. 실제 문서 ID 할당·선택·History는 Object paste가
+소유하고 마지막 item이 primary가 됩니다. 변환 자체는 문서를 쓰지 않습니다.
+Usage·Source: [Canvas](/demo/canvas).
+
 ## Editing identity and observation
 
 `createEditingId(prefix)` supplies opaque UUID-based identities for Document,

@@ -151,8 +151,9 @@ the formats it enables and their priority, while
 named codecs remain compatibility aliases over those domain formats. Clipboard
 surfaces write both the structured json-document MIME payload and its
 `text/plain` projection. `captureWebClipboardPaste` captures an enabled structured
-representation, files, or literal text before the event expires. Its codec is
-optional for file-only consumers. Domain conversion belongs to the canonical
+representation, files, opt-in image-containing HTML (`html: "images"`), or literal
+text before the event expires. `delegatedMimeTypes` leaves recognized formats to
+an existing nested binding before this priority. Its codec is optional. Domain conversion belongs to the canonical
 Editing or Hand API; the Host supplies product policy.
 
 `readWebRasterFiles` validates a PNG/JPEG/WebP batch and prepares its embedded
@@ -160,6 +161,14 @@ content and intrinsic dimensions through `readWebRasterFile`. Canvas and Compose
 share this path. File Intake owns `RasterImageContent`; Web owns reading and
 decoding, not document mutation or server upload. See the
 [Clipboard API and remaining TBD](docs/clipboard.md).
+
+`parseWebHTMLFragment` is the inert platform parser shared with Rich Text Web;
+its nodes are conversion input, never live DOM insertion output.
+`parseWebClipboardHTML` projects ordered text/image sources. `readWebHTMLClipboard`
+checks embedded PNG/JPEG/WebP data URLs before allocating bytes and reuses the
+raster batch reader. It does not fetch external, relative, blob, or cid URLs.
+Canvas consumes mixed content; Composer accepts image-only HTML and explicitly
+rejects mixed text/images until its document profile can represent them.
 
 The official keyboard adapter owns `defaultWebKeymap`. `resolve` returns a
 semantic command or `null`; `moveLinePoint` and `moveGridPoint` locate the

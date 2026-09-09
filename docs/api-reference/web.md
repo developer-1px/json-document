@@ -39,7 +39,8 @@ calendarMinutesFromWebGrid(clientY: number, bounds: { readonly top: number; read
 ## `captureWebClipboardPaste`
 
 ```ts
-captureWebClipboardPaste<Payload extends WebClipboardPayload = WebClipboardPayload>(event: WebClipboardEvent, options: { readonly codec?: WebClipboardCodec<Payload>; readonly files?: boolean; readonly text?: boolean; }): WebClipboardPaste<Payload>
+captureWebClipboardPaste<Payload extends WebClipboardPayload = WebClipboardPayload>(event: WebClipboardEvent, options: { readonly codec?: WebClipboardCodec<Payload>; readonly files?: boolean; readonly text?: boolean; readonly html?: never; readonly delegatedMimeTypes?: ReadonlyArray<string>; }): WebClipboardPaste<Payload>
+captureWebClipboardPaste<Payload extends WebClipboardPayload = WebClipboardPayload>(event: WebClipboardEvent, options: { readonly codec?: WebClipboardCodec<Payload>; readonly files?: boolean; readonly text?: boolean; readonly html?: "images"; readonly delegatedMimeTypes?: ReadonlyArray<string>; }): WebHTMLClipboardPaste<Payload>
 ```
 ## `chordFromStroke`
 
@@ -203,6 +204,16 @@ const objectClipboardCodec: WebClipboardCodec<ObjectClipboard>
 ```ts
 const orderClipboardCodec: WebClipboardCodec<OrderClipboard>
 ```
+## `parseWebClipboardHTML`
+
+```ts
+parseWebClipboardHTML(html: string): WebHTMLClipboardContent | null
+```
+## `parseWebHTMLFragment`
+
+```ts
+parseWebHTMLFragment(html: string): WebHTMLFragment | null
+```
 ## `pressInteractionFromWeb`
 
 ```ts
@@ -217,6 +228,11 @@ projectWebClientPointToSVG(point: WebClientPoint, viewport: WebSVGViewport): Web
 
 ```ts
 projectWebWidgetState(state: WebWidgetState): WebWidgetARIA
+```
+## `readWebHTMLClipboard`
+
+```ts
+readWebHTMLClipboard(content: WebHTMLClipboardContent, options: Parameters<typeof readWebRasterFiles>[1] & { readonly currentCount?: number; }): Promise<WebHTMLClipboardResult>
 ```
 ## `readWebRasterFile`
 
@@ -624,6 +640,45 @@ webGridCellAddressProps(point: GridPoint): WebGridCellAddressAttributes
 ```ts
 interface WebGridCellAddressRoot<Cell extends WebGridCellAddressElement> {
   querySelectorAll(selectors: string): ArrayLike<Cell>;
+}
+```
+## `WebHTMLClipboardContent`
+
+```ts
+interface WebHTMLClipboardContent { readonly parts: ReadonlyArray<WebHTMLClipboardPart> }
+```
+## `WebHTMLClipboardPart`
+
+```ts
+type WebHTMLClipboardPart =
+  | { readonly type: "text"; readonly text: string }
+  | { readonly type: "image"; readonly source: string; readonly label: string };
+```
+## `WebHTMLClipboardPaste`
+
+```ts
+type WebHTMLClipboardPaste<Payload extends WebClipboardPayload> = WebClipboardPaste<Payload>
+  | { readonly ok: true; readonly type: "html"; readonly content: WebHTMLClipboardContent };
+```
+## `WebHTMLClipboardResult`
+
+```ts
+type WebHTMLClipboardResult =
+  | { readonly ok: true; readonly parts: ReadonlyArray<Extract<WebHTMLClipboardPart, { readonly type: "text" }> | ({ readonly type: "image" } & WebRasterFileContent)> }
+  | { readonly ok: false; readonly code: string; readonly reason?: string };
+```
+## `WebHTMLFragment`
+
+```ts
+interface WebHTMLFragment { readonly childNodes: ArrayLike<WebHTMLNode> }
+```
+## `WebHTMLNode`
+
+```ts
+interface WebHTMLNode {
+  readonly nodeType: number;
+  readonly textContent: string | null;
+  readonly childNodes: ArrayLike<WebHTMLNode>;
 }
 ```
 ## `WebJSONClipboardFormat`

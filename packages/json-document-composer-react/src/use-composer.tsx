@@ -12,7 +12,7 @@ import {
   type ComposerHostPorts,
   type ComposerHostSuggestion,
 } from "@interactive-os/json-document-composer";
-import { createRichTextEditor, type RichTextEditor, type RichTextNode } from "@interactive-os/json-document-rich-text";
+import { createRichTextEditor, RICH_TEXT_CLIPBOARD_MIME, type RichTextEditor, type RichTextNode } from "@interactive-os/json-document-rich-text";
 import type { RichTextSuggestionCandidate } from "@interactive-os/json-document-rich-text-suggestion";
 import type { RichTextSuggestionBinding } from "@interactive-os/json-document-rich-text-suggestion-react";
 import { captureWebClipboardPaste, type readWebRasterFile, type WebFileCandidate, type WebFileCandidateList } from "@interactive-os/json-document-web";
@@ -104,10 +104,13 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
 
   function handlePaste(event: ClipboardEvent<HTMLElement>) {
     if (event.defaultPrevented) return;
-    const captured = captureWebClipboardPaste(event, { files: true });
+    const captured = captureWebClipboardPaste(event, { files: true, html: "images", delegatedMimeTypes: [RICH_TEXT_CLIPBOARD_MIME] });
     if (captured.ok && captured.type === "files") {
       event.stopPropagation();
       addWebFiles(captured.files);
+    } else if (captured.ok && captured.type === "html") {
+      event.stopPropagation();
+      intake.addHTML(captured.content);
     } else if (!captured.ok && captured.code !== "clipboard.empty") intake.reportError(captured);
   }
 

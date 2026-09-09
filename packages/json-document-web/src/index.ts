@@ -1,6 +1,7 @@
 export {
   createWebClipboardBinding,
   captureWebClipboardPaste,
+  type WebHTMLClipboardPaste,
   createWebJSONClipboardRepresentation,
   createWebClipboardSurface,
   createWebClipboardTextWriter,
@@ -32,6 +33,8 @@ export { createWebAnchoredFloatingPositionPorts } from "./anchored-floating-posi
 export { projectWebClientPointToSVG, webSVGViewportFromElement } from "./svg-coordinate.js";
 export { readWebRasterFile } from "./raster-source.js";
 export { readWebRasterFiles, type WebRasterFileContent, type WebRasterFilesResult } from "./raster-files.js";
+export { parseWebHTMLFragment, type WebHTMLFragment, type WebHTMLNode } from "./html-fragment.js";
+export { parseWebClipboardHTML, readWebHTMLClipboard, type WebHTMLClipboardContent, type WebHTMLClipboardPart, type WebHTMLClipboardResult } from "./html-clipboard.js";
 export { composerAttachmentCandidateFromWebFile, composerAttachmentCandidatesFromWebClipboard, composerAttachmentCandidatesFromWebFiles, fileCandidateFromWebFile, fileCandidatesFromWebClipboard, fileCandidatesFromWebFiles } from "./file-intake.js";
 export { renderWebAnnotationRaster } from "./annotation-raster.js";
 export { registerWebVirtualSelectionScope } from "./virtual-selection-scope.js";

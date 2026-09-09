@@ -37,7 +37,7 @@ const clipboard = createWebClipboardBinding({
 `captureWebClipboardPaste(event, { codec, files: true, text: true })`는 이벤트가 끝나기 전에
 구조화 MIME → 파일 → `text/plain` 순서로 하나의 표현을 캡처합니다. 성공은 `type`이
 `structured`(payload), `files`(파일 배열), `text`(문자열)인 결과입니다. files/text는 명시한
-경우만 처리합니다. `codec`을 생략한 `{ files: true }`는 Composer 같은 file-only 소비자를
+경우만 처리합니다. `codec`을 생략한 `{ files: true }`는 file-only 소비자를
 지원하며 텍스트/HTML의 native 처리를 소유하지 않습니다. 파일 메타데이터는 별도 `fileCandidatesFromWebFiles`
 API로 File Intake에 전달하고, 파일 참조는 실제 browser File이어야 읽을 수 있습니다.
 
@@ -46,6 +46,13 @@ API로 File Intake에 전달하고, 파일 참조는 실제 browser File이어�
 decode 실패도 소유한 실패이며 다른 표현으로 떨어지지 않습니다. 이 strict 캡처는 위의 기존
 동기 binding이 제공하는 여러 representation fallback/pass-through와 구분되는 계약입니다.
 일치하는 표현이 없으면 native 처리를 막지 않고 `clipboard.empty`를 반환합니다.
+
+`html: "images"`를 명시하면 파일 다음, 일반 텍스트 전에 이미지가 포함된 HTML을
+선택합니다. 이 overload는 기존 결과에 `{ ok: true, type: "html", content }`를 더합니다.
+이미지가 없는 HTML은 캡처하지 않으며 `text`를 켜지 않은 소비자는 기존 Rich Text 처리를
+유지합니다. `delegatedMimeTypes`에 지정한 MIME이 있으면 모든 캡처보다 먼저
+`clipboard.empty`로 위임하고 이벤트를 소유하지 않습니다. Composer는 내부 Rich Text
+구조화 MIME을 이렇게 기존 binding에 남깁니다. 위임할 실제 binding이 있는 경우에만 지정합니다.
 
 `readWebRasterFile(file, { signal? })`는 기존 FileReader와 Image decode 정본입니다.
 성공은 dataURL과 자연 width/height, 실패는 `raster.read-failed`, `raster.decode-failed`,
@@ -65,6 +72,33 @@ decode 실패도 소유한 실패이며 다른 표현으로 떨어지지 않습�
 순차화하지만 문서를 변경하거나 Undo 단위·삽입 위치를 결정하지 않습니다. 준비한
 batch를 어떻게 적용하고 언제 취소할지는 Editing과 각 Hand가 소유합니다.
 
+### HTML 이미지와 순서 있는 내용
+
+`parseWebHTMLFragment(html)`은 브라우저의 inert `template`에서 HTML 문법을 읽습니다.
+`script`·`iframe`·`style`·SVG 등의 요소를 제외하고, DOM 순서의 `childNodes`를 가진
+`WebHTMLFragment` 또는 빈/DOM 미지원 환경에서 `null`을 반환합니다. 반환 노드는 live DOM에
+삽입하지 않습니다. 이 API는 문서 의미로 변환할 입력이지, 임의 HTML을 삽입하는 sanitizer가
+아닙니다. Rich Text Web도 같은 parser를 사용하되 block·mark·schema 변환은 직접 소유합니다.
+
+`parseWebClipboardHTML(html)`은 `{ parts }` 또는 `null`을 반환합니다. 각 part는
+`{ type: "text", text }` 또는 `{ type: "image", source, label }`이며 HTML 내부의 순서를
+유지합니다. block·`br`의 줄바꿈과 table cell 경계를 일반 텍스트로 옮기며 서식·CSS 배치는
+보존하지 않습니다. 문자열 16,777,216 UTF-16 code unit, 탐색 노드 10,000개, part 256개를
+넘으면 `RangeError`입니다. opt-in capture에서 이 실패는 `clipboard.invalid`로 소유하며
+일반 텍스트로 조용히 떨어지지 않습니다.
+
+`readWebHTMLClipboard(content, { policy, maxImagePixels, currentCount?, signal?, readRaster? })`는
+PNG/JPEG/WebP base64 data URL만 준비합니다. 모든 source의 형식과 byte 수·파일 정책을
+검사한 뒤 실제 bytes를 할당하고 `readWebRasterFiles`로 decode합니다. 성공 결과의
+`parts`는 text 또는 `{ type: "image", candidate, image }`입니다. 하나라도 실패하면
+일부 part를 돌려주지 않으며 기존 raster/파일 오류와 `raster.source-unsupported`를 구분합니다.
+외부·상대·blob·cid URL은 다운로드하지 않습니다. 빈 source와 읽을 수 없는 이미지도 실패입니다.
+
+Canvas는 이 결과를 Editing의 순서 있는 객체 변환으로 전달합니다. Composer는 이미지-only
+HTML만 첨부로 받으며 글+이미지 입력은 `composer.clipboard.mixed-unsupported`로 전체를 거절합니다.
+native 파일이 함께 있으면 파일 표현이 우선합니다. 파일과 HTML 이미지의 대응을 추측하거나
+같은 내용을 두 번 추가하지 않으며, 두 표현의 혼합 의미 보존은 아직 TBD입니다.
+
 실제 텍스트·이미지 입력 및 순서/취소 연결: [Canvas Usage/Source](/demo/canvas),
-[Composer Usage/Source](/demo/composer). HTML 이미지, 명시적인 plain paste, 이미지 쓰기와
+[Composer Usage/Source](/demo/composer). HTML의 남은 표현 범위, 명시적인 plain paste, 이미지 쓰기와
 OS-native 왕복의 남은 범위는 [Clipboard 기본기 TBD](/docs/clipboard)에 공개합니다.
