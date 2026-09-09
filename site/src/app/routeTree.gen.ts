@@ -135,6 +135,7 @@ import { Route as PageDocsApiAnimationReactRouteImport } from "./routes/_page/do
 import { Route as PageDocsApiAnnotationRouteImport } from "./routes/_page/docs/api/annotation";
 import { Route as PageDocsApiCalendarRouteImport } from "./routes/_page/docs/api/calendar";
 import { Route as PageDocsApiCalendarDocumentRouteImport } from "./routes/_page/docs/api/calendar-document";
+import { Route as PageDocsApiCanvasRouteImport } from "./routes/_page/docs/api/canvas";
 import { Route as PageDocsApiCollaborationRouteImport } from "./routes/_page/docs/api/collaboration";
 import { Route as PageDocsApiComposerRouteImport } from "./routes/_page/docs/api/composer";
 import { Route as PageDocsApiComposerReactRouteImport } from "./routes/_page/docs/api/composer-react";
@@ -145,6 +146,7 @@ import { Route as PageDocsApiEditingRouteImport } from "./routes/_page/docs/api/
 import { Route as PageDocsApiFileIntakeRouteImport } from "./routes/_page/docs/api/file-intake";
 import { Route as PageDocsApiJsonDocumentRouteImport } from "./routes/_page/docs/api/json-document";
 import { Route as PageDocsApiMarkdownReactRouteImport } from "./routes/_page/docs/api/markdown-react";
+import { Route as PageDocsApiObjectDocumentRouteImport } from "./routes/_page/docs/api/object-document";
 import { Route as PageDocsApiReactRouteImport } from "./routes/_page/docs/api/react";
 import { Route as PageDocsApiReactHookFormRouteImport } from "./routes/_page/docs/api/react-hook-form";
 import { Route as PageDocsApiRichTextRouteImport } from "./routes/_page/docs/api/rich-text";
@@ -830,6 +832,11 @@ const PageDocsApiCalendarDocumentRoute =
     path: "/docs/api/calendar-document",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsApiCanvasRoute = PageDocsApiCanvasRouteImport.update({
+  id: "/docs/api/canvas",
+  path: "/docs/api/canvas",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsApiCollaborationRoute =
   PageDocsApiCollaborationRouteImport.update({
     id: "/docs/api/collaboration",
@@ -883,6 +890,12 @@ const PageDocsApiMarkdownReactRoute =
   PageDocsApiMarkdownReactRouteImport.update({
     id: "/docs/api/markdown-react",
     path: "/docs/api/markdown-react",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsApiObjectDocumentRoute =
+  PageDocsApiObjectDocumentRouteImport.update({
+    id: "/docs/api/object-document",
+    path: "/docs/api/object-document",
     getParentRoute: () => PageRoute,
   } as any);
 const PageDocsApiReactRoute = PageDocsApiReactRouteImport.update({
@@ -1135,6 +1148,7 @@ export interface FileRoutesByFullPath {
   "/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
   "/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/docs/api/calendar-document": typeof PageDocsApiCalendarDocumentRoute;
+  "/docs/api/canvas": typeof PageDocsApiCanvasRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
   "/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
@@ -1145,6 +1159,7 @@ export interface FileRoutesByFullPath {
   "/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
   "/docs/api/markdown-react": typeof PageDocsApiMarkdownReactRoute;
+  "/docs/api/object-document": typeof PageDocsApiObjectDocumentRoute;
   "/docs/api/react": typeof PageDocsApiReactRoute;
   "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
@@ -1294,6 +1309,7 @@ export interface FileRoutesByTo {
   "/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
   "/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/docs/api/calendar-document": typeof PageDocsApiCalendarDocumentRoute;
+  "/docs/api/canvas": typeof PageDocsApiCanvasRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
   "/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
@@ -1304,6 +1320,7 @@ export interface FileRoutesByTo {
   "/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
   "/docs/api/markdown-react": typeof PageDocsApiMarkdownReactRoute;
+  "/docs/api/object-document": typeof PageDocsApiObjectDocumentRoute;
   "/docs/api/react": typeof PageDocsApiReactRoute;
   "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
@@ -1455,6 +1472,7 @@ export interface FileRoutesById {
   "/_page/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
   "/_page/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/_page/docs/api/calendar-document": typeof PageDocsApiCalendarDocumentRoute;
+  "/_page/docs/api/canvas": typeof PageDocsApiCanvasRoute;
   "/_page/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/_page/docs/api/composer": typeof PageDocsApiComposerRoute;
   "/_page/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
@@ -1465,6 +1483,7 @@ export interface FileRoutesById {
   "/_page/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/_page/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
   "/_page/docs/api/markdown-react": typeof PageDocsApiMarkdownReactRoute;
+  "/_page/docs/api/object-document": typeof PageDocsApiObjectDocumentRoute;
   "/_page/docs/api/react": typeof PageDocsApiReactRoute;
   "/_page/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/_page/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
@@ -1616,6 +1635,7 @@ export interface FileRouteTypes {
     | "/docs/api/annotation"
     | "/docs/api/calendar"
     | "/docs/api/calendar-document"
+    | "/docs/api/canvas"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
     | "/docs/api/composer-react"
@@ -1626,6 +1646,7 @@ export interface FileRouteTypes {
     | "/docs/api/file-intake"
     | "/docs/api/json-document"
     | "/docs/api/markdown-react"
+    | "/docs/api/object-document"
     | "/docs/api/react"
     | "/docs/api/react-hook-form"
     | "/docs/api/rich-text"
@@ -1775,6 +1796,7 @@ export interface FileRouteTypes {
     | "/docs/api/annotation"
     | "/docs/api/calendar"
     | "/docs/api/calendar-document"
+    | "/docs/api/canvas"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
     | "/docs/api/composer-react"
@@ -1785,6 +1807,7 @@ export interface FileRouteTypes {
     | "/docs/api/file-intake"
     | "/docs/api/json-document"
     | "/docs/api/markdown-react"
+    | "/docs/api/object-document"
     | "/docs/api/react"
     | "/docs/api/react-hook-form"
     | "/docs/api/rich-text"
@@ -1935,6 +1958,7 @@ export interface FileRouteTypes {
     | "/_page/docs/api/annotation"
     | "/_page/docs/api/calendar"
     | "/_page/docs/api/calendar-document"
+    | "/_page/docs/api/canvas"
     | "/_page/docs/api/collaboration"
     | "/_page/docs/api/composer"
     | "/_page/docs/api/composer-react"
@@ -1945,6 +1969,7 @@ export interface FileRouteTypes {
     | "/_page/docs/api/file-intake"
     | "/_page/docs/api/json-document"
     | "/_page/docs/api/markdown-react"
+    | "/_page/docs/api/object-document"
     | "/_page/docs/api/react"
     | "/_page/docs/api/react-hook-form"
     | "/_page/docs/api/rich-text"
@@ -2861,6 +2886,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiCalendarDocumentRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/api/canvas": {
+      id: "/_page/docs/api/canvas";
+      path: "/docs/api/canvas";
+      fullPath: "/docs/api/canvas";
+      preLoaderRoute: typeof PageDocsApiCanvasRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/api/collaboration": {
       id: "/_page/docs/api/collaboration";
       path: "/docs/api/collaboration";
@@ -2929,6 +2961,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/api/markdown-react";
       fullPath: "/docs/api/markdown-react";
       preLoaderRoute: typeof PageDocsApiMarkdownReactRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/api/object-document": {
+      id: "/_page/docs/api/object-document";
+      path: "/docs/api/object-document";
+      fullPath: "/docs/api/object-document";
+      preLoaderRoute: typeof PageDocsApiObjectDocumentRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/api/react": {
@@ -3210,6 +3249,7 @@ interface PageRouteChildren {
   PageDocsApiAnnotationRoute: typeof PageDocsApiAnnotationRoute;
   PageDocsApiCalendarRoute: typeof PageDocsApiCalendarRoute;
   PageDocsApiCalendarDocumentRoute: typeof PageDocsApiCalendarDocumentRoute;
+  PageDocsApiCanvasRoute: typeof PageDocsApiCanvasRoute;
   PageDocsApiCollaborationRoute: typeof PageDocsApiCollaborationRoute;
   PageDocsApiComposerRoute: typeof PageDocsApiComposerRoute;
   PageDocsApiComposerReactRoute: typeof PageDocsApiComposerReactRoute;
@@ -3220,6 +3260,7 @@ interface PageRouteChildren {
   PageDocsApiFileIntakeRoute: typeof PageDocsApiFileIntakeRoute;
   PageDocsApiJsonDocumentRoute: typeof PageDocsApiJsonDocumentRoute;
   PageDocsApiMarkdownReactRoute: typeof PageDocsApiMarkdownReactRoute;
+  PageDocsApiObjectDocumentRoute: typeof PageDocsApiObjectDocumentRoute;
   PageDocsApiReactRoute: typeof PageDocsApiReactRoute;
   PageDocsApiReactHookFormRoute: typeof PageDocsApiReactHookFormRoute;
   PageDocsApiRichTextRoute: typeof PageDocsApiRichTextRoute;
@@ -3369,6 +3410,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsApiAnnotationRoute: PageDocsApiAnnotationRoute,
   PageDocsApiCalendarRoute: PageDocsApiCalendarRoute,
   PageDocsApiCalendarDocumentRoute: PageDocsApiCalendarDocumentRoute,
+  PageDocsApiCanvasRoute: PageDocsApiCanvasRoute,
   PageDocsApiCollaborationRoute: PageDocsApiCollaborationRoute,
   PageDocsApiComposerRoute: PageDocsApiComposerRoute,
   PageDocsApiComposerReactRoute: PageDocsApiComposerReactRoute,
@@ -3380,6 +3422,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsApiFileIntakeRoute: PageDocsApiFileIntakeRoute,
   PageDocsApiJsonDocumentRoute: PageDocsApiJsonDocumentRoute,
   PageDocsApiMarkdownReactRoute: PageDocsApiMarkdownReactRoute,
+  PageDocsApiObjectDocumentRoute: PageDocsApiObjectDocumentRoute,
   PageDocsApiReactRoute: PageDocsApiReactRoute,
   PageDocsApiReactHookFormRoute: PageDocsApiReactHookFormRoute,
   PageDocsApiRichTextRoute: PageDocsApiRichTextRoute,

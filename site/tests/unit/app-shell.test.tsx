@@ -115,13 +115,13 @@ describe("official site shell", () => {
     )).toBeTruthy();
   }, 10000);
 
-  test("exposes the Calendar owner without closing the other Document Types TBD boundary", async () => {
+  test("exposes Calendar and Object owners without closing the remaining Document Types TBD boundary", async () => {
     resetDocument("/docs/document-types");
     render(<App />);
 
     expect(await screen.findByRole("heading", { level: 1, name: "Document Types · TBD" })).toBeTruthy();
     expect(screen.getByRole("heading", { level: 2, name: "책임" })).toBeTruthy();
-    expect(screen.getByText(/Calendar는 공개 소유자와 소비 경계를 확정했고/)).toBeTruthy();
+    expect(screen.getByText(/Calendar와 Object는 공개 소유자와 소비 경계를 확정했고/)).toBeTruthy();
     expect(screen.getByRole("heading", { level: 2, name: "현재 소유자와 후보" })).toBeTruthy();
     const breadcrumb = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
     expect(breadcrumb.getByRole("link", { name: "Foundation" }).getAttribute("href")).toBe("/docs/foundation");

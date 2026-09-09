@@ -5,6 +5,7 @@
   "workspaces": [
     "packages/json-document",
     "packages/json-document-selection",
+    "packages/json-document-object-document",
     "packages/json-document-calendar-document",
     "packages/json-document-editing",
     "packages/json-document-react",
@@ -19,6 +20,7 @@
     "packages/json-document-database",
     "packages/json-document-annotation",
     "packages/json-document-calendar",
+    "packages/json-document-canvas",
     "packages/json-document-tanstack-table",
     "packages/json-document-web",
     "packages/json-document-contenteditable",

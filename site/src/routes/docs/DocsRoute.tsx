@@ -73,6 +73,8 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   jsonDocumentApi: "patch",
   selectionApi: "patch",
   editingApi: "patch",
+  objectDocumentApi: "braces",
+  canvasApi: "peek",
   reactApi: "connector",
   reactHookFormApi: "connector",
   ajvApi: "connector",

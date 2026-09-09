@@ -1,4 +1,6 @@
 export const apiReferencePackages = [
+  ["object-document", "@interactive-os/json-document-object-document", "packages/json-document-object-document/src/index.ts", "Document Types", "Object 문서와 Canvas 프로파일의 모델·검증·연산·projection"],
+  ["canvas", "@interactive-os/json-document-canvas", "packages/json-document-canvas/src/index.ts", "Hands", "한 장짜리 Canvas의 입력·preview·UI 조합"],
   ["calendar-document", "@interactive-os/json-document-calendar-document", "packages/json-document-calendar-document/src/index.ts", "Document Types", "Calendar 문서 모델·검증·의미 연산·projection 계약"],
   ["a2ui", "@interactive-os/json-document-a2ui", "packages/json-document-a2ui/src/index.ts", "Connector", "A2UI streaming document connector"],
   ["json-document", "@interactive-os/json-document", "packages/json-document/src/application/document/index.ts", "JSON Document", "Core document 값·주소·patch 계약"],

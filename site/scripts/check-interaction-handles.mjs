@@ -7,7 +7,7 @@ const sources = {
   owner: read("packages/json-document-affordance/src/interaction-handle.ts"),
   react: read("packages/json-document-ui-primitives-react/src/surfaces.tsx"),
   calendar: read("packages/json-document-calendar/src/use-calendar-pointer-interactions.ts"),
-  canvas: read("site/src/routes/canvas-demo/CanvasDemoRoute.tsx"),
+  canvas: read("packages/json-document-canvas/src/canvas-object-view.tsx"),
   database: read("packages/json-document-database/src/database-hand.tsx"),
   annotation: read("packages/json-document-annotation/src/annotation-hand.tsx"),
 };
