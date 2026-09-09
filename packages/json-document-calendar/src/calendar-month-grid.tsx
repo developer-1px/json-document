@@ -124,6 +124,7 @@ export const CalendarMonthGrid = forwardRef<CalendarMonthGridHandle, CalendarMon
 
     return (
       <div
+        ref={interactions.rootRef}
         role="grid"
         aria-label={props.labels.grid}
         aria-multiselectable="true"

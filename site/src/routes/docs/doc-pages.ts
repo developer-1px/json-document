@@ -2,6 +2,7 @@ import apiReferenceMarkdown from "../../../../docs/public/api.md?raw";
 import jsonDocumentApiMarkdown from "../../../../docs/api-reference/json-document.md?raw";
 import selectionApiMarkdown from "../../../../docs/api-reference/selection.md?raw";
 import editingApiMarkdown from "../../../../docs/api-reference/editing.md?raw";
+import calendarProfileMarkdown from "../../../../packages/json-document-editing/docs/calendar-profile.md?raw";
 import reactApiMarkdown from "../../../../docs/api-reference/react.md?raw";
 import reactHookFormApiMarkdown from "../../../../docs/api-reference/react-hook-form.md?raw";
 import ajvApiMarkdown from "../../../../docs/api-reference/ajv.md?raw";
@@ -176,7 +177,7 @@ export const docPages = {
   api: docPage("/docs/api", apiReferenceMarkdown),
   jsonDocumentApi: docPage("/docs/api/json-document", jsonDocumentApiMarkdown),
   selectionApi: docPage("/docs/api/selection", selectionApiMarkdown),
-  editingApi: docPage("/docs/api/editing", editingApiMarkdown),
+  editingApi: docPage("/docs/api/editing", `${editingApiMarkdown}\n\n${calendarProfileMarkdown}`),
   reactApi: docPage("/docs/api/react", reactApiMarkdown),
   reactHookFormApi: docPage("/docs/api/react-hook-form", reactHookFormApiMarkdown),
   ajvApi: docPage("/docs/api/ajv", ajvApiMarkdown),
@@ -190,7 +191,7 @@ export const docPages = {
   markdownReactApi: docPage("/docs/api/markdown-react", markdownReactApiMarkdown),
   databaseApi: docPage("/docs/api/database", databaseApiMarkdown),
   annotationApi: docPage("/docs/api/annotation", annotationApiMarkdown),
-  calendarApi: docPage("/docs/api/calendar", calendarApiMarkdown),
+  calendarApi: docPage("/docs/api/calendar", `[시간·반복·거절 계약: Editing의 Calendar protocol profile](/docs/api/editing#calendar-protocol-profile-rc)\n\n${calendarApiMarkdown}`),
   webApi: docPage("/docs/api/web", webApiMarkdown),
   contenteditableApi: docPage("/docs/api/contenteditable", contenteditableApiMarkdown),
   richTextApi: docPage("/docs/api/rich-text", richTextApiMarkdown),

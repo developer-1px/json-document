@@ -14,12 +14,33 @@ beforeEach(() => {
     '<link rel="canonical" href="" />',
   ].join("");
   Object.defineProperty(window, "scrollTo", { configurable: true, value: vi.fn() });
+  Object.defineProperty(Element.prototype, "scrollIntoView", { configurable: true, value: vi.fn() });
   window.history.pushState(null, "", "/");
 });
 
 afterEach(cleanup);
 
 describe("documentation routes", () => {
+  test("renders package APIs and the Calendar profile without the API index masking them", async () => {
+    window.history.pushState(null, "", "/docs/api/editing#calendar-protocol-profile-rc");
+    render(<App />);
+
+    expect(await screen.findByRole("heading", { level: 1, name: "API · Editing" }, { timeout: 10000 })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Calendar protocol profile (RC)" }).id).toBe("calendar-protocol-profile-rc");
+    expect(screen.queryByRole("heading", { level: 1, name: "json-document API" })).toBeNull();
+
+    window.history.pushState(null, "", "/docs/api/calendar");
+    window.dispatchEvent(new Event("popstate"));
+    expect(await screen.findByRole("heading", { level: 1, name: "API · Calendar" }, { timeout: 10000 })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "시간·반복·거절 계약: Editing의 Calendar protocol profile" }).getAttribute("href"))
+      .toBe("/docs/api/editing#calendar-protocol-profile-rc");
+
+    window.history.pushState(null, "", "/docs/api");
+    window.dispatchEvent(new Event("popstate"));
+    expect(await screen.findByRole("heading", { level: 1, name: "json-document API" }, { timeout: 10000 })).toBeTruthy();
+    expect(screen.queryByRole("heading", { level: 2, name: "Calendar protocol profile (RC)" })).toBeNull();
+  }, 15000);
+
   test("navigates across the keyed documentation registry", async () => {
     render(<App />);
     const user = userEvent.setup();

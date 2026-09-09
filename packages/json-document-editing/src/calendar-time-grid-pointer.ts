@@ -1,5 +1,5 @@
 import type { CalendarEvent, CalendarIntent } from "./calendar.js";
-import { calendarEventRecurrence } from "./calendar-occurrence.js";
+import { calendarEventRecurrence, resolveCalendarOccurrence } from "./calendar-occurrence.js";
 import { calendarDatePart, calendarMinutesBetween, calendarShiftInstant, parseCalendarInstant } from "./calendar-validation.js";
 
 export type CalendarTimeGridHandle = "body" | "start" | "end";
@@ -64,7 +64,6 @@ export function bindCalendarTimeGridIntent(
   if (intent.type !== "event.move" && intent.type !== "event.resize") return intent;
   if (event === undefined || calendarEventRecurrence(event) === null) return intent;
   const start = occurrenceStart ?? event.start;
-  if (scope === "all") return bindRecurringSeriesTimeGridIntent(intent, event, start);
   if (intent.type === "event.move") {
     return {
       type: "occurrence.edit",
@@ -75,11 +74,7 @@ export function bindCalendarTimeGridIntent(
     };
   }
   if (intent.edge === "start") {
-    const from = parseCalendarInstant(event.start);
-    const to = parseCalendarInstant(event.end);
-    const occurrenceEnd = from === null || to === null
-      ? null
-      : calendarShiftInstant(start, calendarMinutesBetween(from, to));
+    const occurrenceEnd = resolveCalendarOccurrence([event], { eventId: event.id, occurrenceStart: start })?.end ?? null;
     return {
       type: "occurrence.edit",
       eventId: intent.eventId,
@@ -96,35 +91,6 @@ export function bindCalendarTimeGridIntent(
     scope,
     end: intent.instant,
   };
-}
-
-function bindRecurringSeriesTimeGridIntent(
-  intent: Extract<CalendarTimeGridPointerIntent, { type: "event.move" } | { type: "event.resize" }>,
-  event: CalendarEvent,
-  occurrenceStart: string,
-): CalendarIntent {
-  if (intent.type === "event.move") {
-    const origin = parseCalendarInstant(occurrenceStart);
-    const next = parseCalendarInstant(intent.start);
-    if (origin === null || next === null) return intent;
-    const start = calendarShiftInstant(event.start, calendarMinutesBetween(origin, next));
-    if (start === null) return intent;
-    return { type: "event.move", eventId: intent.eventId, start };
-  }
-  const from = parseCalendarInstant(event.start);
-  const to = parseCalendarInstant(event.end);
-  const occStart = parseCalendarInstant(occurrenceStart);
-  const instant = parseCalendarInstant(intent.instant);
-  if (from === null || to === null || occStart === null || instant === null) return intent;
-  if (intent.edge === "start") {
-    const start = calendarShiftInstant(event.start, calendarMinutesBetween(occStart, instant));
-    if (start === null) return intent;
-    return { type: "event.resize", eventId: intent.eventId, edge: "start", instant: start };
-  }
-  const occurrenceEnd = occStart.add({ minutes: calendarMinutesBetween(from, to) });
-  const end = calendarShiftInstant(event.end, calendarMinutesBetween(occurrenceEnd, instant));
-  if (end === null) return intent;
-  return { type: "event.resize", eventId: intent.eventId, edge: "end", instant: end };
 }
 
 function timePart(instant: string): string | null {

@@ -1,5 +1,5 @@
 import { Temporal } from "@js-temporal/polyfill";
-import type { CalendarCalendar, CalendarDocument, CalendarEvent, CalendarView } from "./calendar.js";
+import type { CalendarCalendar, CalendarDocument, CalendarEvent, CalendarRecurrence, CalendarView } from "./calendar.js";
 
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DATETIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
@@ -22,6 +22,7 @@ export function calendarDocumentEvents(document: CalendarDocument): ReadonlyArra
 }
 
 export function assertCalendarDocument(document: CalendarDocument): void {
+  if (!Array.isArray(document.events)) throw new TypeError("Calendar events must be an array.");
   const calendarIds = new Set<string>();
   for (const calendar of calendarDocumentCalendars(document)) {
     if (calendar.id.length === 0) throw new Error("Calendar ids must not be empty.");
@@ -33,22 +34,62 @@ export function assertCalendarDocument(document: CalendarDocument): void {
   }
   const ids = new Set<string>();
   for (const event of calendarDocumentEvents(document)) {
-    if (event.id.length === 0) throw new Error("Calendar event ids must not be empty.");
+    const result = validateCalendarEvent(event, calendarIds);
+    if (!result.ok) throw new TypeError(result.reason);
     if (ids.has(event.id)) throw new Error(`Calendar event id must be unique: ${JSON.stringify(event.id)}.`);
-    const calendarId = typeof event.calendarId === "string" ? event.calendarId : "";
-    if (calendarId.length > 0 && calendarIds.size > 0 && !calendarIds.has(calendarId)) {
-      throw new Error(`Calendar event must belong to a calendar: ${JSON.stringify(event.id)}.`);
-    }
-    if (isCalendarAllDay(event)) {
-      if (parseCalendarDate(event.start) === null || parseCalendarDate(event.end) === null) {
-        throw new Error(`All-day calendar events must use date strings: ${JSON.stringify(event.id)}.`);
-      }
-    } else if (parseCalendarInstant(event.start) === null || parseCalendarInstant(event.end) === null) {
-      throw new Error(`Calendar event times must be datetime-local strings: ${JSON.stringify(event.id)}.`);
-    }
-    if (event.start >= event.end) throw new Error(`Calendar event must end after it starts: ${JSON.stringify(event.id)}.`);
     ids.add(event.id);
   }
+}
+
+type CalendarValidationResult = { readonly ok: true } | {
+  readonly ok: false; readonly code: string; readonly reason: string;
+};
+
+/** One domain invariant shared by construction, edit planning and clipboard ingress. */
+export function validateCalendarEvent(value: unknown, calendarIds?: ReadonlySet<string>): CalendarValidationResult {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return { ok: false, code: "event.invalid", reason: "Calendar events must be objects." };
+  }
+  const event = value as Record<string, unknown>;
+  if (typeof event.id !== "string" || event.id.length === 0 || typeof event.title !== "string") {
+    return { ok: false, code: "event.invalid", reason: "Calendar events require a nonempty id and a string title." };
+  }
+  if (typeof event.start !== "string" || typeof event.end !== "string"
+    || (event.allDay !== undefined && typeof event.allDay !== "boolean")) {
+    return { ok: false, code: "event.invalid-instant", reason: "Calendar events require canonical temporal values." };
+  }
+  const parse = event.allDay === true ? parseCalendarDate : parseCalendarInstant;
+  if (parse(event.start) === null || parse(event.end) === null) {
+    return { ok: false, code: "event.invalid-instant", reason: event.allDay === true
+      ? `All-day calendar events must use date strings: ${JSON.stringify(event.id)}.`
+      : `Calendar event times must be datetime-local strings: ${JSON.stringify(event.id)}.` };
+  }
+  if (event.start >= event.end) {
+    return { ok: false, code: "event.invalid-interval", reason: `Calendar event must end after it starts: ${JSON.stringify(event.id)}.` };
+  }
+  if (event.calendarId !== undefined && typeof event.calendarId !== "string") {
+    return { ok: false, code: "calendar.not-found", reason: "Calendar references must be strings." };
+  }
+  if (typeof event.calendarId === "string" && event.calendarId.length > 0
+    && calendarIds !== undefined && calendarIds.size > 0 && !calendarIds.has(event.calendarId)) {
+    return { ok: false, code: "calendar.not-found", reason: `Calendar event must belong to a calendar: ${JSON.stringify(event.id)}.` };
+  }
+  if (event.recurrence != null && !isCalendarRecurrence(event.recurrence)) {
+    return { ok: false, code: "event.invalid-recurrence", reason: "Calendar recurrence requires a supported frequency, positive safe integer interval and canonical until date." };
+  }
+  if (event.excludeDates !== undefined && (!Array.isArray(event.excludeDates)
+    || !event.excludeDates.every((date) => typeof date === "string" && parseCalendarDate(date) !== null))) {
+    return { ok: false, code: "event.invalid-exclusions", reason: "Calendar exclusions must be canonical dates." };
+  }
+  return { ok: true };
+}
+
+export function isCalendarRecurrence(value: unknown): value is CalendarRecurrence {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const rule = value as Record<string, unknown>;
+  return (rule.freq === "daily" || rule.freq === "weekly" || rule.freq === "monthly" || rule.freq === "yearly")
+    && typeof rule.interval === "number" && Number.isSafeInteger(rule.interval) && rule.interval >= 1
+    && typeof rule.until === "string" && (rule.until === "" || parseCalendarDate(rule.until) !== null);
 }
 
 export function isCalendarAllDay(event: Pick<CalendarEvent, "allDay">): boolean {
@@ -144,4 +185,16 @@ export function calendarDaysBetween(from: Temporal.PlainDate, to: Temporal.Plain
 
 export function calendarMinutesBetween(from: Temporal.PlainDateTime, to: Temporal.PlainDateTime): number {
   return from.until(to, { largestUnit: "minutes" }).total("minutes");
+}
+
+/** Move a Calendar interval without changing its local duration. */
+export function calendarEventIntervalAt(
+  event: Pick<CalendarEvent, "start" | "end" | "allDay">,
+  start: string,
+): { readonly start: string; readonly end: string } | null {
+  const bounds = calendarEventBounds(event);
+  const next = isCalendarAllDay(event) ? parseCalendarDate(start)?.toPlainDateTime() : parseCalendarInstant(start);
+  if (bounds === null || next == null) return null;
+  const end = next.add({ minutes: calendarMinutesBetween(bounds.from, bounds.to) });
+  return { start, end: isCalendarAllDay(event) ? formatCalendarDate(end.toPlainDate()) : formatCalendarInstant(end) };
 }

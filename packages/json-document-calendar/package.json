@@ -19,6 +19,9 @@
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run typecheck && npm test && npm run build"
   },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1"
+  },
   "peerDependencies": {
     "@interactive-os/json-document-affordance": ">=0.1.0-rc.0 <1",
     "@interactive-os/json-document-editing": ">=0.1.0-rc.0 <1",

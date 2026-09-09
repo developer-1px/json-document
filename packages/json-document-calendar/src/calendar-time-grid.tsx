@@ -116,6 +116,7 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
   const gridHeight = (props.hourEnd - props.hourStart) * props.pixelsPerHour;
   return (
     <div
+      ref={interactions.rootRef}
       role="grid"
       aria-multiselectable="true"
       aria-label={props.labels.grid}

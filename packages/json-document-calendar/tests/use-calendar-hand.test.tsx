@@ -201,7 +201,10 @@ describe("useCalendarHand", () => {
     grid.dataset.calendarGrid = "time";
     grid.dataset.calendarDay = "2026-08-03";
     grid.getBoundingClientRect = () => ({ left: 0, right: 100, top: 0, bottom: 1440, width: 100, height: 1440, x: 0, y: 0, toJSON: () => ({}) });
-    document.body.append(grid);
+    const root = document.createElement("div");
+    root.append(grid);
+    document.body.append(root);
+    result.current.pointer.rootRef.current = root;
     const target = {
       closest: () => grid,
       focus: () => undefined,
@@ -227,7 +230,7 @@ describe("useCalendarHand", () => {
     expect(result.current.hand.document.events.map((item) => item.start)).toEqual([
       "2026-08-03T09:00", "2026-08-04T11:00",
     ]);
-    grid.remove();
+    root.remove();
   });
 
   test("finishes an outstanding create rename when selection drag commits", () => {

@@ -55,6 +55,16 @@ describe("DemoWorkbench", () => {
 });
 
 describe("Demo definition and source discovery", () => {
+  test("Calendar Usage exposes the shared edit plan and each canonical owner's API", async () => {
+    const sources = await discoverDemoSources("routes/calendar-demo/CalendarDemoRoute.tsx");
+    const plan = sources.find((file) => file.path === "packages/json-document-editing/src/calendar-event-plan.ts");
+    expect(plan?.referencePath).toBe("/docs/api/editing");
+    expect(await plan!.load()).toContain("export function planCalendarEventEdit");
+    const hand = sources.find((file) => file.path === "packages/json-document-calendar/src/use-calendar-hand.ts");
+    expect(hand?.referencePath).toBe("/docs/api/calendar");
+    expect(await hand!.load()).toContain("export function useCalendarHand");
+  });
+
   test("exercises and exposes the canonical ID allocator in Clipboard Usage", async () => {
     const hook = renderHook(useClipboardLab);
     act(() => { hook.result.current.copy(); });

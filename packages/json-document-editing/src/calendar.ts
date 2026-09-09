@@ -23,7 +23,6 @@ import type { EditingHistoryOptions } from "./history.js";
 import {
   addCalendarDate,
   assertCalendarDocument,
-  calendarAllDaySpan,
   calendarDatePart,
   calendarDaysBetween,
   calendarDocumentCalendars,
@@ -36,8 +35,10 @@ import {
   isCalendarAllDay,
   parseCalendarDate,
   parseCalendarInstant,
+  validateCalendarEvent,
 } from "./calendar-validation.js";
-import { calendarEventExcludeDates, calendarEventRecurrence, projectCalendarOccurrences } from "./calendar-occurrence.js";
+import { calendarEventExcludeDates, calendarEventRecurrence, projectCalendarOccurrences, resolveCalendarOccurrence } from "./calendar-occurrence.js";
+import { planCalendarEventEdit } from "./calendar-event-plan.js";
 import {
   planCalendarSelectionMove,
   type CalendarSelectionMoveTarget,
@@ -126,16 +127,13 @@ export const calendarClipboardFormat = {
     if (!Array.isArray(value.items) || value.items.length === 0) return null;
     if (!value.items.every((item) => (
       isRecord(item)
-      && typeof item.sourceEventId === "string"
-      && typeof item.occurrenceStart === "string"
+      && typeof item.sourceEventId === "string" && item.sourceEventId.length > 0
       && isCalendarClipboardEvent(item.event)
+      && item.occurrenceStart === item.event.start
     ))) return null;
-    return {
-      ...value,
-      anchorOccurrenceStart: typeof value.anchorOccurrenceStart === "string"
-        ? value.anchorOccurrenceStart
-        : (value.items[0] as CalendarClipboardItem).occurrenceStart,
-    } as CalendarClipboard;
+    const anchorOccurrenceStart = value.anchorOccurrenceStart ?? (value.items[0] as CalendarClipboardItem).occurrenceStart;
+    if (!value.items.some((item: CalendarClipboardItem) => item.occurrenceStart === anchorOccurrenceStart)) return null;
+    return { ...value, anchorOccurrenceStart } as CalendarClipboard;
   },
 };
 
@@ -206,8 +204,8 @@ export interface CalendarEditor {
   ): CalendarSelectionDragSource | null;
   dispatch(intent: CalendarIntent): EditingResult<CalendarSelection>;
   copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null;
-  cut(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
-  paste(clipboard: CalendarClipboard, target?: string): EditingResult<CalendarSelection>;
+  cut(source?: ReadonlyArray<CalendarOccurrenceSelection> | CalendarClipboard): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
+  paste(clipboard: CalendarClipboard, target?: string, options?: { readonly calendarId?: string }): EditingResult<CalendarSelection>;
   undo(): EditingResult<CalendarSelection>;
   redo(): EditingResult<CalendarSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<CalendarSelection>) => void): () => void;
@@ -312,6 +310,10 @@ export function createCalendarEditor(
     if (intent.type === "selection.clear") return success(session.select(emptyCalendarSelection()));
 
     if (intent.type === "selection.move") {
+      if (intent.source.points.length !== intent.source.occurrences.length || intent.source.points.some((point, index) => {
+        const occurrence = intent.source.occurrences[index];
+        return occurrence === undefined || point.eventId !== occurrence.eventId || point.occurrenceStart !== occurrence.start;
+      })) return failure("selection.invalid-drag-source");
       const plan = planCalendarSelectionMove(
         value().events,
         intent.source.occurrences,
@@ -327,48 +329,20 @@ export function createCalendarEditor(
       });
     }
 
-    if (intent.type === "event.create") {
-      if (intent.start >= intent.end) return failure("event.invalid-interval");
-      const allDay = intent.allDay === true;
-      const start = allDay ? parseCalendarDate(intent.start) : parseCalendarInstant(intent.start);
-      const end = allDay ? parseCalendarDate(intent.end) : parseCalendarInstant(intent.end);
-      if (start === null || end === null) return failure("event.invalid-instant");
-      const events = value().events;
-      const event: CalendarEvent = {
-        id: createEditingIdAllocator(events.map((event) => event.id), createId, "calendar event")(),
-        title: intent.title ?? "Event",
-        start: intent.start,
-        end: intent.end,
-        allDay,
-        calendarId: intent.calendarId ?? calendarDocumentCalendars(value())[0]?.id ?? "",
-        recurrence: intent.recurrence ?? null,
-        excludeDates: [],
-      };
+    if (intent.type === "event.create" || intent.type === "event.move" || intent.type === "event.resize"
+      || intent.type === "event.move-day" || intent.type === "event.update" || intent.type === "occurrence.edit") {
+      const current = value();
+      const plan = planCalendarEventEdit(current.events, intent, {
+        allocateId: createEditingIdAllocator(current.events.map((event) => event.id), createId, "calendar event"),
+        calendarIds: new Set(calendarDocumentCalendars(current).map((calendar) => calendar.id)),
+        defaultCalendarId: calendarDocumentCalendars(current)[0]?.id ?? "",
+      });
+      if (!plan.ok) return plan;
       return session.apply({
-        operations: [{ op: "add", path: `/events/${events.length}`, value: event }],
-        selectionAfter: selectionForEvents([...events, event], [event.id]),
+        operations: plan.operations,
+        selectionAfter: selectionForOccurrence(plan.selected.eventId, plan.selected.occurrenceStart),
         origin: intent.type,
       });
-    }
-
-    if (intent.type === "event.move") {
-      return moveEvent(intent.eventId, intent.start);
-    }
-
-    if (intent.type === "event.resize") {
-      return resizeEvent(intent.eventId, intent.edge, intent.instant);
-    }
-
-    if (intent.type === "event.move-day") {
-      return moveEventDay(intent.eventId, intent.day);
-    }
-
-    if (intent.type === "event.update") {
-      return updateEvent(intent);
-    }
-
-    if (intent.type === "occurrence.edit") {
-      return editOccurrence(intent);
     }
 
     if (intent.type === "occurrence.remove") {
@@ -379,210 +353,10 @@ export function createCalendarEditor(
       return setCalendarHidden(intent.calendarId, intent.hidden);
     }
 
+    if (intent.type !== "selection.remove") return failure("intent.unsupported");
     const selected = selectedEvents();
     if (selected.length === 0) return failure("selection.empty");
     return removeSelected(selected.map((event) => event.id));
-  }
-
-  function moveEvent(eventId: string, start: string): EditingResult<CalendarSelection> {
-    const events = value().events;
-    const index = events.findIndex((event) => event.id === eventId);
-    const event = events[index];
-    if (!event) return failure("selection.event-not-found");
-    if (isCalendarAllDay(event)) return failure("event.all-day-move");
-    const from = parseCalendarInstant(event.start);
-    const to = parseCalendarInstant(event.end);
-    const nextStart = parseCalendarInstant(start);
-    if (from === null || to === null || nextStart === null) return failure("event.invalid-instant");
-    const nextEnd = formatCalendarInstant(nextStart.add({ minutes: calendarMinutesBetween(from, to) }));
-    return session.apply({
-      operations: [
-        { op: "replace", path: buildPointer(["events", index, "start"]), value: start },
-        { op: "replace", path: buildPointer(["events", index, "end"]), value: nextEnd },
-      ],
-      selectionAfter: selectionForOccurrence(eventId, start),
-      origin: "event.move",
-    });
-  }
-
-  function resizeEvent(
-    eventId: string,
-    edge: "start" | "end",
-    instant: string,
-  ): EditingResult<CalendarSelection> {
-    const events = value().events;
-    const index = events.findIndex((event) => event.id === eventId);
-    const event = events[index];
-    if (!event) return failure("selection.event-not-found");
-    const parsed = isCalendarAllDay(event) ? parseCalendarDate(instant) : parseCalendarInstant(instant);
-    if (parsed === null) return failure("event.invalid-instant");
-    const start = edge === "start" ? instant : event.start;
-    const end = edge === "end" ? instant : event.end;
-    if (start >= end) return failure("event.invalid-interval");
-    return session.apply({
-      operations: [{ op: "replace", path: buildPointer(["events", index, edge]), value: instant }],
-      selectionAfter: selectionForOccurrence(eventId, start),
-      origin: "event.resize",
-    });
-  }
-
-  function moveEventDay(eventId: string, day: string): EditingResult<CalendarSelection> {
-    const events = value().events;
-    const index = events.findIndex((event) => event.id === eventId);
-    const event = events[index];
-    if (!event) return failure("selection.event-not-found");
-    if (parseCalendarDate(day) === null) return failure("event.invalid-day");
-    if (isCalendarAllDay(event)) {
-      const from = parseCalendarDate(event.start);
-      const to = parseCalendarDate(event.end);
-      const nextDay = parseCalendarDate(day);
-      if (from === null || to === null || nextDay === null) return failure("event.invalid-instant");
-      const delta = calendarDaysBetween(from, nextDay);
-      const movedStart = formatCalendarDate(from.add({ days: delta }));
-      const movedEnd = formatCalendarDate(to.add({ days: delta }));
-      return session.apply({
-        operations: [
-          { op: "replace", path: buildPointer(["events", index, "start"]), value: movedStart },
-          { op: "replace", path: buildPointer(["events", index, "end"]), value: movedEnd },
-        ],
-        selectionAfter: selectionForOccurrence(eventId, movedStart),
-        origin: "event.move-day",
-      });
-    }
-    const from = parseCalendarInstant(event.start);
-    const to = parseCalendarInstant(event.end);
-    const currentDay = parseCalendarInstant(`${calendarDatePart(event.start)}T00:00`);
-    const nextDay = parseCalendarInstant(`${day}T00:00`);
-    if (from === null || to === null || currentDay === null || nextDay === null) return failure("event.invalid-instant");
-    const delta = calendarMinutesBetween(currentDay, nextDay);
-    const movedStart = formatCalendarInstant(from.add({ minutes: delta }));
-    const movedEnd = formatCalendarInstant(to.add({ minutes: delta }));
-    return session.apply({
-      operations: [
-        { op: "replace", path: buildPointer(["events", index, "start"]), value: movedStart },
-        { op: "replace", path: buildPointer(["events", index, "end"]), value: movedEnd },
-      ],
-      selectionAfter: selectionForOccurrence(eventId, movedStart),
-      origin: "event.move-day",
-    });
-  }
-
-  function updateEvent(intent: Extract<CalendarIntent, { type: "event.update" }>): EditingResult<CalendarSelection> {
-    const events = value().events;
-    const index = events.findIndex((event) => event.id === intent.eventId);
-    const event = events[index];
-    if (!event) return failure("selection.event-not-found");
-    let start = intent.start ?? event.start;
-    let end = intent.end ?? event.end;
-    const allDay = intent.allDay ?? event.allDay;
-    if (intent.allDay === true && !event.allDay) {
-      start = calendarDatePart(event.start);
-      end = calendarAllDaySpan(start, start)?.end ?? start;
-    } else if (intent.allDay === false && event.allDay) {
-      start = `${calendarDatePart(event.start)}T09:00`;
-      end = `${calendarDatePart(event.start)}T10:00`;
-    } else if (intent.start !== undefined && intent.end === undefined) {
-      const times = shiftedOccurrenceTimes(event, event.start, intent.start, undefined);
-      if (times === null) return failure("event.invalid-interval");
-      start = times.start;
-      end = times.end;
-    }
-    if (start >= end) return failure("event.invalid-interval");
-    const next: CalendarEvent = {
-      ...event,
-      title: intent.title ?? event.title,
-      start,
-      end,
-      allDay,
-      calendarId: intent.calendarId ?? event.calendarId,
-      recurrence: intent.recurrence === undefined ? event.recurrence : intent.recurrence,
-    };
-    if (isCalendarAllDay(next) ? parseCalendarDate(next.start) === null : parseCalendarInstant(next.start) === null) {
-      return failure("event.invalid-instant");
-    }
-    return session.apply({
-      operations: [{ op: "replace", path: buildPointer(["events", index]), value: next }],
-      selectionAfter: selectionForOccurrence(event.id, next.start),
-      origin: intent.type,
-    });
-  }
-
-  function editOccurrence(intent: Extract<CalendarIntent, { type: "occurrence.edit" }>): EditingResult<CalendarSelection> {
-    const events = value().events;
-    const index = events.findIndex((event) => event.id === intent.eventId);
-    const event = events[index];
-    if (!event) return failure("selection.event-not-found");
-    const recurrence = calendarEventRecurrence(event);
-    if (recurrence === null) {
-      return updateEvent({
-        type: "event.update",
-        eventId: intent.eventId,
-        ...(intent.title === undefined ? {} : { title: intent.title }),
-        ...(intent.start === undefined ? {} : { start: intent.start }),
-        ...(intent.end === undefined ? {} : { end: intent.end }),
-      });
-    }
-    if (intent.scope === "all") {
-      const start = intent.start === undefined
-        ? undefined
-        : shiftSeriesValue(event.start, intent.occurrenceStart, intent.start);
-      const end = intent.end === undefined
-        ? undefined
-        : shiftSeriesValue(event.end, occurrenceEndOf(event, intent.occurrenceStart), intent.end);
-      if (intent.start !== undefined && start === undefined) return failure("event.invalid-instant");
-      if (intent.end !== undefined && end === undefined) return failure("event.invalid-instant");
-      return updateEvent({
-        type: "event.update",
-        eventId: intent.eventId,
-        ...(intent.title === undefined ? {} : { title: intent.title }),
-        ...(start === undefined ? {} : { start }),
-        ...(end === undefined ? {} : { end }),
-      });
-    }
-    const times = shiftedOccurrenceTimes(event, intent.occurrenceStart, intent.start, intent.end);
-    if (times === null) return failure("event.invalid-interval");
-    const occurrenceDate = calendarDatePart(intent.occurrenceStart);
-    if (intent.scope === "this") {
-      const split: CalendarEvent = {
-        ...event,
-        id: createEditingIdAllocator(events.map((event) => event.id), createId, "calendar event")(),
-        title: intent.title ?? event.title,
-        start: times.start,
-        end: times.end,
-        recurrence: null,
-        excludeDates: [],
-      };
-      return session.apply({
-        operations: [
-          {
-            op: "replace",
-            path: buildPointer(["events", index, "excludeDates"]),
-            value: [...calendarEventExcludeDates(event), occurrenceDate],
-          },
-          { op: "add", path: `/events/${events.length}`, value: split },
-        ],
-        selectionAfter: selectionForEvents([...events, split], [split.id]),
-        origin: intent.type,
-      });
-    }
-    const until = addCalendarDate(occurrenceDate, -1) ?? occurrenceDate;
-    const following: CalendarEvent = {
-      ...event,
-      id: createEditingIdAllocator(events.map((event) => event.id), createId, "calendar event")(),
-      title: intent.title ?? event.title,
-      start: times.start,
-      end: times.end,
-      recurrence: { ...recurrence, until: "" },
-      excludeDates: [],
-    };
-    return session.apply({
-      operations: [
-        { op: "replace", path: buildPointer(["events", index, "recurrence"]), value: { ...recurrence, until } },
-        { op: "add", path: `/events/${events.length}`, value: following },
-      ],
-      selectionAfter: selectionForEvents([...events, following], [following.id]),
-      origin: intent.type,
-    });
   }
 
   function removeOccurrence(
@@ -592,6 +366,8 @@ export function createCalendarEditor(
     const index = events.findIndex((event) => event.id === intent.eventId);
     const event = events[index];
     if (!event) return failure("selection.event-not-found");
+    if (intent.scope !== "this" && intent.scope !== "this-and-following" && intent.scope !== "all") return failure("occurrence.invalid-scope");
+    if (resolveCalendarOccurrence(events, { eventId: event.id, occurrenceStart: intent.occurrenceStart }) === null) return failure("selection.stale-occurrence");
     const recurrence = calendarEventRecurrence(event);
     if (recurrence === null || intent.scope === "all") {
       return removeSelected([event.id]);
@@ -600,7 +376,7 @@ export function createCalendarEditor(
     if (intent.scope === "this") {
       return session.apply({
         operations: [{
-          op: "replace",
+          op: "add",
           path: buildPointer(["events", index, "excludeDates"]),
           value: [...calendarEventExcludeDates(event), occurrenceDate],
         }],
@@ -624,6 +400,7 @@ export function createCalendarEditor(
   }
 
   function setCalendarHidden(calendarId: string, hidden: boolean): EditingResult<CalendarSelection> {
+    if (typeof hidden !== "boolean") return failure("calendar.invalid-hidden");
     const calendars = calendarDocumentCalendars(value());
     const index = calendars.findIndex((item) => item.id === calendarId);
     if (index < 0) return failure("calendar.not-found");
@@ -655,7 +432,8 @@ export function createCalendarEditor(
     const source = occurrences ?? selectedOccurrences();
     const items = source.flatMap((occurrence): CalendarClipboardItem[] => {
       const event = value().events.find((candidate) => candidate.id === occurrence.eventId);
-      if (event === undefined || occurrence.start >= occurrence.end) return [];
+      const current = resolveCalendarOccurrence(value().events, { eventId: occurrence.eventId, occurrenceStart: occurrence.start });
+      if (event === undefined || current === null || current.end !== occurrence.end) return [];
       return [{
         sourceEventId: event.id,
         occurrenceStart: occurrence.start,
@@ -663,12 +441,14 @@ export function createCalendarEditor(
           ...event,
           start: occurrence.start,
           end: occurrence.end,
+          allDay: isCalendarAllDay(event),
+          calendarId: event.calendarId ?? "",
           recurrence: null,
           excludeDates: [],
         },
       }];
     });
-    if (items.length === 0) return null;
+    if (items.length === 0 || items.length !== source.length) return null;
     return {
       type: "application/vnd.interactive-os.calendar+json",
       anchorOccurrenceStart: items[0]!.occurrenceStart,
@@ -704,9 +484,19 @@ export function createCalendarEditor(
     const events = value().events;
     const removals = new Set<string>();
     const exclusions = new Map<string, Set<string>>();
+    const operations: JSONPatchOperation[] = [];
     for (const item of clipboard.items) {
       const event = events.find((candidate) => candidate.id === item.sourceEventId);
       if (event === undefined) return failure("selection.event-not-found");
+      const current = resolveCalendarOccurrence(events, { eventId: event.id, occurrenceStart: item.occurrenceStart });
+      if (current === null || current.end !== item.event.end) return failure("selection.stale-occurrence");
+      const expected: Record<string, JSONValue> = { ...item.event, start: event.start, end: event.end };
+      // Clipboard events are materialized; keep the source's legacy optional-field shape.
+      for (const field of ["allDay", "calendarId", "recurrence", "excludeDates"] as const) {
+        if (event[field] === undefined) delete expected[field];
+        else if (field === "recurrence" || field === "excludeDates") expected[field] = event[field];
+      }
+      operations.push({ op: "test", path: buildPointer(["events", events.indexOf(event)]), value: expected });
       if (calendarEventRecurrence(event) === null) removals.add(event.id);
       else {
         const dates = exclusions.get(event.id) ?? new Set(calendarEventExcludeDates(event));
@@ -714,10 +504,9 @@ export function createCalendarEditor(
         exclusions.set(event.id, dates);
       }
     }
-    const operations: JSONPatchOperation[] = [];
     for (const [eventId, dates] of exclusions) {
       const index = events.findIndex((event) => event.id === eventId);
-      operations.push({ op: "replace", path: buildPointer(["events", index, "excludeDates"]), value: [...dates] });
+      operations.push({ op: "add", path: buildPointer(["events", index, "excludeDates"]), value: [...dates] });
     }
     for (const index of events.map((event, index) => removals.has(event.id) ? index : -1).filter((index) => index >= 0).sort((a, b) => b - a)) {
       operations.push({ op: "remove", path: buildPointer(["events", index]) });
@@ -725,13 +514,17 @@ export function createCalendarEditor(
     return session.apply({ operations, selectionAfter: emptyCalendarSelection(), origin: "clipboard.cut" });
   }
 
-  function paste(clipboard: CalendarClipboard, target?: string): EditingResult<CalendarSelection> {
-    if (clipboard.items.length === 0) return failure("clipboard.empty");
+  function paste(clipboard: CalendarClipboard, target?: string, options: { readonly calendarId?: string } = {}): EditingResult<CalendarSelection> {
+    const parsed = calendarClipboardFormat.parse(clipboard);
+    if (parsed === null) return failure("clipboard.invalid");
+    clipboard = parsed;
+    const calendarIds = new Set(calendarDocumentCalendars(value()).map((calendar) => calendar.id));
+    if (options.calendarId !== undefined && !calendarIds.has(options.calendarId)) return failure("calendar.not-found");
     const resolvedTarget = target ?? selectedEvents()[0]?.start;
     if (resolvedTarget === undefined) return failure("clipboard.invalid-target");
     const targetInstant = parseCalendarInstant(resolvedTarget);
     const targetDate = parseCalendarDate(calendarDatePart(resolvedTarget));
-    if (targetInstant === null && targetDate === null) return failure("clipboard.invalid-target");
+    if (targetInstant === null && parseCalendarDate(resolvedTarget) === null) return failure("clipboard.invalid-target");
     const timedAnchor = parseCalendarInstant(clipboard.anchorOccurrenceStart)
       ?? clipboard.items.map((item) => parseCalendarInstant(item.event.start)).find((item) => item !== null)
       ?? null;
@@ -763,8 +556,10 @@ export function createCalendarEditor(
         start = source.allDay ? formatCalendarDate(nextStart) : `${formatCalendarDate(nextStart)}T${source.start.slice(11)}`;
         end = source.allDay ? formatCalendarDate(nextStart.add({ days: duration })) : `${formatCalendarDate(nextStart.add({ days: duration }))}T${source.end.slice(11)}`;
       }
-      const event = { ...source, id: allocateId(), start, end, recurrence: null, excludeDates: [] };
-      pasted.push(event);
+      const event = { ...source, start, end, calendarId: options.calendarId ?? source.calendarId, recurrence: null, excludeDates: [] };
+      const validation = validateCalendarEvent(event, calendarIds);
+      if (!validation.ok) return validation;
+      pasted.push({ ...event, id: allocateId() });
     }
     return session.apply({
       operations: pasted.map((event, offset) => ({ op: "add", path: `/events/${existing.length + offset}`, value: event })),
@@ -781,8 +576,8 @@ export function createCalendarEditor(
     prepareSelectionDrag,
     dispatch,
     copy,
-    cut: (occurrences) => cutEditingClipboard(
-      () => copy(occurrences),
+    cut: (source) => cutEditingClipboard(
+      () => source !== undefined && "type" in source ? calendarClipboardFormat.parse(source) : copy(source),
       removeClipboard,
     ),
     paste,
@@ -793,16 +588,9 @@ export function createCalendarEditor(
 }
 
 function isCalendarClipboardEvent(value: unknown): value is CalendarEvent {
-  return isRecord(value)
-    && typeof value.id === "string"
-    && typeof value.title === "string"
-    && typeof value.start === "string"
-    && typeof value.end === "string"
-    && typeof value.allDay === "boolean"
-    && typeof value.calendarId === "string"
-    && value.recurrence === null
-    && Array.isArray(value.excludeDates)
-    && value.excludeDates.every((date) => typeof date === "string");
+  return isRecord(value) && validateCalendarEvent(value).ok
+    && typeof value.allDay === "boolean" && typeof value.calendarId === "string"
+    && value.recurrence === null && Array.isArray(value.excludeDates) && value.excludeDates.length === 0;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -866,25 +654,6 @@ function compareCalendarOccurrencePoints(
   return band
     || left.occurrenceStart.localeCompare(right.occurrenceStart)
     || left.eventId.localeCompare(right.eventId);
-}
-
-function resolveCalendarOccurrence(
-  events: ReadonlyArray<CalendarEvent>,
-  point: CalendarOccurrencePoint,
-): CalendarOccurrenceSelection | null {
-  const event = events.find((candidate) => candidate.id === point.eventId);
-  if (event === undefined) return null;
-  const day = calendarDatePart(point.occurrenceStart);
-  const next = addCalendarDate(day, 1);
-  if (next === null) return null;
-  const occurrence = projectCalendarOccurrences([event], day, next).find((candidate) => (
-    candidate.start === point.occurrenceStart
-  ));
-  return occurrence === undefined ? null : {
-    eventId: event.id,
-    start: occurrence.start,
-    end: occurrence.end,
-  };
 }
 
 export function calendarNowMarker(nowInstant: string, day: string): { readonly minutes: number } | null {
@@ -1154,58 +923,6 @@ export function calendarEventsInMonth(
     start: item.start,
     end: item.end,
   }));
-}
-
-function occurrenceEndOf(event: CalendarEvent, occurrenceStart: string): string {
-  const bounds = calendarEventBounds(event);
-  if (bounds === null) return occurrenceStart;
-  if (isCalendarAllDay(event)) {
-    const from = parseCalendarDate(calendarDatePart(occurrenceStart));
-    if (from === null) return occurrenceStart;
-    return formatCalendarDate(from.add({ days: calendarDaysBetween(bounds.from.toPlainDate(), bounds.to.toPlainDate()) }));
-  }
-  const from = parseCalendarInstant(occurrenceStart);
-  if (from === null) return occurrenceStart;
-  return formatCalendarInstant(from.add({ minutes: calendarMinutesBetween(bounds.from, bounds.to) }));
-}
-
-function shiftSeriesValue(seriesValue: string, origin: string, next: string): string | undefined {
-  const originInstant = parseCalendarInstant(origin);
-  const nextInstant = parseCalendarInstant(next);
-  const seriesInstant = parseCalendarInstant(seriesValue);
-  if (originInstant !== null && nextInstant !== null && seriesInstant !== null) {
-    return formatCalendarInstant(seriesInstant.add({ minutes: calendarMinutesBetween(originInstant, nextInstant) }));
-  }
-  const originDate = parseCalendarDate(calendarDatePart(origin));
-  const nextDate = parseCalendarDate(calendarDatePart(next));
-  const seriesDate = parseCalendarDate(calendarDatePart(seriesValue));
-  if (originDate === null || nextDate === null || seriesDate === null) return undefined;
-  return formatCalendarDate(seriesDate.add({ days: calendarDaysBetween(originDate, nextDate) }));
-}
-
-function shiftedOccurrenceTimes(
-  event: CalendarEvent,
-  occurrenceStart: string,
-  start: string | undefined,
-  end: string | undefined,
-): { readonly start: string; readonly end: string } | null {
-  const nextStart = start ?? occurrenceStart;
-  if (end !== undefined) return nextStart < end ? { start: nextStart, end } : null;
-  const bounds = calendarEventBounds(event);
-  if (bounds === null) return null;
-  if (isCalendarAllDay(event)) {
-    const from = parseCalendarDate(calendarDatePart(nextStart));
-    if (from === null) return null;
-    const duration = calendarDaysBetween(bounds.from.toPlainDate(), bounds.to.toPlainDate());
-    const nextEnd = formatCalendarDate(from.add({ days: duration }));
-    const dateStart = calendarDatePart(nextStart);
-    return dateStart < nextEnd ? { start: dateStart, end: nextEnd } : null;
-  }
-  const from = parseCalendarInstant(nextStart);
-  if (from === null) return null;
-  const duration = calendarMinutesBetween(bounds.from, bounds.to);
-  const nextEnd = formatCalendarInstant(from.add({ minutes: duration }));
-  return nextStart < nextEnd ? { start: nextStart, end: nextEnd } : null;
 }
 
 function emptyCalendarSelection(): CalendarSelection {
