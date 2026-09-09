@@ -50,7 +50,7 @@ export function CanvasHand(props: CanvasHandProps) {
             onSelect={(shiftKey) => hand.select(object.id, shiftKey)} onEdit={() => hand.editText(object.id)} onHandle={(interaction, event) => hand.interaction(interaction, event, object, "drag")} />
         </g>)}
         {copyOriginals.size > 0 && <g data-canvas-copy-preview="" pointerEvents="none">{hand.objects.filter((object) => selectedKeys.has(object.id)).map((object) => <CanvasObjectView key={object.id} object={object} />)}</g>}
-        {hand.preview && <g pointerEvents="none" opacity={0.65}><CanvasObjectView object={{ ...hand.preview, id: "preview" }} /></g>}
+        {hand.preview && <g data-canvas-preview="" pointerEvents="none" opacity={0.65}><CanvasObjectView object={{ ...hand.preview, id: "preview" }} /></g>}
         {hand.tool === "select" && hand.objects.filter((object) => selectedKeys.has(object.id)).map((object) =>
           <rect key={object.id} data-selection-outline={object.id} x={object.x} y={object.y} width={object.width} height={object.height} fill="none" stroke="rgb(var(--color-border-accent))" strokeWidth={object.id === selected?.id ? 2 : 1} pointerEvents="none" />)}
         {selected && hand.tool === "select" && <g>

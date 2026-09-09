@@ -15,7 +15,7 @@ export interface CanvasCreationStyle {
 }
 
 type Gesture = { readonly base: CanvasDocument } & (
-  | { readonly type: "create"; readonly tool: Exclude<CanvasObjectKind, "path" | "image">; readonly start: ObjectPoint; readonly point: ObjectPoint }
+  | { readonly type: "create"; readonly tool: Exclude<CanvasObjectKind, "path" | "image">; readonly start: ObjectPoint; readonly point: ObjectPoint; readonly dragged: boolean }
   | { readonly type: "draw"; readonly points: ReadonlyArray<ObjectPoint> }
   | { readonly type: "resize"; readonly object: CanvasObject; readonly start: ObjectPoint; readonly point: ObjectPoint; readonly edge: ResizeEdge }
 );
@@ -138,12 +138,15 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     return point && Number.isFinite(point.x) && Number.isFinite(point.y) ? { x: point.x, y: point.y } : null;
   }
 
-  function createPreview(gesture: Extract<Gesture, { type: "create" | "draw" }>) {
+  function createPreview(gesture: Extract<Gesture, { type: "create" | "draw" }>, committing = false) {
     if (gesture.type === "draw") return gesture.points.length < 2 ? null : createCanvasPath(gesture.points, { color: style.textColor, label: "Drawing", strokeWidth: style.strokeWidth });
     const { start, point } = gesture;
-    const click = Math.hypot(point.x - start.x, point.y - start.y) < 3;
+    const click = !gesture.dragged;
+    // A default-sized object belongs to the completed click, never its press preview.
+    if (click && !committing) return null;
+    if (!click && start.x === point.x && start.y === point.y) return null;
     return createCanvasObject(gesture.tool, {
-      x: Math.min(start.x, point.x), y: Math.min(start.y, point.y),
+      x: click ? start.x : Math.min(start.x, point.x), y: click ? start.y : Math.min(start.y, point.y),
       width: click ? (gesture.tool === "text" ? 280 : 160) : Math.abs(point.x - start.x),
       height: click ? (gesture.tool === "text" ? 64 : 100) : Math.abs(point.y - start.y),
     }, { color: gesture.tool === "text" ? style.textColor : style.color, label: gesture.tool === "text" ? "Text" : "", fontSize: style.fontSize });
@@ -159,7 +162,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     const active = gestures.commit();
     if (!active || active.base !== current()) return;
     if (active.type === "create" || active.type === "draw") {
-      const object = createPreview(active);
+      const object = createPreview(active, true);
       if (!object) return;
       const result = dispatch({ type: "object.create", object });
       if (result.ok) {
@@ -183,7 +186,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     pointer.begin(event.currentTarget, event.pointerId, true);
     if (tool === "select") { beginSelect(point, null, event); return; }
     const base = current();
-    gestures.begin(tool === "path" ? { type: "draw", points: [point], base } : { type: "create", tool, start: point, point, base });
+    gestures.begin(tool === "path" ? { type: "draw", points: [point], base } : { type: "create", tool, start: point, point, dragged: false, base });
   }
 
   function pointerMove(event: PointerEvent<SVGSVGElement>) {
@@ -194,6 +197,8 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     if (active.type === "draw") {
       const last = active.points.at(-1)!;
       if (last.x !== point.x || last.y !== point.y) gestures.preview({ ...active, points: [...active.points, point] });
+    } else if (active.type === "create") {
+      gestures.preview({ ...active, point, dragged: active.dragged || Math.hypot(point.x - active.start.x, point.y - active.start.y) >= 3 });
     } else gestures.preview({ ...active, point });
   }
 

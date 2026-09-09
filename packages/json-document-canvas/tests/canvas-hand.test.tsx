@@ -349,6 +349,83 @@ test("every toolbar control shares icon, accessible name and canonical tooltip w
   expect(toolbar.getByRole("button", { name: "선택" }).getAttribute("aria-pressed")).toBe("false");
 });
 
+const creationTools = [
+  { tool: "사각형", kind: "rectangle", width: 160, height: 100 },
+  { tool: "타원", kind: "ellipse", width: 160, height: 100 },
+  { tool: "글자", kind: "text", width: 280, height: 64 },
+] as const;
+
+function creationPreview(container: HTMLElement) {
+  const view = container.querySelector("[data-canvas-preview]")?.firstElementChild;
+  if (!view) return null;
+  return {
+    width: Number(view.getAttribute(view.tagName === "ellipse" ? "rx" : "width")) * (view.tagName === "ellipse" ? 2 : 1),
+    height: Number(view.getAttribute(view.tagName === "ellipse" ? "ry" : "height")) * (view.tagName === "ellipse" ? 2 : 1),
+  };
+}
+
+test.each(creationTools)("$kind press stays empty and a drag previews only its current bounds", ({ tool, kind }) => {
+  const { svg, container, value, commits } = setup();
+  fireEvent.click(screen.getByRole("button", { name: tool }));
+  fireEvent.pointerDown(svg, event(40, 50));
+  expect(creationPreview(container)).toBeNull();
+  fireEvent.pointerMove(svg, event(40.5, 50.5));
+  expect(creationPreview(container)).toBeNull();
+  fireEvent.pointerMove(svg, event(42, 51.5));
+  expect(creationPreview(container)).toEqual({ width: 4, height: 3 });
+  fireEvent.pointerMove(svg, event(44, 53));
+  expect(creationPreview(container)).toEqual({ width: 8, height: 6 });
+  expect(value()).toEqual(blank); expect(commits).not.toHaveBeenCalled();
+  fireEvent.pointerUp(svg, event(140, 100));
+  expect(creationPreview(container)).toBeNull();
+  expect(value().objects[0]).toMatchObject({ kind, x: 80, y: 100, width: 200, height: 100 });
+  expect(commits).toHaveBeenCalledOnce();
+});
+
+test.each(creationTools)("$kind click creates its default size only on release at the press anchor", ({ tool, kind, width, height }) => {
+  const { svg, container, value, commits } = setup();
+  fireEvent.click(screen.getByRole("button", { name: tool }));
+  fireEvent.pointerDown(svg, event(40, 50));
+  fireEvent.pointerMove(svg, event(39.5, 49.5));
+  expect(creationPreview(container)).toBeNull(); expect(value()).toEqual(blank);
+  fireEvent.pointerUp(svg, event(39.5, 49.5));
+  expect(value().objects[0]).toMatchObject({ kind, x: 80, y: 100, width, height });
+  expect(commits).toHaveBeenCalledOnce();
+  expect(screen.queryByRole("textbox", { name: "Canvas text" }) !== null).toBe(kind === "text");
+});
+
+test.each(creationTools)("$kind stays a drag near the origin and an exact return creates nothing", ({ tool, width, height }) => {
+  const { svg, container, value, editor, commits } = setup();
+  fireEvent.click(screen.getByRole("button", { name: tool }));
+  fireEvent.pointerDown(svg, event(40, 50)); fireEvent.pointerMove(svg, event(50, 60));
+  fireEvent.pointerMove(svg, event(40.5, 50.5));
+  expect(creationPreview(container)).toEqual({ width: 1, height: 1 });
+  fireEvent.pointerMove(svg, event(40, 50));
+  expect(creationPreview(container)).toBeNull();
+  fireEvent.pointerUp(svg, event(40, 50));
+  expect(value()).toEqual(blank); expect(editor.snapshot.canUndo).toBe(false); expect(commits).not.toHaveBeenCalled();
+  fireEvent.pointerDown(svg, event(80, 60)); fireEvent.pointerUp(svg, event(80, 60));
+  expect(value().objects[0]).toMatchObject({ id: "object-1", width, height });
+});
+
+test("a foreign pointer cannot change a pending click into a drag", () => {
+  const { svg, container, value } = setup();
+  fireEvent.click(screen.getByRole("button", { name: "사각형" }));
+  fireEvent.pointerDown(svg, event(40, 50));
+  fireEvent.pointerMove(svg, event(140, 100, 9)); fireEvent.pointerUp(svg, event(140, 100, 9));
+  expect(creationPreview(container)).toBeNull(); expect(value()).toEqual(blank);
+  fireEvent.pointerUp(svg, event(40, 50));
+  expect(value().objects[0]).toMatchObject({ x: 80, y: 100, width: 160, height: 100 });
+});
+
+test("release alone can establish a reverse drag using its final coordinates", () => {
+  const { svg, value, commits } = setup();
+  fireEvent.click(screen.getByRole("button", { name: "사각형" }));
+  fireEvent.pointerDown(svg, event(140, 100)); fireEvent.pointerUp(svg, event(40, 50));
+  expect(value().objects[0]).toMatchObject({ x: 80, y: 100, width: 200, height: 100 });
+  expect(commits).toHaveBeenCalledOnce();
+});
+
 test("creation is transient until release, scales coordinates and selects the result with one undo step", () => {
   const { svg, value, editor, commits } = setup();
   fireEvent.click(screen.getByRole("button", { name: "사각형" }));
@@ -364,14 +441,16 @@ test("creation is transient until release, scales coordinates and selects the re
   fireEvent.click(screen.getByRole("button", { name: "다시 실행" })); expect(value().objects).toHaveLength(1);
 });
 
-test.each(["escape", "pointercancel", "lostpointercapture"])("%s cancels creation without a commit or history", (reason) => {
-  const { svg, value, editor } = setup();
+test.each(["escape", "pointercancel", "lostpointercapture"].flatMap((reason) => [false, true].map((drag) => ({ reason, drag }))))("$reason cancels creation (drag=$drag) without a commit or history", ({ reason, drag }) => {
+  const { svg, container, value, editor } = setup();
   fireEvent.click(screen.getByRole("button", { name: "타원" }));
-  fireEvent.pointerDown(svg, event(40, 50)); fireEvent.pointerMove(svg, event(140, 100));
+  fireEvent.pointerDown(svg, event(40, 50));
+  if (drag) fireEvent.pointerMove(svg, event(140, 100));
   if (reason === "escape") fireEvent.keyDown(svg, { key: "Escape" });
   else if (reason === "pointercancel") fireEvent.pointerCancel(svg, event(140, 100));
   else fireEvent.lostPointerCapture(svg, event(140, 100));
   fireEvent.pointerUp(svg, event(140, 100));
+  expect(creationPreview(container)).toBeNull();
   expect(value()).toEqual(blank); expect(editor.snapshot.canUndo).toBe(false);
 });
 
