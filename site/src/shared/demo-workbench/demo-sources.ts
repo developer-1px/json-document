@@ -33,6 +33,8 @@ import dateValuesSource from "../../../../packages/json-document-calendar/src/da
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
 import affordanceSelectSource from "../../../../packages/json-document-affordance/src/select.ts?raw";
+import planeSelectSource from "../../../../packages/json-document-affordance/src/plane-select.ts?raw";
+import affordanceDragSource from "../../../../packages/json-document-affordance/src/drag.ts?raw";
 import viewportPositionSource from "../../../../packages/json-document-affordance/src/viewport-position.ts?raw";
 import anchoredFloatingPositionSource from "../../../../packages/json-document-affordance/src/anchored-floating-position.ts?raw";
 import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
@@ -276,6 +278,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
   ["packages/json-document-affordance/src/gesture-session.ts", gestureSessionSource],
+  ["packages/json-document-affordance/src/plane-select.ts", planeSelectSource],
+  ["packages/json-document-affordance/src/drag.ts", affordanceDragSource],
   ["packages/json-document-affordance/src/interaction-handle.ts", interactionHandleSource],
   ["packages/json-document-affordance/src/content-interaction.ts", contentInteractionAffordanceSource],
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
@@ -1271,6 +1275,36 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-affordance",
     symbol: "createCanvasGestureSession",
     sourcePath: "packages/json-document-affordance/src/canvas-gesture-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/plane-select.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/select.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/drag.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/gesture-session.ts",
+  },
+  ...["dragAffordance", "resizeAffordance", "marqueeAffordance", "marqueeHitsAffordance"].map((symbol) => ({
+    packageName: "@interactive-os/json-document-affordance",
+    symbol,
+    sourcePath: "packages/json-document-affordance/src/drag.ts",
+  })),
+  {
+    packageName: "@interactive-os/json-document-selection",
+    symbol: "createKeySelectionFamily",
+    sourcePath: "packages/json-document-selection/src/key/index.ts",
   },
   {
     packageName: "@interactive-os/json-document-affordance",

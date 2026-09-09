@@ -4,6 +4,7 @@ import { createJSONDocument } from "@interactive-os/json-document";
 import { createObjectEditor } from "@interactive-os/json-document-editing";
 import type { CanvasDocument } from "@interactive-os/json-document-object-document";
 import { CanvasHand } from "../src/index.js";
+import { createPlaneSelectProfile } from "@interactive-os/json-document-affordance";
 
 const blank: CanvasDocument = { profile: "canvas/1", width: 1280, height: 720, objects: [] };
 const style = { color: "#abcdef", textColor: "#123456", fontSize: 32, strokeWidth: 3 };
@@ -17,12 +18,12 @@ beforeAll(() => {
 });
 afterEach(cleanup);
 
-function setup(document = blank) {
+function setup(document = blank, selectProfile = createPlaneSelectProfile()) {
   const source = createJSONDocument(document);
   const commits = vi.fn(); source.subscribe(commits);
   let id = 0;
   const editor = createObjectEditor(source, { createId: () => `object-${++id}` });
-  const view = render(<CanvasHand editor={editor} creationStyle={style} />);
+  const view = render(<CanvasHand editor={editor} creationStyle={style} selectProfile={selectProfile} />);
   const svg = screen.getByRole("group", { name: "Canvas slide" });
   Object.defineProperty(svg, "viewBox", { value: { baseVal: { x: 0, y: 0, width: 1280, height: 720 } } });
   svg.getBoundingClientRect = () => ({ x: 0, y: 0, left: 0, top: 0, right: 640, bottom: 360, width: 640, height: 360, toJSON() {} });
@@ -34,6 +35,139 @@ function rectangle(svg: Element) {
   fireEvent.click(screen.getByRole("button", { name: "사각형" }));
   fireEvent.pointerDown(svg, event(40, 50)); fireEvent.pointerMove(svg, event(140, 100)); fireEvent.pointerUp(svg, event(140, 100));
 }
+
+const populated: CanvasDocument = { ...blank, objects: [
+  { id: "a", kind: "text", label: "Title", fontSize: 24, color: "black", x: 100, y: 100, width: 100, height: 100 },
+  { id: "b", kind: "rectangle", label: "Box", color: "blue", x: 300, y: 100, width: 100, height: 100 },
+  { id: "c", kind: "ellipse", label: "Circle", color: "green", x: 600, y: 100, width: 100, height: 100 },
+] };
+function pick(container: HTMLElement, key: string, shiftKey = false) {
+  const target = container.querySelector(`[data-canvas-object="${key}"]`)!;
+  fireEvent.pointerDown(target, { ...event(70, 70), shiftKey });
+  fireEvent.pointerUp(window, { ...event(70, 70), shiftKey });
+}
+
+test("Canvas consumes an injected profile for click/Shift/keyboard while focus remains independent", () => {
+  const profile = createPlaneSelectProfile();
+  const begin = vi.spyOn(profile, "begin"), keyDown = vi.spyOn(profile, "keyDown");
+  const { container, svg, editor, value, commits } = setup(populated, profile);
+  pick(container, "c", true); expect(editor.snapshot.selection.keys).toEqual(["a", "c"]);
+  pick(container, "a", true); expect(editor.snapshot.selection.keys).toEqual(["c"]);
+  pick(container, "b"); expect(editor.snapshot.selection.keys).toEqual(["b"]);
+  expect(begin).toHaveBeenCalledTimes(3);
+  const a = container.querySelector('[data-canvas-object="a"]')!;
+  fireEvent.focus(a); expect(editor.snapshot.selection.keys).toEqual(["b"]);
+  fireEvent.keyDown(a, { key: " ", shiftKey: true }); expect(editor.snapshot.selection.keys).toEqual(["a", "b"]);
+  expect(editor.snapshot.selection.primaryKey).toBe("a");
+  for (let i = 0; i < 2; i++) fireEvent.keyDown(svg, { key: "a", metaKey: true });
+  expect(editor.snapshot.selection.keys).toEqual(["a", "b", "c"]); expect(editor.snapshot.selection.primaryKey).toBe("a");
+  expect(keyDown).toHaveBeenCalled();
+  expect(container.querySelectorAll('[aria-pressed="true"][data-canvas-object]')).toHaveLength(3);
+  fireEvent.pointerDown(svg, event(500, 300)); fireEvent.pointerUp(svg, event(500, 300));
+  expect(editor.snapshot.selection.keys).toEqual([]); expect(value()).toEqual(populated);
+  expect(commits).not.toHaveBeenCalled(); expect(editor.snapshot.canUndo).toBe(false);
+});
+
+test("Enter activates the focused object instead of editing an unrelated primary", () => {
+  const { container, editor } = setup(populated);
+  const box = container.querySelector('[data-canvas-object="b"]')!;
+  fireEvent.focus(box); fireEvent.keyDown(box, { key: "Enter" });
+  expect(editor.snapshot.selection.keys).toEqual(["b"]);
+  expect(screen.queryByRole("textbox", { name: "Canvas text" })).toBeNull();
+  const text = container.querySelector('[data-canvas-object="a"]')!;
+  fireEvent.focus(text); fireEvent.keyDown(text, { key: "Enter" });
+  expect(editor.snapshot.selection.keys).toEqual(["a"]);
+  expect(screen.getByRole("textbox", { name: "Canvas text" })).toBeTruthy();
+});
+
+test("marquee previews replace and Shift-add from the base without committing the document", () => {
+  const { container, svg, editor, value, commits } = setup(populated);
+  pick(container, "c");
+  fireEvent.pointerDown(svg, event(20, 20)); fireEvent.pointerMove(svg, event(210, 110));
+  expect(editor.snapshot.selection.keys).toEqual(["c"]);
+  expect(container.querySelectorAll("[data-selection-outline]")).toHaveLength(2);
+  expect(container.querySelector("[data-canvas-marquee]")).not.toBeNull();
+  fireEvent.pointerUp(svg, event(210, 110)); expect(editor.snapshot.selection.keys).toEqual(["a", "b"]);
+  expect(container.querySelector("[data-canvas-marquee]")).toBeNull();
+  fireEvent.pointerDown(svg, { ...event(280, 20), shiftKey: true });
+  fireEvent.pointerMove(svg, event(360, 110)); fireEvent.pointerUp(svg, event(360, 110));
+  expect(editor.snapshot.selection.keys).toEqual(["a", "b", "c"]);
+  expect(value()).toEqual(populated); expect(commits).not.toHaveBeenCalled();
+});
+
+test("dragging a selected hit moves the set once; one Undo restores the set and Delete removes it atomically", () => {
+  const { container, svg, editor, value, commits } = setup(populated);
+  pick(container, "b", true);
+  const before = value(), target = container.querySelector('[data-canvas-object="a"]')!;
+  fireEvent.pointerDown(target, event(70, 70)); fireEvent.pointerMove(window, event(100, 100));
+  expect(value()).toBe(before); expect(commits).not.toHaveBeenCalled();
+  expect(container.querySelector('[data-canvas-object="b"]')?.getAttribute("x")).toBe("360");
+  fireEvent.pointerUp(window, event(100, 100));
+  expect(value().objects.map((object) => object.x)).toEqual([160, 360, 600]);
+  expect(editor.snapshot.selection).toMatchObject({ keys: ["a", "b"], primaryKey: "a" });
+  expect(commits).toHaveBeenCalledTimes(1);
+  fireEvent.keyDown(svg, { key: "z", metaKey: true }); expect(value()).toEqual(before);
+  expect(editor.snapshot.canUndo).toBe(false); expect(editor.snapshot.selection.keys).toEqual(["a", "b"]);
+  fireEvent.keyDown(svg, { key: "z", metaKey: true, shiftKey: true });
+  const moved = value(); commits.mockClear();
+  fireEvent.keyDown(svg, { key: "Delete" }); expect(value().objects.map((object) => object.id)).toEqual(["c"]);
+  expect(commits).toHaveBeenCalledTimes(1);
+  fireEvent.keyDown(svg, { key: "z", metaKey: true }); expect(value()).toEqual(moved);
+  expect(editor.snapshot.selection).toMatchObject({ keys: ["a", "b"], primaryKey: "a" });
+});
+
+test.each(["Escape", "pointercancel", "lostpointercapture"])("%s cancels marquee before clearing the base selection", (reason) => {
+  const { container, svg, editor, value, commits } = setup(populated);
+  fireEvent.pointerDown(svg, event(20, 20)); fireEvent.pointerMove(svg, event(220, 110));
+  if (reason === "Escape") fireEvent.keyDown(svg, { key: reason });
+  else if (reason === "pointercancel") fireEvent.pointerCancel(svg, event(220, 110));
+  else fireEvent.lostPointerCapture(svg, event(220, 110));
+  fireEvent.pointerUp(svg, event(220, 110));
+  expect(container.querySelector("[data-canvas-marquee]")).toBeNull();
+  expect(editor.snapshot.selection.keys).toEqual(["a"]); expect(value()).toEqual(populated);
+  expect(commits).not.toHaveBeenCalled(); expect(editor.snapshot.canUndo).toBe(false);
+  fireEvent.keyDown(svg, { key: "Escape" }); expect(editor.snapshot.selection.keys).toEqual([]);
+});
+
+test("only primary resizes and edits text while retaining the selected set", () => {
+  const { container, svg, editor, value, commits } = setup(populated);
+  act(() => { editor.dispatch({ type: "selection.set", objectIds: ["a", "b"], primaryKey: "a" }); });
+  expect(container.querySelectorAll("[data-resize-edge]")).toHaveLength(4);
+  const handle = container.querySelector('[data-resize-edge="se"]')!;
+  fireEvent.pointerDown(handle, event(100, 100)); fireEvent.pointerMove(window, event(120, 115)); fireEvent.pointerUp(window, event(120, 115));
+  expect(value().objects[0]!.width).toBeCloseTo(140); expect(value().objects[0]!.height).toBeCloseTo(130);
+  expect(value().objects[1]).toEqual(populated.objects[1]);
+  expect(editor.snapshot.selection).toMatchObject({ keys: ["a", "b"], primaryKey: "a" });
+  expect(commits).toHaveBeenCalledTimes(1);
+  fireEvent.keyDown(svg, { key: "F2" });
+  const input = screen.getByRole("textbox", { name: "Canvas text" });
+  fireEvent.keyDown(input, { key: "a", metaKey: true }); expect(editor.snapshot.selection.keys).toEqual(["a", "b"]);
+  fireEvent.change(input, { target: { value: "Primary only" } });
+  fireEvent.keyDown(input, { key: "Enter", metaKey: true });
+  expect(value().objects[0]!.label).toBe("Primary only"); expect(value().objects[1]).toEqual(populated.objects[1]);
+  expect(editor.snapshot.selection).toMatchObject({ keys: ["a", "b"], primaryKey: "a" });
+  expect(commits).toHaveBeenCalledTimes(2);
+  fireEvent.keyDown(svg, { key: "z", metaKey: true }); expect(value().objects[0]!.label).toBe("Title");
+});
+
+test("external document replacement cancels marquee and stale release cannot select removed targets", () => {
+  const { container, svg, source, editor, value } = setup(populated);
+  fireEvent.pointerDown(svg, event(20, 20)); fireEvent.pointerMove(svg, event(220, 110));
+  act(() => { source.commit([{ op: "remove", path: "/objects/1" }]); });
+  fireEvent.pointerUp(svg, event(220, 110));
+  expect(container.querySelector("[data-canvas-marquee]")).toBeNull();
+  expect(editor.snapshot.selection.keys).toEqual(["a"]);
+  expect(value().objects.map((object) => object.id)).toEqual(["a", "c"]);
+});
+
+test("external selection changes supersede a pending preview without a stale selection commit", () => {
+  const { container, svg, editor, commits } = setup(populated);
+  fireEvent.pointerDown(svg, event(20, 20)); fireEvent.pointerMove(svg, event(220, 110));
+  act(() => { editor.dispatch({ type: "selection.set", objectIds: ["c"] }); });
+  fireEvent.pointerUp(svg, event(220, 110));
+  expect(container.querySelector("[data-canvas-marquee]")).toBeNull();
+  expect(editor.snapshot.selection.keys).toEqual(["c"]); expect(commits).not.toHaveBeenCalled();
+});
 
 test("every toolbar control shares icon, accessible name and canonical tooltip without losing state", () => {
   const { svg } = setup();

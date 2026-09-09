@@ -1232,6 +1232,7 @@ type ObjectIntent =
       readonly type: "selection.set";
       readonly objectIds: ReadonlyArray<string>;
       readonly mode?: ObjectSelectionMode;
+      readonly primaryKey?: string;
     }
   | { readonly type: "selection.remove" }
   | { readonly type: "selection.fill"; readonly color: string }

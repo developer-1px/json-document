@@ -21,7 +21,7 @@ export function CanvasObjectTarget(props: {
   readonly object: CanvasObject;
   readonly selected: boolean;
   readonly enabled: boolean;
-  readonly onSelect: () => void;
+  readonly onSelect: (shiftKey: boolean) => void;
   readonly onEdit: () => void;
   readonly onHandle: (interaction: InteractionHandleEvent, event: PointerEvent<SVGElement>) => void;
 }) {
@@ -33,8 +33,14 @@ export function CanvasObjectTarget(props: {
       {...contentInteractionAttributes({ role: "content", selected: props.selected, dragging: binding.active })}
       tabIndex={props.enabled ? 0 : -1} data-canvas-object={object.id} data-kind={object.kind}
       pointerEvents={props.enabled ? "all" : "none"} style={{ cursor: binding.cursor, transform: "none" }}
-      onFocus={props.onSelect} onDoubleClick={props.onEdit}
-      onKeyDown={(event) => { if (event.key === " ") { event.preventDefault(); props.onSelect(); } }} />
+      onDoubleClick={props.onEdit}
+      onKeyDown={(event) => {
+        if (event.nativeEvent.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;
+        if (event.key === " " || (event.key === "Enter" && !event.shiftKey)) {
+          event.preventDefault(); event.stopPropagation(); props.onSelect(event.shiftKey);
+          if (event.key === "Enter") props.onEdit();
+        }
+      }} />
   );
 }
 

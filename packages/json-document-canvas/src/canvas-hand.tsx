@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { Braces, Circle, MousePointer2, Pencil, RectangleHorizontal, Redo2, Trash2, Type, Undo2, type LucideIcon } from "lucide-react";
 import type { ObjectEditor } from "@interactive-os/json-document-editing";
+import type { PlaneSelectProfile } from "@interactive-os/json-document-affordance";
 import { serializeCanvasDocument } from "@interactive-os/json-document-object-document";
 import { Command, Field, ProductShell, Toggle, ToolbarGroup } from "@interactive-os/json-document-ui-primitives-react";
 import { CanvasObjectTarget, CanvasObjectView, CanvasResizeTarget, CanvasTextInput } from "./canvas-object-view.js";
@@ -12,6 +13,8 @@ export interface CanvasHandProps {
   readonly className?: string;
   readonly slideStyle?: CSSProperties;
   readonly label?: string;
+  /** Optional policy instance; one profile per mounted Hand. */
+  readonly selectProfile?: PlaneSelectProfile;
 }
 
 const tools: ReadonlyArray<{ readonly id: CanvasTool; readonly label: string; readonly icon: LucideIcon }> = [
@@ -20,9 +23,10 @@ const tools: ReadonlyArray<{ readonly id: CanvasTool; readonly label: string; re
 ];
 
 export function CanvasHand(props: CanvasHandProps) {
-  const hand = useCanvasHand(props.editor, props.creationStyle);
+  const hand = useCanvasHand(props.editor, props.creationStyle, props.selectProfile);
   const [json, setJSON] = useState<string | null>(null);
-  const selected = hand.objects.find((object) => object.id === hand.snapshot.selection.primaryKey);
+  const selected = hand.objects.find((object) => object.id === hand.selection.primaryKey);
+  const selectedKeys = new Set(hand.selection.keys);
   return (
     <ProductShell className={props.className} toolbarLabel="Canvas tools" toolbar={<ToolbarGroup style={{ flexWrap: "wrap" }}>
       <ToolbarGroup>{tools.map((tool) => <Toggle key={tool.id} label={tool.label} pressed={hand.tool === tool.id} onClick={() => hand.choose(tool.id)}><tool.icon aria-hidden="true" size={16} /></Toggle>)}</ToolbarGroup>
@@ -38,14 +42,16 @@ export function CanvasHand(props: CanvasHandProps) {
         style={{ display: "block", width: "100%", aspectRatio: `${hand.document.width} / ${hand.document.height}`, touchAction: "none", userSelect: "none", overflow: "hidden", ...props.slideStyle }}>
         {hand.objects.map((object) => <g key={object.id}>
           {hand.draft?.id !== object.id && <CanvasObjectView object={object} />}
-          <CanvasObjectTarget object={object} selected={object.id === hand.snapshot.selection.primaryKey} enabled={hand.tool === "select" && hand.draft?.id !== object.id}
-            onSelect={() => hand.select(object.id)} onEdit={() => hand.editText(object.id)} onHandle={(interaction, event) => hand.interaction(interaction, event, object, "drag")} />
+          <CanvasObjectTarget object={object} selected={selectedKeys.has(object.id)} enabled={hand.tool === "select" && hand.draft?.id !== object.id}
+            onSelect={(shiftKey) => hand.select(object.id, shiftKey)} onEdit={() => hand.editText(object.id)} onHandle={(interaction, event) => hand.interaction(interaction, event, object, "drag")} />
         </g>)}
         {hand.preview && <g pointerEvents="none" opacity={0.65}><CanvasObjectView object={{ ...hand.preview, id: "preview" }} /></g>}
+        {hand.tool === "select" && hand.objects.filter((object) => selectedKeys.has(object.id)).map((object) =>
+          <rect key={object.id} data-selection-outline={object.id} x={object.x} y={object.y} width={object.width} height={object.height} fill="none" stroke="rgb(var(--color-border-accent))" strokeWidth={object.id === selected?.id ? 2 : 1} pointerEvents="none" />)}
         {selected && hand.tool === "select" && <g>
-          <rect x={selected.x} y={selected.y} width={selected.width} height={selected.height} fill="none" stroke="rgb(var(--color-border-accent))" strokeWidth={2} pointerEvents="none" />
           {!hand.draft && (["nw", "ne", "se", "sw"] as const).map((edge) => <CanvasResizeTarget key={edge} object={selected} edge={edge} onHandle={(interaction, event) => hand.interaction(interaction, event, selected, "resize", edge)} />)}
         </g>}
+        {hand.marquee && <rect data-canvas-marquee="" {...hand.marquee} fill="rgb(var(--color-border-accent) / 0.08)" stroke="rgb(var(--color-border-accent))" pointerEvents="none" />}
         {selected?.kind === "text" && hand.draft?.id === selected.id && <CanvasTextInput object={selected} text={hand.draft.text} onChange={hand.changeText}
           onCommit={() => { hand.commitText(); hand.surface.current?.focus(); }} onCancel={() => { hand.cancel(); hand.surface.current?.focus(); }} />}
       </svg>

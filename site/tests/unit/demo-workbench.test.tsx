@@ -55,6 +55,23 @@ describe("DemoWorkbench", () => {
 });
 
 describe("Demo definition and source discovery", () => {
+  test("Canvas Usage imports the reusable Plane Select profile and exposes its canonical closure", async () => {
+    const sources = await discoverDemoSources("routes/canvas-demo/CanvasDemoRoute.tsx");
+    expect(await sources[0]!.load()).toContain("createPlaneSelectProfile()");
+    for (const [path, reference] of [
+      ["packages/json-document-affordance/src/plane-select.ts", "/docs/api/affordance"],
+      ["packages/json-document-affordance/src/drag.ts", "/docs/api/affordance"],
+      ["packages/json-document-affordance/src/select.ts", "/docs/api/affordance"],
+      ["packages/json-document-affordance/src/gesture-session.ts", "/docs/api/affordance"],
+      ["packages/json-document-selection/src/key/index.ts", "/docs/api/selection"],
+      ["packages/json-document-editing/src/object.ts", "/docs/api/editing"],
+      ["packages/json-document-canvas/src/use-canvas-hand.ts", "/docs/api/canvas"],
+    ]) {
+      const file = sources.find((source) => source.path === path);
+      expect(file, path).toBeDefined(); expect(file!.referencePath).toBe(reference);
+      expect(await file!.load()).not.toBe("");
+    }
+  });
   test("Calendar Usage exposes the shared edit plan and each canonical owner's API", async () => {
     const sources = await discoverDemoSources("routes/calendar-demo/CalendarDemoRoute.tsx");
     const plan = sources.find((file) => file.path === "packages/json-document-calendar-document/src/calendar-operation.ts");
@@ -217,6 +234,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document/src/application/document/create.ts",
       "packages/json-document-object-document/src/object-projection.ts",
       "packages/json-document-object-document/src/object-operation.ts",
+      "packages/json-document-selection/src/key/index.ts",
     ]);
   });
 
@@ -296,6 +314,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-editing/src/kanban.ts",
+      "packages/json-document-selection/src/key/index.ts",
       "packages/json-document-web/src/kanban-drop-target.ts",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-web/src/drag-drop-session.ts",
@@ -307,10 +326,12 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-affordance/src/content-interaction.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-editing/src/kanban.ts",
+      "packages/json-document-selection/src/key/index.ts",
       "packages/json-document-web/src/kanban-drop-target.ts",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-affordance/src/board-drag-session.ts",
+      "packages/json-document-affordance/src/drag.ts",
     ]);
   });
 

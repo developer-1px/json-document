@@ -58,6 +58,7 @@ export type ObjectIntent =
       readonly type: "selection.set";
       readonly objectIds: ReadonlyArray<string>;
       readonly mode?: ObjectSelectionMode;
+      readonly primaryKey?: string;
     }
   | { readonly type: "selection.remove" }
   | { readonly type: "selection.fill"; readonly color: string }
@@ -139,7 +140,7 @@ export function createObjectEditor(
       return apply({ type: "insert", objects: [object] }, selectionFor([object.id]), intent.type);
     }
     if (intent.type === "object.text") {
-      return apply({ type: "text", objectId: intent.objectId, text: intent.text }, selectionFor([intent.objectId]), intent.type);
+      return apply({ type: "text", objectId: intent.objectId, text: intent.text }, selectionForTargets([intent.objectId]), intent.type);
     }
     if (intent.type === "document.replace") {
       // A profile-specific session cannot silently become another document type.
@@ -155,23 +156,28 @@ export function createObjectEditor(
         type: intent.mode === "extend" ? "add" : intent.mode ?? "replace",
         keys: intent.objectIds,
       };
-      const selection = selectionFamily.transition(
+      const context = selectionContext();
+      let selection = selectionFamily.transition(
         session.snapshot.selection,
         command,
-        selectionContext(),
+        context,
       ).state;
+      if (intent.primaryKey !== undefined) {
+        if (!selectionFamily.targets(selection, context).includes(intent.primaryKey)) return failure("selection.primary-not-selected");
+        selection = selectionFamily.transition(selection, { type: "set-primary", key: intent.primaryKey }, context).state;
+      }
       return success(session.select(selectionFor(
-        selectionFamily.targets(selection, selectionContext()),
+        selectionFamily.targets(selection, context),
         selection.primaryKey,
       )));
     }
 
     if (intent.type === "object.translate") {
-      return apply({ type: "transform", objectIds: intent.objectIds, transform: { dx: intent.dx, dy: intent.dy } }, selectionFor(intent.objectIds), intent.type);
+      return apply({ type: "transform", objectIds: intent.objectIds, transform: { dx: intent.dx, dy: intent.dy } }, selectionForTargets(intent.objectIds), intent.type);
     }
 
     if (intent.type === "object.resize") {
-      return apply({ type: "transform", objectIds: intent.objectIds, transform: { dx: intent.dx, dy: intent.dy, dw: intent.dw, dh: intent.dh } }, selectionFor(intent.objectIds), intent.type);
+      return apply({ type: "transform", objectIds: intent.objectIds, transform: { dx: intent.dx, dy: intent.dy, dw: intent.dw, dh: intent.dh } }, selectionForTargets(intent.objectIds), intent.type);
     }
 
     if (intent.type === "clipboard.paste") {
@@ -192,6 +198,12 @@ export function createObjectEditor(
     }
 
     return intent.type === "selection.remove" ? removeSelected(selected.map((object) => object.id)) : failure("object.unsupported-intent");
+  }
+
+  function selectionForTargets(ids: readonly string[]): ObjectSelection {
+    const selection = session.snapshot.selection;
+    const selected = new Set(selection.keys);
+    return ids.length > 0 && ids.every((id) => selected.has(id)) ? selection : selectionFor(ids);
   }
 
   function apply(operation: ObjectOperation, selectionAfter: ObjectSelection, origin: string): EditingResult<ObjectSelection> {

@@ -89,3 +89,49 @@ test("Canvas move and resize are single history steps and Escape cancels a gestu
   await page.getByRole("button", { name: "실행 취소" }).click();
   expect(Number(await object.getAttribute("x"))).toBeCloseTo(100);
 });
+
+test("Plane Select moves a selected set with one Undo and collapses a plain click on release", async ({ page }) => {
+  await page.goto("/widgets/canvas");
+  const rectangle = page.locator('[data-canvas-object="rectangle"]');
+  const ellipse = page.locator('[data-canvas-object="ellipse"]');
+  const selected = page.locator('[data-canvas-object][aria-pressed="true"]');
+  await rectangle.click(); await ellipse.click({ modifiers: ["Shift"] });
+  await expect(selected).toHaveCount(2);
+  const start = await point(page, 200, 350), end = await point(page, 280, 390);
+  await page.mouse.move(start.x, start.y); await page.mouse.down();
+  await page.mouse.move(end.x, end.y, { steps: 6 });
+  expect(Number(await rectangle.getAttribute("x"))).toBeCloseTo(176);
+  expect(Number(await ellipse.getAttribute("x"))).toBeCloseTo(696);
+  await page.mouse.up();
+  await page.getByRole("button", { name: "실행 취소" }).click();
+  expect(Number(await rectangle.getAttribute("x"))).toBeCloseTo(96);
+  expect(Number(await ellipse.getAttribute("x"))).toBeCloseTo(616);
+  await expect(selected).toHaveCount(2);
+  await expect(page.getByRole("button", { name: "실행 취소" })).toBeDisabled();
+  await rectangle.click(); await expect(selected).toHaveCount(1);
+});
+
+test("Plane Select marquee, cancellation and primary editing share the public profile", async ({ page }) => {
+  await page.goto("/widgets/canvas");
+  const selected = page.locator('[data-canvas-object][aria-pressed="true"]');
+  const start = await point(page, 50, 230), end = await point(page, 900, 530);
+  await page.mouse.move(start.x, start.y); await page.mouse.down(); await page.mouse.move(end.x, end.y);
+  await expect(page.locator("[data-canvas-marquee]")).toHaveCount(1); await expect(selected).toHaveCount(2);
+  await page.keyboard.press("Escape"); await page.mouse.up();
+  await expect(page.locator("[data-canvas-marquee]")).toHaveCount(0);
+  await expect(page.locator('[data-canvas-object="title"]')).toHaveAttribute("aria-pressed", "true");
+  await page.keyboard.press("Escape"); await expect(selected).toHaveCount(0);
+  await page.mouse.move(start.x, start.y); await page.mouse.down(); await page.mouse.move(end.x, end.y); await page.mouse.up();
+  await expect(selected).toHaveCount(2);
+  await page.locator('[data-canvas-object="title"]').click({ modifiers: ["Shift"] });
+  await expect(selected).toHaveCount(3);
+  await page.keyboard.press("ControlOrMeta+a"); await page.keyboard.press("ControlOrMeta+a");
+  await expect(selected).toHaveCount(3); await expect(page.locator("[data-resize-edge]")).toHaveCount(4);
+  await page.keyboard.press("F2");
+  const text = page.getByRole("textbox", { name: "Canvas text", exact: true });
+  await text.fill("Reusable selection"); await text.press("ControlOrMeta+Enter");
+  await expect(page.locator('[data-canvas-object="title"]')).toHaveAttribute("aria-label", "Reusable selection");
+  await expect(selected).toHaveCount(3);
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect(page.locator('[data-canvas-object="title"]')).toHaveAttribute("aria-label", "One slide. Your ideas.");
+});

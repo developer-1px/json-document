@@ -30,6 +30,8 @@ interface CanvasHandProps {
   readonly className?: string;
   readonly slideStyle?: CSSProperties;
   readonly label?: string;
+  /** Optional policy instance; one profile per mounted Hand. */
+  readonly selectProfile?: PlaneSelectProfile;
 }
 ```
 ## `CanvasTool`
@@ -40,5 +42,5 @@ type CanvasTool = "select" | CanvasObjectKind;
 ## `useCanvasHand`
 
 ```ts
-useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle): { document: CanvasDocument; snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<ObjectSelection>; ... 16 more ...; surfaceProps: { ...; }; }
+useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile): { document: CanvasDocument; snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<ObjectSelection>; ... 18 more ...; surfaceProps: { ...; }; }
 ```

@@ -16,6 +16,12 @@ export {
 export { createBoardDragSession } from "./board-drag-session.js";
 export { createCanvasGestureSession } from "./canvas-gesture-session.js";
 export { createGestureSession } from "./gesture-session.js";
+export { createPlaneSelectProfile } from "./plane-select.js";
+export type {
+  PlaneSelectCommit, PlaneSelectContext, PlaneSelectInput, PlaneSelectKeyResult,
+  PlaneSelectPreview, PlaneSelectProfile, PlaneSelectProfileOptions, PlaneSelectSelection,
+  PlaneSelectTranslation,
+} from "./plane-select.js";
 export {
   createInteractionHandleSession,
   interactionHandleCursor,

@@ -13,6 +13,37 @@ const initial: ObjectDocument = {
 };
 
 describe("object editing selection family", () => {
+  test("primaryKey applies after subtract and toggle, and must survive the transition", () => {
+    const editor = createObjectEditor(initial);
+    editor.dispatch({ type: "selection.set", objectIds: ["a", "b", "c"] });
+    editor.dispatch({ type: "selection.set", objectIds: ["b"], mode: "subtract", primaryKey: "a" });
+    expect(editor.snapshot.selection).toEqual({ kind: "explicit", keys: ["a", "c"], primaryKey: "a" });
+    editor.dispatch({ type: "selection.set", objectIds: ["b"], mode: "toggle", primaryKey: "c" });
+    expect(editor.snapshot.selection).toEqual({ kind: "explicit", keys: ["a", "b", "c"], primaryKey: "c" });
+    const before = editor.snapshot;
+    expect(editor.dispatch({ type: "selection.set", objectIds: ["c"], mode: "subtract", primaryKey: "c" }).ok).toBe(false);
+    expect(editor.snapshot).toEqual(before);
+  });
+  test("explicit primary survives set movement and primary-only edits, including undo/redo", () => {
+    const editor = createObjectEditor(initial);
+    editor.dispatch({ type: "selection.set", objectIds: ["a", "c"], primaryKey: "a" });
+    const selected = editor.snapshot.selection;
+    expect(selected.primaryKey).toBe("a");
+    expect(editor.snapshot.canUndo).toBe(false);
+    for (const intent of [
+      { type: "object.translate", objectIds: ["a", "c"], dx: 5, dy: 10 },
+      { type: "object.resize", objectIds: ["a"], dx: 0, dy: 0, dw: 10, dh: 20 },
+    ] as const) {
+      const before = editor.snapshot.value;
+      expect(editor.dispatch(intent).ok).toBe(true);
+      expect(editor.snapshot.selection).toEqual(selected);
+      editor.undo(); expect(editor.snapshot.value).toEqual(before); expect(editor.snapshot.selection).toEqual(selected);
+      editor.redo(); expect(editor.snapshot.selection).toEqual(selected);
+    }
+    const before = editor.snapshot;
+    expect(editor.dispatch({ type: "selection.set", objectIds: ["a"], primaryKey: "c" }).ok).toBe(false);
+    expect(editor.snapshot).toEqual(before);
+  });
   test("uses set transitions for click and host-resolved marquee candidates", () => {
     const editor = createObjectEditor(initial);
     editor.dispatch({ type: "selection.set", objectIds: ["b"], mode: "toggle" });

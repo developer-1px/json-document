@@ -93,6 +93,12 @@ open/focus semantics remain outside this geometry contract.
 
 Usage: [Affordance](https://developer-1px.github.io/json-document/docs/affordance)
 
+`createPlaneSelectProfile` composes key selection, click/drag arbitration, marquee,
+set translation previews and keyboard outcomes without Canvas, React, DOM or a
+document dependency. See the owning [Plane Select API contract](docs/plane-select.md).
+The [Canvas Usage](https://developer-1px.github.io/json-document/demo/canvas)
+imports the public profile and injects it into the Hand.
+
 `selectAllAffordance(stroke, state, { repeat: "preserve" })` emits `select-all`
 for Mod+A even when everything is selected. The default editing Usage chooses
 this policy. Omission or `{ repeat: "toggle" }` retains the existing behavior:
