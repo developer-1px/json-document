@@ -4,6 +4,7 @@
   "references": [
     { "path": "./packages/json-document" },
     { "path": "./packages/json-document-selection" },
+    { "path": "./packages/json-document-object-document" },
     { "path": "./packages/json-document-calendar-document" },
     { "path": "./packages/json-document-editing" },
     { "path": "./packages/json-document-react" },
@@ -18,6 +19,7 @@
     { "path": "./packages/json-document-database" },
     { "path": "./packages/json-document-annotation" },
     { "path": "./packages/json-document-calendar" },
+    { "path": "./packages/json-document-canvas" },
     { "path": "./packages/json-document-tanstack-table" },
     { "path": "./packages/json-document-web" },
     { "path": "./packages/json-document-contenteditable" },

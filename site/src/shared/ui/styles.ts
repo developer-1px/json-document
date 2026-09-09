@@ -85,6 +85,7 @@ export const ui = {
   },
   product: {
     frame: "rounded-surface bg-background-canvas font-sans text-foreground-default antialiased shadow-surface",
+    embedded: "rounded-none shadow-none",
   },
   demoWorkbench: {
     header: "sticky top-0 z-20 border-b border-line-subtle/40 bg-background-subtle px-2 pt-2",

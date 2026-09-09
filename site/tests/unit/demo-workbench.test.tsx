@@ -212,6 +212,11 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-editing/src/object.ts",
+      "packages/json-document-object-document/src/object-model.ts",
+      "packages/json-document-object-document/src/object-validation.ts",
+      "packages/json-document/src/application/document/create.ts",
+      "packages/json-document-object-document/src/object-projection.ts",
+      "packages/json-document-object-document/src/object-operation.ts",
     ]);
   });
 
@@ -309,13 +314,22 @@ describe("Demo definition and source discovery", () => {
     ]);
   });
 
-  test("registers the Canvas gesture owner source next to Canvas usages", async () => {
-    expect((await discoverDemoSources("routes/canvas-demo/CanvasDemoRoute.tsx")).map((file) => file.path)).toContain(
-      "packages/json-document-affordance/src/canvas-gesture-session.ts",
-    );
-    expect((await discoverDemoSources("routes/widgets/CanvasWidgetRoute.tsx")).map((file) => file.path)).toContain(
-      "packages/json-document-affordance/src/canvas-gesture-session.ts",
-    );
+  test("registers the canonical Canvas Hand, Object document, Editing and gesture closure for both Hosts", async () => {
+    for (const entry of ["routes/canvas-demo/CanvasDemoRoute.tsx", "routes/widgets/CanvasWidgetRoute.tsx"]) {
+      const paths = (await discoverDemoSources(entry)).map((file) => file.path);
+      expect(paths).toEqual(expect.arrayContaining([
+        "packages/json-document-canvas/src/canvas-hand.tsx",
+        "packages/json-document-canvas/src/use-canvas-hand.ts",
+        "packages/json-document-canvas/src/canvas-object-view.tsx",
+        "packages/json-document-object-document/src/object-model.ts",
+        "packages/json-document-object-document/src/object-validation.ts",
+        "packages/json-document-object-document/src/object-operation.ts",
+        "packages/json-document-object-document/src/object-projection.ts",
+        "packages/json-document-editing/src/object.ts",
+        "packages/json-document-affordance/src/gesture-session.ts",
+        "packages/json-document-react/src/editing-snapshot.ts",
+      ]));
+    }
   });
 
   test("keeps each Editing concept lab API next to its owning route", async () => {

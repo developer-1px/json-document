@@ -296,7 +296,7 @@ Tabs<T extends string | number>(props: { readonly label: string; readonly value:
 ## `Toggle`
 
 ```ts
-Toggle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & ControlAffordanceProps & { readonly pressed: boolean; readonly presentation?: "button" | "chip"; readonly label?: string; readonly tooltip?: string; }): ReactNode
+Toggle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & ControlAffordanceProps & { readonly pressed: boolean; readonly presentation?: "button" | "chip" | "icon"; readonly label?: string; readonly tooltip?: string; }): ReactNode
 ```
 ## `Toolbar`
 

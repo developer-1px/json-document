@@ -192,19 +192,16 @@ test("Document reads selected keys, focus, and text offset", async ({ page }) =>
   await expect(page.locator("#widget-document-option-move")).toHaveCount(1);
 });
 
-test("Canvas reads selected objects on a plane", async ({ page }) => {
+test("Canvas proof consumes the same Hand and observes single selection", async ({ page }) => {
   await page.goto("/widgets/canvas");
-  const canvas = page.getByRole("listbox", { name: "Canvas objects" });
-  await page.getByRole("option", { name: "Card" }).click();
-  await expect(canvas).toBeFocused();
-  await expect(canvas).toHaveAttribute("aria-activedescendant", "widget-canvas-option-card");
-  expect(await json(page, "widget-canvas-selected")).toEqual(["card"]);
-  expect(await json(page, "widget-canvas-focus")).toBe("card");
+  await page.locator('[data-canvas-object="rectangle"]').click();
+  expect(await json(page, "widget-canvas-selected")).toEqual(["rectangle"]);
+  expect(await json(page, "widget-canvas-focus")).toBe("rectangle");
   await page.keyboard.press("Delete");
-  await expect(page.getByRole("option", { name: "Card" })).toHaveCount(0);
-  await expect(canvas).toBeFocused();
-  await expect(canvas).toHaveAttribute("aria-activedescendant", "widget-canvas-option-chip");
-  await expect(page.locator("#widget-canvas-option-chip")).toHaveCount(1);
+  await expect(page.locator('[data-canvas-object="rectangle"]')).toHaveCount(0);
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect(page.locator('[data-canvas-object="rectangle"]')).toHaveCount(1);
+  expect(await json(page, "widget-canvas-selected")).toEqual(["rectangle"]);
 });
 
 test("Tree reads visible topology and selected keys", async ({ page }) => {
@@ -309,20 +306,18 @@ test("Board modifier click toggles cards and drag moves a card", async ({ page }
   ]);
 });
 
-test("Canvas escape cancels an in-progress marquee", async ({ page }) => {
+test("Canvas proof cancels drawing without adding an object", async ({ page }) => {
   await page.goto("/widgets/canvas");
-  await page.getByRole("option", { name: "Card" }).click();
-  expect(await json(page, "widget-canvas-selected")).toEqual(["card"]);
-  const canvas = page.getByRole("listbox", { name: "Canvas objects" });
+  await page.getByRole("button", { name: "그리기" }).click();
+  const canvas = page.locator("[data-canvas-slide]");
   const box = await canvas.boundingBox();
   if (!box) throw new Error("canvas bounding box");
-  await canvas.focus();
-  await page.mouse.move(box.x + box.width - 24, box.y + box.height - 24);
+  await page.mouse.move(box.x + 20, box.y + 20);
   await page.mouse.down();
-  await page.mouse.move(box.x + box.width - 8, box.y + box.height - 8);
+  await page.mouse.move(box.x + 80, box.y + 60);
   await page.keyboard.press("Escape");
   await page.mouse.up();
-  expect(await json(page, "widget-canvas-selected")).toEqual(["card"]);
+  await expect(page.locator("[data-canvas-object]")).toHaveCount(3);
 });
 
 async function json(page: Page, testId: string): Promise<unknown> {

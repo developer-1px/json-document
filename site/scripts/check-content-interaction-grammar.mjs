@@ -12,7 +12,7 @@ const calendarTime = read("packages/json-document-calendar/src/calendar-time-gri
 const calendarMonth = read("packages/json-document-calendar/src/calendar-month-grid.tsx");
 const database = read("packages/json-document-database/src/database-hand.tsx");
 const board = read("site/src/routes/widgets/BoardWidgetRoute.tsx");
-const canvas = read("site/src/routes/widgets/CanvasWidgetRoute.tsx");
+const canvas = read("packages/json-document-canvas/src/canvas-object-view.tsx");
 const usage = read("docs/public/ui-primitives.md");
 const sources = read("site/src/shared/demo-workbench/demo-sources.ts");
 
@@ -27,7 +27,7 @@ requireText(calendarMonth, 'role: "insertion"');
 requireText(database, "<GridCell");
 requireText(board, 'role: "drop-target"');
 requireText(board, "dragging={activeCardId === card.id}");
-requireText(canvas, "dragging={offset !== null}");
+requireText(canvas, 'contentInteractionAttributes({ role: "content", selected: props.selected, dragging: binding.active })');
 requireText(usage, "### Content interaction grammar");
 requireText(sources, 'symbol: "contentInteractionAffordance"');
 requireText(sources, 'symbol: "contentInteractionAttributes"');

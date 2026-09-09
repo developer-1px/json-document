@@ -79,7 +79,8 @@ Canvas에 한정되지 않은 create/draw/move/resize lifecycle은
 `createGestureSession<Gesture>()`을 사용합니다. `GestureState`는 string `type`만
 요구하며 begin/preview/commit/cancel과 supersede 의미를 소유합니다.
 
-좌표 변환, hit test, 잠금 정책, renderer, tool/viewport 정책은 Host 책임입니다.
+좌표 변환은 Web Adapter, hit target·renderer·tool 조합은 Hand, 문서 기하는
+Document Type이 소유합니다. Host에는 권한·잠금 정책 값과 레이아웃만 남습니다.
 
 ## TBD
 
@@ -88,9 +89,7 @@ Canvas에 한정되지 않은 create/draw/move/resize lifecycle은
 
 ## Live Demo
 
-```live-demo
-/widgets/canvas
-```
+[Canvas Hand의 Usage 및 Source](/docs/api/canvas)에서 같은 drag 문법을 확인할 수 있습니다.
 
 ```live-demo
 /widgets/board

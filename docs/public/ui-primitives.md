@@ -75,7 +75,7 @@ Escape/Tab의 popup close와 focus restore, filtering과 option content는 Host�
 | 역할 | 정본 primitive | 허용 presentation |
 | --- | --- | --- |
 | 명령 실행 | `Command` | label, icon |
-| 이진 상태 | `Toggle` | button, chip |
+| 이진 상태 | `Toggle` | button, chip, icon |
 | 단일 값 선택 | `Choice` | inline, popup |
 | 다중 포함 여부 | `Check` | checkbox |
 | surface 이동 | `Tabs` | tab list |
@@ -118,7 +118,11 @@ icon button은 독립 역할이 아니므로 공개 primitive가 아닙니다.
 보존합니다. `Command`는 명령 실행 역할 하나를 소유하며 label과 icon은 presentation입니다.
 `Toggle`은 `pressed`를 `aria-pressed`에 투영하며 icon-only인 경우
 `label`을 visible tooltip과 accessible name으로 사용합니다. `Command`도
-`label`을 visible tooltip과 accessible name에 투영합니다. `Toggle`은 binary state를,
+`label`을 visible tooltip과 accessible name에 투영합니다. `Toggle`은 label이 있으면
+기본 presentation이 `icon`이며 명시적인 `button`/`chip` 지정은 보존합니다.
+텍스트 버튼에 설명만 추가하려면 `tooltip`을 사용합니다. 아이콘 전용 Command와
+Toggle은 같은 32px hit target, 무테, hover/focus/disabled 문법을 공유하고
+Toggle의 선택 상태는 배경으로 표시합니다. `Toggle`은 binary state를,
 `Choice`는 single choice를, `Tabs`는 navigation surface 전환을 소유합니다.
 `Choice`와 `Tabs`는 option ID generic을 callback까지
 보존하므로 Host는 선택 값을 다시 cast하지 않습니다. `DisclosureButton`은

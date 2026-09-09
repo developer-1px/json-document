@@ -1,4 +1,12 @@
 import type { CodeLanguage } from "../ui/code-tokens";
+import objectModelSource from "../../../../packages/json-document-object-document/src/object-model.ts?raw";
+import objectValidationSource from "../../../../packages/json-document-object-document/src/object-validation.ts?raw";
+import objectOperationSource from "../../../../packages/json-document-object-document/src/object-operation.ts?raw";
+import objectProjectionSource from "../../../../packages/json-document-object-document/src/object-projection.ts?raw";
+import canvasHandSource from "../../../../packages/json-document-canvas/src/canvas-hand.tsx?raw";
+import canvasInteractionSource from "../../../../packages/json-document-canvas/src/use-canvas-hand.ts?raw";
+import canvasObjectViewSource from "../../../../packages/json-document-canvas/src/canvas-object-view.tsx?raw";
+import editingSnapshotSource from "../../../../packages/json-document-react/src/editing-snapshot.ts?raw";
 import pointerTrackingSource from "../../../../packages/json-document/src/foundation/patch/track.ts?raw";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
 import calendarDocumentModelSource from "../../../../packages/json-document-calendar-document/src/calendar-model.ts?raw";
@@ -140,6 +148,8 @@ export type DemoSourceFile = {
 };
 
 const packageReferencePaths = new Map([
+  ["packages/json-document-object-document/", "/docs/api/object-document"],
+  ["packages/json-document-canvas/", "/docs/api/canvas"],
   ["packages/json-document/", "/docs/api/json-document"],
   ["packages/json-document-selection/", "/docs/api/selection"],
   ["packages/json-document-editing/", "/docs/api/editing"],
@@ -190,6 +200,14 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-object-document/src/object-model.ts", objectModelSource],
+  ["packages/json-document-object-document/src/object-validation.ts", objectValidationSource],
+  ["packages/json-document-object-document/src/object-operation.ts", objectOperationSource],
+  ["packages/json-document-object-document/src/object-projection.ts", objectProjectionSource],
+  ["packages/json-document-canvas/src/canvas-hand.tsx", canvasHandSource],
+  ["packages/json-document-canvas/src/use-canvas-hand.ts", canvasInteractionSource],
+  ["packages/json-document-canvas/src/canvas-object-view.tsx", canvasObjectViewSource],
+  ["packages/json-document-react/src/editing-snapshot.ts", editingSnapshotSource],
   ["packages/json-document/src/foundation/patch/track.ts", pointerTrackingSource],
   ["packages/json-document-calendar-document/src/calendar-model.ts", calendarDocumentModelSource],
   ["packages/json-document-calendar-document/src/calendar-projection.ts", calendarDocumentProjectionSource],
@@ -324,6 +342,39 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-canvas",
+    symbol: "CanvasHand",
+    sourcePath: "packages/json-document-canvas/src/canvas-hand.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-canvas",
+    symbol: "CanvasHand",
+    sourcePath: "packages/json-document-canvas/src/use-canvas-hand.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-canvas",
+    symbol: "CanvasHand",
+    sourcePath: "packages/json-document-canvas/src/canvas-object-view.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-canvas",
+    symbol: "useCanvasHand",
+    sourcePath: "packages/json-document-canvas/src/use-canvas-hand.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "useEditingSnapshot",
+    sourcePath: "packages/json-document-react/src/editing-snapshot.ts",
+  },
+  ...(["ObjectDocument", "CanvasDocument", "DocumentObject", "CanvasObject"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-model.ts" })),
+  ...(["assertObjectDocument", "assertCanvasDocument", "parseCanvasDocument", "serializeCanvasDocument"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-validation.ts" })),
+  ...(["createCanvasObject", "createCanvasPath", "projectObject", "transformObject"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-projection.ts" })),
+  {
+    packageName: "@interactive-os/json-document-object-document",
+    symbol: "planObjectOperation",
+    sourcePath: "packages/json-document-object-document/src/object-operation.ts",
+  },
   {
     packageName: "@interactive-os/json-document-web",
     symbol: "textSelectionFromControl",

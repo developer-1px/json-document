@@ -6,6 +6,8 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
+      "@interactive-os/json-document-object-document": ["../packages/json-document-object-document/src/index.ts"],
+      "@interactive-os/json-document-canvas": ["../packages/json-document-canvas/src/index.ts"],
       "@interactive-os/json-document": ["../packages/json-document/src/application/document/index.ts"],
       "@interactive-os/json-document-editing": ["../packages/json-document-editing/src/index.ts"],
       "@interactive-os/json-document-calendar": ["../packages/json-document-calendar/src/index.ts"],

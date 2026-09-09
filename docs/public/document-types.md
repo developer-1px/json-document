@@ -2,7 +2,7 @@
 
 Document Type은 특정 JSON Document가 무엇을 의미하고 어떤 상태와 변경이
 유효한지를 정의하는 생태계 위치입니다. 이 페이지는 책임 이름과 경계만
-확정합니다. Calendar는 공개 소유자와 소비 경계를 확정했고, 나머지 후보의 실제
+확정합니다. Calendar와 Object는 공개 소유자와 소비 경계를 확정했고, 나머지 후보의 실제
 소유권 재배치는 아직 결정하지 않았습니다.
 
 ```text
@@ -69,13 +69,18 @@ Calendar의 정본 소유자는 `@interactive-os/json-document-calendar-document
 책임 감사 증거를 확인할 수 있습니다. 이 소유권 확정은 RC 계약을 Stable wire
 프로파일로 승격하거나 나머지 후보의 완료를 선언하지 않습니다.
 
-현재 사이트에서 다음 항목이 Document Type 후보입니다.
+Object와 단일 슬라이드 Canvas 프로파일의 정본 소유자는
+`@interactive-os/json-document-object-document`입니다. 기존 `createObjectEditor`가 이를
+소비하며 `@interactive-os/json-document-canvas` Hand가 두 Canvas Host의 입력·UI를
+닫습니다. [Object 소유권 감사](/docs/document-types/object)와 [Canvas Usage/Source](/docs/api/canvas)를 참고하세요.
+
+현재 사이트에서 다음 항목을 추적합니다.
 
 ```text
 Document Types · TBD
 ├── Rich Text
 ├── Order
-├── Object
+├── Object · RC 공개 소유자 확정
 ├── Tree
 ├── Database
 ├── Calendar · RC 공개 소유자 확정
@@ -84,7 +89,7 @@ Document Types · TBD
 └── Annotation
 ```
 
-Calendar 이외의 목록은 분류 후보이지 완료 선언이 아닙니다. 각 후보는 모델, invariant,
+Calendar·Object 이외의 목록은 분류 후보이지 완료 선언이 아닙니다. 각 후보는 모델, invariant,
 operation과 projection의 실제 owner를 감사한 뒤에만 이 위치로 이동할 수
 있습니다. 그때까지 기존 package/API 이름, 모듈 배치와 Hands 내비게이션은
 유지합니다.

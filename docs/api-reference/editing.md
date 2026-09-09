@@ -846,14 +846,8 @@ type DocumentIntent =
 ## `DocumentObject`
 
 ```ts
-interface DocumentObject extends Record<string, JSONValue> {
+interface DocumentObject extends ObjectDraft {
   readonly id: string;
-  readonly label: string;
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-  readonly color: string;
 }
 ```
 ## `DocumentPoint`
@@ -1231,6 +1225,9 @@ interface ObjectEditor {
 
 ```ts
 type ObjectIntent =
+  | { readonly type: "object.create"; readonly object: ObjectDraft }
+  | { readonly type: "object.text"; readonly objectId: string; readonly text: string }
+  | { readonly type: "document.replace"; readonly document: ObjectDocument }
   | {
       readonly type: "selection.set";
       readonly objectIds: ReadonlyArray<string>;

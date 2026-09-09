@@ -103,9 +103,9 @@
   },
   {
     "path": "/docs/document-types/object",
-    "label": "Object · TBD",
-    "title": "Object Document Type · TBD - json-document",
-    "description": "Object의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "label": "Object · RC",
+    "title": "Object Document Type · RC - json-document",
+    "description": "Object와 Canvas 프로파일의 공개 소유자와 책임 감사 증거를 설명합니다.",
     "language": "ko",
     "navigationGroup": "Document Types"
   },
@@ -413,6 +413,22 @@
     "navigationGroup": "Hands"
   },
   {
+    "path": "/docs/api/object-document",
+    "label": "API · Object Document",
+    "title": "Object Document Type API - json-document",
+    "description": "Object와 Canvas의 문서 계약과 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/api/canvas",
+    "label": "API · Canvas",
+    "title": "Canvas Hand API - json-document",
+    "description": "Canvas 입력·preview·UI 조합의 API와 Usage입니다.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
     "path": "/docs/api/calendar-document",
     "label": "API · Calendar Document",
     "title": "Calendar Document Type API - json-document",
@@ -686,8 +702,8 @@
     "path": "/demo/canvas",
     "label": "Canvas",
     "title": "Canvas - json-document",
-    "description": "A simple minimal canvas: pick, drag, and fill objects on a plane.",
-    "parentPath": "/docs/object",
+    "description": "한 장에 글자·도형·그리기를 만들고 편집하는 Canvas 수직 슬라이스입니다.",
+    "parentPath": "/docs/api/canvas",
     "sidebar": false
   },
   {
@@ -1248,8 +1264,6 @@
     "description": "화살표로 고른 대상을 한 단위 옮기고, Shift로 큰 단위를 쓰는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
-    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -1260,8 +1274,6 @@
     "description": "누르지 않고 포인터를 올려 손과 도움말을 드러내는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
-    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -1304,8 +1316,6 @@
     "description": "오른쪽 클릭, Shift+F10, Menu 키로 자리 메뉴를 여는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
-    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -1328,8 +1338,6 @@
     "description": "빈 곳에서 끌어서 여러 대상을 한 번에 고르는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
-    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -1340,8 +1348,6 @@
     "description": "드래그한 대상을 어디에 둘지 정하고, 못 두면 no-drop을 보여주는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
-    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -1352,8 +1358,6 @@
     "description": "Alt/Option을 누른 채 드래그하면 원본을 복제하는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
-    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -1388,8 +1392,6 @@
     "description": "손바닥 커서로 평면을 밀고, Space+드래그로 화면을 옮기는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
-    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -1400,8 +1402,6 @@
     "description": "휠과 드래그 중 자동 스크롤로 보이는 줄을 옮기는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
-    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -1412,8 +1412,6 @@
     "description": "Mod+휠과 +/- 키, zoom-in/out 커서로 보이는 배율을 바꾸는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
-    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -1424,8 +1422,6 @@
     "description": "드래그와 크기 바꾸기 중 그리드·가이드에 붙고, 수정 키로 푸는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
-    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -1436,8 +1432,6 @@
     "description": "할 수 없는 자리에서 not-allowed와 no-drop 커서를 보여주는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
-    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -1476,7 +1470,7 @@
     "path": "/widgets/canvas",
     "label": "Canvas proof",
     "title": "Canvas proof - json-document",
-    "description": "A canvas reads selected objects on a plane from Object selection.",
+    "description": "같은 Canvas Hand를 샘플 슬라이드와 Selection 관찰 UI에 조합합니다.",
     "parentPath": "/docs/affordance/drag",
     "sidebar": false
   },

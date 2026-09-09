@@ -9,6 +9,7 @@ const usage = read("docs/public/ui-primitives.md");
 const sources = read("site/src/shared/demo-workbench/demo-sources.ts");
 const calendar = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 const consumers = files("site/src/routes").map((path) => [path, read(path)]);
+const canvasConsumers = files("packages/json-document-canvas/src").map((path) => [path, read(path)]);
 const databaseConsumers = files("packages/json-document-database/src").map((path) => [path, read(path)]);
 
 for (const symbol of ["ProductShell", "ProductCanvas", "ProductInspector"]) {
@@ -29,11 +30,11 @@ requireText(calendar, 'toolbarLabel="Calendar controls"');
 requireText(calendar, '<ToolbarRegion placement="center" label="Calendar view">');
 requireText(usage, '<ToolbarRegion placement="center" label="View">');
 
-const productShellConsumers = consumers.filter(([, source]) => source.includes("<ProductShell"));
+const productShellConsumers = [...consumers, ...canvasConsumers].filter(([, source]) => source.includes("<ProductShell"));
 if (productShellConsumers.length !== 13) {
   throw new Error(`ProductShell 소비자 분모가 달라졌습니다: expected=13 actual=${productShellConsumers.length}`);
 }
-for (const [path, source] of [...consumers, ...databaseConsumers]) {
+for (const [path, source] of [...consumers, ...canvasConsumers, ...databaseConsumers]) {
   forbid(path, source, /\bProductApp\b/);
   forbid(path, source, /role=["']toolbar["']/);
 }

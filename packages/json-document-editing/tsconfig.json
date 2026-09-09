@@ -6,6 +6,7 @@
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "references": [
+    { "path": "../json-document-object-document" },
     { "path": "../json-document-calendar-document" },
     { "path": "../json-document" },
     { "path": "../json-document-selection" }

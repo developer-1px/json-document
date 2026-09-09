@@ -1,6 +1,4 @@
 import {
-  buildPointer,
-  type JSONPatchOperation,
   type JSONValue,
 } from "@interactive-os/json-document";
 import {
@@ -17,21 +15,11 @@ import { resolveDocumentSource, type EditingDocumentSource } from "./document-so
 import { createEditingId, createEditingIdAllocator } from "./identity.js";
 import type { EditingHistoryOptions } from "./history.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
-import { assertObjectDocument } from "./object-validation.js";
-
-export interface DocumentObject extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly label: string;
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-  readonly color: string;
-}
-
-export interface ObjectDocument extends Record<string, JSONValue> {
-  readonly objects: ReadonlyArray<DocumentObject>;
-}
+import {
+  assertObjectDocument, planObjectOperation, transformObject,
+  type DocumentObject, type ObjectDocument, type ObjectDraft, type ObjectOperation,
+} from "@interactive-os/json-document-object-document";
+export type { DocumentObject, ObjectDocument } from "@interactive-os/json-document-object-document";
 
 export interface ObjectSelection extends Record<string, JSONValue> {
   readonly kind: "explicit";
@@ -50,16 +38,9 @@ export interface ObjectClipboard extends Record<string, JSONValue> {
 export const objectClipboardFormat = {
   mimeType: "application/vnd.interactive-os.objects+json" as const,
   parse(value: unknown): ObjectClipboard | null {
-    return isClipboardRecord(value)
-      && value.type === this.mimeType
-      && typeof value.text === "string"
-      && Array.isArray(value.objects)
-      && value.objects.every((item) => isClipboardRecord(item)
-        && typeof item.id === "string" && typeof item.label === "string"
-        && typeof item.x === "number" && typeof item.y === "number"
-        && typeof item.width === "number" && typeof item.height === "number"
-        && typeof item.color === "string")
-      ? value as ObjectClipboard : null;
+    if (!isClipboardRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
+    if (!Array.isArray(value.objects) || value.objects.some((object) => !isClipboardRecord(object) || typeof object.color !== "string")) return null;
+    try { assertObjectDocument(value); return value as ObjectClipboard; } catch { return null; }
   },
 };
 
@@ -70,6 +51,9 @@ export interface ObjectPastePlacement {
 }
 
 export type ObjectIntent =
+  | { readonly type: "object.create"; readonly object: ObjectDraft }
+  | { readonly type: "object.text"; readonly objectId: string; readonly text: string }
+  | { readonly type: "document.replace"; readonly document: ObjectDocument }
   | {
       readonly type: "selection.set";
       readonly objectIds: ReadonlyArray<string>;
@@ -147,6 +131,21 @@ export function createObjectEditor(
   }
 
   function dispatch(intent: ObjectIntent): EditingResult<ObjectSelection> {
+    if (intent.type === "object.create") {
+      const allocate = createEditingIdAllocator(value().objects.map((object) => object.id), createId, "object");
+      let id: string;
+      try { id = allocate(); } catch (error) { return { ok: false, code: "object.identity-unavailable", reason: error instanceof Error ? error.message : String(error) }; }
+      const object = { ...intent.object, id };
+      return apply({ type: "insert", objects: [object] }, selectionFor([object.id]), intent.type);
+    }
+    if (intent.type === "object.text") {
+      return apply({ type: "text", objectId: intent.objectId, text: intent.text }, selectionFor([intent.objectId]), intent.type);
+    }
+    if (intent.type === "document.replace") {
+      // A profile-specific session cannot silently become another document type.
+      if (value().profile !== intent.document?.profile) return failure("object.profile-mismatch");
+      return apply({ type: "replace", document: intent.document }, selectionFor([]), intent.type);
+    }
     if (intent.type === "selection.set") {
       const available = new Set(value().objects.map((object) => object.id));
       if (intent.objectIds.some((id) => !available.has(id))) {
@@ -168,83 +167,36 @@ export function createObjectEditor(
     }
 
     if (intent.type === "object.translate") {
-      const objects = value().objects;
-      const moving = new Set(intent.objectIds);
-      if (intent.objectIds.some((id) => !objects.some((object) => object.id === id))) {
-        return failure("selection.object-not-found");
-      }
-      return session.apply({
-        operations: objects.flatMap((object, index) => {
-          if (!moving.has(object.id)) return [];
-          return [
-            { op: "replace", path: buildPointer(["objects", index, "x"]), value: object.x + intent.dx },
-            { op: "replace", path: buildPointer(["objects", index, "y"]), value: object.y + intent.dy },
-          ];
-        }),
-        selectionAfter: selectionFor(intent.objectIds),
-        origin: intent.type,
-      });
+      return apply({ type: "transform", objectIds: intent.objectIds, transform: { dx: intent.dx, dy: intent.dy } }, selectionFor(intent.objectIds), intent.type);
     }
 
     if (intent.type === "object.resize") {
-      const objects = value().objects;
-      const resizing = new Set(intent.objectIds);
-      if (intent.objectIds.some((id) => !objects.some((object) => object.id === id))) {
-        return failure("selection.object-not-found");
-      }
-      return session.apply({
-        operations: objects.flatMap((object, index) => {
-          if (!resizing.has(object.id)) return [];
-          const width = Math.max(1, object.width + intent.dw);
-          const height = Math.max(1, object.height + intent.dh);
-          return [
-            { op: "replace", path: buildPointer(["objects", index, "x"]), value: object.x + intent.dx },
-            { op: "replace", path: buildPointer(["objects", index, "y"]), value: object.y + intent.dy },
-            { op: "replace", path: buildPointer(["objects", index, "width"]), value: width },
-            { op: "replace", path: buildPointer(["objects", index, "height"]), value: height },
-          ];
-        }),
-        selectionAfter: selectionFor(intent.objectIds),
-        origin: intent.type,
-      });
+      return apply({ type: "transform", objectIds: intent.objectIds, transform: { dx: intent.dx, dy: intent.dy, dw: intent.dw, dh: intent.dh } }, selectionFor(intent.objectIds), intent.type);
     }
 
     if (intent.type === "clipboard.paste") {
       const objects = value().objects;
-      const pasted = cloneObjectsWithUniqueIds(intent.clipboard.objects, objects, createId).map((object) => ({
-        ...object,
-        x: object.x + (intent.placement?.dx ?? 0),
-        y: object.y + (intent.placement?.dy ?? 0),
-      }));
+      if (!objectClipboardFormat.parse(intent.clipboard)) return failure("clipboard.invalid");
+      const dx = intent.placement?.dx ?? 0, dy = intent.placement?.dy ?? 0;
+      if (![dx, dy].every(Number.isFinite)) return failure("object.invalid");
+      const pasted = cloneObjectsWithUniqueIds(intent.clipboard.objects, objects, createId)
+        .map((object) => transformObject(object, { dx, dy }));
       if (pasted.length === 0) return failure("clipboard.empty");
-      return session.apply({
-        operations: pasted.map((object, offset) => ({
-          op: "add",
-          path: `/objects/${objects.length + offset}`,
-          value: object,
-        })),
-        selectionAfter: selectionFor(pasted.map((object) => object.id)),
-        origin: intent.type,
-      });
+      return apply({ type: "insert", objects: pasted }, selectionFor(pasted.map((object) => object.id)), intent.type);
     }
 
     const selected = selectedObjects();
     if (selected.length === 0) return failure("selection.empty");
     if (intent.type === "selection.fill") {
-      const objects = value().objects;
-      const operations: JSONPatchOperation[] = selected.map((object) => ({
-        op: "replace",
-        path: buildPointer(["objects", objects.findIndex((candidate) => candidate.id === object.id), "color"]),
-        value: intent.color,
-      }));
-      return session.apply({
-        operations,
-        selectionAfter: session.snapshot.selection,
-        origin: intent.type,
-      });
+      return apply({ type: "fill", objectIds: selected.map((object) => object.id), color: intent.color }, session.snapshot.selection, intent.type);
     }
 
-    return removeSelected(selected.map((object) => object.id));
+    return intent.type === "selection.remove" ? removeSelected(selected.map((object) => object.id)) : failure("object.unsupported-intent");
+  }
+
+  function apply(operation: ObjectOperation, selectionAfter: ObjectSelection, origin: string): EditingResult<ObjectSelection> {
+    const plan = planObjectOperation(value(), operation);
+    return plan.ok ? session.apply({ operations: plan.operations, selectionAfter, origin }) : plan;
   }
 
   function copy(): ObjectClipboard | null {
@@ -268,11 +220,7 @@ export function createObjectEditor(
     const remaining = objects.filter((object) => !selectedIds.has(object.id));
     const firstRemoved = Math.min(...indices);
     const next = remaining[Math.min(firstRemoved, remaining.length - 1)];
-    return session.apply({
-      operations: indices.map((index) => ({ op: "remove", path: buildPointer(["objects", index]) })),
-      selectionAfter: selectionFor(next ? [next.id] : []),
-      origin: "selection.remove",
-    });
+    return apply({ type: "remove", objectIds: ids }, selectionFor(next ? [next.id] : []), "selection.remove");
   }
 
   return {
