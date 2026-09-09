@@ -31,7 +31,7 @@ export function ObjectDemoRoute() {
     paste: (payload) => editor.dispatch({
       type: "clipboard.paste",
       clipboard: payload,
-      placement: { type: "offset", dx: 24, dy: 24 },
+      placement: { type: "cascade", dx: 24, dy: 24 },
     }),
     onResult(result) {
       if (!result.ok) return observation.announce(result.code);

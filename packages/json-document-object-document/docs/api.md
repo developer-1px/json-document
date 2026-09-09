@@ -1,8 +1,8 @@
 ## Object Document Type 계약 · RC
 
 소유자는 `@interactive-os/json-document-object-document`입니다. Object의 값과
-의미를 정의하며 선택·ID 할당·Intent·History는 Editing이, 사람의 조작은 Canvas
-Hand가 소유합니다. 기존 Editing 타입 export는 같은 정본 타입의 호환 경로입니다.
+의미를 정의하며 선택·ID 할당·Intent·History는 Editing이, 조작 문법은 Affordance가,
+입력 연결·렌더링은 Canvas Hand가 소유합니다. 기존 Editing 타입 export는 같은 정본 타입의 호환 경로입니다.
 
 ### 모델과 Canvas 프로파일
 
@@ -24,12 +24,23 @@ Object도 계속 유효합니다. legacy Object의 생략된 color는 계속 수
 | rectangle | 없음 | color로 채운 사각형 |
 | ellipse | 없음 | 경계 상자에 내접하는 타원 |
 | path | points, 양의 유한수 strokeWidth | color로 그린 열린 선 |
+| image | source | 문서에 포함한 PNG/JPEG/WebP의 base64 data URL |
 
 path points는 최소 두 개의 `{ x, y }`이며 각 좌표는 `[0, 1]`입니다. 경계 상자에
 대한 정규화 좌표이므로 이동·resize는 상자만 바꾸고 점과 strokeWidth를 보존합니다.
 `createCanvasPath`는 슬라이드 좌표의 점을 이 표현으로 변환합니다. 수평·수직 선의
 퇴화한 축은 최소 1 단위의 상자로 표현합니다. `createCanvasObject`는 도형/글자 초안을
 만들며 ID는 Editing의 `object.create`에서 할당합니다.
+
+`createCanvasImage({ source, width, height, label }, bounds)`는 decode된 자연 크기를
+주어진 상자에 비율을 유지해 맞추며 확대하지 않습니다. image의 color는 공통 모델 호환을
+위한 `transparent`이고 렌더링에는 쓰지 않습니다. 이후 resize는 다른 객체와 같은 자유
+상자 변환이며 원본 비율을 강제하지 않습니다. source 바이트는 이동·resize·복제에 유지됩니다.
+
+`assertCanvasImageSource`는 PNG/JPEG/WebP MIME과 비어 있지 않은 base64 문법을 검증합니다.
+외부 URL, blob URL, SVG, HTML은 거절합니다. 실제 이미지 decode나 파일 크기·픽셀 정책 검사는
+하지 않습니다. Web의 `readWebRasterFile`과 File Intake를 거친 입력만 실제 이미지로 수용하는
+경계는 Canvas Clipboard binding에 있습니다. JSON 문자열만으로 디코딩 가능성을 보증하지 않습니다.
 
 ### 검증과 직렬화
 

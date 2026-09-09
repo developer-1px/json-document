@@ -67,6 +67,11 @@ describe("Demo definition and source discovery", () => {
       ["packages/json-document-editing/src/object.ts", "/docs/api/editing"],
       ["packages/json-document-web/src/clipboard.ts", "/docs/api/web"],
       ["packages/json-document-canvas/src/use-canvas-hand.ts", "/docs/api/canvas"],
+      ["packages/json-document-canvas/src/canvas-clipboard.ts", "/docs/api/canvas"],
+      ["packages/json-document-editing/src/canvas-clipboard.ts", "/docs/api/editing"],
+      ["packages/json-document-editing/src/object-paste-session.ts", "/docs/api/editing"],
+      ["packages/json-document-web/src/raster-source.ts", "/docs/api/web"],
+      ["packages/json-document-file-intake/src/index.ts", "/docs/api/file-intake"],
     ]) {
       const file = sources.find((source) => source.path === path);
       expect(file, path).toBeDefined(); expect(file!.referencePath).toBe(reference);

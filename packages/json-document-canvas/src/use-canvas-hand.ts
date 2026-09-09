@@ -3,9 +3,10 @@ import { createGestureSession, createPlaneSelectProfile, resizeAffordance, type 
 import { assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, transformObject, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint } from "@interactive-os/json-document-object-document";
 import type { EditingResult, ObjectEditor, ObjectIntent, ObjectSelection } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { createWebClipboardBinding, createWebKeyboardAdapter, createWebPointerSession, isWebEditableTarget, objectClipboardCodec, projectWebClientPointToSVG, webSVGViewportFromElement } from "@interactive-os/json-document-web";
+import { createWebKeyboardAdapter, createWebPointerSession, isWebEditableTarget, projectWebClientPointToSVG, webSVGViewportFromElement } from "@interactive-os/json-document-web";
+import { createCanvasClipboardBinding } from "./canvas-clipboard.js";
 
-export type CanvasTool = "select" | CanvasObjectKind;
+export type CanvasTool = "select" | Exclude<CanvasObjectKind, "image">;
 export interface CanvasCreationStyle {
   readonly color: string;
   readonly textColor: string;
@@ -14,7 +15,7 @@ export interface CanvasCreationStyle {
 }
 
 type Gesture = { readonly base: CanvasDocument } & (
-  | { readonly type: "create"; readonly tool: Exclude<CanvasObjectKind, "path">; readonly start: ObjectPoint; readonly point: ObjectPoint }
+  | { readonly type: "create"; readonly tool: Exclude<CanvasObjectKind, "path" | "image">; readonly start: ObjectPoint; readonly point: ObjectPoint }
   | { readonly type: "draw"; readonly points: ReadonlyArray<ObjectPoint> }
   | { readonly type: "resize"; readonly object: CanvasObject; readonly start: ObjectPoint; readonly point: ObjectPoint; readonly edge: ResizeEdge }
 );
@@ -34,12 +35,10 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   const draft = useRef<TextDraft | null>(null);
   const selecting = useRef<{ readonly base: CanvasDocument; readonly selection: ObjectSelection; readonly pointerId: number; readonly key: string | null } | null>(null);
   const profile = useMemo(() => selectProfile ?? createPlaneSelectProfile(), [editor, selectProfile]);
-  const clipboard = useMemo(() => createWebClipboardBinding({
-    codec: objectClipboardCodec,
-    read: () => editor.copy(),
-    cut: (payload) => editor.dispatch({ type: "object.remove", objectIds: payload.objects.map((object) => object.id) }),
-    paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload, placement: { type: "offset", dx: 24, dy: 24 } }),
-  }), [editor]);
+  const clipboard = useMemo(() => createCanvasClipboardBinding(editor, { textColor: style.textColor, fontSize: style.fontSize }, {
+    onResult(result) { setError(result.ok ? null : result.reason ?? result.code ?? null); if (result.ok) setTool("select"); },
+    onPendingChange: redraw,
+  }), [editor, style.textColor, style.fontSize]);
   const gestures = useMemo(() => createGestureSession<Gesture>({ onBegin: redraw, onPreview: redraw, onCommit: redraw, onCancel: redraw }), [editor]);
   const pointer = useMemo(() => createWebPointerSession<true>({ onCancel: (_, reason) => {
     gestures.cancel(reason === "lost-capture" ? "lost-capture" : "pointer-cancel");
@@ -52,7 +51,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     return value;
   }
 
-  function cancel() {
+  function cancelInteraction() {
     const active = pointer.getSnapshot();
     if (active) pointer.cancel(active.pointerId);
     gestures.cancel();
@@ -60,6 +59,8 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     draft.current = null;
     redraw();
   }
+
+  function cancel() { clipboard.cancel(); cancelInteraction(); }
 
   useEffect(() => {
     // A replacement/external edit invalidates previews, even when an ID survives.
@@ -70,13 +71,14 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     });
     return () => {
       release();
+      clipboard.cancel();
       const active = pointer.getSnapshot();
       if (active) pointer.cancel(active.pointerId);
       gestures.cancel();
       profile.cancel(); selecting.current = null;
       draft.current = null;
     };
-  }, [editor, gestures, pointer, profile]);
+  }, [editor, gestures, pointer, profile, clipboard]);
 
   function report(result: EditingResult<ObjectSelection>) {
     setError(result.ok ? null : result.reason ?? result.code);
@@ -227,10 +229,9 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
 
   function handleClipboard(operation: "copy" | "cut" | "paste", event: ClipboardEvent) {
     if (isWebEditableTarget(event.target)) return;
-    cancel();
-    const result = clipboard[operation](event);
-    setError(result.ok ? null : result.reason ?? result.code);
-    if (result.ok) setTool("select");
+    cancelInteraction();
+    setError(null);
+    void clipboard[operation](event);
   }
 
   function updateModifiers(event: KeyboardEvent) {
@@ -240,7 +241,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   function keyDown(event: KeyboardEvent) {
     if (event.nativeEvent.isComposing || isWebEditableTarget(event.target)) return;
     updateModifiers(event);
-    const selectedAction = profile.keyDown(event, selectContext(), gestures.getActive() !== null || draft.current !== null);
+    const selectedAction = profile.keyDown(event, selectContext(), gestures.getActive() !== null || draft.current !== null || clipboard.pending);
     if (selectedAction) {
       event.preventDefault();
       cancel();
@@ -269,7 +270,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   const preview = gesture && (gesture.type === "create" || gesture.type === "draw") ? createPreview(gesture) : null;
 
   return {
-    document, snapshot, selection, marquee: selectionPreview?.marquee ?? null, objects, copyOriginals, preview, surface, tool, error, draft: draft.current,
+    document, snapshot, selection, marquee: selectionPreview?.marquee ?? null, objects, copyOriginals, preview, surface, tool, error, pastePending: clipboard.pending, draft: draft.current,
     choose, select, interaction, editText, commitText, cancel, remove, duplicate, history,
     changeText(text: string) { if (draft.current) { draft.current = { ...draft.current, text }; redraw(); } },
     openJSON(json: string) {

@@ -1,7 +1,7 @@
 ## Canvas Hand 계약 · RC
 
 `CanvasHand`는 `ObjectEditor`와 `CanvasCreationStyle`을 받아 글자·사각형·타원·자유
-그리기, 다중 선택, 집합 이동·복제·삭제, native Clipboard, primary resize, Undo/Redo, JSON 재열기를 연결합니다.
+그리기, 이미지·텍스트 붙여넣기, 다중 선택, 집합 이동·복제·삭제, native Clipboard, primary resize, Undo/Redo, JSON 재열기를 연결합니다.
 `useCanvasHand`는 같은 입력 조합을 custom UI에서 사용할 수 있게 공개합니다.
 
 툴바의 모든 도구·명령은 Lucide 아이콘과 공통 `Toggle`/`Command`의 `label`을
@@ -14,10 +14,11 @@ Host: 한 장 fixture, 크기·색상 정책, 레이아웃
   └─ Canvas Hand: 도구, 조작 preview, plain-text draft, UI 조합
       ├─ React Connector: Editing snapshot 구독
       ├─ Web Adapter: SVG 좌표, pointer capture, keyboard·Clipboard 해석
+      ├─ File Intake: 붙여넣은 파일의 형식·개수·용량 정책 검사
       ├─ Affordance: createPlaneSelectProfile, gesture, resize
       │   └─ Selection: key 집합·primaryKey 전이
       ├─ UI Primitives: handle, icon controls·tooltips
-      └─ Object Editing: Intent, ID 할당, Selection, History
+      └─ Object Editing: Intent, ID 할당, Selection, History, 외부 내용 변환·paste 순서/취소
           ├─ Object Document Type: Canvas profile, 검증, 연산, projection, JSON
           └─ Core: immutable 값과 atomic JSON Patch
 ```
@@ -63,11 +64,28 @@ clipboard는 만들지 않습니다. 복제 버튼은 OS clipboard를 바꾸지 
 
 cut은 쓰기에 성공한 캡처 대상만 제거합니다. 쓰기 실패나 Editing 거절은 오류로 드러내고
 문서 삭제나 브라우저 fallback 삭제를 허용하지 않습니다. paste는 새 ID·대응 primary로
-선택하고 원래 좌표에서 x/y 각각 24만큼 offset합니다. 같은 payload를 반복 paste하면
-같은 offset 위치에 새 사본을 만듭니다. text/JSON textarea의 native clipboard는 가로채지 않습니다.
+선택합니다. Editing의 cascade placement로 24/24씩 이동하여 기존 객체와 시작점이 겹치지 않는
+첫 위치를 고릅니다. 객체 간 완전한 충돌 회피나 슬라이드 안 자동 배치는 아닙니다.
+text/JSON textarea의 native clipboard는 가로채지 않습니다.
 
-Canvas 표면으로의 외부 plain text/HTML/image paste와 async clipboard 툴바는 아직 지원하지
-않습니다. 지원 MIME이 없거나 payload가 잘못되면 문서를 바꾸지 않고 실패를 표시합니다.
+`createCanvasClipboardBinding(editor, policy, options?)`가 이 연결의 공개 API입니다.
+구조화 Object → 이미지 파일 → 일반 텍스트 순서로 처리하며 잘못된 Object MIME은 문자열로
+조용히 변환하지 않습니다. 외부 문자열은 한 text 객체가 되며 HTML을 실행/보존하지 않고
+줄바꿈·Unicode를 그대로 보존합니다. PNG/JPEG/WebP는 문서 내부 base64 image 객체로 넣습니다.
+기본은 한 paste당 최대 4개, 파일당 10 MiB, decode 후 이미지당 16,000,000픽셀입니다.
+이미지는 비율을 유지해 슬라이드 75% 상자에 맞추고 확대하지 않습니다. 후속 resize는 일반
+객체와 같은 자유 상자 변환입니다. `policy.files`와 `maxImagePixels`로 입력 정책을 지정할 수
+있지만 Object 모델이 지원하지 않는 이미지 표현까지 허용되는 것은 아닙니다.
+
+같은 batch는 순차 decode로 준비하고 모두 성공한 경우만 한 번 삽입합니다. 연속 paste는
+Editing paste session을 통해 입력 순서대로 각각 commit/Undo를 만듭니다. 진행 상태를 표시하고
+Escape·다른 도구/편집·외부 문서/선택·unmount는 준비를 취소합니다. 늦은 완료는 문서를 바꾸거나
+오류 상태를 덮어쓰지 않습니다. `pending`, `cancel()`, `onResult`, `onPendingChange`를 공개하며
+`readRaster`에는 Web API와 호환되는 구체 환경 인스턴스를 주입할 수 있습니다.
+
+이미지도 기존 다중 선택·이동·복제·copy/cut/paste·삭제·Undo/Redo와 JSON 재열기를 사용합니다.
+이미지용 별도 생성 도구, 외부 URL/SVG/HTML import, 이미지 파일 export, asset 서버,
+async clipboard 툴바는 아직 지원하지 않습니다. 표준 MIME이 없는 입력이나 실패는 오류로 드러냅니다.
 
 ### JSON
 

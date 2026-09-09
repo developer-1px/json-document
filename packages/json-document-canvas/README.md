@@ -5,6 +5,7 @@
 selection/history 구현을 만들지 않고 기존 `createObjectEditor`를 사용합니다.
 재사용 가능한 Plane Select profile로 다중 선택·Alt 복제·Shift 축 고정·방향키 이동을,
 Object Editing과 Web Clipboard로 선택 copy/cut/paste·Mod+D·Undo/Redo를 연결합니다.
+외부 텍스트와 PNG/JPEG/WebP 붙여넣기, 반복 paste 배치와 비동기 취소도 정본 API를 사용합니다.
 
 ```tsx
 import { useState } from "react";

@@ -31,3 +31,25 @@ const clipboard = createWebClipboardBinding({
 
 실제 소비와 Source: [Canvas](/demo/canvas), [Object Demo](/demo/object),
 [Clipboard Adapter](/adapters/clipboard). Canvas text/JSON textarea는 native clipboard를 유지합니다.
+
+### 비동기 입력을 위한 동기 캡처
+
+`captureWebClipboardPaste(event, { codec, files: true, text: true })`는 이벤트가 끝나기 전에
+구조화 MIME → 파일 → `text/plain` 순서로 하나의 표현을 캡처합니다. 성공은 `type`이
+`structured`(payload), `files`(파일 배열), `text`(문자열)인 결과입니다. files/text는 명시한
+경우만 처리하며 기본은 구조화 표현뿐입니다. 파일 메타데이터는 별도 `fileCandidatesFromWebFiles`
+API로 File Intake에 전달하고, 파일 참조는 실제 browser File이어야 읽을 수 있습니다.
+
+캡처한 파일 배열과 문자열을 비동기 작업에 넘기며 ClipboardEvent/DataTransfer를 나중에 다시
+읽지 않습니다. 자신이 처리하는 표현은 즉시 preventDefault합니다. 구조화 MIME이 있으면
+decode 실패도 소유한 실패이며 다른 표현으로 떨어지지 않습니다. 이 strict 캡처는 위의 기존
+동기 binding이 제공하는 여러 representation fallback/pass-through와 구분되는 계약입니다.
+일치하는 표현이 없으면 native 처리를 막지 않고 `clipboard.empty`를 반환합니다.
+
+`readWebRasterFile(file, { signal? })`는 기존 FileReader와 Image decode 정본입니다.
+성공은 dataURL과 자연 width/height, 실패는 `raster.read-failed`, `raster.decode-failed`,
+취소는 `raster.cancelled`입니다. 구조적 `WebRasterReadSignal`은 browser AbortSignal과
+호환되며 read/decode 중 취소하면 리스너를 해제하고 읽기/이미지 요청을 중단합니다.
+파일 형식·크기·개수·픽셀 제한이나 문서 객체 생성은 이 플랫폼 API의 책임이 아닙니다.
+
+실제 텍스트·이미지 입력 및 순서/취소 연결: [Canvas Usage/Source](/demo/canvas).

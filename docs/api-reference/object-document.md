@@ -11,6 +11,11 @@ Object 문서와 Canvas 프로파일의 모델·검증·연산·projection의 pu
 ```ts
 assertCanvasDocument(value: unknown): asserts value is CanvasDocument
 ```
+## `assertCanvasImageSource`
+
+```ts
+assertCanvasImageSource(source: unknown): asserts source is string
+```
 ## `assertObjectDocument`
 
 ```ts
@@ -38,17 +43,23 @@ type CanvasObjectDraft = ObjectDraft & (
   | { readonly kind: "text"; readonly fontSize: number }
   | { readonly kind: "rectangle" | "ellipse" }
   | { readonly kind: "path"; readonly points: ReadonlyArray<ObjectPoint>; readonly strokeWidth: number }
+  | { readonly kind: "image"; readonly source: string }
 );
 ```
 ## `CanvasObjectKind`
 
 ```ts
-type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "path";
+type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "path" | "image";
+```
+## `createCanvasImage`
+
+```ts
+createCanvasImage(image: { readonly source: string; readonly width: number; readonly height: number; readonly label: string; }, bounds: ObjectBounds): Extract<CanvasObjectDraft, { readonly kind: "image"; }>
 ```
 ## `createCanvasObject`
 
 ```ts
-createCanvasObject(kind: Exclude<CanvasObjectKind, "path">, bounds: ObjectBounds, style: { readonly color: string; readonly label: string; readonly fontSize?: number; }): CanvasObjectDraft
+createCanvasObject(kind: Exclude<CanvasObjectKind, "path" | "image">, bounds: ObjectBounds, style: { readonly color: string; readonly label: string; readonly fontSize?: number; }): CanvasObjectDraft
 ```
 ## `createCanvasPath`
 

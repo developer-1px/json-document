@@ -95,6 +95,37 @@ test("Canvas Alt-copy, nudge, duplicate and native selected clipboard share atom
   await expect(selected).toHaveCount(2);
 });
 
+test("Canvas captures real raster bytes before the native event ends and queues subsequent literal text", async ({ page }) => {
+  await page.goto("/demo/canvas");
+  const prevented = await page.evaluate(() => {
+    const raster = document.createElement("canvas"); raster.width = 1600; raster.height = 800;
+    const context = raster.getContext("2d")!; context.fillStyle = "#b6c8e8"; context.fillRect(0, 0, 1600, 800);
+    const bytes = Uint8Array.from(atob(raster.toDataURL("image/png").split(",")[1]!), (character) => character.charCodeAt(0));
+    const data = new DataTransfer(); data.items.add(new File([bytes], "clipboard.png", { type: "image/png" }));
+    data.setData("text/plain", "This fallback must not become an object");
+    const slide = document.querySelector("[data-canvas-slide]")!;
+    const image = new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true });
+    slide.dispatchEvent(image);
+    data.items.clear(); // Event data is ephemeral; preparation must use its captured snapshot.
+    const text = new DataTransfer(); text.setData("text/plain", "<b>한글</b>\nSecond line");
+    slide.dispatchEvent(new ClipboardEvent("paste", { clipboardData: text, bubbles: true, cancelable: true }));
+    return image.defaultPrevented;
+  });
+  expect(prevented).toBe(true);
+  await expect(page.locator("[data-canvas-object]")).toHaveCount(2);
+  await expect(page.locator("[data-canvas-slide]")).toHaveAttribute("aria-busy", "false");
+  await expect(page.locator("[data-canvas-slide] image")).toHaveAttribute("href", /^data:image\/png;base64,/);
+  await expect(page.locator("[data-canvas-slide] b")).toHaveCount(0);
+  await page.getByRole("button", { name: "JSON", exact: true }).click();
+  const saved = await page.getByRole("textbox", { name: "Canvas JSON document" }).inputValue();
+  const objects = JSON.parse(saved).objects;
+  expect(objects.map((object: { kind: string; x: number }) => [object.kind, object.x])).toEqual([["image", 24], ["text", 48]]);
+  expect(objects[0]).toMatchObject({ width: 960, height: 480, label: "clipboard.png" });
+  expect(objects[1].label).toBe("<b>한글</b>\nSecond line");
+  await page.getByRole("button", { name: "JSON 열기" }).click();
+  await expect(page.locator("[data-canvas-slide] image")).toHaveAttribute("href", objects[0].source);
+});
+
 test("Canvas move and resize are single history steps and Escape cancels a gesture", async ({ page }) => {
   await page.goto("/demo/canvas");
   await create(page, "사각형", [100, 100], [300, 200]);

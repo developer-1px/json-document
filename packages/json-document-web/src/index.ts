@@ -1,5 +1,6 @@
 export {
   createWebClipboardBinding,
+  captureWebClipboardPaste,
   createWebJSONClipboardRepresentation,
   createWebClipboardSurface,
   createWebClipboardTextWriter,
@@ -65,6 +66,7 @@ export type {
 } from "./anchored-floating-position.js";
 export type {
   WebClipboardBinding,
+  WebClipboardPaste,
   WebClipboardBindingOptions,
   WebClipboardCodec,
   WebClipboardData,
@@ -118,7 +120,7 @@ export type {
 } from "./viewport-position.js";
 export type { WebKanbanTargetElement } from "./kanban-drop-target.js";
 export type { WebClientPoint, WebSVGElement, WebSVGViewport } from "./svg-coordinate.js";
-export type { WebRasterFile, WebRasterSourceResult } from "./raster-source.js";
+export type { WebRasterFile, WebRasterReadSignal, WebRasterSourceResult } from "./raster-source.js";
 export type { WebComposerClipboardEvent, WebComposerFile, WebComposerFileList, WebFileCandidate, WebFileCandidateList, WebFileClipboardEvent } from "./file-intake.js";
 export type { WebAnnotationRasterResult, WebAnnotationRasterStyle } from "./annotation-raster.js";
 export type {

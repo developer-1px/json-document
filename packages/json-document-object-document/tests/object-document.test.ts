@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { applyPatch } from "@interactive-os/json-document";
-import { assertCanvasDocument, assertObjectDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, planObjectOperation, serializeCanvasDocument, transformObject, type CanvasDocument } from "../src/index.js";
+import { assertCanvasDocument, assertCanvasImageSource, assertObjectDocument, createCanvasImage, createCanvasObject, createCanvasPath, parseCanvasDocument, planObjectOperation, serializeCanvasDocument, transformObject, type CanvasDocument } from "../src/index.js";
 
 const blank: CanvasDocument = { profile: "canvas/1", width: 1280, height: 720, objects: [] };
 const text = { ...createCanvasObject("text", { x: 10, y: 20, width: 300, height: 100 }, { color: "#123456", label: "Hello\n안녕", fontSize: 36 }), id: "text" };
@@ -11,9 +11,22 @@ describe("Object document and Canvas profile", () => {
     const document: CanvasDocument = { ...blank, title: "Slide", objects: [text, path,
       { ...createCanvasObject("rectangle", { x: 100, y: 150, width: 80, height: 60 }, { color: "#abcdef", label: "" }), id: "rect" },
       { ...createCanvasObject("ellipse", { x: 200, y: 150, width: 80, height: 60 }, { color: "#abcdef", label: "" }), id: "ellipse" },
+      { ...createCanvasImage({ source: "data:image/png;base64,AQID", width: 800, height: 400, label: "Picture" }, { x: 30, y: 40, width: 200, height: 200 }), id: "image" },
     ] };
     expect(parseCanvasDocument(serializeCanvasDocument(document))).toEqual(document);
     expect(Object.keys(JSON.parse(serializeCanvasDocument(blank)))).toEqual(["profile", "width", "height", "objects"]);
+  });
+
+  test("embedded raster fitting preserves aspect and transform leaves bytes unchanged", () => {
+    const object = { ...createCanvasImage({ source: "data:image/jpeg;base64,AQID", width: 800, height: 400, label: "Picture" }, { x: 10, y: 20, width: 200, height: 200 }), id: "image" };
+    expect(object).toMatchObject({ kind: "image", width: 200, height: 100 });
+    expect(transformObject(object, { dx: 20, dy: 30, dw: 10, dh: 20 })).toMatchObject({ source: object.source, x: 30, y: 50, width: 210, height: 120 });
+    expect(() => createCanvasImage({ source: object.source, width: 0, height: 10, label: "" }, object)).toThrow();
+    expect(() => assertCanvasImageSource(`data:image/webp;base64,${"AQID".repeat(100_000)}`)).not.toThrow();
+  });
+
+  test.each([undefined, "https://example.com/a.png", "blob:temporary", "data:image/svg+xml;base64,AQID", "data:text/html;base64,AQID", "data:image/png;base64,", "data:image/png;base64,A", "data:image/png;base64,AQ=Z", "data:image/png;base64,A===", "data:image/png;base64,AQID\n"])("rejects nonportable or malformed image source %#", (source) => {
+    expect(() => assertCanvasDocument({ ...blank, objects: [{ ...text, kind: "image", source }] })).toThrow();
   });
 
   test.each([null, [], {}, { ...blank, objects: null }, { ...blank, width: 0 }, { ...blank, height: Infinity },

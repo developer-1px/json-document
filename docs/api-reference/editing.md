@@ -536,6 +536,23 @@ calendarVisibleEvents(document: CalendarDocument): ReadonlyArray<CalendarEvent>
 ```ts
 calendarVisibleHourBand(startMinutes: number, endMinutes: number, hourStart: number, hourEnd: number): { readonly startMinutes: number; readonly endMinutes: number; } | null
 ```
+## `CanvasClipboardContent`
+
+```ts
+type CanvasClipboardContent =
+  | { readonly type: "text"; readonly text: string }
+  | { readonly type: "images"; readonly images: ReadonlyArray<{ readonly source: string; readonly width: number; readonly height: number; readonly label: string }> };
+```
+## `CanvasClipboardOptions`
+
+```ts
+interface CanvasClipboardOptions {
+  readonly bounds: ObjectBounds;
+  readonly textColor: string;
+  readonly fontSize: number;
+  readonly imageOffset?: number;
+}
+```
 ## `createAnnotationEditor`
 
 ```ts
@@ -545,6 +562,11 @@ createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>, option
 
 ```ts
 createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; readonly initialEventIds?: ReadonlyArray<string>; }): CalendarEditor
+```
+## `createCanvasClipboard`
+
+```ts
+createCanvasClipboard(content: CanvasClipboardContent, options: CanvasClipboardOptions): ObjectClipboard
 ```
 ## `createDatabaseEditor`
 
@@ -580,6 +602,11 @@ createKanbanEditor(source: EditingDocumentSource<KanbanDocument>, options?: Edit
 
 ```ts
 createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): ObjectEditor
+```
+## `createObjectPasteSession`
+
+```ts
+createObjectPasteSession(editor: ObjectEditor, options?: { readonly placement?: ObjectPastePlacement; readonly onResult?: (result: EditingResult<ObjectSelection>) => void; readonly onPendingChange?: (pending: boolean) => void; }): ObjectPasteSession
 ```
 ## `createOrderEditor`
 
@@ -1260,9 +1287,26 @@ type ObjectIntent =
 
 ```ts
 interface ObjectPastePlacement {
-  readonly type: "offset";
+  readonly type: "offset" | "cascade";
   readonly dx: number;
   readonly dy: number;
+}
+```
+## `ObjectPastePreparation`
+
+```ts
+type ObjectPastePreparation =
+  | { readonly ok: true; readonly clipboard: ObjectClipboard }
+  | { readonly ok: false; readonly code: string; readonly reason?: string };
+```
+## `ObjectPasteSession`
+
+```ts
+interface ObjectPasteSession {
+  readonly pending: boolean;
+  enqueue(prepare: () => ObjectPastePreparation | Promise<ObjectPastePreparation>, cancelPreparation?: () => void): Promise<EditingResult<ObjectSelection>>;
+  /** Cancels queued work and releases subscriptions. The session can be reused. */
+  cancel(): void;
 }
 ```
 ## `ObjectSelection`

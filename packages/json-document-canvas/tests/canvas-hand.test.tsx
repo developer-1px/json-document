@@ -5,6 +5,7 @@ import { createObjectEditor } from "@interactive-os/json-document-editing";
 import type { CanvasDocument } from "@interactive-os/json-document-object-document";
 import { CanvasHand } from "../src/index.js";
 import { createPlaneSelectProfile } from "@interactive-os/json-document-affordance";
+import * as web from "@interactive-os/json-document-web";
 
 const blank: CanvasDocument = { profile: "canvas/1", width: 1280, height: 720, objects: [] };
 const style = { color: "#abcdef", textColor: "#123456", fontSize: 32, strokeWidth: 3 };
@@ -16,7 +17,7 @@ beforeAll(() => {
   Element.prototype.hasPointerCapture = function (id) { return captures.get(this) === id; };
   Element.prototype.releasePointerCapture = function () { captures.delete(this); };
 });
-afterEach(cleanup);
+afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 function setup(document = blank, selectProfile = createPlaneSelectProfile()) {
   const source = createJSONDocument(document);
@@ -80,6 +81,55 @@ test("Alt+Shift drag previews originals and copies, switches live modifiers, the
   expect(commits).toHaveBeenCalledOnce();
   fireEvent.keyDown(svg, { key: "z", metaKey: true }); expect(value()).toEqual(before);
   expect(editor.snapshot.selection).toMatchObject({ keys: ["a", "b"], primaryKey: "a" });
+});
+
+test("external text paste is literal, repeated placement is visible, and editing retains the native field boundary", () => {
+  const { svg, container, value } = setup();
+  const data = clipboardData(); data.setData("text/plain", "<b>한글</b>\nSecond line");
+  expect(clipboardEvent(svg, "paste", data).defaultPrevented).toBe(true);
+  clipboardEvent(svg, "paste", data);
+  expect(value().objects.map((object) => [object.kind, object.x, object.y])).toEqual([["text", 24, 24], ["text", 48, 48]]);
+  expect(container.querySelector("foreignObject b")).toBeNull();
+  const text = container.querySelector('[data-canvas-object="object-2"]')!;
+  fireEvent.doubleClick(text);
+  const input = screen.getByRole("textbox", { name: "Canvas text" });
+  expect(clipboardEvent(input, "paste", data).defaultPrevented).toBe(false);
+  expect(value().objects).toHaveLength(2);
+});
+
+test("image paste reaches the SVG renderer and existing duplication, Undo, and JSON reopening", async () => {
+  const png = "data:image/png;base64,AQID";
+  vi.spyOn(web, "readWebRasterFile").mockResolvedValue({ ok: true, dataURL: png, width: 1600, height: 800 });
+  const { svg, container, value } = setup();
+  const data = { ...clipboardData(), files: [{ name: "picture.png", type: "image/png", size: 3 }] };
+  await act(async () => { clipboardEvent(svg, "paste", data); });
+  expect(container.querySelector("image")?.getAttribute("href")).toBe(png);
+  expect(value().objects[0]).toMatchObject({ kind: "image", width: 960, height: 480 });
+  fireEvent.keyDown(svg, { key: "d", metaKey: true }); expect(container.querySelectorAll("image")).toHaveLength(2);
+  fireEvent.keyDown(svg, { key: "z", metaKey: true }); expect(container.querySelectorAll("image")).toHaveLength(1);
+  fireEvent.click(screen.getByRole("button", { name: "JSON" }));
+  const json = screen.getByRole("textbox", { name: "Canvas JSON document" }) as HTMLTextAreaElement;
+  expect(JSON.parse(json.value).objects[0].source).toBe(png);
+  fireEvent.click(screen.getByRole("button", { name: "JSON 열기" }));
+  expect(container.querySelector("image")?.getAttribute("href")).toBe(png);
+});
+
+test.each(["Escape", "tool", "selection", "unmount"])("pending image paste is cancelled by %s and cannot arrive after the action", async (reason) => {
+  let resolve!: (result: web.WebRasterSourceResult) => void;
+  const read = vi.spyOn(web, "readWebRasterFile").mockImplementation(() => new Promise((done) => { resolve = done; }));
+  const { svg, editor, unmount, value, commits } = setup(populated);
+  const data = { ...clipboardData(), files: [{ name: "picture.png", type: "image/png", size: 3 }] };
+  clipboardEvent(svg, "paste", data);
+  expect(svg.getAttribute("aria-busy")).toBe("true"); expect(screen.getByRole("status").textContent).toContain("Escape");
+  if (reason === "Escape") fireEvent.keyDown(svg, { key: "Escape" });
+  else if (reason === "tool") fireEvent.click(screen.getByRole("button", { name: "사각형" }));
+  else if (reason === "selection") act(() => { editor.dispatch({ type: "selection.set", objectIds: ["b"] }); });
+  else unmount();
+  expect(read.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
+  await act(async () => { resolve({ ok: true, dataURL: "data:image/png;base64,AQID", width: 100, height: 100 }); });
+  expect(value()).toEqual(populated); expect(commits).not.toHaveBeenCalled();
+  if (reason === "Escape") expect(editor.snapshot.selection.keys).toEqual(["a"]);
+  if (reason !== "unmount") expect(screen.queryByRole("status")).toBeNull();
 });
 
 test.each(["Escape", "pointercancel"])("cancelled Alt duplication (%s) does not allocate IDs or commit", (reason) => {

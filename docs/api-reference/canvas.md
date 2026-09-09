@@ -6,6 +6,16 @@
 
 > 이 문서는 `packages/json-document-canvas/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `CanvasClipboardPolicy`
+
+```ts
+interface CanvasClipboardPolicy {
+  readonly textColor: string;
+  readonly fontSize: number;
+  readonly files?: FileAcceptancePolicy;
+  readonly maxImagePixels?: number;
+}
+```
 ## `CanvasCreationStyle`
 
 ```ts
@@ -37,10 +47,15 @@ interface CanvasHandProps {
 ## `CanvasTool`
 
 ```ts
-type CanvasTool = "select" | CanvasObjectKind;
+type CanvasTool = "select" | Exclude<CanvasObjectKind, "image">;
+```
+## `createCanvasClipboardBinding`
+
+```ts
+createCanvasClipboardBinding(editor: ObjectEditor, policy: CanvasClipboardPolicy, options?: { readonly readRaster?: typeof readWebRasterFile; readonly onResult?: (result: { readonly ok: boolean; readonly code?: string; readonly reason?: string; }) => void; readonly onPendingChange?: (pending: boolean) => void; }): { ...; }
 ```
 ## `useCanvasHand`
 
 ```ts
-useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile): { document: CanvasDocument; snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<ObjectSelection>; ... 20 more ...; surfaceProps: { ...; }; }
+useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile): { document: CanvasDocument; snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<ObjectSelection>; ... 21 more ...; surfaceProps: { ...; }; }
 ```

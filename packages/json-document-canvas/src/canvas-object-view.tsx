@@ -4,6 +4,7 @@ import type { InteractionHandleEvent, ResizeEdge } from "@interactive-os/json-do
 import { contentInteractionAttributes, Field, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 
 export function CanvasObjectView({ object }: { readonly object: CanvasObject }): ReactNode {
+  if (object.kind === "image") return <image href={object.source} x={object.x} y={object.y} width={object.width} height={object.height} preserveAspectRatio="none" />;
   if (object.kind === "path") {
     return <polyline points={object.points.map((point) => `${object.x + point.x * object.width},${object.y + point.y * object.height}`).join(" ")} fill="none" stroke={object.color} strokeWidth={object.strokeWidth} strokeLinecap="round" strokeLinejoin="round" />;
   }

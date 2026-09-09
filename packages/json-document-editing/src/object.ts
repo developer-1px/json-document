@@ -51,7 +51,7 @@ export const objectClipboardFormat = {
 };
 
 export interface ObjectPastePlacement {
-  readonly type: "offset";
+  readonly type: "offset" | "cascade";
   readonly dx: number;
   readonly dy: number;
 }
@@ -220,8 +220,19 @@ export function createObjectEditor(
   }
 
   function insertCopies(source: readonly DocumentObject[], primaryKey: string | null, placement: ObjectPastePlacement | undefined, origin: string): EditingResult<ObjectSelection> {
-    const dx = placement?.dx ?? 0, dy = placement?.dy ?? 0;
+    let dx = placement?.dx ?? 0, dy = placement?.dy ?? 0;
     if (![dx, dy].every(Number.isFinite)) return failure("object.invalid");
+    if (placement?.type === "cascade") {
+      if (dx === 0 && dy === 0) return failure("object.invalid");
+      const occupied = new Set(value().objects.map((object) => `${object.x}:${object.y}`));
+      const anchor = source[0]!;
+      let step = 1;
+      while (occupied.has(`${anchor.x + dx}:${anchor.y + dy}`)) {
+        if (++step > occupied.size + 1) return failure("object.invalid");
+        dx = placement.dx * step; dy = placement.dy * step;
+      }
+    }
+    if (source.some((object) => !Number.isFinite(object.x + dx) || !Number.isFinite(object.y + dy))) return failure("object.invalid");
     let copies: DocumentObject[];
     try {
       copies = cloneObjectsWithUniqueIds(source, value().objects, createId).map((object) => transformObject(object, { dx, dy }));
