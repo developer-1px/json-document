@@ -2,6 +2,7 @@ import type { CodeLanguage } from "../ui/code-tokens";
 import pointerTrackingSource from "../../../../packages/json-document/src/foundation/patch/track.ts?raw";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
 import calendarEditingSource from "../../../../packages/json-document-editing/src/calendar.ts?raw";
+import calendarEventPlanSource from "../../../../packages/json-document-editing/src/calendar-event-plan.ts?raw";
 import calendarAllDayPointerSource from "../../../../packages/json-document-editing/src/calendar-allday-pointer.ts?raw";
 import calendarMonthPointerSource from "../../../../packages/json-document-editing/src/calendar-month-pointer.ts?raw";
 import calendarTimeGridPointerSource from "../../../../packages/json-document-editing/src/calendar-time-grid-pointer.ts?raw";
@@ -140,6 +141,7 @@ const packageReferencePaths = new Map([
   ["packages/json-document/", "/docs/api/json-document"],
   ["packages/json-document-selection/", "/docs/api/selection"],
   ["packages/json-document-editing/", "/docs/api/editing"],
+  ["packages/json-document-calendar/", "/docs/api/calendar"],
   ["packages/json-document-react/", "/docs/api/react"],
   ["packages/json-document-react-hook-form/", "/docs/api/react-hook-form"],
   ["packages/json-document-ajv/", "/docs/api/ajv"],
@@ -192,6 +194,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/calendar-time-grid-pointer.ts", calendarTimeGridPointerSource],
   ["packages/json-document-editing/src/calendar-occurrence.ts", calendarOccurrenceSource],
   ["packages/json-document-editing/src/calendar-preview.ts", calendarPreviewSource],
+  ["packages/json-document-editing/src/calendar-event-plan.ts", calendarEventPlanSource],
   ["packages/json-document-editing/src/calendar-selection.ts", calendarSelectionSource],
   ["packages/json-document-editing/src/calendar-selection-move.ts", calendarSelectionMoveSource],
   ["packages/json-document-editing/src/calendar-validation.ts", calendarValidationSource],
@@ -395,6 +398,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "createCalendarEditor",
     sourcePath: "packages/json-document-editing/src/calendar.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createCalendarEditor",
+    sourcePath: "packages/json-document-editing/src/calendar-event-plan.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",

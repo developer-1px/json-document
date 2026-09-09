@@ -287,11 +287,12 @@ const misplacedMarkdown = filesUnder("").filter((path) => {
   return path.endsWith(".md")
     && !path.startsWith("docs/")
     && !path.startsWith("standards/")
+    && !rootPackage.workspaces.some((workspace) => workspace.startsWith("packages/") && path.startsWith(`${workspace}/docs/`))
     && name !== "README.md"
     && name !== "AGENTS.md";
 });
 if (misplacedMarkdown.length > 0) {
-  fail(`docs layout: non-README markdown must live under docs/: ${misplacedMarkdown.join(", ")}.`);
+  fail(`docs layout: non-README markdown must live under docs/, standards/, or a registered package's docs/: ${misplacedMarkdown.join(", ")}.`);
 }
 
 for (const [name, source] of Object.entries(surfaces)) {

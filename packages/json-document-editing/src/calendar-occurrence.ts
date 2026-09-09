@@ -1,12 +1,16 @@
 import { Temporal } from "@js-temporal/polyfill";
-import type { CalendarEvent, CalendarRecurrence } from "./calendar.js";
+import type { CalendarEvent, CalendarOccurrencePoint, CalendarOccurrenceSelection, CalendarRecurrence } from "./calendar.js";
 import {
   addCalendarDate,
   calendarDatePart,
   calendarEventBounds,
+  calendarEventIntervalAt,
+  calendarDaysBetween,
+  formatCalendarDate,
+  formatCalendarInstant,
   isCalendarAllDay,
+  isCalendarRecurrence,
   parseCalendarDate,
-  parseCalendarInstant,
 } from "./calendar-validation.js";
 
 export type CalendarOccurrence = {
@@ -16,17 +20,7 @@ export type CalendarOccurrence = {
 };
 
 export function calendarEventRecurrence(event: CalendarEvent): CalendarRecurrence | null {
-  const value = event.recurrence;
-  if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
-  const freq = value.freq;
-  const interval = value.interval;
-  if (
-    (freq !== "daily" && freq !== "weekly" && freq !== "monthly" && freq !== "yearly")
-    || typeof interval !== "number"
-    || interval < 1
-  ) return null;
-  const until = typeof value.until === "string" ? value.until : "";
-  return { freq, interval, until };
+  return isCalendarRecurrence(event.recurrence) ? event.recurrence : null;
 }
 
 export function calendarRecurrenceWithFrequency(
@@ -82,8 +76,21 @@ export function projectCalendarOccurrences(
     }
     const excluded = new Set(calendarEventExcludeDates(event));
     const until = recurrence.until === "" ? null : parseCalendarDate(recurrence.until);
-    for (let index = 0; index < 400; index += 1) {
-      const shifted = shiftOccurrence(event, recurrence.freq, recurrence.interval * index);
+    const end = parseCalendarDate(calendarDatePart(event.end));
+    if (end === null) continue;
+    // Seek by the interval end, not start, so long occurrences overlapping the
+    // window are retained. One preceding period covers constrained month/year ends.
+    const distance = recurrence.freq === "monthly" ? (from.year - end.year) * 12 + from.month - end.month
+      : recurrence.freq === "yearly" ? from.year - end.year
+      : calendarDaysBetween(end, from) / (recurrence.freq === "weekly" ? 7 : 1);
+    const first = Math.max(0, Math.floor(distance / recurrence.interval) - 1);
+    for (let index = first; ; index += 1) {
+      let shifted: ReturnType<typeof shiftOccurrence>;
+      try { shifted = shiftOccurrence(event, recurrence.freq, recurrence.interval * index); }
+      catch (error) {
+        if (!(error instanceof RangeError)) throw error;
+        break; // Beyond the finite Temporal date domain, not a truncated result.
+      }
       if (shifted === null) break;
       const bounds = calendarEventBounds({ ...event, start: shifted.start, end: shifted.end });
       if (bounds === null) break;
@@ -97,37 +104,31 @@ export function projectCalendarOccurrences(
   return occurrences;
 }
 
+/** Resolve against the current recurrence/exclusion rules, including off-screen occurrences. */
+export function resolveCalendarOccurrence(
+  events: ReadonlyArray<CalendarEvent>,
+  point: CalendarOccurrencePoint,
+): CalendarOccurrenceSelection | null {
+  const event = events.find((candidate) => candidate.id === point.eventId);
+  if (event === undefined || typeof point.occurrenceStart !== "string") return null;
+  const day = calendarDatePart(point.occurrenceStart);
+  const next = addCalendarDate(day, 1);
+  if (next === null) return null;
+  const occurrence = projectCalendarOccurrences([event], day, next).find((candidate) => candidate.start === point.occurrenceStart);
+  return occurrence === undefined ? null : { eventId: event.id, start: occurrence.start, end: occurrence.end };
+}
+
 function shiftOccurrence(
   event: CalendarEvent,
   freq: CalendarRecurrence["freq"],
   steps: number,
 ): { readonly start: string; readonly end: string } | null {
   if (steps === 0) return { start: event.start, end: event.end };
-  if (isCalendarAllDay(event)) {
-    const start = shiftDate(event.start, freq, steps);
-    const end = shiftDate(event.end, freq, steps);
-    if (start === null || end === null) return null;
-    return { start, end };
-  }
-  const start = shiftInstant(event.start, freq, steps);
-  const end = shiftInstant(event.end, freq, steps);
-  if (start === null || end === null) return null;
-  return { start, end };
-}
-
-function shiftDate(value: string, freq: CalendarRecurrence["freq"], steps: number): string | null {
-  if (freq === "daily") return addCalendarDate(value, steps);
-  if (freq === "weekly") return addCalendarDate(value, steps * 7);
-  if (parseCalendarDate(value) === null) return null;
-  const duration = freq === "monthly" ? { months: steps } : { years: steps };
-  return Temporal.PlainDate.from(value).add(duration, { overflow: "constrain" }).toString();
-}
-
-function shiftInstant(value: string, freq: CalendarRecurrence["freq"], steps: number): string | null {
-  const dateTime = parseCalendarInstant(value);
-  if (dateTime === null) return null;
-  if (freq === "daily") return dateTime.add({ days: steps }).toString({ smallestUnit: "minute" });
-  if (freq === "weekly") return dateTime.add({ weeks: steps }).toString({ smallestUnit: "minute" });
-  const duration = freq === "monthly" ? { months: steps } : { years: steps };
-  return Temporal.PlainDateTime.from(value).add(duration, { overflow: "constrain" }).toString({ smallestUnit: "minute" });
+  const bounds = calendarEventBounds(event);
+  if (bounds === null) return null;
+  const duration = freq === "daily" ? { days: steps } : freq === "weekly" ? { weeks: steps }
+    : freq === "monthly" ? { months: steps } : { years: steps };
+  const shifted = bounds.from.add(duration, { overflow: "constrain" });
+  const start = isCalendarAllDay(event) ? formatCalendarDate(shifted.toPlainDate()) : formatCalendarInstant(shifted);
+  return calendarEventIntervalAt(event, start);
 }

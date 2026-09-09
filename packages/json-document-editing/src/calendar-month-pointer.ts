@@ -48,15 +48,6 @@ export function bindCalendarMonthIntent(
   if (intent.type !== "event.move-day") return intent;
   if (event === undefined || calendarEventRecurrence(event) === null) return intent;
   const start = occurrenceStart ?? event.start;
-  const occDay = calendarDatePart(start);
-  const origin = parseCalendarDate(occDay);
-  const next = parseCalendarDate(intent.day);
-  if (origin === null || next === null) return intent;
-  if (scope === "all") {
-    const day = addCalendarDate(calendarDatePart(event.start), calendarDaysBetween(origin, next));
-    if (day === null) return intent;
-    return { type: "event.move-day", eventId: intent.eventId, day };
-  }
   return {
     type: "occurrence.edit",
     eventId: intent.eventId,

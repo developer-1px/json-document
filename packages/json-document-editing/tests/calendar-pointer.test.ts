@@ -314,7 +314,7 @@ describe("previewCalendarTimeGrid", () => {
     expect(preview.find((item) => item.id === "preview")).toMatchObject({
       start: "2026-08-04T11:00",
       end: "2026-08-04T11:30",
-      recurrence: { freq: "daily", interval: 1, until: "" },
+      recurrence: { freq: "daily", interval: 1, until: "2026-08-05" },
     });
   });
 });
@@ -473,9 +473,11 @@ describe("bindCalendarTimeGridIntent", () => {
     });
     const intent = bindCalendarTimeGridIntent(move, series, "2026-08-04T09:00", "all");
     expect(intent).toEqual({
-      type: "event.move",
+      type: "occurrence.edit",
       eventId: "standup",
-      start: "2026-08-03T11:00",
+      occurrenceStart: "2026-08-04T09:00",
+      scope: "all",
+      start: "2026-08-04T11:00",
     });
     const editor = createCalendarEditor({
       calendars: [{ id: "home", title: "Home", hidden: false, color: "subtle" }],

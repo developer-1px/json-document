@@ -240,8 +240,8 @@ interface CalendarEditor {
   ): CalendarSelectionDragSource | null;
   dispatch(intent: CalendarIntent): EditingResult<CalendarSelection>;
   copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null;
-  cut(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
-  paste(clipboard: CalendarClipboard, target?: string): EditingResult<CalendarSelection>;
+  cut(source?: ReadonlyArray<CalendarOccurrenceSelection> | CalendarClipboard): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
+  paste(clipboard: CalendarClipboard, target?: string, options?: { readonly calendarId?: string }): EditingResult<CalendarSelection>;
   undo(): EditingResult<CalendarSelection>;
   redo(): EditingResult<CalendarSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<CalendarSelection>) => void): () => void;

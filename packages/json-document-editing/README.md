@@ -180,6 +180,9 @@ It publishes rows with hierarchy/ARIA facts and the matching `TreeTopology`.
 `gridPointKey` and `gridPointFromKey` provide the canonical reversible string
 identity when a selection or rendering adapter needs to key a `GridPoint`.
 
+`Calendar` follows the owner-local [Calendar protocol profile](docs/calendar-profile.md).
+The profile is also rendered on the site's Editing API page; it documents the
+current RC implementation, not a frozen Official Hands wire standard.
 `Calendar` keeps interval events `{ id, title, start, end, allDay }`. Timed
 events use datetime-local strings; all-day events use exclusive-end dates.
 `parseCalendarView` validates untrusted runtime values against the canonical
@@ -210,7 +213,8 @@ the public editors; each domain still owns its projection and removal plan.
 `interpretCalendarAllDayPointer`, and `interpretCalendarMonthPointer` map a
 press-release to those intents from the origin event, not the current
 selection. `calendarTimedLayout` places a timed event on its `start`/`end`
-span. Pixel grids and view chrome stay in the Host.
+span. Calendar Hands own reusable grids and lifecycle, Web owns pixel-coordinate
+translation, and Hosts retain visual composition and policy values.
 
 `Annotation` keeps a target selector separate from its presentation. Point
 targets may use numbered `marker` presentations for instructions or a

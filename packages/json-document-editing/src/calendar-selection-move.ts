@@ -1,4 +1,6 @@
-import { calendarEventExcludeDates, calendarEventRecurrence } from "./calendar-occurrence.js";
+import { calendarEventRecurrence, resolveCalendarOccurrence } from "./calendar-occurrence.js";
+import { planCalendarEventEdit } from "./calendar-event-plan.js";
+import { createEditingIdAllocator } from "./identity.js";
 import type {
   CalendarEvent,
   CalendarOccurrencePoint,
@@ -29,7 +31,7 @@ export type CalendarSelectionMovePlan =
     }
   | { readonly ok: false; readonly code: string };
 
-/** Plans one atomic temporal translation for a materialized occurrence selection. */
+/** Plans one atomic temporal translation; captured intervals are preconditions, not current truth. */
 export function planCalendarSelectionMove(
   events: ReadonlyArray<CalendarEvent>,
   occurrences: ReadonlyArray<CalendarOccurrenceSelection>,
@@ -41,75 +43,61 @@ export function planCalendarSelectionMove(
     readonly primary?: CalendarOccurrencePoint;
   } = {},
 ): CalendarSelectionMovePlan {
-  const anchorOccurrence = occurrences.find((item) => (
-    item.eventId === anchor.eventId && item.start === anchor.occurrenceStart
-  ));
-  if (anchorOccurrence === undefined || occurrences.length === 0) {
-    return { ok: false, code: "selection.drag-source-not-found" };
+  const matches = (item: CalendarOccurrenceSelection, point: CalendarOccurrencePoint) =>
+    item.eventId === point.eventId && item.start === point.occurrenceStart;
+  const anchorOccurrence = occurrences.find((item) => matches(item, anchor));
+  const primaryIndex = occurrences.findIndex((item) => matches(item, options.primary ?? anchor));
+  if (anchorOccurrence === undefined || primaryIndex < 0) return { ok: false, code: "selection.drag-source-not-found" };
+  const scope = options.scope ?? "this";
+  if (scope !== "this" && scope !== "this-and-following" && scope !== "all") return { ok: false, code: "occurrence.invalid-scope" };
+  const seen = new Set<string>();
+  for (const occurrence of occurrences) {
+    const key = JSON.stringify([occurrence.eventId, occurrence.start]);
+    if (seen.has(key)) return { ok: false, code: "selection.duplicate-occurrence" };
+    seen.add(key);
+    const current = resolveCalendarOccurrence(events, { eventId: occurrence.eventId, occurrenceStart: occurrence.start });
+    if (current === null || current.end !== occurrence.end) return { ok: false, code: "selection.stale-occurrence" };
   }
   const delta = resolveDelta(anchorOccurrence.start, target);
   if (delta === null) return { ok: false, code: "selection.invalid-drop-target" };
-  if (target.type === "instant" && occurrences.some((item) => {
-    const event = events.find((candidate) => candidate.id === item.eventId);
-    return event === undefined || isCalendarAllDay(event);
-  })) return { ok: false, code: "selection.incompatible-drop-target" };
+  if (target.type === "instant" && occurrences.some((item) => (
+    isCalendarAllDay(events.find((event) => event.id === item.eventId)!)
+  ))) return { ok: false, code: "selection.incompatible-drop-target" };
 
-  const next = [...events];
+  let next = events;
+  let sequence = 0;
+  const allocateId = createEditingIdAllocator(events.map((event) => event.id), options.createId ?? (() => `preview-${++sequence}`), "calendar event");
   const moved: CalendarOccurrenceSelection[] = [];
-  const exclusions = new Map<string, Set<string>>();
-  const scope = options.scope ?? "this";
-  const createId = options.createId ?? (() => `preview-${moved.length + 1}`);
-  const seenSeries = new Set<string>();
-
-  for (const occurrence of occurrences) {
-    const index = events.findIndex((event) => event.id === occurrence.eventId);
-    const event = events[index];
-    if (event === undefined) return { ok: false, code: "selection.event-not-found" };
+  const seriesIds = new Map<string, string>();
+  // Following starts at the earliest selected occurrence, independent of selection/primary order.
+  const ordered = occurrences.map((occurrence, index) => ({ occurrence, index }))
+    .sort((left, right) => left.occurrence.start.localeCompare(right.occurrence.start));
+  for (const { occurrence, index } of ordered) {
+    const event = events.find((item) => item.id === occurrence.eventId)!;
     const shifted = shiftInterval(occurrence.start, occurrence.end, delta);
     if (shifted === null) return { ok: false, code: "event.invalid-instant" };
-    const recurrence = calendarEventRecurrence(event);
-    if (recurrence === null) {
-      if (seenSeries.has(event.id)) return { ok: false, code: "selection.duplicate-event" };
-      seenSeries.add(event.id);
-      next[index] = { ...event, start: shifted.start, end: shifted.end };
-      moved.push({ eventId: event.id, ...shifted });
-      continue;
+    const recurring = calendarEventRecurrence(event) !== null;
+    let eventId = recurring && scope !== "this" ? seriesIds.get(event.id) : undefined;
+    if (eventId === undefined) {
+      const plan = planCalendarEventEdit(next, recurring ? {
+        type: "occurrence.edit", eventId: event.id, occurrenceStart: occurrence.start, scope, ...shifted,
+      } : { type: "event.update", eventId: event.id, ...shifted }, { allocateId });
+      if (!plan.ok) return plan;
+      next = plan.events;
+      eventId = plan.selected.eventId;
+      if (recurring && scope !== "this") seriesIds.set(event.id, eventId);
     }
-    if (scope !== "this") return { ok: false, code: "selection.recurring-group-scope-unsupported" };
-    const dates = exclusions.get(event.id) ?? new Set(calendarEventExcludeDates(event));
-    dates.add(calendarDatePart(occurrence.start));
-    exclusions.set(event.id, dates);
-    const detached: CalendarEvent = {
-      ...event,
-      id: uniqueId(next, createId),
-      start: shifted.start,
-      end: shifted.end,
-      recurrence: null,
-      excludeDates: [],
-    };
-    next.push(detached);
-    moved.push({ eventId: detached.id, ...shifted });
+    moved[index] = { eventId, ...shifted };
   }
-  for (const [eventId, dates] of exclusions) {
-    const index = next.findIndex((event) => event.id === eventId);
-    next[index] = { ...next[index]!, excludeDates: [...dates] };
-  }
-  const points = moved.map((item): CalendarOccurrencePoint => ({
-    eventId: item.eventId,
-    occurrenceStart: item.start,
-  }));
-  const primary = options.primary ?? anchor;
-  const primaryIndex = occurrences.findIndex((item) => (
-    item.eventId === primary.eventId && item.start === primary.occurrenceStart
-  ));
+  // A monthly/yearly re-anchor may not represent every translated point: fail atomically.
+  if (moved.some((item) => resolveCalendarOccurrence(next, {
+    eventId: item.eventId, occurrenceStart: item.start,
+  })?.end !== item.end)) return { ok: false, code: "selection.unrepresentable-series-move" };
+  const points = moved.map((item): CalendarOccurrencePoint => ({ eventId: item.eventId, occurrenceStart: item.start }));
   return {
-    ok: true,
-    events: next,
-    movedOccurrences: moved,
+    ok: true, events: next, movedOccurrences: moved,
     selectionAfter: {
-      kind: "range",
-      ranges: points.map((point) => ({ anchor: point, focus: point, points: [point] })),
-      primaryIndex: Math.max(0, primaryIndex),
+      kind: "range", ranges: points.map((point) => ({ anchor: point, focus: point, points: [point] })), primaryIndex,
     },
   };
 }
@@ -145,10 +133,4 @@ function shiftInterval(start: string, end: string, delta: Delta): { start: strin
     start: formatCalendarInstant(from.add({ minutes })),
     end: formatCalendarInstant(to.add({ minutes })),
   };
-}
-
-function uniqueId(events: ReadonlyArray<CalendarEvent>, createId: () => string): string {
-  let id = createId();
-  while (events.some((event) => event.id === id)) id = createId();
-  return id;
 }

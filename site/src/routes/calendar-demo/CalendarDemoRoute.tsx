@@ -132,16 +132,18 @@ export function CalendarDemoRoute(props: {
       initialEventIds: [],
     });
   });
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const hand = useCalendarHand(editor, {
     initialOccurrence: { start: null, end: null },
     defaultTitle: "Event",
+    onResult: (result) => setErrorCode(result.ok ? null : result.code),
   });
   const clipboard = createWebClipboardSurface({
     codec: createWebJSONClipboardRepresentation(calendarClipboardFormat),
     read: hand.copy,
     cut: hand.cut,
     paste: hand.paste,
-    onResult: () => {},
+    onResult: (result) => { if (result.ok) setErrorCode(null); else if (result.code !== "editing.rejected") setErrorCode(result.code); },
   });
   const [viewState, setViewState] = useState<CalendarView>(calendarSearchDefaults.view);
   const [visibleDateState, setVisibleDateState] = useState(calendarSearchDefaults.date);
@@ -404,6 +406,9 @@ export function CalendarDemoRoute(props: {
       >
         <div className="relative flex h-full min-h-0 min-w-0 flex-col">
           <div className={styles.controlLayer()}>
+            {errorCode === null ? null : <p role="alert" className={classes("absolute bottom-20 left-4 right-4 m-0", ui.text.meta)}>
+              변경하지 못했습니다. 선택과 입력을 확인한 뒤 다시 시도하세요. ({errorCode})
+            </p>}
             {eventInspectorVisible ? <CalendarEventInspector
               hand={hand}
               calendars={calendars}

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { createRenameSession, type RenameSessionSnapshot } from "@interactive-os/json-document-affordance";
 import {
+  calendarClipboardFormat,
   calendarOccurrenceAfterIntent,
   calendarOccurrenceForInspector,
   calendarOccurrenceFromSelection,
@@ -38,6 +39,7 @@ export interface CalendarSelectionDragPreview {
 export type CalendarHandOptions = {
   readonly initialOccurrence?: CalendarOccurrenceRange;
   readonly defaultTitle?: string;
+  readonly onResult?: (result: EditingResult<CalendarSelection>) => void;
 };
 
 export interface CalendarHand {
@@ -88,12 +90,14 @@ export interface CalendarHand {
   undo(): void;
   redo(): void;
   copy(): CalendarClipboard | null;
-  cut(): EditingResult<CalendarSelection> | null;
+  cut(clipboard?: CalendarClipboard): EditingResult<CalendarSelection> | null;
   paste(clipboard: CalendarClipboard): EditingResult<CalendarSelection>;
 }
 
 export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOptions = {}): CalendarHand {
   const snapshot = useEditingSnapshot(editor);
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
   const selectedEvent = editor.selectedEvents[0] ?? null;
   const selectedOccurrences = editor.selectedOccurrences;
   const [occurrence, setOccurrence] = useState<CalendarOccurrenceRange>(
@@ -112,15 +116,13 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
       if (current === undefined) return;
       const next = draft.trim() || (options.defaultTitle ?? "Event");
       if (next !== current.title) {
-        editor.dispatch(calendarUpdateIntent(current, occurrenceRef.current.start, scopeRef.current, { title: next }));
-        setOccurrence(calendarOccurrenceFromSelection(editor.selectedEvents[0] ?? null));
+        if (dispatch(calendarUpdateIntent(current, occurrenceRef.current.start, scopeRef.current, { title: next }))) rememberSelection();
       }
     },
     onCancel(key, draft) {
       const fallback = options.defaultTitle ?? "Event";
       if (createdRenameKeyRef.current === key && (draft.trim() === "" || draft.trim() === fallback)) {
-        editor.dispatch({ type: "selection.remove" });
-        setOccurrence(calendarOccurrenceFromSelection(editor.selectedEvents[0] ?? null));
+        if (dispatch({ type: "selection.remove" })) rememberSelection();
       }
     },
     onFinish(key) {
@@ -156,11 +158,16 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     : selectedEvent?.title ?? "";
 
   function dispatch(intent: CalendarIntent | null): boolean {
-    return intent !== null && editor.dispatch(intent).ok;
+    return intent !== null && observe(editor.dispatch(intent)).ok;
+  }
+
+  function observe(result: EditingResult<CalendarSelection>): EditingResult<CalendarSelection> {
+    optionsRef.current.onResult?.(result);
+    return result;
   }
 
   function rememberSelection(): void {
-    setOccurrence(calendarOccurrenceFromSelection(editor.selectedEvents[0] ?? null));
+    setOccurrence(calendarOccurrenceFromSelection(editor.primaryOccurrence));
   }
 
   function commitIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): boolean {
@@ -170,7 +177,7 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
   }
 
   function rememberIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): void {
-    const committed = calendarOccurrenceFromSelection(editor.selectedEvents[0] ?? null);
+    const committed = calendarOccurrenceFromSelection(editor.primaryOccurrence);
     setOccurrence(calendarOccurrenceAfterIntent(intent, origin, committed));
     if (intent?.type === "event.create") {
       setScope("this");
@@ -287,28 +294,29 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
 
   function undo(): void {
     setSelectionDragPreview(null);
-    editor.undo();
-    rememberSelection();
+    if (observe(editor.undo()).ok) rememberSelection();
   }
 
   function redo(): void {
     setSelectionDragPreview(null);
-    editor.redo();
-    rememberSelection();
+    if (observe(editor.redo()).ok) rememberSelection();
   }
 
   function copy(): CalendarClipboard | null {
     return editor.copy();
   }
 
-  function cut(): EditingResult<CalendarSelection> | null {
-    const cut = editor.cut();
-    if (cut?.result.ok) rememberSelection();
-    return cut?.result ?? null;
+  function cut(clipboard?: CalendarClipboard): EditingResult<CalendarSelection> | null {
+    if (clipboard !== undefined && calendarClipboardFormat.parse(clipboard) === null) return observe({ ok: false, code: "clipboard.invalid" });
+    const cut = editor.cut(clipboard);
+    if (cut === null) return null;
+    const result = observe(cut.result);
+    if (result.ok) rememberSelection();
+    return result;
   }
 
   function paste(clipboard: CalendarClipboard): EditingResult<CalendarSelection> {
-    const result = editor.paste(clipboard, occurrence.start ?? selectedEvent?.start);
+    const result = observe(editor.paste(clipboard, occurrence.start ?? selectedEvent?.start));
     if (result.ok) rememberSelection();
     return result;
   }

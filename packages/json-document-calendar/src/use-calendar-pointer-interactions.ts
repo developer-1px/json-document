@@ -1,10 +1,10 @@
-import { useRef, useState, type PointerEvent } from "react";
+import { useRef, useState, type PointerEvent, type RefObject } from "react";
 import { createGestureSession } from "@interactive-os/json-document-affordance";
 import {
   addCalendarDate, bindCalendarAllDayIntent, bindCalendarMonthIntent, bindCalendarTimeGridIntent,
   calendarEventsOnDay, calendarInstantAt, calendarShiftInstant, calendarVisibleEvents,
   interpretCalendarAllDayPointer, interpretCalendarMonthPointer, interpretCalendarTimeGridPointer,
-  type CalendarAllDayPointerRelease, type CalendarIntent, type CalendarTimeGridHandle,
+  type CalendarAllDayPointerRelease, type CalendarTimeGridHandle,
   type CalendarTimeGridPointerRelease,
   type CalendarSelectionDragSource,
 } from "@interactive-os/json-document-editing";
@@ -43,6 +43,8 @@ type CalendarSelectionDragGesture = {
 };
 
 export interface CalendarPointerInteractions {
+  /** Bind to one Calendar surface; canonical grids attach it automatically. */
+  readonly rootRef: RefObject<HTMLDivElement | null>;
   readonly hoveredTime: { readonly day: string; readonly instant: string; readonly minutes: number } | null;
   instantAt(day: string, clientY: number, grid: Element): string | null;
   timePointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: CalendarTimeGridHandle | null): void;
@@ -66,6 +68,7 @@ export interface CalendarPointerInteractions {
 
 /** Owns Calendar's Web pointer preview, commit, cancel, and resize lifecycle. */
 export function useCalendarPointerInteractions(hand: CalendarHand, policy: CalendarPointerPolicy): CalendarPointerInteractions {
+  const rootRef = useRef<HTMLDivElement>(null);
   const [timePointer] = useState(() => createWebPointerSession<TimeRelease>());
   const [allDayPointer] = useState(() => createWebPointerSession<AllDayRelease>());
   const [monthPointer] = useState(() => createWebPointerSession<MonthRelease>());
@@ -76,9 +79,8 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
   const document = hand.document;
   const visibleEvents = calendarVisibleEvents(document);
 
-  function remember(intent: CalendarIntent | null, start: string | null, end: string | null): void {
-    hand.dispatch(intent);
-    hand.rememberIntent(intent, { start, end });
+  function pointTarget(selector: string, event: { clientX: number; clientY: number }): Element | null {
+    return rootRef.current === null ? null : findWebPointTarget<Element>(selector, { x: event.clientX, y: event.clientY }, rootRef.current);
   }
 
   function bindTime(intent: ReturnType<typeof interpretCalendarTimeGridPointer>, occurrenceStart: string | null) {
@@ -97,7 +99,7 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     if (release.originEventId === null) return;
     const event = document.events.find((item) => item.id === release.originEventId);
     const intent = bindCalendarAllDayIntent(interpretCalendarAllDayPointer(release), event, release.originEventStart, hand.scope);
-    remember(intent, release.originEventStart, event?.end ?? null);
+    hand.commitIntent(intent, { start: release.originEventStart, end: event?.end ?? null });
   }
 
   function timePointerDown(event: PointerEvent<HTMLElement>, day: string, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null, originHandle: CalendarTimeGridHandle | null): void {
@@ -116,7 +118,7 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
   }
 
   function timePointerMove(event: PointerEvent<HTMLElement>): void {
-    const grid = findWebPointTarget<Element>('[data-calendar-grid="time"]', { x: event.clientX, y: event.clientY });
+    const grid = pointTarget('[data-calendar-grid="time"]', event);
     const day = grid?.getAttribute("data-calendar-day");
     if (grid == null || day == null) return;
     if (timePointer.getSnapshot()?.pointerId !== event.pointerId) {
@@ -144,7 +146,11 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     if (next?.dragSource !== null && next?.dragSource !== undefined) {
       const originAnchor = next.dragSource.anchor.occurrenceStart;
       const move = interpretCalendarTimeGridPointer(next);
-      if (move?.type !== "event.move") return;
+      if (move?.type !== "event.move") {
+        selectionDrag.cancel("pointer-cancel");
+        hand.previewSelectionDrag(null);
+        return;
+      }
       if (selectionDrag.getActive() === null) selectionDrag.begin({ type: "calendar-selection-drag", source: next.dragSource, target: { type: "instant", instant: originAnchor } });
       const gesture = selectionDrag.preview((active) => ({ ...active, target: { type: "instant", instant: move.start } }));
       hand.previewSelectionDrag(gesture);
@@ -168,7 +174,7 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
       hand.setOccurrence({ start: release.targetInstant, end: release.targetInstant });
       return;
     }
-    remember(bindTime(interpretCalendarTimeGridPointer(release), release.originEventStart), release.originEventStart, release.originEventEnd);
+    hand.commitIntent(bindTime(interpretCalendarTimeGridPointer(release), release.originEventStart), { start: release.originEventStart, end: release.originEventEnd });
   }
 
   function allDayPointerDown(event: PointerEvent<HTMLElement>, originDay: string, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null, originHandle: "body" | "start" | "end" | null): void {
@@ -184,7 +190,7 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
 
   function allDayPointerMove(event: PointerEvent<HTMLElement>): void {
     if (allDayPointer.getSnapshot()?.pointerId !== event.pointerId) return;
-    const targetDay = findWebPointTarget<Element>("[data-calendar-allday-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-allday-day");
+    const targetDay = pointTarget("[data-calendar-allday-day]", event)?.getAttribute("data-calendar-allday-day");
     if (targetDay == null) return;
     const next = allDayPointer.preview(event.pointerId, (state) => {
       const dragSource = state.dragSource ?? (state.dragCandidate !== null && targetDay !== state.originDay
@@ -193,8 +199,14 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
       return { ...state, targetDay, dragSource };
     });
     if (next?.dragSource !== null && next?.dragSource !== undefined) {
+      const move = interpretCalendarAllDayPointer(next);
+      if (move?.type !== "event.move-day") {
+        selectionDrag.cancel("pointer-cancel");
+        hand.previewSelectionDrag(null);
+        return;
+      }
       if (selectionDrag.getActive() === null) selectionDrag.begin({ type: "calendar-selection-drag", source: next.dragSource, target: { type: "day", day: next.originDay } });
-      const gesture = selectionDrag.preview((active) => ({ ...active, target: { type: "day", day: targetDay } }));
+      const gesture = selectionDrag.preview((active) => ({ ...active, target: { type: "day", day: move.day } }));
       hand.previewSelectionDrag(gesture);
     } else if (next !== null) hand.setAllDayPreview(next);
   }
@@ -203,13 +215,19 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     const release = allDayPointer.commit(event.pointerId);
     hand.setAllDayPreview(null);
     if (release === null) return;
-    const targetDay = findWebPointTarget<Element>("[data-calendar-allday-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-allday-day");
-    if (targetDay == null) return;
+    const targetDay = pointTarget("[data-calendar-allday-day]", event)?.getAttribute("data-calendar-allday-day");
+    if (targetDay == null) {
+      selectionDrag.cancel("pointer-cancel");
+      hand.previewSelectionDrag(null);
+      return;
+    }
     if (release.dragSource !== null) {
       suppressEventClick.current = true;
       suppressDoubleClickBriefly();
       const gesture = selectionDrag.commit();
-      if (gesture !== null) hand.commitSelectionDrag({ ...gesture, target: { type: "day", day: targetDay } });
+      const move = interpretCalendarAllDayPointer({ ...release, targetDay });
+      hand.previewSelectionDrag(null);
+      if (gesture !== null && move?.type === "event.move-day") hand.commitSelectionDrag({ ...gesture, target: { type: "day", day: move.day } });
       return;
     }
     if (release.dragCandidate !== null) return;
@@ -221,7 +239,7 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     }
     const id = raw?.type === "event.move-day" || raw?.type === "event.resize" ? raw.eventId : null;
     const intent = bindCalendarAllDayIntent(raw, id === null ? undefined : document.events.find((item) => item.id === id), release.originEventStart, hand.scope);
-    remember(intent, release.originEventStart, release.originEventEnd);
+    hand.commitIntent(intent, { start: release.originEventStart, end: release.originEventEnd });
   }
 
   function monthPointerDown(event: PointerEvent<HTMLElement>, fallbackDay: string, rowDays: ReadonlyArray<string>, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null): void {
@@ -242,7 +260,7 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
 
   function monthPointerMove(event: PointerEvent<HTMLElement>): void {
     if (monthPointer.getSnapshot()?.pointerId !== event.pointerId) return;
-    const targetDay = findWebPointTarget<Element>("[data-calendar-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-day");
+    const targetDay = pointTarget("[data-calendar-day]", event)?.getAttribute("data-calendar-day");
     if (targetDay == null) return;
     const next = monthPointer.preview(event.pointerId, (state) => {
       const dragSource = state.dragSource ?? (state.dragCandidate !== null && targetDay !== state.originDay
@@ -251,8 +269,14 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
       return { ...state, targetDay, dragSource };
     });
     if (next?.dragSource !== null && next?.dragSource !== undefined) {
+      const move = interpretCalendarMonthPointer(next);
+      if (move?.type !== "event.move-day") {
+        selectionDrag.cancel("pointer-cancel");
+        hand.previewSelectionDrag(null);
+        return;
+      }
       if (selectionDrag.getActive() === null) selectionDrag.begin({ type: "calendar-selection-drag", source: next.dragSource, target: { type: "day", day: next.originDay } });
-      const gesture = selectionDrag.preview((active) => ({ ...active, target: { type: "day", day: targetDay } }));
+      const gesture = selectionDrag.preview((active) => ({ ...active, target: { type: "day", day: move.day } }));
       hand.previewSelectionDrag(gesture);
     } else if (next !== null) hand.setMonthPreview({ ...next, eventsOnTargetDay: [] });
   }
@@ -261,13 +285,19 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     const release = monthPointer.commit(event.pointerId);
     hand.setMonthPreview(null);
     if (release === null) return;
-    const targetDay = findWebPointTarget<Element>("[data-calendar-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-day");
-    if (targetDay == null) return;
+    const targetDay = pointTarget("[data-calendar-day]", event)?.getAttribute("data-calendar-day");
+    if (targetDay == null) {
+      selectionDrag.cancel("pointer-cancel");
+      hand.previewSelectionDrag(null);
+      return;
+    }
     if (release.dragSource !== null) {
       suppressEventClick.current = true;
       suppressDoubleClickBriefly();
       const gesture = selectionDrag.commit();
-      if (gesture !== null) hand.commitSelectionDrag({ ...gesture, target: { type: "day", day: targetDay } });
+      const move = interpretCalendarMonthPointer({ ...release, targetDay });
+      hand.previewSelectionDrag(null);
+      if (gesture !== null && move?.type === "event.move-day") hand.commitSelectionDrag({ ...gesture, target: { type: "day", day: move.day } });
       return;
     }
     if (release.dragCandidate !== null) return;
@@ -279,7 +309,7 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     }
     const id = raw?.type === "event.move-day" ? raw.eventId : null;
     const intent = bindCalendarMonthIntent(raw, id === null ? undefined : document.events.find((item) => item.id === id), release.originEventStart, hand.scope);
-    remember(intent, release.originEventStart, release.originEventEnd);
+    hand.commitIntent(intent, { start: release.originEventStart, end: release.originEventEnd });
   }
 
   function resizeTimed(id: string, edge: "start" | "end", occurrenceStart: string, origin: string, delta: number, phase: Phase): void {
@@ -289,12 +319,15 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     const release = { originInstant: origin, originEventId: id, originEventStart: occurrenceStart, originHandle: edge, targetInstant };
     if (phase === "preview") return hand.setTimePreview(release);
     hand.setTimePreview(null);
-    remember(bindTime(interpretCalendarTimeGridPointer(release), occurrenceStart), occurrenceStart, targetInstant);
+    hand.commitIntent(bindTime(interpretCalendarTimeGridPointer(release), occurrenceStart), { start: occurrenceStart, end: targetInstant });
   }
 
   function resizeAllDay(id: string, edge: "start" | "end", originDay: string, occurrenceStart: string, delta: number, phase: Phase): void {
-    const column = globalThis.document.querySelector("[data-calendar-allday-day]") ?? globalThis.document.querySelector("[data-calendar-week] [data-calendar-day]");
-    const targetDay = addCalendarDate(originDay, calendarDayDeltaFromWebWidth(delta, column?.getBoundingClientRect().width ?? 0));
+    const column = rootRef.current?.querySelector("[data-calendar-allday-day]") ?? rootRef.current?.querySelector("[data-calendar-week] [data-calendar-day]");
+    if (column == null) return;
+    const width = column.getBoundingClientRect().width;
+    if (width <= 0) return;
+    const targetDay = addCalendarDate(originDay, calendarDayDeltaFromWebWidth(delta, width));
     if (targetDay === null) return;
     const release = { originDay, originEventId: id, originEventStart: occurrenceStart, originHandle: edge, targetDay };
     if (phase === "preview") return hand.setAllDayPreview(release);
@@ -328,6 +361,7 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
   }
 
   return {
+    rootRef,
     hoveredTime,
     instantAt,
     timePointerDown,

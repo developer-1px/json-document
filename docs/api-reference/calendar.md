@@ -216,7 +216,7 @@ interface CalendarHand {
   undo(): void;
   redo(): void;
   copy(): CalendarClipboard | null;
-  cut(): EditingResult<CalendarSelection> | null;
+  cut(clipboard?: CalendarClipboard): EditingResult<CalendarSelection> | null;
   paste(clipboard: CalendarClipboard): EditingResult<CalendarSelection>;
 }
 ```
@@ -226,6 +226,7 @@ interface CalendarHand {
 type CalendarHandOptions = {
   readonly initialOccurrence?: CalendarOccurrenceRange;
   readonly defaultTitle?: string;
+  readonly onResult?: (result: EditingResult<CalendarSelection>) => void;
 };
 ```
 ## `CalendarKeyboardOptions`
@@ -348,6 +349,8 @@ type CalendarPeriod = "day" | CalendarGrain;
 
 ```ts
 interface CalendarPointerInteractions {
+  /** Bind to one Calendar surface; canonical grids attach it automatically. */
+  readonly rootRef: RefObject<HTMLDivElement | null>;
   readonly hoveredTime: { readonly day: string; readonly instant: string; readonly minutes: number } | null;
   instantAt(day: string, clientY: number, grid: Element): string | null;
   timePointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: CalendarTimeGridHandle | null): void;
