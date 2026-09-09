@@ -17,12 +17,15 @@ canonical module과 public API로 정본화한다
 Application이 정본 API를 다시 소비한다
 ```
 
-구현 의존 방향과 책임을 발견하는 방향은 서로 반대입니다.
+읽기 순서와 책임을 발견하는 방향을 구별합니다.
 
 ```text
-구현 의존: Foundation → Building Blocks → Hands → Artifact → Application
+읽기 순서: Foundation → Building Blocks → Hands → Artifact → Application
 책임 발견: Application → 책임 발견 → Canonical Module → Application
 ```
+
+이 읽기 순서는 package의 직렬 의존 관계가 아닙니다. Adapter와 Connector는
+독립적으로 선택하고, Collaboration은 같은 JSONDocument 계약을 구현합니다.
 
 여기서 Artifact는 독립 App이 아니라 Application이 만들고 편집하는 콘텐츠입니다.
 Navigation, workflow, runtime과 제품 정책은 Application에 남습니다.

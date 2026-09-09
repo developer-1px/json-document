@@ -4,7 +4,10 @@ import { DocumentationPage } from "./DocumentationPage";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "package",
+  concepts: "sleep",
   foundation: "braces",
+  buildingBlocks: "braces",
+  editing: "branch",
   howWeBuild: "branch",
   applications: "peek",
   documentTypes: "braces",
@@ -211,8 +214,9 @@ export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
   const page = docPages[pageId];
   return (
     <DocumentationPage
-      title={page.heading ?? page.label}
+      title={page.heading ?? page.title.replace(/ - json-document$/, "")}
       source={page.source}
+      sourcePath={page.documentSource}
       illustration={docIllustrations[pageId]}
     />
   );

@@ -39,6 +39,18 @@ fixture, copy, layout-only CSS, tests와 generated route는 제외합니다.
 ${name}은 현재 Document Type 후보입니다. 기존 package와 Hands에서 실제 책임을
 옮기거나 완료를 선언하지 않았습니다.
 
+## 목표 경계 · TBD
+
+| 책임 | 목표 owner | 남은 증거 |
+| --- | --- | --- |
+| Document Model · Schema · invariant | ${name} Document Type | 실제 소유자와 유효 상태의 공개 계약 |
+| Document Operation · Projection | ${name} Document Type | 의미 연산·파생 조회의 API와 소비자 연결 |
+| Selection · Intent · Clipboard · History | Editing | 문서 의미와 편집 lifecycle의 경계 |
+| 플랫폼 입력 · framework lifecycle · UI | Adapter · Connector · UI Primitives | Host local bypass 없이 공개 API로 연결 |
+
+이 표는 목표 책임 지도이며 새로운 package나 API를 확정한 목록이 아닙니다.
+현재 관찰된 모델과 이 경계 사이의 차이를 확인한 뒤 아래 완료 증거를 닫습니다.
+
 ## 왜 필요한가
 
 ${profile.why}
@@ -80,7 +92,7 @@ ${auditSource}
       title={`${name} Document Type · TBD`}
       source={source}
       illustration="braces"
-      summary="후보의 이름만 등록했으며 소유권과 구현 경계는 아직 확정하지 않았습니다."
+      summary="관찰된 schema와 목표 책임을 구분합니다. 후보별 owner 수렴과 공개 계약의 완료는 아직 TBD입니다."
     />
   );
 }

@@ -7,10 +7,10 @@
   },
   {
     "path": "/viewer",
-    "label": "Document · Presentation · Spreadsheet",
-    "title": "Artifact - json-document",
-    "heading": "Artifact",
-    "description": "MD·PPT·Sheet artifact가 한 host에 나타나고 서로 다른 Hands를 얻는 미래의 mock입니다.",
+    "label": "Content Prototype · TBD",
+    "title": "Artifact · TBD - json-document",
+    "heading": "Artifact · TBD",
+    "description": "Application 안에서 MD·PPT·Sheet를 다루는 visual prototype과 아직 연결하지 않은 문서·Hands·호환성 계약을 구분합니다.",
     "language": "ko",
     "navigationGroup": "Artifact"
   },
@@ -19,9 +19,10 @@
     "label": "Why",
     "title": "json-document Docs - json-document",
     "heading": "왜 json-document인가",
-    "description": "문서·표·보드가 같은 JSON 계약을 쓰고, 협업과 장르의 손과 붙이는 층을 같은 커널 위에 올리는 이유를 설명합니다.",
+    "description": "문서·표·보드가 JSON Document 계약을 공유하고, 독립적인 편집·플랫폼·생태계 책임을 조합하는 이유를 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Introduction"
+    "navigationGroup": "Introduction",
+    "documentSource": "docs/public/overview.md"
   },
   {
     "path": "/docs/foundation",
@@ -30,15 +31,17 @@
     "heading": "Foundation",
     "description": "JSON Document, Document Types, Editing과 Collaboration이 공유하는 기반 계약을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "JSON Document"
+    "documentSource": "docs/public/foundation.md",
+    "sidebar": false
   },
   {
     "path": "/docs/concepts",
     "label": "Concept Map",
     "title": "Concept Map - json-document",
-    "description": "JSON Document에서 Artifact까지 책임이 쌓이는 순서와 각 계층의 경계를 설명합니다.",
+    "description": "목표 레이어·책임 경계와 실제 프로토콜을 구분하고, 현재 제공되는 계약과 TBD를 함께 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Introduction"
+    "navigationGroup": "Introduction",
+    "documentSource": "docs/public/concepts.md"
   },
   {
     "path": "/docs/how-we-build",
@@ -47,7 +50,8 @@
     "heading": "제품에서 정본 모듈을 발견하는 방법",
     "description": "Application을 먼저 만들고 실제 제품 책임을 canonical module로 추출한 뒤 제품이 다시 소비하는 개발 순환을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Introduction"
+    "navigationGroup": "Introduction",
+    "documentSource": "docs/public/how-we-build.md"
   },
   {
     "path": "/applications",
@@ -56,7 +60,8 @@
     "heading": "Applications",
     "description": "Artifact와 Hands를 실제 제품 경험으로 조합하고 재사용 책임을 발견하는 Application 목록입니다.",
     "language": "ko",
-    "navigationGroup": "Applications"
+    "navigationGroup": "Applications",
+    "documentSource": "docs/public/applications.md"
   },
   {
     "path": "/applications/calendar",
@@ -77,13 +82,24 @@
     "chrome": "app"
   },
   {
+    "path": "/docs/building-blocks",
+    "label": "Overview",
+    "title": "Building Blocks - json-document",
+    "heading": "Building Blocks",
+    "description": "Adapter·Connector·Affordance·UI Primitives의 독립적인 책임과 Foundation·Hands를 연결하는 계약을 설명합니다.",
+    "language": "ko",
+    "sidebar": false,
+    "documentSource": "docs/public/building-blocks.md"
+  },
+  {
     "path": "/docs/document-types",
     "label": "Overview · TBD",
     "title": "Document Types · TBD - json-document",
     "heading": "Document Types · TBD",
     "description": "JSON Document의 의미 모델을 소유하는 Document Type 책임과 아직 확정하지 않은 후보를 정리합니다.",
     "language": "ko",
-    "navigationGroup": "Document Types"
+    "navigationGroup": "Document Types",
+    "documentSource": "docs/public/document-types.md"
   },
   {
     "path": "/docs/document-types/rich-text",
@@ -159,12 +175,13 @@
   },
   {
     "path": "/docs/api",
-    "label": "API Reference",
-    "title": "json-document API - json-document",
-    "heading": "json-document API",
-    "description": "여섯 가지 JSON Document 진입점과 JSON Patch, Pointer, JSONPath 공개 API를 정리합니다.",
+    "label": "JSON Document Protocol",
+    "title": "JSON Document Protocol - json-document",
+    "heading": "JSON Document Protocol",
+    "description": "로컬·협업 구현이 공유하는 여섯 member의 JSONDocument 계약과 JSON 표준 연산 API를 설명합니다.",
     "language": "ko",
-    "navigationGroup": "JSON Document"
+    "navigationGroup": "JSON Document",
+    "documentSource": "docs/public/api.md"
   },
   {
     "path": "/docs/api/json-document",
@@ -172,7 +189,8 @@
     "title": "JSON Document public API - json-document",
     "description": "@interactive-os/json-document의 전체 public export와 signature입니다.",
     "language": "ko",
-    "navigationGroup": "JSON Document"
+    "navigationGroup": "JSON Document",
+    "documentSource": "docs/api-reference/json-document.md"
   },
   {
     "path": "/docs/api/selection",
@@ -180,7 +198,8 @@
     "title": "Selection API - json-document",
     "description": "@interactive-os/json-document-selection의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Editing"
+    "navigationGroup": "Editing",
+    "documentSource": "docs/api-reference/selection.md"
   },
   {
     "path": "/docs/api/editing",
@@ -188,7 +207,8 @@
     "title": "Editing API - json-document",
     "description": "@interactive-os/json-document-editing의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Editing"
+    "navigationGroup": "Editing",
+    "documentSource": "docs/api-reference/editing.md"
   },
   {
     "path": "/docs/api/rich-text",
@@ -196,7 +216,8 @@
     "title": "Rich Text API - json-document",
     "description": "@interactive-os/json-document-rich-text의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Editing"
+    "navigationGroup": "Editing",
+    "documentSource": "docs/api-reference/rich-text.md"
   },
   {
     "path": "/docs/api/file-intake",
@@ -204,7 +225,8 @@
     "title": "File Intake API - json-document",
     "description": "@interactive-os/json-document-file-intake의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Artifact"
+    "navigationGroup": "Artifact",
+    "documentSource": "docs/api-reference/file-intake.md"
   },
   {
     "path": "/docs/api/rich-text-mention",
@@ -212,7 +234,8 @@
     "title": "Rich Text Mention API - json-document",
     "description": "@interactive-os/json-document-rich-text-mention의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/api-reference/rich-text-mention.md"
   },
   {
     "path": "/docs/api/rich-text-suggestion",
@@ -220,7 +243,8 @@
     "title": "Rich Text Suggestion API - json-document",
     "description": "@interactive-os/json-document-rich-text-suggestion의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/api-reference/rich-text-suggestion.md"
   },
   {
     "path": "/docs/api/rich-text-suggestion-react",
@@ -228,7 +252,8 @@
     "title": "Rich Text Suggestion React API - json-document",
     "description": "@interactive-os/json-document-rich-text-suggestion-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/api-reference/rich-text-suggestion-react.md"
   },
   {
     "path": "/docs/api/rich-text-mention-react",
@@ -236,7 +261,8 @@
     "title": "Rich Text Mention React API - json-document",
     "description": "@interactive-os/json-document-rich-text-mention-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/api-reference/rich-text-mention-react.md"
   },
   {
     "path": "/docs/api/composer",
@@ -244,7 +270,8 @@
     "title": "Composer API - json-document",
     "description": "@interactive-os/json-document-composer의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/api-reference/composer.md"
   },
   {
     "path": "/docs/api/composer-react",
@@ -252,7 +279,8 @@
     "title": "Composer React API - json-document",
     "description": "@interactive-os/json-document-composer-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/api-reference/composer-react.md"
   },
   {
     "path": "/docs/api/web",
@@ -260,7 +288,8 @@
     "title": "Web API - json-document",
     "description": "@interactive-os/json-document-web의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Adapter"
+    "navigationGroup": "Adapter",
+    "documentSource": "docs/api-reference/web.md"
   },
   {
     "path": "/docs/api/contenteditable",
@@ -268,7 +297,8 @@
     "title": "Contenteditable API - json-document",
     "description": "@interactive-os/json-document-contenteditable의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Adapter"
+    "navigationGroup": "Adapter",
+    "documentSource": "docs/api-reference/contenteditable.md"
   },
   {
     "path": "/docs/api/rich-text-web",
@@ -276,7 +306,8 @@
     "title": "Rich Text Web API - json-document",
     "description": "@interactive-os/json-document-rich-text-web의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Adapter"
+    "navigationGroup": "Adapter",
+    "documentSource": "docs/api-reference/rich-text-web.md"
   },
   {
     "path": "/docs/api/react",
@@ -284,7 +315,8 @@
     "title": "React API - json-document",
     "description": "@interactive-os/json-document-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/api-reference/react.md"
   },
   {
     "path": "/docs/api/react-hook-form",
@@ -292,7 +324,8 @@
     "title": "React Hook Form API - json-document",
     "description": "@interactive-os/json-document-react-hook-form의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/api-reference/react-hook-form.md"
   },
   {
     "path": "/docs/api/ajv",
@@ -300,7 +333,8 @@
     "title": "Ajv API - json-document",
     "description": "@interactive-os/json-document-ajv의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/api-reference/ajv.md"
   },
   {
     "path": "/docs/api/a2ui",
@@ -308,7 +342,8 @@
     "title": "A2UI API - json-document",
     "description": "@interactive-os/json-document-a2ui의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/api-reference/a2ui.md"
   },
   {
     "path": "/docs/connector-a2ui",
@@ -316,7 +351,8 @@
     "title": "A2UI Connector - json-document",
     "description": "A2UI 메시지와 JSONL을 JSONDocument로 연결합니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/public/connector-a2ui.md"
   },
   {
     "path": "/docs/api/zod",
@@ -324,7 +360,8 @@
     "title": "Zod API - json-document",
     "description": "@interactive-os/json-document-zod의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/api-reference/zod.md"
   },
   {
     "path": "/docs/api/tanstack-table",
@@ -332,7 +369,8 @@
     "title": "TanStack Table API - json-document",
     "description": "@interactive-os/json-document-tanstack-table의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/api-reference/tanstack-table.md"
   },
   {
     "path": "/docs/api/rich-text-react",
@@ -340,7 +378,8 @@
     "title": "Rich Text React API - json-document",
     "description": "@interactive-os/json-document-rich-text-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/api-reference/rich-text-react.md"
   },
   {
     "path": "/docs/api/affordance",
@@ -348,7 +387,8 @@
     "title": "Affordance API - json-document",
     "description": "@interactive-os/json-document-affordance의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Affordance"
+    "navigationGroup": "Affordance",
+    "documentSource": "docs/api-reference/affordance.md"
   },
   {
     "path": "/docs/api/ui-primitives-react",
@@ -356,7 +396,8 @@
     "title": "UI Primitives API - json-document",
     "description": "@interactive-os/json-document-ui-primitives-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "UI Primitives"
+    "navigationGroup": "UI Primitives",
+    "documentSource": "docs/api-reference/ui-primitives-react.md"
   },
   {
     "path": "/docs/api/animation-react",
@@ -364,7 +405,8 @@
     "title": "Animation API - json-document",
     "description": "@interactive-os/json-document-animation-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "UI Primitives"
+    "navigationGroup": "UI Primitives",
+    "documentSource": "docs/api-reference/animation-react.md"
   },
   {
     "path": "/docs/api/markdown-react",
@@ -374,7 +416,8 @@
     "language": "ko",
     "navigationGroup": "Artifact",
     "relatedDemoPath": "/demo/markdown",
-    "relatedDemoLabel": "Streaming Markdown"
+    "relatedDemoLabel": "Streaming Markdown",
+    "documentSource": "docs/api-reference/markdown-react.md"
   },
   {
     "path": "/demo/markdown",
@@ -402,7 +445,8 @@
     "title": "Database API - json-document",
     "description": "@interactive-os/json-document-database의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/api-reference/database.md"
   },
   {
     "path": "/docs/api/annotation",
@@ -410,7 +454,8 @@
     "title": "Annotation API - json-document",
     "description": "@interactive-os/json-document-annotation의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/api-reference/annotation.md"
   },
   {
     "path": "/docs/api/calendar",
@@ -418,7 +463,8 @@
     "title": "Calendar API - json-document",
     "description": "@interactive-os/json-document-calendar의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/api-reference/calendar.md"
   },
   {
     "path": "/docs/api/collaboration",
@@ -426,7 +472,8 @@
     "title": "Collaboration API - json-document",
     "description": "@interactive-os/json-document-collaboration의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Collaboration"
+    "navigationGroup": "Collaboration",
+    "documentSource": "docs/api-reference/collaboration.md"
   },
   {
     "path": "/docs/api/contenteditable-collaboration",
@@ -434,17 +481,18 @@
     "title": "Contenteditable Collaboration API - json-document",
     "description": "@interactive-os/json-document-contenteditable-collaboration의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Collaboration"
+    "navigationGroup": "Collaboration",
+    "documentSource": "docs/api-reference/contenteditable-collaboration.md"
   },
   {
     "path": "/docs/collaboration",
-    "label": "Collaboration",
+    "label": "Overview",
     "title": "Collaboration - json-document",
     "heading": "Collaboration",
     "description": "같은 JSON Document 계약을 여러 참여자의 인과 변경으로 수렴시킵니다.",
     "language": "ko",
     "navigationGroup": "Collaboration",
-    "sidebar": false
+    "documentSource": "docs/public/collaboration.md"
   },
   {
     "path": "/docs/collaboration/replica",
@@ -453,7 +501,8 @@
     "heading": "Replica",
     "description": "한 참여자가 소유한 인과 상태와 아직 적용하지 못한 변경을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Collaboration"
+    "navigationGroup": "Collaboration",
+    "documentSource": "docs/public/collaboration-replica.md"
   },
   {
     "path": "/docs/collaboration/lifecycle",
@@ -462,7 +511,8 @@
     "heading": "Lifecycle",
     "description": "epoch, checkpoint, restore, compaction이 협업 세대를 접고 되돌리는 방식을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Collaboration"
+    "navigationGroup": "Collaboration",
+    "documentSource": "docs/public/collaboration-lifecycle.md"
   },
   {
     "path": "/docs/collaboration/history",
@@ -471,7 +521,8 @@
     "heading": "Collaborative History",
     "description": "다른 참여자를 덮어쓰지 않고 현재 참여자의 인과 기여를 끄거나 켭니다.",
     "language": "ko",
-    "navigationGroup": "Collaboration"
+    "navigationGroup": "Collaboration",
+    "documentSource": "docs/public/collaboration-history.md"
   },
   {
     "path": "/docs/collaboration/text",
@@ -480,7 +531,8 @@
     "heading": "Collaborative Text",
     "description": "같이 쓰는 문자열의 안정된 글자 단위와 상대 위치를 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Collaboration"
+    "navigationGroup": "Collaboration",
+    "documentSource": "docs/public/collaboration-text.md"
   },
   {
     "path": "/docs/collaboration/text/lease",
@@ -489,7 +541,18 @@
     "heading": "Contenteditable lease",
     "description": "협업 문자열이 입력 중에도 인과 변경을 멈추지 않게 하는 native-input DOM lease를 설명합니다.",
     "language": "ko",
-    "parentPath": "/docs/collaboration/text"
+    "parentPath": "/docs/collaboration/text",
+    "documentSource": "docs/public/collaboration-lease.md"
+  },
+  {
+    "path": "/docs/editing",
+    "label": "Editing Protocol",
+    "title": "Editing Protocol - json-document",
+    "heading": "Editing Protocol",
+    "description": "Intent, EditingPlan, EditingSession과 EditingSnapshot의 현재 계약 및 아직 동결하지 않은 Hands Profile을 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Editing",
+    "documentSource": "docs/public/editing.md"
   },
   {
     "path": "/docs/intent-guide",
@@ -498,7 +561,8 @@
     "heading": "Editor와 Intent 만들기",
     "description": "Document editor를 만들고 요청을 EditingIntent로 표현해 EditingResult를 처리합니다.",
     "language": "ko",
-    "navigationGroup": "Editing"
+    "navigationGroup": "Editing",
+    "documentSource": "docs/public/intent-guide.md"
   },
   {
     "path": "/docs/intent",
@@ -507,7 +571,8 @@
     "heading": "Intent 레퍼런스",
     "description": "EditingIntent, dispatch, EditingResult와 editor별 Intent의 공개 시그니처를 정리합니다.",
     "language": "ko",
-    "navigationGroup": "Editing"
+    "navigationGroup": "Editing",
+    "documentSource": "docs/public/intent.md"
   },
   {
     "path": "/docs/topology",
@@ -517,7 +582,8 @@
     "description": "Selection과 Clipboard가 공유하는 화면 순서인 LineTopology와 GridTopology를 설명합니다.",
     "language": "ko",
     "navigationGroup": "Editing",
-    "relatedDemoPath": "/demo/topology"
+    "relatedDemoPath": "/demo/topology",
+    "documentSource": "docs/public/topology.md"
   },
   {
     "path": "/demo/topology",
@@ -536,7 +602,8 @@
     "description": "문서 값을 바꾸지 않고 편집 대상을 기억하는 구조적 Selection을 설명합니다.",
     "language": "ko",
     "navigationGroup": "Editing",
-    "relatedDemoPath": "/demo/selection"
+    "relatedDemoPath": "/demo/selection",
+    "documentSource": "docs/public/selection.md"
   },
   {
     "path": "/demo/selection",
@@ -555,7 +622,8 @@
     "description": "현재 구조적 Selection에서 copy, cut, paste에 사용할 Clipboard payload를 만듭니다.",
     "language": "ko",
     "navigationGroup": "Editing",
-    "relatedDemoPath": "/demo/clipboard"
+    "relatedDemoPath": "/demo/clipboard",
+    "documentSource": "docs/public/clipboard.md"
   },
   {
     "path": "/demo/clipboard",
@@ -574,7 +642,8 @@
     "description": "document value와 구조적 Selection을 함께 복원하는 로컬 undo와 redo를 설명합니다.",
     "language": "ko",
     "navigationGroup": "Editing",
-    "relatedDemoPath": "/demo/history"
+    "relatedDemoPath": "/demo/history",
+    "documentSource": "docs/public/history.md"
   },
   {
     "path": "/demo/history",
@@ -601,7 +670,8 @@
     "heading": "Hands",
     "description": "닫힌 장르의 손과 TBD 손을 고릅니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/public/hands.md"
   },
   {
     "path": "/docs/official-hands",
@@ -610,7 +680,8 @@
     "heading": "Official Hands · TBD",
     "description": "디자인과 제품 데이터는 자유롭게 유지하면서 수렴된 편집 기능을 완성된 SDK로 제공하는 방향을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/public/official-hands.md"
   },
   {
     "path": "/demo",
@@ -637,7 +708,8 @@
     "description": "한 줄 목록을 범위 선택으로 집고 옮기는 Order editor를 설명합니다.",
     "language": "ko",
     "navigationGroup": "Hands",
-    "relatedDemoPath": "/demo/order"
+    "relatedDemoPath": "/demo/order",
+    "documentSource": "docs/public/order.md"
   },
   {
     "path": "/demo/order",
@@ -655,7 +727,8 @@
     "description": "안정된 객체 ID를 키 가족으로 집는 Object editor를 설명합니다.",
     "language": "ko",
     "navigationGroup": "Hands",
-    "relatedDemoPath": "/demo/object"
+    "relatedDemoPath": "/demo/object",
+    "documentSource": "docs/public/object.md"
   },
   {
     "path": "/demo/object",
@@ -698,7 +771,8 @@
     "description": "호스트가 만든 보이는 노드 줄에서 범위를 집는 Tree editor를 설명합니다.",
     "language": "ko",
     "navigationGroup": "Hands",
-    "relatedDemoPath": "/demo/tree"
+    "relatedDemoPath": "/demo/tree",
+    "documentSource": "docs/public/tree.md"
   },
   {
     "path": "/demo/tree",
@@ -743,7 +817,8 @@
     "language": "ko",
     "navigationGroup": "UI Primitives",
     "relatedDemoPath": "/demo/animation",
-    "relatedDemoLabel": "Animation"
+    "relatedDemoLabel": "Animation",
+    "documentSource": "docs/public/animation.md"
   },
   {
     "path": "/demo/animation",
@@ -763,7 +838,8 @@
     "description": "저장된 Table view가 순서·숨김·너비·정렬·필터를 투사하는 Database editor를 설명합니다.",
     "language": "ko",
     "navigationGroup": "Hands",
-    "relatedDemoPath": "/demo/database"
+    "relatedDemoPath": "/demo/database",
+    "documentSource": "docs/public/database.md"
   },
   {
     "path": "/demo/database",
@@ -781,7 +857,8 @@
     "description": "사람이 agent에게 지시와 구조화된 context를 한 턴으로 건네는 Composer Hands입니다.",
     "language": "ko",
     "navigationGroup": "Hands",
-    "relatedDemoPath": "/demo/composer"
+    "relatedDemoPath": "/demo/composer",
+    "documentSource": "docs/public/composer.md"
   },
   {
     "path": "/demo/composer",
@@ -805,7 +882,8 @@
     "heading": "Mention",
     "description": "이름으로 보이는 안정적인 entity reference를 inline atom으로 삽입하는 Hands입니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "documentSource": "docs/public/mention.md"
   },
   {
     "path": "/adapters",
@@ -822,7 +900,8 @@
     "heading": "json-document Adapters",
     "description": "Keyboard, Clipboard, Contenteditable 공식 adapter 계약을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Adapter"
+    "navigationGroup": "Adapter",
+    "documentSource": "docs/public/adapters.md"
   },
   {
     "path": "/docs/adapter-keyboard",
@@ -831,7 +910,8 @@
     "heading": "Keyboard Adapter",
     "description": "Keyboard, Press와 ARIA platform contract를 Editing 입력으로 번역합니다.",
     "language": "ko",
-    "navigationGroup": "Adapter"
+    "navigationGroup": "Adapter",
+    "documentSource": "docs/public/adapter-keyboard.md"
   },
   {
     "path": "/docs/adapter-grid-cell",
@@ -840,7 +920,8 @@
     "heading": "Grid cell Adapter",
     "description": "GridPoint를 안정된 DOM cell 주소와 focus lookup에 연결합니다.",
     "language": "ko",
-    "navigationGroup": "Adapter"
+    "navigationGroup": "Adapter",
+    "documentSource": "docs/public/adapter-grid-cell.md"
   },
   {
     "path": "/docs/adapter-interaction",
@@ -849,7 +930,8 @@
     "heading": "Interaction Adapter",
     "description": "Pointer capture와 HTML Drag and Drop session을 preview, commit, cancel lifecycle에 연결합니다.",
     "language": "ko",
-    "navigationGroup": "Adapter"
+    "navigationGroup": "Adapter",
+    "documentSource": "docs/public/adapter-interaction.md"
   },
   {
     "path": "/docs/adapter-clipboard",
@@ -858,7 +940,8 @@
     "heading": "Clipboard Adapter",
     "description": "ClipboardEvent를 구조화된 copy, cut, paste 계약에 연결합니다.",
     "language": "ko",
-    "navigationGroup": "Adapter"
+    "navigationGroup": "Adapter",
+    "documentSource": "docs/public/adapter-clipboard.md"
   },
   {
     "path": "/docs/adapter-contenteditable",
@@ -867,7 +950,8 @@
     "heading": "Contenteditable Adapter",
     "description": "문자열 pointer와 native-input DOM lifecycle을 연결합니다.",
     "language": "ko",
-    "navigationGroup": "Adapter"
+    "navigationGroup": "Adapter",
+    "documentSource": "docs/public/adapter-contenteditable.md"
   },
   {
     "path": "/docs/adapter-virtual-selection",
@@ -876,7 +960,8 @@
     "heading": "Virtual Selection Adapter",
     "description": "부분 마운트된 DOM의 Native Selection과 전체 model-backed plain-text 복사를 연결합니다.",
     "language": "ko",
-    "navigationGroup": "Adapter"
+    "navigationGroup": "Adapter",
+    "documentSource": "docs/public/adapter-virtual-selection.md"
   },
   {
     "path": "/affordances/handles",
@@ -949,7 +1034,8 @@
     "heading": "json-document Connectors",
     "description": "React 구독과 선택·커서 질의, React Hook Form, Ajv, Zod, TanStack Table 연결 계약을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/public/connectors.md"
   },
   {
     "path": "/docs/connector-react",
@@ -958,7 +1044,8 @@
     "heading": "React Connector",
     "description": "document와 editor의 변경을 React 구독과 선택 질의로 연결합니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/public/connector-react.md"
   },
   {
     "path": "/docs/react-editing",
@@ -969,7 +1056,8 @@
     "language": "ko",
     "parentPath": "/docs/connector-react",
     "relatedDemoPath": "/connectors/react",
-    "relatedDemoLabel": "React"
+    "relatedDemoLabel": "React",
+    "documentSource": "docs/public/react-editing.md"
   },
   {
     "path": "/docs/connector-react-hook-form",
@@ -978,7 +1066,8 @@
     "heading": "React Hook Form Connector",
     "description": "form draft와 canonical document commit을 연결합니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/public/connector-react-hook-form.md"
   },
   {
     "path": "/docs/connector-ajv",
@@ -987,7 +1076,8 @@
     "heading": "Ajv Connector",
     "description": "Ajv validator와 JSON Document validation을 연결합니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/public/connector-ajv.md"
   },
   {
     "path": "/docs/connector-zod",
@@ -996,7 +1086,8 @@
     "heading": "Zod Connector",
     "description": "Zod schema와 Database document 변환을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/public/connector-zod.md"
   },
   {
     "path": "/docs/connector-zod-validate",
@@ -1005,7 +1096,8 @@
     "heading": "Zod Validate",
     "description": "Zod issue path를 JSON Pointer validation 결과로 번역합니다.",
     "language": "ko",
-    "parentPath": "/docs/connector-zod"
+    "parentPath": "/docs/connector-zod",
+    "documentSource": "docs/public/connector-zod-validate.md"
   },
   {
     "path": "/docs/connector-tanstack-table",
@@ -1014,7 +1106,8 @@
     "heading": "TanStack Table Connector",
     "description": "visible row와 column 순서를 SheetTopology에 연결합니다.",
     "language": "ko",
-    "navigationGroup": "Connector"
+    "navigationGroup": "Connector",
+    "documentSource": "docs/public/connector-tanstack-table.md"
   },
   {
     "path": "/connectors/react",
@@ -1106,7 +1199,8 @@
     "navigationGroup": "UI Primitives",
     "relatedDemoPath": "/demo/ui-primitives",
     "relatedDemoLabel": "Design system",
-    "sidebar": false
+    "sidebar": false,
+    "documentSource": "docs/public/ui-primitives.md"
   },
   {
     "path": "/docs/affordance",
@@ -1116,7 +1210,8 @@
     "description": "제품이 json-document를 만지는 최전선의 키보드·마우스·커서 손을 API와 사용법으로 설명합니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "sidebar": false
+    "sidebar": false,
+    "documentSource": "docs/public/affordance.md"
   },
   {
     "path": "/docs/affordance/focus",
@@ -1126,7 +1221,8 @@
     "description": "Tab은 컴포넌트 사이로, 화살표는 컴포넌트 안에서 초점을 옮기는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-focus.md"
   },
   {
     "path": "/docs/affordance/caret",
@@ -1136,7 +1232,8 @@
     "description": "I-beam 클릭으로 글 삽입점을 두고, 화살표로 글자 사이를 옮기는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-caret.md"
   },
   {
     "path": "/docs/affordance/select",
@@ -1148,7 +1245,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/widgets/listbox",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-select.md"
   },
   {
     "path": "/docs/affordance/typeahead",
@@ -1160,7 +1258,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/order",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-typeahead.md"
   },
   {
     "path": "/docs/affordance/activate",
@@ -1172,7 +1271,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-activate.md"
   },
   {
     "path": "/docs/affordance/cancel",
@@ -1184,7 +1284,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-cancel.md"
   },
   {
     "path": "/docs/affordance/fold",
@@ -1196,7 +1297,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/widgets/tree",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-fold.md"
   },
   {
     "path": "/docs/affordance/history",
@@ -1208,7 +1310,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/widgets/toolbar",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-history.md"
   },
   {
     "path": "/docs/affordance/delete",
@@ -1220,7 +1323,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-delete.md"
   },
   {
     "path": "/docs/affordance/rename",
@@ -1230,7 +1334,8 @@
     "description": "F2와 느린 두 번 누르기로 고른 대상의 이름을 고치는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-rename.md"
   },
   {
     "path": "/docs/affordance/nudge",
@@ -1242,7 +1347,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-nudge.md"
   },
   {
     "path": "/docs/affordance/hover",
@@ -1254,7 +1360,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-hover.md"
   },
   {
     "path": "/docs/affordance/contextual",
@@ -1266,7 +1373,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/calendar",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-contextual.md"
   },
   {
     "path": "/docs/affordance/double-click",
@@ -1276,7 +1384,8 @@
     "description": "click detail 2로 열기·단어 고르기·이름 바꾸기를 여는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-double-click.md"
   },
   {
     "path": "/docs/affordance/triple-click",
@@ -1286,7 +1395,8 @@
     "description": "click detail 3으로 줄이나 문단을 고르는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-triple-click.md"
   },
   {
     "path": "/docs/affordance/context-menu",
@@ -1298,7 +1408,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-context-menu.md"
   },
   {
     "path": "/docs/affordance/drag",
@@ -1310,7 +1421,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/widgets/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-drag.md"
   },
   {
     "path": "/docs/affordance/marquee",
@@ -1322,7 +1434,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-marquee.md"
   },
   {
     "path": "/docs/affordance/drop",
@@ -1334,7 +1447,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-drop.md"
   },
   {
     "path": "/docs/affordance/copy-drag",
@@ -1346,7 +1460,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-copy-drag.md"
   },
   {
     "path": "/docs/affordance/handles",
@@ -1358,7 +1473,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/affordances/handles",
     "relatedDemoLabel": "Usage 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-handles.md"
   },
   {
     "path": "/docs/affordance/resize",
@@ -1370,7 +1486,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-resize.md"
   },
   {
     "path": "/docs/affordance/pan",
@@ -1382,7 +1499,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-pan.md"
   },
   {
     "path": "/docs/affordance/scroll",
@@ -1394,7 +1512,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-scroll.md"
   },
   {
     "path": "/docs/affordance/zoom",
@@ -1406,7 +1525,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-zoom.md"
   },
   {
     "path": "/docs/affordance/snap",
@@ -1418,7 +1538,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-snap.md"
   },
   {
     "path": "/docs/affordance/forbid",
@@ -1430,7 +1551,8 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance"
+    "parentPath": "/docs/affordance",
+    "documentSource": "docs/public/affordance-forbid.md"
   },
   {
     "path": "/widgets/toolbar",

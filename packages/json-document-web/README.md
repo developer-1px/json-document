@@ -68,8 +68,9 @@ const dragDrop = createWebDragDropSession({
 });
 ```
 
-The sessions own platform lifecycle state. Hit testing, valid targets, geometry,
-and document Intent remain in the host.
+세션은 플랫폼 수명주기를 소유합니다. Hit testing과 geometry의 플랫폼 관찰,
+유효 대상과 문서 Intent의 의미는 각각 Adapter와 문서·Editing owner의 계약을
+소비합니다. Host는 제품의 대상·정책 값과 실행 경로를 연결합니다.
 
 `createWebViewportPositionPorts` measures an exact target and its paired tail
 reserve, writes temporary scroll range, performs smooth or instant positioning,
@@ -118,12 +119,12 @@ const keyboard = createWebKeyboardAdapter();
 
 surface.addEventListener("click", (event) => {
   const operation = selectionOperationFromModifiers(event);
-  // The host resolves geometry and dispatches its domain selection intent.
+  // Connect canonical geometry/selection APIs with the product's target.
 });
 
 surface.addEventListener("keydown", (event) => {
   const command = keyboard.resolve(event);
-  // Official adapter output. The host maps it through topology to a domain intent.
+  // Pass the command to the canonical topology/editor API.
 });
 
 input.addEventListener("input", (event) => {
@@ -148,18 +149,19 @@ named codecs remain compatibility aliases over those domain formats. Clipboard
 surfaces write both the structured json-document MIME payload and its
 `text/plain` projection. Paste
 consumes only a valid structured payload. Parsing arbitrary external plain text
-into domain records or cells remains a host policy.
+into domain records or cells belongs to the document/editor's format contract.
+The Host chooses which representations and product policies to enable.
 
 The official keyboard adapter owns `defaultWebKeymap`. `resolve` returns a
 semantic command or `null`; `moveLinePoint` and `moveGridPoint` locate the
 visible neighbor. The host still decides when a command applies and which
 domain Intent to dispatch.
 
-The clipboard binding calls `preventDefault()` only after a successful copy,
-canonical cut, or canonical paste. Cut writes the selected payload before
-asking the Editing companion to remove it. Missing clipboard data, malformed
-payloads, unsupported cut, and rejected editing results leave native handling
-available.
+Cut writes the selected payload before asking Editing to remove it. Once a
+Cut payload is owned, native deletion is cancelled before removal; a rejected
+removal must not trigger another browser deletion. Copy/Paste cancel native
+handling on success. Missing data and unsupported input follow the specific
+failure boundary below.
 
 `createWebClipboardSurface` is the public surface-level orchestration API. It
 projects one binding into `onCopy`, `onCut`, and `onPaste` handlers and reports
@@ -187,11 +189,16 @@ The Adapter owns:
 
 The host owns:
 
-- the event target, canonical focus, when a command applies, and role workflow policy;
-- DOM/canvas geometry and hit testing;
-- external plain-text interpretation and product-specific paste policy;
+- product-specific activation, permissions, and workflow policy;
+- concrete DOM/external instances and visual composition;
+- selection of canonical geometry, editor, focus, and clipboard APIs;
+- product-specific paste policy values;
 - enabled representations and their priority;
-- native text selection, IME, drag/drop, persistence, and remote protocols.
+- composition and execution order of persistence and remote-system integrations.
+
+Native text selection, IME, drag/drop lifecycle, serialization, and reusable UI
+behavior remain at their canonical Adapter, Affordance, Connector, or UI owner.
+Host composition is not an exemption from those module boundaries.
 
 The module does not access `window`, `document`, or `navigator` during import,
 so non-browser tooling can load it safely.

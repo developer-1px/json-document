@@ -6,7 +6,10 @@ DOM-free selection families and semantic interaction controllers for structural 
 
 The package owns JSON-safe selection state, pure family transitions, reconciliation/mapping, target publication, and pointer/keyboard interaction lifecycles after physical input has been translated into semantic operations.
 
-The host owns DOM or canvas geometry, hit testing implementation, modifier-key mapping, focus and accessibility wiring, native text caret/IME state, and domain edits such as delete, move, fill, and paste.
+플랫폼 geometry 관찰·hit testing·modifier 해석·DOM focus·native caret/IME는
+Adapter와 해당 UI owner가, delete·move·fill·paste의 의미는 문서·Editing owner가
+소유합니다. Host는 제품 정책 값과 구체 인스턴스·layout을 조합하며 이 책임을
+직접 재구현하지 않습니다.
 
 ```text
 platform adapter ─┐
@@ -19,7 +22,7 @@ editing history ──┘
 - `KeySelection`: explicit keys or symbolic `all` with exclusions and a host-issued universe token.
 - `RangeSelection`: directional anchor/focus ranges over a host-provided `OrderedTopology`.
 - `MaterializedRangeSelection`: directional ranges whose resolved points survive virtualized or paged topology changes. Each range keeps its anchor/focus and the points produced by the topology at transition time; reconciliation removes only identities that the topology no longer recognizes.
-- `MaskSelection`: an extension protocol whose weighted representation and algebra remain host-owned.
+- `MaskSelection`: an extension protocol whose weighted representation and algebra belong to the implementing document/editor owner, not anonymous Host logic.
 
 These families share `SelectionFamily`; they do not share a universal reducer.
 
@@ -30,11 +33,9 @@ Use `createMaterializedRangeSelectionFamily` when the visible topology can chang
 Translate physical input before calling the package:
 
 ```ts
-const operation: SelectionOperation = event.shiftKey
-  ? "extend"
-  : event.metaKey || event.ctrlKey
-    ? "toggle"
-    : "replace";
+import { selectionOperationFromModifiers } from "@interactive-os/json-document-web";
+
+const operation = selectionOperationFromModifiers(event);
 ```
 
 Viewport-to-domain coordinate conversion, pointer capture, auto-scroll, and accessibility remain in the adapter. Pass only `PointerSample<Point>` values to `reducePressInteraction` or `reduceMarqueeInteraction`.

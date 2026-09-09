@@ -59,25 +59,34 @@ Document Type은 DOM event, pointer gesture, React lifecycle, 화면 layout과 �
 
 ## 후보 · TBD
 
-현재 사이트에서 다음 항목이 Document Type 후보입니다.
+현재 사이트에서 다음 후보의 관찰된 schema와 목표 책임을 미리 볼 수 있습니다.
 
-```text
-Document Types · TBD
-├── Rich Text
-├── Order
-├── Object
-├── Tree
-├── Database
-├── Calendar
-├── Sheet
-├── Kanban
-└── Annotation
-```
+| 후보 | 닫으려는 문서 의미 |
+| --- | --- |
+| [Rich Text · TBD](/docs/document-types/rich-text) | node·mark·text 구조와 schema-aware 연산 |
+| [Order · TBD](/docs/document-types/order) | 항목 identity와 순서·이름 변경 |
+| [Object · TBD](/docs/document-types/object) | 객체 identity·geometry와 의미 연산 |
+| [Tree · TBD](/docs/document-types/tree) | parent/child 관계·subtree 연산·visible projection |
+| [Database · TBD](/docs/document-types/database) | property·record·saved view와 projection |
+| [Calendar · TBD](/docs/document-types/calendar) | event·recurrence·interval·occurrence projection |
+| [Sheet · TBD](/docs/document-types/sheet) | row·column·cell identity와 구조 연산 |
+| [Kanban · TBD](/docs/document-types/kanban) | column·card 관계와 이동 |
+| [Annotation · TBD](/docs/document-types/annotation) | annotation shape와 geometry 연산 |
 
 이 목록은 분류 후보이지 완료 선언이 아닙니다. 각 후보는 모델, invariant,
 operation과 projection의 실제 owner를 감사한 뒤에만 이 위치로 이동할 수
 있습니다. 그때까지 기존 package/API 이름, 모듈 배치와 Hands 내비게이션은
 유지합니다.
+
+## 현재와 목표 사이
+
+현재 구현의 schema와 API는 후보를 검토할 근거입니다. 목표는 model·invariant·
+operation·projection이 한 Document Type owner에서 나오고, Editing과 UI가 그
+공개 계약을 소비하는 것입니다. 편집 lifecycle·DOM geometry 관찰·React 구독은
+각자의 이웃 책임에 남습니다.
+
+Calendar에는 소스 기반 책임 감사가 있으며 아직 canonical move가 남아 있습니다.
+다른 후보도 이름이나 schema 표만으로 소유권 검토를 완료했다고 간주하지 않습니다.
 
 ## 완료 조건 · TBD
 

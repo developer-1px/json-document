@@ -45,7 +45,7 @@ json-document는 그 공통 층을 화면과 분리된 문서 커널로 둡니�
 통과한 변경만 원자적으로 적용되고, 실제로 값이 달라진 변경만
 구독자에게 전달됩니다. 현재 값을 읽고, 한 위치와 여러 위치를 찾고,
 검사하고, 적용하고, 구독하는 일이 이 계약의 전부입니다. 호출 모양은
-[API](api.md)에 있습니다.
+[JSON Document Protocol](api.md)에 있습니다.
 
 ## 같은 문을 여는 협업
 
@@ -76,8 +76,17 @@ Editing은 이 상태를 JSON Document 옆에 둡니다. 화면은 클릭과 키
 보이는 순서를 알려 줍니다. Clipboard는 JSON과 사람이 읽을 텍스트를 함께
 나릅니다. History는 값과 선택을 같이 되돌립니다.
 
-같은 문서 위에 선택과 작업을 더하는 일이 Editing입니다. 따라 가려면
-[Intent guide](intent-guide.md)에서 시작합니다.
+같은 문서 위에 선택과 작업을 더하는 일이 Editing입니다.
+[Editing Protocol](editing.md)에서 계획·적용·관찰의 경계를 보고,
+[Intent guide](intent-guide.md)에서 직접 호출해 봅니다.
+
+## 문서의 의미와 목표 owner
+
+Calendar의 recurrence나 Tree의 parent/child 관계는 편집 중의 선택과 다른
+책임입니다. Document Type이 model·schema·invariant·의미 연산·Projection을
+소유하고 Editing이 그 계약을 소비하는 구조를 지향합니다.
+[Document Types · TBD](document-types.md)에 현재 후보와 남은 소유권 수렴을
+미리 드러냅니다. 기존 package/API의 존재만으로 이 목표가 완료되지는 않습니다.
 
 ## Artifact에 손을 붙이기
 
@@ -85,10 +94,15 @@ Editing은 이 상태를 JSON Document 옆에 둡니다. 화면은 클릭과 키
 제품처럼 보입니다. 그 아래에서는 같은 문서와 같은 편집 상태를 씁니다.
 다른 것은 그 장르가 손을 얹는 방식입니다.
 
-Hands는 사람이 artifact와 agent를 다루는 편집 도구의 최소 완성본입니다.
+Hands는 사람이 artifact와 agent를 다루는 장르별 편집 조합입니다.
 한 줄 목록을 집어 옮기는 손, 칸을 채우는 손, 가지를 접는 손이 선반에
 있습니다. Agent에게 지시와 맥락을 건네는 Composer와, 안정적인 대상을 글에
 넣는 Mention도 Rich Text와 구조화된 context로 동작합니다. 고르려면 [Hands](hands.md)로 갑니다.
+
+[Official Hands · TBD](official-hands.md)는 이 조합을 기본 편집이 완성된 SDK로
+제공하려는 목표입니다. 전체 지원 입력·실패·선택 복원·호환성 조건은 아직 닫히지
+않았습니다. [Artifact](/viewer)도 현재는 visual prototype이며 문서·Hands 연결과
+파일 호환성을 증명하지 않습니다.
 
 ## 플랫폼, 라이브러리, Affordance
 
@@ -102,12 +116,13 @@ React로 그리거나 Zod로 검사하려면 이름 있는 라이브러리의 �
 React 구독으로 흐르고, 표의 보이는 행과 열은 Sheet의 Topology가 됩니다.
 
 고르기, 접기, 드래그, 되돌리기는 제품이 json-document를 만지는 손입니다.
-화면은 호스트가 그리고, 단축키와 마우스 문법은 Affordance가 닫습니다.
+제품 화면은 Host가 조합하고, 플랫폼 사실은 Adapter가 해석하며,
+입력 장치와 독립적인 조작 의미·수명주기는 Affordance가 소유합니다.
 
 Adapter와 Connector는 서로 직렬인 계층이 아니라 환경에 따라 독립적으로
 고르는 책임입니다. Affordance도 필요한 입력 문법을 선택해 Host에 조합합니다.
-[Adapters](adapters.md)와 [Connectors](connectors.md),
-[Affordance](affordance.md)에서 이어서 읽습니다.
+[Building Blocks](building-blocks.md)에서 Adapter·Connector·Affordance·
+UI Primitives의 경계를 함께 봅니다.
 
 ## Artifact editing의 Core
 
@@ -118,5 +133,5 @@ Connector, Affordance와 UI Primitive는 필요한 환경과 입력 문법에 �
 Hands는 그 조합이 장르별 최소 편집 loop를 완성했는지 판정합니다.
 
 여러 artifact가 같은 주소와 실행 취소와 협업을 쓰게 하려는 자리가 이
-Core입니다. 각 책임의 경계와 의존 순서는 [Concept Map](concepts.md)에서
+Core입니다. 각 책임의 경계와 선택적인 의존 관계는 [Concept Map](concepts.md)에서
 이어집니다.

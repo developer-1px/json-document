@@ -72,6 +72,12 @@ Package는 같은 도구를 쓴다는 이유가 아니라 독립 배포, 외부 
 | Validation | State를 바꾸지 않는 입력·candidate 검사 | Transformation과 normalization |
 | Test support | Production-shaped fixture와 test host | 배포 public API |
 
+이 표는 package 내부의 역할 분류이며 사이트의 읽기 레이어와 다르다.
+Document Type은 문서 고유의 Domain model·Domain operation·Projection을 소유하는
+생태계 위치다. 후보별 package 재배치는 아직 TBD이며 아래 현재 package 모형을
+이름만으로 이동시키지 않는다. Hands 내비게이션에서 읽는 React integration도
+실제 주책임이 framework lifecycle이면 Connector다.
+
 한 module에 여러 역할이 보이더라도 같은 이유로 항상 함께 바뀌고 독립 경계를
 만들 수 없다면 하나의 책임으로 유지한다. 표의 행마다 파일을 하나씩 만들지
 않는다.
