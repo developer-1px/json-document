@@ -1,4 +1,5 @@
 import type { ZodType } from "zod/v4";
+import type { DatabaseTableView } from "@interactive-os/json-document-editing";
 
 export type DatabaseRow = Record<string, unknown>;
 export type DatabaseRowId = string;
@@ -10,64 +11,8 @@ export interface DatabaseResource<Row extends DatabaseRow, Create = Partial<Row>
   readonly createDraft: () => Create;
 }
 
-export type DatabaseFilterOperator =
-  | "equals"
-  | "not-equals"
-  | "contains"
-  | "greater-than"
-  | "greater-than-or-equal"
-  | "less-than"
-  | "less-than-or-equal"
-  | "is-empty";
-
-export interface DatabaseFilterRule {
-  readonly id: string;
-  readonly propertyId: string;
-  readonly operator: DatabaseFilterOperator;
-  readonly value?: unknown;
-}
-
-export interface DatabaseFilterGroup {
-  readonly id: string;
-  readonly conjunction: "and" | "or";
-  readonly items: ReadonlyArray<DatabaseFilterRule | DatabaseFilterGroup>;
-}
-
-export interface DatabaseSortRule {
-  readonly propertyId: string;
-  readonly direction: "ascending" | "descending";
-}
-
-export interface DatabaseGroupRule {
-  readonly propertyId: string;
-  readonly direction: "ascending" | "descending";
-}
-
-export interface DatabaseColumnProjection {
-  readonly propertyId: string;
-  readonly visible: boolean;
-  readonly width?: number;
-  readonly pinned?: "start" | "end";
-}
-
-export interface DatabaseProjection {
-  readonly search: string;
-  readonly filter: DatabaseFilterGroup;
-  readonly sorts: ReadonlyArray<DatabaseSortRule>;
-  readonly groups: ReadonlyArray<DatabaseGroupRule>;
-  readonly columns: ReadonlyArray<DatabaseColumnProjection>;
-}
-
-export interface DatabaseViewDocument {
-  readonly id: string;
-  readonly name: string;
-  readonly ownership: "personal" | "shared" | "locked";
-  readonly layout: "table";
-  readonly projection: DatabaseProjection;
-}
-
 export interface DatabaseQueryRequest {
-  readonly view: DatabaseViewDocument;
+  readonly view: DatabaseTableView;
   readonly cursor?: string;
   readonly pageSize: number;
   readonly signal: AbortSignal;
@@ -140,8 +85,8 @@ export function createDatabaseView(
   id: string,
   name: string,
   propertyIds: ReadonlyArray<string>,
-  ownership: DatabaseViewDocument["ownership"] = "personal",
-): DatabaseViewDocument {
+  ownership: DatabaseTableView["ownership"] = "personal",
+): DatabaseTableView {
   return {
     id,
     name,
@@ -152,7 +97,7 @@ export function createDatabaseView(
       filter: { id: `${id}:root`, conjunction: "and", items: [] },
       sorts: [],
       groups: [],
-      columns: propertyIds.map((propertyId) => ({ propertyId, visible: propertyId !== "id" })),
+      columns: propertyIds.map((propertyId) => ({ propertyId, visible: propertyId !== "id", width: null, pinned: null })),
     },
   };
 }

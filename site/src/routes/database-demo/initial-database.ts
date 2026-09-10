@@ -28,11 +28,14 @@ export const initialDatabase: DatabaseDocument = {
   views: [{
     id: "table",
     name: "All work",
-    type: "table",
-    propertyOrder: ["name", "note", "score", "status", "complete"],
-    propertyVisibility: {},
-    propertyWidths: {},
-    sort: null,
-    filter: null,
+    ownership: "personal",
+    layout: "table",
+    projection: {
+      search: "",
+      filter: { id: "table:root", conjunction: "and", items: [] },
+      sorts: [],
+      groups: [],
+      columns: ["name", "note", "score", "status", "complete"].map((propertyId) => ({ propertyId, visible: true, width: null, pinned: null })),
+    },
   }],
 };

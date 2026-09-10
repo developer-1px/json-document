@@ -91,6 +91,8 @@ import databaseHandSource from "../../../../packages/json-document-database/src/
 import annotationSelectionSource from "../../../../packages/json-document-editing/src/annotation-selection.ts?raw";
 import annotationOutputSource from "../../../../packages/json-document-annotation/src/annotation-output.ts?raw";
 import annotationHandSource from "../../../../packages/json-document-annotation/src/annotation-hand.tsx?raw";
+import databasePropertyControlSource from "../../../../packages/json-document-database/src/database-property-control.tsx?raw";
+import databaseViewControlsSource from "../../../../packages/json-document-database/src/database-view-controls.tsx?raw";
 import annotationEditingSource from "../../../../packages/json-document-editing/src/annotation.ts?raw";
 import webSVGCoordinateSource from "../../../../packages/json-document-web/src/svg-coordinate.ts?raw";
 import webRasterSource from "../../../../packages/json-document-web/src/raster-source.ts?raw";
@@ -310,6 +312,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-annotation/src/annotation-hand.tsx", annotationHandSource],
   ["packages/json-document-annotation/src/annotation-output.ts", annotationOutputSource],
   ["packages/json-document-editing/src/annotation-selection.ts", annotationSelectionSource],
+  ["packages/json-document-database/src/database-property-control.tsx", databasePropertyControlSource],
+  ["packages/json-document-database/src/database-view-controls.tsx", databaseViewControlsSource],
   ["packages/json-document-editing/src/annotation.ts", annotationEditingSource],
   ["packages/json-document-web/src/svg-coordinate.ts", webSVGCoordinateSource],
   ["packages/json-document-web/src/raster-source.ts", webRasterSource],
@@ -366,6 +370,9 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-rich-text-web/src/contenteditable.ts", richTextWebSource],
   ["packages/json-document-tanstack-table/src/index.ts", tanStackTableSource],
   ["packages/json-document-zod/src/index.ts", zodSource],
+]);
+const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
   { packageName: "@interactive-os/json-document-web", symbol: "parseWebHTMLFragment", sourcePath: "packages/json-document-web/src/html-fragment.ts" },
@@ -1451,6 +1458,7 @@ async function discoverSourceClosure(entry: string): Promise<ReadonlyArray<DemoS
     visited.add(path);
     paths.push(path);
     const source = await loadSource(path);
+    for (const implementation of registeredImplementationSources.get(path) ?? []) await visit(implementation);
     for (const specifier of relativeSpecifiers(source)) {
       const resolved = resolveSource(path, specifier);
       if (resolved !== undefined) await visit(resolved);

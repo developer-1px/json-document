@@ -41,7 +41,7 @@ const cases: Case[] = [
   { name: "Database", initial: {
     schema: { properties: [{ id: "title", name: "Title", type: "title", options: [] }] },
     records: [{ id: "a", values: { title: "Draft" } }],
-    views: [{ id: "all", name: "All", type: "table", propertyOrder: ["title"], propertyVisibility: { title: true }, propertyWidths: {}, sort: null, filter: null }],
+    views: [{ id: "all", name: "All", ownership: "personal", layout: "table", projection: { search: "", filter: { id: "all:root", conjunction: "and", items: [] }, sorts: [], groups: [], columns: [{ propertyId: "title", visible: true, width: null, pinned: null }] } }],
   }, create: createDatabaseEditor, remove: [{ op: "remove", path: "/records/0" }], empty: emptyGrid },
   { name: "Kanban", initial: { columns: [{ id: "todo", title: "Todo", cardIds: ["a"] }], cards: [{ id: "a", title: "Draft" }] }, create: createKanbanEditor,
     remove: [{ op: "remove", path: "/cards/0" }, { op: "remove", path: "/columns/0/cardIds/0" }], empty: emptyKeys },
