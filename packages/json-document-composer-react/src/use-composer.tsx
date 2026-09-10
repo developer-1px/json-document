@@ -118,7 +118,7 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
     if (event.key === "Escape" && intake.hasPending() && !event.nativeEvent.isComposing) {
       event.preventDefault(); event.stopPropagation(); intake.cancel(); return;
     }
-    const interaction = composerInteractionFromKeyStroke({ key: event.key, shiftKey: event.shiftKey, commandKey: event.metaKey || event.ctrlKey }, config.interaction);
+    const interaction = composerInteractionFromKeyStroke({ key: event.key, shiftKey: event.shiftKey, commandKey: event.metaKey || event.ctrlKey, altKey: event.altKey }, config.interaction);
     if (commandMenu.open) {
       commandMenu.handleKeyDown(event);
       if (event.defaultPrevented) {
@@ -133,7 +133,7 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
   }
 
   function handleHistoryKeyDown(event: KeyboardEvent<HTMLElement>) {
-    const interaction = composerInteractionFromKeyStroke({ key: event.key, shiftKey: event.shiftKey, commandKey: event.metaKey || event.ctrlKey }, config.interaction);
+    const interaction = composerInteractionFromKeyStroke({ key: event.key, shiftKey: event.shiftKey, commandKey: event.metaKey || event.ctrlKey, altKey: event.altKey }, config.interaction);
     if (interaction !== "history.undo" && interaction !== "history.redo") return;
     event.preventDefault();
     event.stopPropagation();

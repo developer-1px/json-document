@@ -1,4 +1,5 @@
 import {
+  chordFromStroke,
   createWebKeyboardAdapter,
   selectionOperationFromModifiers,
   type WebKeyboardCommand,
@@ -88,9 +89,16 @@ export function planeHitAffordance(input: {
   };
 }
 
-export function deleteAffordance(input: { readonly key?: string }): AffordancePreview {
-  if (input.key === "Delete" || input.key === "Backspace") return { hand: { type: "delete" } };
-  return { hand: null };
+/** Uses the default structural delete chord; omitted modifiers are false. */
+export function deleteAffordance(input: Partial<WebKeyboardStroke>): AffordancePreview {
+  const command = keyboard.resolve({
+    key: input.key ?? "",
+    shiftKey: input.shiftKey ?? false,
+    metaKey: input.metaKey ?? false,
+    ctrlKey: input.ctrlKey ?? false,
+    altKey: input.altKey ?? false,
+  });
+  return { hand: command?.type === "delete" ? command : null };
 }
 
 export function contextMenuAffordance(input: {
@@ -111,14 +119,20 @@ export function resolveAffordanceKey(stroke: WebKeyboardStroke): AffordancePrevi
   return { hand: keyboard.resolve(stroke) };
 }
 
-/** Mod+A selects all. Choose preserve for repeated selection; omission retains the legacy toggle. */
+/** Mod+A without Alt/Shift selects all. Choose preserve for repetition; omission retains the legacy toggle. */
 export function selectAllAffordance(
-  stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey">,
+  stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey"> & Partial<Pick<WebKeyboardStroke, "shiftKey" | "altKey">>,
   state: { readonly allSelected: boolean },
   options: { readonly repeat?: "preserve" | "toggle" } = {},
 ): AffordancePreview {
-  const mod = stroke.metaKey || stroke.ctrlKey;
-  if (!mod || stroke.key.toLowerCase() !== "a") return { hand: null };
+  const chord = chordFromStroke({
+    key: stroke.key,
+    shiftKey: stroke.shiftKey ?? false,
+    metaKey: stroke.metaKey,
+    ctrlKey: stroke.ctrlKey,
+    altKey: stroke.altKey ?? false,
+  });
+  if (chord !== "Mod-a") return { hand: null };
   return { hand: { type: state.allSelected && options.repeat !== "preserve" ? "clear" : "select-all" } };
 }
 

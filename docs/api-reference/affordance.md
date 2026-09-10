@@ -386,7 +386,7 @@ createViewportPositionSession<Key>(options: ViewportPositionOptions<Key>): Viewp
 ## `deleteAffordance`
 
 ```ts
-deleteAffordance(input: { readonly key?: string; }): AffordancePreview
+deleteAffordance(input: Partial<WebKeyboardStroke>): AffordancePreview
 ```
 ## `disclosureAffordance`
 
@@ -879,7 +879,7 @@ resolveAffordanceKey(stroke: WebKeyboardStroke): AffordancePreview
 ## `selectAllAffordance`
 
 ```ts
-selectAllAffordance(stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey">, state: { readonly allSelected: boolean; }, options?: { readonly repeat?: "preserve" | "toggle"; }): AffordancePreview
+selectAllAffordance(stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey"> & Partial<Pick<WebKeyboardStroke, "shiftKey" | "altKey">>, state: { readonly allSelected: boolean; }, options?: { readonly repeat?: "preserve" | "toggle"; }): AffordancePreview
 ```
 ## `SelectOperation`
 

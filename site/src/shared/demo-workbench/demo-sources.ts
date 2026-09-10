@@ -663,6 +663,11 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-web",
+    symbol: "chordFromStroke",
+    sourcePath: "packages/json-document-web/src/keyboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
     symbol: "calendarMinutesFromWebGrid",
     sourcePath: "packages/json-document-web/src/calendar-input.ts",
   },
@@ -1161,6 +1166,11 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-affordance",
     symbol: "selectAllAffordance",
+    sourcePath: "packages/json-document-affordance/src/select.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "deleteAffordance",
     sourcePath: "packages/json-document-affordance/src/select.ts",
   },
   {

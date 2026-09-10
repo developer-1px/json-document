@@ -262,3 +262,13 @@ const range = textSelectionFromControl({ currentTarget: textarea });
 [Document Usage](https://developer-1px.github.io/json-document/demo); its source
 view links the React binding to this package's `input.ts` implementation and
 [API reference](https://developer-1px.github.io/json-document/docs/api/web).
+
+Default keyboard interpretation has one owner here. `chordFromStroke` folds
+Meta/Control into `Mod`, preserves Alt/Shift, normalizes single-character case,
+and maps the space key to `Space`. Unlisted chords resolve to `null`; for
+example, Mod+Alt+Z and Mod+Backspace have no default structural command.
+`createWebKeyboardAdapter({ keymap, defaults: false })` can explicitly assign
+such chords for a product profile. Affordance consumes the default delete
+mapping; Composer consumes its Undo/Redo mapping. Select-all remains an
+Affordance policy over the canonical chord normalizer, outside
+`WebKeyboardCommand`.

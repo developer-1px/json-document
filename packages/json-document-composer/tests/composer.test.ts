@@ -155,3 +155,16 @@ describe("Composer domain", () => {
     expect(composerInteractionFromKeyStroke({ key: "Escape" }, policy)).toBe("dismiss");
   });
 });
+
+
+describe("Composer default history keyboard", () => {
+  for (const commandKey of [false, true]) for (const shiftKey of [false, true]) for (const altKey of [false, true]) {
+    test(`history command=${commandKey} shift=${shiftKey} alt=${altKey}`, () => {
+      for (const key of ["z", "Z"]) {
+        const stroke = { key, commandKey, shiftKey, altKey };
+        expect(composerInteractionFromKeyStroke(stroke, { submit: "enter", newline: "shift-enter" }))
+          .toBe(commandKey && !altKey ? shiftKey ? "history.redo" : "history.undo" : null);
+      }
+    });
+  }
+});
