@@ -24,6 +24,8 @@ interface CanvasCreationStyle {
   readonly textColor: string;
   readonly fontSize: number;
   readonly strokeWidth: number;
+  /** Sticky-note fill; omitted hosts reuse their ordinary object fill. */
+  readonly stickyNoteColor?: string;
 }
 ```
 ## `CanvasHand`
@@ -57,5 +59,5 @@ createCanvasClipboardBinding(editor: ObjectEditor, policy: CanvasClipboardPolicy
 ## `useCanvasHand`
 
 ```ts
-useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile): { document: CanvasDocument; snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<ObjectSelection>; ... 21 more ...; surfaceProps: { ...; }; }
+useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile): { document: CanvasDocument; snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<ObjectSelection>; ... 23 more ...; surfaceProps: { ...; }; }
 ```

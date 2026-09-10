@@ -223,7 +223,7 @@ type MenuItem = {
 ## `Popover`
 
 ```ts
-Popover(props: { readonly label: string; readonly open: boolean; readonly onOpenChange: (open: boolean) => void; readonly trigger: ReactNode; readonly children: ReactNode; readonly className?: string; readonly panelClassName?: string; }): ReactNode
+Popover(props: { readonly label: string; readonly open: boolean; readonly onOpenChange: (open: boolean) => void; readonly trigger: ReactNode; readonly triggerPresentation?: "label" | "icon"; readonly children: ReactNode; readonly className?: string; readonly panelClassName?: string; }): ReactNode
 ```
 ## `ProductCanvas`
 

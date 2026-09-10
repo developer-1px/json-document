@@ -1,5 +1,6 @@
 import type { CanvasObject, CanvasObjectDraft, CanvasObjectKind, DocumentObject, ObjectBounds, ObjectPoint } from "./object-model.js";
 import { assertCanvasImageSource } from "./object-validation.js";
+import { getObjectStyle, type ObjectStyle } from "./object-style.js";
 
 export interface ObjectTransform {
   readonly dx: number;
@@ -27,13 +28,35 @@ export function projectObject(object: DocumentObject): CanvasObject {
   return object.kind === undefined ? { ...object, color: object.color ?? "transparent", kind: "rectangle" } : object as CanvasObject;
 }
 
+/** Read-only body layout, shared by display, native editing, and text capability checks. */
+export interface ObjectTextProjection extends ObjectBounds, Pick<ObjectStyle, "fontSize" | "fontWeight" | "textAlign" | "color"> {
+  readonly text: string;
+  readonly verticalAlign: "top" | "center";
+}
+
+export function projectObjectText(object: DocumentObject): ObjectTextProjection | null {
+  const style = getObjectStyle(object);
+  if (style.fontSize === undefined) return null;
+  const shape = object.kind === "rectangle" || object.kind === "ellipse";
+  const padding = object.kind === "text" ? 0 : object.kind === "sticky-note" ? 16 : 12;
+  const insetX = object.kind === "ellipse" ? object.width * (1 - Math.SQRT1_2) / 2 : Math.min(padding, object.width / 4);
+  const insetY = object.kind === "ellipse" ? object.height * (1 - Math.SQRT1_2) / 2 : Math.min(padding, object.height / 4);
+  return {
+    x: object.x + insetX, y: object.y + insetY, width: object.width - 2 * insetX, height: object.height - 2 * insetY,
+    text: object.label, color: style.textColor ?? style.color!, fontSize: style.fontSize,
+    fontWeight: style.fontWeight!, textAlign: style.textAlign!, verticalAlign: shape ? "center" : "top",
+  };
+}
+
 export function createCanvasObject(
   kind: Exclude<CanvasObjectKind, "path" | "image">,
   bounds: ObjectBounds,
-  style: { readonly color: string; readonly label: string; readonly fontSize?: number },
+  style: { readonly color: string; readonly label: string; readonly fontSize?: number; readonly textColor?: string },
 ): CanvasObjectDraft {
   const base = { ...bounds, width: Math.max(1, bounds.width), height: Math.max(1, bounds.height), color: style.color, label: style.label };
-  return kind === "text" ? { ...base, kind, fontSize: style.fontSize ?? 32 } : { ...base, kind };
+  return kind === "text" ? { ...base, kind, fontSize: style.fontSize ?? 32 } : {
+    ...base, kind, ...(style.fontSize === undefined ? {} : { fontSize: style.fontSize }), ...(style.textColor === undefined ? {} : { textColor: style.textColor }),
+  };
 }
 
 /** Fits a decoded raster inside bounds without upscaling; persisted bytes survive JSON round trips. */

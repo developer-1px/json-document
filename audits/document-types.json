@@ -32,15 +32,17 @@
     },
     "object": {
       "why": "캔버스 object는 identity, geometry와 presentation 값을 하나의 의미 단위로 유지해야 하기 때문입니다.",
-      "does": "object의 위치·크기·색상 모델을 정의하고 translate·resize·fill 같은 공간 연산의 기반을 제공합니다.",
-      "schema": "interface DocumentObject {\n  readonly id: string;\n  readonly label: string;\n  readonly x: number;\n  readonly y: number;\n  readonly width: number;\n  readonly height: number;\n  readonly color: string;\n}\n\ninterface ObjectDocument {\n  readonly objects: ReadonlyArray<DocumentObject>;\n}\n\ntype CanvasObject = DocumentObject & (\n  | { kind: \"text\"; fontSize: number }\n  | { kind: \"rectangle\" | \"ellipse\" }\n  | { kind: \"path\"; points: ReadonlyArray<{ x: number; y: number }>; strokeWidth: number }\n  | { kind: \"image\"; source: string }\n);\ninterface CanvasDocument extends ObjectDocument {\n  readonly profile: \"canvas/1\";\n  readonly width: number; readonly height: number;\n  readonly objects: ReadonlyArray<CanvasObject>;\n}",
+      "does": "object의 위치·크기·본문·스타일 모델을 정의하고 translate·resize·fill·style·text의 원자적 연산을 제공합니다.",
+      "schema": "interface DocumentObject {\n  readonly id: string;\n  readonly label: string;\n  readonly x: number;\n  readonly y: number;\n  readonly width: number;\n  readonly height: number;\n  readonly color: string;\n}\n\ninterface ObjectDocument {\n  readonly objects: ReadonlyArray<DocumentObject>;\n}\n\ninterface CanvasTextFormat {\n  readonly fontSize?: number;\n  readonly fontWeight?: 400 | 700;\n  readonly textAlign?: \"left\" | \"center\" | \"right\";\n}\ntype CanvasObject = DocumentObject & (\n  | (CanvasTextFormat & { kind: \"text\"; fontSize: number })\n  | (CanvasTextFormat & { kind: \"rectangle\" | \"ellipse\" | \"sticky-note\"; textColor?: string; strokeColor?: string; strokeWidth?: number })\n  | { kind: \"path\"; points: ReadonlyArray<{ x: number; y: number }>; strokeWidth: number }\n  | { kind: \"image\"; source: string }\n);\ninterface CanvasDocument extends ObjectDocument {\n  readonly profile: \"canvas/1\";\n  readonly width: number; readonly height: number;\n  readonly objects: ReadonlyArray<CanvasObject>;\n}",
       "fields": [
         { "name": "objects", "description": "같은 공간에서 배치·선택되는 object의 ordered collection입니다." },
         { "name": "objects[].id", "description": "selection, transform과 clipboard가 object를 안정적으로 참조하는 identity입니다." },
-        { "name": "objects[].label", "description": "object의 사용자 가시 이름입니다." },
+        { "name": "objects[].label", "description": "text·도형·노트의 실제 본문이며 별도 text 복사본이 없습니다. image·path에서는 이름입니다." },
         { "name": "x / y", "description": "문서 좌표계에서 object 좌상단의 위치입니다." },
         { "name": "width / height", "description": "resize 이후에도 유효해야 하는 object의 공간 크기입니다." },
-        { "name": "color", "description": "object가 소유하는 현재 presentation 값입니다." }
+        { "name": "color / textColor", "description": "color는 도형·노트 채우기·독립 글자색·path 선 색이고 textColor는 도형·노트 본문 색입니다." },
+        { "name": "fontSize / fontWeight / textAlign", "description": "본문의 크기·굵기·정렬입니다. 도형·노트의 생략된 크기는 24, 굵기는 400, 정렬은 도형 center·노트와 독립 글자 left입니다." },
+        { "name": "strokeColor / strokeWidth", "description": "도형 테두리는 기본 #000000·0이며 path는 color와 양의 strokeWidth를 사용합니다." }
       ],
       "sourcePath": "packages/json-document-object-document/src/object-model.ts",
       "symbol": "ObjectDocument"
@@ -136,7 +138,7 @@
   "audits": {
     "object": {
       "status": "owner-closed",
-      "denominator": 14,
+      "denominator": 15,
       "horizon": {
         "enumerators": [
           "packages/json-document-object-document/src/index.ts",
@@ -151,6 +153,22 @@
         ]
       },
       "occurrences": [
+        {
+          "id": "style",
+          "role": "Document Style",
+          "knowledge": "종류별 스타일·유효 기본값·혼합 선택·요청 검증",
+          "decision": "표시와 편집이 같은 스타일 의미를 소비",
+          "changeReason": "스타일 속성과 적용 가능성 변경",
+          "stateLifecycle": "문서 값 또는 stateless 계산",
+          "inputsOutputs": "readObjectStyle의 public 계약",
+          "currentOwner": "@interactive-os/json-document-object-document",
+          "canonicalEvidence": "packages/json-document-object-document/src/object-style.ts와 공개 API·소유 API 문서·Canvas Usage/Source",
+          "sourcePath": "packages/json-document-object-document/src/object-style.ts",
+          "symbol": "readObjectStyle",
+          "disposition": "canonical consumer",
+          "intendedOwner": "@interactive-os/json-document-object-document",
+          "nextCheck": "혼합 스타일·no-op·원자적 거절 회귀와 두 Canvas Host"
+        },
         {
           "id": "model",
           "role": "Document Model",
@@ -202,11 +220,11 @@
         {
           "id": "projection",
           "role": "Projection",
-          "knowledge": "Object bounds·path 정규화",
-          "decision": "preview와 commit의 동일한 기하",
+          "knowledge": "Object bounds·path 정규화·본문 capability와 배치",
+          "decision": "preview/commit의 동일한 기하와 표시/입력의 동일한 본문 projection",
           "changeReason": "기하 표현 변경",
           "stateLifecycle": "문서 값 또는 stateless 계산",
-          "inputsOutputs": "transformObject의 public 계약",
+          "inputsOutputs": "transformObject와 projectObjectText의 public 계약",
           "currentOwner": "@interactive-os/json-document-object-document",
           "canonicalEvidence": "packages/json-document-object-document/src/object-projection.ts와 공개 entrypoint·package API 문서·Canvas Usage/Source",
           "sourcePath": "packages/json-document-object-document/src/object-projection.ts",

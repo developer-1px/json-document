@@ -1,7 +1,7 @@
 ## Canvas Hand 계약 · RC
 
-`CanvasHand`는 `ObjectEditor`와 `CanvasCreationStyle`을 받아 글자·사각형·타원·자유
-그리기, 이미지·텍스트 붙여넣기, 다중 선택, 집합 이동·복제·삭제, native Clipboard, primary resize, Undo/Redo, JSON 재열기를 연결합니다.
+`CanvasHand`는 `ObjectEditor`와 `CanvasCreationStyle`을 받아 글자·사각형·타원·스티커 노트·자유
+그리기, 이미지·텍스트 붙여넣기, 다중 선택, 선택 스타일, 집합 이동·복제·삭제, native Clipboard, primary resize, Undo/Redo, JSON 재열기를 연결합니다.
 `useCanvasHand`는 같은 입력 조합을 custom UI에서 사용할 수 있게 공개합니다.
 
 툴바의 모든 도구·명령은 Lucide 아이콘과 공통 `Toggle`/`Command`의 `label`을
@@ -28,7 +28,7 @@ Host: 한 장 fixture, 크기·색상 정책, 레이아웃
 ### 입력과 History
 
 - 도구를 고르고 클릭하면 기본 크기, 드래그하면 지정한 크기로 생성합니다.
-  사각형·타원·글자는 누르거나 작게 흔들리는 동안 기본 크기를 미리 표시하지 않습니다.
+  사각형·타원·글자·노트는 누르거나 작게 흔들리는 동안 기본 크기를 미리 표시하지 않습니다.
   시작점에서 3 문서 단위 이상 움직이면 실제 드래그 상자만 표시하며, 다시 시작점 근처로
   돌아와도 클릭 크기로 바뀌지 않습니다. 클릭 기본 크기는 놓을 때 press 위치에만 생성합니다.
   드래그 후 시작점에 정확히 돌아와 놓으면 객체나 History를 만들지 않습니다.
@@ -40,11 +40,17 @@ Host: 한 장 fixture, 크기·색상 정책, 레이아웃
   선택 윤곽은 모두 그리지만 네 변·네 모서리 resize targets는 primary 하나에만 붙습니다.
   Delete는 집합 전체를 한 번 삭제하며 primary resize/text 편집은 기존 선택 집합을 보존합니다.
   Focus만으로 선택하지 않으며, focused 객체에서 Space/Shift+Space로 선택/toggle합니다.
-  focused 객체의 Enter는 그 객체를 선택하고 글자라면 편집합니다. 슬라이드 자체의
+  focused 객체의 Enter는 그 객체를 선택하고 본문이 있는 글자·도형·노트라면 편집합니다. 슬라이드 자체의
   Enter/F2는 현재 primary를 편집하며, F2는 객체에 focus가 있어도 primary를 대상으로 합니다.
-- 글자는 생성 직후 또는 더블클릭/F2/Enter로 편집합니다. 줄바꿈·IME·선택·native
+- 글자·노트는 생성 직후, 사각형·타원은 더블클릭/F2/Enter로 편집합니다.
+  기존 글자·노트도 같은 더블클릭/F2/Enter를 사용합니다. 줄바꿈·IME·선택·native
   입력 Undo는 textarea에 남습니다. blur 또는 Mod+Enter가 전체 draft를 한 번 commit하고
   Escape는 draft만 버립니다. 객체의 label이 실제 문자열 값입니다.
+  노트 클릭 기본 크기는 200×200이며 드래그로 자유 크기를 지정합니다. 생성과 이후
+  본문 확정은 각각 한 번의 Undo입니다. 새 노트에서 Escape하면 빈 노트는 남습니다.
+  도형은 내부 중앙, 노트는 여백을 둔 상단이며 `projectObjectText`를 표시와 입력이 공유합니다.
+  편집 중에도 채우기와 테두리는 유지합니다. 상자 밖 본문은 clip하며 입력 중에는 native
+  textarea 스크롤로 긴 내용을 편집할 수 있습니다. 자동 글자 축소나 상자 자동 확대는 하지 않습니다.
 - Alt/Option+drag는 선택 집합을 복제합니다. 원본을 남기고 사본 위치를 preview하며
   release에 새 ID를 할당합니다. Alt를 도중에 누르거나 놓으면 copy/move가 전환됩니다.
   Shift+drag는 큰 delta 축을 고정하며 Shift+click toggle과 구분합니다.
@@ -66,6 +72,32 @@ Host: 한 장 fixture, 크기·색상 정책, 레이아웃
 - 선택만 바꾸거나 0 거리로 움직이면 History가 생기지 않습니다. commit된 편집은
   한 번의 Undo로 되돌리며 삭제 Undo는 객체와 선택을 함께 복원합니다. Mod+Z/Mod+Shift+Z는
   입력 필드 밖에서 문서 Undo/Redo를 실행합니다.
+
+### 선택 스타일
+
+Select 도구에서 스타일을 지원하는 객체가 선택되면 팔레트 아이콘 하나가 나타납니다.
+공통 Popover와 Command 툴팁을 사용하며, 선택한 종류에 필요한 속성만 엽니다.
+색상 팔레트와 굵게·정렬 버튼은 즉시 확정합니다. 직접 입력한 CSS 색·글자 크기·선 굵기는
+Enter 또는 적용 아이콘으로 확정하고, Escape·바깥 클릭으로 닫으면 미확정 입력은 버립니다.
+이미지만 선택한 경우에는 스타일 컨트롤이 없습니다.
+
+도형·노트에는 `색상`(채우기)과 `글자색`이 따로 나타납니다. 글자 크기·굵기·정렬도
+같은 선택 스타일 API로 적용합니다. 독립 글자는 기존 `색상`을 글자색으로 씁니다.
+
+혼합 선택은 `readObjectStyle`의 `null`을 `혼합`으로 드러냅니다. 색·크기·정렬을 임의의
+primary 값으로 표시하지 않습니다. 속성은 이를 지원하는 선택 객체에만 적용하고 전체
+선택과 primary를 보존합니다. 굵기가 모두 0인 도형에 테두리색을 고르면 2 단위로 함께
+켭니다. 투명한 테두리색이나 도형의 0 굵기로 테두리를 없앨 수 있습니다. path는 양의
+굵기가 필요하므로 path가 포함된 선택에 0을 입력하면 전체를 거절합니다.
+
+`useCanvasHand`의 `selectedStyle`과 `setStyle(style)`로 같은 기능을 custom UI에 연결할
+수 있습니다. `setStyle`은 `selection.style` Intent의 결과를 반환합니다. 스타일을 열거나
+적용할 때 글자 draft는 먼저 확정하고 진행 중인 gesture·paste는 취소합니다. 글자 편집
+textarea도 표시와 같은 크기·굵기·정렬을 사용합니다. 스타일 확정당 한 번의 Undo이며
+기본값·동일값은 문서와 History를 바꾸지 않습니다.
+
+스타일은 저장 객체에만 적용하며 `creationStyle`의 제품 생성 기본값을 변경하지 않습니다.
+글자 자동 크기, 부분 문자열 서식, 상시 inspector는 이번 범위 밖입니다.
 
 ### Native Clipboard
 
@@ -119,6 +151,8 @@ JSON 버튼은 현재 문서 문자열을 노출합니다. 이 문자열을 저�
 단일 슬라이드를 컨테이너에 맞춰 표시합니다. 확대/축소·페이지·팬·다중 resize·그룹·회전·
 snap·레이어·PPTX·collaboration은 이번 Hand의 지원 범위가 아닙니다.
 `creationStyle`은 새 객체에만 적용하는 제품 기본값이며 저장 객체의 스타일을 덮어쓰지 않습니다.
+`stickyNoteColor`로 새 노트의 채우기를 지정하며 생략하면 `color`를 사용합니다.
+노트·도형의 본문은 `textColor`와 `fontSize` 생성 기본값을 받습니다.
 
 선택은 Affordance의 [평면 Select 프로파일](/docs/api/affordance)을 소비합니다.
 `selectProfile`을 주입하거나 생략하여 기본 instance를 만들 수 있습니다. instance는 Hand마다

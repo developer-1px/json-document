@@ -232,7 +232,7 @@ test("Enter activates the focused object instead of editing an unrelated primary
   const box = container.querySelector('[data-canvas-object="b"]')!;
   fireEvent.focus(box); fireEvent.keyDown(box, { key: "Enter" });
   expect(editor.snapshot.selection.keys).toEqual(["b"]);
-  expect(screen.queryByRole("textbox", { name: "Canvas text" })).toBeNull();
+  expect((screen.getByRole("textbox", { name: "Canvas text" }) as HTMLTextAreaElement).value).toBe("Box");
   const text = container.querySelector('[data-canvas-object="a"]')!;
   fireEvent.focus(text); fireEvent.keyDown(text, { key: "Enter" });
   expect(editor.snapshot.selection.keys).toEqual(["a"]);
@@ -331,7 +331,7 @@ test("external selection changes supersede a pending preview without a stale sel
 test("every toolbar control shares icon, accessible name and canonical tooltip without losing state", () => {
   const { svg } = setup();
   const toolbar = within(screen.getByRole("toolbar", { name: "Canvas tools" }));
-  const labels = ["선택", "글자", "사각형", "타원", "그리기", "실행 취소", "다시 실행", "복제", "삭제", "JSON"];
+  const labels = ["선택", "글자", "스티커 노트", "사각형", "타원", "그리기", "실행 취소", "다시 실행", "복제", "삭제", "JSON"];
   expect(toolbar.getAllByRole("button")).toHaveLength(labels.length);
   for (const label of labels) {
     const button = toolbar.getByRole("button", { name: label });
@@ -353,6 +353,7 @@ const creationTools = [
   { tool: "사각형", kind: "rectangle", width: 160, height: 100 },
   { tool: "타원", kind: "ellipse", width: 160, height: 100 },
   { tool: "글자", kind: "text", width: 280, height: 64 },
+  { tool: "스티커 노트", kind: "sticky-note", width: 200, height: 200 },
 ] as const;
 
 function creationPreview(container: HTMLElement) {
@@ -391,7 +392,7 @@ test.each(creationTools)("$kind click creates its default size only on release a
   fireEvent.pointerUp(svg, event(39.5, 49.5));
   expect(value().objects[0]).toMatchObject({ kind, x: 80, y: 100, width, height });
   expect(commits).toHaveBeenCalledOnce();
-  expect(screen.queryByRole("textbox", { name: "Canvas text" }) !== null).toBe(kind === "text");
+  expect(screen.queryByRole("textbox", { name: "Canvas text" }) !== null).toBe(kind === "text" || kind === "sticky-note");
 });
 
 test.each(creationTools)("$kind stays a drag near the origin and an exact return creates nothing", ({ tool, width, height }) => {
@@ -509,7 +510,7 @@ test("resize switches Shift/Alt live and commits the release coordinates and mod
   expect(commits).toHaveBeenCalledOnce(); expect(value().objects).toHaveLength(1);
 });
 
-test.each(["rectangle", "ellipse", "text", "path", "image"] as const)("%s uses the same west-edge clamp without changing its content", (kind) => {
+test.each(["rectangle", "ellipse", "sticky-note", "text", "path", "image"] as const)("%s uses the same west-edge clamp without changing its content", (kind) => {
   const object = { id: "a", x: 100, y: 100, width: 200, height: 100, color: "blue", label: "Content", kind,
     ...(kind === "text" ? { fontSize: 24 } : kind === "path" ? { points: [{ x: 0, y: 0 }, { x: 1, y: 1 }], strokeWidth: 3 } : kind === "image" ? { source: "data:image/png;base64,AQID" } : {}) } as CanvasDocument["objects"][number];
   const { container, value } = setup({ ...blank, objects: [object] });
@@ -608,4 +609,166 @@ test("external replacement cancels an in-flight transform and unmount releases p
   const observer = vi.fn(); window.addEventListener("pointerup", observer);
   window.dispatchEvent(end); window.removeEventListener("pointerup", observer);
   expect(observer).toHaveBeenCalled(); expect(commits).not.toHaveBeenCalled();
+});
+
+test("selection style uses an icon tooltip and only exposes supported properties", () => {
+  const { editor } = setup(populated);
+  const trigger = screen.getByRole("button", { name: "스타일" });
+  expect(document.getElementById(trigger.getAttribute("aria-describedby")!)?.textContent).toBe("스타일");
+  fireEvent.click(trigger);
+  expect(screen.getByRole("textbox", { name: "글자 크기" })).toBeTruthy();
+  expect(screen.queryByRole("textbox", { name: "테두리 색" })).toBeNull();
+  act(() => { editor.dispatch({ type: "selection.set", objectIds: [] }); });
+  expect(screen.queryByRole("button", { name: "스타일" })).toBeNull();
+  expect(screen.queryByRole("dialog", { name: "스타일" })).toBeNull();
+});
+
+test("mixed color applies to the whole set once, preserves primary and leaves image data unchanged", () => {
+  const initial: CanvasDocument = { ...populated, objects: [...populated.objects, { id: "image", kind: "image", source: "data:image/png;base64,AQID", label: "Image", color: "transparent", x: 800, y: 100, width: 100, height: 100 }] };
+  const { editor, value, commits } = setup(initial);
+  act(() => { editor.dispatch({ type: "selection.set", objectIds: ["a", "b", "image"], primaryKey: "image" }); });
+  const selection = editor.snapshot.selection;
+  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  expect((screen.getByRole("textbox", { name: "색상" }) as HTMLInputElement).placeholder).toBe("혼합");
+  fireEvent.click(screen.getByRole("button", { name: "색상: 빨강" }));
+  expect(value().objects.slice(0, 2).map((object) => object.color)).toEqual(["#ef4444", "#ef4444"]);
+  expect(value().objects[3]).toEqual(initial.objects[3]); expect(editor.snapshot.selection).toEqual(selection);
+  expect(commits).toHaveBeenCalledOnce();
+  fireEvent.click(screen.getByRole("button", { name: "색상: 빨강" })); expect(commits).toHaveBeenCalledOnce();
+  fireEvent.click(screen.getByRole("button", { name: "실행 취소" })); expect(value()).toEqual(initial);
+  expect(editor.snapshot.selection).toEqual(selection);
+  act(() => { editor.dispatch({ type: "selection.set", objectIds: ["image"] }); });
+  expect(screen.queryByRole("button", { name: "스타일" })).toBeNull();
+});
+
+test("text font size, bold and alignment render identically in display and native editing", () => {
+  const { container, value, commits } = setup(populated);
+  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  const font = screen.getByRole("textbox", { name: "글자 크기" });
+  fireEvent.change(font, { target: { value: "48" } });
+  expect(value().objects[0]!.fontSize).toBe(24); expect(commits).not.toHaveBeenCalled();
+  fireEvent.submit(font.closest("form")!);
+  fireEvent.click(screen.getByRole("button", { name: "굵게" }));
+  fireEvent.click(screen.getByRole("button", { name: "가운데 정렬" }));
+  expect(value().objects[0]).toMatchObject({ fontSize: 48, fontWeight: 700, textAlign: "center" });
+  expect(commits).toHaveBeenCalledTimes(3);
+  const display = container.querySelector("foreignObject > div") as HTMLElement;
+  expect(display.style.fontSize).toBe("48px"); expect(display.style.fontWeight).toBe("700"); expect(display.style.textAlign).toBe("center");
+  fireEvent.keyDown(screen.getByRole("dialog", { name: "스타일" }), { key: "Escape" });
+  fireEvent.doubleClick(container.querySelector('[data-canvas-object="a"]')!);
+  const input = screen.getByRole("textbox", { name: "Canvas text" }) as HTMLTextAreaElement;
+  expect(input.style.fontSize).toBe(display.style.fontSize); expect(input.style.fontWeight).toBe("700"); expect(input.style.textAlign).toBe("center");
+  fireEvent.change(input, { target: { value: "Updated" } });
+  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  expect(value().objects[0]!.label).toBe("Updated"); expect(commits).toHaveBeenCalledTimes(4);
+  fireEvent.click(screen.getByRole("button", { name: "굵게" }));
+  expect(value().objects[0]).toMatchObject({ label: "Updated", fontWeight: 400 });
+});
+
+test("shape outlines and path widths render without replacing geometry or primary selection", () => {
+  const path = { id: "p", kind: "path", label: "Line", color: "black", strokeWidth: 3, points: [{ x: 0, y: 0 }, { x: 1, y: 1 }], x: 100, y: 400, width: 100, height: 80 } as const;
+  const { container, editor, value } = setup({ ...populated, objects: [...populated.objects, path] });
+  pick(container, "b");
+  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  fireEvent.click(screen.getByRole("button", { name: "테두리 색: 빨강" }));
+  expect(value().objects[1]).toMatchObject({ strokeColor: "#ef4444", strokeWidth: 2 });
+  expect(container.querySelector('rect[stroke="#ef4444"]')?.getAttribute("stroke-width")).toBe("2");
+  act(() => { editor.dispatch({ type: "selection.set", objectIds: ["b", "p"], primaryKey: "b" }); });
+  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  const width = screen.getByRole("textbox", { name: "선 굵기" });
+  expect((width as HTMLInputElement).placeholder).toBe("혼합");
+  fireEvent.change(width, { target: { value: "8" } }); fireEvent.submit(width.closest("form")!);
+  expect(value().objects[3]).toEqual({ ...path, strokeWidth: 8 });
+  expect(container.querySelector("polyline")?.getAttribute("stroke-width")).toBe("8");
+  expect(editor.snapshot.selection).toMatchObject({ keys: ["b", "p"], primaryKey: "b" });
+});
+
+test("invalid style and cancelled field drafts do not create partial state or history", () => {
+  const { value, editor, commits } = setup(populated);
+  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  const field = screen.getByRole("textbox", { name: "글자 크기" });
+  fireEvent.change(field, { target: { value: "-1" } }); fireEvent.submit(field.closest("form")!);
+  expect(screen.getByRole("alert")).toBeTruthy(); expect(value()).toEqual(populated); expect(commits).not.toHaveBeenCalled();
+  fireEvent.change(field, { target: { value: "99" } }); fireEvent.keyDown(field, { key: "Escape" });
+  expect(screen.queryByRole("dialog", { name: "스타일" })).toBeNull();
+  expect(editor.snapshot.canUndo).toBe(false); expect(value()).toEqual(populated);
+});
+
+test("opening style cancels a resize preview and stale pointer release cannot overwrite a style", () => {
+  const { container, value, commits } = setup(populated);
+  const handle = container.querySelector('[data-resize-edge="se"]')!;
+  fireEvent.pointerDown(handle, event(100, 100)); fireEvent.pointerMove(window, event(140, 140));
+  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  fireEvent.click(screen.getByRole("button", { name: "색상: 빨강" }));
+  fireEvent.pointerUp(window, event(150, 150));
+  expect(value().objects[0]).toEqual({ ...populated.objects[0], color: "#ef4444" }); expect(commits).toHaveBeenCalledOnce();
+});
+
+test.each(["rectangle", "ellipse", "sticky-note"] as const)("%s edits inside the same body box, retains its fill and shares draft/IME/history behavior", (kind) => {
+  const object = { ...populated.objects[1]!, kind, label: "기존 본문", textColor: "purple", fontSize: 28, fontWeight: 700 as const, textAlign: "right" as const };
+  const { container, svg, editor, value, commits } = setup({ ...populated, objects: [populated.objects[0]!, object] });
+  act(() => { editor.dispatch({ type: "selection.set", objectIds: ["a", "b"], primaryKey: "b" }); });
+  const target = container.querySelector('[data-canvas-object="b"]')!;
+  const displayed = target.parentElement!.querySelector("[data-canvas-text-box]")!;
+  const bounds = ["x", "y", "width", "height"].map((key) => displayed.getAttribute(key));
+  fireEvent.doubleClick(target);
+  const input = screen.getByRole("textbox", { name: "Canvas text" }) as HTMLTextAreaElement;
+  expect(input.value).toBe(object.label); expect(document.activeElement).toBe(input);
+  expect(["x", "y", "width", "height"].map((key) => input.closest("[data-canvas-text-box]")!.getAttribute(key))).toEqual(bounds);
+  expect(target.parentElement!.querySelector(`${kind === "ellipse" ? "ellipse" : "rect"}[fill="blue"]`)).not.toBeNull();
+  expect(input.style.color).toBe("purple"); expect(input.style.fontSize).toBe("28px"); expect(input.style.fontWeight).toBe("700"); expect(input.style.textAlign).toBe("right");
+  fireEvent.change(input, { target: { value: "한글\n💡" } });
+  fireEvent.keyDown(input, { key: "Enter", metaKey: true, isComposing: true });
+  fireEvent.keyDown(input, { key: "Escape", isComposing: true });
+  expect(screen.getByRole("textbox", { name: "Canvas text" })).toBe(input); expect(commits).not.toHaveBeenCalled();
+  fireEvent.keyDown(input, { key: "Enter", metaKey: true });
+  expect(value().objects[1]).toEqual({ ...object, label: "한글\n💡" }); expect(commits).toHaveBeenCalledOnce();
+  expect(editor.snapshot.selection).toMatchObject({ keys: ["a", "b"], primaryKey: "b" });
+  fireEvent.keyDown(svg, { key: "F2" });
+  fireEvent.change(screen.getByRole("textbox", { name: "Canvas text" }), { target: { value: "버릴 내용" } });
+  fireEvent.keyDown(screen.getByRole("textbox", { name: "Canvas text" }), { key: "Escape" });
+  expect(value().objects[1]!.label).toBe("한글\n💡"); expect(commits).toHaveBeenCalledOnce();
+  act(() => { editor.undo(); }); expect(value().objects[1]).toEqual(object);
+  act(() => { editor.redo(); }); expect(value().objects[1]!.label).toBe("한글\n💡");
+});
+
+test("new sticky notes accept immediate text, use host fill policy and copy through the existing native binding", () => {
+  const { svg, container, value, rerender, editor } = setup();
+  rerender(<CanvasHand editor={editor} creationStyle={{ ...style, stickyNoteColor: "#fff2a8" }} />);
+  fireEvent.click(screen.getByRole("button", { name: "스티커 노트" }));
+  fireEvent.pointerDown(svg, event(40, 50)); fireEvent.pointerUp(svg, event(40, 50));
+  const input = screen.getByRole("textbox", { name: "Canvas text" });
+  expect(value().objects[0]).toMatchObject({ kind: "sticky-note", label: "", color: "#fff2a8", textColor: style.textColor });
+  fireEvent.change(input, { target: { value: "작은 아이디어\n한 장" } }); fireEvent.blur(input);
+  expect(container.querySelectorAll("[data-resize-edge]")).toHaveLength(8);
+  const data = clipboardData(); clipboardEvent(svg, "copy", data);
+  expect(data.getData("text/plain")).toBe("작은 아이디어\n한 장");
+  clipboardEvent(svg, "paste", data);
+  expect(value().objects[1]).toEqual({ ...value().objects[0], id: "object-2", x: 104, y: 124 });
+  fireEvent.click(screen.getByRole("button", { name: "실행 취소" })); expect(value().objects).toHaveLength(1);
+});
+
+test("filled objects expose independent body color without repainting their backgrounds", () => {
+  const { container, editor, value } = setup({ ...populated, objects: [...populated.objects, { ...populated.objects[1]!, id: "note", kind: "sticky-note", textColor: "red" }] });
+  act(() => { editor.dispatch({ type: "selection.set", objectIds: ["b", "note"], primaryKey: "note" }); });
+  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  expect((screen.getByRole("textbox", { name: "글자색" }) as HTMLInputElement).placeholder).toBe("혼합");
+  fireEvent.click(screen.getByRole("button", { name: "글자색: 빨강" }));
+  expect(value().objects[1]).toMatchObject({ textColor: "#ef4444", color: "blue" });
+  expect(value().objects[3]).toMatchObject({ textColor: "#ef4444", color: "blue" });
+  fireEvent.keyDown(screen.getByRole("dialog", { name: "스타일" }), { key: "Escape" });
+  fireEvent.doubleClick(container.querySelector('[data-canvas-object="note"]')!);
+  expect((screen.getByRole("textbox", { name: "Canvas text" }) as HTMLTextAreaElement).style.color).toBe("rgb(239, 68, 68)");
+});
+
+test.each(["", "끝의 빈 줄\n", "줄\n\n"])("body display and native input measure the same terminal line without storing a layout marker: %j", (label) => {
+  const object = { ...populated.objects[1]!, label };
+  const { container, value, commits } = setup({ ...blank, objects: [object] });
+  const rendered = container.querySelector("[data-canvas-text-box]")!.textContent;
+  fireEvent.doubleClick(container.querySelector("[data-canvas-object]")!);
+  const input = screen.getByRole("textbox", { name: "Canvas text" }) as HTMLTextAreaElement;
+  expect(input.previousElementSibling!.textContent).toBe(rendered);
+  expect(input.value).toBe(label);
+  fireEvent.keyDown(input, { key: "Enter", metaKey: true });
+  expect(value().objects[0]).toEqual(object); expect(commits).not.toHaveBeenCalled();
 });

@@ -15,6 +15,7 @@ import planeSelectContractMarkdown from "../../../../packages/json-document-affo
 import resizeContractMarkdown from "../../../../packages/json-document-affordance/docs/resize.md?raw";
 import objectSelectionContractMarkdown from "../../../../packages/json-document-editing/docs/object-selection.md?raw";
 import uiPrimitivesApiMarkdown from "../../../../docs/api-reference/ui-primitives-react.md?raw";
+import uiPopoverContractMarkdown from "../../../../packages/json-document-ui-primitives-react/docs/popover.md?raw";
 import animationApiMarkdown from "../../../../docs/api-reference/animation-react.md?raw";
 import markdownReactApiMarkdown from "../../../../docs/api-reference/markdown-react.md?raw";
 import databaseApiMarkdown from "../../../../docs/api-reference/database.md?raw";
@@ -196,7 +197,7 @@ export const docPages = {
   zodApi: docPage("/docs/api/zod", zodApiMarkdown),
   tanStackTableApi: docPage("/docs/api/tanstack-table", tanStackTableApiMarkdown),
   affordanceApi: docPage("/docs/api/affordance", `${planeSelectContractMarkdown}\n\n${resizeContractMarkdown}\n\n${affordanceApiMarkdown}`),
-  uiPrimitivesApi: docPage("/docs/api/ui-primitives-react", uiPrimitivesApiMarkdown),
+  uiPrimitivesApi: docPage("/docs/api/ui-primitives-react", `${uiPopoverContractMarkdown}\n\n${uiPrimitivesApiMarkdown}`),
   animationApi: docPage("/docs/api/animation-react", animationApiMarkdown),
   markdownReactApi: docPage("/docs/api/markdown-react", markdownReactApiMarkdown),
   databaseApi: docPage("/docs/api/database", databaseApiMarkdown),

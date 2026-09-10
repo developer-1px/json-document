@@ -17,7 +17,7 @@ import type { EditingHistoryOptions } from "./history.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
   assertObjectDocument, planObjectOperation, transformObject,
-  type DocumentObject, type ObjectDocument, type ObjectDraft, type ObjectOperation,
+  type DocumentObject, type ObjectDocument, type ObjectDraft, type ObjectOperation, type ObjectStyle,
 } from "@interactive-os/json-document-object-document";
 export type { DocumentObject, ObjectDocument } from "@interactive-os/json-document-object-document";
 
@@ -70,6 +70,7 @@ export type ObjectIntent =
     }
   | { readonly type: "selection.remove" }
   | { readonly type: "selection.fill"; readonly color: string }
+  | { readonly type: "selection.style"; readonly style: Partial<ObjectStyle> }
   | {
       readonly type: "object.translate";
       readonly objectIds: ReadonlyArray<string>;
@@ -208,6 +209,9 @@ export function createObjectEditor(
     if (selected.length === 0) return failure("selection.empty");
     if (intent.type === "selection.fill") {
       return apply({ type: "fill", objectIds: selected.map((object) => object.id), color: intent.color }, session.snapshot.selection, intent.type);
+    }
+    if (intent.type === "selection.style") {
+      return apply({ type: "style", objectIds: selected.map((object) => object.id), style: intent.style }, session.snapshot.selection, intent.type);
     }
 
     return intent.type === "selection.remove" ? removeSelected(selected.map((object) => object.id)) : failure("object.unsupported-intent");

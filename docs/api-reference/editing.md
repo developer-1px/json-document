@@ -1299,6 +1299,7 @@ type ObjectIntent =
     }
   | { readonly type: "selection.remove" }
   | { readonly type: "selection.fill"; readonly color: string }
+  | { readonly type: "selection.style"; readonly style: Partial<ObjectStyle> }
   | {
       readonly type: "object.translate";
       readonly objectIds: ReadonlyArray<string>;
