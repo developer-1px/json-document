@@ -64,6 +64,8 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "input-controls.tsx",
     "database-view-controls.tsx",
     "controls.tsx",
+    "clipboard-event.ts",
+    "input.ts",
     "keyboard.ts",
     "toolbar.tsx",
     "clipboard.ts",

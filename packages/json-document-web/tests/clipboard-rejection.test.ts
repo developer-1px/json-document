@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createJSONDocument } from "@interactive-os/json-document";
-import { createDocumentEditor } from "@interactive-os/json-document-editing";
+import { createDocumentEditor, type DocumentClipboard } from "@interactive-os/json-document-editing";
 import { createWebClipboardBinding, documentClipboardCodec } from "../src/index.js";
 
 describe("clipboard event ownership", () => {
@@ -28,35 +28,88 @@ describe("clipboard event ownership", () => {
     expect(preventDefault).not.toHaveBeenCalled();
   });
 
-  it.each(["structured", "text"])("EG-CUT / failed %s write does not invoke removal", (failedWrite) => {
+  it.each([
+    { mode: "codec", stage: "encode", index: 0 },
+    { mode: "codec", stage: "write", index: 0 },
+    { mode: "codec", stage: "write", index: 1 },
+    { mode: "representations", stage: "encode", index: 0 },
+    { mode: "representations", stage: "encode", index: 1 },
+    { mode: "representations", stage: "write", index: 0 },
+    { mode: "representations", stage: "write", index: 1 },
+    { mode: "representations", stage: "write", index: 2 },
+  ])("EG-CUT / failed $mode $stage at $index cancels native Cut without removal", ({ mode, stage, index }) => {
     const document = createJSONDocument({ blocks: payload.blocks });
     const editor = createDocumentEditor(document);
     const before = structuredClone(editor.snapshot);
     const remove = vi.fn(() => editor.cut()?.result ?? { ok: false, code: "selection.empty" });
-    const binding = createWebClipboardBinding({ codec: documentClipboardCodec, read: () => editor.copy(), cut: remove,
+    const preventDefault = vi.fn();
+    const formats = mode === "codec" ? [payload.type, "text/plain"] : [payload.type, "text/html", "text/plain"];
+    const attempted: string[] = [];
+    const encode = (format: string, clipboard: DocumentClipboard) => {
+      if (stage === "encode" && format === formats[index]) {
+        attempted.push(format);
+        throw new Error("Clipboard encode refused");
+      }
+      return format === payload.type ? documentClipboardCodec.encode(clipboard) : clipboard.text;
+    };
+    const binding = createWebClipboardBinding({
+      codec: { ...documentClipboardCodec, encode: (clipboard: DocumentClipboard) => encode(payload.type, clipboard) },
+      ...(mode === "representations" ? { representations: formats.map(mimeType => ({
+        mimeType, encode: (clipboard: DocumentClipboard) => encode(mimeType, clipboard), decode: () => null,
+      })) } : {}),
+      read: () => editor.copy(), cut: remove,
       paste: (clipboard) => editor.dispatch({ type: "clipboard.paste", clipboard }),
     });
     const published: unknown[] = [];
     const release = editor.subscribe((snapshot) => published.push(snapshot));
     const written = new Map<string, string>();
-    const preventDefault = vi.fn();
     try {
       const result = binding.cut({
         clipboardData: { types: [], getData: () => "", setData(format, data) {
-          if (format === (failedWrite === "structured" ? payload.type : "text/plain")) throw new Error("Clipboard write refused");
+          attempted.push(format);
+          if (stage === "write" && format === formats[index]) throw new Error("Clipboard write refused");
           written.set(format, data);
         } },
         preventDefault,
       });
-      expect(result).toMatchObject({ ok: false, code: "clipboard.unavailable" });
+      expect(result).toEqual({ ok: false, code: "clipboard.unavailable", reason: `Clipboard ${stage} refused` });
+      expect(preventDefault).toHaveBeenCalledOnce();
+      expect(attempted).toEqual(formats.slice(0, index + 1));
       expect(remove).not.toHaveBeenCalled();
       expect(preventDefault).toHaveBeenCalledOnce();
       expect(document.value).toEqual(before.value);
       expect(editor.snapshot).toMatchObject(before);
       expect(published).toEqual([]);
       // A preceding clipboard representation can remain written: this is not an OS transaction.
-      expect(written.size).toBe(failedWrite === "structured" ? 0 : 1);
+      expect([...written.keys()]).toEqual(formats.slice(0, index));
     } finally { release(); }
+  });
+
+  it.each(["unsupported", "unavailable", "empty"] as const)("reports %s Cut with ownership independent of readiness", (state) => {
+    const preventDefault = vi.fn();
+    const remove = vi.fn(() => ({ ok: true }));
+    const setData = vi.fn();
+    const binding = createWebClipboardBinding({ codec: documentClipboardCodec,
+      read: () => state === "empty" ? null : payload,
+      ...(state === "unsupported" ? {} : { cut: remove }), paste: () => ({ ok: true }),
+    });
+    expect(binding.cut({ clipboardData: state === "unavailable" ? null : { types: [], getData: () => "", setData }, preventDefault }))
+      .toEqual({ ok: false, code: `clipboard.${state}` });
+    expect(preventDefault).toHaveBeenCalledTimes(state === "unsupported" ? 0 : 1);
+    expect(setData).not.toHaveBeenCalled();
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it("leaves failed Copy unclaimed even when Cut is supported", () => {
+    const preventDefault = vi.fn();
+    const remove = vi.fn(() => ({ ok: true }));
+    const binding = createWebClipboardBinding({ codec: documentClipboardCodec, read: () => payload,
+      cut: remove, paste: () => ({ ok: true }),
+    });
+    expect(binding.copy({ clipboardData: { types: [], getData: () => "", setData() { throw new Error("Clipboard write refused"); } }, preventDefault }))
+      .toMatchObject({ ok: false, code: "clipboard.unavailable" });
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(remove).not.toHaveBeenCalled();
   });
 
   it("EG-CUT / rejected removal keeps the captured clipboard and document unchanged", () => {

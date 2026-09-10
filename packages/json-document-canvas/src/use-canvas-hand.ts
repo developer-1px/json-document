@@ -3,7 +3,7 @@ import { commitAffordance, createGestureSession, createPlaneSelectProfile, resiz
 import { assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, projectObjectText, readObjectStyle, transformObject, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint, type ObjectStyle } from "@interactive-os/json-document-object-document";
 import type { EditingResult, ObjectEditor, ObjectIntent, ObjectSelection } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { createWebKeyboardAdapter, createWebPointerSession, isWebEditableTarget, projectWebClientPointToSVG, webSVGViewportFromElement } from "@interactive-os/json-document-web";
+import { routeWebClipboardEvent, createWebKeyboardAdapter, createWebPointerSession, isWebEditableTarget, projectWebClientPointToSVG, webSVGViewportFromElement } from "@interactive-os/json-document-web";
 import { createCanvasClipboardBinding } from "./canvas-clipboard.js";
 
 export type CanvasTool = "select" | Exclude<CanvasObjectKind, "image">;
@@ -243,10 +243,11 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   function setStyle(style: Partial<ObjectStyle>) { commitText(); cancel(); return dispatch({ type: "selection.style", style }); }
 
   function handleClipboard(operation: "copy" | "cut" | "paste", event: ClipboardEvent) {
-    if (isWebEditableTarget(event.target)) return;
-    cancelInteraction();
-    setError(null);
-    void clipboard[operation](event);
+    routeWebClipboardEvent(event.currentTarget, event, operation, () => {
+      cancelInteraction();
+      setError(null);
+      void clipboard[operation](event);
+    });
   }
 
   function updateModifiers(event: KeyboardEvent) {

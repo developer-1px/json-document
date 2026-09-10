@@ -1,7 +1,7 @@
 import { ClipboardAdapterLab } from "./ClipboardAdapterLab";
 import { CatalogDemoPage } from "../../../shared/ui/catalog-demo-page";
 
-const connectionCode = `import { createWebClipboardSurface, documentClipboardCodec, isWebEditingHostTarget } from "@interactive-os/json-document-web";
+const connectionCode = `import { createWebClipboardSurface, documentClipboardCodec } from "@interactive-os/json-document-web";
 
 const clipboardSurface = createWebClipboardSurface({
   codec: documentClipboardCodec,
@@ -13,23 +13,13 @@ const clipboardSurface = createWebClipboardSurface({
   onResult: (result) => setAnnouncement(messageFor(result)),
 });
 
-return <section
-  onCopy={(event) => {
-    if (isWebEditingHostTarget(event.currentTarget, event.target)) clipboardSurface.onCopy(event);
-  }}
-  onCut={(event) => {
-    if (isWebEditingHostTarget(event.currentTarget, event.target)) clipboardSurface.onCut(event);
-  }}
-  onPaste={(event) => {
-    if (isWebEditingHostTarget(event.currentTarget, event.target)) clipboardSurface.onPaste(event);
-  }}
-/>;`;
+return <section {...clipboardSurface} />;`;
 
 export function ClipboardAdapterDemoRoute() {
   return (
     <CatalogDemoPage
       connectionCode={{ language: "typescript", source: connectionCode }}
-      connectionDescription="The official clipboard adapter translates native ClipboardEvent into the public copy, cut, and paste doors. The host owns the event target and when native handling remains."
+      connectionDescription="The official clipboard adapter translates native ClipboardEvent into the public copy, cut, and paste doors. The Web surface routes the editing target before preparing content and preserves nested native editors."
       description="Official clipboard adapter. Native ClipboardEvent, text-control input, and modifier keys bind to public editing contracts."
       illustration="clipboard"
       install="npm i @interactive-os/json-document-web"
