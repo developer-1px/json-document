@@ -550,14 +550,19 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   const selectedCell = page.locator('[role="gridcell"][data-selected="true"]').first();
   expect(await selectedCell.evaluate((element) => ({
     backgroundColor: getComputedStyle(element).backgroundColor,
-    borderColor: getComputedStyle(element).borderColor,
+    borderLeftWidth: getComputedStyle(element).borderLeftWidth,
+    borderRightWidth: getComputedStyle(element).borderRightWidth,
+    boxShadow: getComputedStyle(element).boxShadow,
   }))).toEqual({
     backgroundColor: "rgb(255, 255, 255)",
     borderColor: "rgb(229, 231, 235) rgb(229, 231, 235) rgb(216, 209, 197)",
   });
+  await selectedCell.focus();
+  await expect.poll(() => selectedCell.evaluate((element) => getComputedStyle(element).boxShadow))
+    .toBe("rgb(222, 109, 85) 0px 0px 0px 2px inset");
   expect(await page.getByRole("combobox").first().evaluate(controlSnapshot)).toMatchObject({
-    backgroundColor: "rgb(255, 255, 255)",
-    borderColor: "rgb(216, 209, 197)",
+    backgroundColor: "rgba(0, 0, 0, 0)",
+    boxShadow: "none",
   });
 });
 

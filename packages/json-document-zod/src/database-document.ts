@@ -115,12 +115,15 @@ export function databaseDocumentFromZod(
       views: [{
         id: "table",
         name: "All records",
-        type: "table",
-        propertyOrder,
-        propertyVisibility: {},
-        propertyWidths: {},
-        sort: null,
-        filter: null,
+        ownership: "personal",
+        layout: "table",
+        projection: {
+          search: "",
+          filter: { id: "table:root", conjunction: "and", items: [] },
+          sorts: [],
+          groups: [],
+          columns: propertyOrder.map((propertyId) => ({ propertyId, visible: true, width: null, pinned: null })),
+        },
       }],
     },
   };

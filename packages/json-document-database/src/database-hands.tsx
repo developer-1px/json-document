@@ -5,14 +5,9 @@ import { databaseValueFromText } from "@interactive-os/json-document-editing";
 import { Check as CheckControl, Command, ToolbarGroup } from "@interactive-os/json-document-ui-primitives-react";
 import { DatabaseHand, type DatabaseHandCellRenderProps } from "./database-hand.js";
 import { DatabaseProvider, useDatabase, type DatabaseProviderProps } from "./database-context.js";
-import type {
-  DatabaseColumnProjection,
-  DatabaseFilterGroup,
-  DatabaseFilterOperator,
-  DatabaseFilterRule,
-  DatabaseRow,
-  DatabaseViewDocument,
-} from "./contracts.js";
+import { DatabasePropertyControl } from "./database-property-control.js";
+import { DatabaseViewControls } from "./database-view-controls.js";
+import type { DatabaseRow } from "./contracts.js";
 
 export interface DatabaseTableProps<Row extends DatabaseRow> {
   readonly renderCell?: Readonly<Record<string, (props: DatabaseHandCellRenderProps<Row>) => ReactNode>>;
@@ -28,8 +23,8 @@ export function DatabaseTable<Row extends DatabaseRow>(props: DatabaseTableProps
   const presentation = {
     propertyOrder: columns.map((column) => column.propertyId),
     propertyVisibility: Object.fromEntries(columns.map((column) => [column.propertyId, column.visible])),
-    propertyWidths: Object.fromEntries(columns.flatMap((column) => column.width === undefined ? [] : [[column.propertyId, column.width]])),
-    propertyPinned: Object.fromEntries(columns.flatMap((column) => column.pinned === undefined ? [] : [[column.propertyId, column.pinned]])),
+    propertyWidths: Object.fromEntries(columns.flatMap((column) => column.width === null ? [] : [[column.propertyId, column.width]])),
+    propertyPinned: Object.fromEntries(columns.flatMap((column) => column.pinned === null ? [] : [[column.propertyId, column.pinned]])),
   };
   return <div className="jd-database__sheet"><DatabaseHand
     schema={database.resource.schema}
@@ -43,18 +38,7 @@ export function DatabaseTable<Row extends DatabaseRow>(props: DatabaseTableProps
     readOnly={!database.capabilities.update}
     onSelectionChange={database.selectRows}
     onRecordOpen={database.openRow}
-    onRecordsChange={(next) => {
-      const previous = new Map(database.rows.map((row) => [database.resource.getRowId(row), row]));
-      for (const row of next) {
-        const id = database.resource.getRowId(row);
-        const before = previous.get(id);
-        if (before && JSON.stringify(before) !== JSON.stringify(row)) {
-          const patch = Object.fromEntries(Object.entries(row).filter(([key, value]) => !Object.is(before[key], value)));
-          void database.update(id, patch as Partial<Row>);
-          return;
-        }
-      }
-    }}
+    onRecordsChange={(_next, change) => change.updates?.forEach(({ recordId, patch }) => { void database.update(recordId, patch); })}
   />
     {database.capabilities.create ? <Command className="jd-database__append-row" type="button" label="New record" onClick={() => void database.create(database.resource.createDraft())}><Plus aria-hidden="true" size={16} /></Command> : null}
   </div>;
@@ -75,10 +59,6 @@ export function DatabaseViewToolbar() {
   const view = database.view;
   const properties = resourceProperties(database.resource.schema);
   const canConfigure = database.capabilities.configureView && view.ownership !== "locked";
-
-  function projection(next: Partial<DatabaseViewDocument["projection"]>) {
-    database.setView({ ...view, projection: { ...view.projection, ...next } });
-  }
 
   return (
     <ToolbarGroup className="jd-database__toolbar-group" label="Database view">
@@ -101,31 +81,9 @@ export function DatabaseViewToolbar() {
         placeholder="Search records…"
         value={view.projection.search}
         disabled={!canConfigure}
-        onChange={(event) => projection({ search: event.currentTarget.value })}
+        onChange={(event) => database.setView({ ...view, projection: { ...view.projection, search: event.currentTarget.value } })}
       />
-      <FilterBuilder
-        value={view.projection.filter}
-        propertyIds={properties.map((property) => property.id)}
-        disabled={!canConfigure}
-        onChange={(filter) => projection({ filter })}
-      />
-      <SortBuilder
-        value={view.projection.sorts}
-        propertyIds={properties.map((property) => property.id)}
-        disabled={!canConfigure}
-        onChange={(sorts) => projection({ sorts })}
-      />
-      <GroupBuilder
-        propertyId={view.projection.groups[0]?.propertyId ?? ""}
-        propertyIds={properties.map((property) => property.id)}
-        disabled={!canConfigure}
-        onChange={(propertyId) => projection({ groups: propertyId ? [{ propertyId, direction: "ascending" }] : [] })}
-      />
-      <ColumnBuilder
-        columns={view.projection.columns}
-        disabled={!canConfigure}
-        onChange={(columns) => projection({ columns })}
-      />
+      <DatabaseViewControls projection={view.projection} properties={properties} disabled={!canConfigure} onChange={(next) => database.setView({ ...view, projection: next })} />
       {database.capabilities.saveView && view.ownership !== "locked" ? (
         <Command type="button" label="Save view" onClick={() => void database.saveView(view)}><Check aria-hidden="true" size={16} /></Command>
       ) : <span aria-label="Locked view">Locked</span>}
@@ -190,22 +148,7 @@ export function DatabaseRecordPanel() {
           {properties.map((property) => (
             <label key={property.id}>
               <span>{property.name}</span>
-              {property.type === "checkbox" ? (
-                <CheckControl label={property.name} checked={Boolean(draft[property.id] ?? row?.[property.id])} onCheckedChange={(checked) => {
-                  setDraft((value) => ({ ...value, [property.id]: checked }));
-                }} />
-              ) : property.type === "select" ? (
-                <select value={String(draft[property.id] ?? row?.[property.id] ?? "")} onChange={(event) => {
-                  const next = event.currentTarget.value;
-                  setDraft((value) => ({ ...value, [property.id]: next }));
-                }}>
-                  <option value="">Select…</option>{property.options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
-                </select>
-              ) : (
-                <input type={property.type === "number" ? "number" : "text"} value={String(draft[property.id] ?? row?.[property.id] ?? "")} onChange={(event) => {
-                  setDraft((value) => ({ ...value, [property.id]: databaseValueFromText(property, event.currentTarget.value) }));
-                }} />
-              )}
+              <DatabasePropertyControl property={property} value={(draft[property.id] ?? row?.[property.id] ?? "") as string | number | boolean} mode="form" onChange={(next) => setDraft((value) => ({ ...value, [property.id]: next }))} />
               {database.status.fieldErrors?.[property.id] ? <small role="alert">{database.status.fieldErrors[property.id]}</small> : null}
             </label>
           ))}
@@ -238,54 +181,6 @@ export function DatabasePagination() {
   const database = useDatabase();
   if (!database.nextCursor) return null;
   return <Command className="jd-database__more" type="button" onClick={() => void database.loadMore()}>Load more</Command>;
-}
-
-function FilterBuilder(props: { readonly value: DatabaseFilterGroup; readonly propertyIds: ReadonlyArray<string>; readonly disabled: boolean; readonly onChange: (value: DatabaseFilterGroup) => void }) {
-  const rules = props.value.items.filter((item): item is DatabaseFilterRule => "propertyId" in item);
-  return <details><summary aria-label="Filter" title="Filter"><ListFilter aria-hidden="true" size={16} />{rules.length ? <small>{rules.length}</small> : null}</summary><div className="jd-database__column-menu">
-    <label>Match <select disabled={props.disabled} value={props.value.conjunction} onChange={(event) => props.onChange({ ...props.value, conjunction: event.currentTarget.value as "and" | "or" })}><option value="and">all</option><option value="or">any</option></select></label>
-    {rules.map((rule) => <div key={rule.id} className="jd-database__control-row">
-      <select aria-label="Filter property" disabled={props.disabled} value={rule.propertyId} onChange={(event) => props.onChange(replaceRule(props.value, { ...rule, propertyId: event.currentTarget.value }))}>{props.propertyIds.map((id) => <option key={id}>{id}</option>)}</select>
-      <select aria-label="Filter operator" disabled={props.disabled} value={rule.operator} onChange={(event) => props.onChange(replaceRule(props.value, { ...rule, operator: event.currentTarget.value as DatabaseFilterOperator }))}>{["equals", "not-equals", "contains", "greater-than", "less-than", "is-empty"].map((operator) => <option key={operator}>{operator}</option>)}</select>
-      {rule.operator !== "is-empty" ? <input aria-label="Filter value" disabled={props.disabled} value={String(rule.value ?? "")} onChange={(event) => props.onChange(replaceRule(props.value, { ...rule, value: event.currentTarget.value }))} /> : null}
-      <Command type="button" label="Remove filter" onClick={() => props.onChange({ ...props.value, items: props.value.items.filter((item) => item.id !== rule.id) })}><X aria-hidden="true" size={16} /></Command>
-    </div>)}
-    <Command type="button" disabled={props.disabled || props.propertyIds.length === 0} onClick={() => props.onChange({ ...props.value, items: [...props.value.items, { id: crypto.randomUUID(), propertyId: props.propertyIds[0]!, operator: "equals", value: "" }] })}>Add filter</Command>
-  </div></details>;
-}
-
-function SortBuilder(props: { readonly value: DatabaseViewDocument["projection"]["sorts"]; readonly propertyIds: ReadonlyArray<string>; readonly disabled: boolean; readonly onChange: (value: DatabaseViewDocument["projection"]["sorts"]) => void }) {
-  return <details><summary aria-label="Sort" title="Sort"><ArrowUpDown aria-hidden="true" size={16} />{props.value.length ? <small>{props.value.length}</small> : null}</summary><div className="jd-database__column-menu">
-    {props.value.map((sort, index) => <div key={`${sort.propertyId}:${index}`} className="jd-database__control-row"><select aria-label={`Sort property ${index + 1}`} value={sort.propertyId} onChange={(event) => props.onChange(props.value.map((item, position) => position === index ? { ...item, propertyId: event.currentTarget.value } : item))}>{props.propertyIds.map((id) => <option key={id}>{id}</option>)}</select><select aria-label={`Sort direction ${index + 1}`} value={sort.direction} onChange={(event) => props.onChange(props.value.map((item, position) => position === index ? { ...item, direction: event.currentTarget.value as "ascending" | "descending" } : item))}><option value="ascending">ascending</option><option value="descending">descending</option></select><Command type="button" label={`Remove sort ${index + 1}`} onClick={() => props.onChange(props.value.filter((_, position) => position !== index))}><X aria-hidden="true" size={16} /></Command></div>)}
-    <Command type="button" disabled={props.disabled || props.propertyIds.length === 0} onClick={() => props.onChange([...props.value, { propertyId: props.propertyIds[0]!, direction: "ascending" }])}>Add sort</Command>
-  </div></details>;
-}
-
-function GroupBuilder(props: { readonly propertyId: string; readonly propertyIds: ReadonlyArray<string>; readonly disabled: boolean; readonly onChange: (value: string) => void }) {
-  return <label><span className="jd-database__sr-only">Group</span><select aria-label="Group property" disabled={props.disabled} value={props.propertyId} onChange={(event) => props.onChange(event.currentTarget.value)}><option value="">Group</option>{props.propertyIds.map((id) => <option key={id}>{id}</option>)}</select></label>;
-}
-
-function ColumnBuilder(props: { readonly columns: ReadonlyArray<DatabaseColumnProjection>; readonly disabled: boolean; readonly onChange: (value: ReadonlyArray<DatabaseColumnProjection>) => void }) {
-  return <details><summary aria-label="Columns" title="Columns"><Columns3 aria-hidden="true" size={16} /></summary><div className="jd-database__column-menu">{props.columns.map((column, index) => <div key={column.propertyId} className="jd-database__control-row"><label><CheckControl label={column.propertyId} checked={column.visible} disabled={props.disabled} onCheckedChange={(checked) => props.onChange(props.columns.map((item) => item.propertyId === column.propertyId ? { ...item, visible: checked } : item))} />{column.propertyId}</label><input aria-label={`Width ${column.propertyId}`} type="number" min="80" max="600" value={column.width ?? 160} onChange={(event) => props.onChange(props.columns.map((item) => item.propertyId === column.propertyId ? { ...item, width: Number(event.currentTarget.value) } : item))} /><Command type="button" disabled={index === 0} label={`Move ${column.propertyId} left`} onClick={() => props.onChange(move(props.columns, index, index - 1))}><ArrowLeft aria-hidden="true" size={16} /></Command><Command type="button" disabled={index === props.columns.length - 1} label={`Move ${column.propertyId} right`} onClick={() => props.onChange(move(props.columns, index, index + 1))}><ArrowRight aria-hidden="true" size={16} /></Command><Command type="button" label={`Pin ${column.propertyId}`} onClick={() => props.onChange(props.columns.map((item) => item.propertyId === column.propertyId ? togglePin(item) : item))}>{column.pinned ? "Unpin" : "Pin"}</Command></div>)}</div></details>;
-}
-
-function togglePin(column: DatabaseColumnProjection): DatabaseColumnProjection {
-  if (column.pinned) {
-    const { pinned: _pinned, ...rest } = column;
-    return rest;
-  }
-  return { ...column, pinned: "start" };
-}
-
-function replaceRule(group: DatabaseFilterGroup, rule: DatabaseFilterRule): DatabaseFilterGroup {
-  return { ...group, items: group.items.map((item) => item.id === rule.id ? rule : item) };
-}
-
-function move<Value>(values: ReadonlyArray<Value>, from: number, to: number): ReadonlyArray<Value> {
-  const next = [...values];
-  const [value] = next.splice(from, 1);
-  if (value !== undefined) next.splice(to, 0, value);
-  return next;
 }
 
 function resourceProperties(schema: Parameters<typeof databaseDocumentFromZod>[0]) {

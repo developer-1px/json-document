@@ -18,11 +18,13 @@ import {
   type DatabaseClipboard,
   type DatabaseEditor,
   type DatabaseFilter,
+  type DatabaseFilterGroup,
   type DatabaseProperty,
   type DatabaseRecord,
   type DatabaseSelection,
   type DatabaseSort,
   type DatabaseTableView,
+  type DatabaseTopology,
   type EditingResult,
   type EditingSnapshot,
 } from "@interactive-os/json-document-editing";
@@ -38,14 +40,17 @@ import {
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import { Check, Command, GridCell, Toolbar, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 import type { InteractionHandleEvent } from "@interactive-os/json-document-affordance";
+import { DatabasePropertyControl } from "./database-property-control.js";
 import type { ZodType } from "zod/v4";
 import type { JSONValue } from "@interactive-os/json-document";
-import { ArrowDown, ArrowUp, Columns3, Minus, Plus, Redo2, Undo2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Minus, Plus, Redo2, Undo2 } from "lucide-react";
+import { DatabaseViewControls } from "./database-view-controls.js";
 
 export interface DatabaseHandChange<Row> {
   readonly records: ReadonlyArray<Row>;
   readonly origin: "cell.commit" | "record.add" | "record.delete" | "undo" | "redo";
   readonly revision: number;
+  readonly updates?: ReadonlyArray<{ readonly recordId: string; readonly patch: Partial<Row> }>;
 }
 
 export interface DatabaseHandFeatures {
@@ -149,6 +154,7 @@ export interface DatabaseHandDocumentChange {
 }
 
 type DatabaseHandOrigin = DatabaseHandChange<Record<string, unknown>>["origin"] | "view.configure";
+type DatabaseHandEmission<Row> = Pick<DatabaseHandChange<Row>, "origin" | "updates">;
 
 export type DatabaseHandProps<Row extends Record<string, unknown>> = DatabaseHandCommonProps<Row> & (
   | DatabaseHandEditorSource
@@ -201,10 +207,10 @@ function DatabaseHandDocumentProfile<Row extends Record<string, unknown>>(props:
     if (lastEmitted.current === fingerprint) { lastEmitted.current = null; return; }
     if (open.fingerprint !== fingerprint) setOpen({ editor: createDatabaseEditor(props.document), fingerprint });
   }, [fingerprint, open.fingerprint, props.document]);
-  return <DatabaseTableSurface {...props} directEditing editor={open.editor} viewId={props.viewId} features={{ ...defaultFeatures, ...props.features }} labels={{ ...defaultLabels, ...props.labels }} onEmit={(origin) => {
+  return <DatabaseTableSurface {...props} directEditing editor={open.editor} viewId={props.viewId} features={{ ...defaultFeatures, ...props.features }} labels={{ ...defaultLabels, ...props.labels }} onEmit={(change) => {
     const document = open.editor.snapshot.value as DatabaseDocument;
     lastEmitted.current = recordsFingerprint([document]);
-    props.onDocumentChange(document, { origin, revision: open.editor.snapshot.revision });
+    props.onDocumentChange(document, { origin: change.origin, revision: open.editor.snapshot.revision });
   }} />;
 }
 
@@ -238,14 +244,14 @@ function DatabaseHandLegacyProfile<Row extends Record<string, unknown>>(props: D
       viewId={(open.editor.snapshot.value as DatabaseDocument).views[0]!.id}
       features={features}
       labels={labels}
-      onEmit={(origin) => {
-        if (origin === "view.configure") return;
+      onEmit={(change) => {
+        if (change.origin === "view.configure") return;
         const records = hostRecords<Row>(open.editor.snapshot.value as DatabaseDocument);
         const fingerprint = recordsFingerprint([records, props.presentation]);
         lastEmitted.current = fingerprint;
         props.onRecordsChange?.(records, {
           records,
-          origin,
+          ...change,
           revision: open.editor.snapshot.revision,
         });
       }}
@@ -259,13 +265,12 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
   readonly directEditing?: boolean;
   readonly features: Required<DatabaseHandFeatures>;
   readonly labels: Required<DatabaseHandLabels>;
-  readonly onEmit: (origin: DatabaseHandOrigin) => void;
+  readonly onEmit: (change: DatabaseHandEmission<Row> | { readonly origin: "view.configure" }) => void;
 }) {
   const { editor } = props;
   const [announcement, setAnnouncement] = useState("");
   const [lastResult, setLastResult] = useState<EditingResult<DatabaseSelection> | null>(null);
   const [nativeTextLease, setNativeTextLease] = useState<DatabaseHandContext["nativeTextLease"]>(null);
-  const [filterPropertyId, setFilterPropertyId] = useState("");
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editingInitialValue, setEditingInitialValue] = useState<string>();
   const [headerMenu, setHeaderMenu] = useState<{ readonly propertyId: string; readonly x: number; readonly y: number } | null>(null);
@@ -275,12 +280,19 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
   const snapshot = useEditingSnapshot(editor);
   const document = snapshot.value as DatabaseDocument;
   const view = document.views.find((candidate) => candidate.id === props.viewId) ?? document.views[0]!;
+  const columns = view.projection.columns;
+  const propertyOrder = columns.map((column) => column.propertyId);
+  const propertyVisibility = Object.fromEntries(columns.map((column) => [column.propertyId, column.visible]));
+  const propertyWidths = Object.fromEntries(columns.flatMap((column) => column.width === null ? [] : [[column.propertyId, column.width]]));
+  const propertyPinned = Object.fromEntries(columns.flatMap((column) => column.pinned === null ? [] : [[column.propertyId, column.pinned]]));
+  const sort = view.projection.sorts[0] ?? null;
+  const filter = firstFilter(view.projection.filter);
   const topology = editor.tableTopology(view.id);
-  const properties = view.propertyOrder
-    .filter((id) => view.propertyVisibility[id] !== false)
+  const properties = propertyOrder
+    .filter((id) => propertyVisibility[id] !== false)
     .map((id) => document.schema.properties.find((property) => property.id === id)!)
     .filter(Boolean);
-  const hiddenProperties = document.schema.properties.filter((property) => view.propertyVisibility[property.id] === false);
+  const hiddenProperties = document.schema.properties.filter((property) => propertyVisibility[property.id] === false);
   const records = topology.recordIds.map((id) => document.records.find((record) => record.id === id)!).filter(Boolean);
   const focus = snapshot.selection.focus;
   const editing = useEditing<DatabaseSelection>({
@@ -331,14 +343,14 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
     return result;
   }
 
-  function emit(origin: DatabaseHandChange<Row>["origin"], message: string) {
+  function emit(change: DatabaseHandEmission<Row>, message: string) {
     announce(message);
-    props.onEmit(origin);
+    props.onEmit(change);
   }
 
   function commit(recordId: string, propertyId: string, value: string | number | boolean) {
     const result = observe(editor.dispatch({ type: "cell.commit", recordId, propertyId, value }));
-    if (result.ok) emit("cell.commit", `${propertyId} saved`);
+    if (result.ok) emit({ origin: "cell.commit", updates: [{ recordId, patch: { [propertyId]: value } as Partial<Row> }] }, `${propertyId} saved`);
     else announce(result.code);
   }
 
@@ -359,19 +371,19 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
       recordId: id,
       ...(values === undefined ? {} : { values }),
     }));
-    if (result.ok) emit("record.add", "Record added");
+    if (result.ok) emit({ origin: "record.add" }, "Record added");
   }
 
   function deleteSelected() {
     const recordId = snapshot.selection.focus?.recordId;
     if (!recordId) return announce("Select a record first");
     const result = observe(editor.dispatch({ type: "record.delete", recordId }));
-    if (result.ok) emit("record.delete", "Record deleted");
+    if (result.ok) emit({ origin: "record.delete" }, "Record deleted");
   }
 
   function history(kind: "undo" | "redo") {
     const result = observe(editor[kind]());
-    if (result.ok) emit(kind, kind === "undo" ? "Undone" : "Redone");
+    if (result.ok) emit({ origin: kind }, kind === "undo" ? "Undone" : "Redone");
   }
 
   function configure(input: {
@@ -381,8 +393,20 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
     readonly propertyOrder?: ReadonlyArray<string>;
     readonly propertyWidths?: Readonly<Record<string, number>>;
   }) {
-    const result = observe(editor.dispatch({ type: "view.configure", viewId: view.id, ...input }));
-    if (result.ok) props.onEmit("view.configure");
+    const nextSort = input.sort === undefined ? view.projection.sorts : input.sort === null ? [] : [input.sort];
+    const nextFilter = input.filter === undefined ? view.projection.filter : filterGroup(view.id, input.filter);
+    const nextColumns = (input.propertyOrder ?? propertyOrder).map((propertyId) => {
+      const current = columns.find((column) => column.propertyId === propertyId);
+      const width = input.propertyWidths?.[propertyId] ?? current?.width;
+      return {
+        propertyId,
+        visible: input.propertyVisibility?.[propertyId] ?? current?.visible ?? true,
+        width: width ?? null,
+        pinned: current?.pinned ?? null,
+      };
+    });
+    const result = observe(editor.dispatch({ type: "view.configure", viewId: view.id, projection: { ...view.projection, sorts: nextSort, filter: nextFilter, columns: nextColumns } }));
+    if (result.ok) props.onEmit({ origin: "view.configure" });
     announce(result.ok ? "View updated" : result.code);
   }
 
@@ -453,7 +477,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
         return;
       }
       if (result.operation === "copy") announce("Selection copied");
-      if (result.operation === "paste") emit("cell.commit", "Selection pasted");
+      if (result.operation === "paste") emit({ origin: "cell.commit", updates: clipboardUpdates<Row>(result.payload, topology, snapshot.selection.focus) }, "Selection pasted");
     },
   });
 
@@ -474,35 +498,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
             <Command type="button" label={props.labels.redo} disabled={!snapshot.canRedo} onClick={() => history("redo")}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
         ) : null}
-        {props.features.filter ? (
-          <FilterControl
-            properties={document.schema.properties}
-            propertyId={filterPropertyId}
-            filter={view.filter}
-            labels={props.labels}
-            onProperty={setFilterPropertyId}
-            onFilter={(filter) => configure({ filter })}
-          />
-        ) : null}
-        {props.features.columns ? (
-          <details className="jd-database__columns">
-            <summary aria-label={props.labels.columns} title={props.labels.columns}><Columns3 aria-hidden="true" size={16} />{hiddenProperties.length > 0 ? <small>{hiddenProperties.length}</small> : null}</summary>
-            <div className="jd-database__column-menu">
-              {document.schema.properties.map((property) => (
-                <label key={property.id}>
-                  <Check
-                    label={property.name}
-                    checked={view.propertyVisibility[property.id] !== false}
-                    onCheckedChange={(checked) => configure({
-                      propertyVisibility: { ...view.propertyVisibility, [property.id]: checked },
-                    })}
-                  />
-                  {property.name}
-                </label>
-              ))}
-            </div>
-          </details>
-        ) : null}
+        {props.features.filter || props.features.columns ? <DatabaseViewControls projection={view.projection} properties={document.schema.properties} disabled={props.readOnly ?? false} filter={props.features.filter} sort={false} group={false} columns={props.features.columns} onChange={(projection) => { const result = observe(editor.dispatch({ type: "view.configure", viewId: view.id, projection })); if (result.ok) props.onEmit({ origin: "view.configure" }); announce(result.ok ? "View updated" : result.code); }} /> : null}
         {props.toolbar}
         {props.renderToolbar?.(context)}
         {announcement ? <output className="jd-database__announcement" aria-live="polite">{announcement}</output> : null}
@@ -524,13 +520,13 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                   key={property.id}
                   scope="col"
                   aria-label={`${property.name} ${property.type}`}
-                  aria-sort={ariaSort(view.sort, property.id)}
+                  aria-sort={ariaSort(sort, property.id)}
                   draggable
                   onDragStart={() => setDraggedPropertyId(property.id)}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={() => {
                     if (!draggedPropertyId || draggedPropertyId === property.id) return;
-                    const order = [...view.propertyOrder];
+                    const order = [...propertyOrder];
                     const from = order.indexOf(draggedPropertyId);
                     const to = order.indexOf(property.id);
                     if (from < 0 || to < 0) return;
@@ -543,23 +539,23 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                     event.preventDefault();
                     setHeaderMenu({ propertyId: property.id, x: event.clientX, y: event.clientY });
                   }}
-                  style={{ ...columnStyle(property.id, properties, view.propertyWidths, props.presentation?.propertyPinned), position: "relative" }}
-                  data-pinned={props.presentation?.propertyPinned?.[property.id]}
+                  style={{ ...columnStyle(property.id, properties, propertyWidths, propertyPinned), position: "relative" }}
+                  data-pinned={propertyPinned[property.id]}
                 >
-                  <Command type="button" onClick={() => configure({ sort: nextDatabasePropertySort(view.sort, property.id) })}>
+                  <Command type="button" onClick={() => configure({ sort: nextDatabasePropertySort(sort, property.id) })}>
                     <span>{property.name}</span>
-                    <small>{property.type}{sortMark(view.sort, property.id)}</small>
+                    <small>{property.type}{sortMark(sort, property.id)}</small>
                   </Command>
                   <DatabaseColumnResizeHandle
                     label={`${property.name} column width`}
                     propertyId={property.id}
-                    width={view.propertyWidths[property.id] ?? 160}
-                    onCommit={(width) => configure({ propertyWidths: { ...view.propertyWidths, [property.id]: width } })}
+                    width={propertyWidths[property.id] ?? 160}
+                    onCommit={(width) => configure({ propertyWidths: { ...propertyWidths, [property.id]: width } })}
                   />
                 </th>
               ))}
               {hiddenProperties.map((property) => (
-                <th key={property.id} scope="col" aria-label={`Show ${property.name}`} onClick={() => configure({ propertyVisibility: { ...view.propertyVisibility, [property.id]: true } })}>·</th>
+                <th key={property.id} scope="col" aria-label={`Show ${property.name}`} onClick={() => configure({ propertyVisibility: { ...propertyVisibility, [property.id]: true } })}>·</th>
               ))}
               <th scope="col">Row</th>
             </tr>
@@ -591,8 +587,8 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                         setEditingKey(key);
                         requestAnimationFrame(() => findWebGridCell<HTMLElement>(tableRef.current, point)?.querySelector<HTMLElement>("input, select")?.focus());
                       }}
-                      style={columnStyle(property.id, properties, view.propertyWidths, props.presentation?.propertyPinned)}
-                      data-pinned={props.presentation?.propertyPinned?.[property.id]}
+                      style={columnStyle(property.id, properties, propertyWidths, propertyPinned)}
+                      data-pinned={propertyPinned[property.id]}
                     >
                       {custom ? custom({
                         property,
@@ -633,9 +629,9 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
           const property = document.schema.properties.find((candidate) => candidate.id === headerMenu.propertyId);
           if (!property) return null;
           return <div role="menu" aria-label={`${property.name} property`} className="jd-database__column-menu" style={{ position: "fixed", left: headerMenu.x, top: headerMenu.y }}>
-            <Command type="button" role="menuitem" onClick={() => { configure({ propertyVisibility: { ...view.propertyVisibility, [property.id]: false } }); setHeaderMenu(null); }}>Hide</Command>
-            {filterItems(property).map((item) => <Command key={String(item.value)} type="button" role="menuitem" onClick={() => { configure({ filter: { propertyId: property.id, operator: "equals", value: item.value } }); setHeaderMenu(null); }}>Filter {item.label}</Command>)}
-            {view.filter?.propertyId === property.id ? <Command type="button" role="menuitem" onClick={() => { configure({ filter: null }); setHeaderMenu(null); }}>Clear filter</Command> : null}
+            <Command type="button" role="menuitem" onClick={() => { configure({ propertyVisibility: { ...propertyVisibility, [property.id]: false } }); setHeaderMenu(null); }}>Hide</Command>
+            {filterItems(property).map((item) => <Command key={String(item.value)} type="button" role="menuitem" onClick={() => { configure({ filter: { id: `${view.id}:filter`, propertyId: property.id, operator: "equals", value: item.value } }); setHeaderMenu(null); }}>Filter {item.label}</Command>)}
+            {filter?.propertyId === property.id ? <Command type="button" role="menuitem" onClick={() => { configure({ filter: null }); setHeaderMenu(null); }}>Clear filter</Command> : null}
           </div>;
         })() : null}
       </div>
@@ -704,28 +700,21 @@ function DefaultCell(props: {
     requestAnimationFrame(() => cell?.focus());
   }
   if (props.readOnly || (!props.editing && !props.directEditing)) return <span className="jd-database__readonly">{String(value)}</span>;
-  if (props.property.type === "checkbox") {
-    return <input key={String(value)} type="checkbox" aria-label={label} defaultChecked={Boolean(value)} onKeyDown={cancel} onChange={(event) => finish(event.currentTarget.checked, event.currentTarget)} onBlur={props.finish} />;
-  }
-  if (props.property.type === "select") {
-    return (
-      <select key={String(value)} aria-label={label} defaultValue={String(value)} onKeyDown={cancel} onChange={(event) => finish(event.currentTarget.value, event.currentTarget)} onBlur={props.finish}>
-        {props.property.options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
-      </select>
-    );
-  }
   return (
-    <input
+    <DatabasePropertyControl
       key={String(value)}
-      type={props.property.type === "number" ? "number" : "text"}
-      aria-label={label}
-      defaultValue={props.initialValue ?? String(value)}
+      property={props.property}
+      value={value}
+      label={label}
+      mode="cell"
+      {...(props.initialValue === undefined ? {} : { initialValue: props.initialValue })}
       autoFocus={props.editing}
       onFocus={() => (props.property.type === "title" || props.property.type === "text") && props.onLease(false)}
       onCompositionStart={() => props.onLease(true)}
       onCompositionEnd={() => props.onLease(false)}
-      onBlur={(event) => {
-        if (props.directEditing) props.commit(databaseValueFromText(props.property, event.currentTarget.value));
+      onChange={(next) => finish(next, document.activeElement as HTMLInputElement | HTMLSelectElement)}
+      onBlur={(next) => {
+        if (props.directEditing) props.commit(next);
         props.onLease(null);
         props.finish();
       }}
@@ -733,62 +722,13 @@ function DefaultCell(props: {
         cancel(event);
         if (event.key === "Enter" || event.key === "Tab") {
           event.preventDefault();
-          finish(databaseValueFromText(props.property, event.currentTarget.value), event.currentTarget);
+          const next = event.currentTarget instanceof HTMLInputElement && event.currentTarget.type === "checkbox"
+            ? event.currentTarget.checked
+            : databaseValueFromText(props.property, event.currentTarget.value);
+          finish(next, event.currentTarget);
           props.moveAfterCommit(event.key === "Tab" ? (event.shiftKey ? "left" : "right") : (event.shiftKey ? "up" : "down"));
         }
       }}
-    />
-  );
-}
-
-function FilterControl(props: {
-  readonly properties: ReadonlyArray<DatabaseProperty>;
-  readonly propertyId: string;
-  readonly filter: DatabaseFilter | null;
-  readonly labels: Required<DatabaseHandLabels>;
-  readonly onProperty: (id: string) => void;
-  readonly onFilter: (filter: DatabaseFilter | null) => void;
-}) {
-  const propertyId = props.propertyId || props.filter?.propertyId || props.properties[0]?.id || "";
-  const property = props.properties.find((candidate) => candidate.id === propertyId);
-  const value = props.filter?.propertyId === propertyId ? props.filter.value : "";
-  return (
-    <div className="jd-database__filter">
-      <label>
-        <span className="jd-database__sr-only">{props.labels.filter}</span>
-        <select aria-label="Filter property" value={propertyId} onChange={(event) => props.onProperty(event.currentTarget.value)}>
-          {props.properties.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
-        </select>
-      </label>
-      {property ? <FilterValue property={property} value={value} onChange={(next) => props.onFilter({ propertyId, operator: "equals", value: next })} /> : null}
-      {props.filter ? <Command type="button" label={props.labels.clearFilter} onClick={() => props.onFilter(null)}><X aria-hidden="true" size={16} /></Command> : null}
-    </div>
-  );
-}
-
-function FilterValue(props: { readonly property: DatabaseProperty; readonly value: unknown; readonly onChange: (value: string | number | boolean) => void }) {
-  if (props.property.type === "checkbox") {
-    return (
-      <select aria-label="Filter value" value={String(props.value)} onChange={(event) => props.onChange(databaseValueFromText(props.property, event.currentTarget.value))}>
-        <option value="">Any value</option><option value="true">Checked</option><option value="false">Unchecked</option>
-      </select>
-    );
-  }
-  if (props.property.type === "select") {
-    return (
-      <select aria-label="Filter value" value={String(props.value)} onChange={(event) => props.onChange(event.currentTarget.value)}>
-        <option value="">Any value</option>
-        {props.property.options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
-      </select>
-    );
-  }
-  return (
-    <input
-      aria-label="Filter value"
-      type={props.property.type === "number" ? "number" : "text"}
-      value={String(props.value ?? "")}
-      placeholder="Equals…"
-      onChange={(event) => props.onChange(databaseValueFromText(props.property, event.currentTarget.value))}
     />
   );
 }
@@ -820,18 +760,34 @@ function openDatabase<Row extends Record<string, unknown>>(
   const available = translated.value.schema.properties.map((property) => property.id);
   const order = presentation?.propertyOrder
     ? [...presentation.propertyOrder.filter((id) => available.includes(id)), ...available.filter((id) => !presentation.propertyOrder!.includes(id))]
-    : firstView.propertyOrder;
+    : firstView.projection.columns.map((column) => column.propertyId);
   const value: DatabaseDocument = {
     ...translated.value,
     views: [{
       ...firstView,
-      propertyOrder: order,
-      propertyVisibility: presentation?.propertyVisibility ?? firstView.propertyVisibility,
-      propertyWidths: presentation?.propertyWidths ?? firstView.propertyWidths,
+      projection: {
+        ...firstView.projection,
+        columns: order.map((propertyId) => ({
+          propertyId,
+          visible: presentation?.propertyVisibility?.[propertyId] ?? true,
+          width: presentation?.propertyWidths?.[propertyId] ?? null,
+          pinned: presentation?.propertyPinned?.[propertyId] ?? null,
+        })),
+      },
     }],
   };
   return { ok: true, editor: createDatabaseEditor(value), fingerprint };
 }
+
+function firstFilter(group: DatabaseFilterGroup): DatabaseFilter | null {
+  for (const item of group.items) {
+    const found = isFilter(item) ? item : firstFilter(item);
+    if (found) return found;
+  }
+  return null;
+}
+function isFilter(item: DatabaseFilter | DatabaseFilterGroup): item is DatabaseFilter { return typeof item.propertyId === "string"; }
+function filterGroup(viewId: string, filter: DatabaseFilter | null): DatabaseFilterGroup { return { id: `${viewId}:root`, conjunction: "and", items: filter === null ? [] : [filter] }; }
 
 function hostRecords<Row>(document: DatabaseDocument): ReadonlyArray<Row> {
   return document.records.map((record) => hostRecordFor<Row>(record));
@@ -870,6 +826,19 @@ function databaseClipboardFromText(
     return databaseValueFromText(property, value);
   }));
   return { type: "application/vnd.interactive-os.database+json" as const, cells, text };
+}
+
+function clipboardUpdates<Row>(clipboard: { readonly cells: ReadonlyArray<ReadonlyArray<JSONValue>> }, topology: DatabaseTopology, focus: DatabaseSelection["focus"]): ReadonlyArray<{ readonly recordId: string; readonly patch: Partial<Row> }> {
+  if (focus === null) return [];
+  const rowStart = topology.recordIds.indexOf(focus.recordId);
+  const columnStart = topology.propertyIds.indexOf(focus.propertyId);
+  if (rowStart < 0 || columnStart < 0) return [];
+  return clipboard.cells.flatMap((cells, rowOffset) => {
+    const recordId = topology.recordIds[rowStart + rowOffset];
+    if (recordId === undefined) return [];
+    const patch = Object.fromEntries(cells.flatMap((value, columnOffset) => topology.propertyIds[columnStart + columnOffset] === undefined ? [] : [[topology.propertyIds[columnStart + columnOffset], value]])) as Partial<Row>;
+    return [{ recordId, patch }];
+  });
 }
 
 function arrowDirection(key: string): "up" | "down" | "left" | "right" | null {

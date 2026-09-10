@@ -43,7 +43,7 @@ describe("databaseDocumentFromZod", () => {
       status: "backlog",
       shipped: false,
     });
-    expect(result.value.views[0]?.propertyOrder).toEqual(["title", "owner", "points", "status", "shipped"]);
+    expect(result.value.views[0]?.projection.columns.map((column) => column.propertyId)).toEqual(["title", "owner", "points", "status", "shipped"]);
   });
 
   test("generates record ids when the schema has no id field", () => {

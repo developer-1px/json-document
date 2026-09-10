@@ -1,8 +1,9 @@
 # @interactive-os/json-document-database
 
 Enterprise React Database Hands for existing schemas and CRUD APIs. The host
-owns data, authorization, and business rules; the package owns the interaction
-quality of querying, projecting, editing, and recovering from failures.
+owns data, authorization, and business rules; `@interactive-os/json-document-editing`
+owns the saved-view projection contract, and this package owns the React interaction
+quality of querying, editing, and recovering from failures.
 
 ```tsx
 import { Database, createDatabaseResource, createDatabaseView } from "@interactive-os/json-document-database";
@@ -57,3 +58,11 @@ private surface.
 
 This package does not implement a backend, authentication, authorization
 policy, database migration, formula runtime, or product business rules.
+
+## Saved-view 저장 형태 전환
+
+Saved view는 Editing의 `DatabaseTableView.projection`으로 저장합니다. 기존
+`type/propertyOrder/propertyVisibility/propertyWidths/sort/filter` 형태의 view는
+새 `layout/ownership/projection` 형태로 전환해야 하며 자동 마이그레이션하지 않습니다.
+`projection`은 `search`, `filter` group, `sorts`, `groups`, `columns`를 소유합니다.
+문서의 schema·records와 legacy Zod records 입력은 계속 지원합니다.
