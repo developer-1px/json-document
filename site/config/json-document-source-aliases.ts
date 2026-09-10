@@ -7,6 +7,8 @@ export interface SourceAlias {
 
 export function jsonDocumentSourceAliases(): SourceAlias[] {
   return [
+    { find: "@interactive-os/json-document-web/interaction-recording", replacement: sourceFile("packages/json-document-web/src/interaction-recording-index.ts") },
+    { find: "@interactive-os/json-document-markdown-web/markdown-editor.css", replacement: sourceFile("packages/json-document-markdown-web/src/markdown-editor.css") },
     { find: "@interactive-os/json-document-markdown", replacement: sourceFile("packages/json-document-markdown/src/index.ts") },
     { find: "@interactive-os/json-document-markdown-web", replacement: sourceFile("packages/json-document-markdown-web/src/index.ts") },
     { find: "@interactive-os/json-document-object-document", replacement: sourceFile("packages/json-document-object-document/src/index.ts") },

@@ -59,7 +59,7 @@ export function validateSiteRoutes(routes, fail) {
     if (route.documentIncludes !== undefined && (!Array.isArray(route.documentIncludes) || route.documentIncludes.some((source) => typeof source !== "string" || !/^packages\/[^/]+\/docs\/[^/]+\.md$/.test(source)))) {
       fail(`site route ${route.path} has invalid owner documentation includes.`);
     }
-    if (route.chrome !== undefined && route.chrome !== "app") {
+    if (route.chrome !== undefined && route.chrome !== "app" && route.chrome !== "none") {
       fail(`site route ${route.path} has an invalid chrome.`);
     }
     if (route.relatedDemoLabel !== undefined && (typeof route.relatedDemoLabel !== "string" || route.relatedDemoLabel.trim() === "")) {

@@ -72,6 +72,11 @@ describe("persistent Markdown parsing", () => {
     expect(parser.update(from, from + insert.length, source.slice(from, to)).projection).toEqual(projectMarkdown(source));
   });
 
+  test("inserting a letter immediately before syntax shifts the complete following node", () => {
+    const parser = createMarkdownParser("a**bold**");
+    expect(parser.update(1, 1, "x").projection).toEqual(projectMarkdown("ax**bold**"));
+  });
+
   test("preserves no-op identity and rejects invalid ranges without changing state", () => {
     const parser = createMarkdownParser("A **text**");
     const previous = parser.projection;

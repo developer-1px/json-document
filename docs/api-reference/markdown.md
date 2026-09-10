@@ -20,6 +20,32 @@ interface MarkdownChangedRange {
   readonly newTo: number;
 }
 ```
+## `MarkdownNode`
+
+```ts
+interface MarkdownNode {
+  readonly kind: MarkdownNodeKind;
+  readonly from: number;
+  readonly to: number;
+  readonly children?: ReadonlyArray<MarkdownNode>;
+  readonly value?: string;
+  readonly depth?: number;
+  readonly ordered?: boolean;
+  readonly start?: number | null;
+  readonly checked?: boolean | null;
+  readonly align?: ReadonlyArray<"left" | "right" | "center" | null>;
+  readonly url?: string;
+  readonly title?: string | null;
+  readonly alt?: string | null;
+  readonly identifier?: string;
+  readonly lang?: string | null;
+}
+```
+## `MarkdownNodeKind`
+
+```ts
+type MarkdownNodeKind = "paragraph" | "heading" | "thematicBreak" | "blockquote" | "list" | "listItem" | "code" | "html" | "definition" | "text" | "emphasis" | "strong" | "delete" | "inlineCode" | "break" | "link" | "image" | "linkReference" | "imageReference" | "table" | "tableRow" | "tableCell" | "footnoteDefinition" | "footnoteReference";
+```
 ## `MarkdownParser`
 
 ```ts
@@ -34,6 +60,7 @@ interface MarkdownParser {
 ```ts
 interface MarkdownProjection {
   readonly source: string;
+  readonly nodes: ReadonlyArray<MarkdownNode>;
   readonly strong: ReadonlyArray<MarkdownStrongSpan>;
 }
 ```

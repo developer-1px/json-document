@@ -1,70 +1,113 @@
-import type { MarkdownChangedRange, MarkdownProjection, MarkdownStrongSpan } from "@interactive-os/json-document-markdown";
+import type { MarkdownNode, MarkdownNodeKind, MarkdownProjection } from "@interactive-os/json-document-markdown";
 
-export interface SourceRun {
-  readonly from: number;
-  readonly to: number;
-  readonly kind: "text" | "strong" | "delimiter";
-  readonly owner?: MarkdownStrongSpan;
+interface SourceRange { readonly from: number; readonly to: number }
+export interface SourceRun extends SourceRange {
+  readonly kind: MarkdownNodeKind | "source" | "delimiter" | "imagePreview";
+  readonly tag: string;
+  readonly attributes: Readonly<Record<string, string>>;
+  readonly value?: string;
+  readonly children?: ReadonlyArray<SourceRun>;
+  readonly owner?: SourceRange;
+  readonly conceal?: boolean;
 }
 
-/** Sweep syntax boundaries once; do not search every span for every DOM run. */
-export function sourceRuns(projection: MarkdownProjection, from = 0, to = projection.source.length): SourceRun[] {
-  interface Boundary { content: number; opens: MarkdownStrongSpan[]; closes: MarkdownStrongSpan[] }
-  const boundaries = new Map<number, Boundary>();
-  const at = (offset: number): Boundary => {
-    let value = boundaries.get(offset);
-    if (!value) boundaries.set(offset, value = { content: 0, opens: [], closes: [] });
-    return value;
-  };
-  at(from); at(to);
-  for (const span of projection.strong) {
-    if (span.from < from || span.to > to) continue;
-    at(span.from).opens.push(span);
-    at(span.contentFrom).closes.push(span);
-    at(span.contentFrom).content++;
-    at(span.contentTo).content--;
-    at(span.contentTo).opens.push(span);
-    at(span.to).closes.push(span);
-  }
-  const offsets = [...boundaries.keys()].sort((a, b) => a - b);
-  const owners = new Set<MarkdownStrongSpan>();
-  let content = 0;
-  const runs: SourceRun[] = [];
-  for (let index = 0; index < offsets.length - 1; index++) {
-    const from = offsets[index]!;
-    const boundary = boundaries.get(from)!;
-    for (const owner of boundary.closes) owners.delete(owner);
-    for (const owner of boundary.opens) owners.add(owner);
-    content += boundary.content;
-    const owner = owners.values().next().value;
-    runs.push({ from, to: offsets[index + 1]!, kind: owner ? "delimiter" : content > 0 ? "strong" : "text", ...(owner ? { owner } : {}) });
-  }
-  return runs;
+const tags: Record<MarkdownNodeKind, string> = {
+  paragraph: "span", heading: "span", thematicBreak: "span", blockquote: "span",
+  list: "span", listItem: "span", code: "code", html: "code", definition: "span",
+  text: "span", emphasis: "em", strong: "strong", delete: "s", inlineCode: "code",
+  break: "span", link: "a", image: "span", linkReference: "a", imageReference: "span",
+  table: "span", tableRow: "span", tableCell: "span", footnoteDefinition: "span", footnoteReference: "sup",
+};
+const concealedGaps = new Set<MarkdownNodeKind>(["heading", "emphasis", "strong", "delete", "link", "linkReference", "table", "tableRow", "tableCell"]);
+const markerGaps = new Set<MarkdownNodeKind>([...concealedGaps, "listItem", "blockquote", "footnoteDefinition"]);
+
+/** Only navigable document URLs can become DOM attributes; raw HTML stays text. */
+function safeURL(value: string | undefined, image = false): string | undefined {
+  if (!value) return undefined;
+  const normalized = value.replace(/[\u0000-\u0020\u007f]/g, "");
+  const scheme = /^([a-z][a-z\d+.-]*):/i.exec(normalized)?.[1]?.toLowerCase();
+  if (scheme && !(image ? ["http", "https"] : ["http", "https", "mailto", "tel"]).includes(scheme)) return undefined;
+  return value;
 }
 
-/** The parser invalidates complete blocks; unaffected runs only need their source offsets moved. */
-export function updateSourceRuns(previous: ReadonlyArray<SourceRun>, projection: MarkdownProjection, changed: MarkdownChangedRange): SourceRun[] {
-  const before: SourceRun[] = [], after: SourceRun[] = [];
-  const delta = changed.newTo - changed.to;
-  const owners = new Map<MarkdownStrongSpan, MarkdownStrongSpan>();
-  const move = (owner: MarkdownStrongSpan): MarkdownStrongSpan => {
-    if (delta === 0) return owner;
-    let shifted = owners.get(owner);
-    if (!shifted) {
-      shifted = { from: owner.from + delta, to: owner.to + delta, contentFrom: owner.contentFrom + delta, contentTo: owner.contentTo + delta };
-      owners.set(owner, shifted);
+/** A source-complete tree: visual decoration never adds text to the document. */
+export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
+  const { source } = projection;
+  const definitions = new Map<string, MarkdownNode>();
+  const collect = (nodes: ReadonlyArray<MarkdownNode>) => {
+    for (const node of nodes) {
+      if (node.kind === "definition" && node.identifier && !definitions.has(node.identifier)) definitions.set(node.identifier, node);
+      if (node.children) collect(node.children);
     }
-    return shifted;
   };
-  for (const run of previous) {
-    if (run.from < changed.from) before.push(run.to <= changed.from ? run : { ...run, to: changed.from });
-    if (run.to > changed.to) after.push({ ...run, from: Math.max(run.from, changed.to) + delta, to: run.to + delta, ...(run.owner ? { owner: move(run.owner) } : {}) });
-  }
-  const result: SourceRun[] = [];
-  for (const run of [...before, ...sourceRuns(projection, changed.from, changed.newTo), ...after]) {
-    const tail = result[result.length - 1];
-    if (tail?.kind === "text" && run.kind === "text" && tail.to === run.from) result[result.length - 1] = { ...tail, to: run.to };
-    else if (run.to > run.from) result.push(run);
-  }
-  return result;
+  collect(projection.nodes);
+  const raw = (from: number, to: number, owner?: SourceRange, conceal = false): SourceRun => ({
+    kind: owner ? "delimiter" : "source", tag: "span", from, to, value: source.slice(from, to),
+    attributes: owner ? { "data-markdown-delimiter": "" } : {}, ...(owner ? { owner, conceal } : {}),
+  });
+  const gap = (from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun => {
+    if (parent?.kind === "listItem" && typeof parent.checked === "boolean" && /\[[ xX]\]/.test(source.slice(from, to))) {
+      return { kind: "delimiter", tag: "span", from, to, owner: parent,
+        attributes: { "data-markdown-display": parent.checked ? "☑ " : "☐ ", "data-markdown-delimiter": "" },
+        children: [raw(from, to, parent, true)],
+      };
+    }
+    return raw(from, to, parent && markerGaps.has(parent.kind) ? table ?? parent : undefined, !!parent && concealedGaps.has(parent.kind));
+  };
+  const children = (nodes: ReadonlyArray<MarkdownNode>, from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun[] => {
+    const result: SourceRun[] = [];
+    let cursor = from;
+    for (const [index, node] of nodes.entries()) {
+      if (node.from > cursor) result.push(gap(cursor, node.from, parent, table));
+      result.push(visit(node, parent, index, table));
+      cursor = node.to;
+    }
+    if (cursor < to) result.push(gap(cursor, to, parent, table));
+    return result;
+  };
+  const visit = (node: MarkdownNode, parent?: MarkdownNode, index = 0, table?: MarkdownNode): SourceRun => {
+    const attributes: Record<string, string> = { "data-markdown-kind": node.kind };
+    if (node.depth) { attributes.role = "heading"; attributes["aria-level"] = String(node.depth); attributes["data-depth"] = String(node.depth); }
+    if (node.kind === "list") attributes.role = "list";
+    if (node.kind === "listItem") {
+      attributes.role = "listitem";
+      if (node.checked !== null && node.checked !== undefined) attributes["data-checked"] = String(node.checked);
+    }
+    if (node.kind === "table") attributes.role = "table";
+    if (node.kind === "tableRow") attributes.role = "row";
+    if (node.kind === "tableCell") {
+      attributes.role = "cell";
+      const align = table?.align?.[index];
+      if (align) attributes["data-align"] = align;
+    }
+    if (node.lang) attributes["data-language"] = node.lang;
+    const definition = node.identifier ? definitions.get(node.identifier) : undefined;
+    const image = node.kind === "image" || node.kind === "imageReference";
+    const url = safeURL(node.url ?? definition?.url, image);
+    if ((node.kind === "link" || node.kind === "linkReference") && url) {
+      attributes.href = url; attributes.rel = "noreferrer noopener";
+      attributes.target = "_blank";
+    }
+    const title = node.title ?? definition?.title;
+    if (title) attributes.title = title;
+    let content: SourceRun[];
+    if (node.children) content = children(node.children, node.from, node.to, node, node.kind === "table" ? node : table);
+    else if (image && url) {
+      content = [raw(node.from, node.to, node, true), {
+        kind: "imagePreview", tag: "img", from: node.from, to: node.from,
+        attributes: { src: url, alt: node.alt ?? "", contenteditable: "false", draggable: "false", loading: "lazy" }, owner: node,
+      }];
+    } else if (node.kind === "thematicBreak") {
+      attributes.role = "separator";
+      content = [raw(node.from, node.to, node, true)];
+    } else if (node.value !== undefined && node.kind !== "html" && node.value !== source.slice(node.from, node.to)) {
+      attributes["data-markdown-display"] = node.value;
+      content = [raw(node.from, node.to, node, true)];
+    } else if (node.kind === "break") {
+      attributes["data-markdown-display"] = "\n";
+      content = [raw(node.from, node.to, node, true)];
+    } else content = [raw(node.from, node.to)];
+    return { kind: node.kind, tag: tags[node.kind], from: node.from, to: node.to, attributes, children: content, owner: node };
+  };
+  return children(projection.nodes, 0, source.length);
 }

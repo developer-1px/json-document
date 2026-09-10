@@ -41,6 +41,8 @@ function AppShell() {
     setOpenSections((current) => current.has(activeSection.id) ? current : new Set([...current, activeSection.id]));
   }, [activeSection]);
 
+  if (route.chrome === "none") return <Outlet />;
+
   return (
     <div className={classes("flex min-h-screen flex-col md:flex-row", appChrome && "h-screen overflow-hidden", ui.frame.app)}>
       <a

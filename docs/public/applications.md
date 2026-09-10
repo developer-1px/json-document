@@ -4,6 +4,14 @@ Application은 navigation, workflow, runtime과 제품 정책을 소유하는 �
 표면입니다. Artifact는 Application과 같은 앱이 아니라, 그 안에서 사람이 만들고
 수정하며 agent와 주고받는 콘텐츠입니다.
 
+## Bear
+
+[Bear Application](/applications/bear)은 메뉴나 도구 모음 없이 가운데 Markdown
+문서만 보여줍니다. `MarkdownEditingSurface`, `createTextEditor`,
+`createJSONDocument`의 public API를 조합하며 입력·선택·문법 표시·Undo는 각
+canonical package가 소유합니다. Application은 문서 초기값과 본문 배치만 소유합니다.
+현재 문서는 열린 페이지 안에서 유지되며 새로고침하면 초기 문서로 돌아갑니다.
+
 ## Calendar
 
 [Calendar Application](/applications/calendar)은 Calendar Document Type, Editing,
@@ -33,6 +41,6 @@ AI Agent Application
 └─ App-owned · session navigation, runtime connection, shell, policy
 ```
 
-두 Application은 showcase가 아니라 책임을 발견하고 canonical API가 실제 제품에서
+Application은 showcase가 아니라 책임을 발견하고 canonical API가 실제 제품에서
 다시 소비되는지 검증하는 production composition root입니다. 개발 순환은
 [How We Build](/docs/how-we-build)에서 설명합니다.

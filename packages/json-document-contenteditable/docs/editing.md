@@ -21,9 +21,14 @@ blur/cancel/dispose는 미완료 lease를 폐기합니다.
 
 editor 모드에서 조합 중 Enter는 IME 확정을 허용한 뒤 `compositionend`에서
 `editor.insert("\n")`를 이어갑니다. 같은 Enter가 만드는 native paragraph/line-break
-입력은 중복 반영하지 않습니다. 다음 Enter의 `insertParagraph`/`insertLineBreak`도
+입력은 중복 반영하지 않습니다. 한글 IME가 `keydown(229) → keyup(13) → keydown(13)`을
+동일한 `timeStamp`로 재전달하는 경우, 중간 keyup 뒤에도 이미 처리한 Enter 상태를 유지합니다.
+실제 release 또는 다른 timestamp의 다음 keydown에서 상태를 해제합니다. 시간 간격에 따른
+일괄 무시는 하지 않으며 키 반복도 허용합니다. 다음 Enter의 `insertParagraph`/`insertLineBreak`도
 `editor.insert("\n")`로 번역해 원문 위치에 줄바꿈 한 개를 삽입합니다.
-Undo는 줄바꿈을 먼저, 그다음 확정한 조합을 되돌립니다. Enter 없이 끝난 조합이나
+브라우저가 조합 종료 전에 native paragraph/line-break `input`을 이미 처리했다면
+그 DOM 결과를 반영하고 줄바꿈을 추가하지 않습니다. 편집기가 추가한 줄바꿈은
+Undo로 먼저 되돌리고, 그다음 확정한 조합을 되돌립니다. native 줄바꿈은 조합과 함께 되돌립니다. Enter 없이 끝난 조합이나
 blur/cancel로 폐기한 조합에는 줄바꿈을 추가하지 않습니다.
 
 ## 마지막 빈 줄의 caret
@@ -45,3 +50,7 @@ Markdown처럼 별도 projection을 만드는 adapter도 같은 공개 함수를
 native 줄바꿈과 방향 있는 선택도 같은 원문 좌표를 사용합니다.
 
 [Markdown caret Usage](/demo/markdown-caret) · [Markdown DOM API](/docs/api/markdown-web)
+
+`Mod+A`는 `selectAllAffordance`의 반복 유지 정책을 사용하여 원문 전체를 선택합니다.
+Markdown처럼 첫/마지막 문법 기호가 숨겨진 projection에서도 `[0, source.length]`가
+선택되며, 다시 눌러도 선택을 해제하지 않습니다. IME 조합 중에는 브라우저/입력기에 맡깁니다.

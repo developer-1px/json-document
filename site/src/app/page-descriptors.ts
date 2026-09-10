@@ -28,7 +28,7 @@ export type SiteRoute = {
   readonly navigationGroup?: SiteNavigationGroup;
   readonly parentPath?: string;
   readonly sidebar?: false;
-  readonly chrome?: "app";
+  readonly chrome?: "app" | "none";
   readonly relatedDemoPath?: string;
   readonly relatedDemoLabel?: string;
   readonly integration?: {

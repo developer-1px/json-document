@@ -4,7 +4,9 @@
   "description": "DOM projection of Markdown source with selection-aware delimiters.",
   "type": "module",
   "license": "MIT",
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {
@@ -22,13 +24,15 @@
     "!dist/.tsbuildinfo",
     "README.md",
     "docs",
-    "LICENSE"
+    "LICENSE",
+    "src/markdown-editor.css"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./markdown-editor.css": "./src/markdown-editor.css"
   },
   "scripts": {
     "clean": "rm -rf dist",

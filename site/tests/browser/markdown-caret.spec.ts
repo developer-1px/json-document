@@ -160,6 +160,28 @@ test("IME-consumed Enter confirms Korean text and inserts exactly one newline", 
   await client.detach();
 });
 
+test("IME confirmation followed by another Enter keydown inserts only one newline", async ({ page }) => {
+  await select(page, source.length);
+  const client = await page.context().newCDPSession(page);
+  await client.send("Input.imeSetComposition", { text: "한글", selectionStart: 2, selectionEnd: 2 });
+  await client.send("Input.dispatchKeyEvent", { type: "rawKeyDown", key: "Process", code: "Enter", windowsVirtualKeyCode: 229 });
+  await client.send("Input.insertText", { text: "한글" });
+  // The same physical key can arrive again after compositionend, before keyup.
+  await page.keyboard.down("Enter");
+  await page.keyboard.up("Enter");
+  await expect.poll(() => model(page)).toBe(source + "한글\n");
+  await expect.poll(() => selection(page)).toEqual({ anchor: source.length + 3, focus: source.length + 3 });
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect.poll(() => model(page)).toBe(source + "한글");
+  await page.keyboard.press("ControlOrMeta+Shift+z");
+  await expect.poll(() => model(page)).toBe(source + "한글\n");
+  await page.keyboard.press("Enter");
+  await expect.poll(() => model(page)).toBe(source + "한글\n\n");
+  await page.keyboard.type("next");
+  await expect.poll(() => model(page)).toBe(source + "한글\n\nnext");
+  await client.detach();
+});
+
 test("IME Enter with native paragraph input still inserts only one newline", async ({ page }) => {
   await select(page, source.length);
   const client = await page.context().newCDPSession(page);
@@ -186,7 +208,7 @@ test("unclosed delimiters and surrogate-pair deletion stay editable", async ({ p
   await expect.poll(() => model(page)).toBe("**");
   await page.keyboard.type("done**");
   await expect.poll(() => model(page)).toBe("**done**");
-  await expect(page.getByTestId("markdown-editor").locator("strong")).toHaveText("done");
+  await expect(page.getByTestId("markdown-editor").locator('strong [data-markdown-kind="text"]')).toHaveText("done");
 });
 
 test("Usage exposes every Markdown owner and its API reference through source tabs", async ({ page }) => {

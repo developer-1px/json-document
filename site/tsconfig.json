@@ -6,6 +6,7 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
+      "@interactive-os/json-document-web/interaction-recording": ["../packages/json-document-web/src/interaction-recording-index.ts"],
       "@interactive-os/json-document-markdown": ["../packages/json-document-markdown/src/index.ts"],
       "@interactive-os/json-document-markdown-web": ["../packages/json-document-markdown-web/src/index.ts"],
       "@interactive-os/json-document-object-document": ["../packages/json-document-object-document/src/index.ts"],

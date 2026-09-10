@@ -9,6 +9,7 @@ import { useState } from "react";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createTextEditor } from "@interactive-os/json-document-editing";
 import { MarkdownEditingSurface } from "@interactive-os/json-document-markdown-react";
+import "@interactive-os/json-document-markdown-web/markdown-editor.css";
 
 function Note() {
   const [editor] = useState(() => createTextEditor(createJSONDocument("**원문**")));
@@ -16,7 +17,7 @@ function Note() {
 }
 ```
 
-현재 strong delimiter·caret 실험입니다. native 입력과 한국어 composition 이벤트,
+CommonMark/GFM 전체 문법을 원문 보존 projection으로 표시합니다. native 입력과 한국어 composition 이벤트,
 raw text clipboard, `Mod-z`/`Mod-Shift-z`를 연결합니다.
 조합 중 Enter 한 번으로 조합 확정과 줄바꿈을 처리하고 다음 줄에서 입력을 이어갑니다.
 Undo는 줄바꿈, 확정한 조합 순서로 되돌립니다.

@@ -1061,3 +1061,86 @@ type WebWidgetState =
   }
   | { readonly role: "disclosure"; readonly expanded: boolean; readonly disabled?: boolean };
 ```
+## `@interactive-os/json-document-web/interaction-recording`
+
+아래 API는 package root가 아닌 이 subpath에서 import합니다.
+### `bindWebRecordingArchive`
+
+```ts
+bindWebRecordingArchive(recorder: import("./interaction-recording.js").WebInteractionRecorder, archive: ReturnType<typeof createWebRecordingArchive>, onResult: (result: WebRecordingSaveResult, recording: WebInteractionRecording) => void, checkpointMilliseconds?: number): () => void
+```
+### `createWebInteractionRecorder`
+
+```ts
+createWebInteractionRecorder(options: { document: Document; maxBytes?: number; maxRecords?: number; }): WebInteractionRecorder
+```
+### `createWebRecordingArchive`
+
+```ts
+createWebRecordingArchive(options: { endpoint: string; storage: Storage; fetch: typeof fetch; }): { save: (recording: WebInteractionRecording) => Promise<WebRecordingSaveResult>; pending: () => WebInteractionRecording[]; stage: (recording: WebInteractionRecording) => boolean; }
+```
+### `downloadWebInteractionRecording`
+
+```ts
+downloadWebInteractionRecording(doc: Document, recording: WebInteractionRecording): void
+```
+### `registerWebInteractionSource`
+
+```ts
+registerWebInteractionSource(root: HTMLElement, name: string, read: () => unknown): () => void
+```
+### `serializeWebInteractionRecording`
+
+```ts
+serializeWebInteractionRecording(recording: WebInteractionRecording): string
+```
+### `traceWebInteraction`
+
+```ts
+traceWebInteraction(root: HTMLElement, kind: string, read: () => unknown, event?: Event): void
+```
+### `WebInteractionRecord`
+
+```ts
+interface WebInteractionRecord {
+  readonly sequence: number;
+  readonly milliseconds: number;
+  readonly path: string;
+  readonly kind: string;
+  readonly eventId: number | null;
+  readonly targetId: number | null;
+  readonly detail: unknown;
+}
+```
+### `WebInteractionRecorder`
+
+```ts
+interface WebInteractionRecorder {
+  start(): void;
+  stop(reason?: string): WebInteractionRecording | null;
+  snapshot(): WebInteractionRecording | null;
+  readonly recording: boolean;
+  subscribe(listener: () => void): () => void;
+  dispose(): void;
+}
+```
+### `WebInteractionRecording`
+
+```ts
+interface WebInteractionRecording {
+  readonly version: 1;
+  readonly id: string;
+  readonly startedAt: string;
+  readonly endedAt: string | null;
+  readonly reason: string | null;
+  readonly environment: Readonly<Record<string, unknown>>;
+  readonly records: readonly WebInteractionRecord[];
+}
+```
+### `WebRecordingSaveResult`
+
+```ts
+type WebRecordingSaveResult =
+  | { readonly ok: true; readonly id: string; readonly path: string }
+  | { readonly ok: false; readonly id: string; readonly local: boolean; readonly error: string };
+```

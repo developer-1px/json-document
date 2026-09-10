@@ -287,3 +287,12 @@ Affordance policy over the canonical chord normalizer, outside
 앱 소유 Cut은 준비 전에 취소합니다. 빈 선택·clipboard 없음·read/encode/write 실패를
 native 소유권의 증거로 사용하지 않습니다. SVG root와 중첩 native 입력도 같은 경계를 씁니다.
 [소유 계약과 Usage](docs/clipboard.md#입력-소유권과-실행-준비)를 참고하세요.
+
+## Interaction recording
+
+`@interactive-os/json-document-web/interaction-recording` exports the browser-only
+recording API. `createWebInteractionRecorder` captures browser input, composition, selection,
+and DOM evidence across one document. Canonical bindings contribute correlated
+command/model evidence through `traceWebInteraction` and `registerWebInteractionSource`.
+`createWebRecordingArchive` preserves recordings through a host-provided local endpoint
+with browser storage fallback. See [입력 진단 기록 API](docs/interaction-recording.md).

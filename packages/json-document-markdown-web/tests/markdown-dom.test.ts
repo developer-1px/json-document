@@ -48,21 +48,21 @@ describe("source-preserving Markdown DOM", () => {
   test("recovers native markup changes even when text has not changed", () => {
     const source = "A **raw**";
     const { root, dom } = setup(source);
-    root.firstElementChild!.innerHTML = "<em>A </em>";
+    root.querySelector('[data-markdown-kind="text"]')!.innerHTML = "<em>A </em>";
     expect(root.textContent).toBe(source);
     dom.render(root, source);
     expect(root.querySelector("em")).toBeNull();
-    expect(root.querySelector("strong")?.textContent).toBe("raw");
+    expect(root.querySelector('strong [data-markdown-kind="text"]')?.textContent).toBe("raw");
     expect(dom.observe(root).value).toBe(source);
   });
 
   test("edits one source run without replacing the surrounding or edited text nodes", () => {
     const { root, dom } = setup("A **one** B __two__ C");
     const nodes = Array.from(root.childNodes);
-    const text = root.querySelector("strong")!.firstChild;
+    const text = root.querySelector('strong [data-markdown-kind="text"] span')!.firstChild;
     dom.render(root, "A **changed** B __two__ C", { anchor: 7, focus: 7 });
     expect(Array.from(root.childNodes)).toEqual(nodes);
-    expect(root.querySelector("strong")!.firstChild).toBe(text);
+    expect(root.querySelector('strong [data-markdown-kind="text"] span')!.firstChild).toBe(text);
     expect(dom.observe(root).value).toBe("A **changed** B __two__ C");
     dom.restoreSelection(root, { anchor: 21, focus: 4 });
     expect(dom.observe(root).selection).toEqual({ anchor: 21, focus: 4 });
@@ -70,9 +70,9 @@ describe("source-preserving Markdown DOM", () => {
 
   test("preserves a matching suffix when syntax inserts new source runs", () => {
     const { root, dom } = setup("A **one** B __two__ C");
-    const tail = Array.from(root.childNodes).slice(1);
+    const tail = Array.from(root.querySelectorAll("strong"));
     dom.render(root, "**new** A **one** B __two__ C");
-    expect(Array.from(root.childNodes).slice(-tail.length)).toEqual(tail);
+    expect(Array.from(root.querySelectorAll("strong")).slice(-tail.length)).toEqual(tail);
     expect(dom.observe(root).value).toBe("**new** A **one** B __two__ C");
   });
 
@@ -99,7 +99,8 @@ describe("source-preserving Markdown DOM", () => {
   test("preserves nested strong boundaries while editing and undoing syntax", () => {
     const source = "**outer __inner__ tail**";
     const { root, dom } = setup(source);
-    expect(Array.from(root.querySelectorAll("strong")).map(node => node.textContent)).toEqual(["outer ", "inner", " tail"]);
+    expect(root.querySelector("strong strong")?.textContent).toBe("__inner__");
+    expect(Array.from(root.querySelectorAll('[data-markdown-kind="text"]')).map(node => node.textContent)).toEqual(["outer ", "inner", " tail"]);
     expect(root.querySelectorAll("[data-markdown-delimiter]")).toHaveLength(4);
     dom.render(root, "**outer __inner tail**");
     expect(dom.observe(root).value).toBe("**outer __inner tail**");

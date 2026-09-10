@@ -1,3 +1,8 @@
+import interactionRecordingSource from "../../../../packages/json-document-web/src/interaction-recording.ts?raw";
+import interactionRecordingDOMSource from "../../../../packages/json-document-web/src/interaction-recording-dom.ts?raw";
+import interactionRecordingArchiveSource from "../../../../packages/json-document-web/src/interaction-recording-archive.ts?raw";
+import markdownNodesSource from "../../../../packages/json-document-markdown/src/nodes.ts?raw";
+import markdownEditorCSSSource from "../../../../packages/json-document-markdown-web/src/markdown-editor.css?raw";
 import textChangeSource from "../../../../packages/json-document-editing/src/text-change.ts?raw";
 import markdownSyntaxSource from "../../../../packages/json-document-markdown/src/syntax.ts?raw";
 import markdownParserSource from "../../../../packages/json-document-markdown/src/parser.ts?raw";
@@ -230,6 +235,9 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-web/src/interaction-recording.ts", interactionRecordingSource],
+  ["packages/json-document-web/src/interaction-recording-dom.ts", interactionRecordingDOMSource],
+  ["packages/json-document-web/src/interaction-recording-archive.ts", interactionRecordingArchiveSource],
   ["packages/json-document-web/src/clipboard-event.ts", clipboardEventSource],
   ["packages/json-document-editing/src/preparation-queue.ts", editingPreparationQueueSource],
   ["packages/json-document-web/src/raster-files.ts", webRasterFilesSource],
@@ -272,6 +280,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
+  ["packages/json-document-markdown/src/nodes.ts", markdownNodesSource],
+  ["packages/json-document-markdown-web/src/markdown-editor.css", markdownEditorCSSSource],
   ["packages/json-document-markdown/src/projection.ts", markdownProjectionSource],
   ["packages/json-document-editing/src/text-change.ts", textChangeSource],
   ["packages/json-document-markdown/src/syntax.ts", markdownSyntaxSource],
@@ -400,11 +410,14 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["routes/markdown-caret/MarkdownCaretRoute.tsx", ["app/interaction-recording/InteractionRecordingControls.tsx"]],
   ["packages/json-document-editing/src/text.ts", ["packages/json-document-editing/src/session.ts"]],
   ["packages/json-document-editing/src/session.ts", ["packages/json-document-editing/src/history-patch.ts"]],
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  ...["createWebInteractionRecorder", "traceWebInteraction", "registerWebInteractionSource"].map(symbol => ({ packageName: "@interactive-os/json-document-web/interaction-recording", symbol, sourcePath: "packages/json-document-web/src/interaction-recording.ts" })),
+  ...["createWebRecordingArchive", "bindWebRecordingArchive", "downloadWebInteractionRecording"].map(symbol => ({ packageName: "@interactive-os/json-document-web/interaction-recording", symbol, sourcePath: "packages/json-document-web/src/interaction-recording-archive.ts" })),
   ...["createWebClipboardSurface", "routeWebClipboardEvent"].flatMap(symbol => [
     { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/clipboard-event.ts" },
     { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/input.ts" },
@@ -772,6 +785,7 @@ const registeredPublicUsages = [
     symbol: "createMarkdownDOMAdapter",
     sourcePath: "packages/json-document-markdown-web/src/source-runs.ts",
   },
+  { packageName: "@interactive-os/json-document-markdown-web", symbol: "createMarkdownDOMAdapter", sourcePath: "packages/json-document-markdown-web/src/markdown-editor.css" },
   {
     packageName: "@interactive-os/json-document-markdown",
     symbol: "createMarkdownParser",
@@ -782,6 +796,7 @@ const registeredPublicUsages = [
     symbol: "createMarkdownParser",
     sourcePath: "packages/json-document-markdown/src/syntax.ts",
   },
+  { packageName: "@interactive-os/json-document-markdown", symbol: "createMarkdownParser", sourcePath: "packages/json-document-markdown/src/nodes.ts" },
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "diffText",
@@ -1604,7 +1619,7 @@ function sourceFile(path: string): DemoSourceFile {
   }
   return {
     path,
-    language: path.endsWith(".tsx") ? "tsx" : "typescript",
+    language: path.endsWith(".css") ? "text" : path.endsWith(".tsx") ? "tsx" : "typescript",
     referencePath: [...packageReferencePaths].find(([prefix]) => path.startsWith(prefix))?.[1],
     load: () => loadSource(path),
   };

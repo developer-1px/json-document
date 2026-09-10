@@ -38,13 +38,15 @@
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run typecheck && npm test && npm run build"
   },
-  "peerDependencies": {},
   "devDependencies": {
     "@types/node": "^25.9.0",
     "typescript": "^5.0.0",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.7",
+    "@types/mdast": "^4.0.4"
   },
   "dependencies": {
-    "mdast-util-from-markdown": "^2.0.3"
+    "mdast-util-from-markdown": "^2.0.3",
+    "mdast-util-gfm": "^3.1.0",
+    "micromark-extension-gfm": "^3.0.0"
   }
 }

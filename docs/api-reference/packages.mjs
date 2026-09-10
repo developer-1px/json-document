@@ -45,6 +45,9 @@ export const apiReferencePackages = [
   }, {
     packageName: "@interactive-os/json-document-collaboration/editing",
     entrypoint: "packages/json-document-collaboration/src/editing-index.ts",
+  }] : slug === "web" ? [{
+    packageName: "@interactive-os/json-document-web/interaction-recording",
+    entrypoint: "packages/json-document-web/src/interaction-recording-index.ts",
   }] : [],
 }));
 

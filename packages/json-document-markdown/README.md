@@ -6,12 +6,13 @@ serializer is needed.
 
 ```ts
 import { projectMarkdown } from "@interactive-os/json-document-markdown";
-const projection = projectMarkdown("A **source** and __text__");
-// projection.source is unchanged; strong spans use UTF-16 source offsets.
+const projection = projectMarkdown("# Heading\n\nA **source** and ~~text~~");
+// projection.source is unchanged. nodes contains the CommonMark/GFM syntax tree.
+// All ranges, including the compatible strong spans, use UTF-16 source offsets.
 ```
 
 For repeated edits, `createMarkdownParser(source).update(from, to, insert)`
 reuses safe syntax fragments and reports the changed block range. Uncertain
-CommonMark boundaries fall back to a full parse; the raw source remains canonical.
+CommonMark/GFM boundaries fall back to a full parse; the raw source remains canonical.
 
 See [API and scope](docs/api.md) and the [caret Usage](/demo/markdown-caret).

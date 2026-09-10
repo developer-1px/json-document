@@ -1,24 +1,32 @@
-## Markdown 원문 projection 실험
+## Markdown 원문 projection
 
 생태계 위치는 **Document Types**입니다. Markdown 원문 문자열이 정본이며
 JSONDocument의 root string 또는 string pointer로 보관합니다.
 Rich Text의 구조화된 문서 모델과 독립적입니다. 문법 상태는 원문에서 파생하는 캐시이며
 JSONDocument에 저장하거나 원문으로 다시 직렬화하지 않습니다.
 
-`projectMarkdown(source)`는 동일한 `source`와 `strong` 목록을 반환합니다.
-CommonMark parser가 인식한 `**…**`, `__…__`의 원문 위치만 추출합니다.
-`from`/`to`는 delimiter를 포함하고 `contentFrom`/`contentTo`는 내부 텍스트의
-UTF-16 half-open 범위입니다. DOM Selection과 같은 좌표계를 사용합니다.
-code·escape·미완성 문법은 CommonMark 규칙에 따릅니다.
+`projectMarkdown(source)`는 동일한 `source`, 전체 문법 트리 `nodes`, 기존 API와 호환되는
+`strong` 범위 목록을 반환합니다. CommonMark에 GFM 확장(표·task list·취소선·자동 링크·각주)을
+적용합니다. `nodes`는 공개 `MarkdownNode`의 불변 배열이며 `kind`, `from`, `to`,
+`children`과 해당 문법의 `depth`, `url`, `checked`, `align`, `value` 등을 제공합니다.
+위치는 모두 원문의 UTF-16 half-open 좌표이며 `value`는 해석된 표시 값일 뿐 정본을 대체하지 않습니다.
+기존 `strong`의 `contentFrom`/`contentTo`는 내부 텍스트 범위를 나타냅니다.
 
-현재 실험은 한 문단의 strong 문법과 caret 이동에 집중합니다. 나머지 문법은
-원문으로 보존합니다. CRLF, 공백, delimiter의 선택을 정규화하지 않습니다.
-문서 구조를 수정하는 명령이나 다른 Markdown 문법의 스타일은 제공하지 않습니다.
+| 구분 | 문법 |
+| --- | --- |
+| 블록 | ATX/Setext 제목, 문단·빈 줄, 구분선, 인용, 순서/비순서·중첩 목록, fenced/indented 코드, HTML, 참조 정의 |
+| 인라인 | 강조·굵게·중첩 강조, 코드, 링크·이미지·참조 링크/이미지, 자동 링크, escape·entity, hard/soft break, HTML |
+| GFM | 표와 정렬, task list, 취소선, literal autolink, 각주 |
+
+CRLF·공백·기호·미완성 문법을 정규화하지 않습니다. 구조 편집은 기존 TextEditor의 원문
+변경을 통해 수행합니다. Bear 전용 태그·위키 링크·하이라이트·수식은 이 계약에 포함하지 않습니다.
 
 ```ts
 import { projectMarkdown } from "@interactive-os/json-document-markdown";
-const source = "A **한글** and __raw__";
+const source = "# 제목\n\nA **한글** and __raw__";
 const projection = projectMarkdown(source);
+projection.nodes[0]!.kind; // "heading"
+projection.nodes[0]!.depth; // 1
 const first = projection.strong[0]!;
 source.slice(first.contentFrom, first.contentTo); // "한글"
 ```
@@ -43,7 +51,7 @@ update.changed; // { from: 0, to: 8, newTo: 10 }
 바꾸고, 이후 구간의 offset을 `newTo - to`만큼 옮깁니다. 전체 재파싱 시 문서 전체를 반환합니다.
 이 범위는 최소 문자 diff가 아니며 화면 owner가 영향 없는 결과를 재사용하기 위한 계약입니다.
 
-문법 owner는 블록 상대 위치의 strong·text 조각을 보관합니다. 구분자 인식과 블록 문맥을
+문법 owner는 블록 상대 위치의 전체 문법 트리와 strong·text 조각을 보관합니다. 구분자 인식과 블록 문맥을
 보존하는 글자 편집은 위치만 갱신합니다. 마지막 문단의 일반 글자·한 줄 개행 추가도 문맥이
 확실하면 재사용합니다. 문단 안의 inline 변경은 해당 문단을 파싱하며, 참조 정의가 있거나
 블록 경계·문법 영향이 불확실하면 기존 CommonMark 전체 파싱으로 되돌아갑니다.

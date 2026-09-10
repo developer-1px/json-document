@@ -64,6 +64,15 @@
     "documentSource": "docs/public/applications.md"
   },
   {
+    "path": "/applications/bear",
+    "label": "Bear",
+    "title": "Bear",
+    "description": "화면 중앙의 Markdown 문서에 집중하는 편집기입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications",
+    "chrome": "none"
+  },
+  {
     "path": "/applications/calendar",
     "label": "Calendar",
     "title": "Calendar Application - json-document",
@@ -287,7 +296,8 @@
     "documentSource": "docs/api-reference/web.md",
     "documentIncludes": [
       "packages/json-document-web/docs/clipboard.md",
-      "packages/json-document-web/docs/text-clipboard.md"
+      "packages/json-document-web/docs/text-clipboard.md",
+      "packages/json-document-web/docs/interaction-recording.md"
     ]
   },
   {

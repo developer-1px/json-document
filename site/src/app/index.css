@@ -1,4 +1,5 @@
 @import "../../../packages/json-document-ui-primitives-react/src/content-interaction.css";
+@import "@interactive-os/json-document-markdown-web/markdown-editor.css";
 
 @layer tokens, base, components, utilities;
 
@@ -95,8 +96,11 @@
 
 @layer components {
   /* Markdown presentation consumes semantic tokens; streaming adds animation. */
-  [data-markdown-delimiter] {
-    @apply text-foreground-muted;
+  [data-markdown-editor] {
+    --markdown-muted: theme("colors.foreground-muted");
+    --markdown-accent: theme("colors.foreground-accent");
+    --markdown-code-background: theme("colors.background-subtle");
+    --markdown-border: theme("colors.border-subtle");
   }
 
   [data-markdown-streaming="true"] > :last-child {
