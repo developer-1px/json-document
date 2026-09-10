@@ -64,3 +64,8 @@ HTML의 혼합 의미 보존 및 inline 이미지 profile은 TBD입니다.
 Usage와 Source: [Composer](/demo/composer). PNG/JPEG/WebP의 내용·미리보기·삭제·Undo/Redo와
 submit payload를 확인할 수 있습니다. 서버 upload와 OS-native Clipboard 호환성 완료를
 주장하지 않습니다.
+
+`useComposer` preserves Alt when translating key events to Composer interaction
+meaning. Its history capture handler consumes only the default Undo/Redo chord;
+Alt-modified variants leave the event and canonical history untouched. Submit
+and command-menu handling retain the configured Composer policy.

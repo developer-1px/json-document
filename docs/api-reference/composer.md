@@ -146,6 +146,7 @@ interface ComposerKeyStroke {
   readonly key: string;
   readonly shiftKey?: boolean;
   readonly commandKey?: boolean;
+  readonly altKey?: boolean;
 }
 ```
 ## `ComposerReference`

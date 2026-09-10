@@ -28,3 +28,15 @@ if (prepared.ok) addComposerAttachments(editor, draft, prepared.attachments);
 `image`가 없는 첨부는 파일 이름·크기·형식 정보뿐입니다. 실제 byte 저장이나 서버 업로드가
 완료된 파일이라고 해석하지 않습니다. Clipboard HTML의 글+이미지 변환과 이미지 asset
 저장소 연결은 TBD입니다. 실제 Usage·Source는 [Composer](/demo/composer)에 있습니다.
+
+`composerInteractionFromKeyStroke(stroke, policy)` preserves the existing
+`commandKey` input (Meta or Control) and accepts optional `altKey` alongside
+`shiftKey`. Omitted modifiers are false. Its keyboard compatibility boundary
+uses `@interactive-os/json-document-web`'s pure default resolver for Undo/Redo:
+Mod+Z undoes, Mod+Shift+Z redoes, and Alt-modified variants return `null`.
+Composer still owns Escape and the configured Enter submit/newline meaning.
+The keyboard dependency is confined to `interaction.ts`; draft model, schema,
+and commands do not interpret Web events. No DOM environment is required.
+
+Usage: [Composer](https://developer-1px.github.io/json-document/demo/composer).
+The React integration passes all modifier facts to this boundary.
