@@ -72,9 +72,39 @@ publication
   -> change notification
 ```
 
-`Projection`, capability probe, acceptance callback 같은 이전 synonym은 public
-identifier로 남기지 않는다. Canonical code는 `JSONDocument`, `validatePatch`,
-`JSONPatchValidationResult`, `validate`만 사용한다.
+JSON Document를 뜻하던 `Document Projection`·`Projection snapshot`,
+capability probe, acceptance callback 같은 이전 synonym은 남기지 않는다.
+이 책임의 canonical code는 `JSONDocument`, `validatePatch`,
+`JSONPatchValidationResult`, `validate`를 사용한다. 문서에서 파생 조회를 만드는
+Projection은 아래 Document Type의 별도 의미이며 이 퇴역 규칙에 포함하지 않는다.
+
+### Document Type
+
+| Canonical term | 정의 | 포함하지 않는 것 |
+| --- | --- | --- |
+| Document Type | 특정 JSON Document의 의미·유효 상태·변경을 정의하는 생태계 위치 | 편집 lifecycle, 플랫폼 입력, 제품 화면 |
+| Document Model | 값·entity·관계의 구조 | 일시적 selection, DOM state |
+| Schema / invariant | 구조적·의미적 유효 조건 | 제품의 화면 배치 |
+| Document Operation | 문서 의미를 보존하는 변경 | raw event 해석, 제품 workflow |
+| Projection | 문서를 조회·표현에 필요한 파생 형태로 읽는 계약 | stateful JSON Document의 다른 이름 |
+| Document Type Profile | 문서 인스턴스가 따르는 의미 계약의 식별과 지원 범위 | 모든 Hands의 입력·History 정책 |
+
+이 위치를 `Domain`이나 `Genre`라는 다른 이름으로 등록하지 않는다.
+package 내부의 domain model/operation이라는 책임 분류와 기존 public identifier는
+그대로 유지한다. 책임 이름과 경계는 확정됐지만 후보별 owner 재배치와 공개 계약
+수렴은 TBD다. 현재 package/API의 존재를 그 후보의 완료로 간주하지 않는다.
+
+### 읽기 구조와 조합
+
+Foundation은 JSON Document, Document Types, Editing과 Collaboration을 읽는
+묶음이고, Building Blocks는 Adapter, Connector, Affordance와 UI Primitives를
+읽는 묶음이다. Hands는 장르별 편집 조합, Artifact는 그 조합으로 다루는 콘텐츠,
+Application은 최종 제품 composition root다.
+
+이 분류는 필수 dependency chain이 아니다. Collaboration은 같은 JSONDocument의
+대체 구현이고 Adapter와 Connector는 서로 독립적으로 선택한다. 사이트의
+탐색 분류와 package의 실제 책임 종류도 별도 축이다. API owner는 공개
+entrypoint를 소유하는 package이며, 탐색 분류를 owner 이름으로 사용하지 않는다.
 
 ### Collaboration
 
@@ -201,15 +231,22 @@ companion과 외부 peer version 범위를 기록한다.
 | 위치 | 판정 질문 |
 | --- | --- |
 | Core | UI·편집·platform 없이 JSON 값과 표준 연산만으로 성립하는가? |
+| Document Type | 특정 문서의 model·schema·invariant·의미 연산·Projection을 소유하는가? 후보별 수렴은 TBD인가? |
 | Editing | Intent, Selection, Topology, Clipboard, History처럼 편집 의미를 소유하는가? |
 | Collaboration | 여러 참여자의 causal state와 수렴을 소유하는가? |
 | Adapter | Web/DOM 같은 platform contract를 기존 public contract로 번역하는가? |
 | Connector | React, Zod, Ajv, TanStack Table처럼 이름 있는 외부 생태계의 public contract를 연결하는가? |
-| Affordance | platform input을 사람이 아는 조작 문법으로 해석하는가? |
+| Affordance | 입력 장치와 독립적인 조작 의미와 수명주기를 소유하는가? 플랫폼 사실은 Adapter에서 받는가? |
+| UI Primitives | 표준 control·focus·overlay와 재사용 UI 행동을 소유하는가? |
 | Hands | 한 artifact 장르에서 여러 capability를 조합한 최소 편집 도구인가? |
-| Host | 제품 고유 정책·메시지·UI composition·payload 의미를 결정하는가? |
+| Artifact | 사람이 보고 편집하는 콘텐츠이며 navigation·workflow를 소유하지 않는가? |
+| Application / Host | 정본 모듈 조합·실행 순서·제품 정책 값·copy·fixture·layout·구체 인스턴스 주입만 소유하는가? |
 | Page-local | 한 page의 교육·fixture·presentation 목적 때문에 함께 바뀌는가? |
 | Etc | 아직 위 위치로 설명할 수 없는가? 임시 분류이며 identifier 조각으로 쓰지 않는다. |
+
+Host는 모델·schema·Intent·command·selection·history·gesture·플랫폼 번역·직렬화·
+projection·재사용 UI의 최종 owner가 아니다. 하나의 소비자만 있어도 이 책임은
+이름 있는 canonical module로 두고 Host는 공개 API를 조합한다.
 
 위치를 결정할 때 최소한 다음 네 질문에 답한다.
 
@@ -447,7 +484,7 @@ Change    = 작성되거나 적용된 historical record
 | `append*` | 기존 representation에 component 하나 추가 |
 | `track*` | Change를 통과한 identity/location 추적 |
 | `materialize*` | Change history/DAG를 현재 domain value로 fold |
-| `project*` | 낮은 수준 구조에서 read representation 파생; internal 전용 |
+| `project*` | 정본 문서나 구조에서 read representation 파생; 공개 여부는 owner의 계약으로 결정 |
 | `export*` | Typed transport-neutral artifact 생성 |
 | `ingest*` | 신뢰하지 않는 외부 artifact 검증과 replica 통합 |
 | `compact*` | History를 새 recovery boundary로 fold |
@@ -850,8 +887,8 @@ Connector packages
 11. Public boolean은 `is`, `has`, `can`, `should`, `did`로 읽히게 한다.
 12. 새 public field를 불필요하게 축약하지 않는다.
 13. 같은 validation 책임에는 하나의 동사를 사용한다.
-14. Public canonical concept는 JSON Document이며 Projection은 public 또는
-    internal identifier로 사용하지 않는다.
+14. Stateful document의 canonical concept는 JSON Document다. 퇴역한 Document
+    Projection 별칭과 유효한 파생 조회 Projection을 혼동하지 않는다.
 15. 이름 변경은 runtime logic, protocol semantics 또는 wire behavior 변경을
     승인하지 않는다.
 16. Connector는 외부 생태계 integration package의 분류이며 공통 runtime

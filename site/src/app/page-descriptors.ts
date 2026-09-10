@@ -21,6 +21,8 @@ export type SiteRoute = {
   readonly label: string;
   readonly title: string;
   readonly heading?: string;
+  readonly documentSource?: string;
+  readonly documentIncludes?: readonly string[];
   readonly description: string;
   readonly language?: "en" | "ko";
   readonly navigationGroup?: SiteNavigationGroup;

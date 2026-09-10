@@ -7,7 +7,7 @@ source release는 `3.0.0`이며 npm publication 전까지 release-prepared 상�
 이 profile은 JSON Document, stateless JSON Patch, validation과 change
 notification이라는 canonical vocabulary만 사용한다. Repository 전체의 concept와
 naming grammar는
-[Concept and Naming Standard](concept-and-naming-standard.md)가 정의한다.
+[Concept and Naming Standard](../repository-naming.md)가 정의한다.
 
 이 profile은 문서, 표, 슬라이드, 캔버스, 노트 편집기가 공통으로 의존할
 수 있는 최소 JSON 편집 계약을 정의한다. 구현체는 더 많은 기능을 제공할 수
@@ -167,7 +167,7 @@ conformance corpus의 public-root binding을 서로 분리한다.
 | `packages/json-document/tests/conformance/rfc6902.test.ts` | public root `applyPatch`의 전체 RFC 6902 corpus binding |
 | `standards/json-document-v3/conformance/suites/jsonpath.ts` | vendored RFC 9535 CTS를 `query`와 `at`으로 검증하는 runner |
 | `packages/json-document/tests/conformance/jsonpath.test.ts` | public root JSON Document의 전체 RFC 9535 CTS binding |
-| `standards/json-document-v3/conformance/vectors/foundation.json` | Core와 collaboration package-local primitive의 array index·equality parity 및 JSON boundary fixture |
+| `standards/json-document-v3/conformance/vectors/foundation.json` | Core public primitive의 array index·equality 및 JSON boundary fixture |
 | `standards/json-document-v3/conformance/vectors/pressure.json` | form, table/data-grid, outliner/tree, rich text, storage/collaboration 시나리오 |
 | `standards/json-document-v3/conformance/suites/pressure.ts` | 여섯 member만으로 다섯 vertical을 실행하는 injected runner |
 | `standards/json-document-v3/implementations/independent/json-document.ts` | reference runtime을 import하지 않는 독립 6-member test implementation |
@@ -199,9 +199,9 @@ reference와 독립 구현을 모두 통과하며, collaboration public binding�
 Core의 JSON equality는 하나의 equality leaf가 소유한다. canonical array index
 `[0]|[1-9][0-9]*`와 JavaScript safe-integer 경계도 하나의 Pointer leaf가
 소유하며, RFC 6902 append marker `-`는 write 문맥에서만 별도로 처리한다.
-collaboration package는 Core private path를 deep import하지 않고 package-local
-두 primitive를 유지하며 `foundation-vectors.json`을 함께 실행해 의미 차이를
-드러낸다.
+collaboration package는 Core private path를 deep import하거나 같은 primitive를
+별도로 구현하지 않는다. Core public API의 `jsonEqual`과 `parseArrayIndex`를
+소비하며 foundation conformance vector로 그 경계 의미를 검증한다.
 
 JSON validation, owning clone, trusted clone은 하나의 traversal abstraction으로
 합치지 않는다. validation은 오류 위치를 설명하고, owning clone은 검증과

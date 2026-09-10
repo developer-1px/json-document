@@ -30,15 +30,15 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("y mandatory");
   await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
-  await navigation.getByRole("button", { name: "Introduce" }).click();
-  await expect(navigation.getByRole("group", { name: "Introduce" }).getByRole("link")).toHaveText([
+  await navigation.getByRole("button", { name: "Introduction" }).click();
+  await expect(navigation.getByRole("group", { name: "Introduction" }).getByRole("link")).toHaveText([
     "Why",
     "Concept Map",
     "How We Build",
   ]);
   await navigation.getByRole("button", { name: "Foundation" }).click();
   await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
-  await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: "Overview", exact: true })).toBeVisible();
+  await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: "Overview", exact: true }).first()).toBeVisible();
   await navigation.getByRole("button", { name: "Building Blocks" }).click();
   await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Hands" }).click();
@@ -54,7 +54,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await navigation.getByRole("button", { name: "Artifact" }).click();
   await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText([
-    "Document · Presentation · Spreadsheet",
+    "Content Prototype · TBD",
   ]);
   await navigation.getByRole("button", { name: "Applications" }).click();
   await expect(navigation.getByRole("group", { name: "Applications" }).getByRole("link")).toHaveText([
@@ -62,9 +62,9 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Calendar",
     "AI Agent",
   ]);
-  await expect(navigation.getByRole("link", { name: "Reference", exact: true })).toHaveAttribute("href", "/docs/api");
+  await expect(navigation.getByRole("link", { name: "JSON Document Protocol", exact: true })).toHaveAttribute("href", "/docs/api");
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
-    "Introduce",
+    "Introduction",
     "Foundation",
     "Building Blocks",
     "Hands",
@@ -83,7 +83,7 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(page.locator("[data-home-scene]")).toHaveCount(5);
 
   const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(siteNavigation.getByRole("group", { name: "Introduce" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Introduction" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Foundation" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Hands" })).toBeVisible();
@@ -166,16 +166,17 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("heading", { level: 3, name: "값을 다루는 하나의 계약" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Introduce" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
+  await expect(siteNavigation.getByRole("group", { name: "Introduction" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
   await siteNavigation.getByRole("button", { name: "Building Blocks" }).click();
-  await siteNavigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Overview", exact: true }).nth(1).click();
+  await siteNavigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Overview", exact: true }).nth(2).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(0);
 
-  await siteNavigation.getByRole("link", { name: "Reference", exact: true }).click();
-  await expect(page).toHaveTitle("json-document API - json-document");
-  await expect(page.getByRole("heading", { level: 1, name: "json-document API" })).toBeVisible();
+  await siteNavigation.getByRole("button", { name: "Foundation" }).click();
+  await siteNavigation.getByRole("link", { name: "JSON Document Protocol", exact: true }).click();
+  await expect(page).toHaveTitle("JSON Document Protocol - json-document");
+  await expect(page.getByRole("heading", { level: 1, name: "JSON Document Protocol" })).toBeVisible();
 });
 
 test("Editing docs and API demos keep one Korean reading flow", async ({ page }) => {
@@ -563,7 +564,7 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
 test("official site uses window scroll with sticky desktop navigation", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto("/docs/api");
-  await expect(page.getByRole("heading", { level: 1, name: "json-document API" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "JSON Document Protocol" })).toBeVisible();
 
   await page.evaluate(() => window.scrollTo(0, 1200));
 

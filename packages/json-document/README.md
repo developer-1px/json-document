@@ -200,15 +200,22 @@ const body = JSON.stringify(operations);
 body satisfies string;
 ```
 
-## Connector와 host 경계
+## 생태계와 Host 경계
 
 Form, data-grid, outliner, rich text, persistence/collaboration extension은 여섯
-member `JSONDocument`를 포트로 받는 것이 권장됩니다. DOM focus, geometry,
-keyboard, system clipboard, filesystem, network, formula, CRDT와 OT는 host가
-소유합니다.
+member `JSONDocument`를 포트로 받습니다. 문서 고유 모델·의미 연산·Projection은
+Document Type, 선택·작업·History는 Editing, 플랫폼 입력과 DOM lifecycle은
+Adapter의 책임입니다. 이 기능을 Core나 Host에 재구현하지 않습니다.
 
 React, Zod와 TanStack Table 같은 외부 생태계의 반복되는 integration은 Root가
 아니라 `@interactive-os/json-document-<target>` 공식 Connector가 제공합니다.
+Host는 제품 정책 값·copy·fixture·layout, 정본 모듈의 조합·실행 순서와
+구체 외부 인스턴스 주입을 소유합니다.
 
-- GitHub Wiki: https://github.com/developer-1px/json-document/wiki
-- Extension guide: https://github.com/developer-1px/json-document/wiki/Labs-and-Extensions
+현재 package 배치와 목표 책임의 수렴은 구별합니다. Document Type 후보와
+Official Hands Profile의 전체 완료는 아직 TBD이며 Core v3의 Stable 계약을
+확장하지 않습니다.
+
+- [Concept Map](../../docs/public/concepts.md)
+- [Building Blocks](../../docs/public/building-blocks.md)
+- [Document Types · TBD](../../docs/public/document-types.md)

@@ -94,7 +94,17 @@ operation과 projection의 실제 owner를 감사한 뒤에만 이 위치로 이
 있습니다. 그때까지 기존 package/API 이름, 모듈 배치와 Hands 내비게이션은
 유지합니다.
 
-## 소유권 확정 조건
+## 현재와 목표 사이
+
+현재 구현의 schema와 API는 후보를 검토할 근거입니다. 목표는 model·invariant·
+operation·projection이 한 Document Type owner에서 나오고, Editing과 UI가 그
+공개 계약을 소비하는 것입니다. 편집 lifecycle·DOM geometry 관찰·React 구독은
+각자의 이웃 책임에 남습니다.
+
+Calendar와 Object는 공개 소유자와 소스 기반 책임 감사를 연결했습니다.
+다른 후보도 이름이나 schema 표만으로 소유권 검토를 완료했다고 간주하지 않습니다.
+
+## 완료 조건 · TBD
 
 각 Document Type의 분류를 확정할 때는 다음 증거가 모두 필요합니다.
 
