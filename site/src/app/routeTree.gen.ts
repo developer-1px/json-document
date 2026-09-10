@@ -61,6 +61,7 @@ import { Route as PageDocsAdapterKeyboardRouteImport } from "./routes/_page/docs
 import { Route as PageDocsAdapterVirtualSelectionRouteImport } from "./routes/_page/docs/adapter-virtual-selection";
 import { Route as PageDocsAdaptersRouteImport } from "./routes/_page/docs/adapters";
 import { Route as PageDocsAnimationRouteImport } from "./routes/_page/docs/animation";
+import { Route as PageDocsBuildingBlocksRouteImport } from "./routes/_page/docs/building-blocks";
 import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipboard";
 import { Route as PageDocsComposerRouteImport } from "./routes/_page/docs/composer";
 import { Route as PageDocsConceptsRouteImport } from "./routes/_page/docs/concepts";
@@ -73,6 +74,7 @@ import { Route as PageDocsConnectorZodRouteImport } from "./routes/_page/docs/co
 import { Route as PageDocsConnectorZodValidateRouteImport } from "./routes/_page/docs/connector-zod-validate";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
 import { Route as PageDocsDatabaseRouteImport } from "./routes/_page/docs/database";
+import { Route as PageDocsEditingRouteImport } from "./routes/_page/docs/editing";
 import { Route as PageDocsFoundationRouteImport } from "./routes/_page/docs/foundation";
 import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
 import { Route as PageDocsHowWeBuildRouteImport } from "./routes/_page/docs/how-we-build";
@@ -439,6 +441,11 @@ const PageDocsAnimationRoute = PageDocsAnimationRouteImport.update({
   path: "/docs/animation",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsBuildingBlocksRoute = PageDocsBuildingBlocksRouteImport.update({
+  id: "/docs/building-blocks",
+  path: "/docs/building-blocks",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsClipboardRoute = PageDocsClipboardRouteImport.update({
   id: "/docs/clipboard",
   path: "/docs/clipboard",
@@ -500,6 +507,11 @@ const PageDocsConnectorsRoute = PageDocsConnectorsRouteImport.update({
 const PageDocsDatabaseRoute = PageDocsDatabaseRouteImport.update({
   id: "/docs/database",
   path: "/docs/database",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsEditingRoute = PageDocsEditingRouteImport.update({
+  id: "/docs/editing",
+  path: "/docs/editing",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsFoundationRoute = PageDocsFoundationRouteImport.update({
@@ -1072,6 +1084,7 @@ export interface FileRoutesByFullPath {
   "/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/animation": typeof PageDocsAnimationRoute;
+  "/docs/building-blocks": typeof PageDocsBuildingBlocksRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
@@ -1084,6 +1097,7 @@ export interface FileRoutesByFullPath {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
+  "/docs/editing": typeof PageDocsEditingRoute;
   "/docs/foundation": typeof PageDocsFoundationRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
@@ -1233,6 +1247,7 @@ export interface FileRoutesByTo {
   "/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/animation": typeof PageDocsAnimationRoute;
+  "/docs/building-blocks": typeof PageDocsBuildingBlocksRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
@@ -1245,6 +1260,7 @@ export interface FileRoutesByTo {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
+  "/docs/editing": typeof PageDocsEditingRoute;
   "/docs/foundation": typeof PageDocsFoundationRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
@@ -1396,6 +1412,7 @@ export interface FileRoutesById {
   "/_page/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/_page/docs/adapters": typeof PageDocsAdaptersRoute;
   "/_page/docs/animation": typeof PageDocsAnimationRoute;
+  "/_page/docs/building-blocks": typeof PageDocsBuildingBlocksRoute;
   "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
   "/_page/docs/composer": typeof PageDocsComposerRoute;
   "/_page/docs/concepts": typeof PageDocsConceptsRoute;
@@ -1408,6 +1425,7 @@ export interface FileRoutesById {
   "/_page/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
   "/_page/docs/database": typeof PageDocsDatabaseRoute;
+  "/_page/docs/editing": typeof PageDocsEditingRoute;
   "/_page/docs/foundation": typeof PageDocsFoundationRoute;
   "/_page/docs/history": typeof PageDocsHistoryRoute;
   "/_page/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
@@ -1559,6 +1577,7 @@ export interface FileRouteTypes {
     | "/docs/adapter-virtual-selection"
     | "/docs/adapters"
     | "/docs/animation"
+    | "/docs/building-blocks"
     | "/docs/clipboard"
     | "/docs/composer"
     | "/docs/concepts"
@@ -1571,6 +1590,7 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
+    | "/docs/editing"
     | "/docs/foundation"
     | "/docs/history"
     | "/docs/how-we-build"
@@ -1720,6 +1740,7 @@ export interface FileRouteTypes {
     | "/docs/adapter-virtual-selection"
     | "/docs/adapters"
     | "/docs/animation"
+    | "/docs/building-blocks"
     | "/docs/clipboard"
     | "/docs/composer"
     | "/docs/concepts"
@@ -1732,6 +1753,7 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
+    | "/docs/editing"
     | "/docs/foundation"
     | "/docs/history"
     | "/docs/how-we-build"
@@ -1882,6 +1904,7 @@ export interface FileRouteTypes {
     | "/_page/docs/adapter-virtual-selection"
     | "/_page/docs/adapters"
     | "/_page/docs/animation"
+    | "/_page/docs/building-blocks"
     | "/_page/docs/clipboard"
     | "/_page/docs/composer"
     | "/_page/docs/concepts"
@@ -1894,6 +1917,7 @@ export interface FileRouteTypes {
     | "/_page/docs/connector-zod-validate"
     | "/_page/docs/connectors"
     | "/_page/docs/database"
+    | "/_page/docs/editing"
     | "/_page/docs/foundation"
     | "/_page/docs/history"
     | "/_page/docs/how-we-build"
@@ -2368,6 +2392,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsAnimationRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/building-blocks": {
+      id: "/_page/docs/building-blocks";
+      path: "/docs/building-blocks";
+      fullPath: "/docs/building-blocks";
+      preLoaderRoute: typeof PageDocsBuildingBlocksRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/clipboard": {
       id: "/_page/docs/clipboard";
       path: "/docs/clipboard";
@@ -2450,6 +2481,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/database";
       fullPath: "/docs/database";
       preLoaderRoute: typeof PageDocsDatabaseRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/editing": {
+      id: "/_page/docs/editing";
+      path: "/docs/editing";
+      fullPath: "/docs/editing";
+      preLoaderRoute: typeof PageDocsEditingRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/foundation": {
@@ -3173,6 +3211,7 @@ interface PageRouteChildren {
   PageDocsAdapterVirtualSelectionRoute: typeof PageDocsAdapterVirtualSelectionRoute;
   PageDocsAdaptersRoute: typeof PageDocsAdaptersRoute;
   PageDocsAnimationRoute: typeof PageDocsAnimationRoute;
+  PageDocsBuildingBlocksRoute: typeof PageDocsBuildingBlocksRoute;
   PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
   PageDocsComposerRoute: typeof PageDocsComposerRoute;
   PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
@@ -3185,6 +3224,7 @@ interface PageRouteChildren {
   PageDocsConnectorZodValidateRoute: typeof PageDocsConnectorZodValidateRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
   PageDocsDatabaseRoute: typeof PageDocsDatabaseRoute;
+  PageDocsEditingRoute: typeof PageDocsEditingRoute;
   PageDocsFoundationRoute: typeof PageDocsFoundationRoute;
   PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
   PageDocsHowWeBuildRoute: typeof PageDocsHowWeBuildRoute;
@@ -3334,6 +3374,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAdapterVirtualSelectionRoute: PageDocsAdapterVirtualSelectionRoute,
   PageDocsAdaptersRoute: PageDocsAdaptersRoute,
   PageDocsAnimationRoute: PageDocsAnimationRoute,
+  PageDocsBuildingBlocksRoute: PageDocsBuildingBlocksRoute,
   PageDocsClipboardRoute: PageDocsClipboardRoute,
   PageDocsComposerRoute: PageDocsComposerRoute,
   PageDocsConceptsRoute: PageDocsConceptsRoute,
@@ -3346,6 +3387,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsConnectorZodValidateRoute: PageDocsConnectorZodValidateRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
   PageDocsDatabaseRoute: PageDocsDatabaseRoute,
+  PageDocsEditingRoute: PageDocsEditingRoute,
   PageDocsFoundationRoute: PageDocsFoundationRoute,
   PageDocsHistoryRoute: PageDocsHistoryRoute,
   PageDocsHowWeBuildRoute: PageDocsHowWeBuildRoute,

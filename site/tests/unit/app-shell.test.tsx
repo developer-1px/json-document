@@ -48,8 +48,8 @@ describe("official site shell", () => {
     expect(nav.queryByRole("link", { name: "Why" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
     expect(screen.queryByRole("navigation", { name: "Dependency map" })).toBeNull();
-    await user.click(nav.getByRole("button", { name: "Introduce" }));
-    expect(groupLinks(nav, "Introduce")).toEqual([
+    await user.click(nav.getByRole("button", { name: "Introduction" }));
+    expect(groupLinks(nav, "Introduction")).toEqual([
       "Why",
       "Concept Map",
       "How We Build",
@@ -71,12 +71,12 @@ describe("official site shell", () => {
       "Mention",
     ]));
     await user.click(nav.getByRole("button", { name: "Artifact" }));
-    expect(groupLinks(nav, "Artifact")).toEqual(["Document · Presentation · Spreadsheet"]);
+    expect(groupLinks(nav, "Artifact")).toEqual(["Content Prototype · TBD"]);
     await user.click(nav.getByRole("button", { name: "Applications" }));
     expect(groupLinks(nav, "Applications")).toEqual(["Overview", "Calendar", "AI Agent"]);
-    expect(nav.getByRole("link", { name: "Reference" }).getAttribute("href")).toBe("/docs/api");
+    expect(nav.getByRole("link", { name: "JSON Document Protocol" }).getAttribute("href")).toBe("/docs/api");
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
-      "Introduce",
+      "Introduction",
       "Foundation",
       "Building Blocks",
       "Hands",
@@ -107,7 +107,7 @@ describe("official site shell", () => {
     expect(databaseCrumb.getByRole("link", { name: "Hands" }).getAttribute("href")).toBe("/editors");
     expect(databaseCrumb.getByText("Database")).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Building Blocks" })).getAllByRole("link", { name: "Overview", exact: true })[1]!);
+    await user.click(within(nav.getByRole("group", { name: "Building Blocks" })).getAllByRole("link", { name: "Overview", exact: true })[2]!);
     expect(await screen.findByRole(
       "heading",
       { level: 1, name: "json-document Connectors" },
@@ -131,7 +131,7 @@ describe("official site shell", () => {
   test("renders the Calendar owner API reference and package-owned contract", async () => {
     resetDocument("/docs/api/calendar-document");
     render(<App />);
-    expect(await screen.findByRole("heading", { level: 1, name: "API · Calendar Document" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 1, name: "Calendar Document Type API" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Calendar Document Type 계약 · RC" })).toBeTruthy();
     expect(screen.getAllByRole("link", { name: "validateCalendarDocument", exact: true }).length).toBeGreaterThan(0);
   });
@@ -143,8 +143,8 @@ describe("official site shell", () => {
     const brand = screen.getByRole("link", { name: "json-document" });
     const siteNav = screen.getByRole("navigation", { name: "Site navigation" });
 
-    await user.click(nav.getByRole("button", { name: "Introduce" }));
-    await user.click(within(nav.getByRole("group", { name: "Introduce" })).getByRole("link", { name: "Why" }));
+    await user.click(nav.getByRole("button", { name: "Introduction" }));
+    await user.click(within(nav.getByRole("group", { name: "Introduction" })).getByRole("link", { name: "Why" }));
     await waitFor(() => expect(document.documentElement.lang).toBe("ko"));
     const frame = await waitFor(() => {
       const node = document.querySelector("[data-page-frame]");
@@ -152,9 +152,10 @@ describe("official site shell", () => {
       return node;
     });
 
-    await user.click(nav.getByRole("link", { name: "Reference" }));
+    await user.click(nav.getByRole("button", { name: "Foundation" }));
+    await user.click(nav.getByRole("link", { name: "JSON Document Protocol" }));
     const crumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
-    await waitFor(() => expect(crumb.getByText("Reference")).toBeTruthy());
+    await waitFor(() => expect(crumb.getByText("JSON Document Protocol")).toBeTruthy());
     expect(screen.getByRole("link", { name: "json-document" })).toBe(brand);
     expect(screen.getByRole("navigation", { name: "Site navigation" })).toBe(siteNav);
     expect(document.querySelector("[data-page-frame]")).toBe(frame);

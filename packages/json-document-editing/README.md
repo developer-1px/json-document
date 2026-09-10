@@ -155,10 +155,10 @@ Its structural selection slices split into two reusable families without
 pretending that every topology is the same:
 
 - `Document`, `Order`, `Sheet`, and `Tree` use the range family.
-  Their host or domain slice supplies ordered axes, visible order, and JSON
-  Patch planning.
-- `Object` uses the key family. The host owns pointer
-  geometry and hit-testing, then sends only stable object IDs to the editor.
+  Ordered axes, visible projections and JSON Patch planning come from the
+  canonical document/editor or external-model connector.
+- `Object` uses the key family. Canonical platform geometry and hit-testing
+  APIs supply stable object IDs to the editor; the Host composes that path.
   Its public `selection.set` accepts the shared `replace`, `extend`, and
   `toggle` vocabulary directly; `extend` has key-family union semantics.
 

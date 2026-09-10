@@ -15,12 +15,12 @@ export const apiReferencePackages = [
   ["ui-primitives-react", "@interactive-os/json-document-ui-primitives-react", "packages/json-document-ui-primitives-react/src/index.ts", "UI Primitives", "표준 React UI primitive"],
   ["animation-react", "@interactive-os/json-document-animation-react", "packages/json-document-animation-react/src/index.ts", "UI Primitives", "생성 대기 시각 언어"],
   ["markdown-react", "@interactive-os/json-document-markdown-react", "packages/json-document-markdown-react/src/index.ts", "Artifact", "스트리밍 Markdown 투영과 렌더링"],
-  ["database", "@interactive-os/json-document-database", "packages/json-document-database/src/index.ts", "Hands", "Database Hand domain 계약"],
-  ["annotation", "@interactive-os/json-document-annotation", "packages/json-document-annotation/src/index.ts", "Hands", "Annotation Hand interaction과 SVG projection"],
-  ["calendar", "@interactive-os/json-document-calendar", "packages/json-document-calendar/src/index.ts", "Hands", "Calendar React lifecycle와 occurrence interaction 계약"],
+  ["database", "@interactive-os/json-document-database", "packages/json-document-database/src/index.ts", "Hands", "Database 문서 모델·연산·saved-view projection"],
+  ["annotation", "@interactive-os/json-document-annotation", "packages/json-document-annotation/src/index.ts", "Hands", "Annotation interaction과 SVG projection"],
+  ["calendar", "@interactive-os/json-document-calendar", "packages/json-document-calendar/src/index.ts", "Hands", "Calendar React lifecycle와 occurrence interaction 계약 ([시간·반복·거절 계약: Editing의 Calendar protocol profile](/docs/api/editing#calendar-protocol-profile-rc))"],
   ["web", "@interactive-os/json-document-web", "packages/json-document-web/src/index.ts", "Adapter", "Web platform adapter"],
   ["contenteditable", "@interactive-os/json-document-contenteditable", "packages/json-document-contenteditable/src/index.ts", "Adapter", "contenteditable platform adapter"],
-  ["rich-text", "@interactive-os/json-document-rich-text", "packages/json-document-rich-text/src/index.ts", "Editing", "Rich Text domain과 editing 계약"],
+  ["rich-text", "@interactive-os/json-document-rich-text", "packages/json-document-rich-text/src/index.ts", "Editing", "Rich Text 문서 의미와 editing 계약"],
   ["file-intake", "@interactive-os/json-document-file-intake", "packages/json-document-file-intake/src/index.ts", "Artifact", "플랫폼 독립 파일 후보와 수용 정책"],
   ["rich-text-suggestion", "@interactive-os/json-document-rich-text-suggestion", "packages/json-document-rich-text-suggestion/src/index.ts", "Hands", "Rich Text suggestion trigger와 상태 계약"],
   ["rich-text-suggestion-react", "@interactive-os/json-document-rich-text-suggestion-react", "packages/json-document-rich-text-suggestion-react/src/index.ts", "Hands", "Rich Text suggestion React interaction binding"],
@@ -32,13 +32,34 @@ export const apiReferencePackages = [
   ["rich-text-react", "@interactive-os/json-document-rich-text-react", "packages/json-document-rich-text-react/src/index.tsx", "Connector", "Rich Text React connector"],
   ["collaboration", "@interactive-os/json-document-collaboration", "packages/json-document-collaboration/src/index.ts", "Collaboration", "replica, history, text collaboration runtime"],
   ["contenteditable-collaboration", "@interactive-os/json-document-contenteditable-collaboration", "packages/contenteditable-collaboration/src/index.ts", "Collaboration", "collaborative contenteditable lease"],
-].map(([slug, packageName, entrypoint, owner, responsibility]) => ({
-  slug, packageName, entrypoint, owner, responsibility,
+].map(([slug, packageName, entrypoint, navigationGroup, responsibility]) => ({
+  slug, packageName, entrypoint, navigationGroup, responsibility,
   subpaths: slug === "collaboration" ? [{
     packageName: "@interactive-os/json-document-collaboration/history",
     entrypoint: "packages/json-document-collaboration/src/history-index.ts",
+  }, {
+    packageName: "@interactive-os/json-document-collaboration/text",
+    entrypoint: "packages/json-document-collaboration/src/text-index.ts",
   }, {
     packageName: "@interactive-os/json-document-collaboration/editing",
     entrypoint: "packages/json-document-collaboration/src/editing-index.ts",
   }] : [],
 }));
+
+export function apiReferenceCoverageErrors(manifests, references = apiReferencePackages) {
+  const expected = manifests.filter((manifest) => !manifest.private).flatMap((manifest) =>
+    Object.entries(manifest.exports).filter(([, target]) => hasTypes(target))
+      .map(([subpath]) => subpath === "." ? manifest.name : `${manifest.name}/${subpath.slice(2)}`));
+  const registered = references.flatMap(({ packageName, subpaths }) =>
+    [packageName, ...subpaths.map((subpath) => subpath.packageName)]);
+  return [
+    ...expected.filter((name) => !registered.includes(name)).map((name) => `API reference missing: ${name}`),
+    ...registered.filter((name) => !expected.includes(name)).map((name) => `API reference is not public: ${name}`),
+    ...registered.filter((name, index) => registered.indexOf(name) !== index).map((name) => `Duplicate API reference: ${name}`),
+  ];
+}
+
+function hasTypes(target) {
+  return target !== null && typeof target === "object"
+    && (typeof target.types === "string" || Object.values(target).some(hasTypes));
+}

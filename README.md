@@ -28,9 +28,14 @@ stateless JSON Patch
 
 | 목적 | 위치 |
 | --- | --- |
-| 빠른 사용 예제 | [docs/public/quickstart.md](docs/public/quickstart.md) |
+| 빠른 사용 예제 | [Intent guide](docs/public/intent-guide.md) |
+| 목표 구조와 TBD | [Concept Map](docs/public/concepts.md), [Foundation](docs/public/foundation.md) |
 | JSON Document 개념 | [docs/public/overview.md](docs/public/overview.md) |
-| JSON Document API | [docs/public/api.md](docs/public/api.md) |
+| JSON Document Protocol | [docs/public/api.md](docs/public/api.md) |
+| Editing Protocol | [docs/public/editing.md](docs/public/editing.md) |
+| Document Types · TBD | [후보와 완료 조건](docs/public/document-types.md) |
+| Official Hands · TBD | [Profile의 목표와 현재 증거](docs/public/official-hands.md) |
+| Building Blocks | [독립적인 네 책임](docs/public/building-blocks.md) |
 | 편집 개념 | [docs/public/selection.md](docs/public/selection.md), [history](docs/public/history.md), [clipboard](docs/public/clipboard.md), [topology](docs/public/topology.md) |
 | Adapter | [docs/public/adapters.md](docs/public/adapters.md) |
 | Connector | [docs/public/connectors.md](docs/public/connectors.md) |
@@ -68,7 +73,10 @@ Editing, Adapter, Connector와 collaboration package는 독립 version과 releas
 lifecycle을 가집니다. Selection, clipboard, history는 editing companion이
 제공하는 headless lifecycle 위에서 도메인별 모델을 조합합니다. 플랫폼 계약은
 공식 Adapter가 맡고, external framework와 schema의 반복 glue는 공식 Connector가
-맡으며, persistence와 제품별 UI 의미는 host가 소유합니다.
+맡습니다. Host는 조합·실행 순서·제품 정책 값·copy·fixture·layout과 구체
+persistence 인스턴스 주입을 소유합니다. 재사용 모델·연산·투영·UI 행동은 각
+정본 모듈에 둡니다. Document Type 후보와 Official Hands의 전체 Profile은
+아직 TBD이며 기존 package/API의 존재만으로 완료를 선언하지 않습니다.
 일반 DOM과 Input Events 정규화가 필요한 제품은 별도 수명 주기의
 `@interactive-os/editable`도 검토할 수 있습니다.
 
@@ -89,12 +97,15 @@ optional editing companion이 제공하는 것:
 - range-set과 set-selection transition family
 - Document·Order·Sheet·Object·Tree domain slice와 selection-restoring history
 
-편집 제품이 계속 소유하는 것:
+Application/Host가 소유하는 것:
 
-- rendering, DOM focus, keyboard, drag/drop UI와 geometry hit-test
-- DOM focus, system clipboard와 제품별 interaction policy
-- formula engine과 제품별 grid projection 정책
-- product command 이름, layout, route, remote protocol
+- 정본 모듈의 조합과 실행 순서
+- 제품의 권한·기본값·copy·fixture·layout·route
+- 구체 persistence·network 인스턴스와 제품별 정책 값의 주입
+
+문서 의미·formula·grid projection은 해당 의미 owner에, DOM focus·keyboard·
+clipboard·geometry 관찰은 Adapter에, 조작 수명주기와 재사용 UI는 Affordance·
+Connector·UI Primitives에 둡니다. Core 밖의 책임이 모두 Host 책임은 아닙니다.
 
 공식 Adapter가 제공하는 것:
 

@@ -1,19 +1,18 @@
 import { type SiteNavigationGroup } from "./page-descriptors";
 
 export type SiteSection = {
-  readonly id: "introduce" | "foundation" | "building-blocks" | "hands" | "artifact" | "applications" | "reference";
+  readonly id: "introduction" | "foundation" | "building-blocks" | "hands" | "artifact" | "applications";
   readonly path: string;
   readonly label: string;
   readonly blurb: string;
   readonly groups: ReadonlyArray<SiteNavigationGroup>;
-  readonly separated?: boolean;
 };
 
 export const siteSections: ReadonlyArray<SiteSection> = [
   {
-    id: "introduce",
+    id: "introduction",
     path: "/docs",
-    label: "Introduce",
+    label: "Introduction",
     blurb: "Why, concepts, and how we build",
     groups: ["Introduction"],
   },
@@ -26,7 +25,7 @@ export const siteSections: ReadonlyArray<SiteSection> = [
   },
   {
     id: "building-blocks",
-    path: "/docs/adapters",
+    path: "/docs/building-blocks",
     label: "Building Blocks",
     blurb: "Platform, ecosystem, interaction, and UI",
     groups: ["Adapter", "Connector", "Affordance", "UI Primitives"],
@@ -51,14 +50,6 @@ export const siteSections: ReadonlyArray<SiteSection> = [
     label: "Applications",
     blurb: "Products that reveal reusable modules",
     groups: ["Applications"],
-  },
-  {
-    id: "reference",
-    path: "/docs/api",
-    label: "Reference",
-    blurb: "Canonical package and API indexes",
-    groups: [],
-    separated: true,
   },
 ];
 

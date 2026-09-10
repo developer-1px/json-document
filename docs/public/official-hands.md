@@ -1,8 +1,7 @@
 # Official Hands · TBD
 
-> **TBD** — 이 페이지는 Official Hands의 제품 방향을 설명하는 초안입니다.
-> 새로운 public contract, package boundary, kit admission 기준 또는
-> compatibility 약속을 확정하지 않습니다.
+Official Hands의 목표와 남은 경계를 설명하는 초안입니다. 새로운 public contract,
+package boundary, kit admission 기준 또는 compatibility 약속을 확정하지 않습니다.
 
 Official Hands는 디자인과 제품 데이터는 자유롭게 바꿀 수 있지만, 사람이
 편집을 끝내는 데 필요한 기능은 이미 구현되어 있는 SDK를 지향합니다.
@@ -40,15 +39,14 @@ Official은 제품 취향을 임의로 정한다는 뜻이 아닙니다. 여러 
 대부분의 사용자는 Official Hands만으로 편집기를 완성할 수 있어야 합니다.
 Custom Hands는 기본 경로가 아니라 제품에만 있는 차이를 위한 escape hatch입니다.
 
-## 하나의 Hands Profile
+## Hands Profile · TBD
 
 완성된 Hands는 행동 함수만 모은 package가 아닙니다. 그 행동이 항상 같은
 뜻을 갖게 하는 최소 profile을 함께 제공합니다.
 
 ```text
 Official Hands Profile
-├─ minimum schema와 canonical shape
-├─ stable identity와 structural invariant
+├─ Document Type Profile 참조: schema · identity · invariant
 ├─ Selection specialization
 ├─ Topology interpretation
 ├─ Intent vocabulary
@@ -63,6 +61,11 @@ row identity, column identity와 cell addressability를 먼저 정해야 합니�
 이 최소 schema는 특정 업무 제품의 field를 강제하기 위한 것이 아니라,
 Sheet다운 편집 행동이 무엇을 대상으로 하는지 안정적으로 정하기 위해
 필요합니다.
+
+최소 schema와 의미 연산의 owner는 [Document Type](document-types.md)입니다.
+Hands Profile은 이 계약을 참조하고 Editing·Adapter·Affordance·Connector·UI를
+함께 선택합니다. Hands가 각 책임을 다시 구현하거나 Host가 빈칸을 메우는 구조가
+아닙니다.
 
 ### 공통 규칙과 profile의 선택
 
@@ -90,17 +93,17 @@ Selection family, EditingSession을 사용하면서 입력부터 편집 결과�
 Official Hands가 최소 profile을 제공해도 완성 제품을 대신 소유하지는 않습니다.
 
 ```text
-Official Hands가 소유
-├─ 장르다운 편집을 성립시키는 최소 shape
-├─ identity와 structural invariant
-├─ 수렴한 편집 행동
-└─ 함께 검증된 기본 조합
+Official Hands Profile이 연결
+├─ Document Type의 shape·identity·invariant
+├─ Editing의 Selection·Intent·Clipboard·History
+├─ Adapter·Affordance·Connector·UI의 편집 경로
+└─ 함께 검증할 지원 범위와 기본 조합
 
 Host가 소유
-├─ 업무 field와 business rule
-├─ permission과 workflow
-├─ persistence와 collaboration policy
-├─ rendering과 layout
+├─ 제품별 정책 값·권한·copy·fixture
+├─ workflow와 실행 순서
+├─ persistence·collaboration의 구체 인스턴스 주입
+├─ UI composition과 layout
 └─ visual design
 ```
 
@@ -108,6 +111,9 @@ Host가 소유
 automation에서 전혀 다르게 보일 수 있습니다. Hands는 object identity,
 Selection, translate와 resize의 의미를 유지하고 Host는 표현과 제품 정책을
 결정합니다.
+
+재사용 가능한 업무 모델·규칙과 rendering 행동은 각각 문서 의미와 UI의 정본
+모듈에 둡니다. 제품에서 선택하는 정책 값과 모듈 자체의 의미를 구별합니다.
 
 ## Affordance까지 닫기
 
@@ -186,3 +192,17 @@ Official profile의 지향점은 구현이 바뀌어도 같은 지원 입력에�
 구체적인 profile별 필수 작업, Host field 연결, 여러 Hand가 공유하는 History
 단위는 아직 확정하지 않았습니다. 현재 후보 목록과 위 동작 예시는 완성된 SDK의
 호환성 보장이 아닙니다.
+
+## 현재 증거와 완료 조건 · TBD
+
+| 경계 | 현재 있는 것 | 완료에 필요한 것 |
+| --- | --- | --- |
+| 문서 의미 | 각 editor와 package의 모델·연산 | Document Type owner와 Profile 참조의 수렴 |
+| 편집 작업 | 기존 Intent와 EditingSession 공통 의미 | Profile별 지원/의도적 미지원/미구현 및 결과·실패 조건 |
+| 실제 입력 | Hands Live Demo와 platform binding | keyboard·pointer·Clipboard·취소·Undo/Redo가 이어지는 적합성 증거 |
+| 공개 사용 | package API와 Usage·Source | Host의 같은 책임 우회 구현 없이 조합되는 완료 경로 |
+| 호환성 | 개별 구현과 Profile의 증거 | 기본값·중첩 맥락·공유 History와 변경 정책의 명시 |
+
+이 조건을 닫기 전에는 Official Hands를 완성된 SDK나 모든 장르가 상호운용하는
+Stable 계약으로 표시하지 않습니다. 목표를 미리 드러내되 현재 동작의 증거와
+미확정 설계를 섞지 않습니다.
