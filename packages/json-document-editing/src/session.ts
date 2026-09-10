@@ -10,6 +10,7 @@ import {
 import type { SelectionHistoryEntry } from "@interactive-os/json-document-selection";
 import { observeHistoryInvalidation } from "./history-invalidation.js";
 import { invertEditingPatch } from "./invert-patch.js";
+import { expandTextHistory, restoreHistoryPatch, storeHistoryPatch, type StoredHistoryOperation } from "./history-patch.js";
 import type { EditingHistoryOptions, EditingHistoryResult, EditingHistoryStatus } from "./history.js";
 
 export interface EditingDocumentChange {
@@ -58,7 +59,7 @@ export interface EditingSession<Selection extends JSONValue> {
 }
 
 interface HistoryEntry<Selection extends JSONValue>
-  extends SelectionHistoryEntry<Selection, JSONPatchOperation> {
+  extends SelectionHistoryEntry<Selection, StoredHistoryOperation> {
   readonly group?: string;
 }
 
@@ -241,6 +242,11 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       const validation = document.validatePatch(plan.operations);
       return validation.ok ? { ok: false, code: "history.inverse-unavailable" } : validation;
     }
+    const ignoredHistory = plan.history === "ignore" ? {
+      undo: expandTextHistory(beforeValue, undoStack, "inverse"),
+      redo: expandTextHistory(beforeValue, redoStack, "forward"),
+    } : null;
+    if (ignoredHistory && (!ignoredHistory.undo || !ignoredHistory.redo)) return { ok: false, code: "history.inverse-unavailable" };
     const result = commit(plan.operations, {
       editing: {
         origin: plan.origin,
@@ -250,6 +256,10 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
     });
     if (!result.ok) return result;
 
+    if (ignoredHistory && result.change.applied.length > 0) {
+      undoStack = ignoredHistory.undo!;
+      redoStack = ignoredHistory.redo!;
+    }
     selection = selectionAfter;
     revision += 1;
     const historyStatus = options.history?.status();
@@ -262,8 +272,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
     }
     if (!options.history && plan.history !== "ignore" && result.change.applied.length > 0) {
       const entry: HistoryEntry<Selection> = {
-        forward: result.change.applied,
-        inverse,
+        ...storeHistoryPatch(result.change.applied, inverse, plan.historyGroup),
         selectionBefore: beforeSelection,
         selectionAfter: selection,
         ...(plan.historyGroup === undefined ? {} : { group: plan.historyGroup }),
@@ -287,7 +296,8 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
   }
 
   function restore(entry: HistoryEntry<Selection>, direction: "undo" | "redo"): EditingResult<Selection> {
-    const operations = direction === "undo" ? entry.inverse : entry.forward;
+    const operations = restoreHistoryPatch(document, direction === "undo" ? entry.inverse : entry.forward);
+    if (operations === null) return { ok: false as const, code: "history.text-source-stale" };
     const nextSelection = direction === "undo" ? entry.selectionBefore : entry.selectionAfter;
     const result = commit(operations, {
       editing: { origin: direction, selectionAfter: nextSelection },

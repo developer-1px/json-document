@@ -94,7 +94,11 @@
 }
 
 @layer components {
-  /* Tailwind recipes own Markdown presentation; CSS only owns stream-state animation. */
+  /* Markdown presentation consumes semantic tokens; streaming adds animation. */
+  [data-markdown-delimiter] {
+    @apply text-foreground-muted;
+  }
+
   [data-markdown-streaming="true"] > :last-child {
     animation: markdown-stream-in 180ms ease-out;
   }

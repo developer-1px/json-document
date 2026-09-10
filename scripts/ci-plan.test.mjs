@@ -40,7 +40,10 @@ test("기반 패키지 변경은 모든 역방향 소비자를 선택한다", ()
   const plan = createPlan(["packages/json-document/src/index.ts"]);
 
   assert.equal(plan.full, false);
-  assert.equal(plan.packageWorkspaces.length, 27);
+  assert.deepEqual(
+    libraries.map((library) => library.manifest.name).filter((name) => !plan.packageWorkspaces.includes(name)),
+    ["@interactive-os/json-document-selection", "@interactive-os/json-document-animation-react", "@interactive-os/json-document-markdown"],
+  );
   assert.equal(plan.standards, true);
   assert.equal(plan.externalKit, true);
   assert.deepEqual(plan.browserSpecs, ["site/tests/browser"]);

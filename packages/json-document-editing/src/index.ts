@@ -227,3 +227,5 @@ export type {
   CalendarTimeGridPointerIntent,
   CalendarTimeGridPointerRelease,
 } from "./calendar-time-grid-pointer.js";
+export { createTextEditor, clampTextSelection, type TextEditor, type TextSelection } from "./text.js";
+export { diffText, type TextChange } from "./text-change.js";

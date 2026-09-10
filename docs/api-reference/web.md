@@ -274,6 +274,11 @@ selectionOperationFromModifiers(modifiers: WebModifierState): Extract<SelectionO
 ```ts
 const sheetClipboardCodec: WebClipboardCodec<SheetClipboard>
 ```
+## `textClipboardCodec`
+
+```ts
+const textClipboardCodec: WebClipboardCodec<{ readonly type: "text/plain"; readonly text: string; }>
+```
 ## `textInputFromControl`
 
 ```ts

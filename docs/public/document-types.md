@@ -76,6 +76,12 @@ Object와 단일 슬라이드 Canvas 프로파일의 정본 소유자는
 
 현재 사이트에서 다음 항목을 추적합니다.
 
+Markdown은 원문 문자열을 JSONDocument에 저장하는 별도의 실험입니다.
+`@interactive-os/json-document-markdown`이 문법의 source 위치 projection을 소유하고,
+Editing이 문자열 선택·이력을, Markdown Web과 contenteditable이 DOM·native 입력을
+소유합니다. Rich Text 모델로 변환하지 않습니다. [Markdown API](/docs/api/markdown)와
+[caret Usage](/demo/markdown-caret)에서 strong 한 문단의 동작과 범위를 확인합니다.
+
 ```text
 Document Types · TBD
 ├── Rich Text

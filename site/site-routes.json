@@ -201,7 +201,8 @@
     "documentSource": "docs/api-reference/editing.md",
     "documentIncludes": [
       "packages/json-document-editing/docs/object-selection.md",
-      "packages/json-document-editing/docs/calendar-profile.md"
+      "packages/json-document-editing/docs/calendar-profile.md",
+      "packages/json-document-editing/docs/text.md"
     ]
   },
   {
@@ -285,7 +286,8 @@
     "navigationGroup": "Adapter",
     "documentSource": "docs/api-reference/web.md",
     "documentIncludes": [
-      "packages/json-document-web/docs/clipboard.md"
+      "packages/json-document-web/docs/clipboard.md",
+      "packages/json-document-web/docs/text-clipboard.md"
     ]
   },
   {
@@ -295,7 +297,10 @@
     "description": "@interactive-os/json-document-contenteditable의 전체 public API입니다.",
     "language": "ko",
     "navigationGroup": "Adapter",
-    "documentSource": "docs/api-reference/contenteditable.md"
+    "documentSource": "docs/api-reference/contenteditable.md",
+    "documentIncludes": [
+      "packages/json-document-contenteditable/docs/editing.md"
+    ]
   },
   {
     "path": "/docs/api/rich-text-web",
@@ -413,15 +418,55 @@
     "documentSource": "docs/api-reference/animation-react.md"
   },
   {
-    "path": "/docs/api/markdown-react",
+    "path": "/docs/api/markdown",
     "label": "API · Markdown",
+    "title": "Markdown API - json-document",
+    "description": "@interactive-os/json-document-markdown의 원문 보존 편집 계약입니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types",
+    "relatedDemoPath": "/demo/markdown-caret",
+    "relatedDemoLabel": "Markdown caret",
+    "documentSource": "docs/api-reference/markdown.md",
+    "documentIncludes": [
+      "packages/json-document-markdown/docs/api.md"
+    ]
+  },
+  {
+    "path": "/docs/api/markdown-web",
+    "label": "API · Markdown Web",
+    "title": "Markdown Web API - json-document",
+    "description": "@interactive-os/json-document-markdown-web의 원문 보존 편집 계약입니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter",
+    "relatedDemoPath": "/demo/markdown-caret",
+    "relatedDemoLabel": "Markdown caret",
+    "documentSource": "docs/api-reference/markdown-web.md",
+    "documentIncludes": [
+      "packages/json-document-markdown-web/docs/api.md"
+    ]
+  },
+  {
+    "path": "/demo/markdown-caret",
+    "label": "Markdown caret",
+    "title": "Markdown caret - json-document",
+    "heading": "Markdown caret",
+    "description": "Markdown 원문이 정본인 caret·delimiter·입력·clipboard·history 실험입니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/api/markdown-react",
+    "label": "API · Markdown React",
     "title": "Markdown React API - json-document",
     "description": "@interactive-os/json-document-markdown-react의 전체 public API입니다.",
     "language": "ko",
     "navigationGroup": "Artifact",
     "relatedDemoPath": "/demo/markdown",
     "relatedDemoLabel": "Streaming Markdown",
-    "documentSource": "docs/api-reference/markdown-react.md"
+    "documentSource": "docs/api-reference/markdown-react.md",
+    "documentIncludes": [
+      "packages/json-document-markdown-react/docs/editing.md"
+    ]
   },
   {
     "path": "/demo/markdown",

@@ -561,6 +561,11 @@ interface CanvasClipboardOptions {
   readonly contentGap?: number;
 }
 ```
+## `clampTextSelection`
+
+```ts
+clampTextSelection(value: string, selection: TextSelection): TextSelection
+```
 ## `createAnnotationEditor`
 
 ```ts
@@ -630,6 +635,11 @@ createOrderEditor(source: EditingDocumentSource<OrderDocument>, options?: Editin
 
 ```ts
 createSheetEditor(source: EditingDocumentSource<SheetDocument>, options?: EditingHistoryOptions): SheetEditor
+```
+## `createTextEditor`
+
+```ts
+createTextEditor(document: JSONDocument, pointer?: Pointer): TextEditor
 ```
 ## `createTreeEditor`
 
@@ -841,6 +851,11 @@ databaseValueFromText(property: DatabaseProperty, value: string): string | numbe
 
 ```ts
 defaultDatabaseValue(property: DatabaseProperty): JSONValue
+```
+## `diffText`
+
+```ts
+diffText(before: string, after: string): TextChange | null
 ```
 ## `DocumentBlock`
 
@@ -1600,6 +1615,37 @@ interface SheetSelection extends Record<string, JSONValue> {
 
 ```ts
 type SheetTopology = GridTopology;
+```
+## `TextChange`
+
+```ts
+interface TextChange {
+  readonly from: number;
+  readonly to: number;
+  readonly insert: string;
+}
+```
+## `TextEditor`
+
+```ts
+interface TextEditor {
+  readonly document: JSONDocument;
+  readonly pointer: Pointer;
+  readonly text: string;
+  readonly snapshot: EditingSnapshot<TextSelection>;
+  select(selection: TextSelection): EditingSnapshot<TextSelection>;
+  replace(value: string, selection: TextSelection): EditingResult<TextSelection>;
+  insert(text: string): EditingResult<TextSelection>;
+  copy(): string;
+  undo(): EditingResult<TextSelection>;
+  redo(): EditingResult<TextSelection>;
+  subscribe(listener: (snapshot: EditingSnapshot<TextSelection>) => void): () => void;
+}
+```
+## `TextSelection`
+
+```ts
+type TextSelection = { readonly anchor: number; readonly focus: number };
 ```
 ## `transformAnnotationSelector`
 

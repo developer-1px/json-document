@@ -1,9 +1,6 @@
 import type { JSONDocument, Pointer } from "@interactive-os/json-document";
-
-export interface TextSelection {
-  readonly anchor: number;
-  readonly focus: number;
-}
+import type { TextEditor, TextSelection } from "@interactive-os/json-document-editing";
+export type { TextSelection } from "@interactive-os/json-document-editing";
 
 export interface DOMObservation {
   readonly value: string;
@@ -12,7 +9,7 @@ export interface DOMObservation {
 
 export interface TextDOMAdapter {
   observe(root: HTMLElement): DOMObservation;
-  render(root: HTMLElement, value: string): void;
+  render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
   restoreSelection(root: HTMLElement, selection: TextSelection): boolean;
 }
 
@@ -21,6 +18,8 @@ export interface ContentEditableBindingOptions {
   readonly pointer: Pointer;
   readonly root: HTMLElement;
   readonly dom?: TextDOMAdapter;
+  /** Optional canonical source editor; replaces direct commits with selection-restoring Editing transactions. */
+  readonly editor?: TextEditor;
 }
 
 export type ContentEditableBindingResult =
