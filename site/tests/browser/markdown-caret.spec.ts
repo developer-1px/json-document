@@ -136,6 +136,48 @@ test("native copy/cut/paste uses Markdown source; literal paste preserves CRLF a
   await expect.poll(() => model(page)).toBe(literal);
 });
 
+test("IME-consumed Enter confirms Korean text and inserts exactly one newline", async ({ page }) => {
+  await select(page, 6, 4);
+  const client = await page.context().newCDPSession(page);
+  await client.send("Input.imeSetComposition", { text: "한국", selectionStart: 2, selectionEnd: 2 });
+  // Model the OS-consumed Enter: keydown reaches the root, but no native paragraph input follows.
+  await client.send("Input.dispatchKeyEvent", { type: "rawKeyDown", key: "Enter", code: "Enter", windowsVirtualKeyCode: 229 });
+  await expect.poll(() => model(page)).toBe(source);
+  await client.send("Input.insertText", { text: "한국" });
+  await client.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 });
+  await expect.poll(() => model(page)).toBe("A **한국\n** B __raw__ C");
+  await expect.poll(() => selection(page)).toEqual({ anchor: 7, focus: 7 });
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect.poll(() => model(page)).toBe("A **한국** B __raw__ C");
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect.poll(() => model(page)).toBe(source);
+  await expect.poll(() => selection(page)).toEqual({ anchor: 6, focus: 4 });
+  await page.keyboard.press("ControlOrMeta+Shift+z");
+  await page.keyboard.press("ControlOrMeta+Shift+z");
+  await expect.poll(() => model(page)).toBe("A **한국\n** B __raw__ C");
+  await page.keyboard.press("Enter");
+  await expect.poll(() => model(page)).toBe("A **한국\n\n** B __raw__ C");
+  await client.detach();
+});
+
+test("IME Enter with native paragraph input still inserts only one newline", async ({ page }) => {
+  await select(page, source.length);
+  const client = await page.context().newCDPSession(page);
+  await client.send("Input.imeSetComposition", { text: "한글", selectionStart: 2, selectionEnd: 2 });
+  await page.keyboard.down("Enter");
+  await client.send("Input.insertText", { text: "한글" });
+  await page.keyboard.up("Enter");
+  await expect.poll(() => model(page)).toBe(source + "한글\n");
+  await expect.poll(() => selection(page)).toEqual({ anchor: source.length + 3, focus: source.length + 3 });
+  await page.keyboard.type("next");
+  await expect.poll(() => model(page)).toBe(source + "한글\nnext");
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("tail");
+  await expect.poll(() => model(page)).toBe(source + "한글\nnext\n\ntail");
+  await client.detach();
+});
+
 test("unclosed delimiters and surrogate-pair deletion stay editable", async ({ page }) => {
   await select(page, 0, source.length);
   await paste(page, "**😀");

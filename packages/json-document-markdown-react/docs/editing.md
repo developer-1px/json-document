@@ -18,6 +18,8 @@ function Note() {
 
 현재 strong delimiter·caret 실험입니다. native 입력과 한국어 composition 이벤트,
 raw text clipboard, `Mod-z`/`Mod-Shift-z`를 연결합니다.
+조합 중 Enter 한 번으로 조합 확정과 줄바꿈을 처리하고 다음 줄에서 입력을 이어갑니다.
+Undo는 줄바꿈, 확정한 조합 순서로 되돌립니다.
 복사·잘라내기·붙여넣기는 원문 selection을 기준으로 처리합니다.
 `MarkdownRenderer`의 읽기 전용 GFM/streaming 렌더링은 별도 역할로 유지됩니다.
 streaming용 문법 보정 결과는 편집 원문에 기록하지 않습니다.

@@ -68,6 +68,11 @@ interface DOMObservation {
 ```ts
 const plainTextDOMAdapter: TextDOMAdapter
 ```
+## `renderTextCaretBoundary`
+
+```ts
+renderTextCaretBoundary(root: HTMLElement, value: string): void
+```
 ## `TextDOMAdapter`
 
 ```ts

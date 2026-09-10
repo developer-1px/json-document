@@ -1,5 +1,5 @@
 import { projectMarkdown, type MarkdownProjection } from "@interactive-os/json-document-markdown";
-import { plainTextDOMAdapter, type TextDOMAdapter, type TextSelection } from "@interactive-os/json-document-contenteditable";
+import { plainTextDOMAdapter, renderTextCaretBoundary, type TextDOMAdapter, type TextSelection } from "@interactive-os/json-document-contenteditable";
 
 interface Surface {
   readonly projection: MarkdownProjection;
@@ -43,6 +43,7 @@ export function createMarkdownDOMAdapter(): TextDOMAdapter {
         }
         if (source.length === 0) fragment.append(root.ownerDocument.createTextNode(""));
         root.replaceChildren(fragment);
+        renderTextCaretBoundary(root, source);
         surface = { projection, delimiters, markup: root.innerHTML };
         surfaces.set(root, surface);
       }

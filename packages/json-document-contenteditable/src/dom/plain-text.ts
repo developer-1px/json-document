@@ -10,6 +10,7 @@ export const plainTextDOMAdapter: TextDOMAdapter = Object.freeze({
   },
   render(root: HTMLElement, value: string): void {
     root.replaceChildren(root.ownerDocument.createTextNode(value));
+    renderTextCaretBoundary(root, value);
   },
   restoreSelection(
     root: HTMLElement,
@@ -38,6 +39,15 @@ export const plainTextDOMAdapter: TextDOMAdapter = Object.freeze({
     }
   },
 });
+
+/** Gives a terminal empty line a caret position without adding source text. */
+export function renderTextCaretBoundary(root: HTMLElement, value: string): void {
+  root.querySelectorAll("br[data-contenteditable-caret]").forEach(node => node.remove());
+  if (value.length !== 0 && !value.endsWith("\n")) return;
+  const boundary = root.ownerDocument.createElement("br");
+  boundary.dataset.contenteditableCaret = "";
+  root.append(boundary);
+}
 
 function selectionInRoot(
   root: HTMLElement,
@@ -98,6 +108,9 @@ function projectPlainText(
     };
   }
   if (isBreak(node)) {
+    if ((node as Element).hasAttribute("data-contenteditable-caret")) {
+      return { value: "", offset: node === target ? 0 : null };
+    }
     return { value: "\n", offset: node === target ? 0 : null };
   }
 

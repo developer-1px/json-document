@@ -11,6 +11,7 @@ interface ActiveLease {
   phase: "native" | "composing";
   nativeFallback: ReturnType<typeof setTimeout> | null;
   readonly value: string;
+  lineBreakAfterComposition: boolean;
 }
 
 interface RenderedDocument {
@@ -41,6 +42,7 @@ export function createContentEditableBinding({
   let bound = false;
   let unsubscribeDocument: (() => void) | null = null;
   let rendering = false;
+  let compositionEnterKeyDown = false;
   const keyboard = createWebKeyboardAdapter();
 
   const currentDOMSelection = (): TextSelection | null =>
@@ -134,8 +136,20 @@ export function createContentEditableBinding({
         return failure(committed.code, committed.reason ?? committed.code);
       }
     }
+    let selection = observation.selection;
+    if (editor && lease.lineBreakAfterComposition) {
+      const focus = (selection ?? editor.snapshot.selection).focus;
+      editor.select({ anchor: focus, focus });
+      const inserted = editor.insert("\n");
+      if (!inserted.ok) {
+        clearActiveLease();
+        renderLatest(undefined, true);
+        return failure(inserted.code, inserted.reason ?? inserted.code);
+      }
+      selection = inserted.snapshot.selection;
+    }
     clearActiveLease();
-    renderLatest(observation.selection, true);
+    renderLatest(selection, true);
     return COMMITTED;
   };
 
@@ -169,7 +183,7 @@ export function createContentEditableBinding({
       const selection = currentDOMSelection();
       if (selection) editor.select(selection);
     }
-    activeLease = { phase, nativeFallback: null, value: current.value };
+    activeLease = { phase, nativeFallback: null, value: current.value, lineBreakAfterComposition: false };
     if (phase === "native") {
       const lease = activeLease;
       lease.nativeFallback = setTimeout(() => {
@@ -182,6 +196,7 @@ export function createContentEditableBinding({
   };
 
   const cancelInternal = (): ContentEditableBindingResult => {
+    compositionEnterKeyDown = false;
     const changed = activeLease !== null || trailingComposition;
     if (!changed) return NO_CHANGE;
     clearActiveLease();
@@ -191,6 +206,19 @@ export function createContentEditableBinding({
   };
 
   const handleInternal = (event: Event): ContentEditableBindingResult => {
+    if (editor && event.type === "keydown") {
+      compositionEnterKeyDown = false;
+      const key = event as KeyboardEvent;
+      if (activeLease?.phase === "composing" && isEnterKey(key) && !key.metaKey && !key.ctrlKey && !key.altKey) {
+        // Let the IME confirm its text. The line break follows compositionend.
+        activeLease.lineBreakAfterComposition = true;
+        compositionEnterKeyDown = true;
+        return NO_CHANGE;
+      }
+    }
+    if (event.type === "keyup" && isEnterKey(event as KeyboardEvent)) {
+      compositionEnterKeyDown = false;
+    }
     if (event.type === "focus") {
       return editor ? renderLatest(undefined, true) : NO_CHANGE;
     }
@@ -212,8 +240,22 @@ export function createContentEditableBinding({
     }
 
     if (event.type === "beforeinput") {
+      const inputType = (event as InputEvent).inputType ?? "";
+      if (editor && event.cancelable && (compositionEnterKeyDown || activeLease?.lineBreakAfterComposition)
+        && (inputType === "insertParagraph" || inputType === "insertLineBreak")) {
+        // Some browsers also emit a native break for the same confirming Enter.
+        event.preventDefault();
+        return NO_CHANGE;
+      }
       if (editor && event.cancelable && activeLease?.phase !== "composing") {
-        const inputType = (event as InputEvent).inputType ?? "";
+        if (inputType === "insertParagraph" || inputType === "insertLineBreak") {
+          event.preventDefault();
+          if (trailingComposition) finishTrailing();
+          const selection = currentDOMSelection();
+          if (selection) editor.select(selection);
+          const result = editor.insert("\n");
+          return result.ok ? COMMITTED : failure(result.code, result.reason ?? result.code);
+        }
         if (inputType.startsWith("format")) {
           event.preventDefault();
           return failure("text_format_unsupported", "source text has no native formatting state");
@@ -323,6 +365,7 @@ export function createContentEditableBinding({
     for (const type of ["copy", "cut", "paste"]) root.removeEventListener(type, onClipboard as EventListener);
     clearActiveLease();
     clearTrailing();
+    compositionEnterKeyDown = false;
   };
 
   return Object.freeze({
@@ -352,11 +395,16 @@ export function createContentEditableBinding({
       return cancelInternal();
     },
     reset(): void {
+      compositionEnterKeyDown = false;
       clearActiveLease();
       clearTrailing();
       renderLatest(undefined, true);
     },
   });
+}
+
+function isEnterKey(event: KeyboardEvent): boolean {
+  return event.key === "Enter" || event.code === "Enter" || event.code === "NumpadEnter";
 }
 
 function isCompositionInput(event: Event): boolean {
@@ -387,6 +435,7 @@ const ROOT_EVENTS = Object.freeze([
   "input",
   "blur",
   "keydown",
+  "keyup",
 ] as const);
 
 const NO_CHANGE: ContentEditableBindingResult = Object.freeze({
