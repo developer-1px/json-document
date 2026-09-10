@@ -45,8 +45,8 @@ type CanvasObject = CanvasObjectDraft & { readonly id: string };
 
 ```ts
 type CanvasObjectDraft = ObjectDraft & (
-  | { readonly kind: "text"; readonly fontSize: number; readonly fontWeight?: 400 | 700; readonly textAlign?: "left" | "center" | "right" }
-  | { readonly kind: "rectangle" | "ellipse"; readonly strokeColor?: string; readonly strokeWidth?: number }
+  | (CanvasTextFormat & { readonly kind: "text"; readonly fontSize: number })
+  | (CanvasTextFormat & { readonly kind: "rectangle" | "ellipse" | "sticky-note"; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
   | { readonly kind: "path"; readonly points: ReadonlyArray<ObjectPoint>; readonly strokeWidth: number }
   | { readonly kind: "image"; readonly source: string }
 );
@@ -54,7 +54,16 @@ type CanvasObjectDraft = ObjectDraft & (
 ## `CanvasObjectKind`
 
 ```ts
-type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "path" | "image";
+type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "sticky-note" | "path" | "image";
+```
+## `CanvasTextFormat`
+
+```ts
+interface CanvasTextFormat {
+  readonly fontSize?: number;
+  readonly fontWeight?: 400 | 700;
+  readonly textAlign?: "left" | "center" | "right";
+}
 ```
 ## `createCanvasImage`
 
@@ -64,7 +73,7 @@ createCanvasImage(image: { readonly source: string; readonly width: number; read
 ## `createCanvasObject`
 
 ```ts
-createCanvasObject(kind: Exclude<CanvasObjectKind, "path" | "image">, bounds: ObjectBounds, style: { readonly color: string; readonly label: string; readonly fontSize?: number; }): CanvasObjectDraft
+createCanvasObject(kind: Exclude<CanvasObjectKind, "path" | "image">, bounds: ObjectBounds, style: { readonly color: string; readonly label: string; readonly fontSize?: number; readonly textColor?: string; }): CanvasObjectDraft
 ```
 ## `createCanvasPath`
 
@@ -140,6 +149,8 @@ interface ObjectPoint extends Record<string, JSONValue> {
 ```ts
 interface ObjectStyle {
   readonly color: string;
+  /** Body text paint for filled objects; standalone text keeps its existing color field. */
+  readonly textColor: string;
   readonly fontSize: number;
   readonly fontWeight: 400 | 700;
   readonly textAlign: "left" | "center" | "right";
@@ -151,6 +162,14 @@ interface ObjectStyle {
 
 ```ts
 type ObjectStyleSelection = { readonly [Key in keyof ObjectStyle]?: ObjectStyle[Key] | null };
+```
+## `ObjectTextProjection`
+
+```ts
+interface ObjectTextProjection extends ObjectBounds, Pick<ObjectStyle, "fontSize" | "fontWeight" | "textAlign" | "color"> {
+  readonly text: string;
+  readonly verticalAlign: "top" | "center";
+}
 ```
 ## `ObjectTransform`
 
@@ -176,6 +195,11 @@ planObjectOperation(document: ObjectDocument, operation: ObjectOperation): Objec
 
 ```ts
 projectObject(object: DocumentObject): CanvasObject
+```
+## `projectObjectText`
+
+```ts
+projectObjectText(object: DocumentObject): ObjectTextProjection | null
 ```
 ## `readObjectStyle`
 
