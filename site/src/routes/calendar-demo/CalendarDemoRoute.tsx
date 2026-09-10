@@ -22,7 +22,7 @@ import {
   type CalendarRecurrence,
 } from "@interactive-os/json-document-calendar-document";
 import { useAnchoredFloatingPosition } from "@interactive-os/json-document-react";
-import { createWebClipboardSurface, createWebJSONClipboardRepresentation, isWebEditableTarget } from "@interactive-os/json-document-web";
+import { createWebClipboardSurface, createWebJSONClipboardRepresentation } from "@interactive-os/json-document-web";
 import {
   useCalendarHand,
   useCalendarKeyboard,
@@ -314,9 +314,9 @@ export function CalendarDemoRoute(props: {
     <DemoSurface>
       <div
         className="contents"
-        onCopy={(event) => { if (!isWebEditableTarget(event.target)) clipboard.onCopy(event); }}
-        onCut={(event) => { if (!isWebEditableTarget(event.target)) clipboard.onCut(event); }}
-        onPaste={(event) => { if (!isWebEditableTarget(event.target)) clipboard.onPaste(event); }}
+        onCopy={clipboard.onCopy}
+        onCut={clipboard.onCut}
+        onPaste={clipboard.onPaste}
       >
       <ProductShell
         className={styles.shell()}

@@ -1,3 +1,4 @@
+import { routeWebClipboardEvent } from "./clipboard-event.js";
 import {
   databaseClipboardFormat,
   documentClipboardFormat,
@@ -22,6 +23,9 @@ export interface WebClipboardData {
 }
 
 export interface WebClipboardEvent {
+  readonly target?: object | null;
+  readonly currentTarget?: object | null;
+  readonly defaultPrevented?: boolean;
   readonly clipboardData: WebClipboardData | null;
   preventDefault(): void;
 }
@@ -121,9 +125,9 @@ export interface WebClipboardBindingOptions<
 }
 
 export interface WebClipboardSurface<Payload extends WebClipboardPayload, EditingResult> {
-  readonly onCopy: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
-  readonly onCut: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
-  readonly onPaste: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
+  readonly onCopy: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult> | null;
+  readonly onCut: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult> | null;
+  readonly onPaste: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult> | null;
 }
 
 export type WebClipboardWriteResult =
@@ -197,9 +201,9 @@ export function createWebClipboardBinding<
     | Extract<WebClipboardResult<never, never>, { readonly ok: false }> {
     const data = event.clipboardData;
     if (data === null) return failure("clipboard.unavailable");
-    const payload = options.read();
-    if (payload === null) return failure("clipboard.empty");
     try {
+      const payload = options.read();
+      if (payload === null) return failure("clipboard.empty");
       if (options.representations === undefined) {
         data.setData(options.codec.mimeType, options.codec.encode(payload));
         data.setData("text/plain", payload.text);
@@ -208,10 +212,10 @@ export function createWebClipboardBinding<
           data.setData(representation.mimeType, representation.encode(payload));
         }
       }
+      return { ok: true, payload };
     } catch (error) {
       return failure("clipboard.unavailable", errorMessage(error));
     }
-    return { ok: true, payload };
   }
 
   return {
@@ -225,7 +229,7 @@ export function createWebClipboardBinding<
       if (options.cut === undefined) return failure("clipboard.unsupported");
       // The binding owns this cut, including write failure. Never allow native
       // fallback deletion after a refused/partial structured clipboard write.
-      event.preventDefault();
+      if (!event.defaultPrevented) event.preventDefault();
       const written = write(event);
       if (!written.ok) return written;
       const result = options.cut(written.payload);
@@ -263,10 +267,19 @@ export function createWebClipboardSurface<
   function handle(
     operation: keyof WebClipboardBinding<Payload, EditingResult>,
     event: WebClipboardEvent,
-  ): WebClipboardResult<Payload, EditingResult> {
-    const result = binding[operation](event);
-    options.onResult(result);
-    return result;
+  ): WebClipboardResult<Payload, EditingResult> | null {
+    const execute = () => {
+      const result = binding[operation](event);
+      options.onResult(result);
+      return result;
+    };
+    // DOM events carry their editing root. Target-less programmatic calls
+    // retain the binding precondition: the caller already owns the event.
+    if (event.currentTarget !== undefined || event.target !== undefined) {
+      return event.currentTarget === null || event.currentTarget === undefined
+        ? null : routeWebClipboardEvent(event.currentTarget, event, operation, execute);
+    }
+    return event.defaultPrevented ? null : execute();
   }
 
   return {

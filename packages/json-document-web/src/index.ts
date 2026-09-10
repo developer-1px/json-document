@@ -1,3 +1,4 @@
+export { routeWebClipboardEvent } from "./clipboard-event.js";
 export {
   createWebClipboardBinding,
   captureWebClipboardPaste,

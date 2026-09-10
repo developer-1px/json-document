@@ -386,6 +386,83 @@ test("Rich Text Lab connects Enter, IME, selection restore, and Clipboard repres
   await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), plainId)?.text).toBe("plain");
 });
 
+for (const failedFormat of ["application/vnd.interactive-os.rich-text+json", "text/html", "text/plain"]) {
+  test(`Rich Text failed native Cut at ${failedFormat} preserves selection and history before retry`, async ({ page }) => {
+    await page.goto("/editing/rich-text");
+    const editor = page.getByTestId("rich-text-editor");
+    // Keep a real Redo entry: a failed Cut must not replace history or clear its future.
+    await setSelection(page, "text-editable", 2, 4);
+    await page.keyboard.type("X");
+    const future = await json(page, "rich-text-document-json");
+    await page.keyboard.press("ControlOrMeta+z");
+    await setSelection(page, "text-editable", 4, 2);
+    const before = await json(page, "rich-text-document-json");
+    const selectionBefore = (await json(page, "rich-text-selection-json")).selection;
+    const rangeBefore = await domSelection(page);
+    const text = textNode(before, "text-editable").text;
+    await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Redo", exact: true })).toBeEnabled();
+
+    await editor.evaluate((root, failedFormat) => {
+      const events: { type: string; inputType: string | null; prevented: boolean; trusted: boolean }[] = [];
+      const writes: string[] = [];
+      const original = DataTransfer.prototype.setData;
+      DataTransfer.prototype.setData = function(format, value) {
+        writes.push(format);
+        if (format === failedFormat) throw new Error("Clipboard write refused");
+        original.call(this, format, value);
+      };
+      const record = (event: Event) => events.push({ type: event.type,
+        inputType: event instanceof InputEvent ? event.inputType : null,
+        prevented: event.defaultPrevented, trusted: event.isTrusted,
+      });
+      for (const type of ["cut", "beforeinput", "input"]) root.addEventListener(type, record);
+      Object.assign(window, { cutFailureProbe: { events, writes, restore() {
+        DataTransfer.prototype.setData = original;
+        for (const type of ["cut", "beforeinput", "input"]) root.removeEventListener(type, record);
+      } } });
+    }, failedFormat);
+    try {
+      // A trusted keyboard Cut is necessary: synthetic ClipboardEvents never run native deletion.
+      await page.keyboard.press("ControlOrMeta+x");
+      await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+      expect(await json(page, "rich-text-document-json")).toEqual(before);
+      await expect(page.getByText("last: clipboard.unavailable", { exact: true })).toBeVisible();
+      expect((await json(page, "rich-text-selection-json")).selection).toEqual(selectionBefore);
+      expect(await domSelection(page)).toEqual(rangeBefore);
+      await expect(editor.locator('[data-rich-text-text-id="text-editable"]')).toHaveText(text);
+      await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeDisabled();
+      await expect(page.getByRole("button", { name: "Redo", exact: true })).toBeEnabled();
+      const probe = await page.evaluate(() => {
+        const { events, writes } = (window as any).cutFailureProbe;
+        return { events, writes };
+      });
+      expect(probe.events).toEqual([{ type: "cut", inputType: null, prevented: true, trusted: true }]);
+      const formats = ["application/vnd.interactive-os.rich-text+json", "text/html", "text/plain"];
+      expect(probe.writes).toEqual(formats.slice(0, formats.indexOf(failedFormat) + 1));
+    } finally {
+      await page.evaluate(() => {
+        (window as any).cutFailureProbe.restore();
+        delete (window as any).cutFailureProbe;
+      });
+    }
+
+    await page.keyboard.press("ControlOrMeta+Shift+z");
+    await expect.poll(() => json(page, "rich-text-document-json")).toEqual(future);
+    await page.keyboard.press("ControlOrMeta+z");
+    await setSelection(page, "text-editable", 4, 2);
+    await page.keyboard.press("ControlOrMeta+x");
+    await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-editable").text)
+      .toBe(`${text.slice(0, 2)}${text.slice(4)}`);
+    await expect(page.getByRole("button", { name: "Redo", exact: true })).toBeDisabled();
+    await page.keyboard.press("ControlOrMeta+z");
+    await expect.poll(() => json(page, "rich-text-document-json")).toEqual(before);
+    await expect.poll(async () => (await json(page, "rich-text-selection-json")).selection).toEqual(selectionBefore);
+    await expect.poll(() => domSelection(page)).toEqual(rangeBefore);
+    await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeDisabled();
+  });
+}
+
 test("Rich Text Lab handles Chromium Korean IME composition without orphaned jamo", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium");
   await page.goto("/editing/rich-text");

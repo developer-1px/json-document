@@ -254,6 +254,11 @@ registerWebVirtualSelectionScope(document: object, options: WebVirtualSelectionS
 ```ts
 renderWebAnnotationRaster(options: { readonly document: AnnotationDocument; readonly sourceId: string; readonly sourceURL: string; readonly style: WebAnnotationRasterStyle; }): Promise<WebAnnotationRasterResult>
 ```
+## `routeWebClipboardEvent`
+
+```ts
+routeWebClipboardEvent<Result>(root: object, event: { readonly target?: object | null; readonly defaultPrevented?: boolean; preventDefault(): void; }, operation: "copy" | "cut" | "paste", handle: () => Result): Result | null
+```
 ## `rovingFocusItemProps`
 
 ```ts
@@ -441,6 +446,9 @@ interface WebClipboardData {
 
 ```ts
 interface WebClipboardEvent {
+  readonly target?: object | null;
+  readonly currentTarget?: object | null;
+  readonly defaultPrevented?: boolean;
   readonly clipboardData: WebClipboardData | null;
   preventDefault(): void;
 }
@@ -483,9 +491,9 @@ type WebClipboardResult<Payload extends WebClipboardPayload, EditingResult> =
 
 ```ts
 interface WebClipboardSurface<Payload extends WebClipboardPayload, EditingResult> {
-  readonly onCopy: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
-  readonly onCut: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
-  readonly onPaste: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
+  readonly onCopy: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult> | null;
+  readonly onCut: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult> | null;
+  readonly onPaste: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult> | null;
 }
 ```
 ## `WebClipboardTextPort`

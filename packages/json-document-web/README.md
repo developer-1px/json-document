@@ -278,3 +278,12 @@ such chords for a product profile. Affordance consumes the default delete
 mapping; Composer consumes its Undo/Redo mapping. Select-all remains an
 Affordance policy over the canonical chord normalizer, outside
 `WebKeyboardCommand`.
+
+### Clipboard 소유권 라우팅
+
+`createWebClipboardSurface`는 DOM currentTarget/target의 편집 경계를 자동으로 판정합니다.
+`routeWebClipboardEvent`는 같은 경계를 준비·selection 동기화가 있는 소비자에 제공합니다.
+다른 편집영역과 이미 취소된 이벤트는 null로 위임하며 read·onResult를 호출하지 않습니다.
+앱 소유 Cut은 준비 전에 취소합니다. 빈 선택·clipboard 없음·read/encode/write 실패를
+native 소유권의 증거로 사용하지 않습니다. SVG root와 중첩 native 입력도 같은 경계를 씁니다.
+[소유 계약과 Usage](docs/clipboard.md#입력-소유권과-실행-준비)를 참고하세요.

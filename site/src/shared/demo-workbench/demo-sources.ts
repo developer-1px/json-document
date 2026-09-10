@@ -1,3 +1,4 @@
+import clipboardEventSource from "../../../../packages/json-document-web/src/clipboard-event.ts?raw";
 import type { CodeLanguage } from "../ui/code-tokens";
 import objectModelSource from "../../../../packages/json-document-object-document/src/object-model.ts?raw";
 import objectStyleSource from "../../../../packages/json-document-object-document/src/object-style.ts?raw";
@@ -215,6 +216,7 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-web/src/clipboard-event.ts", clipboardEventSource],
   ["packages/json-document-editing/src/preparation-queue.ts", editingPreparationQueueSource],
   ["packages/json-document-web/src/raster-files.ts", webRasterFilesSource],
   ["packages/json-document-web/src/html-fragment.ts", webHTMLFragmentSource],
@@ -375,6 +377,10 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  ...["createWebClipboardSurface", "routeWebClipboardEvent"].flatMap(symbol => [
+    { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/clipboard-event.ts" },
+    { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/input.ts" },
+  ]),
   { packageName: "@interactive-os/json-document-web", symbol: "parseWebHTMLFragment", sourcePath: "packages/json-document-web/src/html-fragment.ts" },
   ...["captureWebClipboardPaste", "parseWebClipboardHTML", "readWebHTMLClipboard"].flatMap((symbol) => [
     { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/html-clipboard.ts" },

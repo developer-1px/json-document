@@ -32,6 +32,38 @@ const clipboard = createWebClipboardBinding({
 실제 소비와 Source: [Canvas](/demo/canvas), [Object Demo](/demo/object),
 [Clipboard Adapter](/adapters/clipboard). Canvas text/JSON textarea는 native clipboard를 유지합니다.
 
+### 입력 소유권과 실행 준비
+
+`createWebClipboardSurface`는 DOM 이벤트의 `currentTarget`을 편집 root로 사용합니다.
+기존 `isWebEditingHostTarget`으로 중첩 input·textarea·select·contenteditable 경계를
+제외하며 SVG root도 지원합니다. 다른 소유자 또는 이미 취소된 이벤트에는 `null`을
+반환하고 read·command·onResult를 호출하지 않습니다. target/currentTarget 없는
+기존 programmatic 호출은 호출자가 소유권을 확정했다는 binding 전제를 유지합니다.
+
+`routeWebClipboardEvent(root, event, operation, handle)`은 Canvas와 Rich Text처럼
+준비·selection 동기화가 필요한 소비자도 같은 경계를 소비하게 합니다. 소유한 Cut은
+handle 호출 전에 취소하므로 준비가 예외를 던져도 native 삭제로 넘어가지 않습니다.
+Copy/Paste의 취소 시점은 기존 binding 또는 capture API에 남깁니다. `handle`의 결과를
+그대로 반환하고 다른 편집영역·이미 취소된 이벤트에는 `null`을 반환합니다.
+
+```ts
+import { routeWebClipboardEvent } from "@interactive-os/json-document-web";
+routeWebClipboardEvent(root, event, "cut", () => {
+  syncSelection();
+  return clipboard.cut(event);
+});
+```
+
+앱 소유의 빈 선택·clipboard 없음·읽기/인코딩/쓰기 실패는 소유한 실패입니다.
+DOM surface는 Cut callback이 없어도 앱 소유 이벤트를 취소합니다. 저수준 binding을
+직접 호출하면 기존 미지원 callback 결과·취소 계약을 유지합니다. binding은 실제 쓴
+동일 payload를 cut callback에 전달하며 consumer는 그 캡처 대상을 제거해야 합니다.
+이미 처리된 child 이벤트는 parent에서 다시 실행하지 않습니다.
+
+실제 Usage/Source: [Clipboard Adapter](/adapters/clipboard), [Canvas](/demo/canvas),
+[Rich Text](/demo/rich-text). 앱 선택이 남은 중첩 native 입력, 준비 실패, SVG 내부
+textarea, child/parent 단일 실행은 Web 소유 테스트로 검증합니다.
+
 ### 비동기 입력을 위한 동기 캡처
 
 `captureWebClipboardPaste(event, { codec, files: true, text: true })`는 이벤트가 끝나기 전에
