@@ -7,6 +7,9 @@
 `render(root, source, selection?)`는 strong 본문을 강조합니다. 선택이 strong 범위와
 겹치면 해당 delimiter를 표시하고, 그 밖이나 `null`이면 숨깁니다.
 숨겨진 delimiter도 text node로 남아 원문 위치를 보존합니다.
+문법 기호에는 `data-markdown-delimiter` 속성이 붙으므로 소비자가 본문과 다른 색상을 줄 수
+있습니다. 사이트 Usage는 기존 `foreground-muted` 토큰으로 기호를 회색으로 표시합니다.
+색상은 원문이나 caret 좌표를 바꾸지 않습니다.
 `observe`와 `restoreSelection`은 contenteditable의 정본 plain-text DOM 매핑을 사용합니다.
 마지막 빈 줄의 caret 공간도 contenteditable의 `renderTextCaretBoundary`로 생성합니다.
 이 DOM 요소는 source에 포함되지 않으며 빈 줄 뒤의 native 입력 위치를 보존합니다.
