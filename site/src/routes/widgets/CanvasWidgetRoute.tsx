@@ -13,7 +13,7 @@ export function CanvasWidgetRoute() {
     widgetLabel="Canvas Hand" widget={<CanvasHand className={ui.product.embedded} editor={editor} creationStyle={canvasCreationStyle} slideStyle={{ background: "rgb(var(--color-background-canvas))" }} />}
     values={[
       { label: "selectedKeys", value: snapshot.selection.keys, testId: "widget-canvas-selected", size: "compact" },
-      { label: "focus", value: snapshot.selection.primaryKey, testId: "widget-canvas-focus", size: "compact" },
+      { label: "primaryKey", value: snapshot.selection.primaryKey, testId: "widget-canvas-primary", size: "compact" },
       { label: "selection", value: snapshot.selection, testId: "widget-canvas-selection", size: "compact" },
     ]} />;
 }

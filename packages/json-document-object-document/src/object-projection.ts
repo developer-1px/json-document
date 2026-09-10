@@ -1,4 +1,5 @@
 import type { CanvasObject, CanvasObjectDraft, CanvasObjectKind, DocumentObject, ObjectBounds, ObjectPoint } from "./object-model.js";
+import { assertCanvasImageSource } from "./object-validation.js";
 
 export interface ObjectTransform {
   readonly dx: number;
@@ -27,12 +28,24 @@ export function projectObject(object: DocumentObject): CanvasObject {
 }
 
 export function createCanvasObject(
-  kind: Exclude<CanvasObjectKind, "path">,
+  kind: Exclude<CanvasObjectKind, "path" | "image">,
   bounds: ObjectBounds,
   style: { readonly color: string; readonly label: string; readonly fontSize?: number },
 ): CanvasObjectDraft {
   const base = { ...bounds, width: Math.max(1, bounds.width), height: Math.max(1, bounds.height), color: style.color, label: style.label };
   return kind === "text" ? { ...base, kind, fontSize: style.fontSize ?? 32 } : { ...base, kind };
+}
+
+/** Fits a decoded raster inside bounds without upscaling; persisted bytes survive JSON round trips. */
+export function createCanvasImage(
+  image: { readonly source: string; readonly width: number; readonly height: number; readonly label: string },
+  bounds: ObjectBounds,
+): Extract<CanvasObjectDraft, { readonly kind: "image" }> {
+  assertCanvasImageSource(image.source);
+  if (![image.width, image.height, bounds.width, bounds.height].every((value) => Number.isFinite(value) && value > 0)
+    || ![bounds.x, bounds.y].every(Number.isFinite)) throw new TypeError("Image and fit dimensions must be positive and finite.");
+  const scale = Math.min(1, bounds.width / image.width, bounds.height / image.height);
+  return { kind: "image", source: image.source, label: image.label, color: "transparent", x: bounds.x, y: bounds.y, width: image.width * scale, height: image.height * scale };
 }
 
 /** Converts slide-space samples to one bounding box and normalized path geometry. */

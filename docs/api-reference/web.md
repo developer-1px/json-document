@@ -36,6 +36,11 @@ calendarKeyFromWebRow<Key>(clientX: number, bounds: { readonly left: number; rea
 ```ts
 calendarMinutesFromWebGrid(clientY: number, bounds: { readonly top: number; readonly height: number; }, options: { readonly hourStart: number; readonly hourEnd: number; readonly stepMinutes: number; }): number
 ```
+## `captureWebClipboardPaste`
+
+```ts
+captureWebClipboardPaste<Payload extends WebClipboardPayload>(event: WebClipboardEvent, options: { readonly codec: WebClipboardCodec<Payload>; readonly files?: boolean; readonly text?: boolean; }): WebClipboardPaste<Payload>
+```
 ## `chordFromStroke`
 
 ```ts
@@ -216,7 +221,7 @@ projectWebWidgetState(state: WebWidgetState): WebWidgetARIA
 ## `readWebRasterFile`
 
 ```ts
-readWebRasterFile(file: WebRasterFile): Promise<WebRasterSourceResult>
+readWebRasterFile(file: WebRasterFile, options?: { readonly signal?: WebRasterReadSignal; }): Promise<WebRasterSourceResult>
 ```
 ## `registerWebVirtualSelectionScope`
 
@@ -406,6 +411,7 @@ interface WebClipboardCodec<Payload extends WebClipboardPayload> {
 ```ts
 interface WebClipboardData {
   readonly types: ReadonlyArray<string>;
+  readonly files?: WebFileCandidateList;
   getData(format: string): string;
   setData(format: string, data: string): void;
 }
@@ -417,6 +423,15 @@ interface WebClipboardEvent {
   readonly clipboardData: WebClipboardData | null;
   preventDefault(): void;
 }
+```
+## `WebClipboardPaste`
+
+```ts
+type WebClipboardPaste<Payload extends WebClipboardPayload> =
+  | { readonly ok: true; readonly type: "structured"; readonly payload: Payload }
+  | { readonly ok: true; readonly type: "files"; readonly files: ReadonlyArray<WebFileCandidate> }
+  | { readonly ok: true; readonly type: "text"; readonly text: string }
+  | Extract<WebClipboardResult<never, never>, { readonly ok: false }>;
 ```
 ## `WebClipboardPayload`
 
@@ -769,12 +784,21 @@ interface WebRasterFile {
   readonly type: string;
 }
 ```
+## `WebRasterReadSignal`
+
+```ts
+interface WebRasterReadSignal {
+  readonly aborted: boolean;
+  addEventListener(type: "abort", listener: () => void, options?: { readonly once?: boolean }): void;
+  removeEventListener(type: "abort", listener: () => void): void;
+}
+```
 ## `WebRasterSourceResult`
 
 ```ts
 type WebRasterSourceResult =
   | { readonly ok: true; readonly dataURL: string; readonly width: number; readonly height: number }
-  | { readonly ok: false; readonly code: "raster.read-failed" | "raster.decode-failed"; readonly reason?: string };
+  | { readonly ok: false; readonly code: "raster.read-failed" | "raster.decode-failed" | "raster.cancelled"; readonly reason?: string };
 ```
 ## `WebSVGElement`
 

@@ -17,7 +17,7 @@
     "provenance": true,
     "tag": "next"
   },
-  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "LICENSE"],
+  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "docs", "LICENSE"],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -33,9 +33,11 @@
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
+    "@interactive-os/json-document-selection": ">=0.1.0-rc.0 <1",
     "@interactive-os/json-document-web": ">=0.1.0-rc.0 <1"
   },
   "devDependencies": {
+    "@interactive-os/json-document-selection": "*",
     "@interactive-os/json-document-web": "*",
     "@types/node": "^25.9.0",
     "typescript": "^5.0.0",

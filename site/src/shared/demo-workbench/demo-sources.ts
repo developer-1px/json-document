@@ -6,6 +6,9 @@ import objectProjectionSource from "../../../../packages/json-document-object-do
 import canvasHandSource from "../../../../packages/json-document-canvas/src/canvas-hand.tsx?raw";
 import canvasInteractionSource from "../../../../packages/json-document-canvas/src/use-canvas-hand.ts?raw";
 import canvasObjectViewSource from "../../../../packages/json-document-canvas/src/canvas-object-view.tsx?raw";
+import canvasClipboardSource from "../../../../packages/json-document-canvas/src/canvas-clipboard.ts?raw";
+import canvasClipboardEditingSource from "../../../../packages/json-document-editing/src/canvas-clipboard.ts?raw";
+import objectPasteSessionSource from "../../../../packages/json-document-editing/src/object-paste-session.ts?raw";
 import editingSnapshotSource from "../../../../packages/json-document-react/src/editing-snapshot.ts?raw";
 import pointerTrackingSource from "../../../../packages/json-document/src/foundation/patch/track.ts?raw";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
@@ -33,6 +36,8 @@ import dateValuesSource from "../../../../packages/json-document-calendar/src/da
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
 import affordanceSelectSource from "../../../../packages/json-document-affordance/src/select.ts?raw";
+import planeSelectSource from "../../../../packages/json-document-affordance/src/plane-select.ts?raw";
+import affordanceDragSource from "../../../../packages/json-document-affordance/src/drag.ts?raw";
 import viewportPositionSource from "../../../../packages/json-document-affordance/src/viewport-position.ts?raw";
 import anchoredFloatingPositionSource from "../../../../packages/json-document-affordance/src/anchored-floating-position.ts?raw";
 import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
@@ -207,6 +212,9 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-canvas/src/canvas-hand.tsx", canvasHandSource],
   ["packages/json-document-canvas/src/use-canvas-hand.ts", canvasInteractionSource],
   ["packages/json-document-canvas/src/canvas-object-view.tsx", canvasObjectViewSource],
+  ["packages/json-document-canvas/src/canvas-clipboard.ts", canvasClipboardSource],
+  ["packages/json-document-editing/src/canvas-clipboard.ts", canvasClipboardEditingSource],
+  ["packages/json-document-editing/src/object-paste-session.ts", objectPasteSessionSource],
   ["packages/json-document-react/src/editing-snapshot.ts", editingSnapshotSource],
   ["packages/json-document/src/foundation/patch/track.ts", pointerTrackingSource],
   ["packages/json-document-calendar-document/src/calendar-model.ts", calendarDocumentModelSource],
@@ -276,6 +284,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
   ["packages/json-document-affordance/src/gesture-session.ts", gestureSessionSource],
+  ["packages/json-document-affordance/src/plane-select.ts", planeSelectSource],
+  ["packages/json-document-affordance/src/drag.ts", affordanceDragSource],
   ["packages/json-document-affordance/src/interaction-handle.ts", interactionHandleSource],
   ["packages/json-document-affordance/src/content-interaction.ts", contentInteractionAffordanceSource],
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
@@ -342,6 +352,10 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredPublicUsages = [
+  ...(["CanvasHand", "useCanvasHand", "createCanvasClipboardBinding"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-canvas", symbol, sourcePath: "packages/json-document-canvas/src/canvas-clipboard.ts" })),
+  { packageName: "@interactive-os/json-document-editing", symbol: "createCanvasClipboard", sourcePath: "packages/json-document-editing/src/canvas-clipboard.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createObjectPasteSession", sourcePath: "packages/json-document-editing/src/object-paste-session.ts" },
+  { packageName: "@interactive-os/json-document-web", symbol: "captureWebClipboardPaste", sourcePath: "packages/json-document-web/src/clipboard.ts" },
   {
     packageName: "@interactive-os/json-document-canvas",
     symbol: "CanvasHand",
@@ -368,8 +382,8 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-react/src/editing-snapshot.ts",
   },
   ...(["ObjectDocument", "CanvasDocument", "DocumentObject", "CanvasObject"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-model.ts" })),
-  ...(["assertObjectDocument", "assertCanvasDocument", "parseCanvasDocument", "serializeCanvasDocument"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-validation.ts" })),
-  ...(["createCanvasObject", "createCanvasPath", "projectObject", "transformObject"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-projection.ts" })),
+  ...(["assertObjectDocument", "assertCanvasDocument", "assertCanvasImageSource", "parseCanvasDocument", "serializeCanvasDocument"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-validation.ts" })),
+  ...(["createCanvasObject", "createCanvasPath", "createCanvasImage", "projectObject", "transformObject"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-projection.ts" })),
   {
     packageName: "@interactive-os/json-document-object-document",
     symbol: "planObjectOperation",
@@ -1154,6 +1168,16 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-web",
+    symbol: "createWebClipboardBinding",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "objectClipboardCodec",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
     symbol: "createWebJSONClipboardRepresentation",
     sourcePath: "packages/json-document-web/src/clipboard.ts",
   },
@@ -1271,6 +1295,36 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-affordance",
     symbol: "createCanvasGestureSession",
     sourcePath: "packages/json-document-affordance/src/canvas-gesture-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/plane-select.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/select.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/drag.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/gesture-session.ts",
+  },
+  ...["dragAffordance", "resizeAffordance", "marqueeAffordance", "marqueeHitsAffordance"].map((symbol) => ({
+    packageName: "@interactive-os/json-document-affordance",
+    symbol,
+    sourcePath: "packages/json-document-affordance/src/drag.ts",
+  })),
+  {
+    packageName: "@interactive-os/json-document-selection",
+    symbol: "createKeySelectionFamily",
+    sourcePath: "packages/json-document-selection/src/key/index.ts",
   },
   {
     packageName: "@interactive-os/json-document-affordance",

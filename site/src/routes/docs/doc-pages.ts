@@ -11,6 +11,8 @@ import connectorA2uiMarkdown from "../../../../docs/public/connector-a2ui.md?raw
 import zodApiMarkdown from "../../../../docs/api-reference/zod.md?raw";
 import tanStackTableApiMarkdown from "../../../../docs/api-reference/tanstack-table.md?raw";
 import affordanceApiMarkdown from "../../../../docs/api-reference/affordance.md?raw";
+import planeSelectContractMarkdown from "../../../../packages/json-document-affordance/docs/plane-select.md?raw";
+import objectSelectionContractMarkdown from "../../../../packages/json-document-editing/docs/object-selection.md?raw";
 import uiPrimitivesApiMarkdown from "../../../../docs/api-reference/ui-primitives-react.md?raw";
 import animationApiMarkdown from "../../../../docs/api-reference/animation-react.md?raw";
 import markdownReactApiMarkdown from "../../../../docs/api-reference/markdown-react.md?raw";
@@ -24,6 +26,7 @@ import objectDocumentContractMarkdown from "../../../../packages/json-document-o
 import canvasApiMarkdown from "../../../../docs/api-reference/canvas.md?raw";
 import canvasContractMarkdown from "../../../../packages/json-document-canvas/docs/api.md?raw";
 import webApiMarkdown from "../../../../docs/api-reference/web.md?raw";
+import webClipboardContractMarkdown from "../../../../packages/json-document-web/docs/clipboard.md?raw";
 import contenteditableApiMarkdown from "../../../../docs/api-reference/contenteditable.md?raw";
 import richTextApiMarkdown from "../../../../docs/api-reference/rich-text.md?raw";
 import fileIntakeApiMarkdown from "../../../../docs/api-reference/file-intake.md?raw";
@@ -183,7 +186,7 @@ export const docPages = {
   api: docPage("/docs/api", apiReferenceMarkdown),
   jsonDocumentApi: docPage("/docs/api/json-document", jsonDocumentApiMarkdown),
   selectionApi: docPage("/docs/api/selection", selectionApiMarkdown),
-  editingApi: docPage("/docs/api/editing", `${editingApiMarkdown}\n\n${calendarProfileMarkdown}`),
+  editingApi: docPage("/docs/api/editing", `${objectSelectionContractMarkdown}\n\n${editingApiMarkdown}\n\n${calendarProfileMarkdown}`),
   reactApi: docPage("/docs/api/react", reactApiMarkdown),
   reactHookFormApi: docPage("/docs/api/react-hook-form", reactHookFormApiMarkdown),
   ajvApi: docPage("/docs/api/ajv", ajvApiMarkdown),
@@ -191,7 +194,7 @@ export const docPages = {
   connectorA2ui: docPage("/docs/connector-a2ui", connectorA2uiMarkdown),
   zodApi: docPage("/docs/api/zod", zodApiMarkdown),
   tanStackTableApi: docPage("/docs/api/tanstack-table", tanStackTableApiMarkdown),
-  affordanceApi: docPage("/docs/api/affordance", affordanceApiMarkdown),
+  affordanceApi: docPage("/docs/api/affordance", `${planeSelectContractMarkdown}\n\n${affordanceApiMarkdown}`),
   uiPrimitivesApi: docPage("/docs/api/ui-primitives-react", uiPrimitivesApiMarkdown),
   animationApi: docPage("/docs/api/animation-react", animationApiMarkdown),
   markdownReactApi: docPage("/docs/api/markdown-react", markdownReactApiMarkdown),
@@ -201,7 +204,7 @@ export const docPages = {
   calendarDocumentApi: docPage("/docs/api/calendar-document", `${calendarDocumentContractMarkdown}\n\n${calendarDocumentApiMarkdown}`),
   objectDocumentApi: docPage("/docs/api/object-document", `${objectDocumentContractMarkdown}\n\n${objectDocumentApiMarkdown}`),
   canvasApi: docPage("/docs/api/canvas", `${canvasContractMarkdown}\n\n${canvasApiMarkdown}`),
-  webApi: docPage("/docs/api/web", webApiMarkdown),
+  webApi: docPage("/docs/api/web", `${webClipboardContractMarkdown}\n\n${webApiMarkdown}`),
   contenteditableApi: docPage("/docs/api/contenteditable", contenteditableApiMarkdown),
   richTextApi: docPage("/docs/api/rich-text", richTextApiMarkdown),
   fileIntakeApi: docPage("/docs/api/file-intake", fileIntakeApiMarkdown),

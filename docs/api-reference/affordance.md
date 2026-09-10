@@ -363,6 +363,11 @@ createInteractionHandleSession(): InteractionHandleSession
 ```ts
 createLineFocusSession<Key extends string>(options: { readonly initialKey?: Key | null; readonly onFocus: (key: Key | null) => void; readonly wrap?: boolean; }): LineFocusSession<Key>
 ```
+## `createPlaneSelectProfile`
+
+```ts
+createPlaneSelectProfile(options?: PlaneSelectProfileOptions): PlaneSelectProfile
+```
 ## `createRenameSession`
 
 ```ts
@@ -689,6 +694,99 @@ panAffordance(input: { readonly spaceKey?: boolean; readonly buttons?: number; r
 
 ```ts
 planeHitAffordance(input: { readonly hitId: string; readonly selectedIds: ReadonlyArray<string>; readonly shiftKey?: boolean; readonly metaKey?: boolean; readonly ctrlKey?: boolean; readonly nestedId?: string; readonly locked?: boolean; }): AffordancePreview
+```
+## `PlaneSelectCommit`
+
+```ts
+interface PlaneSelectCommit {
+  readonly selection: PlaneSelectSelection;
+  readonly translation: PlaneSelectTranslation | null;
+}
+```
+## `PlaneSelectContext`
+
+```ts
+interface PlaneSelectContext {
+  readonly items: ReadonlyArray<Rect & { readonly id: string }>;
+  readonly selection: PlaneSelectSelection;
+}
+```
+## `PlaneSelectInput`
+
+```ts
+interface PlaneSelectInput extends PlaneSelectModifiers {
+  readonly point: Point;
+  readonly hitKey: string | null;
+}
+```
+## `PlaneSelectKeyResult`
+
+```ts
+type PlaneSelectKeyResult =
+  | { readonly type: "selection"; readonly selection: PlaneSelectSelection }
+  | { readonly type: "delete"; readonly keys: readonly string[] }
+  | { readonly type: "duplicate"; readonly keys: readonly string[] }
+  | { readonly type: "translate"; readonly keys: readonly string[]; readonly dx: number; readonly dy: number }
+  | { readonly type: "edit"; readonly key: string }
+  | { readonly type: "cancel" };
+```
+## `PlaneSelectModifiers`
+
+```ts
+interface PlaneSelectModifiers {
+  readonly shiftKey?: boolean;
+  readonly altKey?: boolean;
+}
+```
+## `PlaneSelectPreview`
+
+```ts
+interface PlaneSelectPreview {
+  readonly selection: PlaneSelectSelection;
+  readonly marquee: Rect | null;
+  readonly translation: PlaneSelectTranslation | null;
+}
+```
+## `PlaneSelectProfile`
+
+```ts
+interface PlaneSelectProfile {
+  begin(context: PlaneSelectContext, input: PlaneSelectInput): PlaneSelectPreview;
+  preview(point: Point, modifiers?: PlaneSelectModifiers): PlaneSelectPreview | null;
+  commit(point: Point, modifiers?: PlaneSelectModifiers): PlaneSelectCommit | null;
+  /** Reproject a stationary drag when a modifier changes; omitted preview modifiers retain this state. */
+  updateModifiers(modifiers: PlaneSelectModifiers): PlaneSelectPreview | null;
+  cancel(reason?: GestureCancelReason): void;
+  getPreview(): PlaneSelectPreview | null;
+  /** Discrete activation (e.g. Space), not focus. Shift toggles, plain activation replaces. */
+  select(context: PlaneSelectContext, key: string | null, shiftKey?: boolean): PlaneSelectSelection;
+  /** Native editable/IME ownership is checked by the platform binding before calling. */
+  keyDown(stroke: WebKeyboardStroke, context: PlaneSelectContext, grabbing?: boolean): PlaneSelectKeyResult | null;
+}
+```
+## `PlaneSelectProfileOptions`
+
+```ts
+interface PlaneSelectProfileOptions {
+  /** In the input coordinate space. Defaults to 3; movement is latched once crossed. */
+  readonly dragThreshold?: number;
+  readonly contain?: "intersect" | "inside";
+}
+```
+## `PlaneSelectSelection`
+
+```ts
+type PlaneSelectSelection = Extract<KeySelection, { readonly kind: "explicit" }>;
+```
+## `PlaneSelectTranslation`
+
+```ts
+interface PlaneSelectTranslation {
+  readonly operation: "move" | "copy";
+  readonly keys: readonly string[];
+  readonly dx: number;
+  readonly dy: number;
+}
 ```
 ## `Point`
 

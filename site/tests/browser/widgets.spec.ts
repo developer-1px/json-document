@@ -192,16 +192,20 @@ test("Document reads selected keys, focus, and text offset", async ({ page }) =>
   await expect(page.locator("#widget-document-option-move")).toHaveCount(1);
 });
 
-test("Canvas proof consumes the same Hand and observes single selection", async ({ page }) => {
+test("Canvas proof consumes the same Hand and observes selection independently of primary", async ({ page }) => {
   await page.goto("/widgets/canvas");
   await page.locator('[data-canvas-object="rectangle"]').click();
   expect(await json(page, "widget-canvas-selected")).toEqual(["rectangle"]);
-  expect(await json(page, "widget-canvas-focus")).toBe("rectangle");
+  expect(await json(page, "widget-canvas-primary")).toBe("rectangle");
+  await page.locator('[data-canvas-object="ellipse"]').click({ modifiers: ["Shift"] });
+  expect(await json(page, "widget-canvas-selected")).toEqual(["rectangle", "ellipse"]);
+  expect(await json(page, "widget-canvas-primary")).toBe("ellipse");
   await page.keyboard.press("Delete");
   await expect(page.locator('[data-canvas-object="rectangle"]')).toHaveCount(0);
+  await expect(page.locator('[data-canvas-object="ellipse"]')).toHaveCount(0);
   await page.keyboard.press("ControlOrMeta+z");
   await expect(page.locator('[data-canvas-object="rectangle"]')).toHaveCount(1);
-  expect(await json(page, "widget-canvas-selected")).toEqual(["rectangle"]);
+  expect(await json(page, "widget-canvas-selected")).toEqual(["rectangle", "ellipse"]);
 });
 
 test("Tree reads visible topology and selected keys", async ({ page }) => {

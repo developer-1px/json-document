@@ -68,6 +68,9 @@ mutation, announcement나 실패 시 rollback을 소유하지 않습니다.
 
 DOM listener를 직접 설치하거나 개별 operation을 호출해야 할 때 사용하는
 저수준 API입니다.
+cut callback이 있으면 write 전에 native event를 취소합니다. 쓰기 실패에도 브라우저의
+기본 삭제로 넘어가지 않으며, 전부 쓴 payload의 캡처 대상만 callback으로 제거합니다.
+상세 실패·native editable 계약은 소유 패키지의 [Web Clipboard API](/docs/api/web)에 있습니다.
 
 ```ts
 function createWebClipboardBinding<Payload, EditingResult>(

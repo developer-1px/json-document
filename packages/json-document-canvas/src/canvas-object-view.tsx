@@ -4,6 +4,7 @@ import type { InteractionHandleEvent, ResizeEdge } from "@interactive-os/json-do
 import { contentInteractionAttributes, Field, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 
 export function CanvasObjectView({ object }: { readonly object: CanvasObject }): ReactNode {
+  if (object.kind === "image") return <image href={object.source} x={object.x} y={object.y} width={object.width} height={object.height} preserveAspectRatio="none" />;
   if (object.kind === "path") {
     return <polyline points={object.points.map((point) => `${object.x + point.x * object.width},${object.y + point.y * object.height}`).join(" ")} fill="none" stroke={object.color} strokeWidth={object.strokeWidth} strokeLinecap="round" strokeLinejoin="round" />;
   }
@@ -21,7 +22,8 @@ export function CanvasObjectTarget(props: {
   readonly object: CanvasObject;
   readonly selected: boolean;
   readonly enabled: boolean;
-  readonly onSelect: () => void;
+  readonly copying?: boolean;
+  readonly onSelect: (shiftKey: boolean) => void;
   readonly onEdit: () => void;
   readonly onHandle: (interaction: InteractionHandleEvent, event: PointerEvent<SVGElement>) => void;
 }) {
@@ -32,9 +34,15 @@ export function CanvasObjectTarget(props: {
       fill="transparent" role="button" aria-label={object.label || object.kind} aria-pressed={props.selected}
       {...contentInteractionAttributes({ role: "content", selected: props.selected, dragging: binding.active })}
       tabIndex={props.enabled ? 0 : -1} data-canvas-object={object.id} data-kind={object.kind}
-      pointerEvents={props.enabled ? "all" : "none"} style={{ cursor: binding.cursor, transform: "none" }}
-      onFocus={props.onSelect} onDoubleClick={props.onEdit}
-      onKeyDown={(event) => { if (event.key === " ") { event.preventDefault(); props.onSelect(); } }} />
+      pointerEvents={props.enabled ? "all" : "none"} style={{ cursor: props.copying ? "copy" : binding.cursor, transform: "none" }}
+      onDoubleClick={props.onEdit}
+      onKeyDown={(event) => {
+        if (event.nativeEvent.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;
+        if (event.key === " " || (event.key === "Enter" && !event.shiftKey)) {
+          event.preventDefault(); event.stopPropagation(); props.onSelect(event.shiftKey);
+          if (event.key === "Enter") props.onEdit();
+        }
+      }} />
   );
 }
 

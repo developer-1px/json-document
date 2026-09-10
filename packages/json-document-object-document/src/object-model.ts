@@ -26,12 +26,13 @@ export interface ObjectDocument extends Record<string, JSONValue> {
   readonly objects: ReadonlyArray<DocumentObject>;
 }
 
-export type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "path";
+export type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "path" | "image";
 
 export type CanvasObjectDraft = ObjectDraft & (
   | { readonly kind: "text"; readonly fontSize: number }
   | { readonly kind: "rectangle" | "ellipse" }
   | { readonly kind: "path"; readonly points: ReadonlyArray<ObjectPoint>; readonly strokeWidth: number }
+  | { readonly kind: "image"; readonly source: string }
 );
 
 export type CanvasObject = CanvasObjectDraft & { readonly id: string };

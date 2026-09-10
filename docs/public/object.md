@@ -22,7 +22,7 @@ ID 정책을 Host가 주입하는 자리입니다.
 
 `dispatch`가 받는 Object domain command입니다. 공개 variant는
 `selection.set`, `selection.remove`, `selection.fill`, `object.create`, `object.text`,
-`object.translate`, `object.resize`, `document.replace`, `clipboard.paste`입니다. DOM event, pointer 좌표, clipboard
+`object.translate`, `object.resize`, `object.duplicate`, `object.remove`, `document.replace`, `clipboard.paste`입니다. DOM event, pointer 좌표, clipboard
 event를 Intent에 넣지 않습니다.
 
 ### `ObjectSelectionMode`
@@ -42,6 +42,10 @@ event를 Intent에 넣지 않습니다.
 `clipboard.paste.placement`의 `{ type: "offset", dx, dy }`로 전달합니다. Editor가
 unique ID clone 뒤 placement를 정확히 한 번 적용하므로 clipboard payload에는
 배치 결과를 미리 저장하지 않습니다. placement 생략은 zero offset입니다.
+복제·paste의 primary remap, 새 ID와 원자적 History 계약은 소유 패키지의
+[Object Editing API](/docs/api/editing)에 있습니다. native cut은 성공적으로 쓴 payload의
+ID를 `object.remove`에 전달합니다. Object Demo의 복제 버튼은 OS Clipboard와 별개이며
+copy/cut/paste는 native 이벤트만 사용합니다.
 
 ## 상태의 주인
 
@@ -70,5 +74,5 @@ Object Hands는 서로 다른 수명의 상태를 한 덩어리로 만들지 않
 ```
 
 [한 장짜리 Canvas의 Usage와 Source](/docs/api/canvas)는 별도 Canvas editor 없이
-이 Object Editing을 사용합니다. 기존 Object의 다중 선택·Clipboard API는 유지하지만
-Canvas UI는 단일 선택만 제공합니다.
+이 Object Editing을 사용합니다. Canvas UI는 같은 다중 선택·Clipboard API와
+Affordance의 평면 Select 프로파일을 연결합니다.
