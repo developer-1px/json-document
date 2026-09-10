@@ -222,7 +222,7 @@ Core는 [v3 profile](json-document-v3/profile.md), Editing의 상태·관찰·�
 
 ## 현재 package 분류
 
-아래 표는 현재 31개 library package를 이 문서의 모형으로 빠짐없이 분류한다.
+아래 표는 library package를 이 문서의 모형으로 빠짐없이 분류한다.
 `후속`은 이 RFC가 source를 이동하지 않고 별도 이슈가 책임짐을 뜻한다.
 
 | Package path | 정본 모형 | 현재 판단 |
@@ -239,7 +239,9 @@ Core는 [v3 profile](json-document-v3/profile.md), Editing의 상태·관찰·�
 | `packages/json-document-affordance` | Responsibility family | select/fold/drag/history 책임 file과 root facade 유지 |
 | `packages/json-document-ui-primitives-react` | React UI Primitive family | 수렴한 Hands의 minimalist surface와 framework lifecycle을 책임별 module로 유지 |
 | `packages/json-document-animation-react` | React UI Primitive family | 생성 대기의 시각 언어를 책임 module과 stylesheet로 유지 |
-| `packages/json-document-markdown-react` | React projection family | 불완전한 스트리밍 Markdown의 복구 투영, GFM renderer, customization contract와 stylesheet를 유지 |
+| `packages/json-document-markdown-react` | React projection family | 읽기 전용 streaming/GFM renderer와 원문 편집 surface의 React 조합. 원문 문법과 DOM은 Markdown·Markdown Web owner를 소비 |
+| `packages/json-document-markdown` | Document Type projection | Markdown 원문을 정본으로 보존하고 CommonMark strong의 UTF-16 source 범위를 투영 |
+| `packages/json-document-markdown-web` | Web DOM adapter | Markdown source 좌표와 delimiter 표시를 contenteditable DOM 계약으로 변환 |
 | `packages/json-document-zod` | Composite Connector | validator와 Database translation을 책임 file로 분리한 현재 모양 유지 |
 | `packages/json-document-database` | Product-facing Hand | 기본 admin UI와 customization contract를 소유하고 headless domain package를 내부 구현으로 조합 |
 | `packages/json-document-annotation` | Product-facing Hand | Annotation 도구, gesture-to-Intent, SVG projection, transient preview와 comment UI를 소유 |

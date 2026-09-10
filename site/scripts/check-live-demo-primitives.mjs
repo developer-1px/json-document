@@ -8,8 +8,9 @@ const registry = readFileSync(registryPath, "utf8");
 const liveDemoPaths = [...registry.matchAll(/^\s*"([^"]+)": demo\(/gm)].map((match) => match[1]);
 
 // /connectors/a2ui uses Command for stream-fixture input and the canonical Inspector.
-if (liveDemoPaths.length !== 41) {
-  throw new Error(`Live Demo 감사 집합이 41개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
+// /demo/markdown-caret uses MarkdownEditingSurface and the canonical JsonInspector.
+if (liveDemoPaths.length !== 42) {
+  throw new Error(`Live Demo 감사 집합이 42개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
 }
 
 const roots = [join(sourceRoot, "routes"), join(sourceRoot, "shared/composer"), join(sourceRoot, "shared/demo-workbench"), join(sourceRoot, "shared/ui")];

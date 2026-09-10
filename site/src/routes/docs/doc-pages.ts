@@ -18,6 +18,8 @@ function docPage(path: string) {
 }
 
 export const docPages = {
+  markdownApi: docPage("/docs/api/markdown"),
+  markdownWebApi: docPage("/docs/api/markdown-web"),
   canvasApi: docPage("/docs/api/canvas"),
   objectDocumentApi: docPage("/docs/api/object-document"),
   calendarDocumentApi: docPage("/docs/api/calendar-document"),

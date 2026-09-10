@@ -1,5 +1,5 @@
 import { plainTextDOMAdapter } from "./dom/plain-text.js";
-import { isWebEditingHostTarget } from "@interactive-os/json-document-web";
+import { createWebClipboardBinding, createWebKeyboardAdapter, isWebEditingHostTarget, textClipboardCodec } from "@interactive-os/json-document-web";
 import type {
   ContentEditableBinding,
   ContentEditableBindingOptions,
@@ -10,6 +10,7 @@ import type {
 interface ActiveLease {
   phase: "native" | "composing";
   nativeFallback: ReturnType<typeof setTimeout> | null;
+  readonly value: string;
 }
 
 interface RenderedDocument {
@@ -28,13 +29,19 @@ export function createContentEditableBinding({
   dom = plainTextDOMAdapter,
   pointer,
   root,
+  editor,
 }: ContentEditableBindingOptions): ContentEditableBinding {
+  if (editor && (editor.document !== document || editor.pointer !== pointer)) {
+    throw new TypeError("contenteditable editor must own the bound document and pointer");
+  }
   let activeLease: ActiveLease | null = null;
   let trailingComposition = false;
   let trailingTimer: ReturnType<typeof setTimeout> | null = null;
   let renderedDocument: RenderedDocument | null = null;
   let bound = false;
   let unsubscribeDocument: (() => void) | null = null;
+  let rendering = false;
+  const keyboard = createWebKeyboardAdapter();
 
   const currentDOMSelection = (): TextSelection | null =>
     dom.observe(root).selection;
@@ -63,10 +70,15 @@ export function createContentEditableBinding({
     const selection = requestedSelection === undefined
       ? currentDOMSelection()
       : requestedSelection;
-    dom.render(root, next.value);
-    renderedDocument = next;
-    if (selection !== null && next.available) {
-      dom.restoreSelection(root, selection);
+    rendering = true;
+    try {
+      dom.render(root, next.value, selection);
+      renderedDocument = next;
+      if (selection !== null && next.available) {
+        dom.restoreSelection(root, selection);
+      }
+    } finally {
+      rendering = false;
     }
     return RENDERED;
   };
@@ -105,8 +117,13 @@ export function createContentEditableBinding({
         "contenteditable target is not a string",
       );
     }
+    if (current.value !== lease.value) {
+      clearActiveLease();
+      renderLatest(undefined, true);
+      return failure("text_source_stale", "source changed while the browser owned native input");
+    }
     if (observation.value !== current.value) {
-      const committed = document.commit([{
+      const committed = editor ? editor.replace(observation.value, observation.selection ?? editor.snapshot.selection) : document.commit([{
         op: "replace",
         path: pointer,
         value: observation.value,
@@ -148,7 +165,11 @@ export function createContentEditableBinding({
         "contenteditable target is not a string",
       );
     }
-    activeLease = { phase, nativeFallback: null };
+    if (editor) {
+      const selection = currentDOMSelection();
+      if (selection) editor.select(selection);
+    }
+    activeLease = { phase, nativeFallback: null, value: current.value };
     if (phase === "native") {
       const lease = activeLease;
       lease.nativeFallback = setTimeout(() => {
@@ -170,9 +191,39 @@ export function createContentEditableBinding({
   };
 
   const handleInternal = (event: Event): ContentEditableBindingResult => {
-    if (event.type === "blur") return cancelInternal();
+    if (event.type === "focus") {
+      return editor ? renderLatest(undefined, true) : NO_CHANGE;
+    }
+    if (event.type === "blur") {
+      const result = cancelInternal();
+      if (editor) renderLatest(null, true);
+      return result;
+    }
+
+    if (editor && event.type === "keydown" && activeLease?.phase !== "composing") {
+      const keyboardEvent = event as KeyboardEvent;
+      const command = keyboard.resolve(keyboardEvent);
+      if (command?.type === "undo" || command?.type === "redo") {
+        event.preventDefault();
+        cancelInternal();
+        const result = command.type === "undo" ? editor.undo() : editor.redo();
+        return result.ok ? RENDERED : failure(result.code, result.reason ?? result.code);
+      }
+    }
 
     if (event.type === "beforeinput") {
+      if (editor && event.cancelable && activeLease?.phase !== "composing") {
+        const inputType = (event as InputEvent).inputType ?? "";
+        if (inputType.startsWith("format")) {
+          event.preventDefault();
+          return failure("text_format_unsupported", "source text has no native formatting state");
+        }
+        if (inputType === "historyUndo" || inputType === "historyRedo") {
+          event.preventDefault();
+          const result = inputType === "historyUndo" ? editor.undo() : editor.redo();
+          return result.ok ? RENDERED : failure(result.code, result.reason ?? result.code);
+        }
+      }
       if (trailingComposition) {
         if (isCompositionInput(event)) return NO_CHANGE;
         finishTrailing();
@@ -214,12 +265,50 @@ export function createContentEditableBinding({
 
   const boundHandle = (event: Event): void => {
     if (!isWebEditingHostTarget(root, event.target)) return;
+    if (event.defaultPrevented) return;
     handleInternal(event);
   };
 
   const onDocumentChange = (): void => {
-    if (activeLease !== null || trailingComposition) return;
-    renderLatest(undefined, false);
+    if (activeLease !== null || trailingComposition || rendering) return;
+    const hasSelection = currentDOMSelection() !== null;
+    renderLatest(editor ? hasSelection ? editor.snapshot.selection : null : undefined, editor !== undefined);
+  };
+
+  const onSelectionChange = (): void => {
+    if (!editor || rendering || activeLease || trailingComposition) return;
+    const selection = currentDOMSelection();
+    if (selection === null) return;
+    const current = editor.snapshot.selection;
+    if (selection.anchor === current.anchor && selection.focus === current.focus) return;
+    editor.select(selection);
+  };
+
+  const clipboard = editor ? createWebClipboardBinding({
+    codec: textClipboardCodec,
+    read: () => {
+      const selection = currentDOMSelection();
+      if (selection) editor.select(selection);
+      const text = editor.copy();
+      return text.length ? { type: "text/plain" as const, text } : null;
+    },
+    cut: () => editor.insert(""),
+    paste: (payload) => {
+      const selection = currentDOMSelection();
+      if (selection) editor.select(selection);
+      return editor.insert(payload.text);
+    },
+  }) : null;
+  const onClipboard = (event: ClipboardEvent): void => {
+    if (!clipboard || !isWebEditingHostTarget(root, event.target) || event.defaultPrevented) return;
+    if (activeLease || trailingComposition) { event.preventDefault(); return; }
+    if (event.type === "copy") clipboard.copy(event);
+    else if (event.type === "cut") clipboard.cut(event);
+    else {
+      // This root accepts source text only, including refusal of HTML-only paste.
+      event.preventDefault();
+      clipboard.paste(event);
+    }
   };
 
   const unbind = (): void => {
@@ -230,6 +319,8 @@ export function createContentEditableBinding({
     }
     unsubscribeDocument?.();
     unsubscribeDocument = null;
+    root.ownerDocument.removeEventListener("selectionchange", onSelectionChange);
+    for (const type of ["copy", "cut", "paste"]) root.removeEventListener(type, onClipboard as EventListener);
     clearActiveLease();
     clearTrailing();
   };
@@ -241,7 +332,11 @@ export function createContentEditableBinding({
       for (const type of ROOT_EVENTS) {
         root.addEventListener(type, boundHandle, true);
       }
-      unsubscribeDocument = document.subscribe(onDocumentChange);
+      unsubscribeDocument = editor ? editor.subscribe(onDocumentChange) : document.subscribe(onDocumentChange);
+      if (editor) {
+        root.ownerDocument.addEventListener("selectionchange", onSelectionChange);
+        for (const type of ["copy", "cut", "paste"]) root.addEventListener(type, onClipboard as EventListener);
+      }
       renderLatest(undefined, true);
       let active = true;
       return () => {
@@ -285,11 +380,13 @@ function failure(
 }
 
 const ROOT_EVENTS = Object.freeze([
+  "focus",
   "beforeinput",
   "compositionstart",
   "compositionend",
   "input",
   "blur",
+  "keydown",
 ] as const);
 
 const NO_CHANGE: ContentEditableBindingResult = Object.freeze({

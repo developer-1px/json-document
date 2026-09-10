@@ -11,6 +11,18 @@
 ```ts
 type Components = import("./lib/index.js").Components;
 ```
+## `MarkdownEditingSurface`
+
+```ts
+MarkdownEditingSurface({ editor, style, ...props }: MarkdownEditingSurfaceProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `MarkdownEditingSurfaceProps`
+
+```ts
+interface MarkdownEditingSurfaceProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "contentEditable"> {
+  readonly editor: TextEditor;
+}
+```
 ## `MarkdownRenderer`
 
 ```ts

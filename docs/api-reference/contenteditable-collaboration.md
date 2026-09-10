@@ -77,7 +77,7 @@ const plainTextDOMAdapter: TextDOMAdapter
 ```ts
 interface TextDOMAdapter {
   observe(root: HTMLElement): DOMObservation;
-  render(root: HTMLElement, value: string): void;
+  render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
   restoreSelection(root: HTMLElement, selection: TextSelection): boolean;
 }
 ```

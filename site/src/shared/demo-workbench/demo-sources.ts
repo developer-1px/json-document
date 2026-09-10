@@ -36,6 +36,10 @@ import calendarTimeGridSource from "../../../../packages/json-document-calendar/
 import calendarEventInspectorSource from "../../../../packages/json-document-calendar/src/calendar-event-inspector.tsx?raw";
 import animationSource from "../../../../packages/json-document-animation-react/src/animations.tsx?raw";
 import markdownRendererSource from "../../../../packages/json-document-markdown-react/src/MarkdownRenderer.tsx?raw";
+import markdownEditingSource from "../../../../packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx?raw";
+import markdownProjectionSource from "../../../../packages/json-document-markdown/src/projection.ts?raw";
+import markdownDOMSource from "../../../../packages/json-document-markdown-web/src/markdown-dom.ts?raw";
+import textEditingSource from "../../../../packages/json-document-editing/src/text.ts?raw";
 import dateValuesSource from "../../../../packages/json-document-calendar/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
@@ -142,6 +146,8 @@ import selectionKeySource from "../../../../packages/json-document-selection/src
 import selectionRangeSource from "../../../../packages/json-document-selection/src/range/index.ts?raw";
 import selectionMaterializedRangeSource from "../../../../packages/json-document-selection/src/range/materialized.ts?raw";
 import contentEditableReactSource from "../../../../packages/json-document-contenteditable/src/content-editable.tsx?raw";
+import contentEditableLeaseSource from "../../../../packages/json-document-contenteditable/src/lease.ts?raw";
+import plainTextDOMSource from "../../../../packages/json-document-contenteditable/src/dom/plain-text.ts?raw";
 import collaborationCreateSource from "../../../../packages/json-document-collaboration/src/create.ts?raw";
 import collaborationEditingSource from "../../../../packages/json-document-collaboration/src/editing-index.ts?raw";
 import collaborationContentEditableSource from "../../../../packages/contenteditable-collaboration/src/lease.ts?raw";
@@ -164,6 +170,8 @@ export type DemoSourceFile = {
 };
 
 const packageReferencePaths = new Map([
+  ["packages/json-document-markdown/", "/docs/api/markdown"],
+  ["packages/json-document-markdown-web/", "/docs/api/markdown-web"],
   ["packages/json-document-object-document/", "/docs/api/object-document"],
   ["packages/json-document-canvas/", "/docs/api/canvas"],
   ["packages/json-document/", "/docs/api/json-document"],
@@ -257,6 +265,10 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-calendar/src/calendar-event-inspector.tsx", calendarEventInspectorSource],
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
+  ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
+  ["packages/json-document-markdown/src/projection.ts", markdownProjectionSource],
+  ["packages/json-document-markdown-web/src/markdown-dom.ts", markdownDOMSource],
+  ["packages/json-document-editing/src/text.ts", textEditingSource],
   ["packages/json-document-calendar/src/date-values.ts", dateValuesSource],
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
   ["packages/json-document-react/src/use-editing.ts", editingItemSource],
@@ -359,6 +371,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-selection/src/key/index.ts", selectionKeySource],
   ["packages/json-document-selection/src/range/materialized.ts", selectionMaterializedRangeSource],
   ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
+  ["packages/json-document-contenteditable/src/lease.ts", contentEditableLeaseSource],
+  ["packages/json-document-contenteditable/src/dom/plain-text.ts", plainTextDOMSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
   ["packages/json-document-collaboration/src/editing-index.ts", collaborationEditingSource],
   ["packages/contenteditable-collaboration/src/lease.ts", collaborationContentEditableSource],
@@ -724,6 +738,26 @@ const registeredPublicUsages = [
     symbol: "MarkdownRenderer",
     sourcePath: "packages/json-document-markdown-react/src/MarkdownRenderer.tsx",
   },
+  {
+    packageName: "@interactive-os/json-document-markdown-react",
+    symbol: "MarkdownEditingSurface",
+    sourcePath: "packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownDOMAdapter",
+    sourcePath: "packages/json-document-markdown-web/src/markdown-dom.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown",
+    symbol: "projectMarkdown",
+    sourcePath: "packages/json-document-markdown/src/projection.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createTextEditor",
+    sourcePath: "packages/json-document-editing/src/text.ts",
+  },
   ...([
     "AuroraMass",
     "BlobMass",
@@ -874,6 +908,26 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-contenteditable",
     symbol: "ContentEditable",
     sourcePath: "packages/json-document-contenteditable/src/content-editable.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-contenteditable",
+    symbol: "createContentEditableBinding",
+    sourcePath: "packages/json-document-contenteditable/src/lease.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-contenteditable",
+    symbol: "plainTextDOMAdapter",
+    sourcePath: "packages/json-document-contenteditable/src/dom/plain-text.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "clampTextSelection",
+    sourcePath: "packages/json-document-editing/src/text.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "textClipboardCodec",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",

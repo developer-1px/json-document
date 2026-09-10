@@ -61,7 +61,7 @@ DOM surface는 Cut callback이 없어도 앱 소유 이벤트를 취소합니다
 이미 처리된 child 이벤트는 parent에서 다시 실행하지 않습니다.
 
 실제 Usage/Source: [Clipboard Adapter](/adapters/clipboard), [Canvas](/demo/canvas),
-[Rich Text](/demo/rich-text). 앱 선택이 남은 중첩 native 입력, 준비 실패, SVG 내부
+[Rich Text](/editing/rich-text). 앱 선택이 남은 중첩 native 입력, 준비 실패, SVG 내부
 textarea, child/parent 단일 실행은 Web 소유 테스트로 검증합니다.
 
 ### 비동기 입력을 위한 동기 캡처

@@ -3,6 +3,8 @@ name: Publish v3 package
 on:
   push:
     tags:
+      - "json-document-markdown-v*"
+      - "json-document-markdown-web-v*"
       - "json-document-v*"
       - "json-document-ajv-v*"
       - "json-document-a2ui-v*"

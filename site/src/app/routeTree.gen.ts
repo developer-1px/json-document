@@ -44,6 +44,7 @@ import { Route as PageDemoDateControlsRouteImport } from "./routes/_page/demo/da
 import { Route as PageDemoHistoryRouteImport } from "./routes/_page/demo/history";
 import { Route as PageDemoKanbanRouteImport } from "./routes/_page/demo/kanban";
 import { Route as PageDemoMarkdownRouteImport } from "./routes/_page/demo/markdown";
+import { Route as PageDemoMarkdownCaretRouteImport } from "./routes/_page/demo/markdown-caret";
 import { Route as PageDemoObjectRouteImport } from "./routes/_page/demo/object";
 import { Route as PageDemoOrderRouteImport } from "./routes/_page/demo/order";
 import { Route as PageDemoSelectionRouteImport } from "./routes/_page/demo/selection";
@@ -147,7 +148,9 @@ import { Route as PageDocsApiDatabaseRouteImport } from "./routes/_page/docs/api
 import { Route as PageDocsApiEditingRouteImport } from "./routes/_page/docs/api/editing";
 import { Route as PageDocsApiFileIntakeRouteImport } from "./routes/_page/docs/api/file-intake";
 import { Route as PageDocsApiJsonDocumentRouteImport } from "./routes/_page/docs/api/json-document";
+import { Route as PageDocsApiMarkdownRouteImport } from "./routes/_page/docs/api/markdown";
 import { Route as PageDocsApiMarkdownReactRouteImport } from "./routes/_page/docs/api/markdown-react";
+import { Route as PageDocsApiMarkdownWebRouteImport } from "./routes/_page/docs/api/markdown-web";
 import { Route as PageDocsApiObjectDocumentRouteImport } from "./routes/_page/docs/api/object-document";
 import { Route as PageDocsApiReactRouteImport } from "./routes/_page/docs/api/react";
 import { Route as PageDocsApiReactHookFormRouteImport } from "./routes/_page/docs/api/react-hook-form";
@@ -350,6 +353,11 @@ const PageDemoKanbanRoute = PageDemoKanbanRouteImport.update({
 const PageDemoMarkdownRoute = PageDemoMarkdownRouteImport.update({
   id: "/demo/markdown",
   path: "/demo/markdown",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoMarkdownCaretRoute = PageDemoMarkdownCaretRouteImport.update({
+  id: "/demo/markdown-caret",
+  path: "/demo/markdown-caret",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoObjectRoute = PageDemoObjectRouteImport.update({
@@ -898,12 +906,22 @@ const PageDocsApiJsonDocumentRoute = PageDocsApiJsonDocumentRouteImport.update({
   path: "/docs/api/json-document",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsApiMarkdownRoute = PageDocsApiMarkdownRouteImport.update({
+  id: "/docs/api/markdown",
+  path: "/docs/api/markdown",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsApiMarkdownReactRoute =
   PageDocsApiMarkdownReactRouteImport.update({
     id: "/docs/api/markdown-react",
     path: "/docs/api/markdown-react",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsApiMarkdownWebRoute = PageDocsApiMarkdownWebRouteImport.update({
+  id: "/docs/api/markdown-web",
+  path: "/docs/api/markdown-web",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsApiObjectDocumentRoute =
   PageDocsApiObjectDocumentRouteImport.update({
     id: "/docs/api/object-document",
@@ -1068,6 +1086,7 @@ export interface FileRoutesByFullPath {
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
   "/demo/markdown": typeof PageDemoMarkdownRoute;
+  "/demo/markdown-caret": typeof PageDemoMarkdownCaretRoute;
   "/demo/object": typeof PageDemoObjectRoute;
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
@@ -1172,7 +1191,9 @@ export interface FileRoutesByFullPath {
   "/docs/api/editing": typeof PageDocsApiEditingRoute;
   "/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
+  "/docs/api/markdown": typeof PageDocsApiMarkdownRoute;
   "/docs/api/markdown-react": typeof PageDocsApiMarkdownReactRoute;
+  "/docs/api/markdown-web": typeof PageDocsApiMarkdownWebRoute;
   "/docs/api/object-document": typeof PageDocsApiObjectDocumentRoute;
   "/docs/api/react": typeof PageDocsApiReactRoute;
   "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
@@ -1231,6 +1252,7 @@ export interface FileRoutesByTo {
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
   "/demo/markdown": typeof PageDemoMarkdownRoute;
+  "/demo/markdown-caret": typeof PageDemoMarkdownCaretRoute;
   "/demo/object": typeof PageDemoObjectRoute;
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
@@ -1335,7 +1357,9 @@ export interface FileRoutesByTo {
   "/docs/api/editing": typeof PageDocsApiEditingRoute;
   "/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
+  "/docs/api/markdown": typeof PageDocsApiMarkdownRoute;
   "/docs/api/markdown-react": typeof PageDocsApiMarkdownReactRoute;
+  "/docs/api/markdown-web": typeof PageDocsApiMarkdownWebRoute;
   "/docs/api/object-document": typeof PageDocsApiObjectDocumentRoute;
   "/docs/api/react": typeof PageDocsApiReactRoute;
   "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
@@ -1396,6 +1420,7 @@ export interface FileRoutesById {
   "/_page/demo/history": typeof PageDemoHistoryRoute;
   "/_page/demo/kanban": typeof PageDemoKanbanRoute;
   "/_page/demo/markdown": typeof PageDemoMarkdownRoute;
+  "/_page/demo/markdown-caret": typeof PageDemoMarkdownCaretRoute;
   "/_page/demo/object": typeof PageDemoObjectRoute;
   "/_page/demo/order": typeof PageDemoOrderRoute;
   "/_page/demo/selection": typeof PageDemoSelectionRoute;
@@ -1500,7 +1525,9 @@ export interface FileRoutesById {
   "/_page/docs/api/editing": typeof PageDocsApiEditingRoute;
   "/_page/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/_page/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
+  "/_page/docs/api/markdown": typeof PageDocsApiMarkdownRoute;
   "/_page/docs/api/markdown-react": typeof PageDocsApiMarkdownReactRoute;
+  "/_page/docs/api/markdown-web": typeof PageDocsApiMarkdownWebRoute;
   "/_page/docs/api/object-document": typeof PageDocsApiObjectDocumentRoute;
   "/_page/docs/api/react": typeof PageDocsApiReactRoute;
   "/_page/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
@@ -1561,6 +1588,7 @@ export interface FileRouteTypes {
     | "/demo/history"
     | "/demo/kanban"
     | "/demo/markdown"
+    | "/demo/markdown-caret"
     | "/demo/object"
     | "/demo/order"
     | "/demo/selection"
@@ -1665,7 +1693,9 @@ export interface FileRouteTypes {
     | "/docs/api/editing"
     | "/docs/api/file-intake"
     | "/docs/api/json-document"
+    | "/docs/api/markdown"
     | "/docs/api/markdown-react"
+    | "/docs/api/markdown-web"
     | "/docs/api/object-document"
     | "/docs/api/react"
     | "/docs/api/react-hook-form"
@@ -1724,6 +1754,7 @@ export interface FileRouteTypes {
     | "/demo/history"
     | "/demo/kanban"
     | "/demo/markdown"
+    | "/demo/markdown-caret"
     | "/demo/object"
     | "/demo/order"
     | "/demo/selection"
@@ -1828,7 +1859,9 @@ export interface FileRouteTypes {
     | "/docs/api/editing"
     | "/docs/api/file-intake"
     | "/docs/api/json-document"
+    | "/docs/api/markdown"
     | "/docs/api/markdown-react"
+    | "/docs/api/markdown-web"
     | "/docs/api/object-document"
     | "/docs/api/react"
     | "/docs/api/react-hook-form"
@@ -1888,6 +1921,7 @@ export interface FileRouteTypes {
     | "/_page/demo/history"
     | "/_page/demo/kanban"
     | "/_page/demo/markdown"
+    | "/_page/demo/markdown-caret"
     | "/_page/demo/object"
     | "/_page/demo/order"
     | "/_page/demo/selection"
@@ -1992,7 +2026,9 @@ export interface FileRouteTypes {
     | "/_page/docs/api/editing"
     | "/_page/docs/api/file-intake"
     | "/_page/docs/api/json-document"
+    | "/_page/docs/api/markdown"
     | "/_page/docs/api/markdown-react"
+    | "/_page/docs/api/markdown-web"
     | "/_page/docs/api/object-document"
     | "/_page/docs/api/react"
     | "/_page/docs/api/react-hook-form"
@@ -2271,6 +2307,13 @@ declare module "@tanstack/react-router" {
       path: "/demo/markdown";
       fullPath: "/demo/markdown";
       preLoaderRoute: typeof PageDemoMarkdownRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/markdown-caret": {
+      id: "/_page/demo/markdown-caret";
+      path: "/demo/markdown-caret";
+      fullPath: "/demo/markdown-caret";
+      preLoaderRoute: typeof PageDemoMarkdownCaretRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/object": {
@@ -2994,11 +3037,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiJsonDocumentRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/api/markdown": {
+      id: "/_page/docs/api/markdown";
+      path: "/docs/api/markdown";
+      fullPath: "/docs/api/markdown";
+      preLoaderRoute: typeof PageDocsApiMarkdownRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/api/markdown-react": {
       id: "/_page/docs/api/markdown-react";
       path: "/docs/api/markdown-react";
       fullPath: "/docs/api/markdown-react";
       preLoaderRoute: typeof PageDocsApiMarkdownReactRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/api/markdown-web": {
+      id: "/_page/docs/api/markdown-web";
+      path: "/docs/api/markdown-web";
+      fullPath: "/docs/api/markdown-web";
+      preLoaderRoute: typeof PageDocsApiMarkdownWebRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/api/object-document": {
@@ -3195,6 +3252,7 @@ interface PageRouteChildren {
   PageDemoHistoryRoute: typeof PageDemoHistoryRoute;
   PageDemoKanbanRoute: typeof PageDemoKanbanRoute;
   PageDemoMarkdownRoute: typeof PageDemoMarkdownRoute;
+  PageDemoMarkdownCaretRoute: typeof PageDemoMarkdownCaretRoute;
   PageDemoObjectRoute: typeof PageDemoObjectRoute;
   PageDemoOrderRoute: typeof PageDemoOrderRoute;
   PageDemoSelectionRoute: typeof PageDemoSelectionRoute;
@@ -3299,7 +3357,9 @@ interface PageRouteChildren {
   PageDocsApiEditingRoute: typeof PageDocsApiEditingRoute;
   PageDocsApiFileIntakeRoute: typeof PageDocsApiFileIntakeRoute;
   PageDocsApiJsonDocumentRoute: typeof PageDocsApiJsonDocumentRoute;
+  PageDocsApiMarkdownRoute: typeof PageDocsApiMarkdownRoute;
   PageDocsApiMarkdownReactRoute: typeof PageDocsApiMarkdownReactRoute;
+  PageDocsApiMarkdownWebRoute: typeof PageDocsApiMarkdownWebRoute;
   PageDocsApiObjectDocumentRoute: typeof PageDocsApiObjectDocumentRoute;
   PageDocsApiReactRoute: typeof PageDocsApiReactRoute;
   PageDocsApiReactHookFormRoute: typeof PageDocsApiReactHookFormRoute;
@@ -3358,6 +3418,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoHistoryRoute: PageDemoHistoryRoute,
   PageDemoKanbanRoute: PageDemoKanbanRoute,
   PageDemoMarkdownRoute: PageDemoMarkdownRoute,
+  PageDemoMarkdownCaretRoute: PageDemoMarkdownCaretRoute,
   PageDemoObjectRoute: PageDemoObjectRoute,
   PageDemoOrderRoute: PageDemoOrderRoute,
   PageDemoSelectionRoute: PageDemoSelectionRoute,
@@ -3463,7 +3524,9 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsApiEditingRoute: PageDocsApiEditingRoute,
   PageDocsApiFileIntakeRoute: PageDocsApiFileIntakeRoute,
   PageDocsApiJsonDocumentRoute: PageDocsApiJsonDocumentRoute,
+  PageDocsApiMarkdownRoute: PageDocsApiMarkdownRoute,
   PageDocsApiMarkdownReactRoute: PageDocsApiMarkdownReactRoute,
+  PageDocsApiMarkdownWebRoute: PageDocsApiMarkdownWebRoute,
   PageDocsApiObjectDocumentRoute: PageDocsApiObjectDocumentRoute,
   PageDocsApiReactRoute: PageDocsApiReactRoute,
   PageDocsApiReactHookFormRoute: PageDocsApiReactHookFormRoute,

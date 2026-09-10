@@ -29,6 +29,8 @@ interface ContentEditableBindingOptions {
   readonly pointer: Pointer;
   readonly root: HTMLElement;
   readonly dom?: TextDOMAdapter;
+  /** Optional canonical source editor; replaces direct commits with selection-restoring Editing transactions. */
+  readonly editor?: TextEditor;
 }
 ```
 ## `ContentEditableBindingResult`
@@ -51,7 +53,7 @@ interface ContentEditableProps {
 ## `createContentEditableBinding`
 
 ```ts
-createContentEditableBinding({ document, dom, pointer, root, }: ContentEditableBindingOptions): ContentEditableBinding
+createContentEditableBinding({ document, dom, pointer, root, editor, }: ContentEditableBindingOptions): ContentEditableBinding
 ```
 ## `DOMObservation`
 
@@ -71,15 +73,12 @@ const plainTextDOMAdapter: TextDOMAdapter
 ```ts
 interface TextDOMAdapter {
   observe(root: HTMLElement): DOMObservation;
-  render(root: HTMLElement, value: string): void;
+  render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
   restoreSelection(root: HTMLElement, selection: TextSelection): boolean;
 }
 ```
 ## `TextSelection`
 
 ```ts
-interface TextSelection {
-  readonly anchor: number;
-  readonly focus: number;
-}
+type TextSelection = { readonly anchor: number; readonly focus: number };
 ```

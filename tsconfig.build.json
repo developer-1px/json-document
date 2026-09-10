@@ -14,6 +14,8 @@
     { "path": "./packages/json-document-affordance" },
     { "path": "./packages/json-document-ui-primitives-react" },
     { "path": "./packages/json-document-animation-react" },
+    { "path": "./packages/json-document-markdown" },
+    { "path": "./packages/json-document-markdown-web" },
     { "path": "./packages/json-document-markdown-react" },
     { "path": "./packages/json-document-zod" },
     { "path": "./packages/json-document-database" },

@@ -145,3 +145,4 @@ export type {
   WebGridCellAddressElement,
   WebGridCellAddressRoot,
 } from "./grid-cell.js";
+export { textClipboardCodec } from "./clipboard.js";

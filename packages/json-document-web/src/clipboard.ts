@@ -15,6 +15,13 @@ export interface WebClipboardPayload {
   readonly text: string;
 }
 
+/** Literal source text representation; preserves Markdown delimiters and original line endings. */
+export const textClipboardCodec: WebClipboardCodec<{ readonly type: "text/plain"; readonly text: string }> = Object.freeze({
+  mimeType: "text/plain",
+  encode: (payload: { readonly text: string }) => payload.text,
+  decode: (text: string) => ({ type: "text/plain" as const, text }),
+});
+
 export interface WebClipboardData {
   readonly types: ReadonlyArray<string>;
   readonly files?: WebFileCandidateList;

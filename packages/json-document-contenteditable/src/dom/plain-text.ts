@@ -1,3 +1,4 @@
+import { clampTextSelection } from "@interactive-os/json-document-editing";
 import type { DOMObservation, TextDOMAdapter, TextSelection } from "../types.js";
 
 export const plainTextDOMAdapter: TextDOMAdapter = Object.freeze({
@@ -16,7 +17,7 @@ export const plainTextDOMAdapter: TextDOMAdapter = Object.freeze({
   ): boolean {
     if (!root.isConnected) return false;
     const value = root.textContent ?? "";
-    const clamped = clampSelectionToScalarBoundaries(value, selection);
+    const clamped = clampTextSelection(value, selection);
     const anchor = domPositionForOffset(root, clamped.anchor);
     const focus = domPositionForOffset(root, clamped.focus);
     const domSelection = root.ownerDocument.getSelection();
@@ -206,45 +207,6 @@ function domPositionForOffset(
   };
 }
 
-function clampSelectionToScalarBoundaries(
-  value: string,
-  selection: TextSelection,
-): TextSelection {
-  const direction = selection.anchor === selection.focus
-    ? "collapsed"
-    : selection.anchor < selection.focus
-      ? "forward"
-      : "backward";
-  const anchorAffinity = direction === "forward" ? "backward" : "forward";
-  const focusAffinity = direction === "backward" ? "backward" : "forward";
-  const anchor = clampScalarOffset(
-    value,
-    selection.anchor,
-    anchorAffinity,
-  );
-  const focus = direction === "collapsed"
-    ? anchor
-    : clampScalarOffset(value, selection.focus, focusAffinity);
-  return { anchor, focus };
-}
-
-function clampScalarOffset(
-  value: string,
-  offset: number,
-  affinity: "backward" | "forward",
-): number {
-  const bounded = boundedInteger(offset, 0, value.length);
-  if (
-    bounded > 0
-    && bounded < value.length
-    && isHighSurrogate(value.charCodeAt(bounded - 1))
-    && isLowSurrogate(value.charCodeAt(bounded))
-  ) {
-    return affinity === "backward" ? bounded - 1 : bounded + 1;
-  }
-  return bounded;
-}
-
 function boundedInteger(
   input: number,
   minimum: number,
@@ -252,12 +214,4 @@ function boundedInteger(
 ): number {
   if (!Number.isFinite(input)) return minimum;
   return Math.min(maximum, Math.max(minimum, Math.trunc(input)));
-}
-
-function isHighSurrogate(value: number): boolean {
-  return value >= 0xd800 && value <= 0xdbff;
-}
-
-function isLowSurrogate(value: number): boolean {
-  return value >= 0xdc00 && value <= 0xdfff;
 }
