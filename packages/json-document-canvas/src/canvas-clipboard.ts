@@ -1,7 +1,7 @@
 import { createCanvasClipboard, createObjectPasteSession, type CanvasClipboardOptions, type EditingResult, type ObjectEditor, type ObjectPastePreparation, type ObjectSelection } from "@interactive-os/json-document-editing";
 import type { FileAcceptancePolicy } from "@interactive-os/json-document-file-intake";
 import { assertCanvasDocument } from "@interactive-os/json-document-object-document";
-import { captureWebClipboardPaste, createWebClipboardBinding, objectClipboardCodec, readWebRasterFile, readWebRasterFiles, type WebClipboardEvent, type WebFileCandidate } from "@interactive-os/json-document-web";
+import { captureWebClipboardPaste, createWebClipboardBinding, objectClipboardCodec, readWebHTMLClipboard, readWebRasterFile, readWebRasterFiles, type WebClipboardEvent, type WebFileCandidate, type WebHTMLClipboardContent } from "@interactive-os/json-document-web";
 
 export interface CanvasClipboardPolicy {
   readonly textColor: string;
@@ -39,6 +39,10 @@ export function createCanvasClipboardBinding(editor: ObjectEditor, policy: Canva
       ? { ok: true, clipboard: createCanvasClipboard({ type: "images", images: prepared.files.map(({ candidate, image }) => ({ ...image, label: candidate.name })) }, content) }
       : prepared;
   }
+  async function html(input: WebHTMLClipboardContent, content: CanvasClipboardOptions, signal: AbortSignal): Promise<ObjectPastePreparation> {
+    const prepared = await readWebHTMLClipboard(input, { policy: files, maxImagePixels: maxPixels, signal, readRaster: options.readRaster ?? readWebRasterFile });
+    return prepared.ok ? { ok: true, clipboard: createCanvasClipboard({ type: "mixed", items: prepared.parts.map((part) => part.type === "text" ? part : { type: "image", ...part.image, label: part.candidate.name }) }, content) } : prepared;
+  }
   return {
     get pending() { return session.pending; },
     cancel: () => session.cancel(),
@@ -51,12 +55,13 @@ export function createCanvasClipboardBinding(editor: ObjectEditor, policy: Canva
       const result = native.cut(event); options.onResult?.(result); return result;
     },
     paste(event: WebClipboardEvent): Promise<EditingResult<ObjectSelection>> {
-      const captured = captureWebClipboardPaste(event, { codec: objectClipboardCodec, files: true, text: true });
+      const captured = captureWebClipboardPaste(event, { codec: objectClipboardCodec, files: true, html: "images", text: true });
       const controller = new AbortController();
       return session.enqueue(() => {
         if (!captured.ok) return captured;
         if (captured.type === "structured") return { ok: true, clipboard: captured.payload };
         const content = contentOptions();
+        if (captured.type === "html") return html(captured.content, content, controller.signal);
         return captured.type === "text"
           ? { ok: true, clipboard: createCanvasClipboard({ type: "text", text: captured.text }, content) }
           : images(captured.files, content, controller.signal);

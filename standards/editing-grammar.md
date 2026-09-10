@@ -286,12 +286,13 @@ EG-COPY/CUT/PASTE/HISTORY의 구체화이며 새로운 Stable profile이나 Core
 | PI-ORDER | 준비 완료 순서가 달라도 요청 순서로 한 batch씩 반영 | Editing | Object·Composer가 공통 queue 소비; [순서·재진입 사례](../packages/json-document-editing/tests/preparation-queue.test.ts) |
 | PI-CANCEL | 취소·History 작업·unmount 뒤 늦은 결과는 무효 | Editing·각 Hand | Object 자동 무효화, Composer Escape·binding History·unmount 취소 구현; [취소 사례](../packages/json-document-composer-react/tests/composer-attachments.test.tsx) |
 | PI-TYPING | 첨부 준비 중 typing/caret 이동 허용; 완료 시 최신 첨부 목록 뒤에 추가 | Composer·React Connector | 구현; [연속 첨부·typing·caret 사례](../packages/json-document-composer-react/tests/composer-attachments.test.tsx). inline anchor mapping은 아님 |
-| PI-HTML | 대체 MIME 선택과 HTML 내부의 글+이미지 순서 보존을 구분 | Web·Rich Text Web·각 Hand | TBD: HTML 이미지, 불가한 source의 실패와 안전한 변환 |
+| PI-HTML | 대체 MIME 선택과 HTML 내부의 글+이미지 순서 보존을 구분 | Web·Rich Text Web·각 Hand | 부분 구현: [inert HTML·우선순위·source 실패](../packages/json-document-web/tests/html-clipboard.test.ts), [Canvas 흐름 변환](../packages/json-document-editing/tests/canvas-clipboard.test.ts), [Composer 이미지-only·mixed 거절](../packages/json-document-composer-react/tests/composer-attachments.test.tsx); TBD: files↔HTML 대응, 외부 source, Composer inline 혼합 의미 |
 | PI-PLAIN | 명시적인 plain paste와 지원 서식 paste를 분리 | Web·Affordance·각 Hand | TBD: 실제 modifier/native editable 사례 |
 | PI-EXPORT | 선택한 Canvas 객체를 PNG로 복사; write 실패는 문서 불변 | Canvas·Web | TBD: 혼합 선택·투명 배경·권한 실패·외부 앱 확인 |
 | PI-NATIVE | OS screenshot, 브라우저 Copy Image, Docs/Slides HTML, 외부 앱 왕복 | Web·제품 경로 | TBD: DOM 합성 이벤트를 OS-native 증거로 계산하지 않음 |
 
-첫 이미지 slice는 서버 upload·임의 URL fetch·HTML import를 추가하지 않는다.
+서버 upload·임의 URL fetch는 추가하지 않는다. 첫 파일 slice에 이어 HTML slice는
+포함된 PNG/JPEG/WebP와 순서 있는 일반 글만 변환하며 원본 CSS·Office layout을 재현하지 않는다.
 TBD를 위해 미동작 public stub이나 범용 registry를 만들지 않는다. Canvas의
 외부 문서/선택 변경 시 취소 정책과 Composer의 typing 중 첨부 준비 유지 정책은
 서로 다른 profile 선택으로 유지한다. 동일한 준비 queue·raster 검증/읽기 책임만

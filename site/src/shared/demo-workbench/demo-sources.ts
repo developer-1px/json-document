@@ -93,6 +93,8 @@ import annotationEditingSource from "../../../../packages/json-document-editing/
 import webSVGCoordinateSource from "../../../../packages/json-document-web/src/svg-coordinate.ts?raw";
 import webRasterSource from "../../../../packages/json-document-web/src/raster-source.ts?raw";
 import webRasterFilesSource from "../../../../packages/json-document-web/src/raster-files.ts?raw";
+import webHTMLFragmentSource from "../../../../packages/json-document-web/src/html-fragment.ts?raw";
+import webHTMLClipboardSource from "../../../../packages/json-document-web/src/html-clipboard.ts?raw";
 import webAnnotationRasterSource from "../../../../packages/json-document-web/src/annotation-raster.ts?raw";
 import uiMenuSource from "../../../../packages/json-document-ui-primitives-react/src/menu.tsx?raw";
 import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
@@ -211,6 +213,8 @@ const excludedSources = new Set([
 const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/preparation-queue.ts", editingPreparationQueueSource],
   ["packages/json-document-web/src/raster-files.ts", webRasterFilesSource],
+  ["packages/json-document-web/src/html-fragment.ts", webHTMLFragmentSource],
+  ["packages/json-document-web/src/html-clipboard.ts", webHTMLClipboardSource],
   ["packages/json-document-file-intake/src/raster-content.ts", rasterContentSource],
   ["packages/json-document-composer-react/src/attachments.ts", composerAttachmentsSource],
   ["packages/json-document-object-document/src/object-model.ts", objectModelSource],
@@ -360,6 +364,11 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredPublicUsages = [
+  { packageName: "@interactive-os/json-document-web", symbol: "parseWebHTMLFragment", sourcePath: "packages/json-document-web/src/html-fragment.ts" },
+  ...["captureWebClipboardPaste", "parseWebClipboardHTML", "readWebHTMLClipboard"].flatMap((symbol) => [
+    { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/html-clipboard.ts" },
+    { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/html-fragment.ts" },
+  ]),
   { packageName: "@interactive-os/json-document-editing", symbol: "createEditingPreparationQueue", sourcePath: "packages/json-document-editing/src/preparation-queue.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createObjectPasteSession", sourcePath: "packages/json-document-editing/src/preparation-queue.ts" },
   { packageName: "@interactive-os/json-document-web", symbol: "readWebRasterFiles", sourcePath: "packages/json-document-web/src/raster-files.ts" },

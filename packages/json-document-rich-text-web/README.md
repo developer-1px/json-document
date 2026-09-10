@@ -8,6 +8,11 @@ Selection round-trips both text offsets and container child boundaries. Copy,
 cut, and paste publish/consume structured Rich Text, safe semantic HTML, and
 plain text in that priority order.
 
+HTML syntax is read through Web's `parseWebHTMLFragment`, an inert template parser
+shared with Canvas and Composer intake. Active and foreign content is excluded;
+returned nodes are never inserted into a live document. Rich Text Web still owns
+schema-specific block/mark conversion. This profile does not add inline images.
+
 Keyboard Undo/Redo consumes the Web package's `createWebKeyboardAdapter` defaults
 (`Mod-z`, `Mod-Shift-z`). This binding retains its historical Alt variants through
 explicit keymap entries. Root ownership and composition handling stay in this

@@ -117,7 +117,11 @@ export function ComposerDemo(props: {
             <span role="status">이미지를 준비하고 있습니다. 계속 입력할 수 있어요.</span>
             <Command className="composer-icon-button" label="이미지 준비 취소" onClick={composer.cancelAttachments}><X aria-hidden="true" size={16} /></Command>
           </div> : null}
-          {composer.attachmentError ? <p className="composer-attachment-status" role="alert">첨부하지 못했습니다: {composer.attachmentError.reason ?? composer.attachmentError.code}</p> : null}
+          {composer.attachmentError ? <p className="composer-attachment-status" role="alert">{composer.attachmentError.code === "composer.clipboard.mixed-unsupported"
+            ? "글과 이미지가 함께 있는 HTML 붙여넣기는 아직 지원하지 않습니다. 내용을 나누어 붙여넣어 주세요."
+            : composer.attachmentError.code === "raster.source-unsupported"
+              ? "이 HTML 이미지의 내용을 읽을 수 없습니다. PNG·JPEG·WebP 파일을 첨부해 주세요."
+              : `첨부하지 못했습니다: ${composer.attachmentError.reason ?? composer.attachmentError.code}`}</p> : null}
 
           <div className="composer-input-row">
             <Menu
