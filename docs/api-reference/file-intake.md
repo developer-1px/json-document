@@ -6,6 +6,16 @@
 
 > 이 문서는 `packages/json-document-file-intake/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `assertRasterImageContent`
+
+```ts
+assertRasterImageContent(value: unknown): asserts value is RasterImageContent
+```
+## `assertRasterImageSource`
+
+```ts
+assertRasterImageSource(source: unknown): asserts source is string
+```
 ## `FileAcceptancePolicy`
 
 ```ts
@@ -35,6 +45,15 @@ type FileIntakeResult<Candidate extends FileCandidate = FileCandidate> =
 
 ```ts
 formatFileSize(bytes: number): string
+```
+## `RasterImageContent`
+
+```ts
+interface RasterImageContent extends Record<string, JSONValue> {
+  readonly source: string;
+  readonly width: number;
+  readonly height: number;
+}
 ```
 ## `validateFileCandidates`
 

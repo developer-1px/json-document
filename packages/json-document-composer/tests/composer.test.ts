@@ -111,6 +111,41 @@ describe("Composer domain", () => {
     expect((document.value as typeof draft).attachments).toEqual([]);
   });
 
+  test("owns image content and preserves it through JSON and History", () => {
+    const image = { source: "data:image/png;base64,AAAA", width: 64, height: 32 };
+    const created = createComposerAttachments(
+      [{ name: "brief.png", size: 3, mediaType: "image/png", image }],
+      { createId: () => "image-1", policy: { acceptedMediaTypes: ["image/*"], maxFiles: 2, maxBytesPerFile: 100 } },
+    );
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    image.width = 1;
+    expect(created.attachments[0]?.image?.width).toBe(64);
+    const draft = createComposerDraft({ id: "draft", instructionId: "instruction", paragraphId: "paragraph", model: "fast" });
+    const document = createJSONDocument(draft);
+    const editor = createRichTextEditor({ document, pointer: "/instruction", schema: composerSchema });
+    expect(addComposerAttachments(editor, draft, created.attachments).ok).toBe(true);
+    expect(JSON.parse(JSON.stringify(document.value)).attachments[0].image).toEqual({ source: image.source, width: 64, height: 32 });
+    expect(editor.undo().ok).toBe(true);
+    expect((document.value as typeof draft).attachments).toEqual([]);
+    expect(editor.redo().ok).toBe(true);
+    expect((document.value as typeof draft).attachments).toEqual(created.attachments);
+  });
+
+  test.each([
+    { source: "https://example.com/image.png", width: 64, height: 32 },
+    { source: "data:image/jpeg;base64,AAAA", width: 64, height: 32 },
+    { source: "data:image/png;base64,AAAA", width: 0, height: 32 },
+  ])("rejects an invalid image batch before allocating IDs: %j", (image) => {
+    let ids = 0;
+    const result = createComposerAttachments([
+      { name: "valid.txt", size: 1, mediaType: "text/plain" },
+      { name: "invalid.png", size: 3, mediaType: "image/png", image },
+    ], { createId: () => String(++ids), policy: { acceptedMediaTypes: ["*/*"], maxFiles: null, maxBytesPerFile: null } });
+    expect(result).toMatchObject({ ok: false, code: "composer.attachments.invalid" });
+    expect(ids).toBe(0);
+  });
+
   test("resolves product-configured Composer interaction meaning", () => {
     const policy = { submit: "enter", newline: "shift-enter" } as const;
     expect(composerInteractionFromKeyStroke({ key: "Enter" }, policy)).toBe("submit");

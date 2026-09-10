@@ -18,6 +18,6 @@
     "test": "vitest run --config vitest.config.ts",
     "verify": "npm run typecheck && npm test && npm run build"
   },
-  "peerDependencies": { "@interactive-os/json-document": "^3.0.0" },
-  "devDependencies": { "@interactive-os/json-document": "*", "@types/node": "^25.9.0", "typescript": "^5.0.0", "vitest": "^4.1.7" }
+  "peerDependencies": { "@interactive-os/json-document": "^3.0.0", "@interactive-os/json-document-file-intake": "^0.1.0-rc.0" },
+  "devDependencies": { "@interactive-os/json-document": "*", "@interactive-os/json-document-file-intake": "*", "@types/node": "^25.9.0", "typescript": "^5.0.0", "vitest": "^4.1.7" }
 }

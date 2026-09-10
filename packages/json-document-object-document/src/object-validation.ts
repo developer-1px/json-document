@@ -1,4 +1,5 @@
 import { createJSONDocument, type JSONValue } from "@interactive-os/json-document";
+import { assertRasterImageSource as assertCanvasImageSource } from "@interactive-os/json-document-file-intake";
 import type { CanvasDocument, ObjectDocument } from "./object-model.js";
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -42,18 +43,7 @@ export function assertObjectDocument(value: unknown): void {
 }
 
 /** Embedded raster only: no external fetch, SVG, HTML, or session-scoped blob URL. Decoding belongs to the platform. */
-export function assertCanvasImageSource(source: unknown): asserts source is string {
-  if (typeof source !== "string") throw new TypeError("Image source must be an embedded PNG, JPEG, or WebP data URL.");
-  const separator = source.indexOf(",");
-  const header = source.slice(0, separator);
-  const bytes = source.slice(separator + 1);
-  // A flat character check avoids recursive regex stack growth on large rasters.
-  if (!["data:image/png;base64", "data:image/jpeg;base64", "data:image/webp;base64"].includes(header)
-    || bytes.length === 0 || bytes.length % 4 !== 0 || /[^A-Za-z0-9+/=]/.test(bytes)
-    || bytes.slice(0, -2).includes("=") || (bytes.at(-2) === "=" && bytes.at(-1) !== "=")) {
-    throw new TypeError("Image source must be an embedded PNG, JPEG, or WebP base64 data URL.");
-  }
-}
+export { assertCanvasImageSource };
 
 function assertCanvasShape(value: ObjectDocument): void {
   if (!positive(value.width) || !positive(value.height)) throw new TypeError("Canvas dimensions must be positive and finite.");

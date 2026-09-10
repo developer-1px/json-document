@@ -5,7 +5,7 @@ import {
   type RichTextNode,
   type RichTextPoint,
 } from "@interactive-os/json-document-rich-text";
-import { validateFileCandidates } from "@interactive-os/json-document-file-intake";
+import { assertRasterImageContent, validateFileCandidates } from "@interactive-os/json-document-file-intake";
 import { insertRichTextMention } from "@interactive-os/json-document-rich-text-mention";
 import { COMPOSER_MENTION_NODE, COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE, type ComposerAttachment, type ComposerAttachmentCandidate, type ComposerDraft, type ComposerReference, type ComposerTrigger } from "./model.js";
 import type { ComposerAttachmentPolicy } from "./host-config.js";
@@ -23,7 +23,18 @@ export function createComposerAttachments(
 ): ComposerAttachmentResult {
   const validated = validateFileCandidates(candidates, options.policy, options.currentCount === undefined ? {} : { currentCount: options.currentCount });
   if (!validated.ok) return { ok: false, code: composerAttachmentError(validated.code), candidate: validated.candidate };
-  const attachments: ComposerAttachment[] = validated.candidates.map((candidate) => ({ id: options.createId(), kind: candidate.mediaType?.startsWith("image/") ? "image" : "document", ...candidate }));
+  for (const candidate of candidates) {
+    if (candidate.image === undefined) continue;
+    try {
+      assertRasterImageContent(candidate.image);
+      if (!candidate.image.source.startsWith(`data:${candidate.mediaType};base64,`)) throw new TypeError("Attachment media type does not match its image.");
+    } catch { return { ok: false, code: "composer.attachments.invalid", candidate }; }
+  }
+  const attachments: ComposerAttachment[] = validated.candidates.map((candidate) => ({
+    ...candidate,
+    id: options.createId(), kind: candidate.mediaType?.startsWith("image/") ? "image" : "document",
+    ...(candidate.image ? { image: { source: candidate.image.source, width: candidate.image.width, height: candidate.image.height } } : {}),
+  }));
   return { ok: true, attachments };
 }
 

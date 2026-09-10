@@ -44,7 +44,7 @@ const hostConfig = {
   profile: COMPOSER_HOST_PROFILE_V1,
   models: modelOptions,
   suggestions,
-  attachments: { acceptedMediaTypes: ["*/*"], maxFiles: null, maxBytesPerFile: null },
+  attachments: { acceptedMediaTypes: ["*/*"], maxFiles: 10, maxBytesPerFile: 10 * 1024 * 1024 },
   interaction: { submit: "enter", newline: "shift-enter" },
 } satisfies ComposerHostConfig<ComposerModel>;
 
@@ -72,7 +72,7 @@ export function ComposerDemo(props: {
   const onAction = useCallback(() => undefined, []);
   const renderComposerReference = useCallback((node: RichTextNode) => composer.renderReference(node, { className: "composer-atom" }), [composer.renderReference]);
   const addActions: ReadonlyArray<{ readonly id: string; readonly label: string; readonly content: ReactNode; readonly run: () => void }> = [
-    { id: "file", label: "파일 업로드", content: <><FileText aria-hidden="true" size={16} /><span><strong>파일 업로드</strong><small>이미지와 문서를 첨부해요</small></span></>, run: composer.openFilePicker },
+    { id: "file", label: "파일 첨부", content: <><FileText aria-hidden="true" size={16} /><span><strong>파일 첨부</strong><small>이미지와 파일 정보를 첨부해요</small></span></>, run: composer.openFilePicker },
     { id: "skill", label: "스킬", content: <><span>/</span><span><strong>스킬</strong><small>반복 작업을 빠르게 실행해요</small></span></>, run: () => composer.chooseTrigger("/") },
     { id: "agent", label: "에이전트", content: <><span>@</span><span><strong>에이전트</strong><small>전문 에이전트와 함께 작업해요</small></span></>, run: () => composer.chooseTrigger("@") },
   ];
@@ -101,16 +101,23 @@ export function ComposerDemo(props: {
             <div className="composer-attachments" aria-label="첨부 파일">
               {composer.attachments.map((file) => (
                 <div className="composer-file" key={file.id}>
-                  <span className="composer-file-ic" aria-hidden="true">{file.kind === "image" ? <Image size={16} /> : <FileText size={16} />}</span>
+                  {file.image ? <img className="composer-file-preview" src={file.image.source} alt={file.name} />
+                    : <span className="composer-file-ic" aria-hidden="true">{file.kind === "image" ? <Image size={16} /> : <FileText size={16} />}</span>}
                   <span className="composer-file-info">
                     <span className="composer-file-name">{file.name}</span>
-                    <span className="composer-file-size">{formatFileSize(file.size)}</span>
+                    <span className="composer-file-size">{formatFileSize(file.size)}{file.image ? ` · ${file.image.width} × ${file.image.height}` : " · 파일 정보만"}</span>
                   </span>
                   <Command className="composer-file-remove" label={`${file.name} 제거`} onClick={() => composer.removeAttachment(file.id)}><X aria-hidden="true" size={16} /></Command>
                 </div>
               ))}
             </div>
           ) : null}
+
+          {composer.isPreparingAttachments ? <div className="composer-attachment-status">
+            <span role="status">이미지를 준비하고 있습니다. 계속 입력할 수 있어요.</span>
+            <Command className="composer-icon-button" label="이미지 준비 취소" onClick={composer.cancelAttachments}><X aria-hidden="true" size={16} /></Command>
+          </div> : null}
+          {composer.attachmentError ? <p className="composer-attachment-status" role="alert">첨부하지 못했습니다: {composer.attachmentError.reason ?? composer.attachmentError.code}</p> : null}
 
           <div className="composer-input-row">
             <Menu
@@ -151,7 +158,7 @@ export function ComposerDemo(props: {
               classNames={{ root: "composer-select-root", trigger: "composer-model-pill", listbox: "composer-layer composer-model-layer", focusedOption: "selected" }}
             />
             <Command className="composer-icon-button" label="음성 입력"><AudioLines aria-hidden="true" size={16} /></Command>
-            <Command kind="primary" label="전송 (Enter)" className={`composer-send-button${composer.hasContent ? " is-active" : ""}`} disabled={!composer.hasContent} onClick={composer.submit}>전송</Command>
+            <Command kind="primary" label="전송 (Enter)" className={`composer-send-button${composer.canSubmit ? " is-active" : ""}`} disabled={!composer.canSubmit} onClick={composer.submit}>전송</Command>
           </div>
 
           {composer.commandKind === "mention" ? (

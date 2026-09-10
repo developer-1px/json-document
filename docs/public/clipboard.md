@@ -49,6 +49,34 @@ if (cut?.result.ok) {
 행과 열 순서를 유지합니다. [History](history.md)는 이렇게 기록된 문서 값과
 Selection을 함께 복원합니다.
 
+## Paste × Image 기본기 — TBD
+
+Clipboard의 기본기는 다른 앱에서 가져온 내용을 편집 가능한 문서로 받아들이고,
+다시 다른 앱에 전달하는 과정까지 포함합니다. 아래 TBD는 지원 약속의 목표이며,
+현재 API가 모두 구현했다는 뜻은 아닙니다.
+
+| 기본기 | 현재 범위 / TBD | 완료를 판단할 동작 | 정본 |
+| --- | --- | --- | --- |
+| 이미지 파일 입력 | Canvas·Composer 공통 경로 구현 | PNG/JPEG/WebP를 실제로 읽고 표시하며, 실패 batch는 삽입하지 않음 | File Intake·Web·각 Hand |
+| 이미지 내용 보존 | Canvas 객체·Composer 첨부에 포함 | Undo/Redo·JSON 왕복·Composer submit, Canvas 구조 복사 후에도 내용과 치수 유지 | 각 문서 모델·Editing |
+| 비동기 편집 | 공통 순서·취소 queue 구현 | 연속 요청 순서 유지, 취소 후 늦은 삽입 없음; Composer는 준비 중 타이핑 가능 | Editing·각 Hand |
+| HTML 이미지·글과 이미지 | TBD | HTML 안의 이미지와 글의 순서를 지원하는 문서 의미로 변환; 읽을 수 없는 이미지는 실패를 알림 | Web·Rich Text Web·각 문서 모델 |
+| 서식 없이 붙여넣기 | 명시적인 공통 입력 계약 TBD | 서식 붙여넣기와 plain text 선택을 구별하고 native 입력을 침범하지 않음 | Web·Affordance·각 Hand |
+| 이미지로 복사 | Canvas TBD | 선택한 글·도형·이미지를 PNG로 복사해 외부 앱에 붙임; 실패가 문서를 바꾸지 않음 | Canvas·Web |
+| 실제 플랫폼 왕복 | OS-native 검증 TBD | 스크린샷·브라우저 이미지·Docs/Slides에서 실제 복사하여 붙이고, 외부 앱으로 다시 전달 | Web·제품 경로 검증 |
+
+한 항목의 HTML·텍스트·PNG는 같은 내용의 대체 표현일 수 있습니다. 이를 모두
+별개 내용으로 삽입하지 않습니다. 반면 선택한 HTML 표현 안의 글·이미지는 함께
+보존해야 할 내용일 수 있습니다. 표현 선택과 문서 내용 변환은 다른 결정입니다.
+[Clipboard 표현 모델](https://www.w3.org/TR/clipboard-apis/#clipboard-interface)은
+이 구분을 설명합니다. [Docs·Slides의 이미지 복사](https://support.google.com/docs/answer/161768?hl=en)도
+외부 앱에는 HTML로 전달되므로 HTML 이미지를 고급 문서 import만의 문제로 보지 않습니다.
+
+Canvas는 평면 객체, Composer는 instruction과 첨부 목록을 결과로 만듭니다.
+같은 입력을 받아도 Canvas 좌표를 Composer에 넣거나, 첨부 목록을 Rich Text의
+inline 이미지처럼 설명하지 않습니다. 서버 업로드, 임의 외부 URL의 가져오기,
+Office 전체 레이아웃 재현은 아직 지원하지 않습니다.
+
 ## Live Demo
 
 ```live-demo

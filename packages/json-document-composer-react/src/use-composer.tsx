@@ -1,9 +1,7 @@
 import { createJSONDocument, type JSONDocument } from "@interactive-os/json-document";
 import {
-  addComposerAttachments,
   composerInteractionFromKeyStroke,
   composerSchema,
-  createComposerAttachments,
   createComposerDraft,
   hasComposerContent,
   insertComposerText,
@@ -17,15 +15,19 @@ import {
 import { createRichTextEditor, type RichTextEditor, type RichTextNode } from "@interactive-os/json-document-rich-text";
 import type { RichTextSuggestionCandidate } from "@interactive-os/json-document-rich-text-suggestion";
 import type { RichTextSuggestionBinding } from "@interactive-os/json-document-rich-text-suggestion-react";
-import { fileCandidatesFromWebClipboard, fileCandidatesFromWebFiles, type WebFileCandidate, type WebFileCandidateList } from "@interactive-os/json-document-web";
+import { captureWebClipboardPaste, type readWebRasterFile, type WebFileCandidate, type WebFileCandidateList } from "@interactive-os/json-document-web";
+import type { EditingPreparationFailure } from "@interactive-os/json-document-editing";
 import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, type ClipboardEvent, type KeyboardEvent, type ReactNode } from "react";
 import { ComposerReferenceAtom, type ComposerReferenceAtomProps } from "./reference-atom.js";
 import { useComposerCommandMenu } from "./command-menu.js";
+import { useComposerAttachments } from "./attachments.js";
 
 export interface UseComposerOptions<Model extends string, Suggestion extends ComposerHostSuggestion & RichTextSuggestionCandidate> {
   readonly id: string;
   readonly config: ComposerHostConfig<Model> & { readonly suggestions: ReadonlyArray<Suggestion> };
   readonly ports: ComposerHostPorts<Model>;
+  readonly maxImagePixels?: number;
+  readonly readRaster?: typeof readWebRasterFile;
   readonly labels: {
     readonly mentionSuggestions: string;
     readonly skillSuggestions: string;
@@ -41,6 +43,10 @@ export interface ComposerBinding<Model extends string, Suggestion extends Compos
   readonly attachments: ComposerDraft<Model>["attachments"];
   readonly model: Model;
   readonly hasContent: boolean;
+  readonly isPreparingAttachments: boolean;
+  readonly attachmentError: EditingPreparationFailure | null;
+  readonly canSubmit: boolean;
+  cancelAttachments(): void;
   readonly commandKind: "mention" | "skill" | null;
   readonly commandMenu: RichTextSuggestionBinding<Suggestion>;
   readonly commandOpen: boolean;
@@ -77,37 +83,38 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
   const fileInputRef = useRef<HTMLInputElement>(null);
   const commandMenu = useComposerCommandMenu({ id: options.id, editor, document: draft.instruction, suggestions: config.suggestions, createId: ports.createId, labels: options.labels });
   const content = hasComposerContent(draft);
+  const intake = useComposerAttachments(document, editor, {
+    policy: config.attachments, createId: ports.createId,
+    ...(options.maxImagePixels === undefined ? {} : { maxImagePixels: options.maxImagePixels }),
+    ...(options.readRaster ? { readRaster: options.readRaster } : {}),
+  });
 
   function submit() {
-    if (content) void ports.submit(draft);
+    const current = document.value as ComposerDraft<Model>;
+    if (!intake.hasPending() && hasComposerContent(current)) void ports.submit(current);
   }
 
-  function addCandidates(candidates: ReturnType<typeof fileCandidatesFromWebFiles>) {
-    if (candidates.length === 0) return;
-    const created = createComposerAttachments(candidates, { createId: ports.createId, policy: config.attachments, currentCount: draft.attachments.length });
-    if (!created.ok) return;
-    addComposerAttachments(editor, draft, created.attachments);
-    editorElementRef.current?.focus();
-  }
-
-  function addWebFiles(files: Parameters<typeof fileCandidatesFromWebFiles>[0]) {
-    addCandidates(fileCandidatesFromWebFiles(files));
-  }
+  const addWebFiles = intake.addFiles;
 
   function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
     addWebFiles(event.currentTarget.files ?? []);
     event.currentTarget.value = "";
+    editorElementRef.current?.focus();
   }
 
   function handlePaste(event: ClipboardEvent<HTMLElement>) {
-    const candidates = fileCandidatesFromWebClipboard(event);
-    if (candidates.length === 0) return;
-    event.preventDefault();
-    event.stopPropagation();
-    addCandidates(candidates);
+    if (event.defaultPrevented) return;
+    const captured = captureWebClipboardPaste(event, { files: true });
+    if (captured.ok && captured.type === "files") {
+      event.stopPropagation();
+      addWebFiles(captured.files);
+    } else if (!captured.ok && captured.code !== "clipboard.empty") intake.reportError(captured);
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.key === "Escape" && intake.hasPending() && !event.nativeEvent.isComposing) {
+      event.preventDefault(); event.stopPropagation(); intake.cancel(); return;
+    }
     const interaction = composerInteractionFromKeyStroke({ key: event.key, shiftKey: event.shiftKey, commandKey: event.metaKey || event.ctrlKey }, config.interaction);
     if (commandMenu.open) {
       commandMenu.handleKeyDown(event);
@@ -128,6 +135,7 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
+    intake.cancel();
     if (interaction === "history.redo") editor.redo();
     else editor.undo();
   }
@@ -145,6 +153,10 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
     attachments: draft.attachments,
     model: draft.model,
     hasContent: content,
+    isPreparingAttachments: intake.isPending,
+    attachmentError: intake.error,
+    canSubmit: content && !intake.isPending,
+    cancelAttachments: intake.cancel,
     commandKind: commandMenu.kind,
     commandMenu: commandMenu.binding,
     commandOpen: commandMenu.open,
@@ -156,7 +168,7 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
     handleKeyDown,
     handleHistoryKeyDown,
     openFilePicker: () => fileInputRef.current?.click(),
-    removeAttachment: (attachmentId) => { removeComposerAttachment(editor, draft, attachmentId); },
+    removeAttachment: (attachmentId) => { removeComposerAttachment(editor, document.value as ComposerDraft, attachmentId); },
     selectModel: (model) => { selectComposerModel(editor, model); },
     insertText: (text) => { insertComposerText(editor, text); },
     chooseTrigger: (value) => { editorElementRef.current?.focus(); insertComposerText(editor, value); },

@@ -273,6 +273,33 @@ offset도 비교하며 블록 toggle과 전체 블록 Copy의 의미는 유지�
 유지하는 증거다. offset 하나로 과거 native range 전체를 복원한다는 계약이나
 profile 동결로 확대하지 않는다.
 
+## Paste × Image 기본기: TBD 선행 계약
+
+TBD는 구현 여부를 숨기는 이름이 아니다. 먼저 지원하려는 입력·관찰 결과·owner와
+판정 사례를 기록하고, 실행 증거를 확보한 범위만 구현으로 바꾼다. 이 표는 기존
+EG-COPY/CUT/PASTE/HISTORY의 구체화이며 새로운 Stable profile이나 Core API가 아니다.
+
+| 사례 | 목표 / profile 결정 | owner | 현재 상태와 증거 |
+| --- | --- | --- | --- |
+| PI-FILE | PNG/JPEG/WebP를 읽고 정책·decode 실패 batch를 원자적으로 거절 | File Intake·Web·각 Hand | 공통 Web batch 구현; [reader 사례](../packages/json-document-web/tests/raster-files.test.ts) |
+| PI-CONTENT | 이미지 내용·치수는 문서에 포함하거나 지속 가능한 asset 참조로 보존; metadata만으로 완료를 주장하지 않음 | 각 Document Type | Canvas·Composer embedded content 구현; [Composer JSON·History 사례](../packages/json-document-composer/tests/composer.test.ts) |
+| PI-ORDER | 준비 완료 순서가 달라도 요청 순서로 한 batch씩 반영 | Editing | Object·Composer가 공통 queue 소비; [순서·재진입 사례](../packages/json-document-editing/tests/preparation-queue.test.ts) |
+| PI-CANCEL | 취소·History 작업·unmount 뒤 늦은 결과는 무효 | Editing·각 Hand | Object 자동 무효화, Composer Escape·binding History·unmount 취소 구현; [취소 사례](../packages/json-document-composer-react/tests/composer-attachments.test.tsx) |
+| PI-TYPING | 첨부 준비 중 typing/caret 이동 허용; 완료 시 최신 첨부 목록 뒤에 추가 | Composer·React Connector | 구현; [연속 첨부·typing·caret 사례](../packages/json-document-composer-react/tests/composer-attachments.test.tsx). inline anchor mapping은 아님 |
+| PI-HTML | 대체 MIME 선택과 HTML 내부의 글+이미지 순서 보존을 구분 | Web·Rich Text Web·각 Hand | TBD: HTML 이미지, 불가한 source의 실패와 안전한 변환 |
+| PI-PLAIN | 명시적인 plain paste와 지원 서식 paste를 분리 | Web·Affordance·각 Hand | TBD: 실제 modifier/native editable 사례 |
+| PI-EXPORT | 선택한 Canvas 객체를 PNG로 복사; write 실패는 문서 불변 | Canvas·Web | TBD: 혼합 선택·투명 배경·권한 실패·외부 앱 확인 |
+| PI-NATIVE | OS screenshot, 브라우저 Copy Image, Docs/Slides HTML, 외부 앱 왕복 | Web·제품 경로 | TBD: DOM 합성 이벤트를 OS-native 증거로 계산하지 않음 |
+
+첫 이미지 slice는 서버 upload·임의 URL fetch·HTML import를 추가하지 않는다.
+TBD를 위해 미동작 public stub이나 범용 registry를 만들지 않는다. Canvas의
+외부 문서/선택 변경 시 취소 정책과 Composer의 typing 중 첨부 준비 유지 정책은
+서로 다른 profile 선택으로 유지한다. 동일한 준비 queue·raster 검증/읽기 책임만
+정본 API로 공유한다. 실제 Usage와 Source는 Canvas·Composer가 각각 소비하는
+owner API에 연결하며 이 표로 API catalog를 대체하지 않는다.
+Composer 외부의 직접 editor Undo/Redo나 draft 교체는 `cancelAttachments()`를 먼저
+호출해야 한다. 이는 binding 바깥의 작업을 자동 감지한다는 보장이 아니다.
+
 ## 장기 호환성
 
 약속하는 것은 **고정된 profile의 지원 입력과 관찰 가능한 결과**다. 같은 profile

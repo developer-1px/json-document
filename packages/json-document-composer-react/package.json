@@ -22,6 +22,8 @@
   "peerDependencies": {
     "@interactive-os/json-document": "^3.0.0",
     "@interactive-os/json-document-composer": "^0.1.0-rc.0",
+    "@interactive-os/json-document-editing": ">=0.1.0-rc.0 <1",
+    "@interactive-os/json-document-file-intake": "^0.1.0-rc.0",
     "@interactive-os/json-document-rich-text": "^0.1.0-rc.0",
     "@interactive-os/json-document-rich-text-mention": "^0.1.0-rc.0",
     "@interactive-os/json-document-rich-text-mention-react": "^0.1.0-rc.0",
@@ -34,6 +36,8 @@
   "devDependencies": {
     "@interactive-os/json-document": "*",
     "@interactive-os/json-document-composer": "*",
+    "@interactive-os/json-document-editing": "*",
+    "@interactive-os/json-document-file-intake": "*",
     "@interactive-os/json-document-rich-text": "*",
     "@interactive-os/json-document-rich-text-mention": "*",
     "@interactive-os/json-document-rich-text-mention-react": "*",
