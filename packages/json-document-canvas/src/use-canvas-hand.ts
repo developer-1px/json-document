@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type ClipboardEvent, type KeyboardEvent, type PointerEvent } from "react";
-import { createGestureSession, createPlaneSelectProfile, resizeAffordance, type InteractionHandleEvent, type PlaneSelectProfile, type PlaneSelectSelection, type ResizeEdge } from "@interactive-os/json-document-affordance";
+import { commitAffordance, createGestureSession, createPlaneSelectProfile, resizeAffordance, type InteractionHandleEvent, type PlaneSelectProfile, type PlaneSelectSelection, type ResizeEdge } from "@interactive-os/json-document-affordance";
 import { assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, transformObject, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint } from "@interactive-os/json-document-object-document";
 import type { EditingResult, ObjectEditor, ObjectIntent, ObjectSelection } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
@@ -15,9 +15,10 @@ export interface CanvasCreationStyle {
 }
 
 type Gesture = { readonly base: CanvasDocument } & (
-  | { readonly type: "create"; readonly tool: Exclude<CanvasObjectKind, "path" | "image">; readonly start: ObjectPoint; readonly point: ObjectPoint }
+  | { readonly type: "create"; readonly tool: Exclude<CanvasObjectKind, "path" | "image">; readonly start: ObjectPoint; readonly point: ObjectPoint; readonly dragged: boolean }
   | { readonly type: "draw"; readonly points: ReadonlyArray<ObjectPoint> }
-  | { readonly type: "resize"; readonly object: CanvasObject; readonly start: ObjectPoint; readonly point: ObjectPoint; readonly edge: ResizeEdge }
+  | { readonly type: "resize"; readonly object: CanvasObject; readonly start: ObjectPoint; readonly point: ObjectPoint; readonly edge: ResizeEdge;
+      readonly pointerId: number; readonly shiftKey: boolean; readonly altKey: boolean; readonly selection: ObjectSelection }
 );
 type TextDraft = { readonly id: string; readonly text: string; readonly base: CanvasDocument };
 
@@ -65,7 +66,8 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   useEffect(() => {
     // A replacement/external edit invalidates previews, even when an ID survives.
     const release = editor.subscribe((next) => {
-      if ((gestures.getActive() && gestures.getActive()!.base !== next.value)
+      const active = gestures.getActive();
+      if ((active && (active.base !== next.value || (active.type === "resize" && active.selection !== next.selection)))
         || (selecting.current && (selecting.current.base !== next.value || selecting.current.selection !== next.selection))
         || (draft.current && draft.current.base !== next.value)) cancel();
     });
@@ -138,28 +140,31 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     return point && Number.isFinite(point.x) && Number.isFinite(point.y) ? { x: point.x, y: point.y } : null;
   }
 
-  function createPreview(gesture: Extract<Gesture, { type: "create" | "draw" }>) {
+  function createPreview(gesture: Extract<Gesture, { type: "create" | "draw" }>, committing = false) {
     if (gesture.type === "draw") return gesture.points.length < 2 ? null : createCanvasPath(gesture.points, { color: style.textColor, label: "Drawing", strokeWidth: style.strokeWidth });
     const { start, point } = gesture;
-    const click = Math.hypot(point.x - start.x, point.y - start.y) < 3;
+    const click = !gesture.dragged;
+    // A default-sized object belongs to the completed click, never its press preview.
+    if (click && !committing) return null;
+    if (!click && start.x === point.x && start.y === point.y) return null;
     return createCanvasObject(gesture.tool, {
-      x: Math.min(start.x, point.x), y: Math.min(start.y, point.y),
+      x: click ? start.x : Math.min(start.x, point.x), y: click ? start.y : Math.min(start.y, point.y),
       width: click ? (gesture.tool === "text" ? 280 : 160) : Math.abs(point.x - start.x),
       height: click ? (gesture.tool === "text" ? 64 : 100) : Math.abs(point.y - start.y),
     }, { color: gesture.tool === "text" ? style.textColor : style.color, label: gesture.tool === "text" ? "Text" : "", fontSize: style.fontSize });
   }
 
   function transform(gesture: Extract<Gesture, { type: "resize" }>) {
-    const result = resizeAffordance(gesture.start, gesture.point, gesture.edge);
-    const hand = result.hand;
-    return hand?.type === "translate" || hand?.type === "resize" ? hand : { dx: 0, dy: 0 };
+    const result = commitAffordance(resizeAffordance(gesture.start, gesture.point, gesture.edge, gesture, gesture.object));
+    const hand = result?.hand;
+    return hand?.type === "resize" ? hand : { dx: 0, dy: 0 };
   }
 
   function commitGesture() {
     const active = gestures.commit();
     if (!active || active.base !== current()) return;
     if (active.type === "create" || active.type === "draw") {
-      const object = createPreview(active);
+      const object = createPreview(active, true);
       if (!object) return;
       const result = dispatch({ type: "object.create", object });
       if (result.ok) {
@@ -169,7 +174,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
       }
     } else {
       const delta = transform(active);
-      dispatch({ type: "object.resize", objectIds: [active.object.id], dx: delta.dx, dy: delta.dy, dw: "dw" in delta ? delta.dw : 0, dh: "dh" in delta ? delta.dh : 0 });
+      if ("dw" in delta) dispatch({ type: "object.resize", objectIds: [active.object.id], dx: delta.dx, dy: delta.dy, dw: delta.dw, dh: delta.dh });
     }
   }
 
@@ -183,7 +188,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     pointer.begin(event.currentTarget, event.pointerId, true);
     if (tool === "select") { beginSelect(point, null, event); return; }
     const base = current();
-    gestures.begin(tool === "path" ? { type: "draw", points: [point], base } : { type: "create", tool, start: point, point, base });
+    gestures.begin(tool === "path" ? { type: "draw", points: [point], base } : { type: "create", tool, start: point, point, dragged: false, base });
   }
 
   function pointerMove(event: PointerEvent<SVGSVGElement>) {
@@ -194,13 +199,18 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     if (active.type === "draw") {
       const last = active.points.at(-1)!;
       if (last.x !== point.x || last.y !== point.y) gestures.preview({ ...active, points: [...active.points, point] });
+    } else if (active.type === "create") {
+      gestures.preview({ ...active, point, dragged: active.dragged || Math.hypot(point.x - active.start.x, point.y - active.start.y) >= 3 });
     } else gestures.preview({ ...active, point });
   }
 
   function interaction(interaction: InteractionHandleEvent, event: PointerEvent<SVGElement>, object: CanvasObject, type: "drag" | "resize", edge: ResizeEdge = "se") {
     if (interaction.phase === "cancel") {
       if (type === "drag" && selecting.current?.key === object.id && selecting.current.pointerId === event.pointerId) { profile.cancel("pointer-cancel"); selecting.current = null; redraw(); }
-      else if (type === "resize") gestures.cancel("pointer-cancel");
+      else if (type === "resize") {
+        const active = gestures.getActive();
+        if (active?.type === "resize" && active.pointerId === event.pointerId && active.edge === edge && active.object.id === object.id) gestures.cancel("pointer-cancel");
+      }
       return;
     }
     const point = eventPoint(event);
@@ -209,7 +219,8 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
       commitText(); cancel(); surface.current?.focus();
       if (type === "drag") { beginSelect(point, object.id, event); return; }
       const latest = current().objects.find((item) => item.id === object.id);
-      if (latest) gestures.begin({ type, object: latest, start: point, point, edge, base: current() });
+      if (latest) gestures.begin({ type, object: latest, start: point, point, edge, base: current(), selection: editor.snapshot.selection,
+        pointerId: event.pointerId, shiftKey: event.shiftKey, altKey: event.altKey });
     } else {
       if (type === "drag") {
         if (selecting.current?.key !== object.id || selecting.current.pointerId !== event.pointerId) return;
@@ -217,8 +228,8 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
         return;
       }
       const active = gestures.getActive();
-      if (!active || active.type !== type || active.object.id !== object.id) return;
-      gestures.preview({ ...active, point });
+      if (!active || active.type !== type || active.object.id !== object.id || active.pointerId !== event.pointerId || active.edge !== edge) return;
+      gestures.preview({ ...active, point, shiftKey: event.shiftKey, altKey: event.altKey });
       if (interaction.phase === "commit") commitGesture();
     }
   }
@@ -235,7 +246,12 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   }
 
   function updateModifiers(event: KeyboardEvent) {
-    if (!event.nativeEvent.isComposing && !isWebEditableTarget(event.target) && profile.updateModifiers(event)) redraw();
+    if (event.nativeEvent.isComposing || isWebEditableTarget(event.target)) return;
+    if (profile.updateModifiers(event)) redraw();
+    const active = gestures.getActive();
+    if (active?.type === "resize" && (active.shiftKey !== event.shiftKey || active.altKey !== event.altKey)) {
+      gestures.preview({ ...active, shiftKey: event.shiftKey, altKey: event.altKey });
+    }
   }
 
   function keyDown(event: KeyboardEvent) {

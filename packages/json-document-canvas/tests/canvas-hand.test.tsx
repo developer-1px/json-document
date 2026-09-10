@@ -291,7 +291,7 @@ test.each(["Escape", "pointercancel", "lostpointercapture"])("%s cancels marquee
 test("only primary resizes and edits text while retaining the selected set", () => {
   const { container, svg, editor, value, commits } = setup(populated);
   act(() => { editor.dispatch({ type: "selection.set", objectIds: ["a", "b"], primaryKey: "a" }); });
-  expect(container.querySelectorAll("[data-resize-edge]")).toHaveLength(4);
+  expect(container.querySelectorAll("[data-resize-edge]")).toHaveLength(8);
   const handle = container.querySelector('[data-resize-edge="se"]')!;
   fireEvent.pointerDown(handle, event(100, 100)); fireEvent.pointerMove(window, event(120, 115)); fireEvent.pointerUp(window, event(120, 115));
   expect(value().objects[0]!.width).toBeCloseTo(140); expect(value().objects[0]!.height).toBeCloseTo(130);
@@ -349,6 +349,83 @@ test("every toolbar control shares icon, accessible name and canonical tooltip w
   expect(toolbar.getByRole("button", { name: "선택" }).getAttribute("aria-pressed")).toBe("false");
 });
 
+const creationTools = [
+  { tool: "사각형", kind: "rectangle", width: 160, height: 100 },
+  { tool: "타원", kind: "ellipse", width: 160, height: 100 },
+  { tool: "글자", kind: "text", width: 280, height: 64 },
+] as const;
+
+function creationPreview(container: HTMLElement) {
+  const view = container.querySelector("[data-canvas-preview]")?.firstElementChild;
+  if (!view) return null;
+  return {
+    width: Number(view.getAttribute(view.tagName === "ellipse" ? "rx" : "width")) * (view.tagName === "ellipse" ? 2 : 1),
+    height: Number(view.getAttribute(view.tagName === "ellipse" ? "ry" : "height")) * (view.tagName === "ellipse" ? 2 : 1),
+  };
+}
+
+test.each(creationTools)("$kind press stays empty and a drag previews only its current bounds", ({ tool, kind }) => {
+  const { svg, container, value, commits } = setup();
+  fireEvent.click(screen.getByRole("button", { name: tool }));
+  fireEvent.pointerDown(svg, event(40, 50));
+  expect(creationPreview(container)).toBeNull();
+  fireEvent.pointerMove(svg, event(40.5, 50.5));
+  expect(creationPreview(container)).toBeNull();
+  fireEvent.pointerMove(svg, event(42, 51.5));
+  expect(creationPreview(container)).toEqual({ width: 4, height: 3 });
+  fireEvent.pointerMove(svg, event(44, 53));
+  expect(creationPreview(container)).toEqual({ width: 8, height: 6 });
+  expect(value()).toEqual(blank); expect(commits).not.toHaveBeenCalled();
+  fireEvent.pointerUp(svg, event(140, 100));
+  expect(creationPreview(container)).toBeNull();
+  expect(value().objects[0]).toMatchObject({ kind, x: 80, y: 100, width: 200, height: 100 });
+  expect(commits).toHaveBeenCalledOnce();
+});
+
+test.each(creationTools)("$kind click creates its default size only on release at the press anchor", ({ tool, kind, width, height }) => {
+  const { svg, container, value, commits } = setup();
+  fireEvent.click(screen.getByRole("button", { name: tool }));
+  fireEvent.pointerDown(svg, event(40, 50));
+  fireEvent.pointerMove(svg, event(39.5, 49.5));
+  expect(creationPreview(container)).toBeNull(); expect(value()).toEqual(blank);
+  fireEvent.pointerUp(svg, event(39.5, 49.5));
+  expect(value().objects[0]).toMatchObject({ kind, x: 80, y: 100, width, height });
+  expect(commits).toHaveBeenCalledOnce();
+  expect(screen.queryByRole("textbox", { name: "Canvas text" }) !== null).toBe(kind === "text");
+});
+
+test.each(creationTools)("$kind stays a drag near the origin and an exact return creates nothing", ({ tool, width, height }) => {
+  const { svg, container, value, editor, commits } = setup();
+  fireEvent.click(screen.getByRole("button", { name: tool }));
+  fireEvent.pointerDown(svg, event(40, 50)); fireEvent.pointerMove(svg, event(50, 60));
+  fireEvent.pointerMove(svg, event(40.5, 50.5));
+  expect(creationPreview(container)).toEqual({ width: 1, height: 1 });
+  fireEvent.pointerMove(svg, event(40, 50));
+  expect(creationPreview(container)).toBeNull();
+  fireEvent.pointerUp(svg, event(40, 50));
+  expect(value()).toEqual(blank); expect(editor.snapshot.canUndo).toBe(false); expect(commits).not.toHaveBeenCalled();
+  fireEvent.pointerDown(svg, event(80, 60)); fireEvent.pointerUp(svg, event(80, 60));
+  expect(value().objects[0]).toMatchObject({ id: "object-1", width, height });
+});
+
+test("a foreign pointer cannot change a pending click into a drag", () => {
+  const { svg, container, value } = setup();
+  fireEvent.click(screen.getByRole("button", { name: "사각형" }));
+  fireEvent.pointerDown(svg, event(40, 50));
+  fireEvent.pointerMove(svg, event(140, 100, 9)); fireEvent.pointerUp(svg, event(140, 100, 9));
+  expect(creationPreview(container)).toBeNull(); expect(value()).toEqual(blank);
+  fireEvent.pointerUp(svg, event(40, 50));
+  expect(value().objects[0]).toMatchObject({ x: 80, y: 100, width: 160, height: 100 });
+});
+
+test("release alone can establish a reverse drag using its final coordinates", () => {
+  const { svg, value, commits } = setup();
+  fireEvent.click(screen.getByRole("button", { name: "사각형" }));
+  fireEvent.pointerDown(svg, event(140, 100)); fireEvent.pointerUp(svg, event(40, 50));
+  expect(value().objects[0]).toMatchObject({ x: 80, y: 100, width: 200, height: 100 });
+  expect(commits).toHaveBeenCalledOnce();
+});
+
 test("creation is transient until release, scales coordinates and selects the result with one undo step", () => {
   const { svg, value, editor, commits } = setup();
   fireEvent.click(screen.getByRole("button", { name: "사각형" }));
@@ -364,14 +441,16 @@ test("creation is transient until release, scales coordinates and selects the re
   fireEvent.click(screen.getByRole("button", { name: "다시 실행" })); expect(value().objects).toHaveLength(1);
 });
 
-test.each(["escape", "pointercancel", "lostpointercapture"])("%s cancels creation without a commit or history", (reason) => {
-  const { svg, value, editor } = setup();
+test.each(["escape", "pointercancel", "lostpointercapture"].flatMap((reason) => [false, true].map((drag) => ({ reason, drag }))))("$reason cancels creation (drag=$drag) without a commit or history", ({ reason, drag }) => {
+  const { svg, container, value, editor } = setup();
   fireEvent.click(screen.getByRole("button", { name: "타원" }));
-  fireEvent.pointerDown(svg, event(40, 50)); fireEvent.pointerMove(svg, event(140, 100));
+  fireEvent.pointerDown(svg, event(40, 50));
+  if (drag) fireEvent.pointerMove(svg, event(140, 100));
   if (reason === "escape") fireEvent.keyDown(svg, { key: "Escape" });
   else if (reason === "pointercancel") fireEvent.pointerCancel(svg, event(140, 100));
   else fireEvent.lostPointerCapture(svg, event(140, 100));
   fireEvent.pointerUp(svg, event(140, 100));
+  expect(creationPreview(container)).toBeNull();
   expect(value()).toEqual(blank); expect(editor.snapshot.canUndo).toBe(false);
 });
 
@@ -390,6 +469,90 @@ test("move and resize share preview geometry, cancel safely and commit exactly o
   expect(value().objects[0]).toMatchObject({ width: 200, height: 100 });
   fireEvent.pointerUp(window, event(200, 160));
   expect(value().objects[0]).toMatchObject({ width: 260, height: 160 }); expect(commits).toHaveBeenCalledTimes(2);
+});
+
+test.each([
+  ["n", 80, 80, 200, 120], ["e", 80, 100, 240, 100],
+  ["s", 80, 100, 200, 80], ["w", 120, 100, 160, 100],
+] as const)("%s offers an invisible full-edge target and an anchored single-axis resize", (edge, x, y, width, height) => {
+  const { svg, container, value, commits } = setup(); rectangle(svg); commits.mockClear();
+  const handle = container.querySelector(`[data-resize-edge="${edge}"]`)!;
+  expect(handle).not.toBeNull(); expect(handle.getAttribute("fill")).toBe("transparent");
+  expect(handle.getAttribute("stroke")).toBeNull(); expect((handle as SVGElement).style.cursor).toBe(`${edge}-resize`);
+  expect(Number(handle.getAttribute(edge === "n" || edge === "s" ? "width" : "height"))).toBe(edge === "n" || edge === "s" ? 200 : 100);
+  expect([...container.querySelectorAll("[data-resize-edge]")].slice(-4).map((node) => node.getAttribute("data-resize-edge"))).toEqual(["nw", "ne", "se", "sw"]);
+  const before = value();
+  fireEvent.pointerDown(handle, event(80, 80)); fireEvent.pointerMove(window, event(100, 70));
+  const preview = container.querySelector("[data-canvas-object]")!;
+  expect(["x", "y", "width", "height"].map((name) => Number(preview.getAttribute(name)))).toEqual([x, y, width, height]);
+  expect(value()).toBe(before); expect(commits).not.toHaveBeenCalled();
+  fireEvent.pointerUp(window, event(100, 70)); expect(value().objects[0]).toMatchObject({ x, y, width, height });
+  expect(commits).toHaveBeenCalledOnce();
+  fireEvent.keyDown(svg, { key: "z", metaKey: true }); expect(value()).toEqual(before);
+  fireEvent.keyDown(svg, { key: "z", metaKey: true, shiftKey: true }); expect(value().objects[0]).toMatchObject({ x, y, width, height });
+});
+
+test("resize switches Shift/Alt live and commits the release coordinates and modifiers once", () => {
+  const { svg, container, value, commits } = setup(); rectangle(svg); commits.mockClear();
+  const handle = container.querySelector('[data-resize-edge="se"]')!;
+  const target = container.querySelector("[data-canvas-object]")!;
+  const bounds = () => ["x", "y", "width", "height"].map((key) => Number(target.getAttribute(key)));
+  fireEvent.pointerDown(handle, event(140, 100)); fireEvent.pointerMove(window, event(160, 105));
+  expect(bounds()).toEqual([80, 100, 240, 110]);
+  fireEvent.keyDown(svg, { key: "Shift", shiftKey: true }); expect(bounds()).toEqual([80, 100, 240, 120]);
+  fireEvent.keyDown(svg, { key: "Alt", shiftKey: true, altKey: true }); expect(bounds()).toEqual([40, 80, 280, 140]);
+  fireEvent.keyUp(svg, { key: "Shift", altKey: true }); expect(bounds()).toEqual([40, 90, 280, 120]);
+  fireEvent.keyUp(svg, { key: "Alt" }); expect(bounds()).toEqual([80, 100, 240, 110]);
+  expect(commits).not.toHaveBeenCalled();
+  fireEvent.pointerUp(window, { ...event(170, 110), shiftKey: true, altKey: true });
+  expect(value().objects[0]).toMatchObject({ x: 20, y: 70, width: 320, height: 160 });
+  expect(commits).toHaveBeenCalledOnce(); expect(value().objects).toHaveLength(1);
+});
+
+test.each(["rectangle", "ellipse", "text", "path", "image"] as const)("%s uses the same west-edge clamp without changing its content", (kind) => {
+  const object = { id: "a", x: 100, y: 100, width: 200, height: 100, color: "blue", label: "Content", kind,
+    ...(kind === "text" ? { fontSize: 24 } : kind === "path" ? { points: [{ x: 0, y: 0 }, { x: 1, y: 1 }], strokeWidth: 3 } : kind === "image" ? { source: "data:image/png;base64,AQID" } : {}) } as CanvasDocument["objects"][number];
+  const { container, value } = setup({ ...blank, objects: [object] });
+  const handle = container.querySelector('[data-resize-edge="w"]')!;
+  fireEvent.pointerDown(handle, event(50, 70)); fireEvent.pointerMove(window, event(250, 200));
+  expect(container.querySelector("[data-canvas-object]")?.getAttribute("x")).toBe("299");
+  fireEvent.pointerUp(window, event(250, 200));
+  expect(value().objects[0]).toEqual({ ...object, x: 299, width: 1 });
+});
+
+test.each(["Escape", "pointercancel", "lostpointercapture", "document", "selection", "unmount"])("resize cancellation (%s) discards preview and ignores stale release", (reason) => {
+  const { container, svg, editor, source, value, commits, unmount } = setup(populated);
+  const handle = container.querySelector('[data-resize-edge="e"]')!;
+  fireEvent.pointerDown(handle, event(100, 75)); fireEvent.pointerMove(window, event(150, 80));
+  if (reason === "Escape") fireEvent.keyDown(svg, { key: "Escape" });
+  else if (reason === "pointercancel") fireEvent.pointerCancel(window, event(150, 80));
+  else if (reason === "lostpointercapture") fireEvent.lostPointerCapture(handle, event(150, 80));
+  else if (reason === "document") act(() => { source.commit([{ op: "replace", path: "/objects/0/color", value: "red" }]); });
+  else if (reason === "selection") act(() => { editor.dispatch({ type: "selection.set", objectIds: ["b"] }); });
+  else unmount();
+  commits.mockClear(); fireEvent.pointerUp(window, event(180, 90));
+  expect(value().objects[0]!.width).toBe(100); expect(commits).not.toHaveBeenCalled();
+  if (reason !== "unmount") expect(container.querySelector('[data-canvas-object="a"]')?.getAttribute("width")).toBe("100");
+});
+
+test("resize ignores foreign pointers and a return to the original bounds adds no History", () => {
+  const { container, editor, value, commits } = setup(populated);
+  const handle = container.querySelector('[data-resize-edge="n"]')!;
+  fireEvent.pointerDown(handle, event(75, 50));
+  fireEvent.pointerMove(window, event(100, 100, 9)); fireEvent.pointerUp(window, event(100, 100, 9));
+  expect(container.querySelector('[data-canvas-object="a"]')?.getAttribute("height")).toBe("100");
+  fireEvent.pointerMove(window, event(75, 30)); fireEvent.pointerUp(window, event(75, 50));
+  expect(value()).toEqual(populated); expect(commits).not.toHaveBeenCalled(); expect(editor.snapshot.canUndo).toBe(false);
+});
+
+test("an imported sub-unit object does not grow on a stationary resize grab", () => {
+  const object = { ...populated.objects[1]!, width: 0.5, height: 0.25 };
+  const { container, value, commits, editor } = setup({ ...blank, objects: [object] });
+  const handle = container.querySelector('[data-resize-edge="nw"]')!;
+  fireEvent.pointerDown(handle, event(150, 50)); fireEvent.pointerUp(window, event(150, 50));
+  expect(value().objects[0]).toEqual(object); expect(editor.snapshot.canUndo).toBe(false); expect(commits).not.toHaveBeenCalled();
+  fireEvent.pointerDown(handle, event(150, 50)); fireEvent.pointerUp(window, event(200, 100));
+  expect(value().objects[0]).toMatchObject({ x: 299.5, y: 99.25, width: 1, height: 1 });
 });
 
 test("text draft supports IME, cancellation and one commit without capturing native editing shortcuts", () => {

@@ -28,12 +28,16 @@ Host: 한 장 fixture, 크기·색상 정책, 레이아웃
 ### 입력과 History
 
 - 도구를 고르고 클릭하면 기본 크기, 드래그하면 지정한 크기로 생성합니다.
+  사각형·타원·글자는 누르거나 작게 흔들리는 동안 기본 크기를 미리 표시하지 않습니다.
+  시작점에서 3 문서 단위 이상 움직이면 실제 드래그 상자만 표시하며, 다시 시작점 근처로
+  돌아와도 클릭 크기로 바뀌지 않습니다. 클릭 기본 크기는 놓을 때 press 위치에만 생성합니다.
+  드래그 후 시작점에 정확히 돌아와 놓으면 객체나 History를 만들지 않습니다.
   생성 후 Select로 돌아가며 새 객체를 선택합니다. 펜은 최소 두 지점이 필요합니다.
 - 객체 click은 단일 선택, Shift+click은 toggle입니다. 빈 곳 click은 clear,
   drag는 marquee replace, Shift+marquee는 add입니다. Mod+A를 반복해도 전체 선택을 유지합니다.
   선택된 객체 press는 집합을 유지하고 release까지 drag가 없으면 단일 선택으로 바꿉니다.
 - 선택된 객체를 끌면 집합 전체가 같은 delta로 이동합니다. 마지막 객체가 위에 표시됩니다.
-  선택 윤곽은 모두 그리지만 네 모서리 resize handles는 primary 하나에만 붙습니다.
+  선택 윤곽은 모두 그리지만 네 변·네 모서리 resize targets는 primary 하나에만 붙습니다.
   Delete는 집합 전체를 한 번 삭제하며 primary resize/text 편집은 기존 선택 집합을 보존합니다.
   Focus만으로 선택하지 않으며, focused 객체에서 Space/Shift+Space로 선택/toggle합니다.
   focused 객체의 Enter는 그 객체를 선택하고 글자라면 편집합니다. 슬라이드 자체의
@@ -47,6 +51,14 @@ Host: 한 장 fixture, 크기·색상 정책, 레이아웃
   Mod+D 또는 아이콘 툴바의 복제는 24단위 offset으로 복제하고 사본 집합·대응 primary를 선택합니다.
 - 방향키는 선택 집합을 1단위, Shift+방향키는 10단위 이동합니다. 수정 키 없는 입력만
   처리하며 text/JSON 입력과 IME의 키보드 소유권은 보존합니다.
+- 네 모서리 손잡이는 기존 사각 모양을 유지하며 네 변 전체에도 보이지 않는 resize 영역이
+  있습니다. 방향 커서로 구분하며 모서리가 변보다 우선합니다. 변은 한 축만 조절하고 반대편
+  변을, 모서리는 반대 모서리를 고정합니다. Shift는 초기 객체 비율을 유지하고, 변에서 비율을
+  유지할 때 다른 축은 중심 기준입니다. Alt/Option은 중심 기준, Shift+Alt는 중심·비율을
+  함께 고정합니다. 포인터가 멈춰 있어도 modifier 전환을 반영합니다. 최소 1 문서 단위까지
+  줄여도 고정점은 움직이지 않고 뒤집히지 않습니다. 정지한 grab은 크기·History를 바꾸지 않습니다.
+  [Resize 정본 계약](/docs/api/affordance)을 소비하며, 글자 크기·path 정규화 좌표·이미지 원본은
+  그대로 두고 객체 상자만 조절합니다.
 - 이동·resize·생성 중에는 문서를 변경하지 않습니다. pointerup의 최종 좌표로 한 번
   commit합니다. Escape, pointercancel, capture loss, 외부 문서 변경, unmount는 preview를
   버립니다. 다른 pointer의 release는 조작을 완료하지 못합니다. marquee 선택 preview도
@@ -74,7 +86,7 @@ text/JSON textarea의 native clipboard는 가로채지 않습니다.
 줄바꿈·Unicode를 그대로 보존합니다. PNG/JPEG/WebP는 문서 내부 base64 image 객체로 넣습니다.
 기본은 한 paste당 최대 4개, 파일당 10 MiB, decode 후 이미지당 16,000,000픽셀입니다.
 이미지는 비율을 유지해 슬라이드 75% 상자에 맞추고 확대하지 않습니다. 후속 resize는 일반
-객체와 같은 자유 상자 변환입니다. `policy.files`와 `maxImagePixels`로 입력 정책을 지정할 수
+객체와 같은 상자 변환이며 Shift로 초기 비율을 유지할 수 있습니다. `policy.files`와 `maxImagePixels`로 입력 정책을 지정할 수
 있지만 Object 모델이 지원하지 않는 이미지 표현까지 허용되는 것은 아닙니다.
 
 HTML은 Web의 inert parser와 이미지 준비 API를 사용합니다. 포함된 PNG/JPEG/WebP data URL과
