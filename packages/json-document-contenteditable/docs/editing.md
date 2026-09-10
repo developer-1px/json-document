@@ -36,4 +36,12 @@ Markdown처럼 별도 projection을 만드는 adapter도 같은 공개 함수를
 일반 native `<br>`는 원문의 줄바꿈으로 유지합니다. 마지막 빈 줄 뒤에서 다음 입력이
 이전 줄로 돌아가는 브라우저 동작을 막으며 원문에 보조 문자를 넣지 않습니다.
 
+## DOM 위치 캐시
+
+`plainTextDOMAdapter`는 DOM 내용이 바뀔 때 원문과 위치 인덱스를 함께 만듭니다.
+선택만 움직이는 관측은 DOM 전체를 다시 읽지 않으며, 원문 위치의 Text node는
+이진 탐색으로 찾습니다. 현재 native selection과 같으면 선택을 다시 설정하지 않습니다.
+자식 교체·텍스트 변경·caret 보조 표시 속성 변경은 즉시 캐시를 무효화합니다.
+native 줄바꿈과 방향 있는 선택도 같은 원문 좌표를 사용합니다.
+
 [Markdown caret Usage](/demo/markdown-caret) · [Markdown DOM API](/docs/api/markdown-web)

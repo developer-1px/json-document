@@ -40,7 +40,8 @@
   },
   "peerDependencies": {
     "@interactive-os/json-document-markdown": "^0.1.0-rc.0",
-    "@interactive-os/json-document-contenteditable": "^0.1.0-rc.0"
+    "@interactive-os/json-document-contenteditable": "^0.1.0-rc.0",
+    "@interactive-os/json-document-editing": "^0.1.0-rc.0"
   },
   "devDependencies": {
     "@types/node": "^25.9.0",
@@ -48,6 +49,7 @@
     "vitest": "^4.1.7",
     "@interactive-os/json-document-markdown": "*",
     "@interactive-os/json-document-contenteditable": "*",
-    "jsdom": "^29.1.1"
+    "jsdom": "^29.1.1",
+    "@interactive-os/json-document-editing": "*"
   }
 }

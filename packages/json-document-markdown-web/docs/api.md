@@ -33,4 +33,20 @@ const dispose = binding.bind();
 같은 source가 그동안 바뀌면 stale 입력을 거절하고 최신 정본을 복원합니다.
 여러 사용자의 동시 문자열 편집을 병합하는 계약은 제공하지 않습니다.
 
+## 변경 비용
+
+원문 변경은 Editing의 `diffText`로 추출하여 Markdown의 `createMarkdownParser.update`에
+전달합니다. 이전 문법 상태와 영향 없는 source run을 재사용하고, 바뀐 블록의 문법 경계를
+정렬한 뒤 한 번 순회해 새 run을 만듭니다. 앞뒤의 같은 구간은 기존 DOM 요소와 Text node를 재사용합니다.
+강조 구간 수를 S라고 하면 구간 구성은 O(S log S)이며 구간마다 모든 강조를 검색하지 않습니다.
+원문 offset은 내부 run에 보관하고, 이동한 모든 요소에 offset 속성을 다시 쓰지 않습니다.
+
+선택만 바뀌면 파싱·DOM 재구성을 하지 않습니다. 전체 `innerHTML` 직렬화 대신
+MutationObserver로 native DOM 변경을 추적합니다. native 서식·자식 요소가 변했으면
+같은 원문이어도 다음 render에서 복원합니다. 원문 위치 매핑은 contenteditable의
+DOM 변경 단위 캐시를 공유합니다. 문법이 불확실할 때의 전체 파싱과 초기 DOM 생성,
+원문 diff·run 순회·브라우저 layout의 문서 크기 비용은 남습니다.
+
+[재현 가능한 성능 검사](performance.md)는 입력 지연과 History 보관량을 함께 측정합니다.
+
 [실행 가능한 Usage](/demo/markdown-caret)의 source 탭에서 canonical 구현까지 확인합니다.

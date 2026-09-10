@@ -1,3 +1,6 @@
+import textChangeSource from "../../../../packages/json-document-editing/src/text-change.ts?raw";
+import markdownSyntaxSource from "../../../../packages/json-document-markdown/src/syntax.ts?raw";
+import markdownParserSource from "../../../../packages/json-document-markdown/src/parser.ts?raw";
 import clipboardEventSource from "../../../../packages/json-document-web/src/clipboard-event.ts?raw";
 import type { CodeLanguage } from "../ui/code-tokens";
 import objectModelSource from "../../../../packages/json-document-object-document/src/object-model.ts?raw";
@@ -39,6 +42,7 @@ import markdownRendererSource from "../../../../packages/json-document-markdown-
 import markdownEditingSource from "../../../../packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx?raw";
 import markdownProjectionSource from "../../../../packages/json-document-markdown/src/projection.ts?raw";
 import markdownDOMSource from "../../../../packages/json-document-markdown-web/src/markdown-dom.ts?raw";
+import markdownSourceRunsSource from "../../../../packages/json-document-markdown-web/src/source-runs.ts?raw";
 import textEditingSource from "../../../../packages/json-document-editing/src/text.ts?raw";
 import dateValuesSource from "../../../../packages/json-document-calendar/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
@@ -65,6 +69,7 @@ import editingClipboardSource from "../../../../packages/json-document-editing/s
 import editingSessionSource from "../../../../packages/json-document-editing/src/session.ts?raw";
 import editingIdentitySource from "../../../../packages/json-document-editing/src/identity.ts?raw";
 import editingHistorySource from "../../../../packages/json-document-editing/src/history.ts?raw";
+import editingHistoryPatchSource from "../../../../packages/json-document-editing/src/history-patch.ts?raw";
 import editingHistoryInvalidationSource from "../../../../packages/json-document-editing/src/history-invalidation.ts?raw";
 import editingInverseSource from "../../../../packages/json-document-editing/src/invert-patch.ts?raw";
 import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
@@ -148,6 +153,7 @@ import selectionMaterializedRangeSource from "../../../../packages/json-document
 import contentEditableReactSource from "../../../../packages/json-document-contenteditable/src/content-editable.tsx?raw";
 import contentEditableLeaseSource from "../../../../packages/json-document-contenteditable/src/lease.ts?raw";
 import plainTextDOMSource from "../../../../packages/json-document-contenteditable/src/dom/plain-text.ts?raw";
+import textDOMIndexSource from "../../../../packages/json-document-contenteditable/src/dom/text-index.ts?raw";
 import collaborationCreateSource from "../../../../packages/json-document-collaboration/src/create.ts?raw";
 import collaborationEditingSource from "../../../../packages/json-document-collaboration/src/editing-index.ts?raw";
 import collaborationContentEditableSource from "../../../../packages/contenteditable-collaboration/src/lease.ts?raw";
@@ -267,7 +273,11 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
   ["packages/json-document-markdown/src/projection.ts", markdownProjectionSource],
+  ["packages/json-document-editing/src/text-change.ts", textChangeSource],
+  ["packages/json-document-markdown/src/syntax.ts", markdownSyntaxSource],
+  ["packages/json-document-markdown/src/parser.ts", markdownParserSource],
   ["packages/json-document-markdown-web/src/markdown-dom.ts", markdownDOMSource],
+  ["packages/json-document-markdown-web/src/source-runs.ts", markdownSourceRunsSource],
   ["packages/json-document-editing/src/text.ts", textEditingSource],
   ["packages/json-document-calendar/src/date-values.ts", dateValuesSource],
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
@@ -293,6 +303,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/session.ts", editingSessionSource],
   ["packages/json-document-editing/src/identity.ts", editingIdentitySource],
   ["packages/json-document-editing/src/history.ts", editingHistorySource],
+  ["packages/json-document-editing/src/history-patch.ts", editingHistoryPatchSource],
   ["packages/json-document-editing/src/invert-patch.ts", editingInverseSource],
   ["packages/json-document-editing/src/history-invalidation.ts", editingHistoryInvalidationSource],
   ["packages/json-document-editing/src/object.ts", objectEditingSource],
@@ -373,6 +384,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
   ["packages/json-document-contenteditable/src/lease.ts", contentEditableLeaseSource],
   ["packages/json-document-contenteditable/src/dom/plain-text.ts", plainTextDOMSource],
+  ["packages/json-document-contenteditable/src/dom/text-index.ts", textDOMIndexSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
   ["packages/json-document-collaboration/src/editing-index.ts", collaborationEditingSource],
   ["packages/contenteditable-collaboration/src/lease.ts", collaborationContentEditableSource],
@@ -388,6 +400,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["packages/json-document-editing/src/text.ts", ["packages/json-document-editing/src/session.ts"]],
+  ["packages/json-document-editing/src/session.ts", ["packages/json-document-editing/src/history-patch.ts"]],
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
@@ -462,6 +476,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "createEditingSession",
     sourcePath: "packages/json-document-editing/src/session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createEditingSession",
+    sourcePath: "packages/json-document-editing/src/history-patch.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",
@@ -749,6 +768,36 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-markdown-web/src/markdown-dom.ts",
   },
   {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownDOMAdapter",
+    sourcePath: "packages/json-document-markdown-web/src/source-runs.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown",
+    symbol: "createMarkdownParser",
+    sourcePath: "packages/json-document-markdown/src/parser.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown",
+    symbol: "createMarkdownParser",
+    sourcePath: "packages/json-document-markdown/src/syntax.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "diffText",
+    sourcePath: "packages/json-document-editing/src/text-change.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown",
+    symbol: "projectMarkdown",
+    sourcePath: "packages/json-document-markdown/src/syntax.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "diffText",
+    sourcePath: "packages/json-document-editing/src/text-change.ts",
+  },
+  {
     packageName: "@interactive-os/json-document-markdown",
     symbol: "projectMarkdown",
     sourcePath: "packages/json-document-markdown/src/projection.ts",
@@ -918,6 +967,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-contenteditable",
     symbol: "plainTextDOMAdapter",
     sourcePath: "packages/json-document-contenteditable/src/dom/plain-text.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-contenteditable",
+    symbol: "plainTextDOMAdapter",
+    sourcePath: "packages/json-document-contenteditable/src/dom/text-index.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",

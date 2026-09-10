@@ -191,11 +191,30 @@ test("unclosed delimiters and surrogate-pair deletion stay editable", async ({ p
 
 test("Usage exposes every Markdown owner and its API reference through source tabs", async ({ page }) => {
   await page.getByRole("tab", { name: "MarkdownCaretRoute.tsx", exact: true }).click();
-  for (const name of ["text.ts", "MarkdownEditingSurface.tsx", "markdown-dom.ts", "projection.ts", "lease.ts", "plain-text.ts"]) {
+  for (const name of ["text.ts", "MarkdownEditingSurface.tsx", "markdown-dom.ts", "source-runs.ts", "parser.ts", "syntax.ts", "text-change.ts", "lease.ts", "plain-text.ts", "text-index.ts", "history-patch.ts"]) {
     await expect(page.getByRole("tab", { name, exact: true })).toBeVisible();
   }
   await page.getByRole("tab", { name: "markdown-dom.ts", exact: true }).click();
   await expect(page.getByRole("link", { name: "API Reference", exact: true })).toHaveAttribute("href", "/docs/api/markdown-web");
   await page.getByRole("link", { name: "API Reference", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Markdown Web DOM 계약", exact: true })).toBeVisible();
+});
+
+test("long source edits keep surrounding DOM and restore exact source and caret", async ({ page }) => {
+  const unit = "Markdown 원문을 **그대로 보존**합니다. 한글 입력과 __방향 있는 선택__을 확인합니다. 문서를 읽고 수정합니다.\n";
+  const longSource = unit.repeat(Math.ceil(50_000 / unit.length)).slice(0, 50_000);
+  await select(page, 0, source.length);
+  await paste(page, longSource);
+  await expect.poll(() => model(page)).toBe(longSource);
+  for (const offset of [0, 25_000, 50_000]) {
+    const retained = await page.getByTestId("markdown-editor").locator("strong").nth(10).elementHandle();
+    await select(page, offset);
+    await page.keyboard.type("x");
+    await expect.poll(() => model(page)).toBe(longSource.slice(0, offset) + "x" + longSource.slice(offset));
+    expect(await retained!.evaluate(node => node.isConnected)).toBe(true);
+    await page.keyboard.press("ControlOrMeta+z");
+    await expect.poll(() => model(page)).toBe(longSource);
+    await expect.poll(() => selection(page)).toEqual({ anchor: offset, focus: offset });
+    await retained!.dispose();
+  }
 });

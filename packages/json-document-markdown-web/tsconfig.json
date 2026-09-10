@@ -11,6 +11,9 @@
     },
     {
       "path": "../json-document-contenteditable"
+    },
+    {
+      "path": "../json-document-editing"
     }
   ],
   "include": [

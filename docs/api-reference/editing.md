@@ -852,6 +852,11 @@ databaseValueFromText(property: DatabaseProperty, value: string): string | numbe
 ```ts
 defaultDatabaseValue(property: DatabaseProperty): JSONValue
 ```
+## `diffText`
+
+```ts
+diffText(before: string, after: string): TextChange | null
+```
 ## `DocumentBlock`
 
 ```ts
@@ -1610,6 +1615,15 @@ interface SheetSelection extends Record<string, JSONValue> {
 
 ```ts
 type SheetTopology = GridTopology;
+```
+## `TextChange`
+
+```ts
+interface TextChange {
+  readonly from: number;
+  readonly to: number;
+  readonly insert: string;
+}
 ```
 ## `TextEditor`
 
