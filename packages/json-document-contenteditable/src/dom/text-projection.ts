@@ -38,7 +38,7 @@ export function createTextProjectionDOMAdapter(
     restoreSelection(root, selection, options) {
       const regions = projections(root);
       const restored = base.restoreSelection(root, selection, {
-        affinity: offset => regions.some(region => region.following === offset) ? "forward" : options?.affinity?.(offset) ?? "backward",
+        affinity: offset => regions.some(region => region.following === offset) ? "forward" : options?.affinity?.(offset),
       });
       paint(root, restored ? base.observe(root).selection : null);
       return restored;

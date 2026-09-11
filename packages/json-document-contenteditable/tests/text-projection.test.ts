@@ -90,3 +90,38 @@ test("atomic projections delete the whole unit and separator from either edge or
   expect(adapter.resolveDeletionSelection!(root, {anchor:10, focus:3}, "backward")).toEqual({anchor:0, focus:10});
   expect(adapter.resolveDeletionSelection!(root, {anchor:8, focus:8}, "forward")).toEqual({anchor:8, focus:10});
 });
+
+test("restoration preserves live DOM sides at equivalent source offsets unless affinity is explicit", () => {
+  const root = document.createElement("div"); document.body.append(root);
+  const before = document.createTextNode("first\n");
+  const marker = document.createElement("span"); marker.textContent = "> ";
+  const body = document.createTextNode("body");
+  root.append(before, marker, body);
+  const selection = document.getSelection()!;
+  selection.setBaseAndExtent(marker.firstChild!, 0, body, 2);
+  const writes = vi.spyOn(selection, "setBaseAndExtent");
+  restoreTextDOMSelection(root, {anchor:6, focus:10});
+  expect(writes).not.toHaveBeenCalled();
+  expect(selection.anchorNode).toBe(marker.firstChild);
+  restoreTextDOMSelection(root, {anchor:6, focus:10}, {affinity: offset => offset === 6 ? "backward" : undefined});
+  expect(selection.anchorNode).toBe(before);
+  expect(selection.focusNode).toBe(body);
+  expect(writes).toHaveBeenCalledTimes(1);
+  // A stale, removed endpoint must still be restored into the current source DOM.
+  root.replaceChildren(document.createTextNode("first\n> body"));
+  restoreTextDOMSelection(root, {anchor:6, focus:10});
+  expect(plainTextDOMAdapter.observe(root).selection).toEqual({anchor:6, focus:10});
+  writes.mockRestore();
+});
+
+test("projection restoration does not impose backward affinity on native block entry", () => {
+  const {root, marker, adapter} = fixture();
+  const before = document.createTextNode(""); root.prepend(before);
+  const selection = document.getSelection()!;
+  selection.setBaseAndExtent(marker.firstChild!, 0, marker.firstChild!, 0);
+  const writes = vi.spyOn(selection, "setBaseAndExtent");
+  adapter.restoreSelection(root, {anchor:0, focus:0});
+  expect(writes).not.toHaveBeenCalled();
+  expect(selection.focusNode).toBe(marker.firstChild);
+  writes.mockRestore();
+});

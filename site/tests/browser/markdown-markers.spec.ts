@@ -111,3 +111,33 @@ test("quote Enter continues the box, exits on empty content, and restores with U
   await expect.poll(() => editor.textContent()).toBe("> first\n> second\n\noutside");
   await expect(editor.locator('[data-markdown-kind="blockquote"]')).not.toContainText("outside");
 });
+
+test("native quote entry preserves its DOM side and vertical goal through selection synchronization", async ({page}) => {
+  await page.goto("/applications/bear");
+  const editor = page.getByRole("textbox", {name:"Markdown 문서"});
+  const source = "abcdefghij\n> quote text\n> next line\n\nabcdefghij";
+  await editor.click(); await page.keyboard.press("ControlOrMeta+a");
+  await editor.evaluate((root, source) => {
+    const data = new DataTransfer(); data.setData("text/plain", source);
+    root.dispatchEvent(new ClipboardEvent("paste", {clipboardData:data,bubbles:true,cancelable:true}));
+    const first = document.createTreeWalker(root, NodeFilter.SHOW_TEXT).nextNode()!;
+    document.getSelection()!.setBaseAndExtent(first, 7, first, 7);
+    document.dispatchEvent(new Event("selectionchange"));
+  }, source);
+  const position = () => editor.evaluate(root => {
+    const selection = document.getSelection()!;
+    const range = document.createRange(); range.selectNodeContents(root);
+    range.setEnd(selection.focusNode!, selection.focusOffset);
+    return range.toString().length;
+  });
+  await expect.poll(position).toBe(7);
+  await page.keyboard.press("ArrowDown");
+  // A source-equivalent restore must not move native entry back outside the quote.
+  await expect.poll(() => editor.evaluate(() => document.getSelection()!.focusNode!.parentElement!
+    .closest('[data-markdown-kind="blockquote"]') !== null)).toBe(true);
+  for (let index = 0; index < 4; index++) await page.keyboard.press("ArrowDown");
+  await expect.poll(position).toBe(44);
+  for (let index = 0; index < 3; index++) await page.keyboard.press("ArrowUp");
+  await expect.poll(position).toBe(7);
+  await expect.poll(() => editor.textContent()).toBe(source);
+});

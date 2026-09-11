@@ -8,7 +8,8 @@ export interface DOMObservation {
 }
 
 export interface TextDOMSelectionOptions {
-  readonly affinity?: (offset: number) => "backward" | "forward";
+  /** Undefined preserves an equivalent live DOM endpoint; explicit affinity chooses a side. */
+  readonly affinity?: (offset: number) => "backward" | "forward" | undefined;
 }
 
 export interface TextDOMAdapter {

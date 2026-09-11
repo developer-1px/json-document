@@ -107,8 +107,11 @@ Backspace로 전체를 삭제합니다. 문서 모델은 원문 문자열로 유
 원문 편집과 Undo는 TextEditor가 담당합니다.
 
 `restoreTextDOMSelection(root, selection, { affinity })`는 동일한 source offset을
-공유하는 text node 중 backward(앞 노드 끝) 또는 forward(다음 노드 시작)를 골라
-DOM 선택을 한 번만 복원합니다. `plainTextDOMAdapter.restoreSelection`도 같은 옵션을
+공유하는 text node 중 명시한 backward(앞 노드 끝) 또는 forward(다음 노드 시작)를 고릅니다.
+`affinity`가 없거나 해당 offset에서 `undefined`이면 현재 DOM endpoint가 같은 원문 위치를
+가리키는 한 그대로 보존합니다. anchor와 focus를 각각 판단하며, DOM이 교체되어 endpoint가
+유효하지 않으면 원문 위치로 복원합니다. 동일한 원문 위치라도 서로 다른 블록·시각적 줄에
+놓일 수 있으므로 native 선택을 불필요하게 재설정하지 않습니다. `plainTextDOMAdapter.restoreSelection`도 같은 옵션을
 지원합니다. 투영은 following에서 forward를 사용해 본문으로 빠져나옵니다.
 
 [Markdown caret Usage](/demo/markdown-caret)는 이 API를 사용하는 제목 projection을

@@ -37,10 +37,16 @@ export function restoreTextDOMSelection(root: HTMLElement, selection: TextSelect
   if (!root.isConnected) return false;
   const index = textDOMIndex(root);
   const clamped = clampTextSelection(index.value, selection);
-  const anchor = index.position(clamped.anchor, options.affinity?.(clamped.anchor));
-  const focus = index.position(clamped.focus, options.affinity?.(clamped.focus));
   const domSelection = root.ownerDocument.getSelection();
   if (domSelection === null) return false;
+  const position = (offset: number, node: Node | null, nodeOffset: number) => {
+    const affinity = options.affinity?.(offset);
+    // Equivalent source positions can lie on different visual lines or sides of a block.
+    if (affinity === undefined && node && index.offset(node, nodeOffset) === offset) return {node, offset: nodeOffset};
+    return index.position(offset, affinity);
+  };
+  const anchor = position(clamped.anchor, domSelection.anchorNode, domSelection.anchorOffset);
+  const focus = position(clamped.focus, domSelection.focusNode, domSelection.focusOffset);
   if (domSelection.anchorNode === anchor.node && domSelection.anchorOffset === anchor.offset
     && domSelection.focusNode === focus.node && domSelection.focusOffset === focus.offset) return true;
   try {
