@@ -1,3 +1,4 @@
+import { captureMarkdownMarkers, offsetMarker, type MarkdownMarker } from "./markers.js";
 import { gfm } from "micromark-extension-gfm";
 import { gfmFromMarkdown } from "mdast-util-gfm";
 import { markdownNode, offsetNode, editNode, type MarkdownNode } from "./nodes.js";
@@ -14,6 +15,7 @@ export interface MarkdownBlock {
     readonly literal: boolean;
     readonly strong: ReadonlyArray<MarkdownStrongSpan>;
     readonly text: ReadonlyArray<TextRange>;
+    readonly markers: ReadonlyArray<MarkdownMarker>;
   };
 }
 export interface MarkdownSyntax {
@@ -23,11 +25,19 @@ export interface MarkdownSyntax {
 
 /** Retain block-relative syntax fragments so moving a block does not rewrite its descendants. */
 export function parseMarkdownSyntax(source: string): MarkdownSyntax {
-  const tree = fromMarkdown(source, { extensions: [gfm()], mdastExtensions: [gfmFromMarkdown()] });
+  const markers: MarkdownMarker[] = [];
+  const tree = fromMarkdown(source, { extensions: [gfm()], mdastExtensions: [gfmFromMarkdown(), captureMarkdownMarkers(source, markers)] });
+  markers.sort((a, b) => a.from - b.from || b.to - a.to);
+  let markerIndex = 0;
   let definitions = false;
   const blocks = tree.children.map(node => {
     const from = node.position!.start.offset!, to = node.position!.end.offset!;
     const raw = source.slice(from, to);
+    const blockMarkers: MarkdownMarker[] = [];
+    while (markerIndex < markers.length && markers[markerIndex]!.from < to) {
+      const marker = markers[markerIndex++]!;
+      if (marker.from >= from && marker.to <= to) blockMarkers.push(offsetMarker(marker, -from));
+    }
     const strong: MarkdownStrongSpan[] = [], text: TextRange[] = [];
     const visit = (node: (typeof tree.children)[number], textContext: boolean): void => {
       // GFM pads short table rows with empty cells that have no source position.
@@ -46,7 +56,7 @@ export function parseMarkdownSyntax(source: string): MarkdownSyntax {
         paragraph: node.type === "paragraph",
         // These constructs can make letter edits alter distant inline recognition or reference labels.
         literal: !["\\", "[", "]", "<", ">", "&", "~", ".", ":", "@", String.fromCharCode(96)].some(marker => raw.includes(marker)),
-        strong, text,
+        strong, text, markers: Object.freeze(blockMarkers),
       },
     };
   });
@@ -56,9 +66,11 @@ export function parseMarkdownSyntax(source: string): MarkdownSyntax {
 export function syntaxProjection(source: string, syntax: MarkdownSyntax): MarkdownProjection {
   let nodes: ReadonlyArray<MarkdownNode> | undefined;
   let strong: ReadonlyArray<MarkdownStrongSpan> | undefined;
+  let markers: ReadonlyArray<MarkdownMarker> | undefined;
   return Object.freeze({
     source,
     get nodes() { return nodes ??= Object.freeze(syntax.blocks.map(block => offsetNode(block.syntax.node, block.from))); },
+    get markers() { return markers ??= Object.freeze(syntax.blocks.flatMap(block => block.syntax.markers.map(marker => offsetMarker(marker, block.from)))); },
     get strong() {
       return strong ??= Object.freeze(syntax.blocks.flatMap(block => block.syntax.strong.map(span => offsetStrong(span, block.from))));
     },
@@ -82,6 +94,7 @@ export function replaceLiteralText(block: MarkdownBlock, source: string, from: n
     syntax: {
       ...block.syntax,
       node: editNode(block.syntax.node, start, end, insert),
+      markers: block.syntax.markers.map(marker => marker.from >= end ? offsetMarker(marker, delta) : marker),
       text: block.syntax.text.map(range => ({ from: range.from >= end ? range.from + delta : range.from, to: move(range.to) })),
       strong: block.syntax.strong.map(span => Object.freeze({ from: move(span.from), to: move(span.to), contentFrom: move(span.contentFrom), contentTo: move(span.contentTo) })),
     },

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createTextEditor } from "@interactive-os/json-document-editing";
-import { createContentEditableBinding, plainTextDOMAdapter } from "../src/index.js";
+import { createContentEditableBinding, plainTextDOMAdapter, type ContentEditableBindingOptions } from "../src/index.js";
 
 const cleanup: Array<() => void> = [];
 afterEach(() => {
@@ -11,13 +11,13 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
-function setup(source = "A **한글** B") {
+function setup(source = "A **한글** B", insertBreak?: ContentEditableBindingOptions["insertBreak"]) {
   const json = createJSONDocument({ source });
   const editor = createTextEditor(json, "/source");
   const root = document.createElement("div");
   root.setAttribute("contenteditable", "true");
   document.body.append(root);
-  const binding = createContentEditableBinding({ document: json, pointer: "/source", root, editor });
+  const binding = createContentEditableBinding({ document: json, pointer: "/source", root, editor, ...(insertBreak ? {insertBreak} : {}) });
   cleanup.push(binding.bind());
   const select = (anchor: number, focus = anchor) => {
     plainTextDOMAdapter.restoreSelection(root, { anchor, focus });
@@ -297,4 +297,100 @@ test("Mod+A selects the complete source including concealed leading and trailing
     expect(editor.copy()).toBe(source);
     expect(plainTextDOMAdapter.observe(root).selection).toEqual({anchor: 0, focus: source.length});
   }
+});
+
+test("projected horizontal selection respects modifiers and composition ownership", () => {
+  const json = createJSONDocument({source:"# title"});
+  const editor = createTextEditor(json, "/source");
+  const root = document.createElement("div"); document.body.append(root);
+  const resolveHorizontalSelection = vi.fn(() => ({anchor:1, focus:1}));
+  const binding = createContentEditableBinding({document:json, pointer:"/source", root, editor,
+    dom:{...plainTextDOMAdapter, resolveHorizontalSelection}});
+  cleanup.push(binding.bind());
+  plainTextDOMAdapter.restoreSelection(root, {anchor:2, focus:2});
+  const left = new KeyboardEvent("keydown", {key:"ArrowLeft", cancelable:true});
+  binding.handle(left);
+  expect(left.defaultPrevented).toBe(true);
+  expect(editor.snapshot.selection).toEqual({anchor:1, focus:1});
+  expect(editor.snapshot.canUndo).toBe(false);
+  expect(resolveHorizontalSelection).toHaveBeenLastCalledWith(root, {anchor:2, focus:2}, "backward", false);
+  resolveHorizontalSelection.mockClear();
+  for (const modifiers of [{metaKey:true}, {ctrlKey:true}, {altKey:true}, {isComposing:true}, {keyCode:229}]) {
+    const key = new KeyboardEvent("keydown", {key:"ArrowLeft", cancelable:true, ...modifiers});
+    binding.handle(key);
+    expect(key.defaultPrevented).toBe(false);
+  }
+  binding.handle(new CompositionEvent("compositionstart"));
+  binding.handle(new KeyboardEvent("keydown", {key:"ArrowLeft", cancelable:true}));
+  expect(resolveHorizontalSelection).not.toHaveBeenCalled();
+  binding.cancel();
+});
+
+test("projected deletion preserves the original caret in Undo and yields to composition", () => {
+  const json = createJSONDocument({source:"## title\n\n**body**"});
+  const editor = createTextEditor(json, "/source");
+  const root = document.createElement("div"); document.body.append(root);
+  const resolveDeletionSelection = vi.fn(() => ({anchor:2, focus:3}));
+  const binding = createContentEditableBinding({document:json, pointer:"/source", root, editor,
+    dom:{...plainTextDOMAdapter, resolveDeletionSelection}});
+  cleanup.push(binding.bind());
+  plainTextDOMAdapter.restoreSelection(root, {anchor:3, focus:3});
+  const input = new InputEvent("beforeinput", {inputType:"deleteContentBackward", cancelable:true});
+  binding.handle(input);
+  expect(input.defaultPrevented).toBe(true);
+  expect(editor.text).toBe("##title\n\n**body**");
+  editor.undo();
+  expect(editor.text).toBe("## title\n\n**body**");
+  expect(editor.snapshot.selection).toEqual({anchor:3, focus:3});
+  resolveDeletionSelection.mockClear();
+  binding.handle(new CompositionEvent("compositionstart"));
+  const composing = new InputEvent("beforeinput", {inputType:"deleteContentBackward", cancelable:true, isComposing:true});
+  binding.handle(composing);
+  expect(composing.defaultPrevented).toBe(false);
+  expect(resolveDeletionSelection).not.toHaveBeenCalled();
+  binding.cancel();
+});
+
+
+test("injected break command receives native selection and IME-confirmed source", () => {
+  vi.useFakeTimers();
+  const insertBreak = vi.fn((editor: ReturnType<typeof createTextEditor>) => editor.insert("\n> "));
+  const {root, editor, select, native} = setup("ab", insertBreak);
+  select(1);
+  root.dispatchEvent(new InputEvent("beforeinput", {inputType:"insertParagraph", cancelable:true}));
+  expect(editor.text).toBe("a\n> b");
+  editor.undo();
+  select(1);
+  root.dispatchEvent(new CompositionEvent("compositionstart"));
+  native("a한b", 2);
+  root.dispatchEvent(new KeyboardEvent("keydown", {key:"Enter", code:"Enter", isComposing:true, cancelable:true}));
+  root.dispatchEvent(new CompositionEvent("compositionend", {data:"한"}));
+  vi.runAllTimers();
+  expect(editor.text).toBe("a한\n> b");
+  expect(insertBreak).toHaveBeenCalledTimes(2);
+  editor.undo();
+  expect(editor.text).toBe("a한b");
+});
+
+test("vertical navigation respects IME and modifiers and resets its goal only for independent input", () => {
+  const json = createJSONDocument("abc"), editor = createTextEditor(json);
+  const root = document.createElement("div"); root.contentEditable="true"; document.body.append(root);
+  const move = vi.fn(() => ({anchor:1, focus:1}));
+  const reset = vi.fn();
+  const binding = createContentEditableBinding({document:json,pointer:"",root,editor,
+    dom:{...plainTextDOMAdapter,resolveVerticalSelection:move,resetNavigation:reset}});
+  cleanup.push(binding.bind());
+  plainTextDOMAdapter.restoreSelection(root, {anchor:0, focus:0});
+  root.dispatchEvent(new KeyboardEvent("keydown", {key:"ArrowDown",cancelable:true}));
+  expect(move).toHaveBeenCalledTimes(1);
+  expect(editor.snapshot.selection).toEqual({anchor:1,focus:1});
+  root.dispatchEvent(new KeyboardEvent("keydown", {key:"Shift"}));
+  expect(reset).not.toHaveBeenCalled();
+  root.dispatchEvent(new KeyboardEvent("keydown", {key:"ArrowUp",metaKey:true,cancelable:true}));
+  expect(move).toHaveBeenCalledTimes(1);
+  root.dispatchEvent(new Event("pointerdown"));
+  expect(reset).toHaveBeenCalledTimes(2);
+  root.dispatchEvent(new CompositionEvent("compositionstart"));
+  root.dispatchEvent(new KeyboardEvent("keydown", {key:"ArrowDown",isComposing:true,cancelable:true}));
+  expect(move).toHaveBeenCalledTimes(1);
 });

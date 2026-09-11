@@ -407,3 +407,21 @@ describe("Demo definition and source discovery", () => {
   });
 
 });
+
+test("Markdown Usage exposes the canonical text projection and restoration sources", async () => {
+  const sources = await discoverDemoSources("routes/markdown-caret/MarkdownCaretRoute.tsx");
+  expect(sources.map(file => file.path)).toEqual(expect.arrayContaining([
+    "packages/json-document-markdown/src/markers.ts",
+    "packages/json-document-markdown/src/tasks.ts",
+    "packages/json-document-markdown/src/paragraph.ts",
+    "packages/json-document-contenteditable/src/dom/text-projection.ts",
+    "packages/json-document-contenteditable/src/dom/text-projection.css",
+    "packages/json-document-contenteditable/src/dom/plain-text.ts",
+    "packages/json-document-contenteditable/src/dom/text-index.ts",
+    "packages/json-document-contenteditable/src/dom/text-navigation.ts",
+    "packages/json-document-contenteditable/src/dom/caret-visibility.ts",
+  ]));
+  const markdown = await sources.find(file => file.path === "packages/json-document-markdown-web/src/markdown-dom.ts")!.load();
+  expect(markdown).toContain("createTextProjectionDOMAdapter");
+  expect(markdown).not.toContain("setBaseAndExtent");
+});

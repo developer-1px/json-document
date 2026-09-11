@@ -42,16 +42,66 @@ test("links and images never activate unsafe URL schemes or raw HTML", () => {
   expect(dom.observe(root).value).toBe(source);
 });
 
-test("heading markers reveal only in their source range; table source reveals as a unit", () => {
+test("heading syntax stays concealed while editing; table source reveals as a unit", () => {
   const root = document.createElement("div"); document.body.append(root);
   const source = "# title\n\n| a | b |\n| - | - |\n| c | d |";
   const dom = createMarkdownDOMAdapter(); dom.render(root, source);
   const heading = root.querySelector('[role="heading"]')!;
   expect(heading.getAttribute("aria-level")).toBe("1");
-  expect((heading.querySelector("[data-markdown-delimiter]") as HTMLElement).hidden).toBe(true);
+  expect(heading.querySelector("[data-markdown-heading-marker]")?.getAttribute("aria-hidden")).toBe("true");
   dom.restoreSelection(root, {anchor: 3, focus: 3});
-  expect((heading.querySelector("[data-markdown-delimiter]") as HTMLElement).hidden).toBe(false);
+  expect(heading.querySelector("[data-markdown-heading-marker]")?.getAttribute("aria-hidden")).toBe("true");
   dom.restoreSelection(root, {anchor: source.indexOf("c"), focus: source.indexOf("c")});
   expect(root.querySelector('[role="table"]')?.getAttribute("data-markdown-active")).toBe("true");
   expect(dom.observe(root).value).toBe(source);
+});
+
+test("heading marker navigation uses source positions and restores the shared boundary in the body", () => {
+  const root = document.createElement("div"); document.body.append(root);
+  const dom = createMarkdownDOMAdapter(); dom.render(root, "### 😀제목\n\n본문");
+  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:4}, "backward", false)).toEqual({anchor:3, focus:3});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:3}, "backward", true)).toEqual({anchor:4, focus:0});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:0}, "forward", false)).toEqual({anchor:4, focus:4});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:4}, "forward", false)).toBeNull();
+  dom.restoreSelection(root, {anchor:4, focus:4});
+  const body = document.createTreeWalker(root.querySelector('[data-markdown-kind="text"]')!, NodeFilter.SHOW_TEXT).nextNode();
+  expect(document.getSelection()!.focusNode).toBe(body);
+  expect(document.getSelection()!.focusOffset).toBe(0);
+  dom.restoreSelection(root, {anchor:4, focus:0});
+  expect(dom.observe(root).selection).toEqual({anchor:4, focus:0});
+  expect(document.getSelection()!.anchorNode).toBe(body);
+});
+
+test.each(["  ##    제목  ", "###\t \t제목\t  ###  ", "##   ", "제목  \n---  "])("heading whitespace stays visible and source-addressable: %s", source => {
+  const root = document.createElement("div"); document.body.append(root);
+  const dom = createMarkdownDOMAdapter(); dom.render(root, source);
+  expect(root.querySelector('[role="heading"]')).not.toBeNull();
+  const visible = () => {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let text = "";
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (!(node.parentElement?.closest('[hidden], [data-text-projection-source]'))) text += node.textContent;
+    }
+    return text;
+  };
+  expect(visible().replace(/\S/g, "")).toBe(source.replace(/\S/g, ""));
+  for (let offset = 0; offset <= source.length; offset++) {
+    dom.restoreSelection(root, {anchor:offset, focus:offset});
+    expect(dom.observe(root)).toEqual({value:source, selection:{anchor:offset, focus:offset}});
+    expect(visible().replace(/\S/g, "")).toBe(source.replace(/\S/g, ""));
+  }
+});
+
+test("code contents and words beside entities remain normal editable text", () => {
+  const root=document.createElement("div");document.body.append(root);
+  const source="one \\* &amp; end `two  words`";
+  const dom=createMarkdownDOMAdapter();dom.render(root,source);
+  expect(root.querySelector('[data-markdown-marker="entity"]')?.getAttribute("data-markdown-label")).toBe("&");
+  expect(root.querySelectorAll('[data-markdown-marker="source"]')).toHaveLength(0);
+  for (const word of ["one","end","two","words"]) {
+    const offset=source.indexOf(word)+1;
+    dom.restoreSelection(root,{anchor:offset,focus:offset});
+    expect(dom.resolveHorizontalSelection!(root,{anchor:offset,focus:offset},"forward",false)).toBeNull();
+    expect(dom.observe(root)).toEqual({value:source,selection:{anchor:offset,focus:offset}});
+  }
 });

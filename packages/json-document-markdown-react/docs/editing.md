@@ -26,3 +26,9 @@ Undo는 줄바꿈, 확정한 조합 순서로 되돌립니다.
 streaming용 문법 보정 결과는 편집 원문에 기록하지 않습니다.
 
 [Markdown caret Usage](/demo/markdown-caret) · [문서 계약](/docs/api/markdown)
+
+체크박스는 주입한 editor로 클릭·Space 토글을 처리합니다. Delete·Backspace는
+todo 전체를 한 번에 지우며, Undo 한 번으로 복원합니다. 기호 표시와 원자 삭제 정책은
+Markdown Web과 공용 contenteditable 투영을 사용합니다.
+
+인용문 Enter는 Markdown의 `insertMarkdownParagraph`를 공용 contenteditable `insertBreak`에 연결합니다. 내용이 있으면 인용을 이어 쓰고, 빈 인용 줄에서는 일반 문단으로 나갑니다. 결과는 기존 editor에 한 번 적용하므로 Undo/Redo와 원문 선택을 유지합니다.

@@ -1,14 +1,16 @@
-import type { MarkdownNode, MarkdownNodeKind, MarkdownProjection } from "@interactive-os/json-document-markdown";
+import type { MarkdownNode, MarkdownNodeKind, MarkdownProjection, MarkdownMarker } from "@interactive-os/json-document-markdown";
 
 interface SourceRange { readonly from: number; readonly to: number }
 export interface SourceRun extends SourceRange {
-  readonly kind: MarkdownNodeKind | "source" | "delimiter" | "imagePreview";
+  readonly kind: MarkdownNodeKind | "source" | "delimiter" | "imagePreview" | "taskControl";
   readonly tag: string;
   readonly attributes: Readonly<Record<string, string>>;
   readonly value?: string;
   readonly children?: ReadonlyArray<SourceRun>;
   readonly owner?: SourceRange;
-  readonly conceal?: boolean;
+  readonly conceal?: boolean | "always";
+  readonly task?: { readonly from: number; readonly checked: boolean };
+  readonly projection?: { readonly to: number; readonly following?: number; readonly atomic?: boolean };
 }
 
 const tags: Record<MarkdownNodeKind, string> = {
@@ -41,28 +43,102 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
     }
   };
   collect(projection.nodes);
-  const raw = (from: number, to: number, owner?: SourceRange, conceal = false): SourceRun => ({
+  const plain = (from: number, to: number, owner?: SourceRange, conceal: SourceRun["conceal"] = false): SourceRun => ({
     kind: owner ? "delimiter" : "source", tag: "span", from, to, value: source.slice(from, to),
     attributes: owner ? { "data-markdown-delimiter": "" } : {}, ...(owner ? { owner, conceal } : {}),
   });
-  const gap = (from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun => {
-    if (parent?.kind === "listItem" && typeof parent.checked === "boolean" && /\[[ xX]\]/.test(source.slice(from, to))) {
-      return { kind: "delimiter", tag: "span", from, to, owner: parent,
-        attributes: { "data-markdown-display": parent.checked ? "☑ " : "☐ ", "data-markdown-delimiter": "" },
-        children: [raw(from, to, parent, true)],
-      };
+  const projected = (marker: MarkdownMarker, parent?: MarkdownNode, owner?: SourceRange, conceal = false): SourceRun => {
+    const {from, kind} = marker;
+    const syntaxTo = marker.to;
+    const atomic = kind === "task" || kind === "blockquote";
+    const to = atomic && /[ \t]/.test(source[syntaxTo] ?? "") ? syntaxTo + 1 : syntaxTo;
+    const original = source.slice(from, to);
+    const heading = kind === "heading" && parent?.kind === "heading" && from === parent.from;
+    const label = marker.value ?? (heading ? `H${parent.depth}` : kind === "list" ? (/^\d/.test(original) ? original.replace(/\)$/, ".") : "•")
+      : kind === "task" ? (/x/i.test(original) ? "☑" : "☐") : kind === "blockquote" ? "│" : kind === "break" ? "↵" : original);
+    const following = !atomic && /[ \t]/.test(source[to] ?? "") ? to + 1 : to;
+    return { kind: "delimiter", tag: "span", from, to,
+      projection: {to, following, ...(atomic ? {atomic:true} : {})},
+      ...(owner ? {owner} : {}),
+      attributes: {
+        "data-markdown-marker": kind, "data-markdown-label": label,
+        ...(kind === "task" ? {} : {"aria-hidden":"true"}),
+        ...(kind === "list" ? {"data-markdown-list-style": /^\d/.test(original) ? "ordered" : "unordered"} : {}),
+        ...(conceal ? {"data-markdown-concealed": ""} : {}),
+        ...(heading ? {"data-markdown-heading-marker": ""} : {}),
+      },
+      children: [{...plain(from, to, owner, conceal), attributes: {
+        ...(owner ? {"data-markdown-delimiter": ""} : {}), "data-text-projection-source": "", "aria-hidden":"true",
+      }}, ...(kind === "task" ? [{
+        kind:"taskControl" as const, tag:"input", from:to, to,
+        task:{from:syntaxTo - 3, checked:/x/i.test(original)},
+        attributes:{type:"checkbox", "data-ui-control":"check", "data-markdown-task-control":"",
+          contenteditable:"false", "aria-label":source.slice(to).split(/[\r\n]/, 1)[0]!.trim() || "Task"},
+      }] : [])],
+    };
+  };
+  const raw = (from: number, to: number, owner?: SourceRange, conceal: SourceRun["conceal"] = false, parent?: MarkdownNode): SourceRun => {
+    const runs: SourceRun[] = [];
+    let cursor = from;
+    const append = (start: number, end: number) => {
+      if (end <= start) return;
+      // Destinations and labels remain ordinary text when syntax is revealed.
+      if (conceal && parent?.kind !== "inlineCode" && /\S/.test(source.slice(start, end))) {
+        for (const part of source.slice(start, end).matchAll(/\s+|\S+/g)) {
+          const next = start + part[0].length;
+          runs.push(/\s/.test(part[0]) ? plain(start, next) : plain(start, next, owner, true));
+          start = next;
+        }
+      } else runs.push(plain(start, end));
+    };
+    let low = 0, high = projection.markers.length;
+    while (low < high) {
+      const middle = (low + high) >>> 1;
+      if (projection.markers[middle]!.from < from) low = middle + 1;
+      else high = middle;
     }
-    return raw(from, to, parent && markerGaps.has(parent.kind) ? table ?? parent : undefined, !!parent && concealedGaps.has(parent.kind));
+    for (let index = low; index < projection.markers.length; index++) {
+      const marker = projection.markers[index]!;
+      if (marker.from >= to) break;
+      if (marker.from < cursor || marker.to > to) continue;
+      append(cursor, marker.from);
+      const next = projection.markers[index + 1];
+      if (marker.kind === "list" && next?.kind === "task" && next.to <= to && /^[ \t]+$/.test(source.slice(marker.to, next.from))) {
+        const task = projected({...next, from:marker.from}, parent);
+        runs.push(task);
+        cursor = task.to;
+        index++;
+        continue;
+      }
+      const heading = marker.kind === "heading" && parent?.kind === "heading" && marker.from === parent.from;
+      const inline = ["emphasis", "strong", "delete", "code", "link", "image", "escape", "break", "table", "entity"].includes(marker.kind);
+      const run = projected(marker, parent, inline ? owner : undefined, inline && (!!conceal || marker.kind === "escape"));
+      runs.push(run);
+      cursor = run.to;
+      if (heading && cursor < to && /[ \t]/.test(source[cursor]!)) {
+        runs.push({...plain(cursor, cursor + 1), attributes:{"data-markdown-heading-separator":"", "aria-hidden":"true"}});
+        cursor++;
+      }
+    }
+    append(cursor, to);
+    if (runs.length === 1) return runs[0]!;
+    return {kind:"source", tag:"span", from, to, attributes:{}, children:runs};
+  };
+  const gap = (from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun[] => {
+    const run = raw(from, to, parent && markerGaps.has(parent.kind) ? table ?? parent : undefined,
+      !!parent && parent.kind !== "heading" && concealedGaps.has(parent.kind), parent);
+    return [parent?.kind === "table" || parent?.kind === "tableRow"
+      ? {...run, attributes:{...run.attributes, "data-markdown-table-gap":""}} : run];
   };
   const children = (nodes: ReadonlyArray<MarkdownNode>, from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun[] => {
     const result: SourceRun[] = [];
     let cursor = from;
     for (const [index, node] of nodes.entries()) {
-      if (node.from > cursor) result.push(gap(cursor, node.from, parent, table));
+      if (node.from > cursor) result.push(...gap(cursor, node.from, parent, table));
       result.push(visit(node, parent, index, table));
       cursor = node.to;
     }
-    if (cursor < to) result.push(gap(cursor, to, parent, table));
+    if (cursor < to) result.push(...gap(cursor, to, parent, table));
     return result;
   };
   const visit = (node: MarkdownNode, parent?: MarkdownNode, index = 0, table?: MarkdownNode): SourceRun => {
@@ -99,14 +175,13 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
       }];
     } else if (node.kind === "thematicBreak") {
       attributes.role = "separator";
-      content = [raw(node.from, node.to, node, true)];
-    } else if (node.value !== undefined && node.kind !== "html" && node.value !== source.slice(node.from, node.to)) {
+      content = [projected({kind:"thematicBreak", from:node.from, to:node.to}, node)];
+    } else if (node.kind === "code" || node.kind === "inlineCode") {
+      content = [raw(node.from, node.to, node, node.kind === "inlineCode", node)];
+    } else if (node.value !== undefined && node.kind !== "html" && node.value !== source.slice(node.from, node.to) && !projection.markers.some(marker => marker.from >= node.from && marker.to <= node.to)) {
       attributes["data-markdown-display"] = node.value;
-      content = [raw(node.from, node.to, node, true)];
-    } else if (node.kind === "break") {
-      attributes["data-markdown-display"] = "\n";
-      content = [raw(node.from, node.to, node, true)];
-    } else content = [raw(node.from, node.to)];
+      content = [plain(node.from, node.to, node, true)];
+    } else content = [raw(node.from, node.to, node, false, node)];
     return { kind: node.kind, tag: tags[node.kind], from: node.from, to: node.to, attributes, children: content, owner: node };
   };
   return children(projection.nodes, 0, source.length);

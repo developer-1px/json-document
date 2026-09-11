@@ -1,0 +1,15 @@
+/* The original text remains editable; the host supplies the visible replacement. */
+[data-text-projection-source] { position: absolute; inset: 0; color: transparent; }
+[data-text-projection-caret] { caret-color: transparent !important; }
+[data-text-projection-edge]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--text-projection-caret, currentColor);
+  pointer-events: none;
+}
+[data-text-projection-edge="before"]::after { left: 0; }
+[data-text-projection-edge="after"]::after { left: 100%; }
+[data-text-projection-caret]:not(:focus-within) [data-text-projection-edge]::after { display: none; }

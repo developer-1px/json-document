@@ -8,7 +8,7 @@ import { JsonInspector } from "../../shared/ui/json-inspector";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { classes, ui } from "../../shared/ui/styles";
 
-const initialSource = "# Markdown\n\nMarkdown은 **원문이 정본**입니다. __한글과 😀__ 역시 그대로 편집합니다.\n\n> *인용*과 ~~취소선~~\n\n- [x] CommonMark\n- [ ] GFM\n\n| 문법 | 값 |\n| --- | --- |\n| 코드 | `source` |\n\n[링크](https://commonmark.org)\n\n```js\nconst source = \"원문\";\n```";
+const initialSource = "#    Markdown  \n\nMarkdown은 **원문이 정본**입니다. __한글과 😀__ 역시 그대로 편집합니다.\n\n> *인용*과 ~~취소선~~\n> > 중첩 인용\n\n- 불릿\n  - 중첩 불릿\n\n12) 번호 목록\n\n- [x] CommonMark\n- [ ] GFM\n\n| 문법 | 값 |\n| --- | --- |\n| 코드 | `source` |\n\n[링크](https://commonmark.org)\n\n```js\nconst source = \"원문\";\n```";
 
 export function MarkdownCaretRoute() {
   const [document] = useState(() => createJSONDocument({ source: initialSource }));
@@ -17,7 +17,7 @@ export function MarkdownCaretRoute() {
   const snapshot = useEditingSnapshot(editor);
   return <DemoPage documentation={
     <PageHeader title="Markdown 원문을 직접 편집합니다.">
-      제목·강조·코드·표 안에 caret을 놓으면 원문 문법이 드러납니다. 선택·입력·복사와 ⌘/Ctrl+Z, Shift+⌘/Ctrl+Z를 시험해 보세요.
+      제목의 공백은 입력한 만큼 표시되며 ←로 한 칸씩 이동하면 왼쪽 H 표시에 도달합니다. # 입력·Backspace·Delete로 제목 단계를 편집할 수 있습니다. 불릿·번호·인용·펜스도 같은 기호 경계로 이동하고 원문을 편집합니다. 체크박스는 클릭·Space로 체크하고 Delete·Backspace 한 번으로 지웁니다. ↑↓는 보이는 줄을 따라 같은 가로 위치로 이동하며 Shift를 누르면 선택을 확장합니다. 인용문에서는 Enter로 이어 쓰고 빈 줄에서 Enter로 빠져나옵니다. Undo 한 번이면 복원됩니다. 강조·링크·표는 선택하면 문법이 드러납니다. 선택·복사와 ⌘/Ctrl+Z를 시험해 보세요.
     </PageHeader>
   }>
     <div className="mx-auto grid w-full max-w-3xl gap-8 py-6">

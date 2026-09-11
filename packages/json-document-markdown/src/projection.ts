@@ -1,3 +1,4 @@
+import type { MarkdownMarker } from "./markers.js";
 import type { MarkdownNode } from "./nodes.js";
 import { parseMarkdownSyntax, syntaxProjection } from "./syntax.js";
 
@@ -12,6 +13,7 @@ export interface MarkdownProjection {
   readonly source: string;
   readonly nodes: ReadonlyArray<MarkdownNode>;
   readonly strong: ReadonlyArray<MarkdownStrongSpan>;
+  readonly markers: ReadonlyArray<MarkdownMarker>;
 }
 
 /** CommonMark recognition with exact source preservation. Includes CommonMark and GFM block and inline syntax. */

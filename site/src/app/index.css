@@ -98,6 +98,7 @@
   /* Markdown presentation consumes semantic tokens; streaming adds animation. */
   [data-markdown-editor] {
     --markdown-muted: theme("colors.foreground-muted");
+    --text-projection-caret: theme("colors.foreground-default");
     --markdown-accent: theme("colors.foreground-accent");
     --markdown-code-background: theme("colors.background-subtle");
     --markdown-border: theme("colors.border-subtle");

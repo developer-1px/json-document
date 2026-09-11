@@ -137,3 +137,39 @@ describe("source-preserving Markdown DOM", () => {
   });
 
 });
+
+test("task controls without an editor are disabled, named, and preserve every source offset", () => {
+  const source = "- [ ] 할 일\n- [X] 완료";
+  const {root, dom} = setup(source);
+  const controls = Array.from(root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+  expect(controls.map(input => [input.disabled, input.checked, input.getAttribute("aria-label")])).toEqual([
+    [true, false, "할 일"], [true, true, "완료"],
+  ]);
+  for (let focus = 0; focus <= source.length; focus++) {
+    expect(dom.restoreSelection(root, {anchor:focus, focus})).toBe(true);
+    expect(dom.observe(root)).toEqual({value:source, selection:{anchor:focus, focus}});
+  }
+  dom.render(root, source.replace("[ ]", "[x]"));
+  expect(root.querySelector<HTMLInputElement>("input")!.checked).toBe(true);
+  expect(dom.observe(root).value).toBe(source.replace("[ ]", "[x]"));
+});
+
+test("task marker includes the first separator, leaving additional spaces editable", () => {
+  const source = "- [ ]   할 일";
+  const {root, dom} = setup(source);
+  const marker = root.querySelector('[data-markdown-marker="task"]')!;
+  expect(marker.textContent).toBe("- [ ] ");
+  expect(dom.resolveHorizontalSelection!(root, {anchor:0, focus:0}, "forward", false)).toEqual({anchor:6, focus:6});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:6, focus:6}, "backward", false)).toEqual({anchor:0, focus:0});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:6, focus:6}, "forward", false)).toBeNull();
+  expect(dom.resolveDeletionSelection!(root, {anchor:5, focus:6}, "backward")).toEqual({anchor:0, focus:6});
+  expect(dom.observe(root).value).toBe(source);
+});
+
+test("hidden quote prefix deletes as one source unit and leaves extra spaces", () => {
+  const source = ">   본문";
+  const {root, dom} = setup(source);
+  expect(root.querySelector('[data-markdown-marker="blockquote"]')!.textContent).toBe("> ");
+  expect(dom.resolveDeletionSelection!(root, {anchor:2, focus:2}, "backward")).toEqual({anchor:0, focus:2});
+  expect(dom.observe(root).value).toBe(source);
+});

@@ -1,3 +1,10 @@
+import textNavigationSource from "../../../../packages/json-document-contenteditable/src/dom/text-navigation.ts?raw";
+import caretVisibilitySource from "../../../../packages/json-document-contenteditable/src/dom/caret-visibility.ts?raw";
+import markdownParagraphSource from "../../../../packages/json-document-markdown/src/paragraph.ts?raw";
+import markdownTasksSource from "../../../../packages/json-document-markdown/src/tasks.ts?raw";
+import markdownMarkersSource from "../../../../packages/json-document-markdown/src/markers.ts?raw";
+import textProjectionSource from "../../../../packages/json-document-contenteditable/src/dom/text-projection.ts?raw";
+import textProjectionCSSSource from "../../../../packages/json-document-contenteditable/src/dom/text-projection.css?raw";
 import interactionRecordingSource from "../../../../packages/json-document-web/src/interaction-recording.ts?raw";
 import interactionRecordingDOMSource from "../../../../packages/json-document-web/src/interaction-recording-dom.ts?raw";
 import interactionRecordingArchiveSource from "../../../../packages/json-document-web/src/interaction-recording-archive.ts?raw";
@@ -280,9 +287,14 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
+  ["packages/json-document-markdown/src/paragraph.ts", markdownParagraphSource],
+  ["packages/json-document-contenteditable/src/dom/text-navigation.ts", textNavigationSource],
+  ["packages/json-document-contenteditable/src/dom/caret-visibility.ts", caretVisibilitySource],
   ["packages/json-document-markdown/src/nodes.ts", markdownNodesSource],
   ["packages/json-document-markdown-web/src/markdown-editor.css", markdownEditorCSSSource],
   ["packages/json-document-markdown/src/projection.ts", markdownProjectionSource],
+  ["packages/json-document-markdown/src/markers.ts", markdownMarkersSource],
+  ["packages/json-document-markdown/src/tasks.ts", markdownTasksSource],
   ["packages/json-document-editing/src/text-change.ts", textChangeSource],
   ["packages/json-document-markdown/src/syntax.ts", markdownSyntaxSource],
   ["packages/json-document-markdown/src/parser.ts", markdownParserSource],
@@ -394,6 +406,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
   ["packages/json-document-contenteditable/src/lease.ts", contentEditableLeaseSource],
   ["packages/json-document-contenteditable/src/dom/plain-text.ts", plainTextDOMSource],
+  ["packages/json-document-contenteditable/src/dom/text-projection.ts", textProjectionSource],
+  ["packages/json-document-contenteditable/src/dom/text-projection.css", textProjectionCSSSource],
   ["packages/json-document-contenteditable/src/dom/text-index.ts", textDOMIndexSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
   ["packages/json-document-collaboration/src/editing-index.ts", collaborationEditingSource],
@@ -797,6 +811,11 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-markdown/src/syntax.ts",
   },
   { packageName: "@interactive-os/json-document-markdown", symbol: "createMarkdownParser", sourcePath: "packages/json-document-markdown/src/nodes.ts" },
+  { packageName: "@interactive-os/json-document-markdown", symbol: "insertMarkdownParagraph", sourcePath: "packages/json-document-markdown/src/paragraph.ts" },
+  { packageName: "@interactive-os/json-document-markdown", symbol: "setMarkdownTaskChecked", sourcePath: "packages/json-document-markdown/src/tasks.ts" },
+  ...["createMarkdownParser", "projectMarkdown", "MarkdownMarker", "MarkdownMarkerKind"].map(symbol => ({
+    packageName: "@interactive-os/json-document-markdown", symbol, sourcePath: "packages/json-document-markdown/src/markers.ts",
+  })),
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "diffText",
@@ -978,6 +997,14 @@ const registeredPublicUsages = [
     symbol: "createContentEditableBinding",
     sourcePath: "packages/json-document-contenteditable/src/lease.ts",
   },
+  ...["packages/json-document-contenteditable/src/dom/text-projection.ts", "packages/json-document-contenteditable/src/dom/text-projection.css"].map(sourcePath => ({
+    packageName: "@interactive-os/json-document-contenteditable", symbol: "createTextProjectionDOMAdapter", sourcePath,
+  })),
+  ...["createTextNavigationDOMAdapter"].flatMap(symbol => [
+    { packageName: "@interactive-os/json-document-contenteditable", symbol, sourcePath: "packages/json-document-contenteditable/src/dom/text-navigation.ts" },
+    { packageName: "@interactive-os/json-document-contenteditable", symbol, sourcePath: "packages/json-document-contenteditable/src/dom/caret-visibility.ts" },
+  ]),
+  { packageName: "@interactive-os/json-document-contenteditable", symbol: "restoreTextDOMSelection", sourcePath: "packages/json-document-contenteditable/src/dom/plain-text.ts" },
   {
     packageName: "@interactive-os/json-document-contenteditable",
     symbol: "plainTextDOMAdapter",

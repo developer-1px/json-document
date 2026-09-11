@@ -33,6 +33,7 @@ export function createContentEditableBinding({
   pointer,
   root,
   editor,
+  insertBreak = (editor) => editor.insert("\n"),
 }: ContentEditableBindingOptions): ContentEditableBinding {
   if (editor && (editor.document !== document || editor.pointer !== pointer)) {
     throw new TypeError("contenteditable editor must own the bound document and pointer");
@@ -155,8 +156,8 @@ export function createContentEditableBinding({
     if (editor && lease.lineBreakAfterComposition === "requested") {
       const focus = (selection ?? editor.snapshot.selection).focus;
       editor.select({ anchor: focus, focus });
-      trace("command", { command: "insert", text: "\n", reason: "composition-enter" });
-      const inserted = editor.insert("\n");
+      trace("command", { command: "insert-break", reason: "composition-enter" });
+      const inserted = insertBreak(editor);
       if (!inserted.ok) {
         clearActiveLease();
         renderLatest(undefined, true);
@@ -212,6 +213,7 @@ export function createContentEditableBinding({
   };
 
   const cancelInternal = (): ContentEditableBindingResult => {
+    dom.resetNavigation?.(root);
     compositionEnter = null;
     const changed = activeLease !== null || trailingComposition;
     if (!changed) return NO_CHANGE;
@@ -251,6 +253,7 @@ export function createContentEditableBinding({
         compositionEnter = null;
       }
     }
+    if (["pointerdown", "beforeinput", "compositionstart", "blur"].includes(event.type)) dom.resetNavigation?.(root);
     if (event.type === "focus") {
       return editor ? renderLatest(undefined, true) : NO_CHANGE;
     }
@@ -262,6 +265,31 @@ export function createContentEditableBinding({
 
     if (editor && event.type === "keydown" && activeLease?.phase !== "composing") {
       const keyboardEvent = event as KeyboardEvent;
+      const command = keyboard.resolve(keyboardEvent);
+      const vertical = command?.type === "move" && (command.direction === "up" || command.direction === "down")
+        && !keyboardEvent.altKey && !keyboardEvent.ctrlKey && !keyboardEvent.metaKey;
+      if (!vertical && !["Shift", "Control", "Alt", "Meta"].includes(keyboardEvent.key)) dom.resetNavigation?.(root);
+      if (vertical && !activeLease && !trailingComposition && !keyboardEvent.isComposing && keyboardEvent.keyCode !== 229) {
+        const selection = currentDOMSelection();
+        const next = selection && dom.resolveVerticalSelection?.(root, selection,
+          command.direction === "up" ? "backward" : "forward", command.operation === "extend");
+        if (next) {
+          event.preventDefault();
+          editor.select(next);
+          return renderLatest(next, true);
+        }
+      }
+      if (!activeLease && !trailingComposition && !keyboardEvent.isComposing && keyboardEvent.keyCode !== 229
+        && command?.type === "move" && (command.direction === "left" || command.direction === "right")) {
+        const selection = currentDOMSelection();
+        const next = selection && dom.resolveHorizontalSelection?.(root, selection,
+          command.direction === "left" ? "backward" : "forward", command.operation === "extend");
+        if (next) {
+          event.preventDefault();
+          editor.select(next);
+          return renderLatest(next, true);
+        }
+      }
       const current = editor.snapshot.selection;
       const text = readString();
       const selectAll = selectAllAffordance(keyboardEvent, {
@@ -274,7 +302,6 @@ export function createContentEditableBinding({
         editor.select(selection);
         return renderLatest(selection, true);
       }
-      const command = keyboard.resolve(keyboardEvent);
       if (command?.type === "undo" || command?.type === "redo") {
         event.preventDefault();
         cancelInternal();
@@ -293,13 +320,27 @@ export function createContentEditableBinding({
         return NO_CHANGE;
       }
       if (editor && event.cancelable && activeLease?.phase !== "composing") {
+        if (!activeLease && !trailingComposition && !(event as InputEvent).isComposing
+          && (inputType === "deleteContentBackward" || inputType === "deleteContentForward")) {
+          const selection = currentDOMSelection();
+          const range = selection && dom.resolveDeletionSelection?.(root, selection,
+            inputType === "deleteContentBackward" ? "backward" : "forward");
+          if (selection && range) {
+            event.preventDefault();
+            editor.select(selection);
+            const from = Math.min(range.anchor, range.focus), to = Math.max(range.anchor, range.focus);
+            trace("command", {command: "replace", reason: "projected-source-deletion", from, to});
+            const result = editor.replace(editor.text.slice(0, from) + editor.text.slice(to), {anchor: from, focus: from});
+            return result.ok ? COMMITTED : failure(result.code, result.reason ?? result.code);
+          }
+        }
         if (inputType === "insertParagraph" || inputType === "insertLineBreak") {
           event.preventDefault();
           if (trailingComposition) finishTrailing();
           const selection = currentDOMSelection();
           if (selection) editor.select(selection);
-          trace("command", { command: "insert", text: "\n", reason: "beforeinput" });
-          const result = editor.insert("\n");
+          trace("command", { command: "insert-break", reason: "beforeinput" });
+          const result = insertBreak(editor);
           return result.ok ? COMMITTED : failure(result.code, result.reason ?? result.code);
         }
         if (inputType.startsWith("format")) {
@@ -422,6 +463,7 @@ export function createContentEditableBinding({
   };
 
   const unbind = (): void => {
+    dom.resetNavigation?.(root);
     if (!bound) return;
     bound = false;
     for (const type of ROOT_EVENTS) {
@@ -508,6 +550,7 @@ function failure(
 
 const ROOT_EVENTS = Object.freeze([
   "focus",
+  "pointerdown",
   "beforeinput",
   "compositionstart",
   "compositionend",

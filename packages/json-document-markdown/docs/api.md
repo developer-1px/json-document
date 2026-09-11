@@ -6,7 +6,7 @@ Rich Text의 구조화된 문서 모델과 독립적입니다. 문법 상태는 
 JSONDocument에 저장하거나 원문으로 다시 직렬화하지 않습니다.
 
 `projectMarkdown(source)`는 동일한 `source`, 전체 문법 트리 `nodes`, 기존 API와 호환되는
-`strong` 범위 목록을 반환합니다. CommonMark에 GFM 확장(표·task list·취소선·자동 링크·각주)을
+`strong` 범위 목록과 `markers` 기호 범위를 반환합니다. CommonMark에 GFM 확장(표·task list·취소선·자동 링크·각주)을
 적용합니다. `nodes`는 공개 `MarkdownNode`의 불변 배열이며 `kind`, `from`, `to`,
 `children`과 해당 문법의 `depth`, `url`, `checked`, `align`, `value` 등을 제공합니다.
 위치는 모두 원문의 UTF-16 half-open 좌표이며 `value`는 해석된 표시 값일 뿐 정본을 대체하지 않습니다.
@@ -77,3 +77,43 @@ JSONDocument string
 ```live-demo
 /demo/markdown-caret
 ```
+
+## 문법 기호의 원문 범위
+
+`MarkdownProjection.markers`는 `MarkdownMarker`의 불변 배열입니다. 각 항목의
+`kind`는 `MarkdownMarkerKind`, `from`/`to`는 기호만 가리키는 UTF-16 half-open
+범위입니다. 원문 순서이며 겹치지 않습니다. 일반 구분 공백은 범위에서 제외합니다.
+공백으로 작성한 hard break는 그 공백 자체가 문법 기호이므로 포함합니다.
+
+종류는 `heading`, `setext`, `list`, `blockquote`, `task`, `fence`, `code`,
+`emphasis`, `strong`, `delete`, `link`, `image`, `definition`, `table`,
+`thematicBreak`, `escape`, `break`, `footnote`, `entity`입니다. 여는/닫는 기호는 각각의
+원문 범위를 가지며, 번호 목록은 숫자와 구분자를 함께 포함합니다.
+
+```ts
+const source = "> - [x] **완료**";
+const { markers } = projectMarkdown(source);
+markers.map(marker => ({ ...marker, source: source.slice(marker.from, marker.to) }));
+// blockquote ">", list "-", task "[x]", strong "**", strong "**"
+```
+
+CommonMark/GFM 인식 과정에서 수집하므로 중첩 인용의 계속되는 줄도 포함하고,
+코드/HTML 내용의 문장부호나 미완성 강조를 기호로 오인하지 않습니다. 따로 입력하는
+기호가 없는 literal autolink와 들여쓰기 코드에는 합성 marker를 추가하지 않습니다.
+Entity는 원문 전체를 한 구간으로 제공하며 `marker.value`에 해석한 글자를 제공합니다. 기존 `MarkdownNode.value`도 유지됩니다.
+기존 점진적 편집에서도 범위가 이동하고 전체 파싱과 같은 결과를 유지합니다.
+기호의 외형·노출 정책·커서·삭제는 이 API의 책임이 아니며 Web/Editing owner가 담당합니다.
+
+## Task 체크 상태 편집
+
+`setMarkdownTaskChecked(source, from, checked): string`은 파서가 인식한 task의
+`[` 원문 offset을 받아 `[ ]`/`[x]`의 가운데 문자만 변경합니다. 나머지 원문과
+UTF-16 길이는 보존합니다. 이미 같은 상태이거나 해당 위치에 task가 없으면 원문을 반환합니다.
+DOM·History는 소유하지 않으며 소비자가 반환값을 기존 TextEditor에 적용합니다.
+[Markdown caret Usage](/demo/markdown-caret)의 체크박스가 Web adapter를 통해 이 API를 사용합니다.
+
+## 인용문 Enter 편집
+
+`insertMarkdownParagraph(source, {anchor, focus})`는 선택을 줄바꿈으로 교체할 원문 `value`와 다음 `selection`을 반환합니다. 인용 줄은 `> ` 접두사를 다음 줄에 이어 붙이고, 본문이 공백뿐인 인용 줄에서는 접두사를 제거하고 인용 밖의 빈 문단으로 이동합니다. 빈 줄 경계를 남겨 이후 입력이 CommonMark의 lazy continuation으로 다시 인용에 들어가지 않게 합니다. 중첩 인용은 접두사를 유지하고 빈 줄에서는 인용 전체를 나갑니다. 일반 문단과 코드 안의 `>`는 일반 줄바꿈입니다. 저장·Undo는 기존 TextEditor가 소유합니다.
+
+[Markdown caret Usage](/demo/markdown-caret)의 React surface가 이 공개 API를 import하여 contenteditable의 `insertBreak` 명령으로 연결합니다. 붙여넣기에는 적용하지 않습니다.

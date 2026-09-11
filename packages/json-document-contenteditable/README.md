@@ -29,3 +29,6 @@ This Draft revision requires the Web peer's `isWebEditingHostTarget` capability.
 
 For selection-restoring history and literal source clipboard, pass the optional
 `TextEditor` to `createContentEditableBinding`. See [editing integration](docs/editing.md).
+
+For source intervals displayed as one visual unit, use `createTextProjectionDOMAdapter`.
+Its [projection contract](docs/editing.md#원문-구간의-시각적-투영) preserves source editing while aligning caret edges to the displayed element.

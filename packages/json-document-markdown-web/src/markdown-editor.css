@@ -1,30 +1,123 @@
-/* Source text remains in the DOM; generated presentation never changes offsets. */
+@import "@interactive-os/json-document-contenteditable/text-projection.css";
+
+/* Source and shared syntax presentation. */
 [data-markdown-editor] {
+  --markdown-marker-size: 1em;
+  --markdown-heading-gap: .25rem;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 [data-markdown-editor] [hidden] { display: none !important; }
 [data-markdown-editor] [data-markdown-delimiter] { color: var(--markdown-muted, #77736b); font: inherit; }
-[data-markdown-kind="heading"] { font-weight: 700; line-height: 1.45; }
+[data-markdown-marker] {
+  position: relative;
+  display: inline-block;
+  color: var(--markdown-muted, #77736b);
+  font-style: normal;
+  font-weight: 400;
+  text-decoration: none;
+  white-space: pre;
+  vertical-align: baseline;
+}
+[data-markdown-marker]::before { content: attr(data-markdown-label) / ""; }
+[data-markdown-marker][data-markdown-concealed]:not([data-markdown-active="true"])::before { content: ""; }
+
+/* Heading gutter: only the first syntax separator occupies the gutter. */
+[data-markdown-kind="heading"] {
+  position: relative;
+  display: inline-block;
+  min-inline-size: 1ch;
+  max-inline-size: 100%;
+  vertical-align: top;
+  font-weight: 700;
+  line-height: 1.45;
+}
 [data-markdown-kind="heading"][data-depth="1"] { font-size: 2em; }
 [data-markdown-kind="heading"][data-depth="2"] { font-size: 1.6em; }
 [data-markdown-kind="heading"][data-depth="3"] { font-size: 1.3em; }
 [data-markdown-kind="heading"][data-depth="4"] { font-size: 1.15em; }
 [data-markdown-kind="heading"][data-depth="5"] { font-size: 1em; }
 [data-markdown-kind="heading"][data-depth="6"] { font-size: .9em; }
+[data-markdown-heading-marker],
+[data-markdown-kind="heading"]:not(:has([data-markdown-heading-marker]))::before {
+  position: absolute;
+  right: calc(100% + var(--markdown-heading-gap));
+  top: 6px;
+  color: var(--markdown-muted, #77736b);
+  font: 400 .625rem/1.4 ui-sans-serif, system-ui, sans-serif;
+  white-space: pre;
+}
+[data-markdown-kind="heading"]:not(:has([data-markdown-heading-marker]))::before { content: "H" attr(data-depth) / ""; }
+[data-markdown-heading-separator] {
+  position: absolute;
+  right: 100%;
+  top: 0;
+  width: var(--markdown-heading-gap);
+  overflow: hidden;
+  white-space: pre;
+}
+
+/* List indicators share one box; native check controls keep their own input boundary. */
+[data-markdown-list-style="unordered"], [data-markdown-marker="task"] {
+  inline-size: var(--markdown-marker-size);
+  block-size: var(--markdown-marker-size);
+  vertical-align: -.12em;
+}
+[data-markdown-list-style="unordered"]::before {
+  content: "";
+  position: absolute;
+  inline-size: .28em;
+  block-size: .28em;
+  inset-inline-start: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: currentColor;
+}
+[data-markdown-list-style="ordered"] { min-inline-size: var(--markdown-marker-size); text-align: end; font-variant-numeric: tabular-nums; }
+[data-markdown-marker="task"] { padding-inline-end: .25em; box-sizing: content-box; }
+[data-markdown-marker="task"]::before { content: none; }
+[data-markdown-editor] [data-markdown-task-control] {
+  position: relative;
+  z-index: 1;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  accent-color: var(--markdown-accent, #9f4937);
+  cursor: pointer;
+}
+[data-markdown-task-control]:focus-visible { outline: 2px solid var(--markdown-accent, #9f4937); outline-offset: 3px; }
+[data-markdown-task-control]:disabled { cursor: default; }
+[data-markdown-kind="listItem"][data-checked="true"] > [data-markdown-kind="paragraph"] { text-decoration: line-through; }
+[data-markdown-kind="blockquote"] {
+  display: inline-block;
+  inline-size: 100%;
+  box-sizing: border-box;
+  padding: .75em 1em;
+  border-radius: .5rem;
+  background: var(--markdown-quote-background, color-mix(in srgb, var(--markdown-accent, #9f4937) 8%, transparent));
+}
+
+[data-markdown-marker="blockquote"] { inline-size: 0; block-size: 1em; }
+[data-markdown-marker="blockquote"]::before { content: none; }
+
+/* Inline content and code retain source spacing. */
 [data-markdown-kind="emphasis"] { font-style: italic; }
 [data-markdown-kind="strong"] { font-weight: 700; }
 [data-markdown-kind="delete"] { text-decoration: line-through; }
-[data-markdown-kind="blockquote"] { color: var(--markdown-muted, #77736b); }
 [data-markdown-kind="link"], [data-markdown-kind="linkReference"] { color: var(--markdown-accent, #9f4937); text-decoration: underline; text-underline-offset: .15em; }
 [data-markdown-kind="inlineCode"], [data-markdown-kind="code"], [data-markdown-kind="html"] { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .9em; }
-[data-markdown-kind="inlineCode"] { background: var(--markdown-code-background, #fbf8f2); }
-[data-markdown-kind="code"] { display: inline-block; min-width: 100%; max-width: 100%; background: var(--markdown-code-background, #fbf8f2); padding: .75em 1em; box-sizing: border-box; }
+[data-markdown-kind="inlineCode"], [data-markdown-kind="code"] { background: var(--markdown-code-background, #fbf8f2); }
+[data-markdown-kind="code"] { display: inline-block; min-width: 100%; max-width: 100%; padding: .75em 1em; box-sizing: border-box; }
 [data-markdown-kind="html"], [data-markdown-kind="definition"], [data-markdown-kind="footnoteDefinition"] { color: var(--markdown-muted, #77736b); }
 [data-markdown-display]:not([data-markdown-active="true"])::after { content: attr(data-markdown-display); white-space: pre-wrap; }
-[data-markdown-kind="thematicBreak"] { display: inline-block; width: 100%; }
-[data-markdown-kind="thematicBreak"]:not([data-markdown-active="true"])::after { content: ""; display: block; border-top: 1px solid var(--markdown-border, #d8d1c5); margin-block: .75em; }
 [data-markdown-kind="image"] img, [data-markdown-kind="imageReference"] img { max-width: 100%; height: auto; vertical-align: middle; }
+[data-markdown-marker="fence"], [data-markdown-marker="setext"] { font-size: .75em; }
+
+/* Tables switch between cells and their editable source. */
 [data-markdown-kind="table"] { display: inline-table; border-collapse: collapse; white-space: normal; max-width: 100%; }
 [data-markdown-kind="tableRow"] { display: table-row; }
 [data-markdown-kind="tableRow"]:first-child { font-weight: 700; }
@@ -32,6 +125,15 @@
 [data-markdown-kind="tableCell"][data-align="right"] { text-align: right; }
 [data-markdown-kind="tableCell"][data-align="center"] { text-align: center; }
 [data-markdown-kind="table"][data-markdown-active="true"],
-[data-markdown-kind="table"][data-markdown-active="true"] [data-markdown-kind="tableRow"],
-[data-markdown-kind="table"][data-markdown-active="true"] [data-markdown-kind="tableCell"] { display: inline; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; padding: 0; border: 0; }
-[data-markdown-kind="listItem"][data-checked="true"] > [data-markdown-kind="paragraph"] { text-decoration: line-through; }
+[data-markdown-kind="table"][data-markdown-active="true"] :is([data-markdown-kind="tableRow"], [data-markdown-kind="tableCell"]) { display: inline; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; padding: 0; border: 0; }
+[data-markdown-kind="table"]:not([data-markdown-active="true"]) [data-markdown-table-gap] { display: none; }
+
+[data-markdown-kind="thematicBreak"] { display: inline-block; width: 100%; }
+[data-markdown-marker="thematicBreak"] { width: 100%; min-height: 1em; }
+[data-markdown-marker="thematicBreak"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  border-top: 1px solid var(--markdown-border, #d8d1c5);
+}
