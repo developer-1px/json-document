@@ -144,3 +144,21 @@ test("plain source rendering retains the live text node when only selection chan
   plainTextDOMAdapter.render(root, "changed");
   expect(root.textContent).toBe("changed");
 });
+
+
+test("projection preserves vertical navigation and its reset lifecycle", () => {
+  const {root} = fixture();
+  let goal: number | null = null;
+  const base: TextDOMAdapter = {...plainTextDOMAdapter,
+    resolveVerticalSelection(_root, selection) {
+      goal ??= selection.focus;
+      return {anchor:goal, focus:goal};
+    },
+    resetNavigation() { goal = null; },
+  };
+  const adapter = createTextProjectionDOMAdapter(base, () => []);
+  expect(adapter.resolveVerticalSelection!(root, {anchor:3,focus:3}, "forward", false)?.focus).toBe(3);
+  expect(adapter.resolveVerticalSelection!(root, {anchor:1,focus:1}, "forward", false)?.focus).toBe(3);
+  adapter.resetNavigation!(root);
+  expect(adapter.resolveVerticalSelection!(root, {anchor:1,focus:1}, "forward", false)?.focus).toBe(1);
+});

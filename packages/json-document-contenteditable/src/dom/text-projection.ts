@@ -30,6 +30,7 @@ export function createTextProjectionDOMAdapter(
     if (root.hasAttribute("data-text-projection-caret") !== active) root.toggleAttribute("data-text-projection-caret", active);
   };
   return {
+    ...base,
     observe: root => base.observe(root),
     render(root, value, selection = null) {
       base.render(root, value, selection);
