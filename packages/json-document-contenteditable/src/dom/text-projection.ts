@@ -7,7 +7,7 @@ export interface TextProjection {
   readonly element: HTMLElement;
   /** Optional next visible source position, after a concealed separator. */
   readonly following?: number;
-  /** Delete this displayed unit and its separator in one editing transaction. */
+  /** Treat the displayed unit and its separator as one navigation and deletion unit. */
   readonly atomic?: boolean;
 }
 
@@ -75,7 +75,7 @@ export function createTextProjectionDOMAdapter(
         const end = region.following ?? region.to;
         if (focus < region.from || focus > end) continue;
         if (!extend && !collapsed) return {anchor: focus, focus};
-        const stops = [region.from, region.to, end];
+        const stops = region.atomic ? [region.from, end] : [region.from, region.to, end];
         const next = direction === "backward"
           ? stops.filter(offset => offset < focus).at(-1)
           : stops.find(offset => offset > focus);

@@ -50,8 +50,9 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
   const projected = (marker: MarkdownMarker, parent?: MarkdownNode, owner?: SourceRange, conceal = false): SourceRun => {
     const {from, kind} = marker;
     const syntaxTo = marker.to;
-    const atomic = kind === "task" || kind === "blockquote";
-    const to = atomic && /[ \t]/.test(source[syntaxTo] ?? "") ? syntaxTo + 1 : syntaxTo;
+    const prefix = kind === "task" || kind === "blockquote";
+    const atomic = prefix || kind === "thematicBreak";
+    const to = prefix && /[ \t]/.test(source[syntaxTo] ?? "") ? syntaxTo + 1 : syntaxTo;
     const original = source.slice(from, to);
     const heading = kind === "heading" && parent?.kind === "heading" && from === parent.from;
     const label = marker.value ?? (heading ? `H${parent.depth}` : kind === "list" ? (/^\d/.test(original) ? original.replace(/\)$/, ".") : "•")

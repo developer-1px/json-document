@@ -173,3 +173,17 @@ test("hidden quote prefix deletes as one source unit and leaves extra spaces", (
   expect(dom.resolveDeletionSelection!(root, {anchor:2, focus:2}, "backward")).toEqual({anchor:0, focus:2});
   expect(dom.observe(root).value).toBe(source);
 });
+
+
+test.each(["---", "***", "___", "* * *", "- - -", "---   ", "- [ ] item", "12. [x] item"])("rendered control is one source-preserving atom: %s", source => {
+  const {root,dom} = setup(source + "\n\nnext");
+  const marker = root.querySelector('[data-markdown-marker="thematicBreak"], [data-markdown-marker="task"]')!;
+  const prefix = document.createRange(); prefix.selectNodeContents(root); prefix.setEndBefore(marker);
+  const from = prefix.toString().length, to = from + marker.textContent!.length;
+  expect(dom.resolveHorizontalSelection!(root,{anchor:from,focus:from},"forward",true)).toEqual({anchor:from,focus:to});
+  expect(dom.resolveHorizontalSelection!(root,{anchor:to,focus:to},"backward",false)).toEqual({anchor:from,focus:from});
+  expect(dom.resolveDeletionSelection!(root,{anchor:to,focus:to},"backward")).toEqual({anchor:from,focus:to});
+  expect(dom.resolveDeletionSelection!(root,{anchor:from,focus:from},"forward")).toEqual({anchor:from,focus:to});
+  expect(dom.resolveDeletionSelection!(root,{anchor:from+1,focus:to-1},"forward")).toEqual({anchor:from,focus:to});
+  expect(dom.observe(root).value).toBe(source + "\n\nnext");
+});

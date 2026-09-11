@@ -112,3 +112,9 @@ Markdown 문자열이 정본이고 CommonMark + GFM은 문법 의미를 결정�
 ## 보이는 줄을 따르는 수직 이동
 
 `createMarkdownDOMAdapter`는 contenteditable의 공개 `createTextNavigationDOMAdapter`와 `createTextProjectionDOMAdapter`를 조합합니다. ↑↓는 숨긴 원문 기호 대신 보이는 본문 줄을 따라 가로 위치를 유지하고, Shift는 원래 anchor를 유지합니다. 별도의 Markdown 문법별 방향키 분기는 없습니다. [공용 화면 줄 이동 계약](/docs/api/contenteditable)과 [Usage](/demo/markdown-caret)에서 문서 끝·빈 줄·스크롤·native fallback의 범위를 확인할 수 있습니다.
+
+가로줄(`---`, `***`, `___`와 공백을 포함한 동등 문법)과 todo는 생성된 뒤 하나의 컨트롤입니다.
+Markdown Web이 공용 `TextProjection.atomic`을 지정하므로 ←/→ 한 번으로 지나가고,
+Shift 이동은 전체 원문을 선택하며 Backspace/Delete 한 번으로 지웁니다. todo는 접두사와
+첫 구분 공백까지 포함하고 추가 본문 공백은 보존합니다. 가로줄은 개행을 포함하지 않습니다.
+복사와 저장은 Markdown 원문 그대로이며 Undo/Redo는 기존 Editing History를 사용합니다.

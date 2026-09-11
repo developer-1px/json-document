@@ -10,7 +10,9 @@ const fixtures = [
   ["link", "a [label](/path) z", "link"], ["image", "a ![alt](/missing.png) z", "image"],
   ["reference", "[ref][a]\n\n[a]: /path", "link"], ["autolink", "<https://example.com>", "link"],
   ["definition", "[a]: /path", "definition"], ["table", "| a | b |\n| --- | --- |\n| c | d |", "table"],
-  ["rule", "---", "thematicBreak"], ["setext", "title\n===", "setext"],
+  ["rule", "---", "thematicBreak"], ["star rule", "***", "thematicBreak"],
+  ["underscore rule", "___", "thematicBreak"], ["spaced rule", "* * *", "thematicBreak"],
+  ["trailing rule", "---   ", "thematicBreak"], ["ordered task", "12. [x] item", "task"], ["setext", "title\n===", "setext"],
   ["hard break", "a\\\nb", "break"], ["space break", "a  \nb", "break"],
   ["footnote", "Note[^a]\n\n[^a]: Footnote", "footnote"],
   ["entity", "a &amp; b", "entity"], ["numeric entity", "a &#x1f600; b", "entity"],
@@ -50,15 +52,21 @@ for (const [name, markdown, kind] of fixtures) test(`${name} projection keeps so
     const data=new DataTransfer();root.dispatchEvent(new ClipboardEvent("copy",{clipboardData:data,bubbles:true,cancelable:true}));return data.getData("text/plain");
   });
   expect(copied).toBe(source.slice(bounds.from,bounds.to));
+  if (kind === "task" || kind === "thematicBreak") {
+    await page.keyboard.insertText("x");
+    await expect.poll(()=>editor.textContent()).toBe(source.slice(0,bounds.from)+"x"+source.slice(bounds.to));
+    await page.keyboard.press("ControlOrMeta+z");
+    await expect.poll(()=>editor.textContent()).toBe(source);
+  }
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Backspace");
-  await expect.poll(()=>editor.textContent()).toBe((kind === "task" || kind === "blockquote") ? source.slice(0,bounds.from)+source.slice(bounds.to) : source.slice(0,bounds.to-1)+source.slice(bounds.to));
+  await expect.poll(()=>editor.textContent()).toBe((kind === "task" || kind === "blockquote" || kind === "thematicBreak") ? source.slice(0,bounds.from)+source.slice(bounds.to) : source.slice(0,bounds.to-1)+source.slice(bounds.to));
   await page.keyboard.press("ControlOrMeta+z");
   await expect.poll(()=>editor.textContent()).toBe(source);
   await expect.poll(position).toBe(bounds.to);
   await page.keyboard.press("ArrowLeft");
   await page.keyboard.press("Delete");
-  await expect.poll(()=>editor.textContent()).toBe((kind === "task" || kind === "blockquote") ? source.slice(0,bounds.from)+source.slice(bounds.to) : source.slice(0,bounds.from)+source.slice(bounds.from+1));
+  await expect.poll(()=>editor.textContent()).toBe((kind === "task" || kind === "blockquote" || kind === "thematicBreak") ? source.slice(0,bounds.from)+source.slice(bounds.to) : source.slice(0,bounds.from)+source.slice(bounds.from+1));
   await page.keyboard.press("ControlOrMeta+z");
   await expect.poll(()=>editor.textContent()).toBe(source);
   await page.keyboard.insertText("x");
@@ -140,4 +148,19 @@ test("native quote entry preserves its DOM side and vertical goal through select
   for (let index = 0; index < 4; index++) await page.keyboard.press("ArrowUp");
   await expect.poll(position).toBe(7);
   await expect.poll(() => editor.textContent()).toBe(source);
+});
+
+
+test("typing a rule creates one control whose source is removed by one Backspace", async ({page}) => {
+  await page.goto("/applications/bear");
+  const editor = page.getByRole("textbox", {name:"Markdown 문서"});
+  await editor.click(); await page.keyboard.press("ControlOrMeta+a");
+  await page.keyboard.press("Backspace");
+  await page.keyboard.type("---");
+  await expect(editor.locator('[data-markdown-marker="thematicBreak"]')).toHaveCount(1);
+  await page.keyboard.press("Backspace");
+  await expect.poll(()=>editor.textContent()).toBe("");
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect.poll(()=>editor.textContent()).toBe("---");
+  await expect(editor.locator('[data-markdown-marker="thematicBreak"]')).toHaveCount(1);
 });
