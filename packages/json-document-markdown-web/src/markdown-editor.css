@@ -51,7 +51,7 @@
 [data-markdown-kind="html"], [data-markdown-kind="definition"], [data-markdown-kind="footnoteDefinition"] { color: var(--markdown-muted, #77736b); }
 [data-markdown-display]:not([data-markdown-active="true"])::after { content: attr(data-markdown-display); white-space: pre-wrap; }
 [data-markdown-kind="thematicBreak"] { display: inline-block; width: 100%; }
-[data-markdown-kind="thematicBreak"]:not([data-markdown-active="true"])::after { content: ""; display: block; border-top: 1px solid var(--markdown-border, #d8d1c5); margin-block: .75em; }
+
 [data-markdown-kind="image"] img, [data-markdown-kind="imageReference"] img { max-width: 100%; height: auto; vertical-align: middle; }
 [data-markdown-kind="table"] { display: inline-table; border-collapse: collapse; white-space: normal; max-width: 100%; }
 [data-markdown-kind="tableRow"] { display: table-row; }
@@ -73,3 +73,30 @@
   overflow: hidden;
   white-space: pre;
 }
+
+/* Every recognized syntax range consumes the same source projection contract. */
+[data-markdown-marker] {
+  position: relative;
+  display: inline-block;
+  color: var(--markdown-muted, #77736b);
+  font-style: normal;
+  font-weight: 400;
+  text-decoration: none;
+  white-space: pre;
+  vertical-align: baseline;
+}
+[data-markdown-marker]::before { content: attr(data-markdown-label) / ""; }
+[data-markdown-marker][data-markdown-concealed]:not([data-markdown-active="true"])::before { content: ""; }
+[data-markdown-marker][data-markdown-heading-marker] { position: absolute; }
+[data-markdown-marker="task"] { color: inherit; }
+
+[data-markdown-marker="thematicBreak"] { width: 100%; min-height: 1em; }
+[data-markdown-marker="thematicBreak"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  border-top: 1px solid var(--markdown-border, #d8d1c5);
+}
+[data-markdown-kind="table"]:not([data-markdown-active="true"]) [data-markdown-table-gap] { display: none; }
+[data-markdown-marker="fence"], [data-markdown-marker="setext"] { font-size: .75em; }

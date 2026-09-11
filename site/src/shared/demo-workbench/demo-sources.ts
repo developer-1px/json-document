@@ -1,3 +1,4 @@
+import markdownMarkersSource from "../../../../packages/json-document-markdown/src/markers.ts?raw";
 import textProjectionSource from "../../../../packages/json-document-contenteditable/src/dom/text-projection.ts?raw";
 import textProjectionCSSSource from "../../../../packages/json-document-contenteditable/src/dom/text-projection.css?raw";
 import interactionRecordingSource from "../../../../packages/json-document-web/src/interaction-recording.ts?raw";
@@ -285,6 +286,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-markdown/src/nodes.ts", markdownNodesSource],
   ["packages/json-document-markdown-web/src/markdown-editor.css", markdownEditorCSSSource],
   ["packages/json-document-markdown/src/projection.ts", markdownProjectionSource],
+  ["packages/json-document-markdown/src/markers.ts", markdownMarkersSource],
   ["packages/json-document-editing/src/text-change.ts", textChangeSource],
   ["packages/json-document-markdown/src/syntax.ts", markdownSyntaxSource],
   ["packages/json-document-markdown/src/parser.ts", markdownParserSource],
@@ -801,6 +803,9 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-markdown/src/syntax.ts",
   },
   { packageName: "@interactive-os/json-document-markdown", symbol: "createMarkdownParser", sourcePath: "packages/json-document-markdown/src/nodes.ts" },
+  ...["createMarkdownParser", "projectMarkdown", "MarkdownMarker", "MarkdownMarkerKind"].map(symbol => ({
+    packageName: "@interactive-os/json-document-markdown", symbol, sourcePath: "packages/json-document-markdown/src/markers.ts",
+  })),
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "diffText",

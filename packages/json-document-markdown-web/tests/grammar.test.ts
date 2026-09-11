@@ -91,3 +91,17 @@ test.each(["  ##    제목  ", "###\t \t제목\t  ###  ", "##   ", "제목  \n--
     expect(visible().replace(/\S/g, "")).toBe(source.replace(/\S/g, ""));
   }
 });
+
+test("code contents and words beside entities remain normal editable text", () => {
+  const root=document.createElement("div");document.body.append(root);
+  const source="one \\* &amp; end `two  words`";
+  const dom=createMarkdownDOMAdapter();dom.render(root,source);
+  expect(root.querySelector('[data-markdown-marker="entity"]')?.getAttribute("data-markdown-label")).toBe("&");
+  expect(root.querySelectorAll('[data-markdown-marker="source"]')).toHaveLength(0);
+  for (const word of ["one","end","two","words"]) {
+    const offset=source.indexOf(word)+1;
+    dom.restoreSelection(root,{anchor:offset,focus:offset});
+    expect(dom.resolveHorizontalSelection!(root,{anchor:offset,focus:offset},"forward",false)).toBeNull();
+    expect(dom.observe(root)).toEqual({value:source,selection:{anchor:offset,focus:offset}});
+  }
+});

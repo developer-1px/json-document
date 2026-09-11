@@ -6,24 +6,37 @@
 
 `render(root, source, selection?)`는 CommonMark/GFM 트리를 원문 보존 DOM으로 표시합니다.
 제목 단계, 중첩 강조, 링크·이미지, 코드, 목록·인용, 표·정렬, task 상태를 반영합니다.
-제목은 편집 중에도 제목 스타일을 유지하며 접두사의 `#`·닫는 `#`·Setext 밑줄 기호를 숨깁니다.
-왼쪽 여백의 `H1`~`H6`는 CSS 표시이며 DOM text와 복사 원문에 추가되지 않습니다.
-ATX 제목의 `#` 기호는 `display: none`으로 제거하지 않고 표시 아래 투명한 원문으로
-배치합니다. `#` 구간과 실제 H 표시 요소는 contenteditable의 공용
-`createTextProjectionDOMAdapter`에 전달합니다. 공백은 투영 구간에서 제외합니다. 첫 구분 공백은 마커와 본문 사이 여백에 배치하고 추가 공백은 본문에 그대로 표시합니다. 방향키는 마커 앞·뒤와 각 공백을 이동하고,
-커서는 마커 요소의 좌우 끝에 맞춰 표시합니다. 제목 마커 내부를 글자별로 이동하지 않습니다.
-공용 `restoreSelection`의 affinity가 마커 다음 일반 텍스트 위치를 선택하므로 Markdown은 DOM Selection을
-직접 다시 설정하지 않습니다. 키 해석은 Web keyboard adapter, 선택 적용과 IME lease는
-contenteditable binding, 입력·삭제·실행 취소는 기존 Editing History가 담당합니다. `#`를 추가하거나 지우면
-파서가 제목 단계를 다시 계산하며, 마지막 `#`를 지우면 일반 문장으로 바뀝니다.
-제목 본문 시작의 Backspace는 바로 앞 원문 공백을 삭제합니다. 투영 경계의 삭제는
-공용 adapter가 원문 범위를 결정해 처리하므로 다음 문단이나 숨긴 문법을 변경하지 않습니다.
-닫는 `#`와 Setext 밑줄은 기존 숨김 표현을 유지합니다.
-접근성은 기존 `role="heading"`, `aria-level`이 전달하고, 표시에는 빈 대체 텍스트를 사용합니다.
-다른 문법은 선택이 범위와 겹치면 해당 원문 기호를 드러냅니다. 표는 선택 중 원문 행·구분선을
-보여주며 밖에서는 셀로 표시합니다. 코드·escape·entity는 선택 밖에서 해석된 값을 표시합니다.
-목록·인용 기호와 참조 정의는 글의 의미를 유지하도록 원문으로 표시합니다.
-숨긴 원문도 text node로 남고, 이미지나 표시 전용 값은 source에 텍스트를 추가하지 않습니다.
+제목은 편집 중에도 제목 스타일을 유지합니다. ATX의 여는 `#`는 왼쪽 H1~H6
+표시로 투영하고 첫 구분 공백은 마커와 본문 사이에 배치합니다. 추가 공백은 본문에
+남아 기본 제목과 일반 본문 시작선이 일치합니다. 닫는 #와 Setext 밑줄도 원문 범위에
+대응하는 편집 가능한 기호입니다.
+
+모든 기호는 `MarkdownProjection.markers`에서 가져옵니다. 문법을 DOM에서 다시
+추측하지 않고 contenteditable의 공용 `createTextProjectionDOMAdapter`에 전달합니다.
+방향키는 투영 앞뒤와 다음 원문 위치로 이동하며 커서는 실제 표시 양 끝에 맞습니다.
+기호 전체를 문서 atom으로 바꾸지 않습니다. Backspace/Delete는 원문 grapheme 한 개,
+범위 삭제는 원문 선택 범위를 Editing History로 반영합니다. Shift 선택·복사·Undo는
+원문을 보존합니다. 임의 원문 offset 복원도 가능합니다.
+
+| 기호 | 표시·편집 정책 |
+| --- | --- |
+| 비순서·순서 목록 | 원문 -, +, *는 •로, 번호와 구분자는 번호 표시로 투영 |
+| task list | 목록 접두사와 [ ]/[x]를 하나의 체크박스 표시로 투영. 원문 삭제는 한 글자 단위 |
+| 인용 | 각 줄의 >를 세로 기호로 표시. 중첩 단계와 원문 공백 유지 |
+| fenced code | 여는/닫는 펜스를 흐린 기호로 표시. 언어·코드·줄바꿈은 원문 유지 |
+| 강조·취소선·inline code·링크·이미지 | 기존 선택 영역의 문법 노출을 유지하며 각 구간의 경계 이동과 삭제를 공용 투영으로 연결 |
+| 표 | 선택 중 원문 기호, 선택 밖에서는 셀 표현. 기호도 동일한 투영 계약을 소비 |
+| 구분선·Setext·각주·참조 정의·escape·hard break | 파서가 인식한 기호 범위에 커서와 편집을 연결 |
+
+투영 표시의 CSS 대체 텍스트는 DOM text와 복사 원문에 추가되지 않습니다. 의미는
+heading/list/table/link 등 기존 접근성 역할이 전달합니다. HTML은 실행하지 않는
+원문이며, entity는 해석된 글자로 표시하되 원문 구간의 경계 이동·삭제를 유지합니다. 이미지 미리보기는
+원문을 추가하지 않습니다. 체크박스 클릭 토글·목록 자동 이어쓰기 같은 새 작성 명령은
+추가하지 않으며 기존 TextEditor로 원문을 편집합니다.
+
+공용 `restoreSelection`의 affinity가 경계 위치를 복원하므로 Markdown은 DOM Selection을
+직접 다시 설정하지 않습니다. 키 해석은 Web keyboard adapter, IME lease는 contenteditable
+binding, 입력·삭제·실행 취소는 Editing이 소유합니다. Bear와 Demo에는 기호별 편집 로직이 없습니다.
 
 기본 표현은 public CSS를 한 번 import합니다. `--markdown-muted`, `--markdown-accent`,
 `--markdown-code-background`, `--markdown-border`, `--text-projection-caret` 변수로 제품 semantic token을 주입합니다.
