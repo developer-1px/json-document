@@ -35,6 +35,8 @@ export interface ContentEditableBindingOptions {
   readonly editor?: TextEditor;
   /** Syntax-owned Enter command; paste and native composition text keep their original content. */
   readonly insertBreak?: (editor: TextEditor) => EditingResult<TextSelection>;
+  /** Syntax-owned Tab action; null leaves native focus navigation available. */
+  readonly indent?: (editor: TextEditor, direction: "indent" | "outdent") => EditingResult<TextSelection> | null;
 }
 
 export type ContentEditableBindingResult =

@@ -13,3 +13,8 @@
 [data-text-projection-edge="before"]::after { left: 0; }
 [data-text-projection-edge="after"]::after { left: 100%; }
 [data-text-projection-caret]:not(:focus-within) [data-text-projection-edge]::after { display: none; }
+
+/* Selection belongs to the visible projection, not its transparent source glyphs. */
+[data-text-projection-source]::selection,
+[data-text-projection-source] *::selection { background: transparent; color: transparent; }
+[data-text-projection-selected] { background-color: Highlight; }

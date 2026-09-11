@@ -37,3 +37,32 @@ test("IME-confirmed quote source uses the same Markdown Enter command", () => {
   editor.undo(); expect(editor.text).toBe("> 한");
   editor.undo(); expect(editor.text).toBe("> ");
 });
+
+
+test("Tab changes parsed list nesting with undo and leaves ordinary focus navigation native", () => {
+  const {root,editor,select} = setup("- one\n- two");
+  const key = (shiftKey=false) => { const event=new KeyboardEvent("keydown",{key:"Tab",shiftKey,cancelable:true}); root.dispatchEvent(event); return event; };
+  expect(key().defaultPrevented).toBe(true);
+  expect(editor.text).toBe("- one\n  - two");
+  expect(key(true).defaultPrevented).toBe(true);
+  expect(editor.text).toBe("- one\n- two");
+  editor.undo(); expect(editor.text).toBe("- one\n  - two");
+  editor.undo(); expect(editor.text).toBe("- one\n- two");
+  editor.replace("plain",{anchor:5,focus:5}); select(5);
+  expect(key().defaultPrevented).toBe(false);
+});
+
+test("IME owns Tab until list text is committed, then Enter uses the list command", () => {
+  vi.useFakeTimers();
+  const {root,editor} = setup("- one\n- ");
+  root.dispatchEvent(new CompositionEvent("compositionstart"));
+  const tab=new KeyboardEvent("keydown",{key:"Tab",isComposing:true,cancelable:true}); root.dispatchEvent(tab);
+  expect(tab.defaultPrevented).toBe(false);
+  expect(editor.text).toBe("- one\n- ");
+  root.replaceChildren(document.createTextNode("- one\n- 한"));
+  plainTextDOMAdapter.restoreSelection(root,{anchor:9,focus:9});
+  root.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",code:"Enter",isComposing:true,cancelable:true}));
+  root.dispatchEvent(new CompositionEvent("compositionend",{data:"한"}));
+  vi.runAllTimers();
+  expect(editor.text).toBe("- one\n- 한\n- ");
+});

@@ -154,3 +154,7 @@ const unbind = binding.bind();
 - 현재 계약은 수평 writing mode의 원문 문자열 편집입니다. 수직 writing mode 또는 DOM 측정이 없는 환경은 native에 맡깁니다. Alt/Ctrl/Meta 방향키, PageUp/Down, Home/End의 플랫폼 명령은 가로채지 않습니다. 구조화된 Rich Text의 node-point 선택 모델은 이 API의 입력 계약이 아닙니다.
 
 [Markdown caret Usage](/demo/markdown-caret)에서 제목·인용·목록·코드·표를 ↑↓와 Shift+↑↓로 이동할 수 있으며, Source에서 화면 줄 탐색과 caret 가시성 모듈까지 확인할 수 있습니다. 문서 원문·편집·History의 owner는 기존 Editing이고, 입력 이벤트 수명은 contenteditable binding에 남습니다.
+
+`ContentEditableBindingOptions.indent(editor, direction)`는 문법 소유 Tab 명령을 주입합니다. `direction`은 `"indent" | "outdent"`입니다. 반환값 `null`은 native focus 이동을 유지하고 EditingResult가 있으면 키를 소비합니다. 키 해석은 Web keyboard adapter, IME·입력 lease 배타성은 binding이 소유합니다. 수정키 조합이나 IME 조합 중에는 호출하지 않습니다.
+
+투영 구간에 선택이 겹치면 `data-text-projection-selected`를 표시해 보이는 기호 영역에 선택 배경을 그립니다. 투명한 원문 글자의 native 선택 배경은 숨겨 이중 표시를 막으며, 복사·선택 offset은 그대로 유지합니다.

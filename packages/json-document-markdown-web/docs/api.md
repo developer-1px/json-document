@@ -119,3 +119,5 @@ Markdown 문자열이 정본이고 CommonMark + GFM은 문법 의미를 결정�
 React `MarkdownEditingSurface`와 직접 Web 소비는 이 API를 함께 사용합니다.
 저수준 `createMarkdownDOMAdapter`는 DOM 투영만 필요한 소비자를 위해 유지합니다.
 [Usage](/demo/markdown-caret)의 소스에서 binding과 문법 명령까지 추적할 수 있습니다.
+
+`createMarkdownEditingBinding`은 Markdown의 목록 Enter 및 `indentMarkdownList`를 contenteditable의 `insertBreak`·`indent` 주입 경계에 연결합니다. Tab/Shift+Tab은 목록에서만 소비하고 IME 조합 중에는 실행하지 않습니다. source·선택 변경은 기존 editor.replace 한 번이므로 Undo/Redo 역시 한 번입니다. React와 직접 Web 소비가 같은 명령을 사용합니다.

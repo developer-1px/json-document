@@ -117,3 +117,11 @@ DOM·History는 소유하지 않으며 소비자가 반환값을 기존 TextEdit
 `insertMarkdownParagraph(source, {anchor, focus})`는 선택을 줄바꿈으로 교체할 원문 `value`와 다음 `selection`을 반환합니다. 인용 줄은 `> ` 접두사를 다음 줄에 이어 붙이고, 본문이 공백뿐인 인용 줄에서는 접두사를 제거하고 인용 밖의 빈 문단으로 이동합니다. 빈 줄 경계를 남겨 이후 입력이 CommonMark의 lazy continuation으로 다시 인용에 들어가지 않게 합니다. 중첩 인용은 접두사를 유지하고 빈 줄에서는 인용 전체를 나갑니다. 일반 문단과 코드 안의 `>`는 일반 줄바꿈입니다. 저장·Undo는 기존 TextEditor가 소유합니다.
 
 [Markdown caret Usage](/demo/markdown-caret)의 React surface가 이 공개 API를 import하여 contenteditable의 `insertBreak` 명령으로 연결합니다. 붙여넣기에는 적용하지 않습니다.
+
+## 목록 편집
+
+`insertMarkdownParagraph(source, selection)`는 파서가 인식한 목록에서도 동작합니다. 본문은 같은 항목 문법으로 이어 쓰고 번호 목록은 다음 번호, task는 미체크 상태로 이어 씁니다. 빈 항목은 목록 접두사를 제거하고 일반 문단 경계를 남깁니다. 감싼 인용 접두사는 유지합니다. 코드·HTML 내부는 목록처럼 보이는 문자만으로 이어 쓰지 않습니다. 빈 task 초안 `[ ]`도 목록 종료 대상으로 처리합니다.
+
+`indentMarkdownList(source, selection, direction: "indent" | "outdent"): MarkdownSourceEdit | null`은 선택한 형제 항목과 하위 내용을 함께 이동합니다. Tab은 앞 형제의 본문 들여쓰기 폭을 사용하고 Shift+Tab은 부모 목록으로 승격합니다. 중첩 번호는 1부터, 승격 번호는 부모 다음부터 시작합니다. 첫 항목의 들여쓰기와 최상위 내어쓰기는 변경 없이 반환하며 목록 밖에서는 `null`입니다. 원문 CRLF와 선택 방향을 보존하며 변경된 들여쓰기는 공백으로 표현합니다.
+
+`MarkdownSourceEdit`는 `{ value, selection: { anchor, focus } }`입니다. 원문·선택은 UTF-16 offset이며 원문 범위 밖 선택은 RangeError입니다. 명령은 DOM·키 이벤트·History를 소유하지 않습니다. [Usage](/demo/markdown-caret)에서 Web binding을 통해 실행합니다.

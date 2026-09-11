@@ -144,3 +144,14 @@ test("plain source rendering retains the live text node when only selection chan
   plainTextDOMAdapter.render(root, "changed");
   expect(root.textContent).toBe("changed");
 });
+
+
+test("selection highlights the visible projection and clears it when collapsed", () => {
+  const {root,marker,adapter} = fixture();
+  adapter.render(root,"[[key]] 😀본문",{anchor:0,focus:7});
+  expect(marker.hasAttribute("data-text-projection-selected")).toBe(true);
+  expect(marker.hasAttribute("data-text-projection-edge")).toBe(false);
+  adapter.render(root,"[[key]] 😀본문",{anchor:7,focus:7});
+  expect(marker.hasAttribute("data-text-projection-selected")).toBe(false);
+  expect(marker.getAttribute("data-text-projection-edge")).toBe("after");
+});
