@@ -5,13 +5,44 @@
 }
 [data-markdown-editor] [hidden] { display: none !important; }
 [data-markdown-editor] [data-markdown-delimiter] { color: var(--markdown-muted, #77736b); font: inherit; }
-[data-markdown-kind="heading"] { font-weight: 700; line-height: 1.45; }
+[data-markdown-kind="heading"] {
+  position: relative;
+  display: inline-block;
+  min-inline-size: 1ch;
+  max-inline-size: 100%;
+  vertical-align: top;
+  font-weight: 700;
+  line-height: 1.45;
+}
+[data-markdown-kind="heading"]::before {
+  content: "H" attr(data-depth) / "";
+  position: absolute;
+  inset-inline-start: -1.5rem;
+  inset-block-start: .6em;
+  inline-size: 1.25rem;
+  color: var(--markdown-muted, #77736b);
+  font: 400 .625rem/1.4 ui-sans-serif, system-ui, sans-serif;
+  text-align: end;
+  user-select: none;
+  pointer-events: none;
+}
 [data-markdown-kind="heading"][data-depth="1"] { font-size: 2em; }
 [data-markdown-kind="heading"][data-depth="2"] { font-size: 1.6em; }
 [data-markdown-kind="heading"][data-depth="3"] { font-size: 1.3em; }
 [data-markdown-kind="heading"][data-depth="4"] { font-size: 1.15em; }
 [data-markdown-kind="heading"][data-depth="5"] { font-size: 1em; }
 [data-markdown-kind="heading"][data-depth="6"] { font-size: .9em; }
+[data-markdown-editor] [data-markdown-heading-marker] {
+  position: absolute;
+  inset-inline-end: calc(100% + .25rem);
+  inset-block-start: 6px;
+  color: transparent;
+  caret-color: var(--markdown-caret, #333);
+  font: 400 1rem/1 monospace;
+  white-space: pre;
+  transform: scaleX(calc(2 / var(--markdown-marker-length)));
+  transform-origin: right center;
+}
 [data-markdown-kind="emphasis"] { font-style: italic; }
 [data-markdown-kind="strong"] { font-weight: 700; }
 [data-markdown-kind="delete"] { text-decoration: line-through; }

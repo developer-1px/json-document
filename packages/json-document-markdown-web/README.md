@@ -2,7 +2,10 @@
 
 Source-preserving Markdown DOM projection for the canonical contenteditable
 binding. Delimiters stay in the DOM text coordinate space and become visible
-when the selection intersects their syntax range. CommonMark and GFM blocks,
+when the selection intersects their syntax range. Heading delimiters remain
+visually concealed while editing, with an H1–H6 indicator in the left gutter.
+ATX prefixes retain native caret positions beneath the indicator for arrow keys,
+selection, insertion and deletion. CommonMark and GFM blocks,
 inlines, tables, tasks and images share the same source mapping.
 
 Import `@interactive-os/json-document-markdown-web/markdown-editor.css` for the

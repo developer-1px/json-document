@@ -262,6 +262,18 @@ export function createContentEditableBinding({
 
     if (editor && event.type === "keydown" && activeLease?.phase !== "composing") {
       const keyboardEvent = event as KeyboardEvent;
+      if (!activeLease && !trailingComposition && !keyboardEvent.isComposing && keyboardEvent.keyCode !== 229
+        && !keyboardEvent.metaKey && !keyboardEvent.ctrlKey && !keyboardEvent.altKey
+        && (keyboardEvent.key === "ArrowLeft" || keyboardEvent.key === "ArrowRight")) {
+        const selection = currentDOMSelection();
+        const next = selection && dom.resolveHorizontalSelection?.(root, selection,
+          keyboardEvent.key === "ArrowLeft" ? "backward" : "forward", keyboardEvent.shiftKey);
+        if (next) {
+          event.preventDefault();
+          editor.select(next);
+          return renderLatest(next, true);
+        }
+      }
       const current = editor.snapshot.selection;
       const text = readString();
       const selectAll = selectAllAffordance(keyboardEvent, {

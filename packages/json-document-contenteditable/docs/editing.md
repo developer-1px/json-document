@@ -54,3 +54,12 @@ native 줄바꿈과 방향 있는 선택도 같은 원문 좌표를 사용합니
 `Mod+A`는 `selectAllAffordance`의 반복 유지 정책을 사용하여 원문 전체를 선택합니다.
 Markdown처럼 첫/마지막 문법 기호가 숨겨진 projection에서도 `[0, source.length]`가
 선택되며, 다시 눌러도 선택을 해제하지 않습니다. IME 조합 중에는 브라우저/입력기에 맡깁니다.
+
+## 투영된 구간의 좌우 이동
+
+`TextDOMAdapter.resolveHorizontalSelection(root, selection, direction, extend)`는 선택적인
+원문 좌표 이동 계약입니다. `direction`은 `backward`/`forward`, `extend`는 Shift 선택입니다.
+반환된 선택은 binding이 `editor.select`와 DOM 복원으로 반영하며, `null`이면 native 이동을
+유지합니다. modifier 없는 좌우 방향키와 Shift+좌우에만 적용하고 IME 조합·native lease 중에는
+호출하지 않습니다. Markdown Usage의 제목 표시가 이 계약으로 원문 접두사와 본문 경계를
+연결합니다. 입력·삭제·history를 별도 구현하지 않습니다.

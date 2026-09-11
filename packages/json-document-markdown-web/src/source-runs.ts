@@ -8,7 +8,7 @@ export interface SourceRun extends SourceRange {
   readonly value?: string;
   readonly children?: ReadonlyArray<SourceRun>;
   readonly owner?: SourceRange;
-  readonly conceal?: boolean;
+  readonly conceal?: boolean | "always";
 }
 
 const tags: Record<MarkdownNodeKind, string> = {
@@ -41,18 +41,24 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
     }
   };
   collect(projection.nodes);
-  const raw = (from: number, to: number, owner?: SourceRange, conceal = false): SourceRun => ({
+  const raw = (from: number, to: number, owner?: SourceRange, conceal: SourceRun["conceal"] = false): SourceRun => ({
     kind: owner ? "delimiter" : "source", tag: "span", from, to, value: source.slice(from, to),
     attributes: owner ? { "data-markdown-delimiter": "" } : {}, ...(owner ? { owner, conceal } : {}),
   });
   const gap = (from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun => {
+    if (parent?.kind === "heading" && from === parent.from && /^ {0,3}#{1,6}(?:[ \t]+|$)/.test(source.slice(from, to))) {
+      return { ...raw(from, to, parent), attributes: {
+        "data-markdown-delimiter": "", "data-markdown-heading-marker": "", "aria-hidden": "true",
+        style: `--markdown-marker-length: ${to - from}`,
+      } };
+    }
     if (parent?.kind === "listItem" && typeof parent.checked === "boolean" && /\[[ xX]\]/.test(source.slice(from, to))) {
       return { kind: "delimiter", tag: "span", from, to, owner: parent,
         attributes: { "data-markdown-display": parent.checked ? "☑ " : "☐ ", "data-markdown-delimiter": "" },
         children: [raw(from, to, parent, true)],
       };
     }
-    return raw(from, to, parent && markerGaps.has(parent.kind) ? table ?? parent : undefined, !!parent && concealedGaps.has(parent.kind));
+    return raw(from, to, parent && markerGaps.has(parent.kind) ? table ?? parent : undefined, parent?.kind === "heading" ? "always" : !!parent && concealedGaps.has(parent.kind));
   };
   const children = (nodes: ReadonlyArray<MarkdownNode>, from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun[] => {
     const result: SourceRun[] = [];

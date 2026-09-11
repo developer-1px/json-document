@@ -42,16 +42,32 @@ test("links and images never activate unsafe URL schemes or raw HTML", () => {
   expect(dom.observe(root).value).toBe(source);
 });
 
-test("heading markers reveal only in their source range; table source reveals as a unit", () => {
+test("heading syntax stays concealed while editing; table source reveals as a unit", () => {
   const root = document.createElement("div"); document.body.append(root);
   const source = "# title\n\n| a | b |\n| - | - |\n| c | d |";
   const dom = createMarkdownDOMAdapter(); dom.render(root, source);
   const heading = root.querySelector('[role="heading"]')!;
   expect(heading.getAttribute("aria-level")).toBe("1");
-  expect((heading.querySelector("[data-markdown-delimiter]") as HTMLElement).hidden).toBe(true);
+  expect(heading.querySelector("[data-markdown-heading-marker]")?.getAttribute("aria-hidden")).toBe("true");
   dom.restoreSelection(root, {anchor: 3, focus: 3});
-  expect((heading.querySelector("[data-markdown-delimiter]") as HTMLElement).hidden).toBe(false);
+  expect(heading.querySelector("[data-markdown-heading-marker]")?.getAttribute("aria-hidden")).toBe("true");
   dom.restoreSelection(root, {anchor: source.indexOf("c"), focus: source.indexOf("c")});
   expect(root.querySelector('[role="table"]')?.getAttribute("data-markdown-active")).toBe("true");
   expect(dom.observe(root).value).toBe(source);
+});
+
+test("heading marker navigation uses source positions and restores the shared boundary in the body", () => {
+  const root = document.createElement("div"); document.body.append(root);
+  const dom = createMarkdownDOMAdapter(); dom.render(root, "### 😀제목\n\n본문");
+  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:4}, "backward", false)).toEqual({anchor:3, focus:3});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:3}, "backward", true)).toEqual({anchor:4, focus:2});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:2}, "forward", false)).toEqual({anchor:4, focus:4});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:4}, "forward", false)).toBeNull();
+  dom.restoreSelection(root, {anchor:4, focus:4});
+  const body = document.createTreeWalker(root.querySelector('[data-markdown-kind="text"]')!, NodeFilter.SHOW_TEXT).nextNode();
+  expect(document.getSelection()!.focusNode).toBe(body);
+  expect(document.getSelection()!.focusOffset).toBe(0);
+  dom.restoreSelection(root, {anchor:4, focus:2});
+  expect(dom.observe(root).selection).toEqual({anchor:4, focus:2});
+  expect(document.getSelection()!.anchorNode).toBe(body);
 });

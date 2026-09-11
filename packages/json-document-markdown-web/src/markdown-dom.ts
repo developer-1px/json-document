@@ -28,7 +28,7 @@ export function createMarkdownDOMAdapter(): TextDOMAdapter {
     const visit = ({ element, run, children }: RenderedRun): void => {
       if (run.owner) {
         const active = selection !== null && Math.max(selection.anchor, selection.focus) >= run.owner.from && Math.min(selection.anchor, selection.focus) <= run.owner.to;
-        if (run.conceal) element.hidden = !active;
+        if (run.conceal) element.hidden = run.conceal === "always" || !active;
         else if (run.kind === "imagePreview") element.hidden = active;
         else if (element.getAttribute("data-markdown-active") !== String(active)) element.setAttribute("data-markdown-active", String(active));
       }
@@ -40,6 +40,27 @@ export function createMarkdownDOMAdapter(): TextDOMAdapter {
   };
   return {
     observe: (root) => plainTextDOMAdapter.observe(root),
+    resolveHorizontalSelection(root, selection, direction, extend) {
+      let result: TextSelection | null = null;
+      const collapsed = selection.anchor === selection.focus;
+      const visit = ({ run, children }: RenderedRun): void => {
+        if ("data-markdown-heading-marker" in run.attributes) {
+          const focus = !extend && !collapsed
+            ? (direction === "backward" ? Math.min(selection.anchor, selection.focus) : Math.max(selection.anchor, selection.focus))
+            : selection.focus;
+          if (focus >= run.from && focus <= run.to) {
+            if (!extend && !collapsed) result = { anchor: focus, focus };
+            else if (direction === "backward" ? focus > run.from : focus < run.to) {
+              const next = focus + (direction === "backward" ? -1 : 1);
+              result = { anchor: extend ? selection.anchor : next, focus: next };
+            }
+          }
+        }
+        children.forEach(visit);
+      };
+      surfaces.get(root)?.runs.forEach(visit);
+      return result;
+    },
     render(root, source, selection = null) {
       let surface = surfaces.get(root);
       if (!surface) {
@@ -69,7 +90,33 @@ export function createMarkdownDOMAdapter(): TextDOMAdapter {
     restoreSelection(root, selection) {
       const surface = surfaces.get(root);
       if (surface) reveal(surface, selection);
-      return plainTextDOMAdapter.restoreSelection(root, selection);
+      // The end of an absolutely positioned prefix and the start of its body
+      // share a source offset. Prefer the body so native arrows can leave the gutter.
+      const bodyStart = (offset: number): Text | null => {
+        let result: Text | null = null;
+        const visit = (entry: RenderedRun): void => {
+          if (entry.run.to === offset && "data-markdown-heading-marker" in entry.run.attributes && entry.text) {
+            const walker = root.ownerDocument.createTreeWalker(root, 4);
+            walker.currentNode = entry.text;
+            result = walker.nextNode() as Text | null;
+          }
+          entry.children.forEach(visit);
+        };
+        surface?.runs.forEach(visit);
+        return result;
+      };
+      const anchor = bodyStart(selection.anchor), focus = bodyStart(selection.focus);
+      const native = root.ownerDocument.getSelection();
+      const observed = plainTextDOMAdapter.observe(root).selection;
+      if (observed?.anchor === selection.anchor && observed.focus === selection.focus
+        && (!anchor || (native?.anchorNode === anchor && native.anchorOffset === 0))
+        && (!focus || (native?.focusNode === focus && native.focusOffset === 0))) return true;
+      if (!plainTextDOMAdapter.restoreSelection(root, selection)) return false;
+      if (native && (anchor || focus)) native.setBaseAndExtent(
+        anchor ?? native.anchorNode!, anchor ? 0 : native.anchorOffset,
+        focus ?? native.focusNode!, focus ? 0 : native.focusOffset,
+      );
+      return true;
     },
   };
 }

@@ -298,3 +298,30 @@ test("Mod+A selects the complete source including concealed leading and trailing
     expect(plainTextDOMAdapter.observe(root).selection).toEqual({anchor: 0, focus: source.length});
   }
 });
+
+test("projected horizontal selection respects modifiers and composition ownership", () => {
+  const json = createJSONDocument({source:"# title"});
+  const editor = createTextEditor(json, "/source");
+  const root = document.createElement("div"); document.body.append(root);
+  const resolveHorizontalSelection = vi.fn(() => ({anchor:1, focus:1}));
+  const binding = createContentEditableBinding({document:json, pointer:"/source", root, editor,
+    dom:{...plainTextDOMAdapter, resolveHorizontalSelection}});
+  cleanup.push(binding.bind());
+  plainTextDOMAdapter.restoreSelection(root, {anchor:2, focus:2});
+  const left = new KeyboardEvent("keydown", {key:"ArrowLeft", cancelable:true});
+  binding.handle(left);
+  expect(left.defaultPrevented).toBe(true);
+  expect(editor.snapshot.selection).toEqual({anchor:1, focus:1});
+  expect(editor.snapshot.canUndo).toBe(false);
+  expect(resolveHorizontalSelection).toHaveBeenLastCalledWith(root, {anchor:2, focus:2}, "backward", false);
+  resolveHorizontalSelection.mockClear();
+  for (const modifiers of [{metaKey:true}, {ctrlKey:true}, {altKey:true}, {isComposing:true}, {keyCode:229}]) {
+    const key = new KeyboardEvent("keydown", {key:"ArrowLeft", cancelable:true, ...modifiers});
+    binding.handle(key);
+    expect(key.defaultPrevented).toBe(false);
+  }
+  binding.handle(new CompositionEvent("compositionstart"));
+  binding.handle(new KeyboardEvent("keydown", {key:"ArrowLeft", cancelable:true}));
+  expect(resolveHorizontalSelection).not.toHaveBeenCalled();
+  binding.cancel();
+});

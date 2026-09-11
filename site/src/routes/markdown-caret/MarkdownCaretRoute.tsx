@@ -17,7 +17,7 @@ export function MarkdownCaretRoute() {
   const snapshot = useEditingSnapshot(editor);
   return <DemoPage documentation={
     <PageHeader title="Markdown 원문을 직접 편집합니다.">
-      제목·강조·코드·표 안에 caret을 놓으면 원문 문법이 드러납니다. 선택·입력·복사와 ⌘/Ctrl+Z, Shift+⌘/Ctrl+Z를 시험해 보세요.
+      제목 시작에서 ←를 누르면 왼쪽 H 표시로 이동합니다. # 입력·Backspace·Delete로 제목 단계를 편집할 수 있습니다. 강조·코드·표는 안에 caret을 놓으면 원문 문법이 드러납니다. 선택·복사와 ⌘/Ctrl+Z를 시험해 보세요.
     </PageHeader>
   }>
     <div className="mx-auto grid w-full max-w-3xl gap-8 py-6">
