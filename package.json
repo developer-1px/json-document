@@ -38,7 +38,8 @@
     "packages/json-document-rich-text-react",
     "packages/json-document-collaboration",
     "packages/contenteditable-collaboration",
-    "site"
+    "site",
+    "packages/json-document-url"
   ],
   "scripts": {
     "dev": "npm run dev -w @interactive-os/json-document-site",

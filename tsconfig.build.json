@@ -2,6 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "files": [],
   "references": [
+    { "path": "./packages/json-document-url" },
     { "path": "./packages/json-document" },
     { "path": "./packages/json-document-selection" },
     { "path": "./packages/json-document-object-document" },

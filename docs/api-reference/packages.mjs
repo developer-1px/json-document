@@ -1,4 +1,5 @@
 export const apiReferencePackages = [
+  ["document-url", "@interactive-os/json-document-url", "packages/json-document-url/src/index.ts", "JSON Document", "DOM 독립 문서 URL 허용 정책"],
   ["markdown", "@interactive-os/json-document-markdown", "packages/json-document-markdown/src/index.ts", "Document Types", "원문 문자열이 정본인 Markdown 문법과 source 위치 projection"],
   ["markdown-web", "@interactive-os/json-document-markdown-web", "packages/json-document-markdown-web/src/index.ts", "Adapter", "Markdown source 위치와 caret에 따른 DOM projection"],
   ["object-document", "@interactive-os/json-document-object-document", "packages/json-document-object-document/src/index.ts", "Document Types", "Object 문서와 Canvas 프로파일의 모델·검증·연산·projection"],

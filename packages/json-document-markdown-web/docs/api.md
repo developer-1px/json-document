@@ -112,3 +112,5 @@ Markdown 문자열이 정본이고 CommonMark + GFM은 문법 의미를 결정�
 ## 보이는 줄을 따르는 수직 이동
 
 `createMarkdownDOMAdapter`는 contenteditable의 공개 `createTextNavigationDOMAdapter`와 `createTextProjectionDOMAdapter`를 조합합니다. ↑↓는 숨긴 원문 기호 대신 보이는 본문 줄을 따라 가로 위치를 유지하고, Shift는 원래 anchor를 유지합니다. 별도의 Markdown 문법별 방향키 분기는 없습니다. [공용 화면 줄 이동 계약](/docs/api/contenteditable)과 [Usage](/demo/markdown-caret)에서 문서 끝·빈 줄·스크롤·native fallback의 범위를 확인할 수 있습니다.
+
+URL 판정은 `@interactive-os/json-document-url`의 공개 `resolveDocumentURL`을 소비합니다. 링크는 http/https/mailto/tel, 이미지는 http/https를 허용하며 일반 상대 참조를 유지합니다. 판정 시 제어문자를 제거하고 반환 원문은 보존하는 기존 정책을 유지합니다. [URL API](/docs/api/document-url) · [Usage](/demo/document-url)

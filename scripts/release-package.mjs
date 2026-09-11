@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { readJson, repositoryRoot } from "./workspace-graph.mjs";
 
 export const releases = [
+  release("json-document-url", "packages/json-document-url/package.json", "@interactive-os/json-document-url"),
   release("json-document-markdown", "packages/json-document-markdown/package.json", "@interactive-os/json-document-markdown"),
   release("json-document-markdown-web", "packages/json-document-markdown-web/package.json", "@interactive-os/json-document-markdown-web"),
   release("json-document-a2ui", "packages/json-document-a2ui/package.json", "@interactive-os/json-document-a2ui"),

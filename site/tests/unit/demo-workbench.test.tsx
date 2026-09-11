@@ -425,3 +425,12 @@ test("Markdown Usage exposes the canonical text projection and restoration sourc
   expect(markdown).toContain("createTextProjectionDOMAdapter");
   expect(markdown).not.toContain("setBaseAndExtent");
 });
+
+
+test("Document URL Usage exposes both the policy engine and the Rich Text contract", async () => {
+  const sources = await discoverDemoSources("routes/document-url/DocumentURLRoute.tsx");
+  expect(sources.map(file => file.path)).toEqual(expect.arrayContaining([
+    "packages/json-document-url/src/index.ts", "packages/json-document-rich-text/src/link-url.ts",
+  ]));
+  expect(sources.find(file => file.path === "packages/json-document-url/src/index.ts")?.referencePath).toBe("/docs/api/document-url");
+});

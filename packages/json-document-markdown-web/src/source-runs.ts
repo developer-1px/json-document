@@ -1,3 +1,4 @@
+import { resolveDocumentURL } from "@interactive-os/json-document-url";
 import type { MarkdownNode, MarkdownNodeKind, MarkdownProjection, MarkdownMarker } from "@interactive-os/json-document-markdown";
 
 interface SourceRange { readonly from: number; readonly to: number }
@@ -22,15 +23,6 @@ const tags: Record<MarkdownNodeKind, string> = {
 };
 const concealedGaps = new Set<MarkdownNodeKind>(["heading", "emphasis", "strong", "delete", "link", "linkReference", "table", "tableRow", "tableCell"]);
 const markerGaps = new Set<MarkdownNodeKind>([...concealedGaps, "listItem", "blockquote", "footnoteDefinition"]);
-
-/** Only navigable document URLs can become DOM attributes; raw HTML stays text. */
-function safeURL(value: string | undefined, image = false): string | undefined {
-  if (!value) return undefined;
-  const normalized = value.replace(/[\u0000-\u0020\u007f]/g, "");
-  const scheme = /^([a-z][a-z\d+.-]*):/i.exec(normalized)?.[1]?.toLowerCase();
-  if (scheme && !(image ? ["http", "https"] : ["http", "https", "mailto", "tel"]).includes(scheme)) return undefined;
-  return value;
-}
 
 /** A source-complete tree: visual decoration never adds text to the document. */
 export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
@@ -159,7 +151,10 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
     if (node.lang) attributes["data-language"] = node.lang;
     const definition = node.identifier ? definitions.get(node.identifier) : undefined;
     const image = node.kind === "image" || node.kind === "imageReference";
-    const url = safeURL(node.url ?? definition?.url, image);
+    const url = resolveDocumentURL(node.url ?? definition?.url, {
+      schemes: image ? ["http", "https"] : ["http", "https", "mailto", "tel"],
+      relative: "any", controlCharacters: "ignore-for-scheme",
+    });
     if ((node.kind === "link" || node.kind === "linkReference") && url) {
       attributes.href = url; attributes.rel = "noreferrer noopener";
       attributes.target = "_blank";

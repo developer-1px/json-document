@@ -42,6 +42,7 @@ import { Route as PageDemoClipboardRouteImport } from "./routes/_page/demo/clipb
 import { Route as PageDemoComposerRouteImport } from "./routes/_page/demo/composer";
 import { Route as PageDemoDatabaseRouteImport } from "./routes/_page/demo/database";
 import { Route as PageDemoDateControlsRouteImport } from "./routes/_page/demo/date-controls";
+import { Route as PageDemoDocumentUrlRouteImport } from "./routes/_page/demo/document-url";
 import { Route as PageDemoHistoryRouteImport } from "./routes/_page/demo/history";
 import { Route as PageDemoKanbanRouteImport } from "./routes/_page/demo/kanban";
 import { Route as PageDemoMarkdownRouteImport } from "./routes/_page/demo/markdown";
@@ -146,6 +147,7 @@ import { Route as PageDocsApiComposerReactRouteImport } from "./routes/_page/doc
 import { Route as PageDocsApiContenteditableRouteImport } from "./routes/_page/docs/api/contenteditable";
 import { Route as PageDocsApiContenteditableCollaborationRouteImport } from "./routes/_page/docs/api/contenteditable-collaboration";
 import { Route as PageDocsApiDatabaseRouteImport } from "./routes/_page/docs/api/database";
+import { Route as PageDocsApiDocumentUrlRouteImport } from "./routes/_page/docs/api/document-url";
 import { Route as PageDocsApiEditingRouteImport } from "./routes/_page/docs/api/editing";
 import { Route as PageDocsApiFileIntakeRouteImport } from "./routes/_page/docs/api/file-intake";
 import { Route as PageDocsApiJsonDocumentRouteImport } from "./routes/_page/docs/api/json-document";
@@ -344,6 +346,11 @@ const PageDemoDatabaseRoute = PageDemoDatabaseRouteImport.update({
 const PageDemoDateControlsRoute = PageDemoDateControlsRouteImport.update({
   id: "/demo/date-controls",
   path: "/demo/date-controls",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoDocumentUrlRoute = PageDemoDocumentUrlRouteImport.update({
+  id: "/demo/document-url",
+  path: "/demo/document-url",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoHistoryRoute = PageDemoHistoryRouteImport.update({
@@ -897,6 +904,11 @@ const PageDocsApiDatabaseRoute = PageDocsApiDatabaseRouteImport.update({
   path: "/docs/api/database",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsApiDocumentUrlRoute = PageDocsApiDocumentUrlRouteImport.update({
+  id: "/docs/api/document-url",
+  path: "/docs/api/document-url",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsApiEditingRoute = PageDocsApiEditingRouteImport.update({
   id: "/docs/api/editing",
   path: "/docs/api/editing",
@@ -1090,6 +1102,7 @@ export interface FileRoutesByFullPath {
   "/demo/composer": typeof PageDemoComposerRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
   "/demo/date-controls": typeof PageDemoDateControlsRoute;
+  "/demo/document-url": typeof PageDemoDocumentUrlRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
   "/demo/markdown": typeof PageDemoMarkdownRoute;
@@ -1195,6 +1208,7 @@ export interface FileRoutesByFullPath {
   "/docs/api/contenteditable": typeof PageDocsApiContenteditableRoute;
   "/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
   "/docs/api/database": typeof PageDocsApiDatabaseRoute;
+  "/docs/api/document-url": typeof PageDocsApiDocumentUrlRoute;
   "/docs/api/editing": typeof PageDocsApiEditingRoute;
   "/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
@@ -1257,6 +1271,7 @@ export interface FileRoutesByTo {
   "/demo/composer": typeof PageDemoComposerRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
   "/demo/date-controls": typeof PageDemoDateControlsRoute;
+  "/demo/document-url": typeof PageDemoDocumentUrlRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
   "/demo/markdown": typeof PageDemoMarkdownRoute;
@@ -1362,6 +1377,7 @@ export interface FileRoutesByTo {
   "/docs/api/contenteditable": typeof PageDocsApiContenteditableRoute;
   "/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
   "/docs/api/database": typeof PageDocsApiDatabaseRoute;
+  "/docs/api/document-url": typeof PageDocsApiDocumentUrlRoute;
   "/docs/api/editing": typeof PageDocsApiEditingRoute;
   "/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
@@ -1426,6 +1442,7 @@ export interface FileRoutesById {
   "/_page/demo/composer": typeof PageDemoComposerRoute;
   "/_page/demo/database": typeof PageDemoDatabaseRoute;
   "/_page/demo/date-controls": typeof PageDemoDateControlsRoute;
+  "/_page/demo/document-url": typeof PageDemoDocumentUrlRoute;
   "/_page/demo/history": typeof PageDemoHistoryRoute;
   "/_page/demo/kanban": typeof PageDemoKanbanRoute;
   "/_page/demo/markdown": typeof PageDemoMarkdownRoute;
@@ -1531,6 +1548,7 @@ export interface FileRoutesById {
   "/_page/docs/api/contenteditable": typeof PageDocsApiContenteditableRoute;
   "/_page/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
   "/_page/docs/api/database": typeof PageDocsApiDatabaseRoute;
+  "/_page/docs/api/document-url": typeof PageDocsApiDocumentUrlRoute;
   "/_page/docs/api/editing": typeof PageDocsApiEditingRoute;
   "/_page/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/_page/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
@@ -1595,6 +1613,7 @@ export interface FileRouteTypes {
     | "/demo/composer"
     | "/demo/database"
     | "/demo/date-controls"
+    | "/demo/document-url"
     | "/demo/history"
     | "/demo/kanban"
     | "/demo/markdown"
@@ -1700,6 +1719,7 @@ export interface FileRouteTypes {
     | "/docs/api/contenteditable"
     | "/docs/api/contenteditable-collaboration"
     | "/docs/api/database"
+    | "/docs/api/document-url"
     | "/docs/api/editing"
     | "/docs/api/file-intake"
     | "/docs/api/json-document"
@@ -1762,6 +1782,7 @@ export interface FileRouteTypes {
     | "/demo/composer"
     | "/demo/database"
     | "/demo/date-controls"
+    | "/demo/document-url"
     | "/demo/history"
     | "/demo/kanban"
     | "/demo/markdown"
@@ -1867,6 +1888,7 @@ export interface FileRouteTypes {
     | "/docs/api/contenteditable"
     | "/docs/api/contenteditable-collaboration"
     | "/docs/api/database"
+    | "/docs/api/document-url"
     | "/docs/api/editing"
     | "/docs/api/file-intake"
     | "/docs/api/json-document"
@@ -1930,6 +1952,7 @@ export interface FileRouteTypes {
     | "/_page/demo/composer"
     | "/_page/demo/database"
     | "/_page/demo/date-controls"
+    | "/_page/demo/document-url"
     | "/_page/demo/history"
     | "/_page/demo/kanban"
     | "/_page/demo/markdown"
@@ -2035,6 +2058,7 @@ export interface FileRouteTypes {
     | "/_page/docs/api/contenteditable"
     | "/_page/docs/api/contenteditable-collaboration"
     | "/_page/docs/api/database"
+    | "/_page/docs/api/document-url"
     | "/_page/docs/api/editing"
     | "/_page/docs/api/file-intake"
     | "/_page/docs/api/json-document"
@@ -2306,6 +2330,13 @@ declare module "@tanstack/react-router" {
       path: "/demo/date-controls";
       fullPath: "/demo/date-controls";
       preLoaderRoute: typeof PageDemoDateControlsRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/document-url": {
+      id: "/_page/demo/document-url";
+      path: "/demo/document-url";
+      fullPath: "/demo/document-url";
+      preLoaderRoute: typeof PageDemoDocumentUrlRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/history": {
@@ -3036,6 +3067,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiDatabaseRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/api/document-url": {
+      id: "/_page/docs/api/document-url";
+      path: "/docs/api/document-url";
+      fullPath: "/docs/api/document-url";
+      preLoaderRoute: typeof PageDocsApiDocumentUrlRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/api/editing": {
       id: "/_page/docs/api/editing";
       path: "/docs/api/editing";
@@ -3269,6 +3307,7 @@ interface PageRouteChildren {
   PageDemoComposerRoute: typeof PageDemoComposerRoute;
   PageDemoDatabaseRoute: typeof PageDemoDatabaseRoute;
   PageDemoDateControlsRoute: typeof PageDemoDateControlsRoute;
+  PageDemoDocumentUrlRoute: typeof PageDemoDocumentUrlRoute;
   PageDemoHistoryRoute: typeof PageDemoHistoryRoute;
   PageDemoKanbanRoute: typeof PageDemoKanbanRoute;
   PageDemoMarkdownRoute: typeof PageDemoMarkdownRoute;
@@ -3374,6 +3413,7 @@ interface PageRouteChildren {
   PageDocsApiContenteditableRoute: typeof PageDocsApiContenteditableRoute;
   PageDocsApiContenteditableCollaborationRoute: typeof PageDocsApiContenteditableCollaborationRoute;
   PageDocsApiDatabaseRoute: typeof PageDocsApiDatabaseRoute;
+  PageDocsApiDocumentUrlRoute: typeof PageDocsApiDocumentUrlRoute;
   PageDocsApiEditingRoute: typeof PageDocsApiEditingRoute;
   PageDocsApiFileIntakeRoute: typeof PageDocsApiFileIntakeRoute;
   PageDocsApiJsonDocumentRoute: typeof PageDocsApiJsonDocumentRoute;
@@ -3435,6 +3475,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoComposerRoute: PageDemoComposerRoute,
   PageDemoDatabaseRoute: PageDemoDatabaseRoute,
   PageDemoDateControlsRoute: PageDemoDateControlsRoute,
+  PageDemoDocumentUrlRoute: PageDemoDocumentUrlRoute,
   PageDemoHistoryRoute: PageDemoHistoryRoute,
   PageDemoKanbanRoute: PageDemoKanbanRoute,
   PageDemoMarkdownRoute: PageDemoMarkdownRoute,
@@ -3541,6 +3582,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsApiContenteditableCollaborationRoute:
     PageDocsApiContenteditableCollaborationRoute,
   PageDocsApiDatabaseRoute: PageDocsApiDatabaseRoute,
+  PageDocsApiDocumentUrlRoute: PageDocsApiDocumentUrlRoute,
   PageDocsApiEditingRoute: PageDocsApiEditingRoute,
   PageDocsApiFileIntakeRoute: PageDocsApiFileIntakeRoute,
   PageDocsApiJsonDocumentRoute: PageDocsApiJsonDocumentRoute,

@@ -1,3 +1,5 @@
+import documentURLSource from "../../../../packages/json-document-url/src/index.ts?raw";
+import richTextLinkURLSource from "../../../../packages/json-document-rich-text/src/link-url.ts?raw";
 import textNavigationSource from "../../../../packages/json-document-contenteditable/src/dom/text-navigation.ts?raw";
 import caretVisibilitySource from "../../../../packages/json-document-contenteditable/src/dom/caret-visibility.ts?raw";
 import markdownParagraphSource from "../../../../packages/json-document-markdown/src/paragraph.ts?raw";
@@ -188,6 +190,7 @@ export type DemoSourceFile = {
 };
 
 const packageReferencePaths = new Map([
+  ["packages/json-document-url/", "/docs/api/document-url"],
   ["packages/json-document-markdown/", "/docs/api/markdown"],
   ["packages/json-document-markdown-web/", "/docs/api/markdown-web"],
   ["packages/json-document-object-document/", "/docs/api/object-document"],
@@ -287,6 +290,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
+  ["packages/json-document-url/src/index.ts", documentURLSource],
+  ["packages/json-document-rich-text/src/link-url.ts", richTextLinkURLSource],
   ["packages/json-document-markdown/src/paragraph.ts", markdownParagraphSource],
   ["packages/json-document-contenteditable/src/dom/text-navigation.ts", textNavigationSource],
   ["packages/json-document-contenteditable/src/dom/caret-visibility.ts", caretVisibilitySource],
@@ -430,6 +435,16 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-url",
+    symbol: "resolveDocumentURL",
+    sourcePath: "packages/json-document-url/src/index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text",
+    symbol: "resolveRichTextLinkURL",
+    sourcePath: "packages/json-document-rich-text/src/link-url.ts",
+  },
   ...["createWebInteractionRecorder", "traceWebInteraction", "registerWebInteractionSource"].map(symbol => ({ packageName: "@interactive-os/json-document-web/interaction-recording", symbol, sourcePath: "packages/json-document-web/src/interaction-recording.ts" })),
   ...["createWebRecordingArchive", "bindWebRecordingArchive", "downloadWebInteractionRecording"].map(symbol => ({ packageName: "@interactive-os/json-document-web/interaction-recording", symbol, sourcePath: "packages/json-document-web/src/interaction-recording-archive.ts" })),
   ...["createWebClipboardSurface", "routeWebClipboardEvent"].flatMap(symbol => [
