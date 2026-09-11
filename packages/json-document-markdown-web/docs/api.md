@@ -6,13 +6,13 @@
 
 `render(root, source, selection?)`는 CommonMark/GFM 트리를 원문 보존 DOM으로 표시합니다.
 제목 단계, 중첩 강조, 링크·이미지, 코드, 목록·인용, 표·정렬, task 상태를 반영합니다.
-제목은 편집 중에도 제목 스타일을 유지하며 접두사·닫는 `#`·Setext 밑줄을 숨깁니다.
+제목은 편집 중에도 제목 스타일을 유지하며 접두사의 `#`·닫는 `#`·Setext 밑줄 기호를 숨깁니다.
 왼쪽 여백의 `H1`~`H6`는 CSS 표시이며 DOM text와 복사 원문에 추가되지 않습니다.
-ATX 제목의 접두사 `# `는 `display: none`으로 제거하지 않고 표시 아래 투명한 원문으로
+ATX 제목의 `#` 기호는 `display: none`으로 제거하지 않고 표시 아래 투명한 원문으로
 배치합니다. `#` 구간과 실제 H 표시 요소는 contenteditable의 공용
-`createTextProjectionDOMAdapter`에 전달합니다. 방향키는 마커 앞·뒤·본문 시작을 이동하고,
+`createTextProjectionDOMAdapter`에 전달합니다. 공백은 투영 구간에서 제외하여 원문 그대로 표시합니다. 방향키는 마커 앞·뒤와 각 공백을 이동하고,
 커서는 마커 요소의 좌우 끝에 맞춰 표시합니다. 제목 마커 내부를 글자별로 이동하지 않습니다.
-공용 `restoreSelection`의 affinity가 본문 시작 위치를 선택하므로 Markdown은 DOM Selection을
+공용 `restoreSelection`의 affinity가 마커 다음 일반 텍스트 위치를 선택하므로 Markdown은 DOM Selection을
 직접 다시 설정하지 않습니다. 키 해석은 Web keyboard adapter, 선택 적용과 IME lease는
 contenteditable binding, 입력·삭제·실행 취소는 기존 Editing History가 담당합니다. `#`를 추가하거나 지우면
 파서가 제목 단계를 다시 계산하며, 마지막 `#`를 지우면 일반 문장으로 바뀝니다.
@@ -75,3 +75,18 @@ DOM 변경 단위 캐시를 공유합니다. 문법이 불확실할 때의 전�
 [기존 성능 검사](performance.md)의 수치는 strong 전용 구현의 기록입니다. 전체 문법 트리의 성능 수치로 재사용하지 않습니다.
 
 [실행 가능한 Usage](/demo/markdown-caret)의 source 탭에서 canonical 구현까지 확인합니다.
+
+## 원문 보존형 편집
+
+Markdown 문자열이 정본이고 CommonMark + GFM은 문법 의미를 결정합니다.
+편집 화면은 출력용 HTML과 다른 표시 계약을 가집니다. 파서가 제목 내용에서
+제외한 공백도 원문에 존재하면 화면에 남습니다. `##    제목`은 H2 표시와
+네 칸의 공백, 제목으로 표시합니다. 앞쪽 들여쓰기와 뒤쪽 공백·탭도 보존합니다.
+기호를 숨기거나 바꾸는 것은 원문을 삭제하거나 정규화하는 작업이 아닙니다.
+
+일반 텍스트의 연속 공백·탭·빈 줄은 `pre-wrap`으로 보존합니다. 제목 공백은
+일반 원문 구간이므로 입력·선택·복사·삭제·Undo도 원문 좌표를 따릅니다.
+문법이 미완성이면 현재 CommonMark/GFM 해석에 따라 원문을 표시하고,
+입력 후 점진적 파싱으로 표현을 갱신합니다. 별도 편집용 dialect는 정의하지 않습니다.
+기존 표·코드·escape·entity의 문법별 표현은 위 계약을 따르며, 출력용 직렬화나
+새로운 문법 인식 규칙을 이 adapter에 추가하지 않습니다.

@@ -46,32 +46,48 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
     kind: owner ? "delimiter" : "source", tag: "span", from, to, value: source.slice(from, to),
     attributes: owner ? { "data-markdown-delimiter": "" } : {}, ...(owner ? { owner, conceal } : {}),
   });
-  const gap = (from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun => {
-    if (parent?.kind === "heading" && from === parent.from && /^ {0,3}#{1,6}(?:[ \t]+|$)/.test(source.slice(from, to))) {
-      const markerEnd = from + source.slice(from, to).match(/^ {0,3}#{1,6}/)![0].length;
-      return { kind: "delimiter", tag: "span", from, to,
-        projection: { to: markerEnd, following: to },
-        attributes: { "data-markdown-heading-marker": "", "data-markdown-label": `H${parent.depth}`, "aria-hidden": "true" },
-        children: [{ ...raw(from, to), attributes: { "data-text-projection-source": "" } }],
-      };
+  const gap = (from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun[] => {
+    if (parent?.kind === "heading") {
+      const value = source.slice(from, to);
+      const prefix = from === parent.from ? /^( {0,3})(#{1,6})(?=[ \t]|$)/.exec(value) : null;
+      // Syntax is decoration; whitespace remains ordinary, editable source.
+      const runs: SourceRun[] = [];
+      let cursor = from;
+      if (prefix) {
+        const markerFrom = from + prefix[1]!.length;
+        const markerEnd = markerFrom + prefix[2]!.length;
+        if (markerFrom > from) runs.push(raw(from, markerFrom));
+        runs.push({ kind: "delimiter", tag: "span", from: markerFrom, to: markerEnd,
+          projection: { to: markerEnd, following: markerEnd < to ? markerEnd + 1 : markerEnd },
+          attributes: { "data-markdown-heading-marker": "", "data-markdown-label": `H${parent.depth}`, "aria-hidden": "true" },
+          children: [{ ...raw(markerFrom, markerEnd), attributes: { "data-text-projection-source": "" } }],
+        });
+        cursor = markerEnd;
+      }
+      for (const part of source.slice(cursor, to).matchAll(/\s+|\S+/g)) {
+        const end = cursor + part[0].length;
+        runs.push(/\s/.test(part[0]) ? raw(cursor, end) : raw(cursor, end, parent, "always"));
+        cursor = end;
+      }
+      return runs;
     }
     if (parent?.kind === "listItem" && typeof parent.checked === "boolean" && /\[[ xX]\]/.test(source.slice(from, to))) {
-      return { kind: "delimiter", tag: "span", from, to, owner: parent,
+      return [{ kind: "delimiter", tag: "span", from, to, owner: parent,
         attributes: { "data-markdown-display": parent.checked ? "☑ " : "☐ ", "data-markdown-delimiter": "" },
         children: [raw(from, to, parent, true)],
-      };
+      }];
     }
-    return raw(from, to, parent && markerGaps.has(parent.kind) ? table ?? parent : undefined, parent?.kind === "heading" ? "always" : !!parent && concealedGaps.has(parent.kind));
+    return [raw(from, to, parent && markerGaps.has(parent.kind) ? table ?? parent : undefined, !!parent && concealedGaps.has(parent.kind))];
   };
   const children = (nodes: ReadonlyArray<MarkdownNode>, from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun[] => {
     const result: SourceRun[] = [];
     let cursor = from;
     for (const [index, node] of nodes.entries()) {
-      if (node.from > cursor) result.push(gap(cursor, node.from, parent, table));
+      if (node.from > cursor) result.push(...gap(cursor, node.from, parent, table));
       result.push(visit(node, parent, index, table));
       cursor = node.to;
     }
-    if (cursor < to) result.push(gap(cursor, to, parent, table));
+    if (cursor < to) result.push(...gap(cursor, to, parent, table));
     return result;
   };
   const visit = (node: MarkdownNode, parent?: MarkdownNode, index = 0, table?: MarkdownNode): SourceRun => {

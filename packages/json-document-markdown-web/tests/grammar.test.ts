@@ -71,3 +71,23 @@ test("heading marker navigation uses source positions and restores the shared bo
   expect(dom.observe(root).selection).toEqual({anchor:4, focus:0});
   expect(document.getSelection()!.anchorNode).toBe(body);
 });
+
+test.each(["  ##    제목  ", "###\t \t제목\t  ###  ", "##   ", "제목  \n---  "])("heading whitespace stays visible and source-addressable: %s", source => {
+  const root = document.createElement("div"); document.body.append(root);
+  const dom = createMarkdownDOMAdapter(); dom.render(root, source);
+  expect(root.querySelector('[role="heading"]')).not.toBeNull();
+  const visible = () => {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let text = "";
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (!(node.parentElement?.closest('[hidden], [data-text-projection-source]'))) text += node.textContent;
+    }
+    return text;
+  };
+  expect(visible().replace(/\S/g, "")).toBe(source.replace(/\S/g, ""));
+  for (let offset = 0; offset <= source.length; offset++) {
+    dom.restoreSelection(root, {anchor:offset, focus:offset});
+    expect(dom.observe(root)).toEqual({value:source, selection:{anchor:offset, focus:offset}});
+    expect(visible().replace(/\S/g, "")).toBe(source.replace(/\S/g, ""));
+  }
+});
