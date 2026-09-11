@@ -34,6 +34,7 @@ export function createContentEditableBinding({
   root,
   editor,
   insertBreak = (editor) => editor.insert("\n"),
+  indent,
 }: ContentEditableBindingOptions): ContentEditableBinding {
   if (editor && (editor.document !== document || editor.pointer !== pointer)) {
     throw new TypeError("contenteditable editor must own the bound document and pointer");
@@ -47,6 +48,7 @@ export function createContentEditableBinding({
   let rendering = false;
   let compositionEnter: { timeStamp: number; keyCode: number; released: boolean } | null = null;
   const keyboard = createWebKeyboardAdapter();
+  const indentationKeyboard = createWebKeyboardAdapter<"indent" | "outdent">({defaults:false,keymap:{Tab:"indent", "Shift-Tab":"outdent"}});
   let diagnosticEvent: Event | undefined;
   let unregisterDiagnosticSource: (() => void) | null = null;
   let unsubscribeDiagnosticDocument: (() => void) | null = null;
@@ -266,6 +268,19 @@ export function createContentEditableBinding({
     if (editor && event.type === "keydown" && activeLease?.phase !== "composing") {
       const keyboardEvent = event as KeyboardEvent;
       const command = keyboard.resolve(keyboardEvent);
+      const indentation = indentationKeyboard.resolve(keyboardEvent);
+      if (indent && indentation && !activeLease && !trailingComposition && !keyboardEvent.isComposing && keyboardEvent.keyCode !== 229) {
+        const selection = currentDOMSelection();
+        if (selection) {
+          dom.resetNavigation?.(root);
+          editor.select(selection);
+          const result = indent(editor, indentation);
+          if (result) {
+            event.preventDefault();
+            return result.ok ? COMMITTED : failure(result.code, result.reason ?? result.code);
+          }
+        }
+      }
       const vertical = command?.type === "move" && (command.direction === "up" || command.direction === "down")
         && !keyboardEvent.altKey && !keyboardEvent.ctrlKey && !keyboardEvent.metaKey;
       if (!vertical && !["Shift", "Control", "Alt", "Meta"].includes(keyboardEvent.key)) dom.resetNavigation?.(root);

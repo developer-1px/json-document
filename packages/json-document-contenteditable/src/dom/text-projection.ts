@@ -19,6 +19,9 @@ export function createTextProjectionDOMAdapter(
   const paint = (root: HTMLElement, selection: TextSelection | null): void => {
     let active = false;
     for (const region of projections(root)) {
+      const selected = selection !== null && selection.anchor !== selection.focus
+        && Math.max(selection.anchor,selection.focus) > region.from && Math.min(selection.anchor,selection.focus) < region.to;
+      if (region.element.hasAttribute("data-text-projection-selected") !== selected) region.element.toggleAttribute("data-text-projection-selected", selected);
       const focus = selection?.anchor === selection?.focus ? selection?.focus : undefined;
       const edge = !active && focus !== undefined && focus >= region.from && focus <= region.to
         ? (focus - region.from < region.to - focus ? "before" : "after") : null;

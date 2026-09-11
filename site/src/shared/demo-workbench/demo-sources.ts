@@ -1,3 +1,6 @@
+import markdownSourceEditSource from "../../../../packages/json-document-markdown/src/source-edit.ts?raw";
+import markdownListEditingSource from "../../../../packages/json-document-markdown/src/list-editing.ts?raw";
+import markdownBindingSource from "../../../../packages/json-document-markdown-web/src/editing-binding.ts?raw";
 import textNavigationSource from "../../../../packages/json-document-contenteditable/src/dom/text-navigation.ts?raw";
 import caretVisibilitySource from "../../../../packages/json-document-contenteditable/src/dom/caret-visibility.ts?raw";
 import markdownParagraphSource from "../../../../packages/json-document-markdown/src/paragraph.ts?raw";
@@ -287,7 +290,10 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
+  ["packages/json-document-markdown-web/src/editing-binding.ts", markdownBindingSource],
   ["packages/json-document-markdown/src/paragraph.ts", markdownParagraphSource],
+  ["packages/json-document-markdown/src/list-editing.ts", markdownListEditingSource],
+  ["packages/json-document-markdown/src/source-edit.ts", markdownSourceEditSource],
   ["packages/json-document-contenteditable/src/dom/text-navigation.ts", textNavigationSource],
   ["packages/json-document-contenteditable/src/dom/caret-visibility.ts", caretVisibilitySource],
   ["packages/json-document-markdown/src/nodes.ts", markdownNodesSource],
@@ -424,6 +430,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["packages/json-document-markdown/src/list-editing.ts", ["packages/json-document-markdown/src/source-edit.ts"]],
+  ["packages/json-document-markdown/src/paragraph.ts", ["packages/json-document-markdown/src/list-editing.ts", "packages/json-document-markdown/src/source-edit.ts"]],
   ["routes/markdown-caret/MarkdownCaretRoute.tsx", ["app/interaction-recording/InteractionRecordingControls.tsx"]],
   ["packages/json-document-editing/src/text.ts", ["packages/json-document-editing/src/session.ts"]],
   ["packages/json-document-editing/src/session.ts", ["packages/json-document-editing/src/history-patch.ts"]],
@@ -811,6 +819,27 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-markdown/src/syntax.ts",
   },
   { packageName: "@interactive-os/json-document-markdown", symbol: "createMarkdownParser", sourcePath: "packages/json-document-markdown/src/nodes.ts" },
+  {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownEditingBinding",
+    sourcePath: "packages/json-document-markdown-web/src/editing-binding.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownEditingBinding",
+    sourcePath: "packages/json-document-markdown-web/src/markdown-dom.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownEditingBinding",
+    sourcePath: "packages/json-document-markdown-web/src/source-runs.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownEditingBinding",
+    sourcePath: "packages/json-document-markdown-web/src/markdown-editor.css",
+  },
+  { packageName: "@interactive-os/json-document-markdown", symbol: "indentMarkdownList", sourcePath: "packages/json-document-markdown/src/list-editing.ts" },
   { packageName: "@interactive-os/json-document-markdown", symbol: "insertMarkdownParagraph", sourcePath: "packages/json-document-markdown/src/paragraph.ts" },
   { packageName: "@interactive-os/json-document-markdown", symbol: "setMarkdownTaskChecked", sourcePath: "packages/json-document-markdown/src/tasks.ts" },
   ...["createMarkdownParser", "projectMarkdown", "MarkdownMarker", "MarkdownMarkerKind"].map(symbol => ({

@@ -11,6 +11,16 @@
 ```ts
 createMarkdownParser(source: string): MarkdownParser
 ```
+## `indentMarkdownList`
+
+```ts
+indentMarkdownList(source: string, selection: Selection, direction: "indent" | "outdent"): MarkdownSourceEdit | null
+```
+## `insertMarkdownParagraph`
+
+```ts
+insertMarkdownParagraph(source: string, selection: { readonly anchor: number; readonly focus: number; }): { readonly value: string; readonly selection: { readonly anchor: number; readonly focus: number; }; }
+```
 ## `MarkdownChangedRange`
 
 ```ts
@@ -19,6 +29,22 @@ interface MarkdownChangedRange {
   readonly to: number;
   readonly newTo: number;
 }
+```
+## `MarkdownMarker`
+
+```ts
+interface MarkdownMarker {
+  readonly kind: MarkdownMarkerKind;
+  readonly from: number;
+  readonly to: number;
+  /** Decoded character reference; other marker kinds have no replacement value. */
+  readonly value?: string;
+}
+```
+## `MarkdownMarkerKind`
+
+```ts
+type MarkdownMarkerKind = "heading" | "setext" | "list" | "blockquote" | "task" | "fence" | "code" | "emphasis" | "strong" | "delete" | "link" | "image" | "definition" | "table" | "thematicBreak" | "escape" | "break" | "footnote" | "entity";
 ```
 ## `MarkdownNode`
 
@@ -62,6 +88,15 @@ interface MarkdownProjection {
   readonly source: string;
   readonly nodes: ReadonlyArray<MarkdownNode>;
   readonly strong: ReadonlyArray<MarkdownStrongSpan>;
+  readonly markers: ReadonlyArray<MarkdownMarker>;
+}
+```
+## `MarkdownSourceEdit`
+
+```ts
+interface MarkdownSourceEdit {
+  readonly value: string;
+  readonly selection: { readonly anchor: number; readonly focus: number };
 }
 ```
 ## `MarkdownStrongSpan`
@@ -86,4 +121,9 @@ interface MarkdownUpdate {
 
 ```ts
 projectMarkdown(source: string): MarkdownProjection
+```
+## `setMarkdownTaskChecked`
+
+```ts
+setMarkdownTaskChecked(source: string, from: number, checked: boolean): string
 ```

@@ -9,5 +9,26 @@ Markdown source 위치와 caret에 따른 DOM projection의 public entrypoint입
 ## `createMarkdownDOMAdapter`
 
 ```ts
-createMarkdownDOMAdapter(): TextDOMAdapter
+createMarkdownDOMAdapter(options?: MarkdownDOMOptions): TextDOMAdapter
+```
+## `createMarkdownEditingBinding`
+
+```ts
+createMarkdownEditingBinding({ editor, root }: MarkdownEditingBindingOptions): ContentEditableBinding
+```
+## `MarkdownDOMOptions`
+
+```ts
+interface MarkdownDOMOptions {
+  /** Enables task controls using the existing source editor and its history. */
+  readonly editor?: TextEditor;
+}
+```
+## `MarkdownEditingBindingOptions`
+
+```ts
+interface MarkdownEditingBindingOptions {
+  readonly editor: TextEditor;
+  readonly root: HTMLElement;
+}
 ```

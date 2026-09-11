@@ -1,3 +1,5 @@
+import { assertMarkdownSelection } from "./source-edit.js";
+import { continueMarkdownList } from "./list-editing.js";
 import { projectMarkdown } from "./projection.js";
 
 /** Source-only Enter edit; the caller owns selection application and History. */
@@ -6,11 +8,13 @@ export function insertMarkdownParagraph(source: string, selection: { readonly an
   readonly selection: { readonly anchor: number; readonly focus: number };
 } {
   const from = Math.min(selection.anchor, selection.focus), to = Math.max(selection.anchor, selection.focus);
-  if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to > source.length) throw new RangeError("Invalid Markdown selection");
+  assertMarkdownSelection(source,selection);
   const lineFrom = from === 0 ? 0 : source.lastIndexOf("\n", from - 1) + 1;
   const end = source.indexOf("\n", from);
   const lineTo = end < 0 ? source.length : end;
   const projection = projectMarkdown(source);
+  const list = continueMarkdownList(source, selection, projection);
+  if (list) return list;
   const markers = projection.markers.filter(marker => marker.kind === "blockquote" && marker.from >= lineFrom && marker.to <= from);
   const last = markers.at(-1);
   const prefixTo = last ? last.to + (/[ \t]/.test(source[last.to] ?? "") ? 1 : 0) : lineFrom;
