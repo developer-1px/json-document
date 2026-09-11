@@ -111,3 +111,9 @@ Entity는 원문 전체를 한 구간으로 제공하며 `marker.value`에 해�
 UTF-16 길이는 보존합니다. 이미 같은 상태이거나 해당 위치에 task가 없으면 원문을 반환합니다.
 DOM·History는 소유하지 않으며 소비자가 반환값을 기존 TextEditor에 적용합니다.
 [Markdown caret Usage](/demo/markdown-caret)의 체크박스가 Web adapter를 통해 이 API를 사용합니다.
+
+## 인용문 Enter 편집
+
+`insertMarkdownParagraph(source, {anchor, focus})`는 선택을 줄바꿈으로 교체할 원문 `value`와 다음 `selection`을 반환합니다. 인용 줄은 `> ` 접두사를 다음 줄에 이어 붙이고, 본문이 공백뿐인 인용 줄에서는 접두사를 제거하고 인용 밖의 빈 문단으로 이동합니다. 빈 줄 경계를 남겨 이후 입력이 CommonMark의 lazy continuation으로 다시 인용에 들어가지 않게 합니다. 중첩 인용은 접두사를 유지하고 빈 줄에서는 인용 전체를 나갑니다. 일반 문단과 코드 안의 `>`는 일반 줄바꿈입니다. 저장·Undo는 기존 TextEditor가 소유합니다.
+
+[Markdown caret Usage](/demo/markdown-caret)의 React surface가 이 공개 API를 import하여 contenteditable의 `insertBreak` 명령으로 연결합니다. 붙여넣기에는 적용하지 않습니다.

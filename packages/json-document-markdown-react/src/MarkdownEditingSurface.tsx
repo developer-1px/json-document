@@ -1,3 +1,4 @@
+import { insertMarkdownParagraph } from "@interactive-os/json-document-markdown";
 import { useEffect, useRef, type HTMLAttributes } from "react";
 import type { TextEditor } from "@interactive-os/json-document-editing";
 import { createContentEditableBinding } from "@interactive-os/json-document-contenteditable";
@@ -14,7 +15,12 @@ export function MarkdownEditingSurface({ editor, style, ...props }: MarkdownEdit
     const root = rootRef.current;
     if (!root) return;
     const binding = createContentEditableBinding({
-      document: editor.document, pointer: editor.pointer, editor, root, dom: createMarkdownDOMAdapter({editor}),
+      document: editor.document, pointer: editor.pointer, editor, root,
+      insertBreak: editor => {
+        const next = insertMarkdownParagraph(editor.text, editor.snapshot.selection);
+        return editor.replace(next.value, next.selection);
+      },
+      dom: createMarkdownDOMAdapter({editor}),
     });
     return binding.bind();
   }, [editor]);

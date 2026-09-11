@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createTextEditor } from "@interactive-os/json-document-editing";
-import { createContentEditableBinding, plainTextDOMAdapter } from "../src/index.js";
+import { createContentEditableBinding, plainTextDOMAdapter, type ContentEditableBindingOptions } from "../src/index.js";
 
 const cleanup: Array<() => void> = [];
 afterEach(() => {
@@ -11,13 +11,13 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
-function setup(source = "A **한글** B") {
+function setup(source = "A **한글** B", insertBreak?: ContentEditableBindingOptions["insertBreak"]) {
   const json = createJSONDocument({ source });
   const editor = createTextEditor(json, "/source");
   const root = document.createElement("div");
   root.setAttribute("contenteditable", "true");
   document.body.append(root);
-  const binding = createContentEditableBinding({ document: json, pointer: "/source", root, editor });
+  const binding = createContentEditableBinding({ document: json, pointer: "/source", root, editor, ...(insertBreak ? {insertBreak} : {}) });
   cleanup.push(binding.bind());
   const select = (anchor: number, focus = anchor) => {
     plainTextDOMAdapter.restoreSelection(root, { anchor, focus });
@@ -349,4 +349,25 @@ test("projected deletion preserves the original caret in Undo and yields to comp
   expect(composing.defaultPrevented).toBe(false);
   expect(resolveDeletionSelection).not.toHaveBeenCalled();
   binding.cancel();
+});
+
+
+test("injected break command receives native selection and IME-confirmed source", () => {
+  vi.useFakeTimers();
+  const insertBreak = vi.fn((editor: ReturnType<typeof createTextEditor>) => editor.insert("\n> "));
+  const {root, editor, select, native} = setup("ab", insertBreak);
+  select(1);
+  root.dispatchEvent(new InputEvent("beforeinput", {inputType:"insertParagraph", cancelable:true}));
+  expect(editor.text).toBe("a\n> b");
+  editor.undo();
+  select(1);
+  root.dispatchEvent(new CompositionEvent("compositionstart"));
+  native("a한b", 2);
+  root.dispatchEvent(new KeyboardEvent("keydown", {key:"Enter", code:"Enter", isComposing:true, cancelable:true}));
+  root.dispatchEvent(new CompositionEvent("compositionend", {data:"한"}));
+  vi.runAllTimers();
+  expect(editor.text).toBe("a한\n> b");
+  expect(insertBreak).toHaveBeenCalledTimes(2);
+  editor.undo();
+  expect(editor.text).toBe("a한b");
 });

@@ -45,7 +45,8 @@
     "react": "^18.0.0 || ^19.0.0",
     "@interactive-os/json-document-editing": "^0.1.0-rc.0",
     "@interactive-os/json-document-contenteditable": "^0.1.0-rc.0",
-    "@interactive-os/json-document-markdown-web": "^0.1.0-rc.0"
+    "@interactive-os/json-document-markdown-web": "^0.1.0-rc.0",
+    "@interactive-os/json-document-markdown": "^0.1.0-rc.0"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.2",
@@ -59,6 +60,7 @@
     "vitest": "^4.1.7",
     "@interactive-os/json-document-editing": "*",
     "@interactive-os/json-document-contenteditable": "*",
-    "@interactive-os/json-document-markdown-web": "*"
+    "@interactive-os/json-document-markdown-web": "*",
+    "@interactive-os/json-document-markdown": "*"
   }
 }

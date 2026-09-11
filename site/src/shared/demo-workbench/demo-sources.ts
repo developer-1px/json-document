@@ -1,3 +1,4 @@
+import markdownParagraphSource from "../../../../packages/json-document-markdown/src/paragraph.ts?raw";
 import markdownTasksSource from "../../../../packages/json-document-markdown/src/tasks.ts?raw";
 import markdownMarkersSource from "../../../../packages/json-document-markdown/src/markers.ts?raw";
 import textProjectionSource from "../../../../packages/json-document-contenteditable/src/dom/text-projection.ts?raw";
@@ -284,6 +285,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
+  ["packages/json-document-markdown/src/paragraph.ts", markdownParagraphSource],
   ["packages/json-document-markdown/src/nodes.ts", markdownNodesSource],
   ["packages/json-document-markdown-web/src/markdown-editor.css", markdownEditorCSSSource],
   ["packages/json-document-markdown/src/projection.ts", markdownProjectionSource],
@@ -805,6 +807,7 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-markdown/src/syntax.ts",
   },
   { packageName: "@interactive-os/json-document-markdown", symbol: "createMarkdownParser", sourcePath: "packages/json-document-markdown/src/nodes.ts" },
+  { packageName: "@interactive-os/json-document-markdown", symbol: "insertMarkdownParagraph", sourcePath: "packages/json-document-markdown/src/paragraph.ts" },
   { packageName: "@interactive-os/json-document-markdown", symbol: "setMarkdownTaskChecked", sourcePath: "packages/json-document-markdown/src/tasks.ts" },
   ...["createMarkdownParser", "projectMarkdown", "MarkdownMarker", "MarkdownMarkerKind"].map(symbol => ({
     packageName: "@interactive-os/json-document-markdown", symbol, sourcePath: "packages/json-document-markdown/src/markers.ts",

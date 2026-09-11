@@ -33,6 +33,7 @@ export function createContentEditableBinding({
   pointer,
   root,
   editor,
+  insertBreak = (editor) => editor.insert("\n"),
 }: ContentEditableBindingOptions): ContentEditableBinding {
   if (editor && (editor.document !== document || editor.pointer !== pointer)) {
     throw new TypeError("contenteditable editor must own the bound document and pointer");
@@ -155,8 +156,8 @@ export function createContentEditableBinding({
     if (editor && lease.lineBreakAfterComposition === "requested") {
       const focus = (selection ?? editor.snapshot.selection).focus;
       editor.select({ anchor: focus, focus });
-      trace("command", { command: "insert", text: "\n", reason: "composition-enter" });
-      const inserted = editor.insert("\n");
+      trace("command", { command: "insert-break", reason: "composition-enter" });
+      const inserted = insertBreak(editor);
       if (!inserted.ok) {
         clearActiveLease();
         renderLatest(undefined, true);
@@ -323,8 +324,8 @@ export function createContentEditableBinding({
           if (trailingComposition) finishTrailing();
           const selection = currentDOMSelection();
           if (selection) editor.select(selection);
-          trace("command", { command: "insert", text: "\n", reason: "beforeinput" });
-          const result = editor.insert("\n");
+          trace("command", { command: "insert-break", reason: "beforeinput" });
+          const result = insertBreak(editor);
           return result.ok ? COMMITTED : failure(result.code, result.reason ?? result.code);
         }
         if (inputType.startsWith("format")) {

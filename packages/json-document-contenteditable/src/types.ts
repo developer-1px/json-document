@@ -1,5 +1,5 @@
 import type { JSONDocument, Pointer } from "@interactive-os/json-document";
-import type { TextEditor, TextSelection } from "@interactive-os/json-document-editing";
+import type { EditingResult, TextEditor, TextSelection } from "@interactive-os/json-document-editing";
 export type { TextSelection } from "@interactive-os/json-document-editing";
 
 export interface DOMObservation {
@@ -28,6 +28,8 @@ export interface ContentEditableBindingOptions {
   readonly dom?: TextDOMAdapter;
   /** Optional canonical source editor; replaces direct commits with selection-restoring Editing transactions. */
   readonly editor?: TextEditor;
+  /** Syntax-owned Enter command; paste and native composition text keep their original content. */
+  readonly insertBreak?: (editor: TextEditor) => EditingResult<TextSelection>;
 }
 
 export type ContentEditableBindingResult =

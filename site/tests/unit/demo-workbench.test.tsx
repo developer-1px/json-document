@@ -413,6 +413,7 @@ test("Markdown Usage exposes the canonical text projection and restoration sourc
   expect(sources.map(file => file.path)).toEqual(expect.arrayContaining([
     "packages/json-document-markdown/src/markers.ts",
     "packages/json-document-markdown/src/tasks.ts",
+    "packages/json-document-markdown/src/paragraph.ts",
     "packages/json-document-contenteditable/src/dom/text-projection.ts",
     "packages/json-document-contenteditable/src/dom/text-projection.css",
     "packages/json-document-contenteditable/src/dom/plain-text.ts",

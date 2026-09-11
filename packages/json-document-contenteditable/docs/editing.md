@@ -20,12 +20,12 @@ native/composing lease 중에는 projection을 다시 그리지 않습니다.
 blur/cancel/dispose는 미완료 lease를 폐기합니다.
 
 editor 모드에서 조합 중 Enter는 IME 확정을 허용한 뒤 `compositionend`에서
-`editor.insert("\n")`를 이어갑니다. 같은 Enter가 만드는 native paragraph/line-break
+주입된 `insertBreak` 명령(기본 `editor.insert("\n")`)을 이어갑니다. 같은 Enter가 만드는 native paragraph/line-break
 입력은 중복 반영하지 않습니다. 한글 IME가 `keydown(229) → keyup(13) → keydown(13)`을
 동일한 `timeStamp`로 재전달하는 경우, 중간 keyup 뒤에도 이미 처리한 Enter 상태를 유지합니다.
 실제 release 또는 다른 timestamp의 다음 keydown에서 상태를 해제합니다. 시간 간격에 따른
 일괄 무시는 하지 않으며 키 반복도 허용합니다. 다음 Enter의 `insertParagraph`/`insertLineBreak`도
-`editor.insert("\n")`로 번역해 원문 위치에 줄바꿈 한 개를 삽입합니다.
+같은 `insertBreak` 명령으로 번역합니다. 기본 동작은 원문 위치에 줄바꿈 한 개를 삽입합니다.
 브라우저가 조합 종료 전에 native paragraph/line-break `input`을 이미 처리했다면
 그 DOM 결과를 반영하고 줄바꿈을 추가하지 않습니다. 편집기가 추가한 줄바꿈은
 Undo로 먼저 되돌리고, 그다음 확정한 조합을 되돌립니다. native 줄바꿈은 조합과 함께 되돌립니다. Enter 없이 끝난 조합이나
@@ -124,3 +124,7 @@ Binding은 cancelable `deleteContentBackward`/`deleteContentForward`에서 이 �
 Editing의 `replace`로 반영하고, Undo가 삭제 직전 caret을 복원하도록 원래 선택을 보존합니다.
 IME 조합과 native lease 중에는 이 경로로 가로채지 않습니다. 이는 절대 위치로 표시된
 접두사와 본문의 경계에서 Chrome이 다른 문단을 합치거나 숨긴 문법을 제거하는 것을 막습니다.
+
+### 문법별 줄바꿈 명령
+
+`ContentEditableBindingOptions.insertBreak?: (editor: TextEditor) => EditingResult<TextSelection>`로 Enter/Shift+Enter의 문법 편집 명령을 주입할 수 있습니다. 생략하면 `editor.insert("\n")`을 호출합니다. 현재 DOM 선택을 먼저 동기화하며 IME Enter 확정 후 줄바꿈도 같은 명령을 사용합니다. 붙여넣기와 일반 텍스트 입력에는 호출하지 않습니다. [Markdown Usage](/demo/markdown-caret)는 Markdown 원문 API를 이 경계에 연결합니다.

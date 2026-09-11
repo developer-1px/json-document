@@ -83,3 +83,31 @@ test("reading presentation retains code text, table rows and one thematic rule",
   expect(widths.marker).toBeCloseTo(widths.block,1);
   await page.screenshot({path:"/tmp/bear-markers-final.png",fullPage:true});
 });
+
+
+test("quote Enter continues the box, exits on empty content, and restores with Undo", async ({page}) => {
+  await page.goto("/applications/bear");
+  const editor = page.getByRole("textbox", {name:"Markdown 문서"});
+  await editor.click();
+  await page.keyboard.press("ControlOrMeta+a");
+  await editor.evaluate(root => {
+    const data = new DataTransfer(); data.setData("text/plain", "> first");
+    root.dispatchEvent(new ClipboardEvent("paste", {clipboardData:data,bubbles:true,cancelable:true}));
+  });
+  await page.keyboard.press("Enter");
+  await expect.poll(() => editor.textContent()).toBe("> first\n> ");
+  await page.keyboard.insertText("second");
+  await expect.poll(() => editor.textContent()).toBe("> first\n> second");
+  await expect(editor.locator('[data-markdown-kind="blockquote"]')).toHaveCount(1);
+  await page.keyboard.press("Enter");
+  await expect.poll(() => editor.textContent()).toBe("> first\n> second\n> ");
+  await page.keyboard.press("Enter");
+  await expect.poll(() => editor.textContent()).toBe("> first\n> second\n\n");
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect.poll(() => editor.textContent()).toBe("> first\n> second\n> ");
+  await page.keyboard.press("ControlOrMeta+Shift+z");
+  await expect.poll(() => editor.textContent()).toBe("> first\n> second\n\n");
+  await page.keyboard.insertText("outside");
+  await expect.poll(() => editor.textContent()).toBe("> first\n> second\n\noutside");
+  await expect(editor.locator('[data-markdown-kind="blockquote"]')).not.toContainText("outside");
+});
