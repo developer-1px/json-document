@@ -60,14 +60,14 @@ test("heading marker navigation uses source positions and restores the shared bo
   const root = document.createElement("div"); document.body.append(root);
   const dom = createMarkdownDOMAdapter(); dom.render(root, "### 😀제목\n\n본문");
   expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:4}, "backward", false)).toEqual({anchor:3, focus:3});
-  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:3}, "backward", true)).toEqual({anchor:4, focus:2});
-  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:2}, "forward", false)).toEqual({anchor:4, focus:4});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:3}, "backward", true)).toEqual({anchor:4, focus:0});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:0}, "forward", false)).toEqual({anchor:4, focus:4});
   expect(dom.resolveHorizontalSelection!(root, {anchor:4, focus:4}, "forward", false)).toBeNull();
   dom.restoreSelection(root, {anchor:4, focus:4});
   const body = document.createTreeWalker(root.querySelector('[data-markdown-kind="text"]')!, NodeFilter.SHOW_TEXT).nextNode();
   expect(document.getSelection()!.focusNode).toBe(body);
   expect(document.getSelection()!.focusOffset).toBe(0);
-  dom.restoreSelection(root, {anchor:4, focus:2});
-  expect(dom.observe(root).selection).toEqual({anchor:4, focus:2});
+  dom.restoreSelection(root, {anchor:4, focus:0});
+  expect(dom.observe(root).selection).toEqual({anchor:4, focus:0});
   expect(document.getSelection()!.anchorNode).toBe(body);
 });

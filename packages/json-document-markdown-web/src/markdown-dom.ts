@@ -1,6 +1,6 @@
 import { createMarkdownParser, type MarkdownParser } from "@interactive-os/json-document-markdown";
 import { diffText } from "@interactive-os/json-document-editing";
-import { plainTextDOMAdapter, renderTextCaretBoundary, type TextDOMAdapter, type TextSelection } from "@interactive-os/json-document-contenteditable";
+import { plainTextDOMAdapter, renderTextCaretBoundary, createTextProjectionDOMAdapter, type TextProjection, type TextDOMAdapter, type TextSelection } from "@interactive-os/json-document-contenteditable";
 import { sourceRuns, type SourceRun } from "./source-runs.js";
 
 interface RenderedRun {
@@ -38,29 +38,8 @@ export function createMarkdownDOMAdapter(): TextDOMAdapter {
     surface.selection = selection;
     surface.observer.takeRecords();
   };
-  return {
+  return createTextProjectionDOMAdapter({
     observe: (root) => plainTextDOMAdapter.observe(root),
-    resolveHorizontalSelection(root, selection, direction, extend) {
-      let result: TextSelection | null = null;
-      const collapsed = selection.anchor === selection.focus;
-      const visit = ({ run, children }: RenderedRun): void => {
-        if ("data-markdown-heading-marker" in run.attributes) {
-          const focus = !extend && !collapsed
-            ? (direction === "backward" ? Math.min(selection.anchor, selection.focus) : Math.max(selection.anchor, selection.focus))
-            : selection.focus;
-          if (focus >= run.from && focus <= run.to) {
-            if (!extend && !collapsed) result = { anchor: focus, focus };
-            else if (direction === "backward" ? focus > run.from : focus < run.to) {
-              const next = focus + (direction === "backward" ? -1 : 1);
-              result = { anchor: extend ? selection.anchor : next, focus: next };
-            }
-          }
-        }
-        children.forEach(visit);
-      };
-      surfaces.get(root)?.runs.forEach(visit);
-      return result;
-    },
     render(root, source, selection = null) {
       let surface = surfaces.get(root);
       if (!surface) {
@@ -87,38 +66,20 @@ export function createMarkdownDOMAdapter(): TextDOMAdapter {
       }
       reveal(surface, selection);
     },
-    restoreSelection(root, selection) {
+    restoreSelection(root, selection, options) {
       const surface = surfaces.get(root);
       if (surface) reveal(surface, selection);
-      // The end of an absolutely positioned prefix and the start of its body
-      // share a source offset. Prefer the body so native arrows can leave the gutter.
-      const bodyStart = (offset: number): Text | null => {
-        let result: Text | null = null;
-        const visit = (entry: RenderedRun): void => {
-          if (entry.run.to === offset && "data-markdown-heading-marker" in entry.run.attributes && entry.text) {
-            const walker = root.ownerDocument.createTreeWalker(root, 4);
-            walker.currentNode = entry.text;
-            result = walker.nextNode() as Text | null;
-          }
-          entry.children.forEach(visit);
-        };
-        surface?.runs.forEach(visit);
-        return result;
-      };
-      const anchor = bodyStart(selection.anchor), focus = bodyStart(selection.focus);
-      const native = root.ownerDocument.getSelection();
-      const observed = plainTextDOMAdapter.observe(root).selection;
-      if (observed?.anchor === selection.anchor && observed.focus === selection.focus
-        && (!anchor || (native?.anchorNode === anchor && native.anchorOffset === 0))
-        && (!focus || (native?.focusNode === focus && native.focusOffset === 0))) return true;
-      if (!plainTextDOMAdapter.restoreSelection(root, selection)) return false;
-      if (native && (anchor || focus)) native.setBaseAndExtent(
-        anchor ?? native.anchorNode!, anchor ? 0 : native.anchorOffset,
-        focus ?? native.focusNode!, focus ? 0 : native.focusOffset,
-      );
-      return true;
+      return plainTextDOMAdapter.restoreSelection(root, selection, options);
     },
-  };
+  }, root => {
+    const result: TextProjection[] = [];
+    const visit = ({run, element, children}: RenderedRun): void => {
+      if (run.projection) result.push({from: run.from, element, ...run.projection});
+      children.forEach(visit);
+    };
+    surfaces.get(root)?.runs.forEach(visit);
+    return result;
+  });
 }
 
 /** Reuse unchanged prefixes/suffixes and preserve text-node identity while typing. */

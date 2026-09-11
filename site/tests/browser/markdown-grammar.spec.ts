@@ -29,7 +29,7 @@ test("CommonMark/GFM presentation preserves source, block edits, copy and undo",
   await expect(editor.locator('[data-markdown-kind="emphasis"]')).toHaveCSS("font-style", "italic");
   await expect(editor.locator('[data-markdown-kind="delete"]')).toHaveCSS("text-decoration-line", "line-through");
   await editor.locator('[data-markdown-kind="heading"]').first().click();
-  await expect(editor.locator('[data-markdown-kind="heading"]').first().locator('[data-markdown-heading-marker]')).toHaveCSS("color", "rgba(0, 0, 0, 0)");
+  await expect(editor.locator('[data-markdown-kind="heading"]').first().locator('[data-text-projection-source]')).toHaveCSS("color", "rgba(0, 0, 0, 0)");
   await editor.evaluate(root => {
     const first = document.createTreeWalker(root, NodeFilter.SHOW_TEXT).nextNode()!;
     document.getSelection()!.setBaseAndExtent(first, 0, first, 0);
@@ -80,8 +80,8 @@ test("heading gutters preserve presentation, source, accessible names and editin
     const heading = editor.getByRole("heading", { level: index + 1, name: title, exact: true });
     await expect(heading).toBeVisible();
     await heading.click();
-    await expect(heading.locator(':scope > [data-markdown-heading-marker]')).toHaveCSS("color", "rgba(0, 0, 0, 0)");
-    const content = await heading.evaluate(element => getComputedStyle(element, "::before").content);
+    await expect(heading.locator('[data-text-projection-source]')).toHaveCSS("color", "rgba(0, 0, 0, 0)");
+    const content = await heading.locator("[data-markdown-heading-marker]").evaluate(element => getComputedStyle(element, "::before").content);
     expect(content).toContain(`H${index + 1}`);
   }
   const third = editor.getByRole("heading", { level: 3 });
@@ -93,7 +93,7 @@ test("heading gutters preserve presentation, source, accessible names and editin
   });
   await page.keyboard.insertText(" 새 문장");
   await expect(third).toContainText(" 새 문장");
-  await expect(third.locator(':scope > [data-markdown-heading-marker]')).toHaveCSS("color", "rgba(0, 0, 0, 0)");
+  await expect(third.locator('[data-text-projection-source]')).toHaveCSS("color", "rgba(0, 0, 0, 0)");
   await page.keyboard.press("ControlOrMeta+z");
   await expect.poll(() => editor.textContent()).toBe(documentSource);
   await page.keyboard.press("ControlOrMeta+a");
@@ -109,10 +109,7 @@ test("heading gutters preserve presentation, source, accessible names and editin
   await page.setViewportSize({ width: 375, height: 812 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   for (const heading of await editor.getByRole("heading").all()) {
-    const markerLeft = await heading.evaluate(element => {
-      const marker = getComputedStyle(element, "::before");
-      return element.getBoundingClientRect().left + parseFloat(marker.left);
-    });
+    const markerLeft = await heading.locator("[data-markdown-heading-marker]").evaluate(element => element.getBoundingClientRect().left);
     expect(markerLeft).toBeGreaterThanOrEqual(0);
   }
   await page.screenshot({ path: "/tmp/bear-heading-gutters-mobile.png" });

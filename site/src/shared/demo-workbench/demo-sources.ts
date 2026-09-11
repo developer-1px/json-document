@@ -1,3 +1,5 @@
+import textProjectionSource from "../../../../packages/json-document-contenteditable/src/dom/text-projection.ts?raw";
+import textProjectionCSSSource from "../../../../packages/json-document-contenteditable/src/dom/text-projection.css?raw";
 import interactionRecordingSource from "../../../../packages/json-document-web/src/interaction-recording.ts?raw";
 import interactionRecordingDOMSource from "../../../../packages/json-document-web/src/interaction-recording-dom.ts?raw";
 import interactionRecordingArchiveSource from "../../../../packages/json-document-web/src/interaction-recording-archive.ts?raw";
@@ -394,6 +396,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
   ["packages/json-document-contenteditable/src/lease.ts", contentEditableLeaseSource],
   ["packages/json-document-contenteditable/src/dom/plain-text.ts", plainTextDOMSource],
+  ["packages/json-document-contenteditable/src/dom/text-projection.ts", textProjectionSource],
+  ["packages/json-document-contenteditable/src/dom/text-projection.css", textProjectionCSSSource],
   ["packages/json-document-contenteditable/src/dom/text-index.ts", textDOMIndexSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
   ["packages/json-document-collaboration/src/editing-index.ts", collaborationEditingSource],
@@ -978,6 +982,10 @@ const registeredPublicUsages = [
     symbol: "createContentEditableBinding",
     sourcePath: "packages/json-document-contenteditable/src/lease.ts",
   },
+  ...["packages/json-document-contenteditable/src/dom/text-projection.ts", "packages/json-document-contenteditable/src/dom/text-projection.css"].map(sourcePath => ({
+    packageName: "@interactive-os/json-document-contenteditable", symbol: "createTextProjectionDOMAdapter", sourcePath,
+  })),
+  { packageName: "@interactive-os/json-document-contenteditable", symbol: "restoreTextDOMSelection", sourcePath: "packages/json-document-contenteditable/src/dom/plain-text.ts" },
   {
     packageName: "@interactive-os/json-document-contenteditable",
     symbol: "plainTextDOMAdapter",

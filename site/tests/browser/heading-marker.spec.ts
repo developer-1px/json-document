@@ -63,15 +63,32 @@ for (const depth of [1, 2, 3, 4, 5, 6]) {
     });
     await page.keyboard.press("ArrowLeft");
     await expect.poll(position).toBe(depth);
-    const geometry = await heading.evaluate(element => {
-      const range = document.getSelection()!.getRangeAt(0).getBoundingClientRect();
-      return { x: range.x, height: range.height, headingX: element.getBoundingClientRect().x };
-    });
-    expect(geometry.height).toBeGreaterThan(0);
-    expect(geometry.x).toBeGreaterThanOrEqual(0);
-    expect(geometry.x).toBeLessThan(geometry.headingX);
+    const marker = heading.locator('[data-markdown-heading-marker]');
+    await expect(marker).toHaveAttribute("data-text-projection-edge", "after");
+    const assertEdge = async (side: "before" | "after") => {
+      const geometry = await marker.evaluate(element => {
+        const box = element.getBoundingClientRect();
+        const caret = getComputedStyle(element, "::after");
+        return {left:box.left, width:box.width, height:box.height, caretLeft:parseFloat(caret.left),
+          caretTop:parseFloat(caret.top), caretHeight:parseFloat(caret.height)};
+      });
+      expect(geometry.left).toBeGreaterThanOrEqual(0);
+      expect(geometry.width).toBeGreaterThan(0);
+      expect(geometry.caretLeft).toBeCloseTo(side === "before" ? 0 : geometry.width, 1);
+      expect(geometry.caretTop).toBe(0);
+      expect(geometry.caretHeight).toBeCloseTo(geometry.height, 1);
+    };
+    await assertEdge("after");
+    await page.keyboard.press("ArrowLeft");
+    await expect.poll(position).toBe(0);
+    await expect(marker).toHaveAttribute("data-text-projection-edge", "before");
+    await assertEdge("before");
+    await page.keyboard.press("ArrowRight");
+    await expect.poll(position).toBe(depth);
+    await expect(marker).toHaveAttribute("data-text-projection-edge", "after");
     await page.keyboard.press("ArrowRight");
     await expect.poll(position).toBe(depth + 1);
+    await expect(editor).not.toHaveAttribute("data-text-projection-caret");
     await page.keyboard.press("ArrowRight");
     await expect.poll(position).toBe(depth + 2);
     await page.keyboard.press("ArrowLeft");
@@ -82,7 +99,7 @@ for (const depth of [1, 2, 3, 4, 5, 6]) {
       root.dispatchEvent(new ClipboardEvent("copy", { clipboardData: data, bubbles: true, cancelable: true }));
       return data.getData("text/plain");
     });
-    expect(copied).toBe("# ");
+    expect(copied).toBe("#".repeat(depth) + " ");
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("ArrowLeft");
     await expect.poll(position).toBe(depth);

@@ -63,3 +63,51 @@ Markdown처럼 첫/마지막 문법 기호가 숨겨진 projection에서도 `[0,
 유지합니다. modifier 없는 좌우 방향키와 Shift+좌우에만 적용하고 IME 조합·native lease 중에는
 호출하지 않습니다. Markdown Usage의 제목 표시가 이 계약으로 원문 접두사와 본문 경계를
 연결합니다. 입력·삭제·history를 별도 구현하지 않습니다.
+
+
+## 원문 구간의 시각적 투영
+
+`createTextProjectionDOMAdapter(base, projections)`는 원문을 보존하는 `TextDOMAdapter`를
+감싸 투영 구간의 이동과 시각적 caret을 제공합니다. 문법 파싱·표시 문구·문서 변경은
+소유하지 않습니다. `base`는 source offset과 DOM 위치를 대응하고 `restoreSelection`의
+세 번째 인자 `TextDOMSelectionOptions.affinity`를 존중해야 합니다.
+
+`TextProjection`의 `from`/`to`는 한 단위로 표시하는 UTF-16 원문 범위이며,
+`element`는 실제 표시 영역입니다. 선택적 `following`은 숨긴 구분자 뒤의 다음 보이는
+원문 위치입니다. 제공자는 현재 DOM과 일치하는, 정렬된 겹치지 않는 유효 범위를 반환합니다
+(`0 <= from < to <= following <= source.length`, following 생략 시 to).
+구간은 surrogate pair를 자르지 않아야 합니다.
+
+```ts
+import { createTextProjectionDOMAdapter } from "@interactive-os/json-document-contenteditable";
+import "@interactive-os/json-document-contenteditable/text-projection.css";
+
+// sourcePreservingDOM은 자체 문법 투영을 담당하는 TextDOMAdapter입니다.
+const dom = createTextProjectionDOMAdapter(sourcePreservingDOM, root => [
+  { from: 0, to: 7, following: 8, element: root.querySelector<HTMLElement>("[data-reference]")! },
+]);
+// 예: 원문 "[[key]] 본문"에서 0 ↔ 7 ↔ 8로 이동합니다.
+// createContentEditableBinding({ document, pointer, root, editor, dom })로 연결합니다.
+```
+
+CSS 소비자는 `element`를 position 기준 요소로 만들고, 표시 문구는 원문 text에 추가하지
+않습니다. 원문 자식에 `data-text-projection-source`를 붙이면 편집 가능한 투명한 원문을
+유지합니다. CSS 생성 콘텐츠를 쓰는 경우 빈 대체 텍스트로 접근성 이름의 중복을 피합니다.
+공용 CSS는 `data-text-projection-edge`의 before/after에 따라 요소의 좌우 끝에 caret을
+그립니다. 크기 변경·스크롤 때도 같은 요소의 좌표를 사용하며 `--text-projection-caret`로
+색을 지정합니다. 마커 안에서 접힌 선택에만 적용하며 본문·범위 선택·blur에서는 해제합니다.
+
+좌우 이동은 from/to/following 경계로 이동하며 Shift는 원래 anchor를 유지합니다.
+외부에서 지정한 구간 내부의 원문 선택을 변경하지는 않으며, 그 caret은 가까운 시각적
+경계로 표시합니다. 삽입·삭제 단위는 바꾸지 않으므로 문서 모델의 atom이 아닙니다.
+키 해석은 Web keyboard adapter, 선택 적용과 IME lease는 contenteditable binding,
+원문 편집과 Undo는 TextEditor가 담당합니다.
+
+`restoreTextDOMSelection(root, selection, { affinity })`는 동일한 source offset을
+공유하는 text node 중 backward(앞 노드 끝) 또는 forward(다음 노드 시작)를 골라
+DOM 선택을 한 번만 복원합니다. `plainTextDOMAdapter.restoreSelection`도 같은 옵션을
+지원합니다. 투영은 following에서 forward를 사용해 본문으로 빠져나옵니다.
+
+[Markdown caret Usage](/demo/markdown-caret)는 이 API를 사용하는 제목 projection을
+실행합니다. Source에서 Markdown의 public import를 따라 공용 투영·CSS·DOM 복원 정본까지
+확인할 수 있습니다. 공용 모듈의 별도 계약 테스트는 Markdown 없는 `[[key]]` fixture를 사용합니다.

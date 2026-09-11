@@ -4,7 +4,9 @@
   "description": "React contenteditable root bound to a local json-document string pointer.",
   "type": "module",
   "license": "MIT",
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {
@@ -22,13 +24,15 @@
     "!dist/.tsbuildinfo",
     "README.md",
     "LICENSE",
-    "docs"
+    "docs",
+    "src/dom/text-projection.css"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./text-projection.css": "./src/dom/text-projection.css"
   },
   "scripts": {
     "clean": "rm -rf dist",

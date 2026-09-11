@@ -9,6 +9,7 @@ export interface SourceRun extends SourceRange {
   readonly children?: ReadonlyArray<SourceRun>;
   readonly owner?: SourceRange;
   readonly conceal?: boolean | "always";
+  readonly projection?: { readonly to: number; readonly following: number };
 }
 
 const tags: Record<MarkdownNodeKind, string> = {
@@ -47,10 +48,12 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
   });
   const gap = (from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun => {
     if (parent?.kind === "heading" && from === parent.from && /^ {0,3}#{1,6}(?:[ \t]+|$)/.test(source.slice(from, to))) {
-      return { ...raw(from, to, parent), attributes: {
-        "data-markdown-delimiter": "", "data-markdown-heading-marker": "", "aria-hidden": "true",
-        style: `--markdown-marker-length: ${to - from}`,
-      } };
+      const markerEnd = from + source.slice(from, to).match(/^ {0,3}#{1,6}/)![0].length;
+      return { kind: "delimiter", tag: "span", from, to,
+        projection: { to: markerEnd, following: to },
+        attributes: { "data-markdown-heading-marker": "", "data-markdown-label": `H${parent.depth}`, "aria-hidden": "true" },
+        children: [{ ...raw(from, to), attributes: { "data-text-projection-source": "" } }],
+      };
     }
     if (parent?.kind === "listItem" && typeof parent.checked === "boolean" && /\[[ xX]\]/.test(source.slice(from, to))) {
       return { kind: "delimiter", tag: "span", from, to, owner: parent,

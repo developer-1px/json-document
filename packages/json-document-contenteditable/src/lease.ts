@@ -262,12 +262,12 @@ export function createContentEditableBinding({
 
     if (editor && event.type === "keydown" && activeLease?.phase !== "composing") {
       const keyboardEvent = event as KeyboardEvent;
+      const command = keyboard.resolve(keyboardEvent);
       if (!activeLease && !trailingComposition && !keyboardEvent.isComposing && keyboardEvent.keyCode !== 229
-        && !keyboardEvent.metaKey && !keyboardEvent.ctrlKey && !keyboardEvent.altKey
-        && (keyboardEvent.key === "ArrowLeft" || keyboardEvent.key === "ArrowRight")) {
+        && command?.type === "move" && (command.direction === "left" || command.direction === "right")) {
         const selection = currentDOMSelection();
         const next = selection && dom.resolveHorizontalSelection?.(root, selection,
-          keyboardEvent.key === "ArrowLeft" ? "backward" : "forward", keyboardEvent.shiftKey);
+          command.direction === "left" ? "backward" : "forward", command.operation === "extend");
         if (next) {
           event.preventDefault();
           editor.select(next);
@@ -286,7 +286,6 @@ export function createContentEditableBinding({
         editor.select(selection);
         return renderLatest(selection, true);
       }
-      const command = keyboard.resolve(keyboardEvent);
       if (command?.type === "undo" || command?.type === "redo") {
         event.preventDefault();
         cancelInternal();

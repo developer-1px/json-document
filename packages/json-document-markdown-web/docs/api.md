@@ -9,9 +9,11 @@
 제목은 편집 중에도 제목 스타일을 유지하며 접두사·닫는 `#`·Setext 밑줄을 숨깁니다.
 왼쪽 여백의 `H1`~`H6`는 CSS 표시이며 DOM text와 복사 원문에 추가되지 않습니다.
 ATX 제목의 접두사 `# `는 `display: none`으로 제거하지 않고 표시 아래 투명한 원문으로
-배치합니다. 각 원문 위치는 native caret을 가집니다. `resolveHorizontalSelection`은 접두사 구간의
-좌우·Shift 이동을 원문 위치로 계산하고, `restoreSelection`은 접두사 끝과 본문 시작이
-겹치는 위치에서 본문을 선택해 커서가 경계에 갇히지 않게 합니다. 키 이벤트와 선택 적용은
+배치합니다. `#` 구간과 실제 H 표시 요소는 contenteditable의 공용
+`createTextProjectionDOMAdapter`에 전달합니다. 방향키는 마커 앞·뒤·본문 시작을 이동하고,
+커서는 마커 요소의 좌우 끝에 맞춰 표시합니다. 제목 마커 내부를 글자별로 이동하지 않습니다.
+공용 `restoreSelection`의 affinity가 본문 시작 위치를 선택하므로 Markdown은 DOM Selection을
+직접 다시 설정하지 않습니다. 키 해석은 Web keyboard adapter, 선택 적용과 IME lease는
 contenteditable binding, 입력·삭제·실행 취소는 기존 Editing History가 담당합니다. `#`를 추가하거나 지우면
 파서가 제목 단계를 다시 계산하며, 마지막 `#`를 지우면 일반 문장으로 바뀝니다.
 닫는 `#`와 Setext 밑줄은 기존 숨김 표현을 유지합니다.
@@ -22,7 +24,7 @@ contenteditable binding, 입력·삭제·실행 취소는 기존 Editing History
 숨긴 원문도 text node로 남고, 이미지나 표시 전용 값은 source에 텍스트를 추가하지 않습니다.
 
 기본 표현은 public CSS를 한 번 import합니다. `--markdown-muted`, `--markdown-accent`,
-`--markdown-code-background`, `--markdown-border`, `--markdown-caret` 변수로 제품 semantic token을 주입합니다.
+`--markdown-code-background`, `--markdown-border`, `--text-projection-caret` 변수로 제품 semantic token을 주입합니다.
 사이트와 Bear가 같은 스타일을 소비합니다. `data-markdown-kind`, `data-markdown-active`,
 `data-markdown-delimiter`가 문법·편집 상태를 나타냅니다.
 
@@ -61,7 +63,8 @@ const dispose = binding.bind();
 앞뒤의 같은 구조는 기존 DOM 요소와 Text node를 재사용합니다. 블록용 DOM도 span으로
 구성하여 contenteditable의 원문 매핑에 암묵적인 개행을 추가하지 않습니다.
 
-선택만 바뀌면 파싱·DOM 재구성을 하지 않습니다. 전체 `innerHTML` 직렬화 대신
+선택만 바뀌면 문법 파싱을 하지 않습니다. 투영 caret의 표시 속성 변경도 observer가
+관측하므로 다음 render에서 원문이 같아도 DOM 정합성을 다시 확인할 수 있습니다. 전체 `innerHTML` 직렬화 대신
 MutationObserver로 native DOM 변경을 추적합니다. native 서식·자식 요소가 변했으면
 같은 원문이어도 다음 render에서 복원합니다. 원문 위치 매핑은 contenteditable의
 DOM 변경 단위 캐시를 공유합니다. 문법이 불확실할 때의 전체 파싱과 초기 DOM 생성,

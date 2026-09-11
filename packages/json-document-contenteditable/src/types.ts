@@ -7,10 +7,14 @@ export interface DOMObservation {
   readonly selection: TextSelection | null;
 }
 
+export interface TextDOMSelectionOptions {
+  readonly affinity?: (offset: number) => "backward" | "forward";
+}
+
 export interface TextDOMAdapter {
   observe(root: HTMLElement): DOMObservation;
   render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
-  restoreSelection(root: HTMLElement, selection: TextSelection): boolean;
+  restoreSelection(root: HTMLElement, selection: TextSelection, options?: TextDOMSelectionOptions): boolean;
   /** Resolve a source-coordinate step across projected DOM boundaries; null keeps native navigation. */
   resolveHorizontalSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward", extend: boolean): TextSelection | null;
 }
