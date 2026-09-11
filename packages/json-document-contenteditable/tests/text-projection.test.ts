@@ -144,3 +144,14 @@ test("plain source rendering retains the live text node when only selection chan
   plainTextDOMAdapter.render(root, "changed");
   expect(root.textContent).toBe("changed");
 });
+
+
+test("atomic horizontal movement includes its separator without an interior stop", () => {
+  const {root, marker} = fixture();
+  const adapter = createTextProjectionDOMAdapter(plainTextDOMAdapter, () => [{from:0,to:7,following:8,atomic:true,element:marker}]);
+  expect(adapter.resolveHorizontalSelection!(root,{anchor:0,focus:0},"forward",false)).toEqual({anchor:8,focus:8});
+  expect(adapter.resolveHorizontalSelection!(root,{anchor:8,focus:8},"backward",false)).toEqual({anchor:0,focus:0});
+  expect(adapter.resolveHorizontalSelection!(root,{anchor:0,focus:0},"forward",true)).toEqual({anchor:0,focus:8});
+  expect(adapter.resolveHorizontalSelection!(root,{anchor:8,focus:8},"backward",true)).toEqual({anchor:8,focus:0});
+  expect(adapter.resolveHorizontalSelection!(root,{anchor:0,focus:8},"forward",false)).toEqual({anchor:8,focus:8});
+});
