@@ -57,16 +57,12 @@ HTML은 실행하지 않는 원문으로 표시합니다. 체크 상태는 원�
 ```ts
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createTextEditor } from "@interactive-os/json-document-editing";
-import { createContentEditableBinding } from "@interactive-os/json-document-contenteditable";
-import { createMarkdownDOMAdapter } from "@interactive-os/json-document-markdown-web";
+import { createMarkdownEditingBinding } from "@interactive-os/json-document-markdown-web";
 import "@interactive-os/json-document-markdown-web/markdown-editor.css";
 
 const document = createJSONDocument("A **source**");
 const editor = createTextEditor(document);
-const binding = createContentEditableBinding({
-  document, pointer: "", editor, root,
-  dom: createMarkdownDOMAdapter({ editor }),
-});
+const binding = createMarkdownEditingBinding({ editor, root });
 const dispose = binding.bind();
 // dispose() releases DOM listeners and native leases.
 ```
@@ -112,3 +108,14 @@ Markdown 문자열이 정본이고 CommonMark + GFM은 문법 의미를 결정�
 ## 보이는 줄을 따르는 수직 이동
 
 `createMarkdownDOMAdapter`는 contenteditable의 공개 `createTextNavigationDOMAdapter`와 `createTextProjectionDOMAdapter`를 조합합니다. ↑↓는 숨긴 원문 기호 대신 보이는 본문 줄을 따라 가로 위치를 유지하고, Shift는 원래 anchor를 유지합니다. 별도의 Markdown 문법별 방향키 분기는 없습니다. [공용 화면 줄 이동 계약](/docs/api/contenteditable)과 [Usage](/demo/markdown-caret)에서 문서 끝·빈 줄·스크롤·native fallback의 범위를 확인할 수 있습니다.
+
+## 프레임워크 독립 Markdown 편집 binding
+
+`createMarkdownEditingBinding({ editor, root }): ContentEditableBinding`는 Markdown DOM,
+인용 Enter 이어 쓰기·빈 줄 탈출, task와 기존 Editing History를 한 계약으로 연결합니다.
+`MarkdownEditingBindingOptions`는 `TextEditor`와 `HTMLElement`를 요구합니다.
+`bind()`가 반환하는 해제 함수를 호출하면 contenteditable의 입력 lease와 이벤트 연결을 해제합니다.
+호스트는 root의 `contentEditable`, 접근성 속성, 레이아웃과 공개 CSS import를 담당합니다.
+React `MarkdownEditingSurface`와 직접 Web 소비는 이 API를 함께 사용합니다.
+저수준 `createMarkdownDOMAdapter`는 DOM 투영만 필요한 소비자를 위해 유지합니다.
+[Usage](/demo/markdown-caret)의 소스에서 binding과 문법 명령까지 추적할 수 있습니다.

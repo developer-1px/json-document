@@ -1,7 +1,7 @@
 ## Markdown 원문 편집 surface
 
-`MarkdownEditingSurface`는 `TextEditor`를 받아 Markdown Web projection과 기존
-contenteditable 입력 수명을 React에 연결합니다. React는 편집 DOM의 children을
+`MarkdownEditingSurface`는 `TextEditor`를 받아 Markdown Web의 공개
+`createMarkdownEditingBinding` 생성·해제를 React 수명에 연결합니다. React는 편집 DOM의 children을
 관리하지 않습니다. 문서 모델·명령·selection·history는 Editing이 소유합니다.
 
 ```tsx
@@ -31,4 +31,4 @@ streaming용 문법 보정 결과는 편집 원문에 기록하지 않습니다.
 todo 전체를 한 번에 지우며, Undo 한 번으로 복원합니다. 기호 표시와 원자 삭제 정책은
 Markdown Web과 공용 contenteditable 투영을 사용합니다.
 
-인용문 Enter는 Markdown의 `insertMarkdownParagraph`를 공용 contenteditable `insertBreak`에 연결합니다. 내용이 있으면 인용을 이어 쓰고, 빈 인용 줄에서는 일반 문단으로 나갑니다. 결과는 기존 editor에 한 번 적용하므로 Undo/Redo와 원문 선택을 유지합니다.
+인용문 Enter 연결은 Markdown Web binding이 소유하며 Markdown의 `insertMarkdownParagraph`를 공용 contenteditable `insertBreak`에 연결합니다. 내용이 있으면 인용을 이어 쓰고, 빈 인용 줄에서는 일반 문단으로 나갑니다. 결과는 기존 editor에 한 번 적용하므로 Undo/Redo와 원문 선택을 유지합니다.

@@ -414,6 +414,7 @@ test("Markdown Usage exposes the canonical text projection and restoration sourc
     "packages/json-document-markdown/src/markers.ts",
     "packages/json-document-markdown/src/tasks.ts",
     "packages/json-document-markdown/src/paragraph.ts",
+    "packages/json-document-markdown-web/src/editing-binding.ts",
     "packages/json-document-contenteditable/src/dom/text-projection.ts",
     "packages/json-document-contenteditable/src/dom/text-projection.css",
     "packages/json-document-contenteditable/src/dom/plain-text.ts",

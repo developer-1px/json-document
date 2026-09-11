@@ -1,3 +1,4 @@
+import markdownBindingSource from "../../../../packages/json-document-markdown-web/src/editing-binding.ts?raw";
 import textNavigationSource from "../../../../packages/json-document-contenteditable/src/dom/text-navigation.ts?raw";
 import caretVisibilitySource from "../../../../packages/json-document-contenteditable/src/dom/caret-visibility.ts?raw";
 import markdownParagraphSource from "../../../../packages/json-document-markdown/src/paragraph.ts?raw";
@@ -287,6 +288,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
+  ["packages/json-document-markdown-web/src/editing-binding.ts", markdownBindingSource],
   ["packages/json-document-markdown/src/paragraph.ts", markdownParagraphSource],
   ["packages/json-document-contenteditable/src/dom/text-navigation.ts", textNavigationSource],
   ["packages/json-document-contenteditable/src/dom/caret-visibility.ts", caretVisibilitySource],
@@ -811,6 +813,9 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-markdown/src/syntax.ts",
   },
   { packageName: "@interactive-os/json-document-markdown", symbol: "createMarkdownParser", sourcePath: "packages/json-document-markdown/src/nodes.ts" },
+  ...["editing-binding.ts", "markdown-dom.ts", "source-runs.ts", "markdown-editor.css"].map(file => ({
+    packageName: "@interactive-os/json-document-markdown-web", symbol: "createMarkdownEditingBinding", sourcePath: `packages/json-document-markdown-web/src/${file}`,
+  })),
   { packageName: "@interactive-os/json-document-markdown", symbol: "insertMarkdownParagraph", sourcePath: "packages/json-document-markdown/src/paragraph.ts" },
   { packageName: "@interactive-os/json-document-markdown", symbol: "setMarkdownTaskChecked", sourcePath: "packages/json-document-markdown/src/tasks.ts" },
   ...["createMarkdownParser", "projectMarkdown", "MarkdownMarker", "MarkdownMarkerKind"].map(symbol => ({

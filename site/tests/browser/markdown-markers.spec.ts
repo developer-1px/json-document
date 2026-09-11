@@ -85,9 +85,19 @@ test("reading presentation retains code text, table rows and one thematic rule",
 });
 
 
-test("quote Enter continues the box, exits on empty content, and restores with Undo", async ({page}) => {
+for (const direct of [false, true]) test(`quote Enter continues the box, exits on empty content, and restores with Undo (direct Web: ${direct})`, async ({page}) => {
   await page.goto("/applications/bear");
-  const editor = page.getByRole("textbox", {name:"Markdown 문서"});
+  if (direct) await page.evaluate(async packageRoot => {
+    const {createMarkdownEditingBinding} = await import(/* @vite-ignore */ `/@fs${packageRoot}json-document-markdown-web/src/index.ts`);
+    const {createJSONDocument} = await import(/* @vite-ignore */ `/@fs${packageRoot}json-document/src/application/document/index.ts`);
+    const {createTextEditor} = await import(/* @vite-ignore */ `/@fs${packageRoot}json-document-editing/src/index.ts`);
+    const root = document.createElement("div"); root.contentEditable = "true";
+    root.setAttribute("role", "textbox"); root.setAttribute("aria-label", "직접 Web 편집");
+    root.style.cssText="position:fixed;inset:20px;z-index:9999;background:white;white-space:pre-wrap";
+    document.body.append(root);
+    createMarkdownEditingBinding({editor:createTextEditor(createJSONDocument("")), root}).bind();
+  }, new URL("../../../packages/", import.meta.url).pathname);
+  const editor = page.getByRole("textbox", {name:direct ? "직접 Web 편집" : "Markdown 문서"});
   await editor.click();
   await page.keyboard.press("ControlOrMeta+a");
   await editor.evaluate(root => {
