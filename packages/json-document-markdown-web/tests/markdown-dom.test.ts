@@ -153,3 +153,15 @@ test("task controls without an editor are disabled, named, and preserve every so
   expect(root.querySelector<HTMLInputElement>("input")!.checked).toBe(true);
   expect(dom.observe(root).value).toBe(source.replace("[ ]", "[x]"));
 });
+
+test("task marker includes the first separator, leaving additional spaces editable", () => {
+  const source = "- [ ]   할 일";
+  const {root, dom} = setup(source);
+  const marker = root.querySelector('[data-markdown-marker="task"]')!;
+  expect(marker.textContent).toBe("- [ ] ");
+  expect(dom.resolveHorizontalSelection!(root, {anchor:0, focus:0}, "forward", false)).toEqual({anchor:6, focus:6});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:6, focus:6}, "backward", false)).toEqual({anchor:0, focus:0});
+  expect(dom.resolveHorizontalSelection!(root, {anchor:6, focus:6}, "forward", false)).toBeNull();
+  expect(dom.resolveDeletionSelection!(root, {anchor:5, focus:6}, "backward")).toEqual({anchor:0, focus:6});
+  expect(dom.observe(root).value).toBe(source);
+});

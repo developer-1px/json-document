@@ -75,8 +75,9 @@
   background: currentColor;
 }
 [data-markdown-list-style="ordered"] { min-inline-size: var(--markdown-marker-size); text-align: end; font-variant-numeric: tabular-nums; }
+[data-markdown-marker="task"] { padding-inline-end: .25em; box-sizing: content-box; }
 [data-markdown-marker="task"]::before { content: none; }
-[data-markdown-task-control] {
+[data-markdown-editor] [data-markdown-task-control] {
   position: relative;
   z-index: 1;
   display: block;

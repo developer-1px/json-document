@@ -48,12 +48,14 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
     attributes: owner ? { "data-markdown-delimiter": "" } : {}, ...(owner ? { owner, conceal } : {}),
   });
   const projected = (marker: MarkdownMarker, parent?: MarkdownNode, owner?: SourceRange, conceal = false): SourceRun => {
-    const {from, to, kind} = marker;
+    const {from, kind} = marker;
+    const syntaxTo = marker.to;
+    const to = kind === "task" && /[ \t]/.test(source[syntaxTo] ?? "") ? syntaxTo + 1 : syntaxTo;
     const original = source.slice(from, to);
     const heading = kind === "heading" && parent?.kind === "heading" && from === parent.from;
     const label = marker.value ?? (heading ? `H${parent.depth}` : kind === "list" ? (/^\d/.test(original) ? original.replace(/\)$/, ".") : "•")
       : kind === "task" ? (/x/i.test(original) ? "☑" : "☐") : kind === "blockquote" ? "│" : kind === "break" ? "↵" : original);
-    const following = /[ \t]/.test(source[to] ?? "") ? to + 1 : to;
+    const following = kind !== "task" && /[ \t]/.test(source[to] ?? "") ? to + 1 : to;
     return { kind: "delimiter", tag: "span", from, to,
       projection: {to, following, ...(kind === "task" ? {atomic:true} : {})},
       ...(owner ? {owner} : {}),
@@ -68,7 +70,7 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
         ...(owner ? {"data-markdown-delimiter": ""} : {}), "data-text-projection-source": "", "aria-hidden":"true",
       }}, ...(kind === "task" ? [{
         kind:"taskControl" as const, tag:"input", from:to, to,
-        task:{from:to - 3, checked:/x/i.test(original)},
+        task:{from:syntaxTo - 3, checked:/x/i.test(original)},
         attributes:{type:"checkbox", "data-ui-control":"check", "data-markdown-task-control":"",
           contenteditable:"false", "aria-label":source.slice(to).split(/[\r\n]/, 1)[0]!.trim() || "Task"},
       }] : [])],
@@ -101,8 +103,9 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
       append(cursor, marker.from);
       const next = projection.markers[index + 1];
       if (marker.kind === "list" && next?.kind === "task" && next.to <= to && /^[ \t]+$/.test(source.slice(marker.to, next.from))) {
-        runs.push(projected({...next, from:marker.from}, parent));
-        cursor = next.to;
+        const task = projected({...next, from:marker.from}, parent);
+        runs.push(task);
+        cursor = task.to;
         index++;
         continue;
       }

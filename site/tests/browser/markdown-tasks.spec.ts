@@ -40,7 +40,7 @@ test("native task checkbox toggles with click and Space, sharing source history"
   await page.keyboard.press("ControlOrMeta+Shift+z"); await expect(check).toBeChecked();
   await page.keyboard.press("ControlOrMeta+Shift+z"); await expect(check).not.toBeChecked();
   const sizes = await editor.evaluate(root => ["task", "list"].map(kind => {
-    const element = root.querySelector(`[data-markdown-marker="${kind}"]`)!;
+    const element = root.querySelector(kind === "task" ? "[data-markdown-task-control]" : `[data-markdown-marker="${kind}"]`)!;
     return {width:element.getBoundingClientRect().width, height:element.getBoundingClientRect().height};
   }));
   expect(sizes[0]!.width).toBeCloseTo(sizes[1]!.width, 1);
