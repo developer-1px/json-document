@@ -1,3 +1,5 @@
+import textNavigationSource from "../../../../packages/json-document-contenteditable/src/dom/text-navigation.ts?raw";
+import caretVisibilitySource from "../../../../packages/json-document-contenteditable/src/dom/caret-visibility.ts?raw";
 import markdownParagraphSource from "../../../../packages/json-document-markdown/src/paragraph.ts?raw";
 import markdownTasksSource from "../../../../packages/json-document-markdown/src/tasks.ts?raw";
 import markdownMarkersSource from "../../../../packages/json-document-markdown/src/markers.ts?raw";
@@ -286,6 +288,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
   ["packages/json-document-markdown/src/paragraph.ts", markdownParagraphSource],
+  ["packages/json-document-contenteditable/src/dom/text-navigation.ts", textNavigationSource],
+  ["packages/json-document-contenteditable/src/dom/caret-visibility.ts", caretVisibilitySource],
   ["packages/json-document-markdown/src/nodes.ts", markdownNodesSource],
   ["packages/json-document-markdown-web/src/markdown-editor.css", markdownEditorCSSSource],
   ["packages/json-document-markdown/src/projection.ts", markdownProjectionSource],
@@ -996,6 +1000,10 @@ const registeredPublicUsages = [
   ...["packages/json-document-contenteditable/src/dom/text-projection.ts", "packages/json-document-contenteditable/src/dom/text-projection.css"].map(sourcePath => ({
     packageName: "@interactive-os/json-document-contenteditable", symbol: "createTextProjectionDOMAdapter", sourcePath,
   })),
+  ...["createTextNavigationDOMAdapter"].flatMap(symbol => [
+    { packageName: "@interactive-os/json-document-contenteditable", symbol, sourcePath: "packages/json-document-contenteditable/src/dom/text-navigation.ts" },
+    { packageName: "@interactive-os/json-document-contenteditable", symbol, sourcePath: "packages/json-document-contenteditable/src/dom/caret-visibility.ts" },
+  ]),
   { packageName: "@interactive-os/json-document-contenteditable", symbol: "restoreTextDOMSelection", sourcePath: "packages/json-document-contenteditable/src/dom/plain-text.ts" },
   {
     packageName: "@interactive-os/json-document-contenteditable",

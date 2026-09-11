@@ -108,3 +108,7 @@ Markdown 문자열이 정본이고 CommonMark + GFM은 문법 의미를 결정�
 입력 후 점진적 파싱으로 표현을 갱신합니다. 별도 편집용 dialect는 정의하지 않습니다.
 기존 표·코드·escape·entity의 문법별 표현은 위 계약을 따르며, 출력용 직렬화나
 새로운 문법 인식 규칙을 이 adapter에 추가하지 않습니다.
+
+## 보이는 줄을 따르는 수직 이동
+
+`createMarkdownDOMAdapter`는 contenteditable의 공개 `createTextNavigationDOMAdapter`와 `createTextProjectionDOMAdapter`를 조합합니다. ↑↓는 숨긴 원문 기호 대신 보이는 본문 줄을 따라 가로 위치를 유지하고, Shift는 원래 anchor를 유지합니다. 별도의 Markdown 문법별 방향키 분기는 없습니다. [공용 화면 줄 이동 계약](/docs/api/contenteditable)과 [Usage](/demo/markdown-caret)에서 문서 끝·빈 줄·스크롤·native fallback의 범위를 확인할 수 있습니다.

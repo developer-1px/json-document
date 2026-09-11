@@ -12,3 +12,4 @@ export type {
   TextSelection,
 } from "./types.js";
 export { createTextProjectionDOMAdapter, type TextProjection } from "./dom/text-projection.js";
+export { createTextNavigationDOMAdapter } from "./dom/text-navigation.js";

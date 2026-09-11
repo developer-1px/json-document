@@ -213,6 +213,7 @@ export function createContentEditableBinding({
   };
 
   const cancelInternal = (): ContentEditableBindingResult => {
+    dom.resetNavigation?.(root);
     compositionEnter = null;
     const changed = activeLease !== null || trailingComposition;
     if (!changed) return NO_CHANGE;
@@ -252,6 +253,7 @@ export function createContentEditableBinding({
         compositionEnter = null;
       }
     }
+    if (["pointerdown", "beforeinput", "compositionstart", "blur"].includes(event.type)) dom.resetNavigation?.(root);
     if (event.type === "focus") {
       return editor ? renderLatest(undefined, true) : NO_CHANGE;
     }
@@ -264,6 +266,19 @@ export function createContentEditableBinding({
     if (editor && event.type === "keydown" && activeLease?.phase !== "composing") {
       const keyboardEvent = event as KeyboardEvent;
       const command = keyboard.resolve(keyboardEvent);
+      const vertical = command?.type === "move" && (command.direction === "up" || command.direction === "down")
+        && !keyboardEvent.altKey && !keyboardEvent.ctrlKey && !keyboardEvent.metaKey;
+      if (!vertical && !["Shift", "Control", "Alt", "Meta"].includes(keyboardEvent.key)) dom.resetNavigation?.(root);
+      if (vertical && !activeLease && !trailingComposition && !keyboardEvent.isComposing && keyboardEvent.keyCode !== 229) {
+        const selection = currentDOMSelection();
+        const next = selection && dom.resolveVerticalSelection?.(root, selection,
+          command.direction === "up" ? "backward" : "forward", command.operation === "extend");
+        if (next) {
+          event.preventDefault();
+          editor.select(next);
+          return renderLatest(next, true);
+        }
+      }
       if (!activeLease && !trailingComposition && !keyboardEvent.isComposing && keyboardEvent.keyCode !== 229
         && command?.type === "move" && (command.direction === "left" || command.direction === "right")) {
         const selection = currentDOMSelection();
@@ -448,6 +463,7 @@ export function createContentEditableBinding({
   };
 
   const unbind = (): void => {
+    dom.resetNavigation?.(root);
     if (!bound) return;
     bound = false;
     for (const type of ROOT_EVENTS) {
@@ -534,6 +550,7 @@ function failure(
 
 const ROOT_EVENTS = Object.freeze([
   "focus",
+  "pointerdown",
   "beforeinput",
   "compositionstart",
   "compositionend",

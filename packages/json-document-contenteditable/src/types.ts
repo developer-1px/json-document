@@ -16,6 +16,10 @@ export interface TextDOMAdapter {
   observe(root: HTMLElement): DOMObservation;
   render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
   restoreSelection(root: HTMLElement, selection: TextSelection, options?: TextDOMSelectionOptions): boolean;
+  /** Resolve one visual line while retaining the horizontal goal; null keeps native navigation. */
+  resolveVerticalSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward", extend: boolean): TextSelection | null;
+  /** Reset the horizontal goal after another input, pointer placement, or blur. */
+  resetNavigation?(root: HTMLElement): void;
   /** Resolve a source deletion range where native DOM deletion cannot preserve the projection. */
   resolveDeletionSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward"): TextSelection | null;
   /** Resolve a source-coordinate step across projected DOM boundaries; null keeps native navigation. */

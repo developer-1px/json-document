@@ -418,6 +418,8 @@ test("Markdown Usage exposes the canonical text projection and restoration sourc
     "packages/json-document-contenteditable/src/dom/text-projection.css",
     "packages/json-document-contenteditable/src/dom/plain-text.ts",
     "packages/json-document-contenteditable/src/dom/text-index.ts",
+    "packages/json-document-contenteditable/src/dom/text-navigation.ts",
+    "packages/json-document-contenteditable/src/dom/caret-visibility.ts",
   ]));
   const markdown = await sources.find(file => file.path === "packages/json-document-markdown-web/src/markdown-dom.ts")!.load();
   expect(markdown).toContain("createTextProjectionDOMAdapter");

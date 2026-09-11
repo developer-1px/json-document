@@ -131,3 +131,26 @@ IME 조합과 native lease 중에는 이 경로로 가로채지 않습니다. �
 ### 문법별 줄바꿈 명령
 
 `ContentEditableBindingOptions.insertBreak?: (editor: TextEditor) => EditingResult<TextSelection>`로 Enter/Shift+Enter의 문법 편집 명령을 주입할 수 있습니다. 생략하면 `editor.insert("\n")`을 호출합니다. 현재 DOM 선택을 먼저 동기화하며 IME Enter 확정 후 줄바꿈도 같은 명령을 사용합니다. 붙여넣기와 일반 텍스트 입력에는 호출하지 않습니다. [Markdown Usage](/demo/markdown-caret)는 Markdown 원문 API를 이 경계에 연결합니다.
+
+
+## 화면 줄 기반 커서 이동
+
+`createTextNavigationDOMAdapter(base: TextDOMAdapter): TextDOMAdapter`는 원문 문자열 DOM adapter에 수직 이동을 추가합니다. 브라우저의 `Range.getClientRects()`로 보이는 텍스트 줄을 모으고, `caretPositionFromPoint`/`caretRangeFromPoint`로 목표 가로 위치의 원문 offset을 찾습니다. 겹친 투영이나 빈 줄에서 hit test가 실패하면 해당 텍스트 조각의 grapheme 경계를 측정합니다. Markdown 문법·React·History를 알지 않습니다.
+
+Markdown Web의 `createMarkdownDOMAdapter`는 공개 `createTextProjectionDOMAdapter`와 `createTextNavigationDOMAdapter`를 조합하므로 Bear·React·Usage는 별도 키 이벤트 구현 없이 같은 기능을 사용합니다. 수평 투영과 수직 이동 capability는 독립적입니다. 일반 source DOM도 다음처럼 공개 API를 직접 조합할 수 있습니다.
+
+```ts
+import { createContentEditableBinding, createTextNavigationDOMAdapter, plainTextDOMAdapter } from "@interactive-os/json-document-contenteditable";
+const dom = createTextNavigationDOMAdapter(plainTextDOMAdapter);
+const binding = createContentEditableBinding({document: editor.document, pointer: editor.pointer, editor, root, dom});
+const unbind = binding.bind();
+```
+
+- `TextDOMAdapter.resolveVerticalSelection(root, selection, direction, extend)`는 다음 화면 줄의 원문 선택을 반환합니다. `null`은 native 이동을 유지한다는 뜻입니다.
+- 짧은 줄을 지나도 연속 ↑↓의 가로 위치를 유지합니다. Shift 선택은 anchor를 보존합니다. 좌우 이동·문자 입력·클릭·blur·composition 시작은 `resetNavigation(root)`으로 가로 위치 기억을 초기화합니다. Shift 키 자체는 초기화하지 않습니다.
+- `[data-text-projection-source]`, `[hidden]`, 편집 불가능한 control은 수직 이동의 본문 정지점에서 제외합니다. 원문과 수평 기호 편집·삭제 계약은 유지합니다. 본문 위치가 없는 문법 기호만의 줄은 다음 편집 가능한 줄로 넘어갑니다.
+- 이동으로 정한 DOM endpoint는 동일 원문 offset의 다른 DOM 경계로 바꾸지 않습니다. 코드·표처럼 선택 시 표현이 바뀌는 surface도 기존 adapter의 render/restore를 거쳐 연결합니다.
+- 마지막 빈 줄과 문서 시작/끝을 처리하고, 선택을 바꾸지 않고 중첩 스크롤 영역에 caret을 드러냅니다.
+- 현재 계약은 수평 writing mode의 원문 문자열 편집입니다. 수직 writing mode 또는 DOM 측정이 없는 환경은 native에 맡깁니다. Alt/Ctrl/Meta 방향키, PageUp/Down, Home/End의 플랫폼 명령은 가로채지 않습니다. 구조화된 Rich Text의 node-point 선택 모델은 이 API의 입력 계약이 아닙니다.
+
+[Markdown caret Usage](/demo/markdown-caret)에서 제목·인용·목록·코드·표를 ↑↓와 Shift+↑↓로 이동할 수 있으며, Source에서 화면 줄 탐색과 caret 가시성 모듈까지 확인할 수 있습니다. 문서 원문·편집·History의 owner는 기존 Editing이고, 입력 이벤트 수명은 contenteditable binding에 남습니다.

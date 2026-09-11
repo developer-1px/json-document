@@ -1,7 +1,7 @@
 import { createWebKeyboardAdapter } from "@interactive-os/json-document-web";
 import { createMarkdownParser, setMarkdownTaskChecked, type MarkdownParser } from "@interactive-os/json-document-markdown";
 import { diffText, type TextEditor } from "@interactive-os/json-document-editing";
-import { plainTextDOMAdapter, renderTextCaretBoundary, createTextProjectionDOMAdapter, type TextProjection, type TextDOMAdapter, type TextSelection } from "@interactive-os/json-document-contenteditable";
+import { plainTextDOMAdapter, renderTextCaretBoundary, createTextNavigationDOMAdapter, createTextProjectionDOMAdapter, type TextProjection, type TextDOMAdapter, type TextSelection } from "@interactive-os/json-document-contenteditable";
 import { sourceRuns, type SourceRun } from "./source-runs.js";
 
 const keyboard = createWebKeyboardAdapter();
@@ -48,7 +48,7 @@ export function createMarkdownDOMAdapter(options: MarkdownDOMOptions = {}): Text
     surface.selection = selection;
     surface.observer.takeRecords();
   };
-  return createTextProjectionDOMAdapter({
+  return createTextNavigationDOMAdapter(createTextProjectionDOMAdapter({
     observe: (root) => plainTextDOMAdapter.observe(root),
     render(root, source, selection = null) {
       let surface = surfaces.get(root);
@@ -103,7 +103,7 @@ export function createMarkdownDOMAdapter(options: MarkdownDOMOptions = {}): Text
     };
     surfaces.get(root)?.runs.forEach(visit);
     return result;
-  });
+  }));
 }
 
 /** Reuse unchanged prefixes/suffixes and preserve text-node identity while typing. */

@@ -11,7 +11,10 @@ export const plainTextDOMAdapter: TextDOMAdapter = Object.freeze({
     return { value: index.value, selection: anchor === null || focus === null ? null : { anchor, focus } };
   },
   render(root: HTMLElement, value: string): void {
-    root.replaceChildren(root.ownerDocument.createTextNode(value));
+    const first = root.firstChild;
+    const stable = first?.nodeType === 3 && first.textContent === value && (root.childNodes.length === 1
+      || (root.childNodes.length === 2 && root.lastElementChild?.matches("br[data-contenteditable-caret]")));
+    if (!stable) root.replaceChildren(root.ownerDocument.createTextNode(value));
     renderTextCaretBoundary(root, value);
   },
   restoreSelection: restoreTextDOMSelection,

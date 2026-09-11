@@ -371,3 +371,26 @@ test("injected break command receives native selection and IME-confirmed source"
   editor.undo();
   expect(editor.text).toBe("a한b");
 });
+
+test("vertical navigation respects IME and modifiers and resets its goal only for independent input", () => {
+  const json = createJSONDocument("abc"), editor = createTextEditor(json);
+  const root = document.createElement("div"); root.contentEditable="true"; document.body.append(root);
+  const move = vi.fn(() => ({anchor:1, focus:1}));
+  const reset = vi.fn();
+  const binding = createContentEditableBinding({document:json,pointer:"",root,editor,
+    dom:{...plainTextDOMAdapter,resolveVerticalSelection:move,resetNavigation:reset}});
+  cleanup.push(binding.bind());
+  plainTextDOMAdapter.restoreSelection(root, {anchor:0, focus:0});
+  root.dispatchEvent(new KeyboardEvent("keydown", {key:"ArrowDown",cancelable:true}));
+  expect(move).toHaveBeenCalledTimes(1);
+  expect(editor.snapshot.selection).toEqual({anchor:1,focus:1});
+  root.dispatchEvent(new KeyboardEvent("keydown", {key:"Shift"}));
+  expect(reset).not.toHaveBeenCalled();
+  root.dispatchEvent(new KeyboardEvent("keydown", {key:"ArrowUp",metaKey:true,cancelable:true}));
+  expect(move).toHaveBeenCalledTimes(1);
+  root.dispatchEvent(new Event("pointerdown"));
+  expect(reset).toHaveBeenCalledTimes(2);
+  root.dispatchEvent(new CompositionEvent("compositionstart"));
+  root.dispatchEvent(new KeyboardEvent("keydown", {key:"ArrowDown",isComposing:true,cancelable:true}));
+  expect(move).toHaveBeenCalledTimes(1);
+});

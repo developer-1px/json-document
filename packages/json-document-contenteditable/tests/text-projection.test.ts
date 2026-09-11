@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { createTextProjectionDOMAdapter, plainTextDOMAdapter, restoreTextDOMSelection, type TextDOMAdapter } from "../src/index.js";
+import { createTextProjectionDOMAdapter, createTextNavigationDOMAdapter, plainTextDOMAdapter, restoreTextDOMSelection, type TextDOMAdapter } from "../src/index.js";
 
 afterEach(() => { document.getSelection()?.removeAllRanges(); document.body.replaceChildren(); });
 function fixture() {
@@ -124,4 +124,23 @@ test("projection restoration does not impose backward affinity on native block e
   expect(writes).not.toHaveBeenCalled();
   expect(selection.focusNode).toBe(marker.firstChild);
   writes.mockRestore();
+});
+
+test("visual navigation keeps native fallback when layout measurement is unavailable", () => {
+  const {root, adapter} = fixture();
+  root.style.writingMode = "horizontal-tb";
+  expect(createTextNavigationDOMAdapter(adapter).resolveVerticalSelection!(root, {anchor:0, focus:0}, "forward", false)).toBeNull();
+});
+
+test("plain source rendering retains the live text node when only selection changes", () => {
+  const root = document.createElement("div"); document.body.append(root);
+  plainTextDOMAdapter.render(root, "one\ntwo\n");
+  const text = root.firstChild;
+  const selection = document.getSelection()!;
+  selection.setBaseAndExtent(text!, 2, text!, 5);
+  plainTextDOMAdapter.render(root, "one\ntwo\n");
+  expect(root.firstChild).toBe(text);
+  expect(plainTextDOMAdapter.observe(root).selection).toEqual({anchor:2,focus:5});
+  plainTextDOMAdapter.render(root, "changed");
+  expect(root.textContent).toBe("changed");
 });

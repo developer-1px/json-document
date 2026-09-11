@@ -135,9 +135,9 @@ test("native quote entry preserves its DOM side and vertical goal through select
   // A source-equivalent restore must not move native entry back outside the quote.
   await expect.poll(() => editor.evaluate(() => document.getSelection()!.focusNode!.parentElement!
     .closest('[data-markdown-kind="blockquote"]') !== null)).toBe(true);
-  for (let index = 0; index < 4; index++) await page.keyboard.press("ArrowDown");
+  for (let index = 0; index < 3; index++) await page.keyboard.press("ArrowDown");
   await expect.poll(position).toBe(44);
-  for (let index = 0; index < 3; index++) await page.keyboard.press("ArrowUp");
+  for (let index = 0; index < 4; index++) await page.keyboard.press("ArrowUp");
   await expect.poll(position).toBe(7);
   await expect.poll(() => editor.textContent()).toBe(source);
 });
