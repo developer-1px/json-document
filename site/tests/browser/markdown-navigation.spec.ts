@@ -114,10 +114,10 @@ test("blank terminal lines remain reachable and pointer placement resets the hor
   await expect(editor).toHaveText(source + "end");
 });
 
-test("the public navigation adapter handles 1000 plain lines and reveals a caret inside a scroll container", async ({page}) => {
+for (const outerProjection of [false, true]) test(`the public navigation adapter handles 1000 plain lines (outer projection: ${outerProjection})`, async ({page}) => {
   await page.goto("/applications/bear");
   const packageRoot = new URL("../../../packages/", import.meta.url).pathname;
-  await page.evaluate(async packageRoot => {
+  await page.evaluate(async ({packageRoot, outerProjection}) => {
     const contenteditable = await import(/* @vite-ignore */ `/@fs${packageRoot}json-document-contenteditable/src/index.ts`);
     const core = await import(/* @vite-ignore */ `/@fs${packageRoot}json-document/src/application/document/index.ts`);
     const editing = await import(/* @vite-ignore */ `/@fs${packageRoot}json-document-editing/src/index.ts`);
@@ -126,10 +126,11 @@ test("the public navigation adapter handles 1000 plain lines and reveals a caret
     root.style.cssText="position:fixed;top:20px;left:20px;width:360px;height:160px;overflow:auto;white-space:pre-wrap;line-height:28px;font:18px/28px monospace;background:white;z-index:9999";
     document.body.append(root);
     const model = core.createJSONDocument(source), editor = editing.createTextEditor(model);
-    const dom = contenteditable.createTextNavigationDOMAdapter(contenteditable.plainTextDOMAdapter);
+    const navigation = contenteditable.createTextNavigationDOMAdapter(contenteditable.plainTextDOMAdapter);
+    const dom = outerProjection ? contenteditable.createTextProjectionDOMAdapter(navigation, () => []) : navigation;
     contenteditable.createContentEditableBinding({document:model,pointer:"",editor,root,dom}).bind();
     root.focus(); editor.select({anchor:7,focus:7});
-  }, packageRoot);
+  }, {packageRoot, outerProjection});
   const editor = page.getByTestId("generic-navigation");
   for(let i=0;i<22;i++) await page.keyboard.press("ArrowDown");
   expect(await editor.evaluate(root=>root.scrollTop)).toBeGreaterThan(200);
@@ -138,4 +139,8 @@ test("the public navigation adapter handles 1000 plain lines and reveals a caret
   expect(p.y+p.height).toBeLessThanOrEqual(box!.y+box!.height+1);
   for(let i=0;i<22;i++) await page.keyboard.press("ArrowUp");
   expect((await point(editor)).focus).toBe(7);
+  await page.keyboard.press("ArrowLeft");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowUp");
+  expect((await point(editor)).focus).toBe(6);
 });

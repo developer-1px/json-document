@@ -154,3 +154,9 @@ const unbind = binding.bind();
 - 현재 계약은 수평 writing mode의 원문 문자열 편집입니다. 수직 writing mode 또는 DOM 측정이 없는 환경은 native에 맡깁니다. Alt/Ctrl/Meta 방향키, PageUp/Down, Home/End의 플랫폼 명령은 가로채지 않습니다. 구조화된 Rich Text의 node-point 선택 모델은 이 API의 입력 계약이 아닙니다.
 
 [Markdown caret Usage](/demo/markdown-caret)에서 제목·인용·목록·코드·표를 ↑↓와 Shift+↑↓로 이동할 수 있으며, Source에서 화면 줄 탐색과 caret 가시성 모듈까지 확인할 수 있습니다. 문서 원문·편집·History의 owner는 기존 Editing이고, 입력 이벤트 수명은 contenteditable binding에 남습니다.
+
+수평 투영 adapter는 자신이 처리하지 않는 기존 capability를 보존합니다. 따라서
+`createTextProjectionDOMAdapter(createTextNavigationDOMAdapter(base), projections)`도
+수직 이동과 `resetNavigation`을 유지합니다. 두 adapter의 `restoreSelection`은 바깥쪽에서
+안쪽으로 위임되므로 순서에 따라 투영 affinity·caret 표시의 적용 순서는 달라질 수 있습니다.
+Markdown Web은 기존처럼 navigation이 projection을 감싸는 조합을 사용합니다.
