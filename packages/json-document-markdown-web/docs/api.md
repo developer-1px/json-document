@@ -24,7 +24,7 @@
 | --- | --- |
 | 비순서·순서 목록 | 원문 -, +, *는 •로, 번호와 구분자는 번호 표시로 투영 |
 | task list | 목록 접두사와 [ ]/[x]를 하나의 체크박스 표시로 투영. 클릭·Space로 토글, Delete·Backspace로 원자 삭제 |
-| 인용 | 각 줄의 >를 세로 기호로 표시. 중첩 단계와 원문 공백 유지 |
+| 인용 | 둥근 모서리의 색상 글상자. 각 줄의 >는 편집 가능한 세로 기호로 표시하며 중첩·원문 공백 유지 |
 | fenced code | 여는/닫는 펜스를 흐린 기호로 표시. 언어·코드·줄바꿈은 원문 유지 |
 | 강조·취소선·inline code·링크·이미지 | 기존 선택 영역의 문법 노출을 유지하며 각 구간의 경계 이동과 삭제를 공용 투영으로 연결 |
 | 표 | 선택 중 원문 기호, 선택 밖에서는 셀 표현. 기호도 동일한 투영 계약을 소비 |
@@ -43,7 +43,7 @@ heading/list/table/link 등 기존 접근성 역할이 전달합니다. HTML은 
 binding, 입력·삭제·실행 취소는 Editing이 소유합니다. Bear와 Demo에는 기호별 편집 로직이 없습니다.
 
 기본 표현은 public CSS를 한 번 import합니다. `--markdown-muted`, `--markdown-accent`,
-`--markdown-code-background`, `--markdown-border`, `--markdown-marker-size`, `--markdown-heading-gap`, `--text-projection-caret` 변수로 제품 semantic token을 주입합니다.
+`--markdown-code-background`, `--markdown-quote-background`, `--markdown-border`, `--markdown-marker-size`, `--markdown-heading-gap`, `--text-projection-caret` 변수로 제품 semantic token을 주입합니다.
 사이트와 Bear가 같은 스타일을 소비합니다. `data-markdown-kind`, `data-markdown-active`,
 `data-markdown-delimiter`가 문법·편집 상태를 나타냅니다.
 

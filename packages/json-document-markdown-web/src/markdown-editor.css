@@ -92,7 +92,14 @@
 [data-markdown-task-control]:focus-visible { outline: 2px solid var(--markdown-accent, #9f4937); outline-offset: 3px; }
 [data-markdown-task-control]:disabled { cursor: default; }
 [data-markdown-kind="listItem"][data-checked="true"] > [data-markdown-kind="paragraph"] { text-decoration: line-through; }
-[data-markdown-kind="blockquote"] { color: var(--markdown-muted, #77736b); }
+[data-markdown-kind="blockquote"] {
+  display: inline-block;
+  inline-size: 100%;
+  box-sizing: border-box;
+  padding: .75em 1em;
+  border-radius: .5rem;
+  background: var(--markdown-quote-background, color-mix(in srgb, var(--markdown-accent, #9f4937) 8%, transparent));
+}
 
 /* Inline content and code retain source spacing. */
 [data-markdown-kind="emphasis"] { font-style: italic; }
