@@ -132,8 +132,8 @@ for (const atLineStart of [true, false]) test(`ba95af50: Backspace at ${atLineSt
     document.dispatchEvent(new Event("selectionchange"));
   }, atLineStart);
   if (atLineStart) await page.keyboard.press("ControlOrMeta+ArrowLeft");
-  // Visible separator is now part of the line; body start remains one space later.
-  const start = original.indexOf("한 줄에서 시작하기") - (atLineStart ? 1 : 0);
+  // The syntax separator lives in the gutter; Home lands at the aligned body.
+  const start = original.indexOf("한 줄에서 시작하기");
   const position = await editor.evaluate(root => {
     const selection = document.getSelection()!;
     const range = document.createRange(); range.selectNodeContents(root);
@@ -170,7 +170,7 @@ test("heading spaces and tabs retain width, individual navigation, edits and und
     }
     return spans;
   });
-  expect(geometry.map(span => span.text)).toEqual(["    ", "  \t"]);
+  expect(geometry.map(span => span.text)).toEqual([" ", "   ", "  \t"]);
   for (const span of geometry) expect(span.width).toBeGreaterThan(0);
   await heading.evaluate(element => {
     const text = document.createTreeWalker(element.querySelector('[data-markdown-kind="text"]')!, NodeFilter.SHOW_TEXT).nextNode()!;
@@ -213,4 +213,28 @@ test("heading spaces and tabs retain width, individual navigation, edits and und
   await page.keyboard.press("ControlOrMeta+z");
   await expect.poll(() => editor.textContent()).toBe(source);
   await page.screenshot({path:"/tmp/bear-heading-whitespace.png"});
+});
+
+for (const depth of [1, 2, 3, 4, 5, 6]) test(`H${depth} first separator aligns body and extra spaces retain width`, async ({ page }) => {
+  await page.goto("/applications/bear");
+  const editor = page.getByRole("textbox", {name:"Markdown 문서"});
+  for (const spaces of [1, 3]) {
+    await editor.click();
+    await page.keyboard.press("ControlOrMeta+a");
+    await editor.evaluate((root, source) => {
+      const data = new DataTransfer(); data.setData("text/plain", source);
+      root.dispatchEvent(new ClipboardEvent("paste", {clipboardData:data,bubbles:true,cancelable:true}));
+    }, "#".repeat(depth) + " ".repeat(spaces) + "제목\n\n본문");
+    const geometry = await editor.evaluate(root => {
+      const heading = root.querySelector('[role="heading"]')!;
+      const text = heading.querySelector('[data-markdown-kind="text"]')!;
+      const paragraph = root.querySelector('[data-markdown-kind="paragraph"]')!;
+      const separator = heading.querySelector('[data-markdown-heading-separator]')!;
+      return {body:paragraph.getBoundingClientRect().left, title:text.getBoundingClientRect().left,
+        separatorEnd:separator.getBoundingClientRect().right};
+    });
+    expect(geometry.separatorEnd).toBeCloseTo(geometry.body, 1);
+    if (spaces === 1) expect(geometry.title).toBeCloseTo(geometry.body, 1);
+    else expect(geometry.title).toBeGreaterThan(geometry.body);
+  }
 });

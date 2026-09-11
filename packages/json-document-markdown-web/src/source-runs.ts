@@ -63,6 +63,10 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
           children: [{ ...raw(markerFrom, markerEnd), attributes: { "data-text-projection-source": "" } }],
         });
         cursor = markerEnd;
+        if (cursor < to) {
+          runs.push({ ...raw(cursor, cursor + 1), attributes: { "data-markdown-heading-separator": "", "aria-hidden": "true" } });
+          cursor++;
+        }
       }
       for (const part of source.slice(cursor, to).matchAll(/\s+|\S+/g)) {
         const end = cursor + part[0].length;

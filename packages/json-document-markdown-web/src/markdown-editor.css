@@ -63,3 +63,13 @@
 [data-markdown-kind="table"][data-markdown-active="true"] [data-markdown-kind="tableRow"],
 [data-markdown-kind="table"][data-markdown-active="true"] [data-markdown-kind="tableCell"] { display: inline; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; padding: 0; border: 0; }
 [data-markdown-kind="listItem"][data-checked="true"] > [data-markdown-kind="paragraph"] { text-decoration: line-through; }
+
+/* The first syntax separator occupies the gutter between marker and body. */
+[data-markdown-heading-separator] {
+  position: absolute;
+  right: 100%;
+  top: 0;
+  width: .25rem;
+  overflow: hidden;
+  white-space: pre;
+}
