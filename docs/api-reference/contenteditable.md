@@ -31,6 +31,8 @@ interface ContentEditableBindingOptions {
   readonly dom?: TextDOMAdapter;
   /** Optional canonical source editor; replaces direct commits with selection-restoring Editing transactions. */
   readonly editor?: TextEditor;
+  /** Syntax-owned Enter command; paste and native composition text keep their original content. */
+  readonly insertBreak?: (editor: TextEditor) => EditingResult<TextSelection>;
 }
 ```
 ## `ContentEditableBindingResult`
@@ -53,7 +55,17 @@ interface ContentEditableProps {
 ## `createContentEditableBinding`
 
 ```ts
-createContentEditableBinding({ document, dom, pointer, root, editor, }: ContentEditableBindingOptions): ContentEditableBinding
+createContentEditableBinding({ document, dom, pointer, root, editor, insertBreak, }: ContentEditableBindingOptions): ContentEditableBinding
+```
+## `createTextNavigationDOMAdapter`
+
+```ts
+createTextNavigationDOMAdapter(base: TextDOMAdapter): TextDOMAdapter
+```
+## `createTextProjectionDOMAdapter`
+
+```ts
+createTextProjectionDOMAdapter(base: TextDOMAdapter, projections: (root: HTMLElement) => ReadonlyArray<TextProjection>): TextDOMAdapter
 ```
 ## `DOMObservation`
 
@@ -73,13 +85,47 @@ const plainTextDOMAdapter: TextDOMAdapter
 ```ts
 renderTextCaretBoundary(root: HTMLElement, value: string): void
 ```
+## `restoreTextDOMSelection`
+
+```ts
+restoreTextDOMSelection(root: HTMLElement, selection: TextSelection, options?: TextDOMSelectionOptions): boolean
+```
 ## `TextDOMAdapter`
 
 ```ts
 interface TextDOMAdapter {
   observe(root: HTMLElement): DOMObservation;
   render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
-  restoreSelection(root: HTMLElement, selection: TextSelection): boolean;
+  restoreSelection(root: HTMLElement, selection: TextSelection, options?: TextDOMSelectionOptions): boolean;
+  /** Resolve one visual line while retaining the horizontal goal; null keeps native navigation. */
+  resolveVerticalSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward", extend: boolean): TextSelection | null;
+  /** Reset the horizontal goal after another input, pointer placement, or blur. */
+  resetNavigation?(root: HTMLElement): void;
+  /** Resolve a source deletion range where native DOM deletion cannot preserve the projection. */
+  resolveDeletionSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward"): TextSelection | null;
+  /** Resolve a source-coordinate step across projected DOM boundaries; null keeps native navigation. */
+  resolveHorizontalSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward", extend: boolean): TextSelection | null;
+}
+```
+## `TextDOMSelectionOptions`
+
+```ts
+interface TextDOMSelectionOptions {
+  /** Undefined preserves an equivalent live DOM endpoint; explicit affinity chooses a side. */
+  readonly affinity?: (offset: number) => "backward" | "forward" | undefined;
+}
+```
+## `TextProjection`
+
+```ts
+interface TextProjection {
+  readonly from: number;
+  readonly to: number;
+  readonly element: HTMLElement;
+  /** Optional next visible source position, after a concealed separator. */
+  readonly following?: number;
+  /** Delete this displayed unit and its separator in one editing transaction. */
+  readonly atomic?: boolean;
 }
 ```
 ## `TextSelection`
