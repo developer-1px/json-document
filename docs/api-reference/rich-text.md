@@ -67,6 +67,11 @@ normalizeRichText(value: unknown, options?: { readonly schema?: RichTextSchema; 
 renderRichText<Output>(document: RichTextDocument, adapter: RichTextRenderAdapter<Output>): RichTextRenderResult<Output>
 renderRichText<Output>(document: RichTextDocument, schema: RichTextSchema | null, adapter: RichTextRenderAdapter<Output>): RichTextRenderResult<Output>
 ```
+## `resolveRichTextLinkURL`
+
+```ts
+resolveRichTextLinkURL(value: string | null | undefined): string | undefined
+```
 ## `RICH_TEXT_CLIPBOARD_MIME`
 
 ```ts

@@ -42,7 +42,7 @@ test("기반 패키지 변경은 모든 역방향 소비자를 선택한다", ()
   assert.equal(plan.full, false);
   assert.deepEqual(
     libraries.map((library) => library.manifest.name).filter((name) => !plan.packageWorkspaces.includes(name)),
-    ["@interactive-os/json-document-selection", "@interactive-os/json-document-animation-react", "@interactive-os/json-document-markdown"],
+    ["@interactive-os/json-document-selection", "@interactive-os/json-document-animation-react", "@interactive-os/json-document-markdown", "@interactive-os/json-document-url"],
   );
   assert.equal(plan.standards, true);
   assert.equal(plan.externalKit, true);
@@ -136,4 +136,12 @@ test("선택기가 반환하는 모든 browser 경로가 존재한다", () => {
       assert.equal(existsSync(browserPath), true, `${path} -> ${browserPath}`);
     }
   }
+});
+
+
+test("URL 정책 변경은 Markdown과 Rich Text 소비자 검증을 선택한다", () => {
+  const plan = createPlan(["packages/json-document-url/src/index.ts"]);
+  for (const name of ["json-document-url", "json-document-markdown-web", "json-document-rich-text", "json-document-rich-text-web"])
+    assert.ok(plan.packageWorkspaces.includes(`@interactive-os/${name}`));
+  assert.ok(plan.browserSpecs.includes("site/tests/browser/document-url.spec.ts"));
 });

@@ -99,3 +99,13 @@ describe("Official Rich Text Web clipboard", () => {
     expect(parsed?.html).toBe("<p><strong>Kept</strong></p>");
   });
 });
+
+
+it.each([["../notes",true],["mailto:a@example.test",true],["notes",false],["javascript:alert(1)",false]] as const)("clipboard import and export preserve Rich Text link policy for %s", (href, allowed) => {
+  const slice = {...clipboard.slice, content:[{id:"t",type:"text" as const,text:"label",marks:[{type:"link" as const,attrs:{href}}]}],openStart:1,openEnd:1};
+  expect(serializeRichTextSlice(slice).includes("<a ")).toBe(allowed);
+  let id=0;
+  const imported = parseRichTextHTML(`<p><a href="${href}">label</a></p>`,()=>`link-${++id}`);
+  expect(imported?.text).toBe("label");
+  expect(imported?.html.includes("<a ")).toBe(allowed);
+});

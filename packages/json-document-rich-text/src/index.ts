@@ -61,3 +61,4 @@ export type {
   RichTextValidationFailure,
   RichTextValidationResult,
 } from "./validation.js";
+export { resolveRichTextLinkURL } from "./link-url.js";

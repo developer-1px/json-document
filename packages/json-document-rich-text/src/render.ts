@@ -1,3 +1,4 @@
+import { resolveRichTextLinkURL } from "./link-url.js";
 import type { JSONValue } from "@interactive-os/json-document";
 import {
   hasRichTextContent,
@@ -65,7 +66,7 @@ export function renderRichText<Output>(
             diagnostics.push({ code: "rich-text.unknown-mark", reason: `No renderer schema for ${mark.type}.`, nodeId: node.id, markType: mark.type });
             return children;
           }
-          if (mark.type === "link" && !safeHref(mark.attrs.href)) {
+          if (mark.type === "link" && !resolveRichTextLinkURL(mark.attrs.href)) {
             diagnostics.push({ code: "rich-text.unsafe-link", reason: `Unsafe link href ${JSON.stringify(mark.attrs.href)}.`, nodeId: node.id, markType: mark.type });
             return children;
           }
@@ -77,9 +78,4 @@ export function renderRichText<Output>(
     const children = hasRichTextContent(node) ? node.content.map(renderNode) : [];
     return adapter.node(node, children);
   }
-}
-
-function safeHref(href: string): boolean {
-  return !/[\u0000-\u001f\u007f]/.test(href)
-    && (/^(https?:|mailto:|tel:)/i.test(href) || /^(\/|\.\/|\.\.\/|#|\?)/.test(href));
 }

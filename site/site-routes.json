@@ -221,7 +221,10 @@
     "description": "@interactive-os/json-document-rich-text의 전체 public API입니다.",
     "language": "ko",
     "navigationGroup": "Editing",
-    "documentSource": "docs/api-reference/rich-text.md"
+    "documentSource": "docs/api-reference/rich-text.md",
+    "documentIncludes": [
+      "packages/json-document-rich-text/docs/link-url.md"
+    ]
   },
   {
     "path": "/docs/api/file-intake",
@@ -1692,5 +1695,28 @@
     "language": "ko",
     "navigationGroup": "Editing",
     "documentSource": "docs/public/editing.md"
+  },
+  {
+    "path": "/docs/api/document-url",
+    "label": "API · Document URL",
+    "title": "Document URL API - json-document",
+    "description": "문서 URL의 scheme·상대 참조·제어문자 허용 정책입니다.",
+    "language": "ko",
+    "navigationGroup": "JSON Document",
+    "relatedDemoPath": "/demo/document-url",
+    "relatedDemoLabel": "Document URL",
+    "documentSource": "docs/api-reference/document-url.md",
+    "documentIncludes": [
+      "packages/json-document-url/docs/api.md"
+    ]
+  },
+  {
+    "path": "/demo/document-url",
+    "label": "Document URL",
+    "title": "Document URL - json-document",
+    "heading": "Document URL",
+    "description": "공개 문서 URL API로 링크·이미지·Rich Text 정책을 비교합니다.",
+    "language": "ko",
+    "navigationGroup": "JSON Document"
   }
 ]

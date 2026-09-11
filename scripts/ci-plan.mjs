@@ -18,6 +18,7 @@ const alwaysFull = new Set([
 ]);
 
 const packageBrowserSpecs = new Map([
+  ["@interactive-os/json-document-url", ["site/tests/browser/document-url.spec.ts", "site/tests/browser/markdown-caret.spec.ts"]],
   ["@interactive-os/json-document-markdown", ["site/tests/browser/markdown-caret.spec.ts"]],
   ["@interactive-os/json-document-markdown-web", ["site/tests/browser/markdown-caret.spec.ts"]],
   ["@interactive-os/json-document-markdown-react", ["site/tests/browser/markdown-caret.spec.ts"]],

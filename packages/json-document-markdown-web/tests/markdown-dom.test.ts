@@ -173,3 +173,11 @@ test("hidden quote prefix deletes as one source unit and leaves extra spaces", (
   expect(dom.resolveDeletionSelection!(root, {anchor:2, focus:2}, "backward")).toEqual({anchor:0, focus:2});
   expect(dom.observe(root).value).toBe(source);
 });
+
+
+test.each([["notes/page",true,true],["../notes",true,true],["mailto:a@example.test",true,false],["javascript:alert(1)",false,false]] as const)("Markdown source DOM preserves link and image URL policies for %s", (url, link, image) => {
+  const {root,dom} = setup(`[label](<${url}>) ![image](<${url}>)`);
+  expect(root.querySelector("a")?.hasAttribute("href") ?? false).toBe(link);
+  expect(root.querySelector("img") !== null).toBe(image);
+  expect(dom.observe(root).value).toBe(`[label](<${url}>) ![image](<${url}>)`);
+});

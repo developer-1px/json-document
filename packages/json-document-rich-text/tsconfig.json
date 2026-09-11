@@ -6,9 +6,20 @@
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "references": [
-    { "path": "../json-document" },
-    { "path": "../json-document-editing" },
-    { "path": "../json-document-selection" }
+    {
+      "path": "../json-document"
+    },
+    {
+      "path": "../json-document-editing"
+    },
+    {
+      "path": "../json-document-selection"
+    },
+    {
+      "path": "../json-document-url"
+    }
   ],
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ]
 }

@@ -1,4 +1,5 @@
 import {
+  resolveRichTextLinkURL,
   RICH_TEXT_CLIPBOARD_MIME,
   RICH_TEXT_PROFILE_V1,
   richTextSchemaV1,
@@ -124,7 +125,7 @@ function wrapMark(mark: RichTextMark, children: string): string {
   if (mark.type === "strikethrough") return `<s>${children}</s>`;
   if (mark.type === "code") return `<code>${children}</code>`;
   if (mark.type !== "link") return children;
-  return safeHref(mark.attrs.href)
+  return resolveRichTextLinkURL(mark.attrs.href)
     ? `<a href="${escapeAttribute(mark.attrs.href)}"${mark.attrs.title ? ` title="${escapeAttribute(mark.attrs.title)}"` : ""}>${children}</a>`
     : children;
 }
@@ -224,7 +225,7 @@ function markFor(element: HTMLElement): RichTextMark | null {
   if (tag === "u") return { type: "underline" };
   if (tag === "s" || tag === "strike") return { type: "strikethrough" };
   if (tag === "code") return { type: "code" };
-  if (tag === "a" && safeHref(element.getAttribute("href") ?? "")) {
+  if (tag === "a" && resolveRichTextLinkURL(element.getAttribute("href") ?? "")) {
     const title = element.getAttribute("title");
     return { type: "link", attrs: { href: element.getAttribute("href")!, ...(title ? { title } : {}) } };
   }
@@ -321,10 +322,7 @@ function collectIds(nodes: ReadonlyArray<RichTextNode>): Set<string> {
   return ids;
 }
 
-function safeHref(href: string): boolean {
-  return !/[\u0000-\u001f\u007f]/.test(href)
-    && (/^(https?:|mailto:|tel:)/i.test(href) || /^(\/|\.\/|\.\.\/|#|\?)/.test(href));
-}
+
 
 function escapeHTML(value: string): string {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
