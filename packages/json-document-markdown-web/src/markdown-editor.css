@@ -101,6 +101,9 @@
   background: var(--markdown-quote-background, color-mix(in srgb, var(--markdown-accent, #9f4937) 8%, transparent));
 }
 
+[data-markdown-marker="blockquote"] { inline-size: 0; block-size: 1em; }
+[data-markdown-marker="blockquote"]::before { content: none; }
+
 /* Inline content and code retain source spacing. */
 [data-markdown-kind="emphasis"] { font-style: italic; }
 [data-markdown-kind="strong"] { font-weight: 700; }

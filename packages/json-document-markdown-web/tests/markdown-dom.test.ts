@@ -165,3 +165,11 @@ test("task marker includes the first separator, leaving additional spaces editab
   expect(dom.resolveDeletionSelection!(root, {anchor:5, focus:6}, "backward")).toEqual({anchor:0, focus:6});
   expect(dom.observe(root).value).toBe(source);
 });
+
+test("hidden quote prefix deletes as one source unit and leaves extra spaces", () => {
+  const source = ">   본문";
+  const {root, dom} = setup(source);
+  expect(root.querySelector('[data-markdown-marker="blockquote"]')!.textContent).toBe("> ");
+  expect(dom.resolveDeletionSelection!(root, {anchor:2, focus:2}, "backward")).toEqual({anchor:0, focus:2});
+  expect(dom.observe(root).value).toBe(source);
+});

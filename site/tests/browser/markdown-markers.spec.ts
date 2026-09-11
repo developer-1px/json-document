@@ -52,13 +52,13 @@ for (const [name, markdown, kind] of fixtures) test(`${name} projection keeps so
   expect(copied).toBe(source.slice(bounds.from,bounds.to));
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Backspace");
-  await expect.poll(()=>editor.textContent()).toBe(kind === "task" ? source.slice(0,bounds.from)+source.slice(bounds.to) : source.slice(0,bounds.to-1)+source.slice(bounds.to));
+  await expect.poll(()=>editor.textContent()).toBe((kind === "task" || kind === "blockquote") ? source.slice(0,bounds.from)+source.slice(bounds.to) : source.slice(0,bounds.to-1)+source.slice(bounds.to));
   await page.keyboard.press("ControlOrMeta+z");
   await expect.poll(()=>editor.textContent()).toBe(source);
   await expect.poll(position).toBe(bounds.to);
   await page.keyboard.press("ArrowLeft");
   await page.keyboard.press("Delete");
-  await expect.poll(()=>editor.textContent()).toBe(kind === "task" ? source.slice(0,bounds.from)+source.slice(bounds.to) : source.slice(0,bounds.from)+source.slice(bounds.from+1));
+  await expect.poll(()=>editor.textContent()).toBe((kind === "task" || kind === "blockquote") ? source.slice(0,bounds.from)+source.slice(bounds.to) : source.slice(0,bounds.from)+source.slice(bounds.from+1));
   await page.keyboard.press("ControlOrMeta+z");
   await expect.poll(()=>editor.textContent()).toBe(source);
   await page.keyboard.insertText("x");
@@ -70,6 +70,8 @@ for (const [name, markdown, kind] of fixtures) test(`${name} projection keeps so
 test("reading presentation retains code text, table rows and one thematic rule", async ({page}) => {
   await page.goto("/applications/bear");
   const editor=page.getByRole("textbox",{name:"Markdown 문서"});
+  const quoteMarker = editor.locator('[data-markdown-marker="blockquote"]').first();
+  expect(await quoteMarker.evaluate(element => ({width:element.getBoundingClientRect().width, content:getComputedStyle(element,"::before").content}))).toEqual({width:0, content:"none"});
   const code=editor.locator('[data-markdown-kind="inlineCode"]').first();
   expect(await code.innerText()).toContain("짧은 코드");
   const rows=await editor.locator('[data-markdown-kind="tableRow"]').evaluateAll(es=>es.map(e=>({top:e.getBoundingClientRect().top,bottom:e.getBoundingClientRect().bottom})));

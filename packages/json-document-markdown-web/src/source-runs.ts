@@ -50,14 +50,15 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
   const projected = (marker: MarkdownMarker, parent?: MarkdownNode, owner?: SourceRange, conceal = false): SourceRun => {
     const {from, kind} = marker;
     const syntaxTo = marker.to;
-    const to = kind === "task" && /[ \t]/.test(source[syntaxTo] ?? "") ? syntaxTo + 1 : syntaxTo;
+    const atomic = kind === "task" || kind === "blockquote";
+    const to = atomic && /[ \t]/.test(source[syntaxTo] ?? "") ? syntaxTo + 1 : syntaxTo;
     const original = source.slice(from, to);
     const heading = kind === "heading" && parent?.kind === "heading" && from === parent.from;
     const label = marker.value ?? (heading ? `H${parent.depth}` : kind === "list" ? (/^\d/.test(original) ? original.replace(/\)$/, ".") : "•")
       : kind === "task" ? (/x/i.test(original) ? "☑" : "☐") : kind === "blockquote" ? "│" : kind === "break" ? "↵" : original);
-    const following = kind !== "task" && /[ \t]/.test(source[to] ?? "") ? to + 1 : to;
+    const following = !atomic && /[ \t]/.test(source[to] ?? "") ? to + 1 : to;
     return { kind: "delimiter", tag: "span", from, to,
-      projection: {to, following, ...(kind === "task" ? {atomic:true} : {})},
+      projection: {to, following, ...(atomic ? {atomic:true} : {})},
       ...(owner ? {owner} : {}),
       attributes: {
         "data-markdown-marker": kind, "data-markdown-label": label,
@@ -111,8 +112,9 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
       }
       const heading = marker.kind === "heading" && parent?.kind === "heading" && marker.from === parent.from;
       const inline = ["emphasis", "strong", "delete", "code", "link", "image", "escape", "break", "table", "entity"].includes(marker.kind);
-      runs.push(projected(marker, parent, inline ? owner : undefined, inline && (!!conceal || marker.kind === "escape")));
-      cursor = marker.to;
+      const run = projected(marker, parent, inline ? owner : undefined, inline && (!!conceal || marker.kind === "escape"));
+      runs.push(run);
+      cursor = run.to;
       if (heading && cursor < to && /[ \t]/.test(source[cursor]!)) {
         runs.push({...plain(cursor, cursor + 1), attributes:{"data-markdown-heading-separator":"", "aria-hidden":"true"}});
         cursor++;
