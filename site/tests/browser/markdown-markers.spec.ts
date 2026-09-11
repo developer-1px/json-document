@@ -52,13 +52,13 @@ for (const [name, markdown, kind] of fixtures) test(`${name} projection keeps so
   expect(copied).toBe(source.slice(bounds.from,bounds.to));
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Backspace");
-  await expect.poll(()=>editor.textContent()).toBe(source.slice(0,bounds.to-1)+source.slice(bounds.to));
+  await expect.poll(()=>editor.textContent()).toBe(kind === "task" ? source.slice(0,bounds.from)+source.slice(bounds.to+1) : source.slice(0,bounds.to-1)+source.slice(bounds.to));
   await page.keyboard.press("ControlOrMeta+z");
   await expect.poll(()=>editor.textContent()).toBe(source);
   await expect.poll(position).toBe(bounds.to);
   await page.keyboard.press("ArrowLeft");
   await page.keyboard.press("Delete");
-  await expect.poll(()=>editor.textContent()).toBe(source.slice(0,bounds.from)+source.slice(bounds.from+1));
+  await expect.poll(()=>editor.textContent()).toBe(kind === "task" ? source.slice(0,bounds.from)+source.slice(bounds.to+1) : source.slice(0,bounds.from)+source.slice(bounds.from+1));
   await page.keyboard.press("ControlOrMeta+z");
   await expect.poll(()=>editor.textContent()).toBe(source);
   await page.keyboard.insertText("x");

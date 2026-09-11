@@ -79,3 +79,14 @@ test("projection deletion retains source graphemes and selected ranges instead o
   expect(adapter.resolveDeletionSelection!(root, {anchor:8, focus:0}, "backward")).toEqual({anchor:8, focus:0});
   expect(adapter.resolveDeletionSelection!(root, {anchor:10, focus:10}, "backward")).toBeNull();
 });
+
+test("atomic projections delete the whole unit and separator from either edge or a partial selection", () => {
+  const {root, marker} = fixture();
+  const adapter = createTextProjectionDOMAdapter(plainTextDOMAdapter, () => [{from:0, to:7, following:8, atomic:true, element:marker}]);
+  for (const focus of [1, 7, 8]) {
+    expect(adapter.resolveDeletionSelection!(root, {anchor:focus, focus}, "backward")).toEqual({anchor:0, focus:8});
+  }
+  expect(adapter.resolveDeletionSelection!(root, {anchor:0, focus:0}, "forward")).toEqual({anchor:0, focus:8});
+  expect(adapter.resolveDeletionSelection!(root, {anchor:10, focus:3}, "backward")).toEqual({anchor:0, focus:10});
+  expect(adapter.resolveDeletionSelection!(root, {anchor:8, focus:8}, "forward")).toEqual({anchor:8, focus:10});
+});

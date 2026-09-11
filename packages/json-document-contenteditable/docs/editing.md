@@ -99,7 +99,10 @@ CSS 소비자는 `element`를 position 기준 요소로 만들고, 표시 문구
 
 좌우 이동은 from/to/following 경계로 이동하며 Shift는 원래 anchor를 유지합니다.
 외부에서 지정한 구간 내부의 원문 선택을 변경하지는 않으며, 그 caret은 가까운 시각적
-경계로 표시합니다. 삽입·삭제 단위는 바꾸지 않으므로 문서 모델의 atom이 아닙니다.
+경계로 표시합니다. 기본 삭제 단위는 원문 grapheme입니다. `atomic: true`이면
+경계에서 Delete·Backspace를 누르거나 구간 일부를 선택해 삭제할 때 `from`부터
+`following ?? to`까지 전체를 한 편집 단위로 삭제합니다. 본문 시작인 following에서도
+Backspace로 전체를 삭제합니다. 문서 모델은 원문 문자열로 유지하고 Undo는 한 번으로 복원합니다.
 키 해석은 Web keyboard adapter, 선택 적용과 IME lease는 contenteditable binding,
 원문 편집과 Undo는 TextEditor가 담당합니다.
 

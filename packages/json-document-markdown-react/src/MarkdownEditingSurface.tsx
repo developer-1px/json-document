@@ -14,7 +14,7 @@ export function MarkdownEditingSurface({ editor, style, ...props }: MarkdownEdit
     const root = rootRef.current;
     if (!root) return;
     const binding = createContentEditableBinding({
-      document: editor.document, pointer: editor.pointer, editor, root, dom: createMarkdownDOMAdapter(),
+      document: editor.document, pointer: editor.pointer, editor, root, dom: createMarkdownDOMAdapter({editor}),
     });
     return binding.bind();
   }, [editor]);

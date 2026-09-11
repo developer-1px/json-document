@@ -103,3 +103,11 @@ CommonMark/GFM 인식 과정에서 수집하므로 중첩 인용의 계속되는
 Entity는 원문 전체를 한 구간으로 제공하며 `marker.value`에 해석한 글자를 제공합니다. 기존 `MarkdownNode.value`도 유지됩니다.
 기존 점진적 편집에서도 범위가 이동하고 전체 파싱과 같은 결과를 유지합니다.
 기호의 외형·노출 정책·커서·삭제는 이 API의 책임이 아니며 Web/Editing owner가 담당합니다.
+
+## Task 체크 상태 편집
+
+`setMarkdownTaskChecked(source, from, checked): string`은 파서가 인식한 task의
+`[` 원문 offset을 받아 `[ ]`/`[x]`의 가운데 문자만 변경합니다. 나머지 원문과
+UTF-16 길이는 보존합니다. 이미 같은 상태이거나 해당 위치에 task가 없으면 원문을 반환합니다.
+DOM·History는 소유하지 않으며 소비자가 반환값을 기존 TextEditor에 적용합니다.
+[Markdown caret Usage](/demo/markdown-caret)의 체크박스가 Web adapter를 통해 이 API를 사용합니다.

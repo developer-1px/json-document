@@ -1,7 +1,12 @@
-import { createMarkdownParser, type MarkdownParser } from "@interactive-os/json-document-markdown";
-import { diffText } from "@interactive-os/json-document-editing";
+import { createWebKeyboardAdapter } from "@interactive-os/json-document-web";
+import { createMarkdownParser, setMarkdownTaskChecked, type MarkdownParser } from "@interactive-os/json-document-markdown";
+import { diffText, type TextEditor } from "@interactive-os/json-document-editing";
 import { plainTextDOMAdapter, renderTextCaretBoundary, createTextProjectionDOMAdapter, type TextProjection, type TextDOMAdapter, type TextSelection } from "@interactive-os/json-document-contenteditable";
 import { sourceRuns, type SourceRun } from "./source-runs.js";
+
+const keyboard = createWebKeyboardAdapter();
+
+type TaskAction = "toggle" | "undo" | "redo";
 
 interface RenderedRun {
   run: SourceRun;
@@ -18,8 +23,13 @@ interface Surface {
   selection: TextSelection | null | undefined;
 }
 
+export interface MarkdownDOMOptions {
+  /** Enables task controls using the existing source editor and its history. */
+  readonly editor?: TextEditor;
+}
+
 /** Source-preserving CommonMark/GFM DOM; all editing still uses source coordinates. */
-export function createMarkdownDOMAdapter(): TextDOMAdapter {
+export function createMarkdownDOMAdapter(options: MarkdownDOMOptions = {}): TextDOMAdapter {
   const surfaces = new WeakMap<HTMLElement, Surface>();
   const reveal = (surface: Surface, selection: TextSelection | null): void => {
     if (surface.observer.takeRecords().length) surface.dirty = true;
@@ -57,7 +67,21 @@ export function createMarkdownDOMAdapter(): TextDOMAdapter {
           const edit = diffText(previous, source)!;
           surface.parser.update(edit.from, edit.to, edit.insert);
         }
-        surface.runs = reconcileRuns(root, surface.runs, sourceRuns(surface.parser.projection));
+        surface.runs = reconcileRuns(root, surface.runs, sourceRuns(surface.parser.projection), (run, input, action) => {
+          const editor = options.editor;
+          const task = run.task!;
+          const current = surface!.parser.projection.source;
+          if (!editor || root.getAttribute("contenteditable") === "false" || editor.text !== current || plainTextDOMAdapter.observe(root).value !== current) {
+            input.checked = task.checked;
+            return;
+          }
+          const checked = input.checked;
+          const result = action === "toggle"
+            ? editor.replace(setMarkdownTaskChecked(current, task.from, checked), editor.snapshot.selection)
+            : editor[action]();
+          if (!result.ok) input.checked = task.checked;
+          if (input.isConnected) input.focus({preventScroll:true});
+        }, !!options.editor && root.getAttribute("contenteditable") !== "false");
         renderTextCaretBoundary(root, source);
         surface.observer.takeRecords();
         surface.dirty = false;
@@ -83,7 +107,8 @@ export function createMarkdownDOMAdapter(): TextDOMAdapter {
 }
 
 /** Reuse unchanged prefixes/suffixes and preserve text-node identity while typing. */
-function reconcileRuns(parent: HTMLElement, previous: RenderedRun[], next: ReadonlyArray<SourceRun>): RenderedRun[] {
+function reconcileRuns(parent: HTMLElement, previous: RenderedRun[], next: ReadonlyArray<SourceRun>,
+  onTaskChange: (run: SourceRun, input: HTMLInputElement, action: TaskAction) => void, tasksEnabled: boolean): RenderedRun[] {
   const matches = (entry: RenderedRun, run: SourceRun) => entry.run.kind === run.kind && entry.run.value === run.value;
   let prefix = 0;
   while (prefix < previous.length && prefix < next.length && matches(previous[prefix]!, next[prefix]!)) prefix++;
@@ -105,7 +130,20 @@ function reconcileRuns(parent: HTMLElement, previous: RenderedRun[], next: Reado
       entry.text ??= parent.ownerDocument.createTextNode(run.value);
       if (entry.text.data !== run.value) entry.text.data = run.value;
       if (element.childNodes.length !== 1 || element.firstChild !== entry.text) element.replaceChildren(entry.text);
-    } else entry.children = reconcileRuns(element, entry.children, run.children ?? []);
+    } else entry.children = reconcileRuns(element, entry.children, run.children ?? [], onTaskChange, tasksEnabled);
+    if (run.task) {
+      const input = element as HTMLInputElement;
+      input.checked = run.task.checked;
+      input.disabled = !tasksEnabled;
+      input.onchange = () => onTaskChange(entry!.run, input, "toggle");
+      input.onkeydown = event => {
+        if (event.isComposing || event.keyCode === 229) return;
+        const command = keyboard.resolve(event);
+        if (command?.type !== "undo" && command?.type !== "redo") return;
+        event.preventDefault();
+        onTaskChange(entry!.run, input, command.type);
+      };
+    }
     if (element === cursor) cursor = cursor.nextSibling;
     else parent.insertBefore(element, cursor);
     entry.run = run;

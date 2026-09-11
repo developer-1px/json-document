@@ -14,6 +14,9 @@
     },
     {
       "path": "../json-document-editing"
+    },
+    {
+      "path": "../json-document-web"
     }
   ],
   "include": [

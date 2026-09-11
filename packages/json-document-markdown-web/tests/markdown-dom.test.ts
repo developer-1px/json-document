@@ -137,3 +137,19 @@ describe("source-preserving Markdown DOM", () => {
   });
 
 });
+
+test("task controls without an editor are disabled, named, and preserve every source offset", () => {
+  const source = "- [ ] 할 일\n- [X] 완료";
+  const {root, dom} = setup(source);
+  const controls = Array.from(root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+  expect(controls.map(input => [input.disabled, input.checked, input.getAttribute("aria-label")])).toEqual([
+    [true, false, "할 일"], [true, true, "완료"],
+  ]);
+  for (let focus = 0; focus <= source.length; focus++) {
+    expect(dom.restoreSelection(root, {anchor:focus, focus})).toBe(true);
+    expect(dom.observe(root)).toEqual({value:source, selection:{anchor:focus, focus}});
+  }
+  dom.render(root, source.replace("[ ]", "[x]"));
+  expect(root.querySelector<HTMLInputElement>("input")!.checked).toBe(true);
+  expect(dom.observe(root).value).toBe(source.replace("[ ]", "[x]"));
+});

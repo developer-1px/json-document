@@ -2,14 +2,15 @@ import type { MarkdownNode, MarkdownNodeKind, MarkdownProjection, MarkdownMarker
 
 interface SourceRange { readonly from: number; readonly to: number }
 export interface SourceRun extends SourceRange {
-  readonly kind: MarkdownNodeKind | "source" | "delimiter" | "imagePreview";
+  readonly kind: MarkdownNodeKind | "source" | "delimiter" | "imagePreview" | "taskControl";
   readonly tag: string;
   readonly attributes: Readonly<Record<string, string>>;
   readonly value?: string;
   readonly children?: ReadonlyArray<SourceRun>;
   readonly owner?: SourceRange;
   readonly conceal?: boolean | "always";
-  readonly projection?: { readonly to: number; readonly following?: number };
+  readonly task?: { readonly from: number; readonly checked: boolean };
+  readonly projection?: { readonly to: number; readonly following?: number; readonly atomic?: boolean };
 }
 
 const tags: Record<MarkdownNodeKind, string> = {
@@ -54,16 +55,23 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
       : kind === "task" ? (/x/i.test(original) ? "☑" : "☐") : kind === "blockquote" ? "│" : kind === "break" ? "↵" : original);
     const following = /[ \t]/.test(source[to] ?? "") ? to + 1 : to;
     return { kind: "delimiter", tag: "span", from, to,
-      projection: {to, following},
+      projection: {to, following, ...(kind === "task" ? {atomic:true} : {})},
       ...(owner ? {owner} : {}),
       attributes: {
-        "data-markdown-marker": kind, "data-markdown-label": label, "aria-hidden":"true",
+        "data-markdown-marker": kind, "data-markdown-label": label,
+        ...(kind === "task" ? {} : {"aria-hidden":"true"}),
+        ...(kind === "list" ? {"data-markdown-list-style": /^\d/.test(original) ? "ordered" : "unordered"} : {}),
         ...(conceal ? {"data-markdown-concealed": ""} : {}),
         ...(heading ? {"data-markdown-heading-marker": ""} : {}),
       },
       children: [{...plain(from, to, owner, conceal), attributes: {
-        ...(owner ? {"data-markdown-delimiter": ""} : {}), "data-text-projection-source": "",
-      }}],
+        ...(owner ? {"data-markdown-delimiter": ""} : {}), "data-text-projection-source": "", "aria-hidden":"true",
+      }}, ...(kind === "task" ? [{
+        kind:"taskControl" as const, tag:"input", from:to, to,
+        task:{from:to - 3, checked:/x/i.test(original)},
+        attributes:{type:"checkbox", "data-ui-control":"check", "data-markdown-task-control":"",
+          contenteditable:"false", "aria-label":source.slice(to).split(/[\r\n]/, 1)[0]!.trim() || "Task"},
+      }] : [])],
     };
   };
   const raw = (from: number, to: number, owner?: SourceRange, conceal: SourceRun["conceal"] = false, parent?: MarkdownNode): SourceRun => {

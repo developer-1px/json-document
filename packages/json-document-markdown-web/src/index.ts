@@ -1,1 +1,1 @@
-export { createMarkdownDOMAdapter } from "./markdown-dom.js";
+export { createMarkdownDOMAdapter, type MarkdownDOMOptions } from "./markdown-dom.js";

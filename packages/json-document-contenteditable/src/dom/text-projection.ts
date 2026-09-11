@@ -7,6 +7,8 @@ export interface TextProjection {
   readonly element: HTMLElement;
   /** Optional next visible source position, after a concealed separator. */
   readonly following?: number;
+  /** Delete this displayed unit and its separator in one editing transaction. */
+  readonly atomic?: boolean;
 }
 
 /** Owns projected navigation and visual caret edges, without syntax or editing policy. */
@@ -43,7 +45,16 @@ export function createTextProjectionDOMAdapter(
     },
     resolveDeletionSelection(root, selection, direction) {
       const from = Math.min(selection.anchor, selection.focus), to = Math.max(selection.anchor, selection.focus);
-      if (!projections(root).some(region => to >= region.from && from <= (region.following ?? region.to))) {
+      const regions = projections(root);
+      const atoms = regions.filter(region => region.atomic && (from === to
+        ? direction === "backward" ? from > region.from && from <= (region.following ?? region.to) : from >= region.from && from < region.to
+        : to > region.from && from < region.to));
+      if (atoms.length) {
+        const start = Math.min(from, ...atoms.map(region => region.from));
+        const end = Math.max(to, ...atoms.map(region => region.following ?? region.to));
+        return {anchor:start, focus:end};
+      }
+      if (!regions.some(region => to >= region.from && from <= (region.following ?? region.to))) {
         return base.resolveDeletionSelection?.(root, selection, direction) ?? null;
       }
       if (from !== to) return selection;
