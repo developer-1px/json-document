@@ -304,6 +304,20 @@ export function createContentEditableBinding({
         return NO_CHANGE;
       }
       if (editor && event.cancelable && activeLease?.phase !== "composing") {
+        if (!activeLease && !trailingComposition && !(event as InputEvent).isComposing
+          && (inputType === "deleteContentBackward" || inputType === "deleteContentForward")) {
+          const selection = currentDOMSelection();
+          const range = selection && dom.resolveDeletionSelection?.(root, selection,
+            inputType === "deleteContentBackward" ? "backward" : "forward");
+          if (selection && range) {
+            event.preventDefault();
+            editor.select(selection);
+            const from = Math.min(range.anchor, range.focus), to = Math.max(range.anchor, range.focus);
+            trace("command", {command: "replace", reason: "projected-source-deletion", from, to});
+            const result = editor.replace(editor.text.slice(0, from) + editor.text.slice(to), {anchor: from, focus: from});
+            return result.ok ? COMMITTED : failure(result.code, result.reason ?? result.code);
+          }
+        }
         if (inputType === "insertParagraph" || inputType === "insertLineBreak") {
           event.preventDefault();
           if (trailingComposition) finishTrailing();

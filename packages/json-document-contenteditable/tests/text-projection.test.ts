@@ -70,3 +70,12 @@ test("adjacent projections share one caret and navigate across the shared bounda
   expect(adapter.resolveHorizontalSelection!(root, {anchor:2, focus:2}, "backward", false)).toEqual({anchor:0, focus:0});
   expect(adapter.resolveHorizontalSelection!(root, {anchor:2, focus:2}, "forward", false)).toEqual({anchor:4, focus:4});
 });
+
+test("projection deletion retains source graphemes and selected ranges instead of deleting a whole marker", () => {
+  const {root, adapter} = fixture();
+  expect(adapter.resolveDeletionSelection!(root, {anchor:8, focus:8}, "backward")).toEqual({anchor:7, focus:8});
+  expect(adapter.resolveDeletionSelection!(root, {anchor:7, focus:7}, "backward")).toEqual({anchor:6, focus:7});
+  expect(adapter.resolveDeletionSelection!(root, {anchor:8, focus:8}, "forward")).toEqual({anchor:8, focus:10});
+  expect(adapter.resolveDeletionSelection!(root, {anchor:8, focus:0}, "backward")).toEqual({anchor:8, focus:0});
+  expect(adapter.resolveDeletionSelection!(root, {anchor:10, focus:10}, "backward")).toBeNull();
+});

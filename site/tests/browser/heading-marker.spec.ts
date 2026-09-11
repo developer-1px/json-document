@@ -119,3 +119,24 @@ for (const depth of [1, 2, 3, 4, 5, 6]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   });
 }
+
+test("ba95af50: Backspace at heading body start deletes preceding source, never following blocks", async ({ page }) => {
+  await page.goto("/applications/bear");
+  const editor = page.getByRole("textbox", { name: "Markdown 문서" });
+  const original = (await editor.textContent())!;
+  const heading = editor.getByRole("heading", {level:2});
+  await heading.click();
+  await heading.evaluate(element => {
+    const text = document.createTreeWalker(element.querySelector('[data-markdown-kind="text"]')!, NodeFilter.SHOW_TEXT).nextNode()!;
+    document.getSelection()!.setBaseAndExtent(text, 5, text, 5);
+    document.dispatchEvent(new Event("selectionchange"));
+  });
+  await page.keyboard.press("ControlOrMeta+ArrowLeft");
+  const start = original.indexOf("한 줄에서 시작하기");
+  for (let count = 1; count <= 5; count++) {
+    await page.keyboard.press("Backspace");
+    await expect.poll(() => editor.textContent(), {timeout:2000}).toBe(original.slice(0, start - count) + original.slice(start));
+  }
+  for (let count = 0; count < 5; count++) await page.keyboard.press("ControlOrMeta+z");
+  await expect.poll(() => editor.textContent()).toBe(original);
+});

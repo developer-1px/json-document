@@ -41,6 +41,20 @@ export function createTextProjectionDOMAdapter(
       paint(root, restored ? base.observe(root).selection : null);
       return restored;
     },
+    resolveDeletionSelection(root, selection, direction) {
+      const from = Math.min(selection.anchor, selection.focus), to = Math.max(selection.anchor, selection.focus);
+      if (!projections(root).some(region => to >= region.from && from <= (region.following ?? region.to))) {
+        return base.resolveDeletionSelection?.(root, selection, direction) ?? null;
+      }
+      if (from !== to) return selection;
+      const source = base.observe(root).value;
+      const segments = new Intl.Segmenter(undefined, {granularity: "grapheme"}).segment(source);
+      const segment = segments.containing(direction === "backward" ? from - 1 : from);
+      if (!segment) return selection;
+      return direction === "backward"
+        ? {anchor: segment.index, focus: from}
+        : {anchor: from, focus: segment.index + segment.segment.length};
+    },
     resolveHorizontalSelection(root, selection, direction, extend) {
       const collapsed = selection.anchor === selection.focus;
       const focus = !extend && !collapsed

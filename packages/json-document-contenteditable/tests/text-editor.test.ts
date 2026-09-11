@@ -325,3 +325,28 @@ test("projected horizontal selection respects modifiers and composition ownershi
   expect(resolveHorizontalSelection).not.toHaveBeenCalled();
   binding.cancel();
 });
+
+test("projected deletion preserves the original caret in Undo and yields to composition", () => {
+  const json = createJSONDocument({source:"## title\n\n**body**"});
+  const editor = createTextEditor(json, "/source");
+  const root = document.createElement("div"); document.body.append(root);
+  const resolveDeletionSelection = vi.fn(() => ({anchor:2, focus:3}));
+  const binding = createContentEditableBinding({document:json, pointer:"/source", root, editor,
+    dom:{...plainTextDOMAdapter, resolveDeletionSelection}});
+  cleanup.push(binding.bind());
+  plainTextDOMAdapter.restoreSelection(root, {anchor:3, focus:3});
+  const input = new InputEvent("beforeinput", {inputType:"deleteContentBackward", cancelable:true});
+  binding.handle(input);
+  expect(input.defaultPrevented).toBe(true);
+  expect(editor.text).toBe("##title\n\n**body**");
+  editor.undo();
+  expect(editor.text).toBe("## title\n\n**body**");
+  expect(editor.snapshot.selection).toEqual({anchor:3, focus:3});
+  resolveDeletionSelection.mockClear();
+  binding.handle(new CompositionEvent("compositionstart"));
+  const composing = new InputEvent("beforeinput", {inputType:"deleteContentBackward", cancelable:true, isComposing:true});
+  binding.handle(composing);
+  expect(composing.defaultPrevented).toBe(false);
+  expect(resolveDeletionSelection).not.toHaveBeenCalled();
+  binding.cancel();
+});

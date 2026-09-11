@@ -111,3 +111,13 @@ DOM 선택을 한 번만 복원합니다. `plainTextDOMAdapter.restoreSelection`
 [Markdown caret Usage](/demo/markdown-caret)는 이 API를 사용하는 제목 projection을
 실행합니다. Source에서 Markdown의 public import를 따라 공용 투영·CSS·DOM 복원 정본까지
 확인할 수 있습니다. 공용 모듈의 별도 계약 테스트는 Markdown 없는 `[[key]]` fixture를 사용합니다.
+
+
+`resolveDeletionSelection(root, selection, direction)`는 투영 구간과 접한 삭제를 원문의
+선택 범위로 반환합니다. `null`이면 native 삭제를 유지합니다. 공용 투영 adapter는
+접힌 선택에서 `Intl.Segmenter`의 grapheme 한 개, 펼친 선택에서는 선택한 원문 범위를
+반환합니다. 마커 전체를 삭제 단위로 바꾸지 않습니다.
+Binding은 cancelable `deleteContentBackward`/`deleteContentForward`에서 이 범위를
+Editing의 `replace`로 반영하고, Undo가 삭제 직전 caret을 복원하도록 원래 선택을 보존합니다.
+IME 조합과 native lease 중에는 이 경로로 가로채지 않습니다. 이는 절대 위치로 표시된
+접두사와 본문의 경계에서 Chrome이 다른 문단을 합치거나 숨긴 문법을 제거하는 것을 막습니다.
