@@ -1,0 +1,32 @@
+import { expect, test } from "@playwright/test";
+
+test("menu moves from quick start to a module and separates design status", async ({ page }, testInfo) => {
+  await page.goto("/docs/quick-start");
+  await expect(page.getByRole("heading", { level: 1, name: "빠른 시작" })).toBeVisible();
+  await expect(page.locator('[data-live-demo="/demo"]')).toBeVisible();
+  const nav = page.getByRole("navigation", { name: "Site navigation" });
+  await nav.getByRole("button", { name: "모듈", exact: true }).click();
+  await nav.getByRole("link", { name: "Document Types", exact: true }).click();
+  await expect(nav.getByRole("link", { name: "API · Markdown", exact: true })).toBeVisible();
+  await expect(nav.getByRole("group", { name: "모듈", exact: true }).getByRole("link", { name: "Tree · TBD", exact: true })).toHaveCount(0);
+  await nav.getByRole("link", { name: "API · Markdown", exact: true }).click();
+  await page.locator('[data-doc-content]').getByRole("link", { name: "Markdown caret", exact: true }).first().click();
+  await expect(page.getByRole("textbox", { name: "Markdown 편집" })).toBeVisible();
+  await expect(page.getByRole("tablist", { name: "Demo and source files" })).toBeVisible();
+  await nav.getByRole("button", { name: "설계와 진행 상태" }).click();
+  await nav.getByRole("link", { name: "소유권 감사", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 2, name: "현재 후보별 상태" })).toBeVisible();
+  await nav.getByRole("link", { name: "Tree · TBD", exact: true }).click();
+  await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "설계와 진행 상태" })).toBeVisible();
+  await nav.getByRole("button", { name: "편집 조합 · Hands" }).click();
+  await nav.getByRole("link", { name: "지원 범위", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "지원 범위" })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/docs/modules");
+  await expect(page.getByRole("heading", { level: 1, name: "전체 모듈" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole("navigation", { name: "Site navigation" }).getByRole("button", { name: "시작하기" }).click();
+  await page.getByRole("navigation", { name: "Site navigation" }).getByRole("button", { name: "설계와 진행 상태" }).click();
+  await page.screenshot({ path: testInfo.outputPath("site-map.png") });
+});

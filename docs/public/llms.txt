@@ -11,7 +11,8 @@ reference·독립·collaboration binding에서 검증한다.
 
 ## 목표 구조와 현재 상태
 
-읽기 순서는 Foundation → Building Blocks → Hands → Artifact → Applications다.
+사이트 탐색은 시작하기 → 모듈 → 편집 조합 · Hands → Applications → 설계와 진행 상태다.
+Artifact·Official Hands 목표·소유권 감사는 설계 영역에 둔다.
 필수 package dependency chain이 아니다. Foundation은 JSON Document, Document
 Types, Editing, Collaboration을, Building Blocks는 Adapter, Connector,
 Affordance, UI Primitives를 묶는다. Adapter와 Connector는 독립적으로 선택한다.

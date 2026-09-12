@@ -6,13 +6,14 @@
 사이트 등록에서 문서 URL·Usage·제품 관계를 읽습니다. 생성 API 본문은 각
 `packages/*/docs/api-reference.md`에 있습니다. 문서 목록을 별도로 복제하지 않습니다.
 
-- Foundation과 Building Blocks의 책임별 개요에서 모듈 API와 Usage를 찾습니다.
+- [모듈](modules.md)의 책임별 개요에서 API와 Usage를 찾습니다.
 - API 문서의 책임과 사용 경로에서 혼합 책임·이행 상태와 소비 제품을 확인합니다.
 - Usage의 Source에서 구현을 확인하고, 제품은 확인된 모듈 조합으로 돌아갑니다.
 - 패키지 공개 여부, Document Type 소유권 확정, Hand Profile 완료는 다른 상태입니다.
 
 목표는 같은 역할과 책임이 하나의 정본 모듈을 갖고, Application이 그 공개 API를
-조합하는 구조입니다. 아래는 읽기 순서와 책임 지도입니다. 모든 package가 차례로
+조합하는 구조입니다. 아래는 책임 지도입니다. 사이트의 읽기 순서는 시작하기·모듈·Hands·Applications·
+설계와 진행 상태이며, 책임 지도를 탐색 목적에 맞춰 투영합니다. 모든 package가 차례로
 의존하는 직렬 계층은 아닙니다.
 
 ```text
@@ -112,7 +113,7 @@ URL과 navigation, 권한·copy·fixture·layout과 concrete runtime 연결을 �
 각 canonical module의 책임입니다. 한 제품에서만 쓰여도 이 경계는 같습니다.
 
 [Calendar와 AI Agent](applications.md)는 현재 제품에서 드러난 조합을 보여 줍니다.
-읽기 순서는 Foundation에서 Application으로 가지만, 책임을 발견하는 작업은
+책임 지도는 기반 계약부터 제품 조합까지 설명하지만, 책임을 발견하는 작업은
 Application에서 시작해 정본 API를 만들고 제품이 다시 소비하는 순환입니다.
 이 과정은 [How We Build](how-we-build.md)에 있습니다.
 

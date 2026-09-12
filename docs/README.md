@@ -25,31 +25,22 @@ docs
 복제한 탐색 정본이 아니다.
 
 ```text
-Introduction
-├─ Why
-├─ Architecture
-└─ How We Build
-Foundation
-├─ Overview
-├─ JSON Document Protocol
-├─ Document Types · TBD
-│  └─ 후보별 관찰된 schema·목표 owner·완료 증거
-├─ Editing Protocol
-│  └─ Intent · Topology · Selection · Clipboard · History
-└─ Collaboration
-   └─ Replica · Lifecycle · History · Text
-Building Blocks
-├─ Overview
-├─ Adapter
-├─ Connector
-├─ Affordance
-└─ UI Primitives
-Hands
-└─ 현재 Usage와 Official Hands Profile · TBD
-Artifact
-└─ Content Prototype · TBD
+시작하기
+├─ 소개 · 빠른 시작
+└─ Architecture
+모듈
+├─ JSON Document · Document Types · Editing · Collaboration
+└─ Adapter · Connector · Affordance · UI Primitives
+편집 조합 · Hands
+├─ 장르별 예제와 API
+└─ 지원 범위
 Applications
-└─ 제품 조합과 제품에서 발견한 책임
+└─ Bear · Calendar · AI Agent
+설계와 진행 상태
+├─ Artifact · Prototype
+├─ Official Hands 목표
+├─ 소유권 감사
+└─ 개발 원칙
 ```
 
 읽기 순서는 필수 package dependency chain이 아니다. Collaboration은 같은
