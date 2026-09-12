@@ -45,43 +45,29 @@ describe("official site shell", () => {
 
     expect(nav.queryByRole("group", { name: "Start" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Core" })).toBeNull();
-    expect(nav.queryByRole("link", { name: "Why" })).toBeNull();
+    expect(nav.queryByRole("link", { name: "소개" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
     expect(screen.queryByRole("navigation", { name: "Dependency map" })).toBeNull();
-    await user.click(nav.getByRole("button", { name: "Introduction" }));
-    expect(groupLinks(nav, "Introduction")).toEqual([
-      "Why",
-      "Architecture",
-      "How We Build",
+    await user.click(nav.getByRole("button", { name: "시작하기" }));
+    expect(groupLinks(nav, "시작하기")).toEqual(["소개", "빠른 시작", "Architecture"]);
+    await user.click(nav.getByRole("button", { name: "모듈" }));
+    expect(groupLinks(nav, "모듈")).toEqual([
+      "전체 모듈", "JSON Document", "Document Types", "Editing", "Collaboration", "Adapter", "Connector", "Affordance", "UI Primitives",
     ]);
-    await user.click(nav.getByRole("button", { name: "Foundation" }));
-    expect(groupLinks(nav, "Foundation")).toEqual(expect.arrayContaining([
-      "Overview",
-      "Replica",
-      "Intent guide",
+    await user.click(nav.getByRole("button", { name: "편집 조합 · Hands" }));
+    expect(groupLinks(nav, "편집 조합 · Hands")).toEqual(expect.arrayContaining([
+      "장르별 예제", "지원 범위", "Order", "Object", "Tree", "Database", "Composer", "Mention",
     ]));
-    await user.click(nav.getByRole("button", { name: "Hands" }));
-    expect(groupLinks(nav, "Hands")).toEqual(expect.arrayContaining([
-      "Overview", "Official Hands · TBD",
-      "Order",
-      "Object",
-      "Tree",
-      "Database",
-      "Composer",
-      "Mention",
+    expect(groupLinks(nav, "편집 조합 · Hands")).not.toContain("Official Hands 목표");
+    await user.click(nav.getByRole("button", { name: "설계와 진행 상태" }));
+    expect(groupLinks(nav, "설계와 진행 상태")).toEqual(expect.arrayContaining([
+      "설계 현황", "Official Hands 목표", "소유권 감사", "Artifact · Prototype", "개발 원칙",
     ]));
-    await user.click(nav.getByRole("button", { name: "Artifact" }));
-    expect(groupLinks(nav, "Artifact")).toEqual(["Content Prototype · TBD"]);
     await user.click(nav.getByRole("button", { name: "Applications" }));
     expect(groupLinks(nav, "Applications")).toEqual(["Overview", "Bear", "Calendar", "AI Agent"]);
-    expect(nav.getByRole("link", { name: "JSON Document Protocol" }).getAttribute("href")).toBe("/docs/api");
+    expect(nav.getByRole("link", { name: "JSON Document", exact: true }).getAttribute("href")).toBe("/docs/api");
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
-      "Introduction",
-      "Foundation",
-      "Building Blocks",
-      "Hands",
-      "Artifact",
-      "Applications",
+      "시작하기", "모듈", "편집 조합 · Hands", "Applications", "설계와 진행 상태",
     ]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
@@ -95,13 +81,13 @@ describe("official site shell", () => {
     expect(catalog.getByRole("link", {name:"Rich Text React",exact:true}).getAttribute("href")).toBe("/docs/api/rich-text-react");
     expect(catalog.getByRole("link", {name:"Validate commits",exact:true}).getAttribute("href")).toBe("/connectors/zod/validate");
 
-    await user.click(within(nav.getByRole("group", { name: "Hands" })).getByRole("link", { name: "Database", exact: true }));
+    await user.click(within(nav.getByRole("group", { name: "편집 조합 · Hands" })).getByRole("link", { name: "Database", exact: true }));
     const databaseCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
     expect(databaseCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
-    expect(databaseCrumb.getByRole("link", { name: "Hands" }).getAttribute("href")).toBe("/editors");
+    expect(databaseCrumb.getByRole("link", { name: "편집 조합 · Hands" }).getAttribute("href")).toBe("/editors");
     expect(databaseCrumb.getByText("Database")).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Building Blocks" })).getAllByRole("link", { name: "Overview", exact: true })[2]!);
+    await user.click(within(nav.getByRole("group", { name: "모듈" })).getByRole("link", { name: "Connector", exact: true }));
     expect(await screen.findByRole(
       "heading",
       { level: 1, name: "json-document Connectors" },
@@ -118,8 +104,8 @@ describe("official site shell", () => {
     expect(screen.getByText(/Calendar와 Object는 공개 소유자와 소비 경계를 확정했고/)).toBeTruthy();
     expect(screen.getByRole("heading", { level: 2, name: "현재 소유자와 후보" })).toBeTruthy();
     const breadcrumb = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
-    expect(breadcrumb.getByRole("link", { name: "Foundation" }).getAttribute("href")).toBe("/docs/foundation");
-    expect(breadcrumb.getByText("Overview · TBD")).toBeTruthy();
+    expect(breadcrumb.getByRole("link", { name: "모듈" }).getAttribute("href")).toBe("/docs/modules");
+    expect(breadcrumb.getByText("Document Types")).toBeTruthy();
   });
 
   test("renders the Calendar owner API reference and package-owned contract", async () => {
@@ -137,8 +123,8 @@ describe("official site shell", () => {
     const brand = screen.getByRole("link", { name: "json-document" });
     const siteNav = screen.getByRole("navigation", { name: "Site navigation" });
 
-    await user.click(nav.getByRole("button", { name: "Introduction" }));
-    await user.click(within(nav.getByRole("group", { name: "Introduction" })).getByRole("link", { name: "Why" }));
+    await user.click(nav.getByRole("button", { name: "시작하기" }));
+    await user.click(within(nav.getByRole("group", { name: "시작하기" })).getByRole("link", { name: "소개" }));
     await waitFor(() => expect(document.documentElement.lang).toBe("ko"));
     const frame = await waitFor(() => {
       const node = document.querySelector("[data-page-frame]");
@@ -146,10 +132,10 @@ describe("official site shell", () => {
       return node;
     });
 
-    await user.click(nav.getByRole("button", { name: "Foundation" }));
-    await user.click(nav.getByRole("link", { name: "JSON Document Protocol" }));
+    await user.click(nav.getByRole("button", { name: "모듈" }));
+    await user.click(nav.getByRole("link", { name: "JSON Document" }));
     const crumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
-    await waitFor(() => expect(crumb.getByText("JSON Document Protocol")).toBeTruthy());
+    await waitFor(() => expect(crumb.getByText("JSON Document")).toBeTruthy());
     expect(screen.getByRole("link", { name: "json-document" })).toBe(brand);
     expect(screen.getByRole("navigation", { name: "Site navigation" })).toBe(siteNav);
     expect(document.querySelector("[data-page-frame]")).toBe(frame);
@@ -157,8 +143,8 @@ describe("official site shell", () => {
     expect(header?.contains(screen.getByRole("navigation", { name: "Breadcrumb" }))).toBe(true);
     expect(header?.querySelector("h1")).toBeTruthy();
 
-    await user.click(nav.getByRole("button", { name: "Hands" }));
-    await user.click(within(nav.getByRole("group", { name: "Hands" })).getByRole("link", { name: "Overview", exact: true }));
+    await user.click(nav.getByRole("button", { name: "편집 조합 · Hands" }));
+    await user.click(within(nav.getByRole("group", { name: "편집 조합 · Hands" })).getByRole("link", { name: "장르별 예제", exact: true }));
     await waitFor(() => expect(document.documentElement.lang).toBe("ko"));
   });
 });

@@ -13,21 +13,21 @@ function trail(path: string) {
 
 describe("breadcrumbTrail", () => {
   test("places owner groups below the new IA sections", () => {
-    expect(trail("/docs")).toEqual(["Overview:/", "Introduction:/docs"]);
-    expect(trail("/docs/architecture")).toEqual(["Overview:/", "Introduction:/docs", "Architecture:/docs/architecture"]);
-    expect(trail("/docs/foundation")).toEqual(["Overview:/", "Foundation:/docs/foundation"]);
+    expect(trail("/docs")).toEqual(["Overview:/", "시작하기:/docs"]);
+    expect(trail("/docs/architecture")).toEqual(["Overview:/", "시작하기:/docs", "Architecture:/docs/architecture"]);
+    expect(trail("/docs/modules")).toEqual(["Overview:/", "모듈:/docs/modules"]);
     expect(trail("/docs/collaboration/replica")).toEqual([
-      "Overview:/", "Foundation:/docs/foundation", "Collaboration:/docs/collaboration", "Replica:/docs/collaboration/replica",
+      "Overview:/", "모듈:/docs/modules", "Collaboration:/docs/collaboration", "Replica:/docs/collaboration/replica",
     ]);
     expect(trail("/docs/selection")).toEqual([
-      "Overview:/", "Foundation:/docs/foundation", "Editing:/docs/editing", "Selection:/docs/selection",
+      "Overview:/", "모듈:/docs/modules", "Editing:/docs/editing", "Selection:/docs/selection",
     ]);
     expect(trail("/docs/connector-zod-validate")).toEqual([
-      "Overview:/", "Building Blocks:/docs/building-blocks", "Connector:/docs/connectors",
+      "Overview:/", "모듈:/docs/modules", "Connector:/docs/connectors",
       "Zod:/docs/connector-zod", "Validate:/docs/connector-zod-validate",
     ]);
-    expect(trail("/docs/order")).toEqual(["Overview:/", "Hands:/editors", "Order:/docs/order"]);
-    expect(trail("/viewer")).toEqual(["Overview:/", "Artifact:/viewer"]);
+    expect(trail("/docs/order")).toEqual(["Overview:/", "편집 조합 · Hands:/editors", "Order:/docs/order"]);
+    expect(trail("/viewer")).toEqual(["Overview:/", "설계와 진행 상태:/docs/design", "Artifact · Prototype:/viewer"]);
     expect(trail("/applications/calendar")).toEqual([
       "Overview:/", "Applications:/applications", "Calendar:/applications/calendar",
     ]);

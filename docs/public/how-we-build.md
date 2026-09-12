@@ -20,7 +20,7 @@ Application이 정본 API를 다시 소비한다
 읽기 순서와 책임을 발견하는 방향을 구별합니다.
 
 ```text
-읽기 순서: Foundation → Building Blocks → Hands → Artifact → Application
+읽기 순서: 시작하기 → 모듈 → Hands → Applications → 설계와 진행 상태
 책임 발견: Application → 책임 발견 → Canonical Module → Application
 ```
 

@@ -2,6 +2,7 @@ import { siteRoutes } from "../../route-registry.mjs";
 export { legacyPageRedirects } from "./legacy-page-redirects";
 
 export type SiteNavigationGroup =
+  | "Design"
   | "Introduction"
   | "JSON Document"
   | "Document Types"

@@ -1,7 +1,7 @@
 import { type SiteNavigationGroup } from "./page-descriptors";
 
 export type SiteSection = {
-  readonly id: "introduction" | "foundation" | "building-blocks" | "hands" | "artifact" | "applications";
+  readonly id: "getting-started" | "modules" | "hands" | "applications" | "design";
   readonly path: string;
   readonly label: string;
   readonly blurb: string;
@@ -9,48 +9,11 @@ export type SiteSection = {
 };
 
 export const siteSections: ReadonlyArray<SiteSection> = [
-  {
-    id: "introduction",
-    path: "/docs",
-    label: "Introduction",
-    blurb: "Why, concepts, and how we build",
-    groups: ["Introduction"],
-  },
-  {
-    id: "foundation",
-    path: "/docs/foundation",
-    label: "Foundation",
-    blurb: "Values, meaning, editing, and collaboration",
-    groups: ["JSON Document", "Document Types", "Editing", "Collaboration"],
-  },
-  {
-    id: "building-blocks",
-    path: "/docs/building-blocks",
-    label: "Building Blocks",
-    blurb: "Platform, ecosystem, interaction, and UI",
-    groups: ["Adapter", "Connector", "Affordance", "UI Primitives"],
-  },
-  {
-    id: "hands",
-    path: "/editors",
-    label: "Hands",
-    blurb: "Tools that close an editing loop",
-    groups: ["Hands"],
-  },
-  {
-    id: "artifact",
-    path: "/viewer",
-    label: "Artifact",
-    blurb: "Editable content inside applications",
-    groups: ["Artifact"],
-  },
-  {
-    id: "applications",
-    path: "/applications",
-    label: "Applications",
-    blurb: "Products that reveal reusable modules",
-    groups: ["Applications"],
-  },
+  { id: "getting-started", path: "/docs", label: "시작하기", blurb: "소개, 빠른 시작과 아키텍처", groups: ["Introduction"] },
+  { id: "modules", path: "/docs/modules", label: "모듈", blurb: "책임별 설명, API와 Usage", groups: ["JSON Document", "Document Types", "Editing", "Collaboration", "Adapter", "Connector", "Affordance", "UI Primitives"] },
+  { id: "hands", path: "/editors", label: "편집 조합 · Hands", blurb: "장르별 편집 예제와 지원 범위", groups: ["Hands"] },
+  { id: "applications", path: "/applications", label: "Applications", blurb: "Bear, Calendar와 AI Agent", groups: ["Applications"] },
+  { id: "design", path: "/docs/design", label: "설계와 진행 상태", blurb: "설계 목표, 프로토타입과 소유권 감사", groups: ["Design", "Artifact"] },
 ];
 
 export type SiteSectionId = (typeof siteSections)[number]["id"];
@@ -72,6 +35,7 @@ export const groupLandings: Record<SiteNavigationGroup, { readonly path: string;
   Affordance: { path: "/docs/affordance", label: "Affordance" },
   "UI Primitives": { path: "/docs/ui-primitives", label: "UI Primitives" },
   Hands: { path: "/editors", label: "Hands" },
-  Artifact: { path: "/viewer", label: "Artifact" },
+  Artifact: { path: "/docs/design", label: "설계와 진행 상태" },
+  Design: { path: "/docs/design", label: "설계와 진행 상태" },
   Applications: { path: "/applications", label: "Applications" },
 };

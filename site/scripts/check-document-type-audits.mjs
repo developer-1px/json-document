@@ -6,7 +6,7 @@ const root = new URL("../..", import.meta.url).pathname;
 const ledger = JSON.parse(readFileSync(join(root, "audits/document-types.json"), "utf8"));
 const allowed = new Set(["canonical consumer", "Host composition", "duplicate implementation", "canonical API gap", "missing canonical module", "mislocated module", "out of scope", "unverified"]);
 const expectedCandidates = siteRoutes
-  .filter((route) => route.navigationGroup === "Document Types" && route.path.startsWith("/docs/document-types/"))
+  .filter((route) => route.path.startsWith("/docs/document-types/"))
   .map((route) => route.path.slice("/docs/document-types/".length));
 
 if (JSON.stringify(ledger.candidates) !== JSON.stringify(expectedCandidates)) throw new Error("Document Type audit candidates do not match the TBD navigation denominator");
