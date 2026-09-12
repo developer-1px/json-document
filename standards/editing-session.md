@@ -152,7 +152,7 @@ DOM lifecycle의 브라우저 증거도 해당 정본에서 관리한다.
 
 - [Editing package](../packages/json-document-editing/README.md)와
   [public entrypoint](../packages/json-document-editing/src/index.ts)
-- [Editing API reference](../docs/api-reference/editing.md)와
+- [Editing API reference](../packages/json-document-editing/docs/api-reference.md)와
   [History 사용법](../docs/public/history.md)
 - [Editing Usage](../site/src/routes/editing-demos/HistoryDemoRoute.tsx)와
   [source registration](../site/src/shared/demo-workbench/demo-sources.ts)

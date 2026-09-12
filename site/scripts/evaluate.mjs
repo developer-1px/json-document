@@ -1,3 +1,4 @@
+import { siteRoutes } from "../route-registry.mjs";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { routeFile, validateSiteRoutes } from "./route-checks.mjs";
@@ -7,7 +8,6 @@ const siteRoot = new URL("..", import.meta.url).pathname;
 const dist = join(siteRoot, "dist");
 const expectedBase = normalizeBase(process.env.SITE_BASE ?? "/");
 const expectedSiteUrl = (process.env.SITE_URL ?? "https://developer-1px.github.io/json-document").replace(/\/$/, "");
-const siteRoutes = JSON.parse(readFileSync(join(siteRoot, "site-routes.json"), "utf8"));
 validateSiteRoutes(siteRoutes, fail);
 validateSourceBoundaries();
 const routes = siteRoutes.map((route) => ({ ...route, file: routeFile(route.path) }));
@@ -33,8 +33,8 @@ function validateSourceBoundaries() {
     .map((entry) => entry.name)
     .sort();
 
-  if (JSON.stringify(rootEntries) !== JSON.stringify(["app", "main.tsx", "routes", "shared"])) {
-    fail(`site src root must contain only app, main.tsx, route owners, and shared UI: ${rootEntries.join(", ")}.`);
+  if (JSON.stringify(rootEntries) !== JSON.stringify(["app", "applications", "main.tsx", "routes", "shared"])) {
+    fail(`site src root must contain only app, applications, main.tsx, route owners, and shared UI: ${rootEntries.join(", ")}.`);
   }
 
   const flatRouteFiles = readdirSync(routesRoot, { withFileTypes: true })
@@ -67,8 +67,8 @@ function validateSourceBoundaries() {
       const specifier = match[1];
       if (!specifier?.startsWith(".")) continue;
       const target = resolve(dirname(file), specifier);
-      if (relative(routesRoot, target).startsWith("..") === false || relative(join(src, "app"), target).startsWith("..") === false) {
-        fail(`site shared UI must not import app or route owners: ${relative(siteRoot, file)}.`);
+      if (relative(routesRoot, target).startsWith("..") === false || relative(join(src, "app"), target).startsWith("..") === false || relative(join(src, "applications"), target).startsWith("..") === false) {
+        fail(`site shared UI must not import app, application or route owners: ${relative(siteRoot, file)}.`);
       }
     }
   }

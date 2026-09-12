@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import siteRoutes from "../../site-routes.json";
+import { siteRoutes } from "../../route-registry.mjs";
 import { breadcrumbTrail, rootNavRoutes, visibleNavChildren } from "../../src/app/breadcrumb";
 import type { SiteRoute } from "../../src/app/router";
 

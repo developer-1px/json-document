@@ -2,7 +2,7 @@ import { documentationMap } from "../../app/documentation-map";
 import { pageDescriptor } from "../../app/page-descriptors";
 
 const documentSources = import.meta.glob<string>(
-  ["../../../../docs/public/*.md", "../../../../docs/api-reference/*.md", "../../../../packages/*/docs/*.md"],
+  ["../../../../docs/public/*.md", "../../../../packages/*/docs/*.md"],
   { query: "?raw", import: "default", eager: true },
 );
 

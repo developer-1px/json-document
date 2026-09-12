@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AdapterCatalogRoute } from "../../../../routes/adapters/AdapterCatalogRoute";
+import { DocsRoute } from "../../../../routes/docs/DocsRoute";
 
 export const Route = createFileRoute("/_page/adapters/")({
-  component: AdapterCatalogRoute,
+  component: () => <DocsRoute pageId="adapters" />,
 });

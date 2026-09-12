@@ -2,8 +2,9 @@
 
 문서는 세 관계를 구분합니다. **책임 위치**는 무엇을 소유하는지, **공개 API**는
 저장소가 실제로 제공하는 계약, **Usage와 Application**은 그 계약을 사용하는
-증거입니다. 위의 현재 저장소 지도는 사이트 등록에서 API·Usage·제품 관계를
-읽습니다. 문서 목록을 별도로 복제하지 않습니다.
+증거입니다. 위의 현재 저장소 지도는 `architecture/modules.json`에서 책임·위치·공개 계약을,
+사이트 등록에서 문서 URL·Usage·제품 관계를 읽습니다. 생성 API 본문은 각
+`packages/*/docs/api-reference.md`에 있습니다. 문서 목록을 별도로 복제하지 않습니다.
 
 - Foundation과 Building Blocks의 책임별 개요에서 모듈 API와 Usage를 찾습니다.
 - API 문서의 책임과 사용 경로에서 혼합 책임·이행 상태와 소비 제품을 확인합니다.
@@ -121,3 +122,15 @@ Rich Text는 새 최상위 계층이 아니라 이 책임 지도를 적용한 �
 문서 의미와 Editing 위에 Web Adapter, React Connector, 장르별 UI를 조합합니다.
 현재 profile·적합성·browser 증거는 다른 Hands가 경계를 판단할 때 참고할 수 있지만
 모든 Document Type과 Hands의 완료를 대신하지는 않습니다.
+
+## 저장소와 문서 사이의 drift 검사
+
+`npm run check:architecture`는 실제 workspace·package exports·source entrypoint·
+패키지 소유 API 문서·사이트 등록을 대조합니다. 제품에 등록된 대표 모듈은 해당
+route source에서 import와 re-export를 따라 도달할 수 있어야 합니다.
+`npm run check:architecture -- --evidence`로 그 경로를 출력합니다.
+
+이 검사는 type import와 barrel re-export를 포함하는 정적 소스 관계입니다.
+실행 시 호출 여부, tree shaking 후 번들, 전체 제품 의존성이나 책임 분류의 의미적
+정당성을 증명하지 않습니다. 소스 표시를 위한 `?raw` import는 소비 증거에서 제외합니다.
+실제 Usage 동작은 브라우저 검사로, 혼합 책임과 Profile 완료는 소유권 감사로 확인합니다.

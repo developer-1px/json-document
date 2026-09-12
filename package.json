@@ -77,7 +77,9 @@
     "site:evaluate:pages": "SITE_BASE=/json-document/ SITE_URL=https://developer-1px.github.io/json-document npm run site:evaluate",
     "site:smoke:pages": "SITE_BASE=/json-document/ SITE_URL=https://developer-1px.github.io/json-document node site/scripts/evaluate-http.mjs",
     "site:verify:pages": "npm run site:build:pages && npm run site:evaluate:pages && npm run site:smoke:pages",
-    "site:evaluate:live": "node site/scripts/evaluate-live.mjs"
+    "site:evaluate:live": "node site/scripts/evaluate-live.mjs",
+    "check:architecture": "node scripts/check-architecture-drift.mjs",
+    "test:architecture": "node --test scripts/architecture-drift.test.mjs"
   },
   "devDependencies": {
     "jsonpath-js": "0.3.1",
