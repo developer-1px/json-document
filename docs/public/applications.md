@@ -30,13 +30,13 @@ Calendar라는 이름 아래의 모든 코드를 App이 소유하지 않습니�
 
 ## AI Agent
 
-[AI Agent Application](/applications/ai-agent)은 session runtime에 Composer,
-Markdown, AG-UI와 A2UI projection을 조합합니다.
+[AI Agent Application](/applications/ai-agent)은 session runtime에 Markdown, AG-UI와 A2UI projection을 조합합니다.
+현재 입력은 Host의 textarea와 UI Primitives이며 Composer Hand 연결을 완료한 상태가 아닙니다.
 
 ```text
 AI Agent Application
-├─ Composer · Mention Hands
-├─ Markdown · Rich Text projection
+├─ 입력 · textarea와 UI Primitives
+├─ Markdown React · 응답 표시
 ├─ AG-UI → A2UI integration
 └─ App-owned · session navigation, runtime connection, shell, policy
 ```

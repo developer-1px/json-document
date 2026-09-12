@@ -102,7 +102,6 @@ function AppShell() {
               item.navigationGroup !== undefined
               && section.groups.includes(item.navigationGroup)
               && item.sidebar !== false
-              && !item.path.startsWith("/docs/api/")
             );
             const landingRoute = siteRoutes.find((item) => item.path === section.path && item.navigationGroup === undefined);
             const sectionLabelId = `site-navigation-${section.id}`;

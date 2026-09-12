@@ -133,5 +133,5 @@ Connector, Affordance와 UI Primitive는 필요한 환경과 입력 문법에 �
 Hands는 그 조합이 장르별 최소 편집 loop를 완성했는지 판정합니다.
 
 여러 artifact가 같은 주소와 실행 취소와 협업을 쓰게 하려는 자리가 이
-Core입니다. 각 책임의 경계와 선택적인 의존 관계는 [Concept Map](concepts.md)에서
+Core입니다. 각 책임의 경계와 선택적인 의존 관계는 [Architecture](architecture.md)에서
 이어집니다.

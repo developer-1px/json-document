@@ -45,7 +45,7 @@ export const ui = {
     meta: "text-xs leading-5 text-foreground-muted",
   },
   markdown: {
-    root: "grid gap-4 text-sm leading-6 text-foreground-default",
+    root: "grid grid-cols-1 gap-4 text-sm leading-6 text-foreground-default",
     heading: "m-0 text-base font-semibold text-foreground-strong",
     section: "mb-0 mt-6 text-base font-semibold text-foreground-strong first:mt-0",
     paragraph: "m-0",

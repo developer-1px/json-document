@@ -29,3 +29,10 @@ test("validates package-owned documentation includes", () => {
   assert.deepEqual(errors([root, route("/docs/one", { documentIncludes: ["packages/json-document-canvas/docs/api.md"] })]), []);
   assert.deepEqual(errors([root, route("/docs/one", { documentIncludes: ["../private.md"] })]), ["site route /docs/one has invalid owner documentation includes."]);
 });
+
+test("rejects missing Usage and product-to-module links", () => {
+  const module = { sourceDirectory: "packages/example", responsibility: "Example", alsoIn: [], usagePaths: ["/missing"] };
+  const failures = errors([root, route("/docs/api/example", {navigationGroup:"Adapter", documentSource:"docs/api-reference/example.md", module}), route("/applications/example", {modulePaths:["/missing"]})]);
+  assert.ok(failures.some(message => message.includes("known Usage")));
+  assert.ok(failures.some(message => message.includes("unknown module")));
+});

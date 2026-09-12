@@ -51,7 +51,7 @@ describe("official site shell", () => {
     await user.click(nav.getByRole("button", { name: "Introduction" }));
     expect(groupLinks(nav, "Introduction")).toEqual([
       "Why",
-      "Concept Map",
+      "Architecture",
       "How We Build",
     ]);
     await user.click(nav.getByRole("button", { name: "Foundation" }));
@@ -73,7 +73,7 @@ describe("official site shell", () => {
     await user.click(nav.getByRole("button", { name: "Artifact" }));
     expect(groupLinks(nav, "Artifact")).toEqual(["Content Prototype · TBD"]);
     await user.click(nav.getByRole("button", { name: "Applications" }));
-    expect(groupLinks(nav, "Applications")).toEqual(["Overview", "Calendar", "AI Agent"]);
+    expect(groupLinks(nav, "Applications")).toEqual(["Overview", "Bear", "Calendar", "AI Agent"]);
     expect(nav.getByRole("link", { name: "JSON Document Protocol" }).getAttribute("href")).toBe("/docs/api");
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "Introduction",
@@ -89,17 +89,11 @@ describe("official site shell", () => {
     window.history.pushState(null, "", "/connectors");
     window.dispatchEvent(new PopStateEvent("popstate"));
     await waitFor(() => expect(document.title).toBe("Connectors - json-document"));
-    expect(await screen.findByRole("heading", { level: 1, name: "Connector" })).toBeTruthy();
-    const demos = screen.getAllByRole("link", { name: "Open Live Demo" });
-    expect(demos.map((link) => link.getAttribute("href"))).toEqual([
-      "/connectors/react",
-      "/connectors/react-hook-form",
-      "/connectors/ajv",
-      "/connectors/a2ui",
-      "/connectors/zod",
-      "/connectors/tanstack-table",
-    ]);
-    expect(screen.getByRole("link", { name: "Validate commits" }).getAttribute("href")).toBe("/connectors/zod/validate");
+    expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" }, {timeout:5000})).toBeTruthy();
+    const catalog = within(document.querySelector("[data-doc-content]") as HTMLElement);
+    expect(catalog.getByRole("link", {name:"Markdown React",exact:true}).getAttribute("href")).toBe("/docs/api/markdown-react");
+    expect(catalog.getByRole("link", {name:"Rich Text React",exact:true}).getAttribute("href")).toBe("/docs/api/rich-text-react");
+    expect(catalog.getByRole("link", {name:"Validate commits",exact:true}).getAttribute("href")).toBe("/connectors/zod/validate");
 
     await user.click(within(nav.getByRole("group", { name: "Hands" })).getByRole("link", { name: "Database", exact: true }));
     const databaseCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));

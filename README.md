@@ -29,7 +29,7 @@ stateless JSON Patch
 | 목적 | 위치 |
 | --- | --- |
 | 빠른 사용 예제 | [Intent guide](docs/public/intent-guide.md) |
-| 목표 구조와 TBD | [Concept Map](docs/public/concepts.md), [Foundation](docs/public/foundation.md) |
+| 목표 구조와 TBD | [Architecture](docs/public/architecture.md), [Foundation](docs/public/foundation.md) |
 | JSON Document 개념 | [docs/public/overview.md](docs/public/overview.md) |
 | JSON Document Protocol | [docs/public/api.md](docs/public/api.md) |
 | Editing Protocol | [docs/public/editing.md](docs/public/editing.md) |

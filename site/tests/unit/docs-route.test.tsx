@@ -53,9 +53,9 @@ describe("documentation routes", () => {
     expect(await screen.findByRole("heading", { level: 1 }, { timeout: 10000 })).toBeTruthy();
     expect(within(nav.getByRole("group", { name: "Introduction" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
 
-    await user.click(within(nav.getByRole("group", { name: "Introduction" })).getByRole("link", { name: "Concept Map" }));
-    await waitFor(() => expect(document.title).toBe("Concept Map - json-document"));
-    expect(await screen.findByRole("heading", { level: 1, name: "Concept Map" }, { timeout: 10000 })).toBeTruthy();
+    await user.click(within(nav.getByRole("group", { name: "Introduction" })).getByRole("link", { name: "Architecture" }));
+    await waitFor(() => expect(document.title).toBe("Architecture - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "Architecture" }, { timeout: 10000 })).toBeTruthy();
 
     expect(screen.queryByRole("navigation", { name: "Documentation pages" })).toBeNull();
 

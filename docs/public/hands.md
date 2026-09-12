@@ -193,7 +193,7 @@ adapter는 제품 의미를 모른 채 position/range lifecycle과 DOM 연결을
 /demo/viewport
 ```
 
-## Artifact를 다루는 닫힌 Hands
+## Artifact를 다루는 Hands 후보와 구현
 
 | Hands | 관찰한 표면 | 사람이 하는 일 |
 | --- | --- | --- |
@@ -210,6 +210,7 @@ Slides, Form 같은 App 이름은 먼저 기존 Hands로 분해합니다. 예를
 Slides는 Order와 Object의 조합일 수 있습니다. 끝까지 환원되지 않는 인간의
 편집 문법이 남을 때만 새 Hands 후보가 됩니다.
 
+이 목록은 장르별 구현과 목표를 함께 보여 주며, 모든 항목의 Profile 완료를 선언하지 않습니다.
 전체 흐름은 [Artifact](/viewer) prototype에서 봅니다. Artifact는 적절한
 surface를 고르고, Hands는 사람이 만지는 방법을 제공하며, Core는 사람과
 agent의 변경을 같은 계약에 남깁니다.
