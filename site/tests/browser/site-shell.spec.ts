@@ -549,11 +549,27 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
     boxShadow: getComputedStyle(element).boxShadow,
   }))).toEqual({
     backgroundColor: "rgb(255, 255, 255)",
-    borderColor: "rgb(229, 231, 235) rgb(229, 231, 235) rgb(216, 209, 197)",
+    borderLeftWidth: "0px",
+    borderRightWidth: "0px",
+    boxShadow: "rgba(119, 115, 107, 0.3) 0px 0px 0px 1px inset, rgba(69, 67, 62, 0.024) 0px 0px 0px 999px inset",
   });
   await selectedCell.focus();
-  await expect.poll(() => selectedCell.evaluate((element) => getComputedStyle(element).boxShadow))
-    .toBe("rgb(222, 109, 85) 0px 0px 0px 2px inset");
+  await expect(selectedCell).toBeFocused();
+  // The canonical content interaction keeps selection and adds a focus outline.
+  await expect.poll(() => selectedCell.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      focusVisible: element.matches(":focus-visible"),
+      outline: style.outline,
+      outlineOffset: style.outlineOffset,
+      boxShadow: style.boxShadow,
+    };
+  })).toEqual({
+    focusVisible: true,
+    outline: "color(srgb 0.870588 0.427451 0.333333 / 0.58) solid 2px",
+    outlineOffset: "2px",
+    boxShadow: "rgba(119, 115, 107, 0.3) 0px 0px 0px 1px inset, rgba(69, 67, 62, 0.024) 0px 0px 0px 999px inset",
+  });
   expect(await page.getByRole("combobox").first().evaluate(controlSnapshot)).toMatchObject({
     backgroundColor: "rgba(0, 0, 0, 0)",
     boxShadow: "none",
