@@ -1,0 +1,188 @@
+# @interactive-os/json-document-animation-react API
+
+**탐색 분류:** UI Primitives
+
+진행·대기·전환 상태의 반복 시각 행동의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 저장소의 아키텍처 등록에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
+
+> 이 문서는 `packages/json-document-animation-react/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
+
+## `AnimationStatusProps`
+
+```ts
+type AnimationStatusProps = {
+  /** When true, expose the visual as a polite status for assistive tech. */
+  readonly announce?: boolean;
+  /** Accessible name used when `announce` is true. */
+  readonly label?: string;
+};
+```
+## `AuroraMass`
+
+```ts
+AuroraMass(props: DivProps): ReactNode
+```
+## `BlobMass`
+
+```ts
+BlobMass(props: DivProps): ReactNode
+```
+## `BorderBeam`
+
+```ts
+BorderBeam(props: DivProps): ReactNode
+```
+## `CloudMass`
+
+```ts
+CloudMass(props: DivProps): ReactNode
+```
+## `CometArc`
+
+```ts
+CometArc(props: SpanProps): ReactNode
+```
+## `DualRings`
+
+```ts
+DualRings(props: SpanProps): ReactNode
+```
+## `EqualizerBars`
+
+```ts
+EqualizerBars(props: SpanProps): ReactNode
+```
+## `FadeSpokes`
+
+```ts
+FadeSpokes(props: SpanProps): ReactNode
+```
+## `GradientSweep`
+
+```ts
+GradientSweep(props: DivProps): ReactNode
+```
+## `HelixDots`
+
+```ts
+HelixDots(props: SpanProps): ReactNode
+```
+## `HelixRings`
+
+```ts
+HelixRings(props: SpanProps): ReactNode
+```
+## `HueOutline`
+
+```ts
+HueOutline(props: DivProps): ReactNode
+```
+## `InfinityStroke`
+
+```ts
+InfinityStroke(props: SpanProps): ReactNode
+```
+## `LoadingBar`
+
+```ts
+LoadingBar(props: DivProps): ReactNode
+```
+## `MassOrb`
+
+```ts
+MassOrb(props: SpanProps): ReactNode
+```
+## `MorphSquare`
+
+```ts
+MorphSquare(props: SpanProps): ReactNode
+```
+## `MorseCode`
+
+```ts
+MorseCode(props: SpanProps): ReactNode
+```
+## `OrbitDots`
+
+```ts
+OrbitDots(props: SpanProps): ReactNode
+```
+## `ParticleBurst`
+
+```ts
+ParticleBurst(props: SpanProps): ReactNode
+```
+## `ProgressRing`
+
+```ts
+ProgressRing(props: SpanProps): ReactNode
+```
+## `PulsingDot`
+
+```ts
+PulsingDot(props: SpanProps): ReactNode
+```
+## `PulsingOrb`
+
+```ts
+PulsingOrb(props: SpanProps): ReactNode
+```
+## `RadarSweep`
+
+```ts
+RadarSweep(props: SpanProps): ReactNode
+```
+## `RingMass`
+
+```ts
+RingMass(props: DivProps): ReactNode
+```
+## `Shimmer`
+
+```ts
+Shimmer(props: DivProps): ReactNode
+```
+## `ShimmerText`
+
+```ts
+ShimmerText(props: SpanProps & { readonly tone?: ShimmerTone; }): ReactNode
+```
+## `ShimmerTone`
+
+```ts
+type ShimmerTone = "mono" | "spectrum";
+```
+## `Skeleton`
+
+```ts
+Skeleton(props: DivProps & { readonly shape?: SkeletonShape; }): ReactNode
+```
+## `SkeletonShape`
+
+```ts
+type SkeletonShape = "line" | "block" | "avatar";
+```
+## `StaggerLines`
+
+```ts
+StaggerLines(props: DivProps & { readonly lines?: number; }): ReactNode
+```
+## `StreamingCaret`
+
+```ts
+StreamingCaret(props: HTMLAttributes<HTMLSpanElement>): ReactNode
+```
+## `WaveDots`
+
+```ts
+WaveDots(props: SpanProps & { readonly frame?: WaveFrame; }): ReactNode
+```
+## `WaveFrame`
+
+```ts
+type WaveFrame = "none" | "bubble";
+```
+## `WaveGrid`
+
+```ts
+WaveGrid(props: SpanProps): ReactNode
+```

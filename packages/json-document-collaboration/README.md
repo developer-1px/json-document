@@ -32,7 +32,7 @@ One causal commit is one undo step. Editing's local `historyGroup` does not grou
 causal changes, and an external-history Editing plan cannot opt out of recording.
 History remains local unless this connection is explicitly configured.
 See [Collaborative History](../../docs/public/collaboration-history.md) and the
-owner [API reference](../../docs/api-reference/collaboration.md).
+owner [API reference](../../packages/json-document-collaboration/docs/api-reference.md).
 
 Successful `runtime.history.undo/redo` results include their own `change`
 (`JSONAppliedChange | null`) and immutable resulting `status`, including

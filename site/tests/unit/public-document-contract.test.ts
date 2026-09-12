@@ -21,7 +21,7 @@ describe("public documentation contract", () => {
       packageName: "@interactive-os/json-document-collaboration/history",
       entrypoint: "packages/json-document-collaboration/src/history-index.ts",
     });
-    const reference = readFileSync(new URL("../../../docs/api-reference/collaboration.md", import.meta.url), "utf8");
+    const reference = readFileSync(new URL("../../../packages/json-document-collaboration/docs/api-reference.md", import.meta.url), "utf8");
     const history = reference.split("## `@interactive-os/json-document-collaboration/history`")[1]?.split("## `@interactive-os/json-document-collaboration/editing`")[0];
     expect(history).toContain("### `HistoryResult`");
     expect(history).toContain("readonly change: JSONAppliedChange | null");

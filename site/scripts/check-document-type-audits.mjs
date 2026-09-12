@@ -1,9 +1,9 @@
+import { siteRoutes } from "../route-registry.mjs";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const root = new URL("../..", import.meta.url).pathname;
 const ledger = JSON.parse(readFileSync(join(root, "audits/document-types.json"), "utf8"));
-const siteRoutes = JSON.parse(readFileSync(join(root, "site/site-routes.json"), "utf8"));
 const allowed = new Set(["canonical consumer", "Host composition", "duplicate implementation", "canonical API gap", "missing canonical module", "mislocated module", "out of scope", "unverified"]);
 const expectedCandidates = siteRoutes
   .filter((route) => route.navigationGroup === "Document Types" && route.path.startsWith("/docs/document-types/"))

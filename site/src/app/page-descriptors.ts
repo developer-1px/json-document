@@ -1,4 +1,4 @@
-import siteRoutesJson from "../../site-routes.json";
+import { siteRoutes } from "../../route-registry.mjs";
 export { legacyPageRedirects } from "./legacy-page-redirects";
 
 export type SiteNavigationGroup =
@@ -32,12 +32,14 @@ export type SiteRoute = {
   readonly relatedDemoPath?: string;
   readonly relatedDemoLabel?: string;
   readonly module?: {
+    readonly packageName: string;
     readonly sourceDirectory: string;
     readonly responsibility: string;
     readonly alsoIn: readonly SiteNavigationGroup[];
     readonly usagePaths: readonly string[];
     readonly statusNote?: string;
   };
+  readonly applicationSource?: string;
   readonly modulePaths?: readonly string[];
   readonly integration?: {
     readonly kind: IntegrationKind;
@@ -45,7 +47,7 @@ export type SiteRoute = {
   };
 };
 
-export const pageDescriptors = siteRoutesJson as ReadonlyArray<SiteRoute>;
+export const pageDescriptors = siteRoutes;
 
 export function pageDescriptor(path: string): SiteRoute {
   const descriptor = pageDescriptors.find((route) => route.path === path);

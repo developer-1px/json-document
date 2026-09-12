@@ -79,7 +79,8 @@
       "/docs/api/markdown-react",
       "/docs/api/contenteditable",
       "/docs/api/web"
-    ]
+    ],
+    "applicationSource": "site/src/app/routes/applications/bear.tsx"
   },
   {
     "path": "/applications/calendar",
@@ -97,7 +98,8 @@
       "/docs/api/affordance",
       "/docs/api/web",
       "/docs/api/ui-primitives-react"
-    ]
+    ],
+    "applicationSource": "site/src/app/routes/_page/applications/calendar.tsx"
   },
   {
     "path": "/applications/ai-agent",
@@ -111,7 +113,8 @@
       "/docs/api/a2ui",
       "/docs/api/markdown-react",
       "/docs/api/ui-primitives-react"
-    ]
+    ],
+    "applicationSource": "site/src/app/routes/_page/applications/ai-agent.tsx"
   },
   {
     "path": "/docs/document-types",
@@ -211,12 +214,8 @@
     "title": "JSON Document public API - json-document",
     "description": "@interactive-os/json-document의 전체 public export와 signature입니다.",
     "language": "ko",
-    "navigationGroup": "JSON Document",
-    "documentSource": "docs/api-reference/json-document.md",
     "module": {
-      "sourceDirectory": "packages/json-document",
-      "responsibility": "JSON 값·주소·검증·원자적 변경·구독",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document",
       "usagePaths": [
         "/demo"
       ]
@@ -228,12 +227,8 @@
     "title": "Selection API - json-document",
     "description": "@interactive-os/json-document-selection의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Editing",
-    "documentSource": "docs/api-reference/selection.md",
     "module": {
-      "sourceDirectory": "packages/json-document-selection",
-      "responsibility": "범위·키·기하 선택과 선택 전이",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-selection",
       "usagePaths": [
         "/demo/selection"
       ]
@@ -245,25 +240,18 @@
     "title": "Editing API - json-document",
     "description": "@interactive-os/json-document-editing의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Editing",
-    "documentSource": "docs/api-reference/editing.md",
     "documentIncludes": [
       "packages/json-document-editing/docs/object-selection.md",
       "packages/json-document-editing/docs/calendar-profile.md",
       "packages/json-document-editing/docs/text.md"
     ],
     "module": {
-      "sourceDirectory": "packages/json-document-editing",
-      "responsibility": "Intent·변경 계획·선택·Clipboard·History",
-      "alsoIn": [
-        "Document Types"
-      ],
+      "packageName": "@interactive-os/json-document-editing",
       "usagePaths": [
         "/demo/history",
         "/demo/clipboard",
         "/demo/markdown-caret"
-      ],
-      "statusNote": "일부 장르의 문서 모델도 현재 Editing에 있습니다. Document Types의 후보별 소유권 감사를 따릅니다."
+      ]
     }
   },
   {
@@ -272,18 +260,11 @@
     "title": "Rich Text API - json-document",
     "description": "@interactive-os/json-document-rich-text의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Editing",
-    "documentSource": "docs/api-reference/rich-text.md",
     "module": {
-      "sourceDirectory": "packages/json-document-rich-text",
-      "responsibility": "Rich Text 모델·의미 연산과 텍스트 편집",
-      "alsoIn": [
-        "Document Types"
-      ],
+      "packageName": "@interactive-os/json-document-rich-text",
       "usagePaths": [
         "/editing/rich-text"
-      ],
-      "statusNote": "문서 모델과 Editing 계약이 한 패키지에 있습니다. Document Type 재배치 완료를 뜻하지 않습니다."
+      ]
     }
   },
   {
@@ -292,17 +273,12 @@
     "title": "File Intake API - json-document",
     "description": "@interactive-os/json-document-file-intake의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Document Types",
-    "documentSource": "docs/api-reference/file-intake.md",
     "module": {
-      "sourceDirectory": "packages/json-document-file-intake",
-      "responsibility": "직렬화 가능한 파일 후보·이미지 내용과 수용 검증",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-file-intake",
       "usagePaths": [
         "/demo/composer",
         "/demo/annotation"
-      ],
-      "statusNote": "파일·이미지 내용 계약을 이 위치에서 안내합니다. 독립 Document Type Profile의 완료를 선언하지 않습니다."
+      ]
     }
   },
   {
@@ -311,12 +287,8 @@
     "title": "Rich Text Mention API - json-document",
     "description": "@interactive-os/json-document-rich-text-mention의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands",
-    "documentSource": "docs/api-reference/rich-text-mention.md",
     "module": {
-      "sourceDirectory": "packages/json-document-rich-text-mention",
-      "responsibility": "안정된 entity reference를 삽입하는 Mention 계약",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-rich-text-mention",
       "usagePaths": [
         "/demo/composer"
       ]
@@ -328,12 +300,8 @@
     "title": "Rich Text Suggestion API - json-document",
     "description": "@interactive-os/json-document-rich-text-suggestion의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands",
-    "documentSource": "docs/api-reference/rich-text-suggestion.md",
     "module": {
-      "sourceDirectory": "packages/json-document-rich-text-suggestion",
-      "responsibility": "입력 문맥에서 suggestion을 찾고 적용하는 계약",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-rich-text-suggestion",
       "usagePaths": [
         "/demo/composer"
       ]
@@ -345,12 +313,8 @@
     "title": "Rich Text Suggestion React API - json-document",
     "description": "@interactive-os/json-document-rich-text-suggestion-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/rich-text-suggestion-react.md",
     "module": {
-      "sourceDirectory": "packages/json-document-rich-text-suggestion-react",
-      "responsibility": "Suggestion 관찰·수명을 React에 연결",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-rich-text-suggestion-react",
       "usagePaths": [
         "/demo/composer"
       ]
@@ -362,12 +326,8 @@
     "title": "Rich Text Mention React API - json-document",
     "description": "@interactive-os/json-document-rich-text-mention-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/rich-text-mention-react.md",
     "module": {
-      "sourceDirectory": "packages/json-document-rich-text-mention-react",
-      "responsibility": "Mention 관찰·수명을 React에 연결",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-rich-text-mention-react",
       "usagePaths": [
         "/demo/composer"
       ]
@@ -379,12 +339,8 @@
     "title": "Composer API - json-document",
     "description": "@interactive-os/json-document-composer의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands",
-    "documentSource": "docs/api-reference/composer.md",
     "module": {
-      "sourceDirectory": "packages/json-document-composer",
-      "responsibility": "텍스트와 구조화된 문맥을 한 입력으로 구성",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-composer",
       "usagePaths": [
         "/demo/composer"
       ]
@@ -396,12 +352,8 @@
     "title": "Composer React API - json-document",
     "description": "@interactive-os/json-document-composer-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/composer-react.md",
     "module": {
-      "sourceDirectory": "packages/json-document-composer-react",
-      "responsibility": "Composer 편집 관찰과 참조 atom을 React에 연결",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-composer-react",
       "usagePaths": [
         "/demo/composer"
       ]
@@ -413,17 +365,13 @@
     "title": "Web API - json-document",
     "description": "@interactive-os/json-document-web의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Adapter",
-    "documentSource": "docs/api-reference/web.md",
     "documentIncludes": [
       "packages/json-document-web/docs/clipboard.md",
       "packages/json-document-web/docs/text-clipboard.md",
       "packages/json-document-web/docs/interaction-recording.md"
     ],
     "module": {
-      "sourceDirectory": "packages/json-document-web",
-      "responsibility": "키보드·포인터·Clipboard·DOM 관찰·입력 기록",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-web",
       "usagePaths": [
         "/adapters/keyboard",
         "/adapters/clipboard",
@@ -437,15 +385,11 @@
     "title": "Contenteditable API - json-document",
     "description": "@interactive-os/json-document-contenteditable의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Adapter",
-    "documentSource": "docs/api-reference/contenteditable.md",
     "documentIncludes": [
       "packages/json-document-contenteditable/docs/editing.md"
     ],
     "module": {
-      "sourceDirectory": "packages/json-document-contenteditable",
-      "responsibility": "DOM 입력·IME·선택 복원·기호 투영·화면 줄 탐색",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-contenteditable",
       "usagePaths": [
         "/adapters/contenteditable",
         "/demo/markdown-caret"
@@ -458,12 +402,8 @@
     "title": "Rich Text Web API - json-document",
     "description": "@interactive-os/json-document-rich-text-web의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Adapter",
-    "documentSource": "docs/api-reference/rich-text-web.md",
     "module": {
-      "sourceDirectory": "packages/json-document-rich-text-web",
-      "responsibility": "Rich Text와 DOM·Clipboard·native 입력의 대응",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-rich-text-web",
       "usagePaths": [
         "/editing/rich-text"
       ]
@@ -475,12 +415,8 @@
     "title": "React API - json-document",
     "description": "@interactive-os/json-document-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/react.md",
     "module": {
-      "sourceDirectory": "packages/json-document-react",
-      "responsibility": "문서·편집 관찰과 React 수명 연결",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-react",
       "usagePaths": [
         "/connectors/react"
       ]
@@ -492,12 +428,8 @@
     "title": "React Hook Form API - json-document",
     "description": "@interactive-os/json-document-react-hook-form의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/react-hook-form.md",
     "module": {
-      "sourceDirectory": "packages/json-document-react-hook-form",
-      "responsibility": "폼 draft·검증 결과를 문서 변경에 연결",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-react-hook-form",
       "usagePaths": [
         "/connectors/react-hook-form"
       ]
@@ -509,12 +441,8 @@
     "title": "Ajv API - json-document",
     "description": "@interactive-os/json-document-ajv의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/ajv.md",
     "module": {
-      "sourceDirectory": "packages/json-document-ajv",
-      "responsibility": "Ajv 검증 결과를 문서 진단으로 연결",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-ajv",
       "usagePaths": [
         "/connectors/ajv"
       ]
@@ -526,12 +454,8 @@
     "title": "A2UI API - json-document",
     "description": "@interactive-os/json-document-a2ui의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/a2ui.md",
     "module": {
-      "sourceDirectory": "packages/json-document-a2ui",
-      "responsibility": "A2UI 메시지와 문서·UI projection 연결",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-a2ui",
       "usagePaths": [
         "/connectors/a2ui"
       ]
@@ -552,12 +476,8 @@
     "title": "Zod API - json-document",
     "description": "@interactive-os/json-document-zod의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/zod.md",
     "module": {
-      "sourceDirectory": "packages/json-document-zod",
-      "responsibility": "Zod schema·오류를 문서 계약에 연결",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-zod",
       "usagePaths": [
         "/connectors/zod",
         "/connectors/zod/validate"
@@ -570,12 +490,8 @@
     "title": "TanStack Table API - json-document",
     "description": "@interactive-os/json-document-tanstack-table의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/tanstack-table.md",
     "module": {
-      "sourceDirectory": "packages/json-document-tanstack-table",
-      "responsibility": "TanStack Table의 표시 모델을 편집 topology에 연결",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-tanstack-table",
       "usagePaths": [
         "/connectors/tanstack-table"
       ]
@@ -587,12 +503,8 @@
     "title": "Rich Text React API - json-document",
     "description": "@interactive-os/json-document-rich-text-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/rich-text-react.md",
     "module": {
-      "sourceDirectory": "packages/json-document-rich-text-react",
-      "responsibility": "Rich Text 편집 관찰·DOM 표면과 React 수명 연결",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-rich-text-react",
       "usagePaths": [
         "/editing/rich-text"
       ]
@@ -604,16 +516,12 @@
     "title": "Affordance API - json-document",
     "description": "@interactive-os/json-document-affordance의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Affordance",
-    "documentSource": "docs/api-reference/affordance.md",
     "documentIncludes": [
       "packages/json-document-affordance/docs/plane-select.md",
       "packages/json-document-affordance/docs/resize.md"
     ],
     "module": {
-      "sourceDirectory": "packages/json-document-affordance",
-      "responsibility": "선택·이동·취소 등 입력 독립 조작 의미와 수명",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-affordance",
       "usagePaths": [
         "/affordances/handles",
         "/demo/viewport"
@@ -626,15 +534,11 @@
     "title": "UI Primitives API - json-document",
     "description": "@interactive-os/json-document-ui-primitives-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "UI Primitives",
-    "documentSource": "docs/api-reference/ui-primitives-react.md",
     "documentIncludes": [
       "packages/json-document-ui-primitives-react/docs/popover.md"
     ],
     "module": {
-      "sourceDirectory": "packages/json-document-ui-primitives-react",
-      "responsibility": "표준 제어·포커스·overlay·접근성 행동",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-ui-primitives-react",
       "usagePaths": [
         "/demo/ui-primitives"
       ]
@@ -646,12 +550,8 @@
     "title": "Animation API - json-document",
     "description": "@interactive-os/json-document-animation-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "UI Primitives",
-    "documentSource": "docs/api-reference/animation-react.md",
     "module": {
-      "sourceDirectory": "packages/json-document-animation-react",
-      "responsibility": "진행·대기·전환 상태의 반복 시각 행동",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-animation-react",
       "usagePaths": [
         "/demo/animation"
       ]
@@ -663,19 +563,14 @@
     "title": "Markdown API - json-document",
     "description": "@interactive-os/json-document-markdown의 원문 보존 편집 계약입니다.",
     "language": "ko",
-    "navigationGroup": "Document Types",
-    "documentSource": "docs/api-reference/markdown.md",
     "documentIncludes": [
       "packages/json-document-markdown/docs/api.md"
     ],
     "module": {
-      "sourceDirectory": "packages/json-document-markdown",
-      "responsibility": "Markdown 원문 구문·좌표·체크·문단·목록 연산",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-markdown",
       "usagePaths": [
         "/demo/markdown-caret"
-      ],
-      "statusNote": "원문 기반 편집 실험입니다. Rich Text 모델과 별개이며 Official Hands Profile 완료를 뜻하지 않습니다."
+      ]
     }
   },
   {
@@ -684,15 +579,11 @@
     "title": "Markdown Web API - json-document",
     "description": "@interactive-os/json-document-markdown-web의 원문 보존 편집 계약입니다.",
     "language": "ko",
-    "navigationGroup": "Adapter",
-    "documentSource": "docs/api-reference/markdown-web.md",
     "documentIncludes": [
       "packages/json-document-markdown-web/docs/api.md"
     ],
     "module": {
-      "sourceDirectory": "packages/json-document-markdown-web",
-      "responsibility": "Markdown 원문과 편집 DOM·입력 binding의 대응",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-markdown-web",
       "usagePaths": [
         "/demo/markdown-caret"
       ]
@@ -713,15 +604,11 @@
     "title": "Markdown React API - json-document",
     "description": "@interactive-os/json-document-markdown-react의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/markdown-react.md",
     "documentIncludes": [
       "packages/json-document-markdown-react/docs/editing.md"
     ],
     "module": {
-      "sourceDirectory": "packages/json-document-markdown-react",
-      "responsibility": "Markdown 렌더링·편집 표면과 React 수명 연결",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-markdown-react",
       "usagePaths": [
         "/demo/markdown-caret",
         "/demo/markdown"
@@ -753,12 +640,8 @@
     "title": "Database API - json-document",
     "description": "@interactive-os/json-document-database의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands",
-    "documentSource": "docs/api-reference/database.md",
     "module": {
-      "sourceDirectory": "packages/json-document-database",
-      "responsibility": "Database record와 view를 편집 UI로 조합",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-database",
       "usagePaths": [
         "/demo/database"
       ]
@@ -770,12 +653,8 @@
     "title": "Annotation API - json-document",
     "description": "@interactive-os/json-document-annotation의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands",
-    "documentSource": "docs/api-reference/annotation.md",
     "module": {
-      "sourceDirectory": "packages/json-document-annotation",
-      "responsibility": "Raster annotation 도구·선택·제스처·UI 조합",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-annotation",
       "usagePaths": [
         "/demo/annotation"
       ]
@@ -787,19 +666,14 @@
     "title": "Object Document Type API - json-document",
     "description": "Object와 Canvas의 문서 계약과 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Document Types",
-    "documentSource": "docs/api-reference/object-document.md",
     "documentIncludes": [
       "packages/json-document-object-document/docs/api.md"
     ],
     "module": {
-      "sourceDirectory": "packages/json-document-object-document",
-      "responsibility": "Object·Canvas 모델·검증·의미 연산·projection",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-object-document",
       "usagePaths": [
         "/demo/canvas"
-      ],
-      "statusNote": "Object 소유권 확정 · RC. 모든 wire 계약의 Stable 승격을 뜻하지 않습니다."
+      ]
     }
   },
   {
@@ -808,15 +682,11 @@
     "title": "Canvas Hand API - json-document",
     "description": "Canvas 입력·preview·UI 조합의 API와 Usage입니다.",
     "language": "ko",
-    "navigationGroup": "Hands",
-    "documentSource": "docs/api-reference/canvas.md",
     "documentIncludes": [
       "packages/json-document-canvas/docs/api.md"
     ],
     "module": {
-      "sourceDirectory": "packages/json-document-canvas",
-      "responsibility": "Canvas 선택·변형·입력·UI 조합",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-canvas",
       "usagePaths": [
         "/demo/canvas"
       ]
@@ -828,19 +698,14 @@
     "title": "Calendar Document Type API - json-document",
     "description": "@interactive-os/json-document-calendar-document의 문서 계약과 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Document Types",
-    "documentSource": "docs/api-reference/calendar-document.md",
     "documentIncludes": [
       "packages/json-document-calendar-document/docs/api.md"
     ],
     "module": {
-      "sourceDirectory": "packages/json-document-calendar-document",
-      "responsibility": "Calendar 이벤트·반복·구간·발생분 projection",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-calendar-document",
       "usagePaths": [
         "/editors"
-      ],
-      "statusNote": "Calendar 소유권 확정 · RC. 모든 wire 계약의 Stable 승격을 뜻하지 않습니다."
+      ]
     }
   },
   {
@@ -849,12 +714,8 @@
     "title": "Calendar API - json-document",
     "description": "@interactive-os/json-document-calendar의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Hands",
-    "documentSource": "docs/api-reference/calendar.md",
     "module": {
-      "sourceDirectory": "packages/json-document-calendar",
-      "responsibility": "Calendar 입력·선택·시간 표시·제어 UI 조합",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-calendar",
       "usagePaths": [
         "/editors",
         "/demo/date-controls"
@@ -867,12 +728,8 @@
     "title": "Collaboration API - json-document",
     "description": "@interactive-os/json-document-collaboration의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Collaboration",
-    "documentSource": "docs/api-reference/collaboration.md",
     "module": {
-      "sourceDirectory": "packages/json-document-collaboration",
-      "responsibility": "동일 JSONDocument 계약의 복제·병합·협업 History",
-      "alsoIn": [],
+      "packageName": "@interactive-os/json-document-collaboration",
       "usagePaths": [
         "/docs/collaboration"
       ]
@@ -884,14 +741,8 @@
     "title": "Contenteditable Collaboration API - json-document",
     "description": "@interactive-os/json-document-contenteditable-collaboration의 전체 public API입니다.",
     "language": "ko",
-    "navigationGroup": "Adapter",
-    "documentSource": "docs/api-reference/contenteditable-collaboration.md",
     "module": {
-      "sourceDirectory": "packages/contenteditable-collaboration",
-      "responsibility": "협업 문자열과 native DOM 입력 lease 연결",
-      "alsoIn": [
-        "Collaboration"
-      ],
+      "packageName": "@interactive-os/json-document-contenteditable-collaboration",
       "usagePaths": [
         "/docs/collaboration"
       ]

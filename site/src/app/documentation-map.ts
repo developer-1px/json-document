@@ -49,7 +49,7 @@ export function documentationMap(page: SiteRoute, pages: readonly SiteRoute[] = 
 }
 
 function applicationMap(pages: readonly SiteRoute[]): string {
-  return `## 제품에서 모듈로\n\n직접 호출과 그 편집 경로에서 사용하는 정본 모듈을 연결합니다. 아래는 확인한 대표 조합이며 전체 의존성 목록이 아닙니다. 제품의 존재가 모든 Profile의 완료를 뜻하지 않습니다.\n\n| Application | 확인된 모듈 조합 |\n| --- | --- |\n${pages.filter(page => page.modulePaths).map(page => `| ${link(page)} | ${links(page.modulePaths!, pages)} |`).join("\n")}`;
+  return `## 제품에서 모듈로\n\n제품 route의 정적 import 경로에서 확인되는 대표 정본 모듈을 연결합니다. type import와 re-export를 포함하며 실행 시 호출을 보장하지 않습니다. 아래는 확인한 대표 조합이며 전체 의존성 목록이 아닙니다. 제품의 존재가 모든 Profile의 완료를 뜻하지 않습니다.\n\n| Application | 확인된 모듈 조합 |\n| --- | --- |\n${pages.filter(page => page.modulePaths).map(page => `| ${link(page)} | ${links(page.modulePaths!, pages)} |`).join("\n")}`;
 }
 
 function documentTypeMap(pages: readonly SiteRoute[]): string {

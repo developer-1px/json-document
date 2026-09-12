@@ -131,6 +131,7 @@ npm run dev
 
 ```sh
 npm run docs:evaluate
+npm run check:architecture -- --evidence
 npm test -w @interactive-os/json-document
 npm run typecheck -w @interactive-os/json-document
 npm run build -w @interactive-os/json-document

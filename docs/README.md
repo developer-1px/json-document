@@ -1,12 +1,12 @@
 # 문서 구조
 
-이 디렉터리는 외부 사용자에게 공개할 문서 원천과 생성된 owner API reference를
-보관한다. 릴리스 과정·검토 루프·과거 판단은 Git issue와 version history에 남긴다.
+이 디렉터리는 외부 사용자에게 공개할 공통 문서 원천과 문서 검사 도구를
+보관한다. 생성 API reference는 각 `packages/*/docs/api-reference.md`가 소유한다. 릴리스 과정·검토 루프·과거 판단은 Git issue와 version history에 남긴다.
 
 ```text
 docs
 ├─ public/                    # 한국어 개념·계약·사용법, llms.txt
-├─ api-reference/             # owner package별 생성 reference와 등록표
+├─ api-reference/             # API 생성기의 아키텍처 등록 연결과 검사
 ├─ changelog.md               # 사용자 영향 중심 변경 기록
 ├─ evaluate.mjs               # 문서·등록·증거 연결 검사
 └─ public-contract-checks.mjs  # 원천·Pages·live의 공통 공개 계약 검사
@@ -14,10 +14,14 @@ docs
 
 ## 사이트의 읽기 구조
 
-탐색 섹션은 `site/src/app/site-layers.ts`, 페이지 제목·URL·문서 원천의 연결은
-`site/site-routes.json`의 `documentSource`가 소유한다. `doc-pages.ts`는 그 원천을
+탐색 섹션은 `site/src/app/site-layers.ts`, 페이지 제목·URL은
+`site/site-routes.json`이 소유한다. 문서 원천은 일반 문서의 경우
+`site/site-routes.json`의 `documentSource`, 패키지 API는
+`architecture/modules.json`의 `referencePath`가 소유한다. `site/route-registry.mjs`가
+책임 등록과 페이지 탐색 정보를 합성한다. `doc-pages.ts`는 그 원천을
 읽고, Markdown 링크도 같은 등록표에서 사이트 URL을 찾는다. 별도 파일명→URL
-카탈로그를 유지하지 않는다. 아래는 개념 수준의 지도이며 leaf 페이지 목록을
+카탈로그를 유지하지 않는다. [아키텍처 등록과 drift 검사](../architecture/README.md)에서
+정본의 방향과 남은 한계를 확인한다. 아래는 개념 수준의 지도이며 leaf 페이지 목록을
 복제한 탐색 정본이 아니다.
 
 ```text
@@ -89,8 +93,9 @@ owner의 행동 테스트에 연결한다. 이 확정은 전체 Hands의 Stable 
 | --- | --- |
 | `public/` | 외부 사용자와 사이트 방문자의 개념·계약·Usage |
 | `public/llms.txt` | 같은 목표와 현재 계약을 요약한 기계 판독 문서 |
-| `api-reference/packages.mjs` | owner package의 source entrypoint와 사이트 탐색 분류 |
-| `api-reference/*.md` | package root와 공개 subpath에서 생성한 API reference |
+| `../architecture/modules.json` | 패키지 책임·위치·공개 source entrypoint의 정본 |
+| `api-reference/packages.mjs` | 아키텍처 등록을 API 생성기에 연결 |
+| `../packages/*/docs/api-reference.md` | owning package의 공개 API에서 생성한 reference |
 | `changelog.md` | 사용자 영향 중심 변경 기록 |
 
 `package.json#exports`의 TypeScript 진입점과 API 등록을 비교해 subpath 누락을
