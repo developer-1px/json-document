@@ -39,4 +39,4 @@ base, History, Text는 선택적인 profile 포함 관계이며 새로운 UI 계
 유지해야 합니다.
 
 플랫폼과 생태계 연결은 [Building Blocks](building-blocks.md), 전체 목표와 현재
-상태의 차이는 [Concept Map](concepts.md)에서 이어집니다.
+상태의 차이는 [Architecture](architecture.md)에서 이어집니다.

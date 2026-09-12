@@ -64,7 +64,7 @@ export function HomeRoute() {
         </p>
         <div className={homeStyles.actions()}>
           <ActionLink to="/docs/foundation" kind="prominent">Foundation 살펴보기</ActionLink>
-          <ActionLink to="/docs/concepts">Concept Map</ActionLink>
+          <ActionLink to="/docs/architecture">Architecture</ActionLink>
         </div>
       </HomeScene>
 

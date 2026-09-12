@@ -47,3 +47,11 @@ permission, fixture, concrete runtime 연결을 소유합니다. 제품 전체�
 추출은 복사본을 하나 더 만드는 일이 아닙니다. Application의 임시 구현을 제거하고
 canonical public API를 소비해야 순환이 닫힙니다. [Applications](/applications)는
 각 제품에 남은 정책과 추출된 책임을 함께 보여 줍니다.
+
+## 문서에 반영하기
+
+[Architecture](/docs/architecture)는 현재 공개 모듈을 책임별로 연결합니다.
+모듈의 역할, 실제 소스 디렉터리, Usage와 확인된 소비 제품은 사이트 등록에 남깁니다.
+개요·API의 관계 안내와 Usage의 Source 링크는 같은 등록을 사용합니다.
+복수 책임 패키지는 관련 위치에 함께 나타내며, 목표 위치만 정한 상태를 소유권
+이전 완료로 표시하지 않습니다. 새 모듈은 등록·문서·실제 소비 증거를 함께 추가합니다.

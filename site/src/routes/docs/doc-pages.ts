@@ -1,3 +1,4 @@
+import { documentationMap } from "../../app/documentation-map";
 import { pageDescriptor } from "../../app/page-descriptors";
 
 const documentSources = import.meta.glob<string>(
@@ -14,7 +15,7 @@ function docPage(path: string) {
     if (source === undefined) throw new Error(`Documentation source is not registered: ${path}`);
     return source;
   });
-  return { ...page, source: [...included, source].join("\n\n") };
+  return { ...page, source: [documentationMap(page), ...included, source].join("\n\n") };
 }
 
 export const docPages = {
@@ -24,7 +25,7 @@ export const docPages = {
   objectDocumentApi: docPage("/docs/api/object-document"),
   calendarDocumentApi: docPage("/docs/api/calendar-document"),
   overview: docPage("/docs"),
-  concepts: docPage("/docs/concepts"),
+  architecture: docPage("/docs/architecture"),
   foundation: docPage("/docs/foundation"),
   buildingBlocks: docPage("/docs/building-blocks"),
   editing: docPage("/docs/editing"),

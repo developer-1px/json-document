@@ -1,4 +1,14 @@
-# Concept Map
+# Architecture
+
+문서는 세 관계를 구분합니다. **책임 위치**는 무엇을 소유하는지, **공개 API**는
+저장소가 실제로 제공하는 계약, **Usage와 Application**은 그 계약을 사용하는
+증거입니다. 위의 현재 저장소 지도는 사이트 등록에서 API·Usage·제품 관계를
+읽습니다. 문서 목록을 별도로 복제하지 않습니다.
+
+- Foundation과 Building Blocks의 책임별 개요에서 모듈 API와 Usage를 찾습니다.
+- API 문서의 책임과 사용 경로에서 혼합 책임·이행 상태와 소비 제품을 확인합니다.
+- Usage의 Source에서 구현을 확인하고, 제품은 확인된 모듈 조합으로 돌아갑니다.
+- 패키지 공개 여부, Document Type 소유권 확정, Hand Profile 완료는 다른 상태입니다.
 
 목표는 같은 역할과 책임이 하나의 정본 모듈을 갖고, Application이 그 공개 API를
 조합하는 구조입니다. 아래는 읽기 순서와 책임 지도입니다. 모든 package가 차례로
@@ -53,9 +63,8 @@ Document Type은 특정 JSON Document가 무엇을 의미하고 어떤 상태와
 유효한지를 정의합니다. Profile, Document Model, Schema와 invariant,
 Document Operation, Projection이 이 책임에 속합니다.
 
-현재 Rich Text·Order·Object·Tree·Database·Calendar·Sheet·Kanban·Annotation은
-분류 후보입니다. [Document Types](document-types.md)에서 현재 관찰된 schema,
-소유권 감사와 완료 조건을 봅니다. 이름이 등록됐다고 package 재배치가 완료된
+[Document Types](document-types.md)에서 후보별 현재 소유자와 소유권 감사,
+공개 계약의 상태를 확인합니다. 이름이 등록됐다고 package 재배치가 완료된
 것은 아닙니다. 같은 Calendar라도 Document Type, Hand와 Application은 다른 책임입니다.
 
 ## Building Blocks

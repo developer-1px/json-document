@@ -1,6 +1,6 @@
 # @interactive-os/json-document-contenteditable-collaboration API
 
-**탐색 분류:** Collaboration
+**탐색 분류:** Adapter
 
 collaborative contenteditable lease의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 사이트에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
 
@@ -78,6 +78,14 @@ const plainTextDOMAdapter: TextDOMAdapter
 interface TextDOMAdapter {
   observe(root: HTMLElement): DOMObservation;
   render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
-  restoreSelection(root: HTMLElement, selection: TextSelection): boolean;
+  restoreSelection(root: HTMLElement, selection: TextSelection, options?: TextDOMSelectionOptions): boolean;
+  /** Resolve one visual line while retaining the horizontal goal; null keeps native navigation. */
+  resolveVerticalSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward", extend: boolean): TextSelection | null;
+  /** Reset the horizontal goal after another input, pointer placement, or blur. */
+  resetNavigation?(root: HTMLElement): void;
+  /** Resolve a source deletion range where native DOM deletion cannot preserve the projection. */
+  resolveDeletionSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward"): TextSelection | null;
+  /** Resolve a source-coordinate step across projected DOM boundaries; null keeps native navigation. */
+  resolveHorizontalSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward", extend: boolean): TextSelection | null;
 }
 ```

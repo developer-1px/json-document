@@ -55,7 +55,7 @@ function fail(message) {
 const publicDocs = {
   overview: read("docs/public/overview.md"),
   applications: read("docs/public/applications.md"),
-  concepts: read("docs/public/concepts.md"),
+  concepts: read("docs/public/architecture.md"),
   foundation: read("docs/public/foundation.md"),
   buildingBlocks: read("docs/public/building-blocks.md"),
   editing: read("docs/public/editing.md"),

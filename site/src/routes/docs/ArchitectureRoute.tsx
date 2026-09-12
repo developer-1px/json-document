@@ -1,7 +1,7 @@
 import { DocsRoute } from "./DocsRoute";
 
-export function ConceptsRoute() {
-  return <DocsRoute pageId="concepts" />;
+export function ArchitectureRoute() {
+  return <DocsRoute pageId="architecture" />;
 }
 
 export function SelectionDocsRoute() {

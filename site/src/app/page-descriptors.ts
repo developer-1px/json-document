@@ -31,6 +31,14 @@ export type SiteRoute = {
   readonly chrome?: "app" | "none";
   readonly relatedDemoPath?: string;
   readonly relatedDemoLabel?: string;
+  readonly module?: {
+    readonly sourceDirectory: string;
+    readonly responsibility: string;
+    readonly alsoIn: readonly SiteNavigationGroup[];
+    readonly usagePaths: readonly string[];
+    readonly statusNote?: string;
+  };
+  readonly modulePaths?: readonly string[];
   readonly integration?: {
     readonly kind: IntegrationKind;
     readonly packageName: string;

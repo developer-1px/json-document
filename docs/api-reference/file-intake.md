@@ -1,6 +1,6 @@
 # @interactive-os/json-document-file-intake API
 
-**탐색 분류:** Artifact
+**탐색 분류:** Document Types
 
 플랫폼 독립 파일 후보와 수용 정책의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 사이트에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
 

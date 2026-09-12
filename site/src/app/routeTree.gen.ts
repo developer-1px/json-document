@@ -63,10 +63,10 @@ import { Route as PageDocsAdapterKeyboardRouteImport } from "./routes/_page/docs
 import { Route as PageDocsAdapterVirtualSelectionRouteImport } from "./routes/_page/docs/adapter-virtual-selection";
 import { Route as PageDocsAdaptersRouteImport } from "./routes/_page/docs/adapters";
 import { Route as PageDocsAnimationRouteImport } from "./routes/_page/docs/animation";
+import { Route as PageDocsArchitectureRouteImport } from "./routes/_page/docs/architecture";
 import { Route as PageDocsBuildingBlocksRouteImport } from "./routes/_page/docs/building-blocks";
 import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipboard";
 import { Route as PageDocsComposerRouteImport } from "./routes/_page/docs/composer";
-import { Route as PageDocsConceptsRouteImport } from "./routes/_page/docs/concepts";
 import { Route as PageDocsConnectorA2uiRouteImport } from "./routes/_page/docs/connector-a2ui";
 import { Route as PageDocsConnectorAjvRouteImport } from "./routes/_page/docs/connector-ajv";
 import { Route as PageDocsConnectorReactRouteImport } from "./routes/_page/docs/connector-react";
@@ -455,6 +455,11 @@ const PageDocsAnimationRoute = PageDocsAnimationRouteImport.update({
   path: "/docs/animation",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsArchitectureRoute = PageDocsArchitectureRouteImport.update({
+  id: "/docs/architecture",
+  path: "/docs/architecture",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsBuildingBlocksRoute = PageDocsBuildingBlocksRouteImport.update({
   id: "/docs/building-blocks",
   path: "/docs/building-blocks",
@@ -468,11 +473,6 @@ const PageDocsClipboardRoute = PageDocsClipboardRouteImport.update({
 const PageDocsComposerRoute = PageDocsComposerRouteImport.update({
   id: "/docs/composer",
   path: "/docs/composer",
-  getParentRoute: () => PageRoute,
-} as any);
-const PageDocsConceptsRoute = PageDocsConceptsRouteImport.update({
-  id: "/docs/concepts",
-  path: "/docs/concepts",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsConnectorA2uiRoute = PageDocsConnectorA2uiRouteImport.update({
@@ -1110,10 +1110,10 @@ export interface FileRoutesByFullPath {
   "/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/animation": typeof PageDocsAnimationRoute;
+  "/docs/architecture": typeof PageDocsArchitectureRoute;
   "/docs/building-blocks": typeof PageDocsBuildingBlocksRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
-  "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connector-a2ui": typeof PageDocsConnectorA2uiRoute;
   "/docs/connector-ajv": typeof PageDocsConnectorAjvRoute;
   "/docs/connector-react": typeof PageDocsConnectorReactRoute;
@@ -1277,10 +1277,10 @@ export interface FileRoutesByTo {
   "/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/animation": typeof PageDocsAnimationRoute;
+  "/docs/architecture": typeof PageDocsArchitectureRoute;
   "/docs/building-blocks": typeof PageDocsBuildingBlocksRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
-  "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connector-a2ui": typeof PageDocsConnectorA2uiRoute;
   "/docs/connector-ajv": typeof PageDocsConnectorAjvRoute;
   "/docs/connector-react": typeof PageDocsConnectorReactRoute;
@@ -1446,10 +1446,10 @@ export interface FileRoutesById {
   "/_page/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/_page/docs/adapters": typeof PageDocsAdaptersRoute;
   "/_page/docs/animation": typeof PageDocsAnimationRoute;
+  "/_page/docs/architecture": typeof PageDocsArchitectureRoute;
   "/_page/docs/building-blocks": typeof PageDocsBuildingBlocksRoute;
   "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
   "/_page/docs/composer": typeof PageDocsComposerRoute;
-  "/_page/docs/concepts": typeof PageDocsConceptsRoute;
   "/_page/docs/connector-a2ui": typeof PageDocsConnectorA2uiRoute;
   "/_page/docs/connector-ajv": typeof PageDocsConnectorAjvRoute;
   "/_page/docs/connector-react": typeof PageDocsConnectorReactRoute;
@@ -1615,10 +1615,10 @@ export interface FileRouteTypes {
     | "/docs/adapter-virtual-selection"
     | "/docs/adapters"
     | "/docs/animation"
+    | "/docs/architecture"
     | "/docs/building-blocks"
     | "/docs/clipboard"
     | "/docs/composer"
-    | "/docs/concepts"
     | "/docs/connector-a2ui"
     | "/docs/connector-ajv"
     | "/docs/connector-react"
@@ -1782,10 +1782,10 @@ export interface FileRouteTypes {
     | "/docs/adapter-virtual-selection"
     | "/docs/adapters"
     | "/docs/animation"
+    | "/docs/architecture"
     | "/docs/building-blocks"
     | "/docs/clipboard"
     | "/docs/composer"
-    | "/docs/concepts"
     | "/docs/connector-a2ui"
     | "/docs/connector-ajv"
     | "/docs/connector-react"
@@ -1950,10 +1950,10 @@ export interface FileRouteTypes {
     | "/_page/docs/adapter-virtual-selection"
     | "/_page/docs/adapters"
     | "/_page/docs/animation"
+    | "/_page/docs/architecture"
     | "/_page/docs/building-blocks"
     | "/_page/docs/clipboard"
     | "/_page/docs/composer"
-    | "/_page/docs/concepts"
     | "/_page/docs/connector-a2ui"
     | "/_page/docs/connector-ajv"
     | "/_page/docs/connector-react"
@@ -2455,6 +2455,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsAnimationRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/architecture": {
+      id: "/_page/docs/architecture";
+      path: "/docs/architecture";
+      fullPath: "/docs/architecture";
+      preLoaderRoute: typeof PageDocsArchitectureRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/building-blocks": {
       id: "/_page/docs/building-blocks";
       path: "/docs/building-blocks";
@@ -2474,13 +2481,6 @@ declare module "@tanstack/react-router" {
       path: "/docs/composer";
       fullPath: "/docs/composer";
       preLoaderRoute: typeof PageDocsComposerRouteImport;
-      parentRoute: typeof PageRoute;
-    };
-    "/_page/docs/concepts": {
-      id: "/_page/docs/concepts";
-      path: "/docs/concepts";
-      fullPath: "/docs/concepts";
-      preLoaderRoute: typeof PageDocsConceptsRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/connector-a2ui": {
@@ -3289,10 +3289,10 @@ interface PageRouteChildren {
   PageDocsAdapterVirtualSelectionRoute: typeof PageDocsAdapterVirtualSelectionRoute;
   PageDocsAdaptersRoute: typeof PageDocsAdaptersRoute;
   PageDocsAnimationRoute: typeof PageDocsAnimationRoute;
+  PageDocsArchitectureRoute: typeof PageDocsArchitectureRoute;
   PageDocsBuildingBlocksRoute: typeof PageDocsBuildingBlocksRoute;
   PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
   PageDocsComposerRoute: typeof PageDocsComposerRoute;
-  PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
   PageDocsConnectorA2uiRoute: typeof PageDocsConnectorA2uiRoute;
   PageDocsConnectorAjvRoute: typeof PageDocsConnectorAjvRoute;
   PageDocsConnectorReactRoute: typeof PageDocsConnectorReactRoute;
@@ -3455,10 +3455,10 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAdapterVirtualSelectionRoute: PageDocsAdapterVirtualSelectionRoute,
   PageDocsAdaptersRoute: PageDocsAdaptersRoute,
   PageDocsAnimationRoute: PageDocsAnimationRoute,
+  PageDocsArchitectureRoute: PageDocsArchitectureRoute,
   PageDocsBuildingBlocksRoute: PageDocsBuildingBlocksRoute,
   PageDocsClipboardRoute: PageDocsClipboardRoute,
   PageDocsComposerRoute: PageDocsComposerRoute,
-  PageDocsConceptsRoute: PageDocsConceptsRoute,
   PageDocsConnectorA2uiRoute: PageDocsConnectorA2uiRoute,
   PageDocsConnectorAjvRoute: PageDocsConnectorAjvRoute,
   PageDocsConnectorReactRoute: PageDocsConnectorReactRoute,

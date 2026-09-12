@@ -14,7 +14,7 @@ function trail(path: string) {
 describe("breadcrumbTrail", () => {
   test("places owner groups below the new IA sections", () => {
     expect(trail("/docs")).toEqual(["Overview:/", "Introduction:/docs"]);
-    expect(trail("/docs/concepts")).toEqual(["Overview:/", "Introduction:/docs", "Concept Map:/docs/concepts"]);
+    expect(trail("/docs/architecture")).toEqual(["Overview:/", "Introduction:/docs", "Architecture:/docs/architecture"]);
     expect(trail("/docs/foundation")).toEqual(["Overview:/", "Foundation:/docs/foundation"]);
     expect(trail("/docs/collaboration/replica")).toEqual([
       "Overview:/", "Foundation:/docs/foundation", "Collaboration:/docs/collaboration", "Replica:/docs/collaboration/replica",

@@ -4,7 +4,7 @@ import { DocumentationPage } from "./DocumentationPage";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "package",
-  concepts: "sleep",
+  architecture: "sleep",
   foundation: "braces",
   buildingBlocks: "braces",
   editing: "branch",

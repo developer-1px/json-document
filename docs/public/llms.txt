@@ -32,7 +32,7 @@ Application/Host는 조합·실행 순서·제품 정책 값·copy·fixture·lay
 둔다. 사이트 탐색 분류는 package의 실제 책임 종류나 API owner의 이름이 아니다.
 
 현재 계약 안내:
-- https://developer-1px.github.io/json-document/docs/concepts/
+- https://developer-1px.github.io/json-document/docs/architecture/
 - https://developer-1px.github.io/json-document/docs/api/
 - https://developer-1px.github.io/json-document/docs/editing/
 - https://developer-1px.github.io/json-document/docs/document-types/

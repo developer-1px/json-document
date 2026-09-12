@@ -54,8 +54,8 @@ describe("canonical documentation projection", () => {
   });
 
   test.each([
-    ["docs/public/concepts.md", "how-we-build.md", "/docs/how-we-build"],
-    ["docs/public/concepts.md", "document-types.md#후보--tbd", "/docs/document-types#후보--tbd"],
+    ["docs/public/architecture.md", "how-we-build.md", "/docs/how-we-build"],
+    ["docs/public/architecture.md", "document-types.md#후보--tbd", "/docs/document-types#후보--tbd"],
     ["docs/public/adapters.md", "adapter-virtual-selection.md", "/docs/adapter-virtual-selection"],
     ["docs/public/ui-primitives.md", "animation.md", "/docs/animation"],
     ["docs/public/connectors.md", "connector-a2ui.md", "/docs/connector-a2ui"],
@@ -69,7 +69,7 @@ describe("canonical documentation projection", () => {
     expect(decodeURIComponent(rewriteMarkdownHref(href, source)!)).toBe(expected);
   });
 
-  test("registers every document page once, including Concept Map", () => {
+  test("registers every document page once, including Architecture", () => {
     const registered = pageDescriptors.filter((route) => route.documentSource !== undefined);
     expect(Object.values(docPages).map((page) => page.path).sort()).toEqual(registered.map((page) => page.path).sort());
   });

@@ -1,3 +1,4 @@
+import { pageDescriptors } from "../../app/page-descriptors";
 import markdownSourceEditSource from "../../../../packages/json-document-markdown/src/source-edit.ts?raw";
 import markdownListEditingSource from "../../../../packages/json-document-markdown/src/list-editing.ts?raw";
 import markdownBindingSource from "../../../../packages/json-document-markdown-web/src/editing-binding.ts?raw";
@@ -190,43 +191,7 @@ export type DemoSourceFile = {
   readonly load: () => Promise<string>;
 };
 
-const packageReferencePaths = new Map([
-  ["packages/json-document-markdown/", "/docs/api/markdown"],
-  ["packages/json-document-markdown-web/", "/docs/api/markdown-web"],
-  ["packages/json-document-object-document/", "/docs/api/object-document"],
-  ["packages/json-document-canvas/", "/docs/api/canvas"],
-  ["packages/json-document/", "/docs/api/json-document"],
-  ["packages/json-document-selection/", "/docs/api/selection"],
-  ["packages/json-document-editing/", "/docs/api/editing"],
-  ["packages/json-document-calendar/", "/docs/api/calendar"],
-  ["packages/json-document-calendar-document/", "/docs/api/calendar-document"],
-  ["packages/json-document-react/", "/docs/api/react"],
-  ["packages/json-document-react-hook-form/", "/docs/api/react-hook-form"],
-  ["packages/json-document-ajv/", "/docs/api/ajv"],
-  ["packages/json-document-a2ui/", "/docs/api/a2ui"],
-  ["packages/json-document-zod/", "/docs/api/zod"],
-  ["packages/json-document-tanstack-table/", "/docs/api/tanstack-table"],
-  ["packages/json-document-affordance/", "/docs/api/affordance"],
-  ["packages/json-document-ui-primitives-react/", "/docs/api/ui-primitives-react"],
-  ["packages/json-document-animation-react/", "/docs/api/animation-react"],
-  ["packages/json-document-markdown-react/", "/docs/api/markdown-react"],
-  ["packages/json-document-database/", "/docs/api/database"],
-  ["packages/json-document-annotation/", "/docs/api/annotation"],
-  ["packages/json-document-web/", "/docs/api/web"],
-  ["packages/json-document-contenteditable/", "/docs/api/contenteditable"],
-  ["packages/json-document-rich-text/", "/docs/api/rich-text"],
-  ["packages/json-document-file-intake/", "/docs/api/file-intake"],
-  ["packages/json-document-rich-text-suggestion/", "/docs/api/rich-text-suggestion"],
-  ["packages/json-document-rich-text-suggestion-react/", "/docs/api/rich-text-suggestion-react"],
-  ["packages/json-document-rich-text-mention/", "/docs/api/rich-text-mention"],
-  ["packages/json-document-rich-text-mention-react/", "/docs/api/rich-text-mention-react"],
-  ["packages/json-document-composer/", "/docs/api/composer"],
-  ["packages/json-document-composer-react/", "/docs/api/composer-react"],
-  ["packages/json-document-rich-text-web/", "/docs/api/rich-text-web"],
-  ["packages/json-document-rich-text-react/", "/docs/api/rich-text-react"],
-  ["packages/json-document-collaboration/", "/docs/api/collaboration"],
-  ["packages/contenteditable-collaboration/", "/docs/api/contenteditable-collaboration"],
-] as const);
+const packageReferencePaths = new Map(pageDescriptors.flatMap(page => page.module ? [[`${page.module.sourceDirectory}/`, page.path] as const] : []));
 
 const sourceModules = import.meta.glob<string>(
   [

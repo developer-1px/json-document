@@ -23,7 +23,7 @@ docs
 ```text
 Introduction
 ├─ Why
-├─ Concept Map
+├─ Architecture
 └─ How We Build
 Foundation
 ├─ Overview

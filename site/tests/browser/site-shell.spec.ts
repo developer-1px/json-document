@@ -33,25 +33,18 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await navigation.getByRole("button", { name: "Introduction" }).click();
   await expect(navigation.getByRole("group", { name: "Introduction" }).getByRole("link")).toHaveText([
     "Why",
-    "Concept Map",
+    "Architecture",
     "How We Build",
   ]);
   await navigation.getByRole("button", { name: "Foundation" }).click();
-  await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
+  await expect(navigation.getByRole("link", { name: "API · Markdown", exact: true })).toBeVisible();
   await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: "Overview", exact: true }).first()).toBeVisible();
   await navigation.getByRole("button", { name: "Building Blocks" }).click();
-  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
+  await expect(navigation.getByRole("link", { name: "API · Markdown React", exact: true })).toBeVisible();
   await navigation.getByRole("button", { name: "Hands" }).click();
-  await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([
-    "Overview",
-    "Official Hands · TBD",
-    "Order",
-    "Object",
-    "Tree",
-    "Database",
-    "Composer",
-    "Mention",
-  ]);
+  for (const label of ["Official Hands · TBD", "Order", "Object", "Tree", "Database", "Composer", "Mention", "API · Calendar"]) {
+    await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link", {name: label, exact:true})).toBeVisible();
+  }
   await navigation.getByRole("button", { name: "Artifact" }).click();
   await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText([
     "Content Prototype · TBD",
@@ -59,6 +52,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await navigation.getByRole("button", { name: "Applications" }).click();
   await expect(navigation.getByRole("group", { name: "Applications" }).getByRole("link")).toHaveText([
     "Overview",
+    "Bear",
     "Calendar",
     "AI Agent",
   ]);
@@ -92,10 +86,10 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Applications" })).toBeVisible();
 
-  await page.goto("/docs/concepts");
+  await page.goto("/docs/architecture");
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Documentation sections" })).toBeVisible();
-  await expect(siteNavigation.getByRole("link", { name: "Concept Map" })).toHaveAttribute("aria-current", "page");
+  await expect(siteNavigation.getByRole("link", { name: "Architecture" })).toHaveAttribute("aria-current", "page");
 });
 
 test("short desktop view keeps the home story in natural document flow", async ({ page }) => {
@@ -223,12 +217,12 @@ test("Adapter and Connector menus expose contract docs while demos stay embedded
   await page.goto("/docs/adapter-keyboard");
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Keyboard" })).toBeVisible();
-  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
+  await expect(navigation.getByRole("link", { name: "API · Markdown React", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Keyboard Adapter" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(1);
 
   await page.goto("/docs/connector-zod-validate");
-  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Zod" })).toBeVisible();
+  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Zod", exact: true })).toBeVisible();
   await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Validate" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Zod Validate" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(1);
@@ -258,7 +252,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
   const illustrations = new Set<string>();
   const routes = [
     "/docs",
-    "/docs/concepts",
+    "/docs/architecture",
     "/docs/connectors",
     "/docs/adapters",
     "/docs/api",
@@ -555,11 +549,27 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
     boxShadow: getComputedStyle(element).boxShadow,
   }))).toEqual({
     backgroundColor: "rgb(255, 255, 255)",
-    borderColor: "rgb(229, 231, 235) rgb(229, 231, 235) rgb(216, 209, 197)",
+    borderLeftWidth: "0px",
+    borderRightWidth: "0px",
+    boxShadow: "rgba(119, 115, 107, 0.3) 0px 0px 0px 1px inset, rgba(69, 67, 62, 0.024) 0px 0px 0px 999px inset",
   });
   await selectedCell.focus();
-  await expect.poll(() => selectedCell.evaluate((element) => getComputedStyle(element).boxShadow))
-    .toBe("rgb(222, 109, 85) 0px 0px 0px 2px inset");
+  await expect(selectedCell).toBeFocused();
+  // The canonical content interaction keeps selection and adds a focus outline.
+  await expect.poll(() => selectedCell.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      focusVisible: element.matches(":focus-visible"),
+      outline: style.outline,
+      outlineOffset: style.outlineOffset,
+      boxShadow: style.boxShadow,
+    };
+  })).toEqual({
+    focusVisible: true,
+    outline: "color(srgb 0.870588 0.427451 0.333333 / 0.58) solid 2px",
+    outlineOffset: "2px",
+    boxShadow: "rgba(119, 115, 107, 0.3) 0px 0px 0px 1px inset, rgba(69, 67, 62, 0.024) 0px 0px 0px 999px inset",
+  });
   expect(await page.getByRole("combobox").first().evaluate(controlSnapshot)).toMatchObject({
     backgroundColor: "rgba(0, 0, 0, 0)",
     boxShadow: "none",

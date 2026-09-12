@@ -60,3 +60,18 @@ export function sectionForGroup(group: SiteNavigationGroup): SiteSection {
   if (section === undefined) throw new Error(`Site navigation group has no section: ${group}`);
   return section;
 }
+
+export const groupLandings: Record<SiteNavigationGroup, { readonly path: string; readonly label: string }> = {
+  Introduction: { path: "/docs", label: "Introduction" },
+  "JSON Document": { path: "/docs/api", label: "JSON Document" },
+  "Document Types": { path: "/docs/document-types", label: "Document Types" },
+  Editing: { path: "/docs/editing", label: "Editing" },
+  Collaboration: { path: "/docs/collaboration", label: "Collaboration" },
+  Adapter: { path: "/docs/adapters", label: "Adapter" },
+  Connector: { path: "/docs/connectors", label: "Connector" },
+  Affordance: { path: "/docs/affordance", label: "Affordance" },
+  "UI Primitives": { path: "/docs/ui-primitives", label: "UI Primitives" },
+  Hands: { path: "/editors", label: "Hands" },
+  Artifact: { path: "/viewer", label: "Artifact" },
+  Applications: { path: "/applications", label: "Applications" },
+};
