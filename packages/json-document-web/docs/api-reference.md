@@ -104,6 +104,11 @@ createWebKeyboardAdapter<Command>(options: { readonly keymap: WebKeymap<Command>
 ```ts
 createWebPointerSession<State>(options?: WebPointerSessionOptions<State>): WebPointerSession<State>
 ```
+## `createWebStoredDocument`
+
+```ts
+createWebStoredDocument<Source extends WebStoredDocumentSource>(options: WebStoredDocumentOptions<Source>): WebStoredDocument<Source>
+```
 ## `createWebViewportPositionPorts`
 
 ```ts
@@ -551,6 +556,11 @@ type WebComposerFile = WebFileCandidate;
 ```ts
 type WebComposerFileList = WebFileCandidateList;
 ```
+## `WebDocumentSaveState`
+
+```ts
+type WebDocumentSaveState = "saved" | "unsaved" | "load-error" | "save-error";
+```
 ## `WebDragDropCancelReason`
 
 ```ts
@@ -902,6 +912,38 @@ interface WebRasterReadSignal {
 type WebRasterSourceResult =
   | { readonly ok: true; readonly dataURL: string; readonly width: number; readonly height: number }
   | { readonly ok: false; readonly code: "raster.read-failed" | "raster.decode-failed" | "raster.cancelled"; readonly reason?: string };
+```
+## `WebStoredDocument`
+
+```ts
+interface WebStoredDocument<Source extends WebStoredDocumentSource> {
+  readonly source: Source;
+  readonly state: WebDocumentSaveState;
+  subscribe(listener: () => void): () => void;
+  /** Observe value changes only. Returns cleanup; selection movement never writes storage. */
+  connect(): () => void;
+  save(): void;
+}
+```
+## `WebStoredDocumentOptions`
+
+```ts
+interface WebStoredDocumentOptions<Source extends WebStoredDocumentSource> {
+  readonly key: string;
+  /** Lazy access also captures browsers that deny access to localStorage itself. */
+  readonly storage: () => {getItem(key: string): string | null; setItem(key: string, value: string): void};
+  /** Validate and construct the canonical document/editor, or throw on invalid stored data. */
+  readonly restore: (value: unknown) => Source;
+  readonly create: () => Source;
+}
+```
+## `WebStoredDocumentSource`
+
+```ts
+interface WebStoredDocumentSource {
+  readonly snapshot: {readonly value: JSONValue};
+  subscribe(listener: () => void): () => void;
+}
 ```
 ## `WebSVGElement`
 

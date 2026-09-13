@@ -9,6 +9,7 @@ export type SheetStructureIntent =
 export interface SheetStructurePolicy {
   readonly headerRows?: number;
   readonly minimumColumns?: number;
+  readonly minimumRows?: number;
 }
 export interface SheetStructureActions {
   readonly insertRow: SheetStructureIntent;
@@ -29,6 +30,7 @@ export function sheetStructureViolation(document: SheetDocument, intent: SheetSt
   const headerRows = policy.headerRows ?? 0;
   if (intent.type === "row.insert" && intent.index < headerRows) return "sheet.header-protected";
   if (intent.type === "row.delete" && document.rows.findIndex(row => row.id === intent.rowId) >= 0 && document.rows.findIndex(row => row.id === intent.rowId) < headerRows) return "sheet.header-protected";
+  if (intent.type === "row.delete" && document.rows.length <= (policy.minimumRows ?? 0)) return "sheet.minimum-rows";
   if (intent.type === "column.delete" && document.columns.length <= (policy.minimumColumns ?? 0)) return "sheet.minimum-columns";
   return null;
 }

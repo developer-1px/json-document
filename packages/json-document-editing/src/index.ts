@@ -236,3 +236,4 @@ export type { SheetStructureIntent, SheetStructurePolicy, SheetStructureActions 
 export { createMarkdownTableEditor } from "./markdown-table.js";
 export { sheetNavigationTarget } from "./sheet-navigation.js";
 export type { SheetTraversalDirection } from "./sheet-navigation.js";
+export {sheetSelectionSummary} from "./sheet-summary.js";

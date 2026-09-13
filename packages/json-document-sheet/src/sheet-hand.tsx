@@ -1,6 +1,6 @@
 import { Rows3, Columns3, Plus, Minus, Undo2, Redo2 } from "lucide-react";
 import { useMemo, useRef, useState, type ReactNode, type KeyboardEvent, type CSSProperties, type KeyboardEventHandler, type FocusEventHandler } from "react";
-import { jsonCellText, gridRangeBounds, gridCellsInRange, gridPointKey, type SheetRange, type SheetDocument, type SheetEditor, type GridPoint } from "@interactive-os/json-document-editing";
+import { sheetColumnLabel, jsonCellText, gridRangeBounds, gridCellsInRange, gridPointKey, type SheetRange, type SheetDocument, type SheetEditor, type GridPoint } from "@interactive-os/json-document-editing";
 import { editingItemProps, useEditingSnapshot, useGridEditing, useRenameSession } from "@interactive-os/json-document-react";
 import { cellEditingAffordance, editingCommandFromWebKeyboardStroke } from "@interactive-os/json-document-affordance";
 import { isWebComposingKey, createWebClipboardSurface, findWebGridCell, gridBoundary, moveGridPoint, rovingFocusItemProps, sheetClipboardCodec, webGridCellAddressProps } from "@interactive-os/json-document-web";
@@ -21,6 +21,8 @@ export interface SheetCellEditorProps {
 export interface SheetHandProps {
   readonly editor: SheetEditor;
   readonly label?: string;
+  /** Display positional A/B/C headers for an application grid instead of field labels. */
+  readonly coordinateHeaders?: boolean;
   /** Header row presentation only; structure restrictions belong to editor.structure. */
   readonly headerRow?: boolean;
   /** Document tables activate editing with Enter; spreadsheets use Enter for sequential entry. */
@@ -32,7 +34,7 @@ export interface SheetHandProps {
 }
 
 /** Shared cell selection, edit mode, clipboard and structural controls. Data/history stay with editor. */
-export function SheetHand({editor, label = "표 편집", headerRow = false, profile = "spreadsheet-grid", renderCell, renderEditor, onExit}: SheetHandProps) {
+export function SheetHand({editor, label = "표 편집", headerRow = false, coordinateHeaders = false, profile = "spreadsheet-grid", renderCell, renderEditor, onExit}: SheetHandProps) {
   const snapshot = useEditingSnapshot(editor);
   const sheet = snapshot.value as SheetDocument;
   const surface = useRef<HTMLDivElement>(null);
@@ -107,9 +109,9 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, prof
     <div style={{overflowX: "auto"}} {...clipboard}>
       <table role="grid" aria-label={label} aria-multiselectable="true" style={{borderCollapse: "collapse", width: "100%"}}>
         <colgroup><col />{sheet.columns.map(column => <col key={column.id} style={{width:columnPreview?.id === column.id ? columnPreview.size : typeof column.width === "number" ? column.width : undefined}} />)}</colgroup>
-        <thead><tr><th aria-label="행 번호" />{sheet.columns.map(column => <th key={column.id} scope="col" style={{position:"relative"}}>
-          <button type="button" aria-label={`${column.label} 열 선택`} onClick={() => editor.dispatch({type:"selection.column",columnId:column.id})} style={{border:0,background:"transparent",font:"inherit",color:"inherit",padding:0}}>{column.label}</button>
-          {editor.capabilities.resize && <SheetAxisResize axis="x" label={`${column.label} 열 너비 조절`} onPreview={size => setColumnPreview(size === null ? null : {id:column.id,size})} onCommit={width => report(editor.dispatch({type:"column.resize",columnId:column.id,width}))} />}
+        <thead><tr><th aria-label="행 번호" />{sheet.columns.map((column,columnIndex) => <th key={column.id} scope="col" style={{position:"relative"}}>
+          <button type="button" aria-label={`${coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label} 열 선택`} onClick={() => editor.dispatch({type:"selection.column",columnId:column.id})} style={{border:0,background:"transparent",font:"inherit",color:"inherit",padding:0}}>{coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label}</button>
+          {editor.capabilities.resize && <SheetAxisResize axis="x" label={`${coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label} 열 너비 조절`} onPreview={size => setColumnPreview(size === null ? null : {id:column.id,size})} onCommit={width => report(editor.dispatch({type:"column.resize",columnId:column.id,width}))} />}
         </th>)}</tr></thead>
         <tbody>{sheet.rows.map((row, index) => <tr key={row.id} style={{height:rowPreview?.id === row.id ? rowPreview.size : typeof row.height === "number" ? row.height : undefined}}><th scope="row" style={{position:"relative"}}>
           <button type="button" aria-label={`${index + 1}행 선택`} onClick={() => editor.dispatch({type:"selection.row",rowId:row.id})} style={{border:0,background:"transparent",font:"inherit",color:"inherit",padding:0}}>{headerRow && index === 0 ? "제목" : index + (headerRow ? 0 : 1)}</button>

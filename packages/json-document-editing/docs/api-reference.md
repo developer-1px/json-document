@@ -1575,6 +1575,7 @@ interface SheetEditorOptions extends EditingHistoryOptions {
 ```ts
 type SheetIntent =
   | SheetStructureIntent
+  | { readonly type: "sheet.rename"; readonly name: string }
   | { readonly type: "column.resize"; readonly columnId: string; readonly width: number }
   | { readonly type: "row.resize"; readonly rowId: string; readonly height: number }
   | { readonly type: "selection.range"; readonly range: SheetRange }
@@ -1648,6 +1649,11 @@ interface SheetSelection extends Record<string, JSONValue> {
   readonly primaryIndex: number | null;
 }
 ```
+## `sheetSelectionSummary`
+
+```ts
+sheetSelectionSummary(editor: SheetEditor): { address: string; selected: number; filled: number; }
+```
 ## `SheetStructureActions`
 
 ```ts
@@ -1673,6 +1679,7 @@ type SheetStructureIntent =
 interface SheetStructurePolicy {
   readonly headerRows?: number;
   readonly minimumColumns?: number;
+  readonly minimumRows?: number;
 }
 ```
 ## `SheetTopology`
