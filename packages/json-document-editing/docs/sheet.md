@@ -27,3 +27,7 @@ editor.dispatch(editor.structure.insertRow);
 `range.fill`은 source 사각형의 값 패턴을 target 사각형에 반복하고 한 번의 History transaction으로 확정합니다. `column.resize`와 `row.resize`는 각각 `width`와 `height`를 문서에 저장합니다. `editor.capabilities.resize`가 false면 UI와 직접 Intent 모두 이 작업을 허용하지 않습니다. Markdown adapter는 GFM에 크기 저장 문법이 없으므로 resize를 지원하지 않습니다.
 
 `sheetNavigationTarget`은 위 연속 입력의 좌표 투영 API이며 순환 순서는 Selection의 `traverseGrid`에 위임합니다.
+
+## 기본 Sheet 애플리케이션
+
+`sheet.rename` Intent는 문서의 `name`을 History에 포함해 변경합니다. `structure.minimumRows`와 `minimumColumns`로 빈 축으로 인한 편집 불능을 방지합니다. `sheetSelectionSummary(editor)`는 활성 셀의 A1 좌표 및 선택/입력 셀 수를 제공합니다. `/applications/sheet`는 이 API와 SheetHand 및 Web 로컬 저장을 조합합니다.

@@ -21,7 +21,7 @@ interface SheetCellEditorProps {
 ## `SheetHand`
 
 ```ts
-SheetHand({ editor, label, headerRow, profile, renderCell, renderEditor, onExit }: SheetHandProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+SheetHand({ editor, label, headerRow, coordinateHeaders, profile, renderCell, renderEditor, onExit }: SheetHandProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
 ## `SheetHandProps`
 
@@ -29,6 +29,8 @@ SheetHand({ editor, label, headerRow, profile, renderCell, renderEditor, onExit 
 interface SheetHandProps {
   readonly editor: SheetEditor;
   readonly label?: string;
+  /** Display positional A/B/C headers for an application grid instead of field labels. */
+  readonly coordinateHeaders?: boolean;
   /** Header row presentation only; structure restrictions belong to editor.structure. */
   readonly headerRow?: boolean;
   /** Document tables activate editing with Enter; spreadsheets use Enter for sequential entry. */

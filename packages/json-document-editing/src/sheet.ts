@@ -87,6 +87,7 @@ export const sheetClipboardFormat = {
 
 export type SheetIntent =
   | SheetStructureIntent
+  | { readonly type: "sheet.rename"; readonly name: string }
   | { readonly type: "column.resize"; readonly columnId: string; readonly width: number }
   | { readonly type: "row.resize"; readonly rowId: string; readonly height: number }
   | { readonly type: "selection.range"; readonly range: SheetRange }
@@ -220,6 +221,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
   }
 
   function dispatch(intent: SheetIntent): EditingResult<SheetSelection> {
+    if (intent.type === "sheet.rename") return session.apply({operations:[{op:"add",path:"/name",value:intent.name}],selectionAfter:session.snapshot.selection,origin:intent.type,historyGroup:"sheet.name"});
     if (intent.type === "selection.row" || intent.type === "selection.column") {
       const current=value(), firstRow=current.rows[0],lastRow=current.rows.at(-1),firstColumn=current.columns[0],lastColumn=current.columns.at(-1);
       if(!firstRow || !lastRow || !firstColumn || !lastColumn) return failure("selection.empty");

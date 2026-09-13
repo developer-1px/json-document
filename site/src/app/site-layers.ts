@@ -12,7 +12,7 @@ export const siteSections: ReadonlyArray<SiteSection> = [
   { id: "getting-started", path: "/docs", label: "시작하기", blurb: "소개, 빠른 시작과 아키텍처", groups: ["Introduction"] },
   { id: "modules", path: "/docs/modules", label: "모듈", blurb: "책임별 설명, API와 Usage", groups: ["JSON Document", "Document Types", "Editing", "Collaboration", "Adapter", "Connector", "Affordance", "UI Primitives"] },
   { id: "hands", path: "/editors", label: "편집 조합 · Hands", blurb: "장르별 편집 예제와 지원 범위", groups: ["Hands"] },
-  { id: "applications", path: "/applications", label: "Applications", blurb: "Bear, Calendar와 AI Agent", groups: ["Applications"] },
+  { id: "applications", path: "/applications", label: "Applications", blurb: "Bear, Sheet, Calendar와 AI Agent", groups: ["Applications"] },
   { id: "design", path: "/docs/design", label: "설계와 진행 상태", blurb: "설계 목표, 프로토타입과 소유권 감사", groups: ["Design", "Artifact"] },
 ];
 

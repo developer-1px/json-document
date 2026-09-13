@@ -64,7 +64,7 @@ describe("official site shell", () => {
       "설계 현황", "Official Hands 목표", "소유권 감사", "Artifact · Prototype", "개발 원칙",
     ]));
     await user.click(nav.getByRole("button", { name: "Applications" }));
-    expect(groupLinks(nav, "Applications")).toEqual(["Overview", "Bear", "Calendar", "AI Agent"]);
+    expect(groupLinks(nav, "Applications")).toEqual(["Overview", "Bear", "Sheet", "Calendar", "AI Agent"]);
     expect(nav.getByRole("link", { name: "JSON Document", exact: true }).getAttribute("href")).toBe("/docs/api");
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "시작하기", "모듈", "편집 조합 · Hands", "Applications", "설계와 진행 상태",

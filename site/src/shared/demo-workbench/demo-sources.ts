@@ -1,3 +1,5 @@
+import storedDocumentSource from "../../../../packages/json-document-web/src/stored-document.ts?raw";
+import sheetSummarySource from "../../../../packages/json-document-editing/src/sheet-summary.ts?raw";
 import gridTraversalSource from "../../../../packages/json-document-selection/src/interaction/grid-traversal.ts?raw";
 import sheetNavigationSource from "../../../../packages/json-document-editing/src/sheet-navigation.ts?raw";
 import sheetAxisResizeSource from "../../../../packages/json-document-sheet/src/sheet-axis-resize.tsx?raw";
@@ -224,6 +226,8 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-web/src/stored-document.ts", storedDocumentSource],
+  ["packages/json-document-editing/src/sheet-summary.ts", sheetSummarySource],
   ["packages/json-document-selection/src/interaction/grid-traversal.ts", gridTraversalSource],
   ["packages/json-document-editing/src/sheet-navigation.ts", sheetNavigationSource],
   ["packages/json-document-sheet/src/sheet-axis-resize.tsx", sheetAxisResizeSource],
@@ -436,6 +440,8 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  {packageName:"@interactive-os/json-document-web",symbol:"createWebStoredDocument",sourcePath:"packages/json-document-web/src/stored-document.ts"},
+  {packageName:"@interactive-os/json-document-editing",symbol:"sheetSelectionSummary",sourcePath:"packages/json-document-editing/src/sheet-summary.ts"},
   {
     packageName: "@interactive-os/json-document-selection",
     symbol: "traverseGrid",

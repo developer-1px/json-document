@@ -15,6 +15,7 @@ import { Route as PageDemosRouteImport } from "./routes/_page/demos";
 import { Route as PageEditorsRouteImport } from "./routes/_page/editors";
 import { Route as PageViewerRouteImport } from "./routes/_page/viewer";
 import { Route as ApplicationsBearRouteImport } from "./routes/applications/bear";
+import { Route as ApplicationsSheetRouteImport } from "./routes/applications/sheet";
 import { Route as PageAdaptersIndexRouteImport } from "./routes/_page/adapters/index";
 import { Route as PageAdaptersClipboardRouteImport } from "./routes/_page/adapters/clipboard";
 import { Route as PageAdaptersContenteditableRouteImport } from "./routes/_page/adapters/contenteditable";
@@ -209,6 +210,11 @@ const PageViewerRoute = PageViewerRouteImport.update({
 const ApplicationsBearRoute = ApplicationsBearRouteImport.update({
   id: "/applications/bear",
   path: "/applications/bear",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const ApplicationsSheetRoute = ApplicationsSheetRouteImport.update({
+  id: "/applications/sheet",
+  path: "/applications/sheet",
   getParentRoute: () => rootRouteImport,
 } as any);
 const PageAdaptersIndexRoute = PageAdaptersIndexRouteImport.update({
@@ -1103,6 +1109,7 @@ export interface FileRoutesByFullPath {
   "/editors": typeof PageEditorsRoute;
   "/viewer": typeof PageViewerRoute;
   "/applications/bear": typeof ApplicationsBearRoute;
+  "/applications/sheet": typeof ApplicationsSheetRoute;
   "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
@@ -1276,6 +1283,7 @@ export interface FileRoutesByTo {
   "/editors": typeof PageEditorsRoute;
   "/viewer": typeof PageViewerRoute;
   "/applications/bear": typeof ApplicationsBearRoute;
+  "/applications/sheet": typeof ApplicationsSheetRoute;
   "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
@@ -1451,6 +1459,7 @@ export interface FileRoutesById {
   "/_page/editors": typeof PageEditorsRoute;
   "/_page/viewer": typeof PageViewerRoute;
   "/applications/bear": typeof ApplicationsBearRoute;
+  "/applications/sheet": typeof ApplicationsSheetRoute;
   "/_page/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/_page/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/_page/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
@@ -1626,6 +1635,7 @@ export interface FileRouteTypes {
     | "/editors"
     | "/viewer"
     | "/applications/bear"
+    | "/applications/sheet"
     | "/adapters/clipboard"
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
@@ -1799,6 +1809,7 @@ export interface FileRouteTypes {
     | "/editors"
     | "/viewer"
     | "/applications/bear"
+    | "/applications/sheet"
     | "/adapters/clipboard"
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
@@ -1973,6 +1984,7 @@ export interface FileRouteTypes {
     | "/_page/editors"
     | "/_page/viewer"
     | "/applications/bear"
+    | "/applications/sheet"
     | "/_page/adapters/clipboard"
     | "/_page/adapters/contenteditable"
     | "/_page/adapters/keyboard"
@@ -2145,6 +2157,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   PageRoute: typeof PageRouteWithChildren;
   ApplicationsBearRoute: typeof ApplicationsBearRoute;
+  ApplicationsSheetRoute: typeof ApplicationsSheetRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -2189,6 +2202,13 @@ declare module "@tanstack/react-router" {
       path: "/applications/bear";
       fullPath: "/applications/bear";
       preLoaderRoute: typeof ApplicationsBearRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/applications/sheet": {
+      id: "/applications/sheet";
+      path: "/applications/sheet";
+      fullPath: "/applications/sheet";
+      preLoaderRoute: typeof ApplicationsSheetRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/_page/adapters/": {
@@ -3708,6 +3728,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PageRoute: PageRouteWithChildren,
   ApplicationsBearRoute: ApplicationsBearRoute,
+  ApplicationsSheetRoute: ApplicationsSheetRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

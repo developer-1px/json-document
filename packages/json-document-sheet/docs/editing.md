@@ -33,3 +33,5 @@ const editor = createSheetEditor({columns: [{id: 'a', label: 'A'}], rows: [{id: 
 크기를 저장할 수 있는 editor에서는 행/열 경계 리사이즈를 제공합니다. 경계 핸들은 키보드로도 조작할 수 있으며 미리보기 후 확정할 때만 History에 기록합니다. GFM editor는 이 capability를 제공하지 않습니다.
 
 `renderEditor`는 포맷 소유 편집기를 받을 수 있습니다. Markdown 소비자는 `MarkdownCellEditor`를 연결하므로 편집 전후 서식도 유지합니다. 단순 문자열은 기존 Field를 사용합니다. `renderCell`은 읽기 표현이며, 맞는 포맷의 `renderEditor`와 함께 사용합니다.
+
+독립 Sheet 애플리케이션은 `coordinateHeaders`를 설정해 저장된 필드 label 대신 현재 순서의 A/B/C 헤더를 표시합니다. 열 삽입/삭제 후에도 좌표가 연속됩니다. 기본값은 필드 label을 유지하므로 문서 표와 기존 예제의 의미를 보존합니다. 실제 조합은 `/applications/sheet`에서 확인합니다.

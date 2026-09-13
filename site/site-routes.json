@@ -93,6 +93,23 @@
     "applicationSource": "site/src/app/routes/applications/bear.tsx"
   },
   {
+    "path": "/applications/sheet",
+    "label": "Sheet",
+    "title": "Sheet",
+    "description": "셀 편집, 범위 선택, 행열 조작과 로컬 저장을 제공하는 기본 Sheet 애플리케이션입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications",
+    "chrome": "none",
+    "modulePaths": [
+      "/docs/api/editing",
+      "/docs/api/react",
+      "/docs/api/web",
+      "/docs/api/sheet",
+      "/docs/api/ui-primitives-react"
+    ],
+    "applicationSource": "site/src/app/routes/applications/sheet.tsx"
+  },
+  {
     "path": "/applications/calendar",
     "label": "Calendar",
     "title": "Calendar Application - json-document",
@@ -275,7 +292,8 @@
       "usagePaths": [
         "/demo/history",
         "/demo/clipboard",
-        "/demo/markdown-caret"
+        "/demo/markdown-caret",
+        "/applications/sheet"
       ]
     },
     "parentPath": "/docs/editing"
@@ -400,14 +418,16 @@
       "packages/json-document-web/docs/clipboard.md",
       "packages/json-document-web/docs/text-clipboard.md",
       "packages/json-document-web/docs/interaction-recording.md",
-      "packages/json-document-web/docs/text-keys.md"
+      "packages/json-document-web/docs/text-keys.md",
+      "packages/json-document-web/docs/stored-document.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-web",
       "usagePaths": [
         "/adapters/keyboard",
         "/adapters/clipboard",
-        "/demo/viewport"
+        "/demo/viewport",
+        "/applications/sheet"
       ]
     },
     "parentPath": "/docs/adapters"
@@ -2008,7 +2028,8 @@
     "module": {
       "packageName": "@interactive-os/json-document-sheet",
       "usagePaths": [
-        "/demo/sheet"
+        "/demo/sheet",
+        "/applications/sheet"
       ]
     },
     "documentIncludes": [
