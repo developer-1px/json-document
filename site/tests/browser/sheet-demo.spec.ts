@@ -73,3 +73,24 @@ test("Sheet Usage exposes the Markdown adapter public API and source history", a
  await page.getByRole("button",{name:"실행 취소",exact:true}).click(); await expect(cells.nth(2)).toHaveText("강조");
  await page.getByRole("tab",{name:"Sheet",exact:true}).click(); await expect(grid.getByRole("gridcell")).toHaveCount(12);
 });
+
+test("table actions stay icon-only and editing preserves cell geometry", async ({page}) => {
+ for (const path of ["/demo/sheet", "/applications/bear"]) {
+  await page.goto(path);
+  const grid=page.getByRole("grid"); const cell=grid.getByRole("gridcell").nth(2);
+  const toolbar=page.getByRole("toolbar",{name:"표 작업"});
+  await expect(toolbar.getByRole("button")).toHaveCount(6);
+  for (const button of await toolbar.getByRole("button").all()) {
+   await expect(button.locator("svg").first()).toBeVisible();
+   expect(await button.textContent()).toBe("");
+  }
+  await cell.scrollIntoViewIfNeeded();
+  const before=await cell.boundingBox(); const gridBefore=await grid.boundingBox();
+  await cell.dblclick(); const input=grid.getByRole("textbox"); await expect(input).toBeVisible();
+  expect(await cell.boundingBox()).toEqual(before); expect(await grid.boundingBox()).toEqual(gridBefore);
+  await input.fill("A long draft that must not resize the table while editing this cell");
+  expect(await cell.boundingBox()).toEqual(before); expect(await grid.boundingBox()).toEqual(gridBefore);
+  await input.press("Escape");
+  expect(await cell.boundingBox()).toEqual(before); expect(await grid.boundingBox()).toEqual(gridBefore);
+ }
+});

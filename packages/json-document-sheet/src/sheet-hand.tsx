@@ -1,9 +1,10 @@
+import { Rows3, Columns3, Plus, Minus, Undo2, Redo2 } from "lucide-react";
 import { useMemo, useRef, useState, type ReactNode, type KeyboardEvent } from "react";
 import { jsonCellText, type SheetDocument, type SheetEditor, type GridPoint } from "@interactive-os/json-document-editing";
 import { editingItemProps, useEditingSnapshot, useGridEditing } from "@interactive-os/json-document-react";
 import { editingCommandFromWebKeyboardStroke } from "@interactive-os/json-document-affordance";
 import { createWebClipboardSurface, findWebGridCell, gridBoundary, moveGridPoint, rovingFocusItemProps, sheetClipboardCodec, webGridCellAddressProps } from "@interactive-os/json-document-web";
-import { Command, ContextualControls, Toolbar, GridCell } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Toolbar, GridCell } from "@interactive-os/json-document-ui-primitives-react";
 
 export interface SheetHandProps {
   readonly editor: SheetEditor;
@@ -62,15 +63,14 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, rend
   const rowIndex = sheet.rows.findIndex(row => row.id === focus?.rowId);
   const columnIndex = sheet.columns.findIndex(column => column.id === focus?.columnId);
   const nextId = (ids: readonly string[], prefix: string) => {let i = 1; while (ids.includes(`${prefix}-${i}`)) i++; return `${prefix}-${i}`;};
-  return <ContextualControls capabilities={[{id: "structure", phases: ["approach", "selected", "editing"]}]} editing={draft !== null}>
-    {context => <div data-sheet-hand="" ref={surface} onKeyDown={keyDown} onBeforeInput={event => event.stopPropagation()} onInput={event => event.stopPropagation()} onPointerDown={event => event.stopPropagation()}>
-    <Toolbar label="표 작업" style={{display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8, fontSize: 13, visibility: headerRow && !context.visible.length ? "hidden" : "visible"}}>
-      <Command onClick={() => report(editor.dispatch({type: "row.insert", index: Math.max(headerRow ? 1 : 0, rowIndex + 1), row: {id: nextId(topology.rowIds, "row"), cells: Object.fromEntries(sheet.columns.map(column => [column.id, ""]))}}))}>행 추가</Command>
-      <Command onClick={() => report(editor.dispatch({type: "column.insert", index: columnIndex + 1, column: {id: nextId(topology.columnIds, "column"), label: String.fromCharCode(65 + sheet.columns.length)}}))}>열 추가</Command>
-      <Command disabled={!focus || (headerRow && rowIndex === 0)} onClick={() => focus && report(editor.dispatch({type: "row.delete", rowId: focus.rowId}))}>행 삭제</Command>
-      <Command disabled={!focus || (headerRow && sheet.columns.length === 1)} onClick={() => focus && report(editor.dispatch({type: "column.delete", columnId: focus.columnId}))}>열 삭제</Command>
-      <Command disabled={!snapshot.canUndo} onClick={() => report(editor.undo())}>실행 취소</Command>
-      <Command disabled={!snapshot.canRedo} onClick={() => report(editor.redo())}>다시 실행</Command>
+  return <div data-sheet-hand="" ref={surface} onKeyDown={keyDown} onBeforeInput={event => event.stopPropagation()} onInput={event => event.stopPropagation()} onPointerDown={event => event.stopPropagation()}>
+    <Toolbar label="표 작업" style={{display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8, fontSize: 13}}>
+      <Command label="행 추가" onClick={() => report(editor.dispatch({type: "row.insert", index: Math.max(headerRow ? 1 : 0, rowIndex + 1), row: {id: nextId(topology.rowIds, "row"), cells: Object.fromEntries(sheet.columns.map(column => [column.id, ""]))}}))}><AxisActionIcon axis="row" action="add" /></Command>
+      <Command label="열 추가" onClick={() => report(editor.dispatch({type: "column.insert", index: columnIndex + 1, column: {id: nextId(topology.columnIds, "column"), label: String.fromCharCode(65 + sheet.columns.length)}}))}><AxisActionIcon axis="column" action="add" /></Command>
+      <Command label="행 삭제" disabled={!focus || (headerRow && rowIndex === 0)} onClick={() => focus && report(editor.dispatch({type: "row.delete", rowId: focus.rowId}))}><AxisActionIcon axis="row" action="remove" /></Command>
+      <Command label="열 삭제" disabled={!focus || (headerRow && sheet.columns.length === 1)} onClick={() => focus && report(editor.dispatch({type: "column.delete", columnId: focus.columnId}))}><AxisActionIcon axis="column" action="remove" /></Command>
+      <Command label="실행 취소" disabled={!snapshot.canUndo} onClick={() => report(editor.undo())}><Undo2 aria-hidden="true" size={16} /></Command>
+      <Command label="다시 실행" disabled={!snapshot.canRedo} onClick={() => report(editor.redo())}><Redo2 aria-hidden="true" size={16} /></Command>
     </Toolbar>
     <div style={{overflowX: "auto"}} {...clipboard}>
       <table role="grid" aria-label={label} aria-multiselectable="true" style={{borderCollapse: "collapse", width: "100%"}}>
@@ -81,7 +81,10 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, rend
           return <GridCell key={column.id} {...webGridCellAddressProps(point)} {...rovingFocusItemProps(item.getIsFocus())} {...editingItemProps(item)}
             style={{minWidth: 90, padding: "7px 10px", border: "1px solid var(--border, #ddd)", position: "relative", fontWeight: headerRow && index === 0 ? 600 : undefined}}
             onDoubleClick={() => setDraft({point, value: jsonCellText(row.cells[column.id])})}>
-            {active ? <input aria-label={`${column.label} ${index + 1}행 편집`} autoFocus value={draft.value} style={{width: "100%", minWidth: 60, font: "inherit"}}
+            <div aria-hidden={active || undefined} style={{visibility: active ? "hidden" : "visible"}}>
+              {(renderCell ? renderCell(jsonCellText(row.cells[column.id])) : jsonCellText(row.cells[column.id])) || <span aria-hidden="true">&nbsp;</span>}
+            </div>
+            {active && <input aria-label={`${column.label} ${index + 1}행 편집`} autoFocus value={draft.value} style={{position: "absolute", inset: 0, boxSizing: "border-box", width: "100%", height: "100%", minWidth: 0, margin: 0, padding: "inherit", border: 0, borderRadius: 0, outline: "none", boxShadow: "none", background: "transparent", color: "inherit", font: "inherit", letterSpacing: "inherit"}}
               onFocus={event => event.currentTarget.select()} onPointerDown={event => event.stopPropagation()}
               onChange={event => setDraft({point, value: event.target.value})} onBlur={finish}
               onKeyDown={event => {
@@ -93,12 +96,17 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, rend
                   if (event.key === "Tab") {if (tab(point, event.shiftKey)) event.preventDefault();}
                   else {const next = moveGridPoint(topology, point, event.shiftKey ? "up" : "down"); select(next ?? point);}
                 }
-              }} /> : (renderCell ? renderCell(jsonCellText(row.cells[column.id])) : jsonCellText(row.cells[column.id])) || <span aria-hidden="true">&nbsp;</span>}
+              }} />}
           </GridCell>;
         })}</tr>)}</tbody>
       </table>
     </div>
     {message && <output role="status">{message}</output>}
-  </div>}
-  </ContextualControls>;
+  </div>;
+}
+
+function AxisActionIcon({axis, action}: {readonly axis: "row" | "column"; readonly action: "add" | "remove"}) {
+  const Axis = axis === "row" ? Rows3 : Columns3;
+  const Action = action === "add" ? Plus : Minus;
+  return <span aria-hidden="true" style={{display: "inline-flex", alignItems: "center"}}><Axis size={16} /><Action size={10} /></span>;
 }
