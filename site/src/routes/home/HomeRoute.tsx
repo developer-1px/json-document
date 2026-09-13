@@ -46,7 +46,7 @@ export function HomeRoute() {
             제품을 먼저 만들고, 그 안에서 발견한 책임을 모듈과 부품으로 되돌립니다.
           </p>
           <div className={homeStyles.actions()}>
-            <ActionLink to="/docs" kind="prominent">Introduction부터 읽기</ActionLink>
+            <ActionLink to="/docs" kind="prominent">시작하기</ActionLink>
             <ActionLink to="/applications">Applications 보기</ActionLink>
           </div>
           <a className={homeStyles.scrollCue()} href="#foundation-title">이야기를 따라 내려가기</a>
@@ -63,7 +63,7 @@ export function HomeRoute() {
           JSON 값, 의미, 변경, 협업의 계약을 먼저 공유하면 사람과 agent가 같은 문서를 안전하게 다룰 수 있습니다.
         </p>
         <div className={homeStyles.actions()}>
-          <ActionLink to="/docs/foundation" kind="prominent">Foundation 살펴보기</ActionLink>
+          <ActionLink to="/docs/modules" kind="prominent">모듈 살펴보기</ActionLink>
           <ActionLink to="/docs/architecture">Architecture</ActionLink>
         </div>
       </HomeScene>

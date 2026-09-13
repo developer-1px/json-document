@@ -40,12 +40,15 @@ export function documentationMap(page: SiteRoute, pages: readonly SiteRoute[] = 
     }).filter(Boolean).join("\n\n")}`).join("\n\n")}\n\n${applicationMap(pages)}`;
   }
   if (page.path === "/applications") return applicationMap(pages);
-  const section = siteSections.find(section => section.path === page.path && ["foundation", "building-blocks"].includes(section.id));
+  const section = siteSections.find(section => section.path === page.path && section.id === "modules");
   const group = Object.entries(groupLandings).find(([, landing]) => landing.path === page.path)?.[0] as SiteNavigationGroup | undefined;
+  if (section?.id === "modules") {
+    return section.groups.map(group => `## ${group}\n\n[설명](${groupLandings[group].path})\n\n${table(modulesAt([group], pages), pages)}`).join("\n\n");
+  }
   const groups = section?.groups ?? (group ? [group] : []);
   const modules = modulesAt(groups, pages);
-  const candidates = page.path === "/docs/document-types" ? documentTypeMap(pages) : "";
-  return modules.length ? `## 현재 제공 모듈\n\n역할별 공개 계약과 실제 Usage입니다. 패키지 내부의 혼합 책임과 이행 상태는 각 API 문서에서 확인합니다.\n\n${table(modules, pages)}\n\n${candidates}` : "";
+  const candidates = ["/docs/document-types", "/docs/ownership"].includes(page.path) ? documentTypeMap(pages) : "";
+  return modules.length ? `## 현재 제공 모듈\n\n역할별 공개 계약과 실제 Usage입니다. 패키지 내부의 혼합 책임과 이행 상태는 각 API 문서에서 확인합니다.\n\n${table(modules, pages)}\n\n${candidates}` : candidates;
 }
 
 function applicationMap(pages: readonly SiteRoute[]): string {

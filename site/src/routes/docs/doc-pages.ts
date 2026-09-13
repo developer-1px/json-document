@@ -19,6 +19,11 @@ function docPage(path: string) {
 }
 
 export const docPages = {
+  quickStart: docPage("/docs/quick-start"),
+  modules: docPage("/docs/modules"),
+  handsSupport: docPage("/docs/hands-support"),
+  design: docPage("/docs/design"),
+  ownership: docPage("/docs/ownership"),
   markdownApi: docPage("/docs/api/markdown"),
   markdownWebApi: docPage("/docs/api/markdown-web"),
   canvasApi: docPage("/docs/api/canvas"),

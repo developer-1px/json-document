@@ -1,5 +1,8 @@
 # Hands
 
+장르별 편집 예제와 공개 API를 확인합니다. [지원 범위](hands-support.md)에서
+현재 증거와 Profile 완료 조건을 구분하고, 설계 목표는 [설계 현황](design.md)에서 봅니다.
+
 ## Annotation editor
 
 Raster Annotation의 persistent model과 editing session은

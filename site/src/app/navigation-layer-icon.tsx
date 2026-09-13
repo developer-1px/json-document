@@ -1,7 +1,6 @@
 import {
   Blocks,
   BookOpen,
-  Braces,
   Files,
   Hand,
   PanelsTopLeft,
@@ -15,11 +14,10 @@ type LayerIcon = {
 };
 
 const layerIcons: Readonly<Record<SiteSectionId, LayerIcon>> = {
-  introduction: { icon: BookOpen, size: 18 },
-  foundation: { icon: Braces, size: 19 },
-  "building-blocks": { icon: Blocks, size: 18 },
+  "getting-started": { icon: BookOpen, size: 18 },
+  modules: { icon: Blocks, size: 18 },
   hands: { icon: Hand, size: 19 },
-  artifact: { icon: Files, size: 18 },
+  design: { icon: Files, size: 18 },
   applications: { icon: PanelsTopLeft, size: 19 },
 };
 
