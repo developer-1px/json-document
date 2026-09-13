@@ -151,3 +151,5 @@ export {
   selectAllAffordance,
   typeaheadAffordance,
 } from "./select.js";
+
+export { cellEditingAffordance } from "./cell-editing.js";

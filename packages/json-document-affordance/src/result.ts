@@ -46,7 +46,7 @@ export type AffordanceHand =
     readonly edge?: "start" | "end";
     readonly operation: "replace" | "extend";
   }
-  | { readonly type: "rename"; readonly action: "begin" | "commit" | "cancel" }
+  | { readonly type: "rename"; readonly action: "begin" | "commit" | "cancel"; readonly initialText?: string; readonly move?: "up" | "down" }
   | { readonly type: "activate" }
   | {
     readonly type: "press";

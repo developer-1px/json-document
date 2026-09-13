@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createJSONDocument } from "@interactive-os/json-document";
-import { createMarkdownTableEditor } from "@interactive-os/json-document-markdown-react";
-import { createSheetEditor, createTextEditor, type SheetDocument } from "@interactive-os/json-document-editing";
+import { createMarkdownTableEditor } from "@interactive-os/json-document-editing";
+import { createSheetEditor, createTextEditor, sheetColumnLabel, type SheetDocument } from "@interactive-os/json-document-editing";
 import { ProductShell, Tabs } from "@interactive-os/json-document-ui-primitives-react";
 import { SheetHand } from "@interactive-os/json-document-sheet";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
@@ -37,7 +37,7 @@ export function SheetDemo() {
     <section role="tabpanel" id={`sheet-${mode}-panel`} aria-labelledby={`sheet-${mode}-tab`}>
     <ProductShell inspector={<Inspector placement="inline" items={[
       {label: mode === "sheet" ? "Canonical JSON" : "Markdown 원문", value: mode === "sheet" ? snapshot.value : source.value, testId: "sheet-canonical-json", size: "tall"},
-      {label: "Selection", value: snapshot.selection, testId: "sheet-selection-json", size: "compact"},
+      {label: "Selection", meta: `열 좌표 A–${sheetColumnLabel((snapshot.value as SheetDocument).columns.length ? (snapshot.value as SheetDocument).columns.length - 1 : 0)}`, value: snapshot.selection, testId: "sheet-selection-json", size: "compact"},
     ]} />}><SheetHand key={mode} editor={editor} label="Project sheet" headerRow={mode === "markdown"} /></ProductShell>
     </section>
   </DemoPage>;

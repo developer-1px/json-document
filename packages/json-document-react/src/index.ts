@@ -94,3 +94,4 @@ export function useDocumentEditor(
   const [editor] = useState(() => createDocumentEditor(initial, options));
   return editor;
 }
+export { useRenameSession, type UseRenameSessionOptions, type RenameSessionBinding } from "./use-rename-session.js";

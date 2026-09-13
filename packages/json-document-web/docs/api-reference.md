@@ -164,6 +164,11 @@ focusWebItem<Item extends WebFocusableItem>(root: WebFocusItemRoot<Item> | null,
 ```ts
 gridBoundary(topology: GridTopology, point: GridPoint, edge: "start" | "end"): GridPoint | null
 ```
+## `isWebComposingKey`
+
+```ts
+isWebComposingKey(event: { readonly isComposing?: boolean; readonly keyCode?: number; }): boolean
+```
 ## `isWebEditableTarget`
 
 ```ts
@@ -747,6 +752,11 @@ interface WebKeyboardStroke {
   readonly ctrlKey: boolean;
   readonly altKey?: boolean;
 }
+```
+## `webKeyboardText`
+
+```ts
+webKeyboardText(stroke: WebKeyboardStroke): string | null
 ```
 ## `WebKeymap`
 

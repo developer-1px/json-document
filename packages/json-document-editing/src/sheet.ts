@@ -1,3 +1,4 @@
+import { createSheetRow, createSheetColumn, sheetStructureActions, sheetStructureViolation, type SheetStructureIntent, type SheetStructurePolicy, type SheetStructureActions } from "./sheet-structure.js";
 import {
   buildPointer,
   isJSONValue,
@@ -84,10 +85,7 @@ export const sheetClipboardFormat = {
 };
 
 export type SheetIntent =
-  | { readonly type: "row.insert"; readonly index: number; readonly row: SheetRow }
-  | { readonly type: "row.delete"; readonly rowId: string }
-  | { readonly type: "column.insert"; readonly index: number; readonly column: SheetColumn }
-  | { readonly type: "column.delete"; readonly columnId: string }
+  | SheetStructureIntent
   | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
@@ -113,6 +111,7 @@ export type SheetIntent =
     };
 
 export interface SheetEditor {
+  readonly structure: SheetStructureActions;
   readonly snapshot: EditingSnapshot<SheetSelection>;
   readonly selectedCells: ReadonlyArray<SheetCell>;
   selectedCellsIn(topology: SheetTopology): ReadonlyArray<SheetCell>;
@@ -125,6 +124,7 @@ export interface SheetEditor {
 }
 
 export interface SheetEditorOptions extends EditingHistoryOptions {
+  readonly structure?: SheetStructurePolicy;
   /** Restore selection when projecting a new source snapshot; missing cells are reconciled. */
   readonly selection?: SheetSelection;
 }
@@ -209,15 +209,19 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
   function dispatch(intent: SheetIntent): EditingResult<SheetSelection> {
     if (intent.type === "row.insert" || intent.type === "row.delete" || intent.type === "column.insert" || intent.type === "column.delete") {
       const current = value();
+      const violation = sheetStructureViolation(current, intent, options.structure ?? {});
+      if (violation) return failure(violation);
       let rows = [...current.rows], columns = [...current.columns];
       if (intent.type === "row.insert") {
-        if (!Number.isInteger(intent.index) || intent.index < 0 || intent.index > rows.length || rows.some(row => row.id === intent.row.id) || !intent.row.id) return failure("row.invalid-insert");
-        if (columns.some(column => !Object.hasOwn(intent.row.cells, column.id))) return failure("row.missing-cell");
-        rows.splice(intent.index, 0, intent.row);
+        const inserted = intent.row ?? createSheetRow(current);
+        if (!Number.isInteger(intent.index) || intent.index < 0 || intent.index > rows.length || rows.some(row => row.id === inserted.id) || !inserted.id) return failure("row.invalid-insert");
+        if (columns.some(column => !Object.hasOwn(inserted.cells, column.id))) return failure("row.missing-cell");
+        rows.splice(intent.index, 0, inserted);
       } else if (intent.type === "column.insert") {
-        if (!Number.isInteger(intent.index) || intent.index < 0 || intent.index > columns.length || columns.some(column => column.id === intent.column.id) || !intent.column.id) return failure("column.invalid-insert");
-        columns.splice(intent.index, 0, intent.column);
-        rows = rows.map(row => ({...row, cells: {...row.cells, [intent.column.id]: ""}}));
+        const inserted = intent.column ?? createSheetColumn(current);
+        if (!Number.isInteger(intent.index) || intent.index < 0 || intent.index > columns.length || columns.some(column => column.id === inserted.id) || !inserted.id) return failure("column.invalid-insert");
+        columns.splice(intent.index, 0, inserted);
+        rows = rows.map(row => ({...row, cells: {...row.cells, [inserted.id]: ""}}));
       } else if (intent.type === "row.delete") {
         if (!rows.some(row => row.id === intent.rowId)) return failure("row.not-found");
         rows = rows.filter(row => row.id !== intent.rowId);
@@ -322,6 +326,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
   }
 
   return {
+    get structure() { return sheetStructureActions(value(), session.snapshot.selection, options.structure ?? {}); },
     get snapshot() { return session.snapshot; },
     get selectedCells() { return selectedCells(); },
     selectedCellsIn: (topology) => selectedCells(topology),

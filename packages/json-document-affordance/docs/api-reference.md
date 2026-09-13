@@ -69,7 +69,7 @@ type AffordanceHand =
     readonly edge?: "start" | "end";
     readonly operation: "replace" | "extend";
   }
-  | { readonly type: "rename"; readonly action: "begin" | "commit" | "cancel" }
+  | { readonly type: "rename"; readonly action: "begin" | "commit" | "cancel"; readonly initialText?: string; readonly move?: "up" | "down" }
   | { readonly type: "activate" }
   | {
     readonly type: "press";
@@ -240,6 +240,11 @@ caretAffordance(input: { readonly type: "pointer"; readonly dragging?: boolean; 
 
 ```ts
 caretCursor(direction: "horizontal" | "vertical"): "text" | "vertical-text"
+```
+## `cellEditingAffordance`
+
+```ts
+cellEditingAffordance(stroke: WebKeyboardStroke, state: { readonly editing: boolean; readonly allSelected: boolean; }): AffordancePreview
 ```
 ## `clickCountAffordance`
 

@@ -1,4 +1,8 @@
-import { createSheetEditor, jsonCellText, type SheetDocument, type SheetEditor, type SheetIntent, type SheetSelection, type SheetPoint, type EditingResult, type TextEditor } from "@interactive-os/json-document-editing";
+import { createSheetEditor, type SheetDocument, type SheetEditor, type SheetIntent, type SheetSelection, type SheetPoint } from "./sheet.js";
+import { jsonCellText } from "./cell-text.js";
+import { sheetColumnLabel } from "./sheet-structure.js";
+import type { EditingResult } from "./session.js";
+import type { TextEditor } from "./text.js";
 import { readMarkdownTable, replaceMarkdownTable, type MarkdownTable } from "@interactive-os/json-document-markdown";
 
 /** Adapt source table transactions to Sheet, retaining the TextEditor as the only history owner. */
@@ -16,8 +20,8 @@ export function createMarkdownTableEditor(text: TextEditor, position: () => numb
     observed = text.text;
     const table = readMarkdownTable(observed, position());
     const width = table?.align.length || table?.rows[0]?.length || 0;
-    const columns = Array.from({length: width}, (_, i) => ({id: `c${i}`, label: String.fromCharCode(65 + i)}));
-    sheet = createSheetEditor({columns, rows: (table?.rows ?? []).map((row, i) => ({id: `r${i}`, cells: Object.fromEntries(columns.map((column, j) => [column.id, row[j] ?? ""]))}))}, selected ? {selection: selected} : {});
+    const columns = Array.from({length: width}, (_, i) => ({id: `c${i}`, label: sheetColumnLabel(i)}));
+    sheet = createSheetEditor({columns, rows: (table?.rows ?? []).map((row, i) => ({id: `r${i}`, cells: Object.fromEntries(columns.map((column, j) => [column.id, row[j] ?? ""]))}))}, {structure: {headerRows: 1, minimumColumns: 1}, ...(selected ? {selection: selected} : {})});
   };
   const snapshot = () => {read(); return {...sheet.snapshot, revision, canUndo: text.snapshot.canUndo, canRedo: text.snapshot.canRedo};};
   const publish = () => {revision++; const next = snapshot(); listeners.forEach(listener => listener(next));};
@@ -25,7 +29,6 @@ export function createMarkdownTableEditor(text: TextEditor, position: () => numb
     read();
     const table = readMarkdownTable(text.text, position());
     if (!table) return {ok: false, code: "table.unavailable"};
-    if ((intent.type === "row.insert" && intent.index === 0) || (intent.type === "row.delete" && intent.rowId === "r0") || (intent.type === "column.delete" && table.align.length <= 1)) return {ok: false, code: "table.header-required"};
     const result = sheet.dispatch(intent);
     if (!result.ok) return result;
     if (intent.type === "selection.set" || intent.type === "selection.select-all") {publish(); return {ok: true, snapshot: snapshot()};}
@@ -51,6 +54,7 @@ export function createMarkdownTableEditor(text: TextEditor, position: () => numb
     publish(); return {ok: true, snapshot: snapshot()};
   };
   return {
+    get structure() {read(); return sheet.structure;},
     get snapshot() {return snapshot();},
     get selectedCells() {read(); return sheet.selectedCells;},
     selectedCellsIn(topology) {read(); return sheet.selectedCellsIn(topology);},

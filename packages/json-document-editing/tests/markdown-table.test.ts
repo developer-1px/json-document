@@ -1,7 +1,7 @@
 import {expect, test} from "vitest";
 import {createJSONDocument} from "@interactive-os/json-document";
 import {createTextEditor, type SheetDocument} from "@interactive-os/json-document-editing";
-import {createMarkdownTableEditor} from "../src/markdown-table-editor.js";
+import {createMarkdownTableEditor} from "../src/markdown-table.js";
 test("cell and structure edits use whole-document history and never store UI labels", () => {
  const original = "| A | B |\n| --- | --- |\n| x | y |\n\nend";
  const text = createTextEditor(createJSONDocument(original));

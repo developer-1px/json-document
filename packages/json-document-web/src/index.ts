@@ -52,6 +52,8 @@ export {
   rovingFocusItemProps,
 } from "./widget.js";
 export {
+  isWebComposingKey,
+  webKeyboardText,
   chordFromStroke,
   createWebKeyboardAdapter,
   defaultWebKeymap,

@@ -1,5 +1,8 @@
+import sheetStructureSource from "../../../../packages/json-document-editing/src/sheet-structure.ts?raw";
+import cellEditingSource from "../../../../packages/json-document-affordance/src/cell-editing.ts?raw";
+import renameSessionBindingSource from "../../../../packages/json-document-react/src/use-rename-session.ts?raw";
 import sheetHandSource from "../../../../packages/json-document-sheet/src/sheet-hand.tsx?raw";
-import markdownTableEditorSource from "../../../../packages/json-document-markdown-react/src/markdown-table-editor.ts?raw";
+import markdownTableEditorSource from "../../../../packages/json-document-editing/src/markdown-table.ts?raw";
 import markdownTableSource from "../../../../packages/json-document-markdown/src/table-editing.ts?raw";
 import { siteRoutes } from "../../../route-registry.mjs";
 import markdownSourceEditSource from "../../../../packages/json-document-markdown/src/source-edit.ts?raw";
@@ -213,8 +216,11 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-editing/src/sheet-structure.ts", sheetStructureSource],
+  ["packages/json-document-affordance/src/cell-editing.ts", cellEditingSource],
+  ["packages/json-document-react/src/use-rename-session.ts", renameSessionBindingSource],
   ["packages/json-document-sheet/src/sheet-hand.tsx", sheetHandSource],
-  ["packages/json-document-markdown-react/src/markdown-table-editor.ts", markdownTableEditorSource],
+  ["packages/json-document-editing/src/markdown-table.ts", markdownTableEditorSource],
   ["packages/json-document-markdown/src/table-editing.ts", markdownTableSource],
   ["packages/json-document-web/src/interaction-recording.ts", interactionRecordingSource],
   ["packages/json-document-web/src/interaction-recording-dom.ts", interactionRecordingDOMSource],
@@ -401,7 +407,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
-  ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", ["packages/json-document-markdown-react/src/markdown-table-editor.ts"]],
+  ["packages/json-document-editing/src/sheet.ts", ["packages/json-document-editing/src/sheet-structure.ts"]],
+  ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", ["packages/json-document-editing/src/markdown-table.ts"]],
   ["packages/json-document-markdown/src/list-editing.ts", ["packages/json-document-markdown/src/source-edit.ts"]],
   ["packages/json-document-markdown/src/paragraph.ts", ["packages/json-document-markdown/src/list-editing.ts", "packages/json-document-markdown/src/source-edit.ts"]],
   ["routes/markdown-caret/MarkdownCaretRoute.tsx", ["app/interaction-recording/InteractionRecordingControls.tsx"]],
@@ -411,14 +418,40 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
 ]);
 const registeredPublicUsages = [
   {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "sheetColumnLabel",
+    sourcePath: "packages/json-document-editing/src/sheet-structure.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "useRenameSession",
+    sourcePath: "packages/json-document-react/src/use-rename-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "cellEditingAffordance",
+    sourcePath: "packages/json-document-affordance/src/cell-editing.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "isWebComposingKey",
+    sourcePath: "packages/json-document-web/src/keyboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "webKeyboardText",
+    sourcePath: "packages/json-document-web/src/keyboard.ts",
+  },
+
+  {
     packageName: "@interactive-os/json-document-sheet",
     symbol: "SheetHand",
     sourcePath: "packages/json-document-sheet/src/sheet-hand.tsx",
   },
   {
-    packageName: "@interactive-os/json-document-markdown-react",
+    packageName: "@interactive-os/json-document-editing",
     symbol: "createMarkdownTableEditor",
-    sourcePath: "packages/json-document-markdown-react/src/markdown-table-editor.ts",
+    sourcePath: "packages/json-document-editing/src/markdown-table.ts",
   },
   ...["readMarkdownTable", "replaceMarkdownTable", "markdownTableBoundary"].map(symbol => ({packageName: "@interactive-os/json-document-markdown", symbol, sourcePath: "packages/json-document-markdown/src/table-editing.ts"})),
   ...["createWebInteractionRecorder", "traceWebInteraction", "registerWebInteractionSource"].map(symbol => ({ packageName: "@interactive-os/json-document-web/interaction-recording", symbol, sourcePath: "packages/json-document-web/src/interaction-recording.ts" })),

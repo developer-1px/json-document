@@ -17,7 +17,7 @@ SheetHand({ editor, label, headerRow, renderCell, onExit }: SheetHandProps): imp
 interface SheetHandProps {
   readonly editor: SheetEditor;
   readonly label?: string;
-  /** Markdown tables retain a mandatory header row and at least one column. */
+  /** Header row presentation only; structure restrictions belong to editor.structure. */
   readonly headerRow?: boolean;
   readonly onExit?: (edge: "before" | "after") => void;
   readonly renderCell?: (value: string) => ReactNode;

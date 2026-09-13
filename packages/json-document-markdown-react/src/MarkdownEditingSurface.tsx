@@ -3,7 +3,7 @@ import { markdownTableBoundary, readMarkdownTable } from "@interactive-os/json-d
 import { MarkdownRenderer } from "./MarkdownRenderer.js";
 import { createRoot } from "react-dom/client";
 import { SheetHand } from "@interactive-os/json-document-sheet";
-import { createMarkdownTableEditor } from "./markdown-table-editor.js";
+import { createMarkdownTableEditor } from "@interactive-os/json-document-editing";
 import type { TextEditor } from "@interactive-os/json-document-editing";
 import { createMarkdownEditingBinding } from "@interactive-os/json-document-markdown-web";
 

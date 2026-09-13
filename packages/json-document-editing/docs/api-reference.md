@@ -616,6 +616,11 @@ createEditingSession<Selection extends JSONValue>(options: EditingSessionOptions
 ```ts
 createKanbanEditor(source: EditingDocumentSource<KanbanDocument>, options?: EditingHistoryOptions): KanbanEditor
 ```
+## `createMarkdownTableEditor`
+
+```ts
+createMarkdownTableEditor(text: TextEditor, position: () => number): SheetEditor
+```
 ## `createObjectEditor`
 
 ```ts
@@ -1524,6 +1529,11 @@ interface SheetColumn extends Record<string, JSONValue> {
   readonly label: string;
 }
 ```
+## `sheetColumnLabel`
+
+```ts
+sheetColumnLabel(index: number): string
+```
 ## `SheetDocument`
 
 ```ts
@@ -1536,6 +1546,7 @@ interface SheetDocument extends Record<string, JSONValue> {
 
 ```ts
 interface SheetEditor {
+  readonly structure: SheetStructureActions;
   readonly snapshot: EditingSnapshot<SheetSelection>;
   readonly selectedCells: ReadonlyArray<SheetCell>;
   selectedCellsIn(topology: SheetTopology): ReadonlyArray<SheetCell>;
@@ -1551,6 +1562,7 @@ interface SheetEditor {
 
 ```ts
 interface SheetEditorOptions extends EditingHistoryOptions {
+  readonly structure?: SheetStructurePolicy;
   /** Restore selection when projecting a new source snapshot; missing cells are reconciled. */
   readonly selection?: SheetSelection;
 }
@@ -1559,10 +1571,7 @@ interface SheetEditorOptions extends EditingHistoryOptions {
 
 ```ts
 type SheetIntent =
-  | { readonly type: "row.insert"; readonly index: number; readonly row: SheetRow }
-  | { readonly type: "row.delete"; readonly rowId: string }
-  | { readonly type: "column.insert"; readonly index: number; readonly column: SheetColumn }
-  | { readonly type: "column.delete"; readonly columnId: string }
+  | SheetStructureIntent
   | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
@@ -1621,6 +1630,33 @@ interface SheetSelection extends Record<string, JSONValue> {
   readonly focus: SheetPoint | null;
   readonly ranges: ReadonlyArray<SheetRange>;
   readonly primaryIndex: number | null;
+}
+```
+## `SheetStructureActions`
+
+```ts
+interface SheetStructureActions {
+  readonly insertRow: SheetStructureIntent;
+  readonly insertColumn: SheetStructureIntent;
+  readonly deleteRow: SheetStructureIntent | null;
+  readonly deleteColumn: SheetStructureIntent | null;
+}
+```
+## `SheetStructureIntent`
+
+```ts
+type SheetStructureIntent =
+  | { readonly type: "row.insert"; readonly index: number; readonly row?: SheetRow }
+  | { readonly type: "row.delete"; readonly rowId: string }
+  | { readonly type: "column.insert"; readonly index: number; readonly column?: SheetColumn }
+  | { readonly type: "column.delete"; readonly columnId: string };
+```
+## `SheetStructurePolicy`
+
+```ts
+interface SheetStructurePolicy {
+  readonly headerRows?: number;
+  readonly minimumColumns?: number;
 }
 ```
 ## `SheetTopology`

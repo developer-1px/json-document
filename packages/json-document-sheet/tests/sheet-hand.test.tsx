@@ -24,3 +24,19 @@ test("edit commits once, Escape cancels, structural commands undo", () => {
  fireEvent.click(screen.getByRole("button", {name:"실행 취소"}));
  expect((editor.snapshot.value as SheetDocument).columns).toHaveLength(1);
 });
+
+test("a rejected commit retains the draft and does not navigate or close editing", () => {
+ const editor=createSheetEditor({columns:[{id:"a",label:"A"}],rows:[{id:"1",cells:{a:"one"}},{id:"2",cells:{a:"two"}}]});
+ let reject=true;
+ const source={...editor,dispatch: ((intent) => intent.type === "cell.commit" && reject ? {ok:false,code:"cell.rejected"} : editor.dispatch(intent)) as typeof editor.dispatch};
+ render(<SheetHand editor={source}/>);
+ fireEvent.doubleClick(screen.getByText("one"));
+ fireEvent.change(screen.getByRole("textbox"),{target:{value:"retained"}});
+ fireEvent.keyDown(screen.getByRole("textbox"),{key:"Tab"});
+ expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("retained");
+ expect(editor.snapshot.selection.focus?.rowId).toBe("1");
+ expect(screen.getByRole("status").textContent).toBe("cell.rejected");
+ reject=false; fireEvent.keyDown(screen.getByRole("textbox"),{key:"Enter"});
+ expect(screen.queryByRole("textbox")).toBeNull();
+ expect((editor.snapshot.value as SheetDocument).rows[0]!.cells.a).toBe("retained");
+});

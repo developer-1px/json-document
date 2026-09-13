@@ -35,4 +35,6 @@ Markdown Web과 공용 contenteditable 투영을 사용합니다.
 
 ## Sheet 표 편집
 
-`MarkdownEditingSurface`는 최상위 GFM 표에 `SheetHand`를 연결합니다. `createMarkdownTableEditor(editor, position)`는 Sheet Intent를 Markdown table 원문 변경으로 변환하고 문서 전체 Undo/Redo를 재사용합니다. 셀 UI와 입력 상태는 Hand, 문법 처리는 Markdown, 원문과 History는 TextEditor가 소유합니다. [Sheet API](/docs/api/sheet)와 [Bear](/applications/bear)에서 확인할 수 있습니다.
+`MarkdownEditingSurface`는 최상위 GFM 표에 `SheetHand`를 연결합니다. `@interactive-os/json-document-editing`의 `createMarkdownTableEditor(editor, position)`는 Sheet Intent를 Markdown table 원문 변경으로 변환하고 문서 전체 Undo/Redo를 재사용합니다. 셀 UI와 입력 상태는 Hand, 문법 처리는 Markdown, 원문과 History는 TextEditor가 소유합니다. [Sheet API](/docs/api/sheet)와 [Bear](/applications/bear)에서 확인할 수 있습니다.
+
+이 패키지의 기존 `createMarkdownTableEditor` export는 호환용 deprecated 재export입니다. 편집 어댑터 구현과 API 문서는 [Editing owner](/docs/api/editing)에 있습니다.

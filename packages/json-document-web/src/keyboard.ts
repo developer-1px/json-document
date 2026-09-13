@@ -158,3 +158,13 @@ function at(topology: GridTopology, rowIndex: number, columnIndex: number): Grid
   if (rowId === undefined || columnId === undefined) return null;
   return { rowId, columnId };
 }
+
+/** Composition keys belong to the native text lease, including the legacy IME sentinel. */
+export function isWebComposingKey(event: {readonly isComposing?: boolean; readonly keyCode?: number}): boolean {
+  return event.isComposing === true || event.keyCode === 229;
+}
+
+/** Printable key payload; shortcut chords and control keys do not author text. */
+export function webKeyboardText(stroke: WebKeyboardStroke): string | null {
+  return !stroke.metaKey && !stroke.ctrlKey && !stroke.altKey && Array.from(stroke.key).length === 1 && stroke.key >= " " ? stroke.key : null;
+}

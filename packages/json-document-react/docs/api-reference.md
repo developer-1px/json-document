@@ -246,6 +246,14 @@ interface GridEditingKeyboardOptions {
   readonly ignoreCommand?: EditingKeyboardOptions<string>["ignoreCommand"];
 }
 ```
+## `RenameSessionBinding`
+
+```ts
+interface RenameSessionBinding<Key> {
+  readonly snapshot: RenameSessionSnapshot<Key> | null;
+  readonly session: RenameSession<Key>;
+}
+```
 ## `restoreTextCursor`
 
 ```ts
@@ -382,6 +390,21 @@ useJSONDocumentValue(document: JSONDocument): JSONValue
 
 ```ts
 useReactConnector(document: JSONDocument): JSONValue
+```
+## `useRenameSession`
+
+```ts
+useRenameSession<Key>(options: UseRenameSessionOptions<Key>): RenameSessionBinding<Key>
+```
+## `UseRenameSessionOptions`
+
+```ts
+interface UseRenameSessionOptions<Key> {
+  /** Replacing the owner discards the old owner's draft. */
+  readonly owner: object;
+  readonly tryCommit: (key: Key, draft: string) => boolean;
+  readonly onFinish?: (key: Key) => void;
+}
 ```
 ## `useRestoreElementFocus`
 
