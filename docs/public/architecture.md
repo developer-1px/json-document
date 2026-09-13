@@ -2,16 +2,18 @@
 
 문서는 세 관계를 구분합니다. **책임 위치**는 무엇을 소유하는지, **공개 API**는
 저장소가 실제로 제공하는 계약, **Usage와 Application**은 그 계약을 사용하는
-증거입니다. 위의 현재 저장소 지도는 사이트 등록에서 API·Usage·제품 관계를
-읽습니다. 문서 목록을 별도로 복제하지 않습니다.
+증거입니다. 위의 현재 저장소 지도는 `architecture/modules.json`에서 책임·위치·공개 계약을,
+사이트 등록에서 문서 URL·Usage·제품 관계를 읽습니다. 생성 API 본문은 각
+`packages/*/docs/api-reference.md`에 있습니다. 문서 목록을 별도로 복제하지 않습니다.
 
-- Foundation과 Building Blocks의 책임별 개요에서 모듈 API와 Usage를 찾습니다.
+- [모듈](modules.md)의 책임별 개요에서 API와 Usage를 찾습니다.
 - API 문서의 책임과 사용 경로에서 혼합 책임·이행 상태와 소비 제품을 확인합니다.
 - Usage의 Source에서 구현을 확인하고, 제품은 확인된 모듈 조합으로 돌아갑니다.
 - 패키지 공개 여부, Document Type 소유권 확정, Hand Profile 완료는 다른 상태입니다.
 
 목표는 같은 역할과 책임이 하나의 정본 모듈을 갖고, Application이 그 공개 API를
-조합하는 구조입니다. 아래는 읽기 순서와 책임 지도입니다. 모든 package가 차례로
+조합하는 구조입니다. 아래는 책임 지도입니다. 사이트의 읽기 순서는 시작하기·모듈·Hands·Applications·
+설계와 진행 상태이며, 책임 지도를 탐색 목적에 맞춰 투영합니다. 모든 package가 차례로
 의존하는 직렬 계층은 아닙니다.
 
 ```text
@@ -111,7 +113,7 @@ URL과 navigation, 권한·copy·fixture·layout과 concrete runtime 연결을 �
 각 canonical module의 책임입니다. 한 제품에서만 쓰여도 이 경계는 같습니다.
 
 [Calendar와 AI Agent](applications.md)는 현재 제품에서 드러난 조합을 보여 줍니다.
-읽기 순서는 Foundation에서 Application으로 가지만, 책임을 발견하는 작업은
+책임 지도는 기반 계약부터 제품 조합까지 설명하지만, 책임을 발견하는 작업은
 Application에서 시작해 정본 API를 만들고 제품이 다시 소비하는 순환입니다.
 이 과정은 [How We Build](how-we-build.md)에 있습니다.
 
@@ -121,3 +123,15 @@ Rich Text는 새 최상위 계층이 아니라 이 책임 지도를 적용한 �
 문서 의미와 Editing 위에 Web Adapter, React Connector, 장르별 UI를 조합합니다.
 현재 profile·적합성·browser 증거는 다른 Hands가 경계를 판단할 때 참고할 수 있지만
 모든 Document Type과 Hands의 완료를 대신하지는 않습니다.
+
+## 저장소와 문서 사이의 drift 검사
+
+`npm run check:architecture`는 실제 workspace·package exports·source entrypoint·
+패키지 소유 API 문서·사이트 등록을 대조합니다. 제품에 등록된 대표 모듈은 해당
+route source에서 import와 re-export를 따라 도달할 수 있어야 합니다.
+`npm run check:architecture -- --evidence`로 그 경로를 출력합니다.
+
+이 검사는 type import와 barrel re-export를 포함하는 정적 소스 관계입니다.
+실행 시 호출 여부, tree shaking 후 번들, 전체 제품 의존성이나 책임 분류의 의미적
+정당성을 증명하지 않습니다. 소스 표시를 위한 `?raw` import는 소비 증거에서 제외합니다.
+실제 Usage 동작은 브라우저 검사로, 혼합 책임과 Profile 완료는 소유권 감사로 확인합니다.

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { siteRoutes } from "../route-registry.mjs";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { validateSiteRoutes } from "./route-checks.mjs";
@@ -12,7 +12,7 @@ const errors = (routes) => {
 };
 
 test("validates the real site registry and separate section landings", () => {
-  assert.deepEqual(errors(JSON.parse(readFileSync(new URL("../site-routes.json", import.meta.url), "utf8"))), []);
+  assert.deepEqual(errors(siteRoutes), []);
   assert.deepEqual(errors([root, route("/docs/foundation", { sidebar: false }), route("/docs/building-blocks", { sidebar: false })]), []);
 });
 
@@ -32,7 +32,7 @@ test("validates package-owned documentation includes", () => {
 
 test("rejects missing Usage and product-to-module links", () => {
   const module = { sourceDirectory: "packages/example", responsibility: "Example", alsoIn: [], usagePaths: ["/missing"] };
-  const failures = errors([root, route("/docs/api/example", {navigationGroup:"Adapter", documentSource:"docs/api-reference/example.md", module}), route("/applications/example", {modulePaths:["/missing"]})]);
+  const failures = errors([root, route("/docs/api/example", {navigationGroup:"Adapter", documentSource:"packages/example/docs/api-reference.md", module}), route("/applications/example", {modulePaths:["/missing"]})]);
   assert.ok(failures.some(message => message.includes("known Usage")));
   assert.ok(failures.some(message => message.includes("unknown module")));
 });

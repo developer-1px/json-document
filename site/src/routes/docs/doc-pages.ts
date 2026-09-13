@@ -2,7 +2,7 @@ import { documentationMap } from "../../app/documentation-map";
 import { pageDescriptor } from "../../app/page-descriptors";
 
 const documentSources = import.meta.glob<string>(
-  ["../../../../docs/public/*.md", "../../../../docs/api-reference/*.md", "../../../../packages/*/docs/*.md"],
+  ["../../../../docs/public/*.md", "../../../../packages/*/docs/*.md"],
   { query: "?raw", import: "default", eager: true },
 );
 
@@ -19,6 +19,11 @@ function docPage(path: string) {
 }
 
 export const docPages = {
+  quickStart: docPage("/docs/quick-start"),
+  modules: docPage("/docs/modules"),
+  handsSupport: docPage("/docs/hands-support"),
+  design: docPage("/docs/design"),
+  ownership: docPage("/docs/ownership"),
   markdownApi: docPage("/docs/api/markdown"),
   markdownWebApi: docPage("/docs/api/markdown-web"),
   canvasApi: docPage("/docs/api/canvas"),

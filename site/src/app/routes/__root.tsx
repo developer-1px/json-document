@@ -141,7 +141,7 @@ function AppShell() {
                 >
                   {open && landingRoute ? <NavItem item={landingRoute} currentPath={route.path} routes={siteRoutes} depth={0} /> : null}
                   {open
-                    ? section.groups.map((group) => {
+                    ? section.groups.flatMap((group) => {
                       const groupRoutes = sectionRoutes.filter((item) => {
                         if (item.navigationGroup !== group) return false;
                         const parent = item.parentPath
@@ -149,17 +149,9 @@ function AppShell() {
                           : undefined;
                         return parent?.navigationGroup !== group;
                       });
-                      if (groupRoutes.length === 0) return null;
-                      return (
-                        <li key={group} className="grid content-start">
-                          {section.groups.length > 1 ? <span className={classes("px-4 pt-3", ui.text.meta)}>{group}</span> : null}
-                          <ul className={ui.nav.list}>
-                            {groupRoutes.map((item) => (
-                              <NavItem key={item.path} item={item} currentPath={route.path} routes={siteRoutes} depth={0} />
-                            ))}
-                          </ul>
-                        </li>
-                      );
+                      return groupRoutes.map((item) => (
+                        <NavItem key={item.path} item={item} currentPath={route.path} routes={siteRoutes} depth={0} />
+                      ));
                     })
                     : null}
                 </ul>

@@ -1,6 +1,7 @@
 const routePathPattern = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/;
 const navigationGroups = new Set([
   "Introduction",
+  "Design",
   "JSON Document",
   "Document Types",
   "Collaboration",
@@ -53,7 +54,7 @@ export function validateSiteRoutes(routes, fail) {
     if (route.heading !== undefined && (typeof route.heading !== "string" || route.heading.trim() === "")) {
       fail(`site route ${route.path} has an invalid heading.`);
     }
-    if (route.documentSource !== undefined && !/^docs\/(?:public|api-reference)\/[^/]+\.md$/.test(route.documentSource)) {
+    if (route.documentSource !== undefined && !/^(?:docs\/public\/[^/]+|packages\/[^/]+\/docs\/[^/]+)\.md$/.test(route.documentSource)) {
       fail(`site route ${route.path} has an invalid documentation source.`);
     }
     if (route.documentIncludes !== undefined && (!Array.isArray(route.documentIncludes) || route.documentIncludes.some((source) => typeof source !== "string" || !/^packages\/[^/]+\/docs\/[^/]+\.md$/.test(source)))) {

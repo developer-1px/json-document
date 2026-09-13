@@ -1,4 +1,4 @@
-import { pageDescriptors } from "../../app/page-descriptors";
+import { siteRoutes } from "../../../route-registry.mjs";
 import markdownSourceEditSource from "../../../../packages/json-document-markdown/src/source-edit.ts?raw";
 import markdownListEditingSource from "../../../../packages/json-document-markdown/src/list-editing.ts?raw";
 import markdownBindingSource from "../../../../packages/json-document-markdown-web/src/editing-binding.ts?raw";
@@ -191,7 +191,7 @@ export type DemoSourceFile = {
   readonly load: () => Promise<string>;
 };
 
-const packageReferencePaths = new Map(pageDescriptors.flatMap(page => page.module ? [[`${page.module.sourceDirectory}/`, page.path] as const] : []));
+const packageReferencePaths = new Map(siteRoutes.flatMap(page => page.module ? [[`${page.module.sourceDirectory}/`, page.path] as const] : []));
 
 const sourceModules = import.meta.glob<string>(
   [

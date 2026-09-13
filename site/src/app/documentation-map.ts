@@ -40,16 +40,19 @@ export function documentationMap(page: SiteRoute, pages: readonly SiteRoute[] = 
     }).filter(Boolean).join("\n\n")}`).join("\n\n")}\n\n${applicationMap(pages)}`;
   }
   if (page.path === "/applications") return applicationMap(pages);
-  const section = siteSections.find(section => section.path === page.path && ["foundation", "building-blocks"].includes(section.id));
+  const section = siteSections.find(section => section.path === page.path && section.id === "modules");
   const group = Object.entries(groupLandings).find(([, landing]) => landing.path === page.path)?.[0] as SiteNavigationGroup | undefined;
+  if (section?.id === "modules") {
+    return section.groups.map(group => `## ${group}\n\n[설명](${groupLandings[group].path})\n\n${table(modulesAt([group], pages), pages)}`).join("\n\n");
+  }
   const groups = section?.groups ?? (group ? [group] : []);
   const modules = modulesAt(groups, pages);
-  const candidates = page.path === "/docs/document-types" ? documentTypeMap(pages) : "";
-  return modules.length ? `## 현재 제공 모듈\n\n역할별 공개 계약과 실제 Usage입니다. 패키지 내부의 혼합 책임과 이행 상태는 각 API 문서에서 확인합니다.\n\n${table(modules, pages)}\n\n${candidates}` : "";
+  const candidates = ["/docs/document-types", "/docs/ownership"].includes(page.path) ? documentTypeMap(pages) : "";
+  return modules.length ? `## 현재 제공 모듈\n\n역할별 공개 계약과 실제 Usage입니다. 패키지 내부의 혼합 책임과 이행 상태는 각 API 문서에서 확인합니다.\n\n${table(modules, pages)}\n\n${candidates}` : candidates;
 }
 
 function applicationMap(pages: readonly SiteRoute[]): string {
-  return `## 제품에서 모듈로\n\n직접 호출과 그 편집 경로에서 사용하는 정본 모듈을 연결합니다. 아래는 확인한 대표 조합이며 전체 의존성 목록이 아닙니다. 제품의 존재가 모든 Profile의 완료를 뜻하지 않습니다.\n\n| Application | 확인된 모듈 조합 |\n| --- | --- |\n${pages.filter(page => page.modulePaths).map(page => `| ${link(page)} | ${links(page.modulePaths!, pages)} |`).join("\n")}`;
+  return `## 제품에서 모듈로\n\n제품 route의 정적 import 경로에서 확인되는 대표 정본 모듈을 연결합니다. type import와 re-export를 포함하며 실행 시 호출을 보장하지 않습니다. 아래는 확인한 대표 조합이며 전체 의존성 목록이 아닙니다. 제품의 존재가 모든 Profile의 완료를 뜻하지 않습니다.\n\n| Application | 확인된 모듈 조합 |\n| --- | --- |\n${pages.filter(page => page.modulePaths).map(page => `| ${link(page)} | ${links(page.modulePaths!, pages)} |`).join("\n")}`;
 }
 
 function documentTypeMap(pages: readonly SiteRoute[]): string {

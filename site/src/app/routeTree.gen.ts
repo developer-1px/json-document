@@ -76,16 +76,21 @@ import { Route as PageDocsConnectorZodRouteImport } from "./routes/_page/docs/co
 import { Route as PageDocsConnectorZodValidateRouteImport } from "./routes/_page/docs/connector-zod-validate";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
 import { Route as PageDocsDatabaseRouteImport } from "./routes/_page/docs/database";
+import { Route as PageDocsDesignRouteImport } from "./routes/_page/docs/design";
 import { Route as PageDocsEditingRouteImport } from "./routes/_page/docs/editing";
 import { Route as PageDocsFoundationRouteImport } from "./routes/_page/docs/foundation";
+import { Route as PageDocsHandsSupportRouteImport } from "./routes/_page/docs/hands-support";
 import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
 import { Route as PageDocsHowWeBuildRouteImport } from "./routes/_page/docs/how-we-build";
 import { Route as PageDocsIntentRouteImport } from "./routes/_page/docs/intent";
 import { Route as PageDocsIntentGuideRouteImport } from "./routes/_page/docs/intent-guide";
 import { Route as PageDocsMentionRouteImport } from "./routes/_page/docs/mention";
+import { Route as PageDocsModulesRouteImport } from "./routes/_page/docs/modules";
 import { Route as PageDocsObjectRouteImport } from "./routes/_page/docs/object";
 import { Route as PageDocsOfficialHandsRouteImport } from "./routes/_page/docs/official-hands";
 import { Route as PageDocsOrderRouteImport } from "./routes/_page/docs/order";
+import { Route as PageDocsOwnershipRouteImport } from "./routes/_page/docs/ownership";
+import { Route as PageDocsQuickStartRouteImport } from "./routes/_page/docs/quick-start";
 import { Route as PageDocsReactEditingRouteImport } from "./routes/_page/docs/react-editing";
 import { Route as PageDocsSelectionRouteImport } from "./routes/_page/docs/selection";
 import { Route as PageDocsTopologyRouteImport } from "./routes/_page/docs/topology";
@@ -523,6 +528,11 @@ const PageDocsDatabaseRoute = PageDocsDatabaseRouteImport.update({
   path: "/docs/database",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsDesignRoute = PageDocsDesignRouteImport.update({
+  id: "/docs/design",
+  path: "/docs/design",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsEditingRoute = PageDocsEditingRouteImport.update({
   id: "/docs/editing",
   path: "/docs/editing",
@@ -531,6 +541,11 @@ const PageDocsEditingRoute = PageDocsEditingRouteImport.update({
 const PageDocsFoundationRoute = PageDocsFoundationRouteImport.update({
   id: "/docs/foundation",
   path: "/docs/foundation",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsHandsSupportRoute = PageDocsHandsSupportRouteImport.update({
+  id: "/docs/hands-support",
+  path: "/docs/hands-support",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsHistoryRoute = PageDocsHistoryRouteImport.update({
@@ -558,6 +573,11 @@ const PageDocsMentionRoute = PageDocsMentionRouteImport.update({
   path: "/docs/mention",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsModulesRoute = PageDocsModulesRouteImport.update({
+  id: "/docs/modules",
+  path: "/docs/modules",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsObjectRoute = PageDocsObjectRouteImport.update({
   id: "/docs/object",
   path: "/docs/object",
@@ -571,6 +591,16 @@ const PageDocsOfficialHandsRoute = PageDocsOfficialHandsRouteImport.update({
 const PageDocsOrderRoute = PageDocsOrderRouteImport.update({
   id: "/docs/order",
   path: "/docs/order",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsOwnershipRoute = PageDocsOwnershipRouteImport.update({
+  id: "/docs/ownership",
+  path: "/docs/ownership",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsQuickStartRoute = PageDocsQuickStartRouteImport.update({
+  id: "/docs/quick-start",
+  path: "/docs/quick-start",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsReactEditingRoute = PageDocsReactEditingRouteImport.update({
@@ -1123,16 +1153,21 @@ export interface FileRoutesByFullPath {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
+  "/docs/design": typeof PageDocsDesignRoute;
   "/docs/editing": typeof PageDocsEditingRoute;
   "/docs/foundation": typeof PageDocsFoundationRoute;
+  "/docs/hands-support": typeof PageDocsHandsSupportRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
+  "/docs/modules": typeof PageDocsModulesRoute;
   "/docs/object": typeof PageDocsObjectRoute;
   "/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/docs/order": typeof PageDocsOrderRoute;
+  "/docs/ownership": typeof PageDocsOwnershipRoute;
+  "/docs/quick-start": typeof PageDocsQuickStartRoute;
   "/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
   "/docs/topology": typeof PageDocsTopologyRoute;
@@ -1290,16 +1325,21 @@ export interface FileRoutesByTo {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
+  "/docs/design": typeof PageDocsDesignRoute;
   "/docs/editing": typeof PageDocsEditingRoute;
   "/docs/foundation": typeof PageDocsFoundationRoute;
+  "/docs/hands-support": typeof PageDocsHandsSupportRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
+  "/docs/modules": typeof PageDocsModulesRoute;
   "/docs/object": typeof PageDocsObjectRoute;
   "/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/docs/order": typeof PageDocsOrderRoute;
+  "/docs/ownership": typeof PageDocsOwnershipRoute;
+  "/docs/quick-start": typeof PageDocsQuickStartRoute;
   "/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
   "/docs/topology": typeof PageDocsTopologyRoute;
@@ -1459,16 +1499,21 @@ export interface FileRoutesById {
   "/_page/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
   "/_page/docs/database": typeof PageDocsDatabaseRoute;
+  "/_page/docs/design": typeof PageDocsDesignRoute;
   "/_page/docs/editing": typeof PageDocsEditingRoute;
   "/_page/docs/foundation": typeof PageDocsFoundationRoute;
+  "/_page/docs/hands-support": typeof PageDocsHandsSupportRoute;
   "/_page/docs/history": typeof PageDocsHistoryRoute;
   "/_page/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/_page/docs/intent": typeof PageDocsIntentRoute;
   "/_page/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/_page/docs/mention": typeof PageDocsMentionRoute;
+  "/_page/docs/modules": typeof PageDocsModulesRoute;
   "/_page/docs/object": typeof PageDocsObjectRoute;
   "/_page/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/_page/docs/order": typeof PageDocsOrderRoute;
+  "/_page/docs/ownership": typeof PageDocsOwnershipRoute;
+  "/_page/docs/quick-start": typeof PageDocsQuickStartRoute;
   "/_page/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/_page/docs/selection": typeof PageDocsSelectionRoute;
   "/_page/docs/topology": typeof PageDocsTopologyRoute;
@@ -1628,16 +1673,21 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
+    | "/docs/design"
     | "/docs/editing"
     | "/docs/foundation"
+    | "/docs/hands-support"
     | "/docs/history"
     | "/docs/how-we-build"
     | "/docs/intent"
     | "/docs/intent-guide"
     | "/docs/mention"
+    | "/docs/modules"
     | "/docs/object"
     | "/docs/official-hands"
     | "/docs/order"
+    | "/docs/ownership"
+    | "/docs/quick-start"
     | "/docs/react-editing"
     | "/docs/selection"
     | "/docs/topology"
@@ -1795,16 +1845,21 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
+    | "/docs/design"
     | "/docs/editing"
     | "/docs/foundation"
+    | "/docs/hands-support"
     | "/docs/history"
     | "/docs/how-we-build"
     | "/docs/intent"
     | "/docs/intent-guide"
     | "/docs/mention"
+    | "/docs/modules"
     | "/docs/object"
     | "/docs/official-hands"
     | "/docs/order"
+    | "/docs/ownership"
+    | "/docs/quick-start"
     | "/docs/react-editing"
     | "/docs/selection"
     | "/docs/topology"
@@ -1963,16 +2018,21 @@ export interface FileRouteTypes {
     | "/_page/docs/connector-zod-validate"
     | "/_page/docs/connectors"
     | "/_page/docs/database"
+    | "/_page/docs/design"
     | "/_page/docs/editing"
     | "/_page/docs/foundation"
+    | "/_page/docs/hands-support"
     | "/_page/docs/history"
     | "/_page/docs/how-we-build"
     | "/_page/docs/intent"
     | "/_page/docs/intent-guide"
     | "/_page/docs/mention"
+    | "/_page/docs/modules"
     | "/_page/docs/object"
     | "/_page/docs/official-hands"
     | "/_page/docs/order"
+    | "/_page/docs/ownership"
+    | "/_page/docs/quick-start"
     | "/_page/docs/react-editing"
     | "/_page/docs/selection"
     | "/_page/docs/topology"
@@ -2546,6 +2606,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsDatabaseRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/design": {
+      id: "/_page/docs/design";
+      path: "/docs/design";
+      fullPath: "/docs/design";
+      preLoaderRoute: typeof PageDocsDesignRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/editing": {
       id: "/_page/docs/editing";
       path: "/docs/editing";
@@ -2558,6 +2625,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/foundation";
       fullPath: "/docs/foundation";
       preLoaderRoute: typeof PageDocsFoundationRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/hands-support": {
+      id: "/_page/docs/hands-support";
+      path: "/docs/hands-support";
+      fullPath: "/docs/hands-support";
+      preLoaderRoute: typeof PageDocsHandsSupportRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/history": {
@@ -2595,6 +2669,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsMentionRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/modules": {
+      id: "/_page/docs/modules";
+      path: "/docs/modules";
+      fullPath: "/docs/modules";
+      preLoaderRoute: typeof PageDocsModulesRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/object": {
       id: "/_page/docs/object";
       path: "/docs/object";
@@ -2614,6 +2695,20 @@ declare module "@tanstack/react-router" {
       path: "/docs/order";
       fullPath: "/docs/order";
       preLoaderRoute: typeof PageDocsOrderRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/ownership": {
+      id: "/_page/docs/ownership";
+      path: "/docs/ownership";
+      fullPath: "/docs/ownership";
+      preLoaderRoute: typeof PageDocsOwnershipRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/quick-start": {
+      id: "/_page/docs/quick-start";
+      path: "/docs/quick-start";
+      fullPath: "/docs/quick-start";
+      preLoaderRoute: typeof PageDocsQuickStartRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/react-editing": {
@@ -3302,16 +3397,21 @@ interface PageRouteChildren {
   PageDocsConnectorZodValidateRoute: typeof PageDocsConnectorZodValidateRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
   PageDocsDatabaseRoute: typeof PageDocsDatabaseRoute;
+  PageDocsDesignRoute: typeof PageDocsDesignRoute;
   PageDocsEditingRoute: typeof PageDocsEditingRoute;
   PageDocsFoundationRoute: typeof PageDocsFoundationRoute;
+  PageDocsHandsSupportRoute: typeof PageDocsHandsSupportRoute;
   PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
   PageDocsHowWeBuildRoute: typeof PageDocsHowWeBuildRoute;
   PageDocsIntentRoute: typeof PageDocsIntentRoute;
   PageDocsIntentGuideRoute: typeof PageDocsIntentGuideRoute;
   PageDocsMentionRoute: typeof PageDocsMentionRoute;
+  PageDocsModulesRoute: typeof PageDocsModulesRoute;
   PageDocsObjectRoute: typeof PageDocsObjectRoute;
   PageDocsOfficialHandsRoute: typeof PageDocsOfficialHandsRoute;
   PageDocsOrderRoute: typeof PageDocsOrderRoute;
+  PageDocsOwnershipRoute: typeof PageDocsOwnershipRoute;
+  PageDocsQuickStartRoute: typeof PageDocsQuickStartRoute;
   PageDocsReactEditingRoute: typeof PageDocsReactEditingRoute;
   PageDocsSelectionRoute: typeof PageDocsSelectionRoute;
   PageDocsTopologyRoute: typeof PageDocsTopologyRoute;
@@ -3468,16 +3568,21 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsConnectorZodValidateRoute: PageDocsConnectorZodValidateRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
   PageDocsDatabaseRoute: PageDocsDatabaseRoute,
+  PageDocsDesignRoute: PageDocsDesignRoute,
   PageDocsEditingRoute: PageDocsEditingRoute,
   PageDocsFoundationRoute: PageDocsFoundationRoute,
+  PageDocsHandsSupportRoute: PageDocsHandsSupportRoute,
   PageDocsHistoryRoute: PageDocsHistoryRoute,
   PageDocsHowWeBuildRoute: PageDocsHowWeBuildRoute,
   PageDocsIntentRoute: PageDocsIntentRoute,
   PageDocsIntentGuideRoute: PageDocsIntentGuideRoute,
   PageDocsMentionRoute: PageDocsMentionRoute,
+  PageDocsModulesRoute: PageDocsModulesRoute,
   PageDocsObjectRoute: PageDocsObjectRoute,
   PageDocsOfficialHandsRoute: PageDocsOfficialHandsRoute,
   PageDocsOrderRoute: PageDocsOrderRoute,
+  PageDocsOwnershipRoute: PageDocsOwnershipRoute,
+  PageDocsQuickStartRoute: PageDocsQuickStartRoute,
   PageDocsReactEditingRoute: PageDocsReactEditingRoute,
   PageDocsSelectionRoute: PageDocsSelectionRoute,
   PageDocsTopologyRoute: PageDocsTopologyRoute,

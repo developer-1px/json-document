@@ -1,3 +1,4 @@
+import { siteRoutes as routes } from "../route-registry.mjs";
 import { readFileSync } from "node:fs";
 import { validateSiteRoutes } from "./route-checks.mjs";
 import { validateLlmsContract } from "../../docs/public-contract-checks.mjs";
@@ -5,7 +6,6 @@ import { validateLlmsContract } from "../../docs/public-contract-checks.mjs";
 const siteUrl = (process.env.SITE_URL ?? "https://developer-1px.github.io/json-document").replace(/\/$/, "");
 const attempts = Number(process.env.SITE_LIVE_ATTEMPTS ?? "18");
 const delayMs = Number(process.env.SITE_LIVE_DELAY_MS ?? "10000");
-const routes = JSON.parse(readFileSync(new URL("../site-routes.json", import.meta.url), "utf8"));
 validateSiteRoutes(routes, fail);
 const rootRoute = routes.find((route) => route.path === "/");
 if (rootRoute === undefined) fail("live site routes are missing the root route.");
