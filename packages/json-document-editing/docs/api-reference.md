@@ -581,6 +581,11 @@ createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: 
 ```ts
 createCanvasClipboard(content: CanvasClipboardContent, options: CanvasClipboardOptions): ObjectClipboard
 ```
+## `createCanvasSheet`
+
+```ts
+createCanvasSheet(bounds: ObjectBounds, options?: { rows?: number; columns?: number; }): CanvasObjectDraft
+```
 ## `createDatabaseEditor`
 
 ```ts
@@ -631,10 +636,20 @@ createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: Edit
 ```ts
 createObjectPasteSession(editor: ObjectEditor, options?: { readonly placement?: ObjectPastePlacement; readonly onResult?: (result: EditingResult<ObjectSelection>) => void; readonly onPendingChange?: (pending: boolean) => void; }): ObjectPasteSession
 ```
+## `createObjectSheetEditor`
+
+```ts
+createObjectSheetEditor(parent: ObjectEditor, objectId: string): SheetEditor
+```
 ## `createOrderEditor`
 
 ```ts
 createOrderEditor(source: EditingDocumentSource<OrderDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): OrderEditor
+```
+## `createProjectedSheetEditor`
+
+```ts
+createProjectedSheetEditor(options: ProjectedSheetOptions): SheetEditor
 ```
 ## `createSheetEditor`
 
@@ -1317,6 +1332,7 @@ type ObjectIntent =
   | { readonly type: "object.create"; readonly object: ObjectDraft }
   | { readonly type: "object.duplicate"; readonly objectIds: ReadonlyArray<string>; readonly placement?: ObjectPastePlacement }
   | { readonly type: "object.remove"; readonly objectIds: ReadonlyArray<string> }
+  | { readonly type: "object.document"; readonly objectId: string; readonly document: JSONValue }
   | { readonly type: "object.text"; readonly objectId: string; readonly text: string }
   | { readonly type: "document.replace"; readonly document: ObjectDocument }
   | {
@@ -1470,6 +1486,11 @@ interface OrderSelection extends Record<string, JSONValue> {
 ```ts
 parseCalendarView(value: unknown): CalendarView | null
 ```
+## `parseSheetClipboardText`
+
+```ts
+parseSheetClipboardText(text: string): SheetClipboard | null
+```
 ## `planCalendarSelectionMove`
 
 ```ts
@@ -1494,6 +1515,28 @@ previewCalendarTimeGrid(events: ReadonlyArray<CalendarEvent>, release: CalendarT
 
 ```ts
 projectCalendarOccurrences(events: ReadonlyArray<CalendarEvent>, rangeStart: string, rangeEnd: string): ReadonlyArray<CalendarOccurrence>
+```
+## `ProjectedSheetOptions`
+
+```ts
+interface ProjectedSheetOptions {
+  readonly source: ProjectedSheetSource;
+  readonly read: () => SheetDocument | null;
+  readonly write: (value: SheetDocument) => {readonly ok:boolean;readonly code?:string};
+  readonly sheet?: SheetEditorOptions;
+  /** Formats with position-based IDs remap selection after structural edits. */
+  readonly mapSelection?: (selection:SheetSelection,value:SheetDocument) => SheetSelection;
+}
+```
+## `ProjectedSheetSource`
+
+```ts
+interface ProjectedSheetSource {
+  readonly snapshot: {readonly value: JSONValue;readonly canUndo: boolean;readonly canRedo: boolean};
+  subscribe(listener: () => void): () => void;
+  undo(): {readonly ok:boolean;readonly code?:string};
+  redo(): {readonly ok:boolean;readonly code?:string};
+}
 ```
 ## `projectTreeVisibility`
 
@@ -1569,6 +1612,11 @@ interface SheetEditorOptions extends EditingHistoryOptions {
   /** Restore selection when projecting a new source snapshot; missing cells are reconciled. */
   readonly selection?: SheetSelection;
 }
+```
+## `sheetEmbeddedDocumentType`
+
+```ts
+const sheetEmbeddedDocumentType: "sheet/1"
 ```
 ## `SheetIntent`
 

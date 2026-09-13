@@ -158,3 +158,4 @@ export { clampResizeValue, storedResizeValue, resizeValueForKey, collapseResizeV
 export type { ResizeBounds } from "./axis-resize.js";
 export { extendGridFill } from "./grid-fill.js";
 export type { GridFillBounds } from "./grid-fill.js";
+export {gridEditingProfiles, resolveGridEditActivation, type GridEditingProfile} from "./grid-editing-profile.js";

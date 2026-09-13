@@ -237,3 +237,6 @@ export { createMarkdownTableEditor } from "./markdown-table.js";
 export { sheetNavigationTarget } from "./sheet-navigation.js";
 export type { SheetTraversalDirection } from "./sheet-navigation.js";
 export {sheetSelectionSummary} from "./sheet-summary.js";
+export {parseSheetClipboardText} from "./sheet-text-clipboard.js";
+export {createProjectedSheetEditor, type ProjectedSheetOptions, type ProjectedSheetSource} from "./projected-sheet.js";
+export {createCanvasSheet, createObjectSheetEditor, sheetEmbeddedDocumentType} from "./object-sheet.js";

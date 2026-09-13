@@ -5,7 +5,7 @@ import {createMarkdownEditingBinding} from "@interactive-os/json-document-markdo
 import type {SheetCellEditorProps} from "@interactive-os/json-document-sheet";
 
 /** A draft-only Markdown editor. The table's editor owns the persisted source and its history. */
-export function MarkdownCellEditor({label,value,onValueChange,style,onKeyDown,onBlur}: SheetCellEditorProps) {
+export function MarkdownCellEditor({label,value,onValueChange,style,onKeyDown,onBlur,initialSelection}: SheetCellEditorProps) {
   const root = useRef<HTMLDivElement>(null);
   const change = useRef(onValueChange);change.current = onValueChange;
   const [editor] = useState(() => createTextEditor(createJSONDocument(value)));
@@ -16,7 +16,7 @@ export function MarkdownCellEditor({label,value,onValueChange,style,onKeyDown,on
     const unsubscribe = editor.subscribe(() => {if (editor.text !== observed) {observed=editor.text;change.current(observed);}});
     const binding = createMarkdownEditingBinding({editor,root:element,revealSyntax:false});
     const unbind = binding.bind();
-    element.focus();editor.select({anchor:0,focus:editor.text.length});
+    element.focus();editor.select({anchor:initialSelection === "end" ? editor.text.length : 0,focus:editor.text.length});
     return () => {unsubscribe();unbind();};
   }, [editor]);
   useEffect(() => {if (editor.text !== value) editor.replace(value,editor.snapshot.selection);}, [editor,value]);

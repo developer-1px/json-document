@@ -46,10 +46,15 @@ interface CanvasHandProps {
   readonly selectProfile?: PlaneSelectProfile;
 }
 ```
+## `CanvasSheetObject`
+
+```ts
+CanvasSheetObject({ object, editor, active, onDeactivate }: { readonly object: Extract<CanvasObject, { kind: "embedded-document"; }>; readonly editor: ObjectEditor; readonly active: boolean; readonly onDeactivate: () => void; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
 ## `CanvasTool`
 
 ```ts
-type CanvasTool = "select" | Exclude<CanvasObjectKind, "image">;
+type CanvasTool = "select" | "table" | Exclude<CanvasObjectKind, "image" | "embedded-document">;
 ```
 ## `createCanvasClipboardBinding`
 
@@ -59,5 +64,5 @@ createCanvasClipboardBinding(editor: ObjectEditor, policy: CanvasClipboardPolicy
 ## `useCanvasHand`
 
 ```ts
-useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile): { document: CanvasDocument; snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<ObjectSelection>; ... 23 more ...; surfaceProps: { ...; }; }
+useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile, activateEmbedded?: (objectId: string) => void): { document: CanvasDocument; ... 24 more ...; surfaceProps: { ...; }; }
 ```

@@ -35,3 +35,7 @@ const editor = createSheetEditor({columns: [{id: 'a', label: 'A'}], rows: [{id: 
 `renderEditor`는 포맷 소유 편집기를 받을 수 있습니다. Markdown 소비자는 `MarkdownCellEditor`를 연결하므로 편집 전후 서식도 유지합니다. 단순 문자열은 기존 Field를 사용합니다. `renderCell`은 읽기 표현이며, 맞는 포맷의 `renderEditor`와 함께 사용합니다.
 
 독립 Sheet 애플리케이션은 `coordinateHeaders`를 설정해 저장된 필드 label 대신 현재 순서의 A/B/C 헤더를 표시합니다. 열 삽입/삭제 후에도 좌표가 연속됩니다. 기본값은 필드 label을 유지하므로 문서 표와 기존 예제의 의미를 보존합니다. 실제 조합은 `/applications/sheet`에서 확인합니다.
+
+`profile`에는 기본 이름 또는 Affordance의 `GridEditingProfile` 값을 전달할 수 있습니다. `SheetCellEditorProps.initialSelection`을 포맷 편집기가 소비하므로 직접 타이핑의 첫 글자가 전체 선택되어 다음 글자에 덮이지 않습니다. `onDeactivate`는 초안이 없는 Escape에서 호출됩니다. Canvas는 이를 바깥 객체 포커스에 연결하고 Bear는 기존 `onExit` 경계를 유지합니다.
+
+표 클립보드는 Web의 `sheetClipboardRepresentations`로 내부 JSON과 외부 텍스트를 함께 처리합니다. 행열 헤더 선택 후에는 활성 셀로 포커스를 넘겨 키보드 이동을 이어갑니다. 확대·축소된 DOM/SVG에 있을 때 리사이즈는 Web의 layout 좌표 변환을 소비합니다.

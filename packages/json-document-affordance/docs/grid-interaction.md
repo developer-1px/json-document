@@ -13,3 +13,11 @@ const width=storedResizeValue(143.6,{min:40,max:1200});
 ```
 
 [Sheet Usage](/demo/sheet)의 채우기 핸들과 행열 리사이즈에서 확인할 수 있습니다. 드래그 미리보기는 문서를 변경하지 않고 확정 시 Editing Intent 하나를 실행합니다. 기존 Sheet의 수식 및 수열 채우기는 해당 Sheet 엔진에 유지되며, JSON/Markdown Hand의 `range.fill`은 원본 값 패턴을 반복 복제합니다.
+
+## 표 입력 프로파일
+
+`GridEditingProfile`과 `gridEditingProfiles`는 배치 환경과 독립인 입력 정책입니다. `document-table`은 Enter로 편집하고 `spreadsheet-grid`는 Enter로 이동합니다. `editSelection`은 F2/더블클릭으로 기존 내용을 편집할 때 전체 선택할지 끝에 둘지 정합니다. 직접 타이핑은 기존 값을 대체하며 첫 글자 뒤에서 이어 씁니다. `createRenameSession.begin`의 `initialSelection`이 이 결정을 초안과 함께 전달합니다.
+
+Canvas·Bear는 별도 입력 프로파일 이름이 아닙니다. 문서 형식의 크기 저장 가능 여부는 Editing capability, 외부로 나가는 포커스는 Hand의 `onExit`/`onDeactivate`, 화면 좌표 변환은 Web이 각각 소유합니다. `cellEditingAffordance`는 초안이 없는 Escape를 `cancel`로 내보내므로 배치 환경이 외부 편집기로 복귀시킬 수 있습니다.
+
+`resolveGridEditActivation(profile, existingText, replacementText?)`가 초안과 초기 선택을 함께 계산합니다. Hand는 이를 RenameSession에 전달할 뿐 첫 입력/F2의 정책을 다시 판단하지 않습니다.

@@ -293,7 +293,8 @@
         "/demo/history",
         "/demo/clipboard",
         "/demo/markdown-caret",
-        "/applications/sheet"
+        "/applications/sheet",
+        "/demo/canvas"
       ]
     },
     "parentPath": "/docs/editing"
@@ -419,7 +420,8 @@
       "packages/json-document-web/docs/text-clipboard.md",
       "packages/json-document-web/docs/interaction-recording.md",
       "packages/json-document-web/docs/text-keys.md",
-      "packages/json-document-web/docs/stored-document.md"
+      "packages/json-document-web/docs/stored-document.md",
+      "packages/json-document-web/docs/grid-embedding.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-web",
@@ -427,7 +429,8 @@
         "/adapters/keyboard",
         "/adapters/clipboard",
         "/demo/viewport",
-        "/applications/sheet"
+        "/applications/sheet",
+        "/demo/canvas"
       ]
     },
     "parentPath": "/docs/adapters"
@@ -592,7 +595,8 @@
       "packageName": "@interactive-os/json-document-affordance",
       "usagePaths": [
         "/affordances/handles",
-        "/demo/viewport"
+        "/demo/viewport",
+        "/demo/canvas"
       ]
     },
     "parentPath": "/docs/affordance"
@@ -760,7 +764,8 @@
     "description": "Canvas 입력·preview·UI 조합의 API와 Usage입니다.",
     "language": "ko",
     "documentIncludes": [
-      "packages/json-document-canvas/docs/api.md"
+      "packages/json-document-canvas/docs/api.md",
+      "packages/json-document-canvas/docs/embedded-sheet.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-canvas",
@@ -2029,7 +2034,8 @@
       "packageName": "@interactive-os/json-document-sheet",
       "usagePaths": [
         "/demo/sheet",
-        "/applications/sheet"
+        "/applications/sheet",
+        "/demo/canvas"
       ]
     },
     "documentIncludes": [

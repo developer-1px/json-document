@@ -234,6 +234,11 @@ parseWebHTMLFragment(html: string): WebHTMLFragment | null
 ```ts
 pressInteractionFromWeb(input: WebPressInput): WebPressInteraction | null
 ```
+## `projectWebClientDeltaToElement`
+
+```ts
+projectWebClientDeltaToElement(element: { readonly offsetWidth: number; readonly offsetHeight: number; getBoundingClientRect(): { readonly width: number; readonly height: number; }; }, delta: { readonly dx: number; readonly dy: number; }): { dx: number; dy: number; }
+```
 ## `projectWebClientPointToSVG`
 
 ```ts
@@ -288,6 +293,11 @@ selectionOperationFromModifiers(modifiers: WebModifierState): Extract<SelectionO
 
 ```ts
 const sheetClipboardCodec: WebClipboardCodec<SheetClipboard>
+```
+## `sheetClipboardRepresentations`
+
+```ts
+const sheetClipboardRepresentations: readonly WebClipboardRepresentation<SheetClipboard>[]
 ```
 ## `textClipboardCodec`
 

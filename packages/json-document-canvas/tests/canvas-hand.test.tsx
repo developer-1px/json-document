@@ -331,7 +331,7 @@ test("external selection changes supersede a pending preview without a stale sel
 test("every toolbar control shares icon, accessible name and canonical tooltip without losing state", () => {
   const { svg } = setup();
   const toolbar = within(screen.getByRole("toolbar", { name: "Canvas tools" }));
-  const labels = ["선택", "글자", "스티커 노트", "사각형", "타원", "그리기", "실행 취소", "다시 실행", "복제", "삭제", "JSON"];
+  const labels = ["선택", "글자", "스티커 노트", "표", "사각형", "타원", "그리기", "실행 취소", "다시 실행", "복제", "삭제", "JSON"];
   expect(toolbar.getAllByRole("button")).toHaveLength(labels.length);
   for (const label of labels) {
     const button = toolbar.getByRole("button", { name: label });

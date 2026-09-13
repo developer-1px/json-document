@@ -49,7 +49,7 @@ export function projectObjectText(object: DocumentObject): ObjectTextProjection 
 }
 
 export function createCanvasObject(
-  kind: Exclude<CanvasObjectKind, "path" | "image">,
+  kind: Exclude<CanvasObjectKind, "path" | "image" | "embedded-document">,
   bounds: ObjectBounds,
   style: { readonly color: string; readonly label: string; readonly fontSize?: number; readonly textColor?: string },
 ): CanvasObjectDraft {

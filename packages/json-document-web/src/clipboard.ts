@@ -1,3 +1,4 @@
+import {parseSheetClipboardText, type SheetClipboard} from "@interactive-os/json-document-editing";
 import { routeWebClipboardEvent } from "./clipboard-event.js";
 import {
   databaseClipboardFormat,
@@ -177,6 +178,12 @@ export function createWebClipboardTextWriter(options?: {
 export const documentClipboardCodec = createWebJSONClipboardRepresentation(documentClipboardFormat);
 
 export const sheetClipboardCodec = createWebJSONClipboardRepresentation(sheetClipboardFormat);
+
+/** Prefer the lossless native payload and accept external spreadsheet/plain text as fallback. */
+export const sheetClipboardRepresentations: ReadonlyArray<WebClipboardRepresentation<SheetClipboard>> = [
+  sheetClipboardCodec,
+  {mimeType:"text/plain",encode:payload=>payload.text,decode:parseSheetClipboardText},
+];
 
 export const orderClipboardCodec = createWebJSONClipboardRepresentation(orderClipboardFormat);
 

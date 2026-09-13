@@ -14,7 +14,7 @@ createMarkdownTableEditor(text: TextEditor, position: () => number): SheetEditor
 ## `MarkdownCellEditor`
 
 ```ts
-MarkdownCellEditor({ label, value, onValueChange, style, onKeyDown, onBlur }: SheetCellEditorProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+MarkdownCellEditor({ label, value, onValueChange, style, onKeyDown, onBlur, initialSelection }: SheetCellEditorProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
 ## `MarkdownComponents`
 
