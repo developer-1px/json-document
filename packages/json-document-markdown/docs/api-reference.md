@@ -109,6 +109,21 @@ interface MarkdownStrongSpan {
   readonly contentTo: number;
 }
 ```
+## `MarkdownTable`
+
+```ts
+interface MarkdownTable {
+  readonly from: number;
+  readonly to: number;
+  readonly rows: ReadonlyArray<ReadonlyArray<string>>;
+  readonly align: ReadonlyArray<"left" | "right" | "center" | null>;
+}
+```
+## `markdownTableBoundary`
+
+```ts
+markdownTableBoundary(source: string, table: MarkdownTable, edge: "before" | "after"): number
+```
 ## `MarkdownUpdate`
 
 ```ts
@@ -121,6 +136,16 @@ interface MarkdownUpdate {
 
 ```ts
 projectMarkdown(source: string): MarkdownProjection
+```
+## `readMarkdownTable`
+
+```ts
+readMarkdownTable(source: string, at: number): MarkdownTable | null
+```
+## `replaceMarkdownTable`
+
+```ts
+replaceMarkdownTable(source: string, table: MarkdownTable, rows: ReadonlyArray<ReadonlyArray<string>>, align?: readonly ("left" | "right" | "center")[]): string
 ```
 ## `setMarkdownTaskChecked`
 

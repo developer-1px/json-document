@@ -6,6 +6,11 @@ Markdown 렌더링·편집 표면과 React 수명 연결의 public entrypoint입
 
 > 이 문서는 `packages/json-document-markdown-react/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `createMarkdownTableEditor`
+
+```ts
+createMarkdownTableEditor(text: TextEditor, position: () => number): SheetEditor
+```
 ## `MarkdownComponents`
 
 ```ts

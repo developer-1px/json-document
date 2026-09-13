@@ -5,22 +5,25 @@
     "outDir": "dist",
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
-  ],
   "references": [
+    {
+      "path": "../json-document-affordance"
+    },
     {
       "path": "../json-document-editing"
     },
     {
-      "path": "../json-document-markdown-web"
+      "path": "../json-document-react"
     },
     {
-      "path": "../json-document-sheet"
+      "path": "../json-document-ui-primitives-react"
     },
     {
-      "path": "../json-document-markdown"
+      "path": "../json-document-web"
     }
+  ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ]
 }

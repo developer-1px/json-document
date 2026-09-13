@@ -1,0 +1,26 @@
+import { afterEach, expect, test } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createSheetEditor, type SheetDocument } from "@interactive-os/json-document-editing";
+import { SheetHand } from "../src/index.js";
+afterEach(cleanup);
+test("edit commits once, Escape cancels, structural commands undo", () => {
+ const editor = createSheetEditor({columns:[{id:"a",label:"A"}],rows:[{id:"1",cells:{a:"one"}},{id:"2",cells:{a:"two"}}]});
+ render(<SheetHand editor={editor}/>);
+ fireEvent.doubleClick(screen.getByText("one"));
+ fireEvent.change(screen.getByRole("textbox"), {target:{value:"changed"}});
+ expect((editor.snapshot.value as SheetDocument).rows[0]!.cells.a).toBe("one");
+ fireEvent.keyDown(screen.getByRole("textbox"), {key:"Escape"});
+ expect(screen.queryByRole("textbox")).toBeNull();
+ fireEvent.doubleClick(screen.getByText("one"));
+ fireEvent.change(screen.getByRole("textbox"), {target:{value:"changed"}});
+ fireEvent.keyDown(screen.getByRole("textbox"), {key:"Enter", isComposing:true, keyCode:229});
+ expect(screen.queryByRole("textbox")).not.toBeNull();
+ fireEvent.keyDown(screen.getByRole("textbox"), {key:"Enter"});
+ expect((editor.snapshot.value as SheetDocument).rows[0]!.cells.a).toBe("changed");
+ fireEvent.click(screen.getByRole("button", {name:"실행 취소"}));
+ expect((editor.snapshot.value as SheetDocument).rows[0]!.cells.a).toBe("one");
+ fireEvent.click(screen.getByRole("button", {name:"열 추가"}));
+ expect((editor.snapshot.value as SheetDocument).columns).toHaveLength(2);
+ fireEvent.click(screen.getByRole("button", {name:"실행 취소"}));
+ expect((editor.snapshot.value as SheetDocument).columns).toHaveLength(1);
+});

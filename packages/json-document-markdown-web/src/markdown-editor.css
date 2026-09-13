@@ -137,3 +137,6 @@
   width: 100%;
   border-top: 1px solid var(--markdown-border, #d8d1c5);
 }
+
+[data-markdown-kind="table"][data-markdown-sheet] { display: inline-block; width: 100%; white-space: normal; font-family: inherit; }
+[data-markdown-sheet] [data-text-decoration] { display: block; }

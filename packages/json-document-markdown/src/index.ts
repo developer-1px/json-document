@@ -6,3 +6,4 @@ export { setMarkdownTaskChecked } from "./tasks.js";
 export { insertMarkdownParagraph } from "./paragraph.js";
 export { indentMarkdownList } from "./list-editing.js";
 export type { MarkdownSourceEdit } from "./source-edit.js";
+export { markdownTableBoundary, readMarkdownTable, replaceMarkdownTable, type MarkdownTable } from "./table-editing.js";

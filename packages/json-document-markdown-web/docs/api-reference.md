@@ -14,7 +14,7 @@ createMarkdownDOMAdapter(options?: MarkdownDOMOptions): TextDOMAdapter
 ## `createMarkdownEditingBinding`
 
 ```ts
-createMarkdownEditingBinding({ editor, root }: MarkdownEditingBindingOptions): ContentEditableBinding
+createMarkdownEditingBinding({ editor, root, mountTable }: MarkdownEditingBindingOptions): ContentEditableBinding
 ```
 ## `MarkdownDOMOptions`
 
@@ -22,6 +22,8 @@ createMarkdownEditingBinding({ editor, root }: MarkdownEditingBindingOptions): C
 interface MarkdownDOMOptions {
   /** Enables task controls using the existing source editor and its history. */
   readonly editor?: TextEditor;
+  /** Mount a table Hand in a source-excluded island. Return its disposal callback. */
+  readonly mountTable?: (element: HTMLElement, position: () => number) => () => void;
 }
 ```
 ## `MarkdownEditingBindingOptions`
@@ -30,5 +32,6 @@ interface MarkdownDOMOptions {
 interface MarkdownEditingBindingOptions {
   readonly editor: TextEditor;
   readonly root: HTMLElement;
+  readonly mountTable?: MarkdownDOMOptions["mountTable"];
 }
 ```

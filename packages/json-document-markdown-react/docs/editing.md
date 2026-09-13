@@ -32,3 +32,7 @@ todo 전체를 한 번에 지우며, Undo 한 번으로 복원합니다. 기호 
 Markdown Web과 공용 contenteditable 투영을 사용합니다.
 
 인용문 Enter 연결은 Markdown Web binding이 소유하며 Markdown의 `insertMarkdownParagraph`를 공용 contenteditable `insertBreak`에 연결합니다. 내용이 있으면 인용을 이어 쓰고, 빈 인용 줄에서는 일반 문단으로 나갑니다. 결과는 기존 editor에 한 번 적용하므로 Undo/Redo와 원문 선택을 유지합니다.
+
+## Sheet 표 편집
+
+`MarkdownEditingSurface`는 최상위 GFM 표에 `SheetHand`를 연결합니다. `createMarkdownTableEditor(editor, position)`는 Sheet Intent를 Markdown table 원문 변경으로 변환하고 문서 전체 Undo/Redo를 재사용합니다. 셀 UI와 입력 상태는 Hand, 문법 처리는 Markdown, 원문과 History는 TextEditor가 소유합니다. [Sheet API](/docs/api/sheet)와 [Bear](/applications/bear)에서 확인할 수 있습니다.

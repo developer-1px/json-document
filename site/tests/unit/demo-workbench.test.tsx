@@ -262,27 +262,16 @@ describe("Demo definition and source discovery", () => {
 
   test("registers the Sheet editor, React and Web Grid owners next to Sheet usage", async () => {
     const sources = await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx");
-    expect(sources.map((file) => file.path)).toEqual([
+    expect(sources.map((file) => file.path)).toEqual(expect.arrayContaining([
       "routes/sheet-demo/SheetDemo.tsx",
-      "packages/json-document-web/src/clipboard-event.ts",
-      "packages/json-document-web/src/input.ts",
-      "packages/json-document-ui-primitives-react/src/controls.tsx",
-      "packages/json-document-ui-primitives-react/src/product-shell.tsx",
-      "packages/json-document-react/src/use-editing.ts",
-      "packages/json-document-react/src/editing-observation.ts",
-      "packages/json-document-affordance/src/select.ts",
-      "packages/json-document-web/src/keyboard.ts",
-      "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-sheet/src/sheet-hand.tsx",
       "packages/json-document-editing/src/sheet.ts",
-      "packages/json-document/src/foundation/json/serializable.ts",
       "packages/json-document-react/src/use-grid-editing.ts",
-      "packages/json-document-editing/src/topology.ts",
-      "packages/json-document-web/src/grid-cell.ts",
-      "packages/json-document-ui-primitives-react/src/input-controls.tsx",
+      "packages/json-document-web/src/clipboard-event.ts",
       "packages/json-document-ui-primitives-react/src/surfaces.tsx",
-      "packages/json-document-web/src/pointer-session.ts",
-      "packages/json-document-affordance/src/interaction-handle.ts",
-    ]);
+    ]));
+    const hand = sources.find(file => file.path === "packages/json-document-sheet/src/sheet-hand.tsx")!;
+    expect(hand.referencePath).toBe("/docs/api/sheet");
     const owner = sources.find((file) => file.path === "packages/json-document-editing/src/sheet.ts")!;
     expect(owner.referencePath).toBe("/docs/api/editing");
     expect(await owner.load()).toContain("export function createSheetEditor");

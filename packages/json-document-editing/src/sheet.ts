@@ -84,6 +84,10 @@ export const sheetClipboardFormat = {
 };
 
 export type SheetIntent =
+  | { readonly type: "row.insert"; readonly index: number; readonly row: SheetRow }
+  | { readonly type: "row.delete"; readonly rowId: string }
+  | { readonly type: "column.insert"; readonly index: number; readonly column: SheetColumn }
+  | { readonly type: "column.delete"; readonly columnId: string }
   | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
@@ -120,15 +124,20 @@ export interface SheetEditor {
   subscribe(listener: (snapshot: EditingSnapshot<SheetSelection>) => void): () => void;
 }
 
-export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, options: EditingHistoryOptions = {}): SheetEditor {
+export interface SheetEditorOptions extends EditingHistoryOptions {
+  /** Restore selection when projecting a new source snapshot; missing cells are reconciled. */
+  readonly selection?: SheetSelection;
+}
+
+export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, options: SheetEditorOptions = {}): SheetEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as SheetDocument;
   assertSheetDocument(initial);
   const firstRow = initial.rows[0];
   const firstColumn = initial.columns[0];
-  const initialSelection = firstRow && firstColumn
-    ? collapsed(firstRow.id, firstColumn.id)
-    : emptySelection();
+  const initialSelection = options.selection
+    ? withPrimaryAliases(reconcileRangeSelection(options.selection, point => initial.rows.some(row => row.id === point.rowId) && initial.columns.some(column => column.id === point.columnId) ? point : null))
+    : firstRow && firstColumn ? collapsed(firstRow.id, firstColumn.id) : emptySelection();
   const session = createEditingSession({
     ...options,
     document,
@@ -198,6 +207,33 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
   }
 
   function dispatch(intent: SheetIntent): EditingResult<SheetSelection> {
+    if (intent.type === "row.insert" || intent.type === "row.delete" || intent.type === "column.insert" || intent.type === "column.delete") {
+      const current = value();
+      let rows = [...current.rows], columns = [...current.columns];
+      if (intent.type === "row.insert") {
+        if (!Number.isInteger(intent.index) || intent.index < 0 || intent.index > rows.length || rows.some(row => row.id === intent.row.id) || !intent.row.id) return failure("row.invalid-insert");
+        if (columns.some(column => !Object.hasOwn(intent.row.cells, column.id))) return failure("row.missing-cell");
+        rows.splice(intent.index, 0, intent.row);
+      } else if (intent.type === "column.insert") {
+        if (!Number.isInteger(intent.index) || intent.index < 0 || intent.index > columns.length || columns.some(column => column.id === intent.column.id) || !intent.column.id) return failure("column.invalid-insert");
+        columns.splice(intent.index, 0, intent.column);
+        rows = rows.map(row => ({...row, cells: {...row.cells, [intent.column.id]: ""}}));
+      } else if (intent.type === "row.delete") {
+        if (!rows.some(row => row.id === intent.rowId)) return failure("row.not-found");
+        rows = rows.filter(row => row.id !== intent.rowId);
+      } else {
+        if (!columns.some(column => column.id === intent.columnId)) return failure("column.not-found");
+        columns = columns.filter(column => column.id !== intent.columnId);
+        rows = rows.map(row => { const cells = {...row.cells}; delete cells[intent.columnId]; return {...row, cells}; });
+      }
+      const focus = session.snapshot.selection.focus;
+      const oldRow = current.rows.findIndex(row => row.id === focus?.rowId);
+      const oldColumn = current.columns.findIndex(column => column.id === focus?.columnId);
+      const row = rows.find(row => row.id === focus?.rowId) ?? rows[Math.min(Math.max(oldRow, 0), rows.length - 1)];
+      const column = columns.find(column => column.id === focus?.columnId) ?? columns[Math.min(Math.max(oldColumn, 0), columns.length - 1)];
+      return session.apply({operations: [{op: "replace", path: "/rows", value: rows}, {op: "replace", path: "/columns", value: columns}],
+        selectionAfter: row && column ? collapsed(row.id, column.id) : emptySelection(), origin: intent.type});
+    }
     if (intent.type === "selection.select-all") {
       const { rowIds, columnIds } = resolveTopology(value(), intent.topology, index());
       const firstRow = rowIds[0];

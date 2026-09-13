@@ -1,0 +1,25 @@
+# @interactive-os/json-document-sheet API
+
+**탐색 분류:** Hands
+
+Sheet와 Markdown 표의 셀 선택·편집·구조 조작 UI 조합의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 저장소의 아키텍처 등록에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
+
+> 이 문서는 `packages/json-document-sheet/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
+
+## `SheetHand`
+
+```ts
+SheetHand({ editor, label, headerRow, renderCell, onExit }: SheetHandProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `SheetHandProps`
+
+```ts
+interface SheetHandProps {
+  readonly editor: SheetEditor;
+  readonly label?: string;
+  /** Markdown tables retain a mandatory header row and at least one column. */
+  readonly headerRow?: boolean;
+  readonly onExit?: (edge: "before" | "after") => void;
+  readonly renderCell?: (value: string) => ReactNode;
+}
+```

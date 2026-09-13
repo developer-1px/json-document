@@ -1988,5 +1988,21 @@
     "language": "ko",
     "navigationGroup": "Editing",
     "documentSource": "docs/public/editing.md"
+  },
+  {
+    "path": "/docs/api/sheet",
+    "label": "API · Sheet",
+    "title": "Sheet API - json-document",
+    "description": "SheetHand의 표 편집 UI와 public API입니다.",
+    "language": "ko",
+    "module": {
+      "packageName": "@interactive-os/json-document-sheet",
+      "usagePaths": [
+        "/demo/sheet"
+      ]
+    },
+    "documentIncludes": [
+      "packages/json-document-sheet/docs/editing.md"
+    ]
   }
 ]

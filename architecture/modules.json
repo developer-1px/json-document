@@ -410,5 +410,16 @@
     "entrypoint": "packages/contenteditable-collaboration/src/index.ts",
     "subpaths": [],
     "referencePath": "packages/contenteditable-collaboration/docs/api-reference.md"
+  },
+  {
+    "packageName": "@interactive-os/json-document-sheet",
+    "sourceDirectory": "packages/json-document-sheet",
+    "positions": [
+      "Hands"
+    ],
+    "responsibility": "Sheet와 Markdown 표의 셀 선택·편집·구조 조작 UI 조합",
+    "entrypoint": "packages/json-document-sheet/src/index.ts",
+    "subpaths": [],
+    "referencePath": "packages/json-document-sheet/docs/api-reference.md"
   }
 ]

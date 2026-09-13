@@ -158,6 +158,7 @@ export type {
   SheetColumn,
   SheetDocument,
   SheetEditor,
+  SheetEditorOptions,
   SheetIntent,
   SheetPoint,
   SheetRange,

@@ -1,0 +1,21 @@
+# Sheet Hand
+
+`@interactive-os/json-document-sheet`는 Hands 위치에서 셀 선택·편집 모드·키보드 이동·클립보드와 행/열 조작을 조합합니다. 문서, selection, History는 `SheetEditor`가 소유합니다.
+
+```tsx
+import { createSheetEditor } from '@interactive-os/json-document-editing';
+import { SheetHand } from '@interactive-os/json-document-sheet';
+const editor = createSheetEditor({columns: [{id: 'a', label: 'A'}], rows: [{id: '1', cells: {a: 'Hello'}}]});
+<SheetHand editor={editor} />;
+```
+
+[Sheet Usage](/demo/sheet)와 [Bear](/applications/bear)는 같은 Hand를 소비합니다. Bear의 Markdown React adapter는 각 변경을 원문 교체로 번역하고 TextEditor의 Undo/Redo를 사용합니다.
+
+- 클릭: 셀 선택. Shift+클릭/방향키: 범위 확장. Mod+클릭: 불연속 범위.
+- 방향키: 셀 이동. Tab/Shift+Tab: 다음/이전 셀. 표 경계에서는 기본 Tab 흐름.
+- Enter/F2/더블클릭: 편집. 입력 중 방향키는 문자열 안에서 이동.
+- 편집 중 Enter: 확정 후 아래 셀. Escape: 취소. Tab: 확정 후 다음 셀.
+- 복사/잘라내기/붙여넣기: Sheet의 정본 TSV 및 structured clipboard 계약.
+- 행/열 추가·삭제: 단일 History transaction. `headerRow`에서는 첫 행과 마지막 열 삭제를 막습니다.
+
+현재 Markdown 연결은 최상위 GFM 표에 적용됩니다. 셀의 inline Markdown을 원문으로 편집하며, 줄바꿈은 공백으로, 구분자 pipe는 escape하여 표 구조를 유지합니다. 수식 계산이나 파일 가져오기는 이 Hand의 기능이 아닙니다.

@@ -634,7 +634,7 @@ createOrderEditor(source: EditingDocumentSource<OrderDocument>, options?: Editin
 ## `createSheetEditor`
 
 ```ts
-createSheetEditor(source: EditingDocumentSource<SheetDocument>, options?: EditingHistoryOptions): SheetEditor
+createSheetEditor(source: EditingDocumentSource<SheetDocument>, options?: SheetEditorOptions): SheetEditor
 ```
 ## `createTextEditor`
 
@@ -1547,10 +1547,22 @@ interface SheetEditor {
   subscribe(listener: (snapshot: EditingSnapshot<SheetSelection>) => void): () => void;
 }
 ```
+## `SheetEditorOptions`
+
+```ts
+interface SheetEditorOptions extends EditingHistoryOptions {
+  /** Restore selection when projecting a new source snapshot; missing cells are reconciled. */
+  readonly selection?: SheetSelection;
+}
+```
 ## `SheetIntent`
 
 ```ts
 type SheetIntent =
+  | { readonly type: "row.insert"; readonly index: number; readonly row: SheetRow }
+  | { readonly type: "row.delete"; readonly rowId: string }
+  | { readonly type: "column.insert"; readonly index: number; readonly column: SheetColumn }
+  | { readonly type: "column.delete"; readonly columnId: string }
   | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";

@@ -14,6 +14,7 @@ Hands는 장르의 문서·편집·입력·UI를 조합한 편집 경험입니�
 ## 현재 근거
 
 - [Calendar](../../packages/json-document-calendar/docs/api-reference.md): 공개 Hand 계약과 [Calendar 예제](hands.md#calendar-editor)를 확인할 수 있습니다.
+- [Sheet](../../packages/json-document-sheet/docs/api-reference.md): [표 편집 예제](/demo/sheet)와 [Bear](/applications/bear)가 셀 이동·편집·행/열 조작 UI를 공유합니다.
 - [Annotation](../../packages/json-document-annotation/docs/api-reference.md): 공개 Hand 계약과 [Annotation 예제](hands.md#annotation-editor)를 확인할 수 있습니다.
 - [Rich Text](/editing/rich-text): 문서·편집·Web·React를 연결한 대표 편집 조합입니다.
 - 다른 장르는 [Hands](hands.md)의 예제와 모듈 API에서 각각 지원 범위를 확인합니다.
