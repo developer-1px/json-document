@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 
-test("Concept Map reaches target boundaries and the remaining TBD through real body links", async ({ page }) => {
-  await page.goto("/docs/concepts");
+test("Architecture reaches target boundaries and the remaining TBD through real body links", async ({ page }) => {
+  await page.goto("/docs/architecture");
   await page.locator("[data-doc-content] article").getByRole("link", { name: "Document Types", exact: true }).click();
   await expect(page).toHaveURL(/\/docs\/document-types$/);
-  await page.getByRole("navigation", { name: "On this page" }).getByRole("link", { name: "후보 · TBD", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "후보 · TBD", level: 2 })).toBeInViewport();
-  await page.locator("[data-doc-content] article").getByRole("link", { name: "Calendar · TBD", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Calendar Document Type · TBD" })).toBeVisible();
+  await page.getByRole("navigation", { name: "On this page" }).getByRole("link", { name: "현재 후보별 상태", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "현재 후보별 상태", level: 2 })).toBeInViewport();
+  await page.locator("[data-doc-content] article").getByRole("link", { name: "Tree", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Tree Document Type · TBD" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "목표 경계 · TBD" })).toBeVisible();
 });
 

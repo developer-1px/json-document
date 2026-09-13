@@ -216,6 +216,6 @@ Host는 제품 정책 값·copy·fixture·layout, 정본 모듈의 조합·실�
 Official Hands Profile의 전체 완료는 아직 TBD이며 Core v3의 Stable 계약을
 확장하지 않습니다.
 
-- [Concept Map](../../docs/public/concepts.md)
+- [Architecture](../../docs/public/architecture.md)
 - [Building Blocks](../../docs/public/building-blocks.md)
 - [Document Types · TBD](../../docs/public/document-types.md)

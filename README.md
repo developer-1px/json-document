@@ -28,8 +28,10 @@ stateless JSON Patch
 
 | 목적 | 위치 |
 | --- | --- |
-| 빠른 사용 예제 | [Intent guide](docs/public/intent-guide.md) |
-| 목표 구조와 TBD | [Concept Map](docs/public/concepts.md), [Foundation](docs/public/foundation.md) |
+| 빠른 시작 | [설치·변경·구독](docs/public/quick-start.md) |
+| 모듈 찾기 | [책임별 API·Usage](docs/public/modules.md) |
+| 설계와 진행 상태 | [목표·프로토타입·소유권 감사](docs/public/design.md) |
+| 목표 구조와 TBD | [Architecture](docs/public/architecture.md), [Foundation](docs/public/foundation.md) |
 | JSON Document 개념 | [docs/public/overview.md](docs/public/overview.md) |
 | JSON Document Protocol | [docs/public/api.md](docs/public/api.md) |
 | Editing Protocol | [docs/public/editing.md](docs/public/editing.md) |
@@ -131,6 +133,7 @@ npm run dev
 
 ```sh
 npm run docs:evaluate
+npm run check:architecture -- --evidence
 npm test -w @interactive-os/json-document
 npm run typecheck -w @interactive-os/json-document
 npm run build -w @interactive-os/json-document

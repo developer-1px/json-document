@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { jsonDocumentSourceAliases } from "./config/json-document-source-aliases.ts";
 import { codexAppServer } from "./config/codex-app-server.ts";
-import siteRoutes from "./site-routes.json";
+import { siteRoutes } from "./route-registry.mjs";
 
 function rootLlmsTxt(): Plugin {
   const path = fileURLToPath(new URL("../docs/public/llms.txt", import.meta.url));

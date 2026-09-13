@@ -3,7 +3,7 @@
 `JSONDocument`는 값·주소·검증·원자적 변경·관찰의 여섯 member를 갖는 공통
 계약입니다. 로컬 구현과 [Collaboration](collaboration.md)이 같은 계약을
 제공합니다. Core v3의 Stable 계약과 현재 TypeScript API를 작업별로 정리합니다.
-package 전체 시그니처는 [JSON Document API](../api-reference/json-document.md)에 있습니다.
+package 전체 시그니처는 [JSON Document API](../../packages/json-document/docs/api-reference.md)에 있습니다.
 
 ## 문서 만들기
 

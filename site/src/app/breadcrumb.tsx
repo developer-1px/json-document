@@ -1,6 +1,6 @@
 import { type SiteNavigationGroup, type SiteRoute } from "./router";
 import { ChevronRight } from "lucide-react";
-import { sectionForGroup, siteSections, type SiteSection } from "./site-layers";
+import { groupLandings, sectionForGroup, siteSections, type SiteSection } from "./site-layers";
 import { ActionLink } from "../shared/ui/interactive";
 import { ui } from "../shared/ui/styles";
 
@@ -11,20 +11,7 @@ export type BreadcrumbCrumb = {
 
 const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
 
-const groupLandings: Record<SiteNavigationGroup, BreadcrumbCrumb> = {
-  Introduction: { path: "/docs", label: "Introduction" },
-  "JSON Document": { path: "/docs/api", label: "JSON Document" },
-  "Document Types": { path: "/docs/document-types", label: "Document Types" },
-  Editing: { path: "/docs/editing", label: "Editing" },
-  Collaboration: { path: "/docs/collaboration", label: "Collaboration" },
-  Adapter: { path: "/docs/adapters", label: "Adapter" },
-  Connector: { path: "/docs/connectors", label: "Connector" },
-  Affordance: { path: "/docs/affordance", label: "Affordance" },
-  "UI Primitives": { path: "/docs/ui-primitives", label: "UI Primitives" },
-  Hands: { path: "/editors", label: "Hands" },
-  Artifact: { path: "/viewer", label: "Artifact" },
-  Applications: { path: "/applications", label: "Applications" },
-};
+
 
 export function breadcrumbTrail(
   route: SiteRoute,

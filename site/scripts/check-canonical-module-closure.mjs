@@ -94,9 +94,10 @@ const linkedPackageDirectories = new Set([...visited]
 const missingSources = packageDirectories.filter((directory) => !linkedPackageDirectories.has(directory));
 if (missingSources.length > 0) throw new Error(`canonical source registration missing:\n${missingSources.join("\n")}`);
 
-const apiReferences = readdirSync(join(repositoryRoot, "docs/api-reference")).filter((name) => name.endsWith(".md"));
-if (apiReferences.length !== packageDirectories.length) {
-  throw new Error(`API Reference denominator mismatch: packages=${packageDirectories.length}, references=${apiReferences.length}`);
+for (const directory of packageDirectories) {
+  if (!existsSync(join(repositoryRoot, directory, "docs/api-reference.md"))) {
+    throw new Error(`Package-owned API reference missing: ${directory}`);
+  }
 }
 
 console.log(`Canonical module closure ok; packages=${packageDirectories.length}; live demos=${entries.length}; linked package sources=${linkedPackageDirectories.size}.`);

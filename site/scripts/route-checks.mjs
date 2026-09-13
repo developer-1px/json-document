@@ -1,6 +1,7 @@
 const routePathPattern = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/;
 const navigationGroups = new Set([
   "Introduction",
+  "Design",
   "JSON Document",
   "Document Types",
   "Collaboration",
@@ -53,7 +54,7 @@ export function validateSiteRoutes(routes, fail) {
     if (route.heading !== undefined && (typeof route.heading !== "string" || route.heading.trim() === "")) {
       fail(`site route ${route.path} has an invalid heading.`);
     }
-    if (route.documentSource !== undefined && !/^docs\/(?:public|api-reference)\/[^/]+\.md$/.test(route.documentSource)) {
+    if (route.documentSource !== undefined && !/^(?:docs\/public\/[^/]+|packages\/[^/]+\/docs\/[^/]+)\.md$/.test(route.documentSource)) {
       fail(`site route ${route.path} has an invalid documentation source.`);
     }
     if (route.documentIncludes !== undefined && (!Array.isArray(route.documentIncludes) || route.documentIncludes.some((source) => typeof source !== "string" || !/^packages\/[^/]+\/docs\/[^/]+\.md$/.test(source)))) {
@@ -104,6 +105,18 @@ export function validateSiteRoutes(routes, fail) {
   }
 
   for (const route of routes) {
+    if (route.module !== undefined) {
+      const module = route.module;
+      if (!route.documentSource || !route.navigationGroup || !module.sourceDirectory?.startsWith("packages/") || !module.responsibility?.trim()) {
+        fail(`site module ${route.path} needs an API document, responsibility, position and package source.`);
+      }
+      if (!Array.isArray(module.alsoIn) || module.alsoIn.some(group => !navigationGroups.has(group))) fail(`site module ${route.path} has unknown positions.`);
+      if (!Array.isArray(module.usagePaths) || module.usagePaths.length === 0 || module.usagePaths.some(path => !paths.has(path))) fail(`site module ${route.path} needs known Usage routes.`);
+      if (routes.some(other => other !== route && other.module?.sourceDirectory === module.sourceDirectory)) fail(`site module ${route.path} repeats a package owner.`);
+    }
+    if (route.modulePaths !== undefined && (!Array.isArray(route.modulePaths) || route.modulePaths.some(path => !routes.some(candidate => candidate.path === path && candidate.module)))) {
+      fail(`site application ${route.path} links to an unknown module.`);
+    }
     if (route.relatedDemoPath !== undefined && !paths.has(route.relatedDemoPath)) {
       fail(`site route ${route.path} points to an unknown related demo ${route.relatedDemoPath}.`);
     }

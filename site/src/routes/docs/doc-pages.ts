@@ -1,7 +1,8 @@
+import { documentationMap } from "../../app/documentation-map";
 import { pageDescriptor } from "../../app/page-descriptors";
 
 const documentSources = import.meta.glob<string>(
-  ["../../../../docs/public/*.md", "../../../../docs/api-reference/*.md", "../../../../packages/*/docs/*.md"],
+  ["../../../../docs/public/*.md", "../../../../packages/*/docs/*.md"],
   { query: "?raw", import: "default", eager: true },
 );
 
@@ -14,17 +15,22 @@ function docPage(path: string) {
     if (source === undefined) throw new Error(`Documentation source is not registered: ${path}`);
     return source;
   });
-  return { ...page, source: [...included, source].join("\n\n") };
+  return { ...page, source: [documentationMap(page), ...included, source].join("\n\n") };
 }
 
 export const docPages = {
+  quickStart: docPage("/docs/quick-start"),
+  modules: docPage("/docs/modules"),
+  handsSupport: docPage("/docs/hands-support"),
+  design: docPage("/docs/design"),
+  ownership: docPage("/docs/ownership"),
   markdownApi: docPage("/docs/api/markdown"),
   markdownWebApi: docPage("/docs/api/markdown-web"),
   canvasApi: docPage("/docs/api/canvas"),
   objectDocumentApi: docPage("/docs/api/object-document"),
   calendarDocumentApi: docPage("/docs/api/calendar-document"),
   overview: docPage("/docs"),
-  concepts: docPage("/docs/concepts"),
+  architecture: docPage("/docs/architecture"),
   foundation: docPage("/docs/foundation"),
   buildingBlocks: docPage("/docs/building-blocks"),
   editing: docPage("/docs/editing"),
