@@ -10,11 +10,18 @@
     "src/**/*.tsx"
   ],
   "references": [
+    { "path": "../json-document" },
     {
       "path": "../json-document-editing"
     },
     {
       "path": "../json-document-markdown-web"
+    },
+    {
+      "path": "../json-document-sheet"
+    },
+    {
+      "path": "../json-document-markdown"
     }
   ]
 }

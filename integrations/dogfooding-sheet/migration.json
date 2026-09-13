@@ -1,0 +1,52 @@
+{
+  "repository": "developer-1px/dogfooding-sheet",
+  "baselineHead": "fb31a2e",
+  "baselineIncludesUncommittedWork": true,
+  "files": [
+    {
+      "path": "package.json",
+      "before": "4cbe6f212a21a5dcb63cdf5e5611cc3aa7902f58664fd56784df824595aec24c",
+      "after": "86f09f367d7cc2b80da51fef8deae55a4d71d93f7ea6dc285ad0d7d40ce9443f"
+    },
+    {
+      "path": "packages/editable-grid/package.json",
+      "before": "74ccb063439140488299c3c54c21251b51ee312cd8cc1729a41f3b5147d7db12",
+      "after": "be1e339c439b0decb9516288a2d277a35084b6b35cf4007803075a2b89f94302"
+    },
+    {
+      "path": "packages/editable-grid/src/resizeRules.ts",
+      "before": "89205de231f79cc3962fd40d04480d68a8f2b3c438e3d61a69e36e878c69df93",
+      "after": "d2891d1791904701ce44f2c3306e33e62db41bfbd9162a06407eb38e5da644bb"
+    },
+    {
+      "path": "packages/grid/README.md",
+      "before": "9ef54a610c0393a78e6ddd6d71bd05bbd917d408b77d90240a339c753272486f",
+      "after": "1c9bb082fe919796b4184339c620036d17cedf8f87f4607be0335a5e5429c498"
+    },
+    {
+      "path": "packages/grid/package.json",
+      "before": "3cd9ec2880f2b9b59f5dfe3651a3c8c1424e4100a8dc04d3f37b24eefb540e0c",
+      "after": "3e227c7a7db92af8a10b1597b490fe2700d2079e56de0d8f259ae7a8e0dabb11"
+    },
+    {
+      "path": "packages/grid/src/editing/fillHandle.ts",
+      "before": "0769548387ced0f291877d72e6f6e647ba2fe564b7f0d7f8f3bfbcab32b19243",
+      "after": "a5aa724890cd4a1b7715a7d5a44432549366dbd5dab3e932db5b70f8d6511ef4"
+    },
+    {
+      "path": "packages/grid/src/purity.test.ts",
+      "before": "0871b6158d8808017a05a56e66ab1b67db06f750209ea971170073795a4847f1",
+      "after": "338cc3e59e7a75332fbe156a6168ace4dd4f621dc1eafca75ea759665e549bc7"
+    },
+    {
+      "path": "packages/grid/src/selection/navigation.ts",
+      "before": "edda5dbc96e44437bbd3166df5231b9d3f12d61d0675673fa745a03a915eec03",
+      "after": "80b82858fa95e17588863283adb9096a1eaeedfec5661f0ead434a620f790eed"
+    },
+    {
+      "path": "src/widgets/sheet-grid/hooks/useSheetGrid.ts",
+      "before": "570bec27f6ac627a992c7183abc8216280c513b2a4df8f88bf734fcea8cc5fdd",
+      "after": "1488a1faa27295846ab30ffd54885c03c90e95f4feda100745a8b6291d668f6e"
+    }
+  ]
+}

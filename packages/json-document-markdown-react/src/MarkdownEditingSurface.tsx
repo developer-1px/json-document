@@ -1,4 +1,10 @@
 import { useEffect, useRef, type HTMLAttributes } from "react";
+import { markdownTableBoundary, readMarkdownTable } from "@interactive-os/json-document-markdown";
+import { MarkdownRenderer } from "./MarkdownRenderer.js";
+import { MarkdownCellEditor } from "./MarkdownCellEditor.js";
+import { createRoot } from "react-dom/client";
+import { SheetHand } from "@interactive-os/json-document-sheet";
+import { createMarkdownTableEditor } from "@interactive-os/json-document-editing";
 import type { TextEditor } from "@interactive-os/json-document-editing";
 import { createMarkdownEditingBinding } from "@interactive-os/json-document-markdown-web";
 
@@ -12,8 +18,22 @@ export function MarkdownEditingSurface({ editor, style, ...props }: MarkdownEdit
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const binding = createMarkdownEditingBinding({editor, root});
-    return binding.bind();
+    const disposals = new Set<() => void>();
+    const binding = createMarkdownEditingBinding({editor, root, mountTable(element, position) {
+      const reactRoot = createRoot(element);
+      const table = createMarkdownTableEditor(editor, position);
+      reactRoot.render(<SheetHand editor={table} profile="document-table" headerRow onExit={edge => {
+        const current = readMarkdownTable(editor.text, position());
+        if (!current) return;
+        const offset = markdownTableBoundary(editor.text, current, edge);
+        root.focus(); editor.select({anchor: offset, focus: offset});
+      }} renderCell={value => <MarkdownRenderer content={value} components={{p: ({children}) => <span>{children}</span>}} />} renderEditor={props => <MarkdownCellEditor {...props} />} />);
+      const dispose = () => {disposals.delete(dispose); queueMicrotask(() => reactRoot.unmount());};
+      disposals.add(dispose);
+      return dispose;
+    }});
+    const unbind = binding.bind();
+    return () => {unbind(); disposals.forEach(dispose => dispose());};
   }, [editor]);
   return <div {...props} ref={rootRef} role="textbox" aria-multiline="true" contentEditable suppressContentEditableWarning style={{ ...style, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }} />;
 }

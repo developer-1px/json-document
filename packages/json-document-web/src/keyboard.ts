@@ -1,5 +1,5 @@
 import type { GridPoint, GridTopology } from "@interactive-os/json-document-editing";
-import type { NavigationCommand } from "@interactive-os/json-document-selection";
+import { traverseGrid, type NavigationCommand } from "@interactive-os/json-document-selection";
 
 export interface WebKeyboardStroke {
   readonly key: string;
@@ -98,14 +98,9 @@ export function moveGridPoint(
   if (direction === "down") return at(topology, index.rowIndex + 1, index.columnIndex);
   if (direction === "left") return at(topology, index.rowIndex, index.columnIndex - 1);
   if (direction === "right") return at(topology, index.rowIndex, index.columnIndex + 1);
-  const linear = index.rowIndex * topology.columnIds.length + index.columnIndex;
-  const next = direction === "previous" ? linear - 1 : linear + 1;
-  if (next < 0 || next >= topology.rowIds.length * topology.columnIds.length) return null;
-  return at(
-    topology,
-    Math.floor(next / topology.columnIds.length),
-    next % topology.columnIds.length,
-  );
+  const next = traverseGrid(index, {rowCount: topology.rowIds.length, columnCount: topology.columnIds.length,
+    order: "row-major", reverse: direction === "previous"});
+  return next ? at(topology, next.rowIndex, next.columnIndex) : null;
 }
 
 export function moveLinePoint(
@@ -157,4 +152,14 @@ function at(topology: GridTopology, rowIndex: number, columnIndex: number): Grid
   const columnId = topology.columnIds[columnIndex];
   if (rowId === undefined || columnId === undefined) return null;
   return { rowId, columnId };
+}
+
+/** Composition keys belong to the native text lease, including the legacy IME sentinel. */
+export function isWebComposingKey(event: {readonly isComposing?: boolean; readonly keyCode?: number}): boolean {
+  return event.isComposing === true || event.keyCode === 229;
+}
+
+/** Printable key payload; shortcut chords and control keys do not author text. */
+export function webKeyboardText(stroke: WebKeyboardStroke): string | null {
+  return !stroke.metaKey && !stroke.ctrlKey && !stroke.altKey && Array.from(stroke.key).length === 1 && stroke.key >= " " ? stroke.key : null;
 }

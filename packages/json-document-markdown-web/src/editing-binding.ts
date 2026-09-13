@@ -1,18 +1,20 @@
 import { createContentEditableBinding, type ContentEditableBinding } from "@interactive-os/json-document-contenteditable";
 import type { TextEditor } from "@interactive-os/json-document-editing";
 import { indentMarkdownList, insertMarkdownParagraph } from "@interactive-os/json-document-markdown";
-import { createMarkdownDOMAdapter } from "./markdown-dom.js";
+import { createMarkdownDOMAdapter, type MarkdownDOMOptions } from "./markdown-dom.js";
 
 export interface MarkdownEditingBindingOptions {
   readonly editor: TextEditor;
   readonly root: HTMLElement;
+  readonly mountTable?: MarkdownDOMOptions["mountTable"];
+  readonly revealSyntax?: boolean;
 }
 
 /** Connect Markdown DOM, syntax-owned Enter, and the editor's existing history. */
-export function createMarkdownEditingBinding({editor, root}: MarkdownEditingBindingOptions): ContentEditableBinding {
+export function createMarkdownEditingBinding({editor, root, mountTable, revealSyntax}: MarkdownEditingBindingOptions): ContentEditableBinding {
   return createContentEditableBinding({
     document: editor.document, pointer: editor.pointer, editor, root,
-    dom: createMarkdownDOMAdapter({editor}),
+    dom: createMarkdownDOMAdapter({editor, ...(mountTable ? {mountTable} : {}), ...(revealSyntax === undefined ? {} : {revealSyntax})}),
     indent(editor, direction) {
       const next = indentMarkdownList(editor.text, editor.snapshot.selection, direction);
       return next ? editor.replace(next.value, next.selection) : null;

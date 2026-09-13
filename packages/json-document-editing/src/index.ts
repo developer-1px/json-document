@@ -158,6 +158,7 @@ export type {
   SheetColumn,
   SheetDocument,
   SheetEditor,
+  SheetEditorOptions,
   SheetIntent,
   SheetPoint,
   SheetRange,
@@ -229,3 +230,9 @@ export type {
 } from "./calendar-time-grid-pointer.js";
 export { createTextEditor, clampTextSelection, type TextEditor, type TextSelection } from "./text.js";
 export { diffText, type TextChange } from "./text-change.js";
+
+export { sheetColumnLabel } from "./sheet-structure.js";
+export type { SheetStructureIntent, SheetStructurePolicy, SheetStructureActions } from "./sheet-structure.js";
+export { createMarkdownTableEditor } from "./markdown-table.js";
+export { sheetNavigationTarget } from "./sheet-navigation.js";
+export type { SheetTraversalDirection } from "./sheet-navigation.js";

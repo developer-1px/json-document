@@ -10,6 +10,24 @@ const databasePropertyConsumers = [
   "packages/json-document-database/src/database-hands.tsx",
   "packages/json-document-zod/src/database-document.ts",
 ];
+// Regression: moving a surface into a Hand must not retain its displaced owners.
+const sheetHand = readSource("packages/json-document-sheet/src/sheet-hand.tsx");
+for (const [packageName, symbol] of [
+  ["@interactive-os/json-document-react", "useRenameSession"],
+  ["@interactive-os/json-document-affordance", "cellEditingAffordance"],
+  ["@interactive-os/json-document-web", "moveGridPoint"],
+  ["@interactive-os/json-document-ui-primitives-react", "Field"],
+]) {
+  if (!hasNamedImport(sheetHand, packageName, symbol)) throw new Error(`Sheet Hand bypasses ${symbol}`);
+}
+for (const pattern of [/<input\b/, /\bsetDraft\b/, /\bevent\.key\b/, /String\.fromCharCode/, /Object\.fromEntries/]) {
+  if (pattern.test(sheetHand)) throw new Error(`Sheet Hand retains displaced responsibility: ${pattern}`);
+}
+if (!sheetHand.includes("editor.structure")) throw new Error("Sheet Hand must consume editor structure capabilities");
+if (existsSync(join(repositoryRoot, "packages/json-document-markdown-react/src/markdown-table-editor.ts"))) throw new Error("Markdown source editing must not return to the React owner");
+const markdownTableEditor = readSource("packages/json-document-editing/src/markdown-table.ts");
+if (/from\s+["'](?:react|react-dom)(?:\/[^"']*)?["']/.test(markdownTableEditor)) throw new Error("Markdown source editor must stay framework independent");
+
 const annotationDemo = readSource("routes/annotation-demo/AnnotationDemoRoute.tsx");
 for (const symbol of ["AnnotationHand", "useAnnotationOutput"]) {
   if (!hasNamedImport(annotationDemo, "@interactive-os/json-document-annotation", symbol)) throw new Error(`Annotation Demo must consume the canonical ${symbol}`);

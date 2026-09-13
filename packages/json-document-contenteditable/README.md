@@ -32,3 +32,7 @@ For selection-restoring history and literal source clipboard, pass the optional
 
 For source intervals displayed as one visual unit, use `createTextProjectionDOMAdapter`.
 Its [projection contract](docs/editing.md#원문-구간의-시각적-투영) preserves source editing while aligning caret edges to the displayed element.
+
+Source-preserving DOM adapters may mark a noneditable UI island with `data-text-decoration`.
+The text index excludes that subtree from source and source selections. Keep the original
+source in a separate text projection; UI labels must never be serialized as document text.

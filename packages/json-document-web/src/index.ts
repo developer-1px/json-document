@@ -52,6 +52,8 @@ export {
   rovingFocusItemProps,
 } from "./widget.js";
 export {
+  isWebComposingKey,
+  webKeyboardText,
   chordFromStroke,
   createWebKeyboardAdapter,
   defaultWebKeymap,
@@ -146,3 +148,4 @@ export type {
   WebGridCellAddressRoot,
 } from "./grid-cell.js";
 export { textClipboardCodec } from "./clipboard.js";
+export { hitTestWebGrid } from "./grid-cell.js";

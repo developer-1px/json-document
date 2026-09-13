@@ -168,6 +168,7 @@ import { Route as PageDocsApiRichTextSuggestionRouteImport } from "./routes/_pag
 import { Route as PageDocsApiRichTextSuggestionReactRouteImport } from "./routes/_page/docs/api/rich-text-suggestion-react";
 import { Route as PageDocsApiRichTextWebRouteImport } from "./routes/_page/docs/api/rich-text-web";
 import { Route as PageDocsApiSelectionRouteImport } from "./routes/_page/docs/api/selection";
+import { Route as PageDocsApiSheetRouteImport } from "./routes/_page/docs/api/sheet";
 import { Route as PageDocsApiTanstackTableRouteImport } from "./routes/_page/docs/api/tanstack-table";
 import { Route as PageDocsApiUiPrimitivesReactRouteImport } from "./routes/_page/docs/api/ui-primitives-react";
 import { Route as PageDocsApiWebRouteImport } from "./routes/_page/docs/api/web";
@@ -1020,6 +1021,11 @@ const PageDocsApiSelectionRoute = PageDocsApiSelectionRouteImport.update({
   path: "/docs/api/selection",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsApiSheetRoute = PageDocsApiSheetRouteImport.update({
+  id: "/docs/api/sheet",
+  path: "/docs/api/sheet",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsApiTanstackTableRoute =
   PageDocsApiTanstackTableRouteImport.update({
     id: "/docs/api/tanstack-table",
@@ -1247,6 +1253,7 @@ export interface FileRoutesByFullPath {
   "/docs/api/rich-text-suggestion-react": typeof PageDocsApiRichTextSuggestionReactRoute;
   "/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
   "/docs/api/selection": typeof PageDocsApiSelectionRoute;
+  "/docs/api/sheet": typeof PageDocsApiSheetRoute;
   "/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
   "/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
   "/docs/api/web": typeof PageDocsApiWebRoute;
@@ -1419,6 +1426,7 @@ export interface FileRoutesByTo {
   "/docs/api/rich-text-suggestion-react": typeof PageDocsApiRichTextSuggestionReactRoute;
   "/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
   "/docs/api/selection": typeof PageDocsApiSelectionRoute;
+  "/docs/api/sheet": typeof PageDocsApiSheetRoute;
   "/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
   "/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
   "/docs/api/web": typeof PageDocsApiWebRoute;
@@ -1593,6 +1601,7 @@ export interface FileRoutesById {
   "/_page/docs/api/rich-text-suggestion-react": typeof PageDocsApiRichTextSuggestionReactRoute;
   "/_page/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
   "/_page/docs/api/selection": typeof PageDocsApiSelectionRoute;
+  "/_page/docs/api/sheet": typeof PageDocsApiSheetRoute;
   "/_page/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
   "/_page/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
   "/_page/docs/api/web": typeof PageDocsApiWebRoute;
@@ -1767,6 +1776,7 @@ export interface FileRouteTypes {
     | "/docs/api/rich-text-suggestion-react"
     | "/docs/api/rich-text-web"
     | "/docs/api/selection"
+    | "/docs/api/sheet"
     | "/docs/api/tanstack-table"
     | "/docs/api/ui-primitives-react"
     | "/docs/api/web"
@@ -1939,6 +1949,7 @@ export interface FileRouteTypes {
     | "/docs/api/rich-text-suggestion-react"
     | "/docs/api/rich-text-web"
     | "/docs/api/selection"
+    | "/docs/api/sheet"
     | "/docs/api/tanstack-table"
     | "/docs/api/ui-primitives-react"
     | "/docs/api/web"
@@ -2112,6 +2123,7 @@ export interface FileRouteTypes {
     | "/_page/docs/api/rich-text-suggestion-react"
     | "/_page/docs/api/rich-text-web"
     | "/_page/docs/api/selection"
+    | "/_page/docs/api/sheet"
     | "/_page/docs/api/tanstack-table"
     | "/_page/docs/api/ui-primitives-react"
     | "/_page/docs/api/web"
@@ -3250,6 +3262,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiSelectionRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/api/sheet": {
+      id: "/_page/docs/api/sheet";
+      path: "/docs/api/sheet";
+      fullPath: "/docs/api/sheet";
+      preLoaderRoute: typeof PageDocsApiSheetRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/api/tanstack-table": {
       id: "/_page/docs/api/tanstack-table";
       path: "/docs/api/tanstack-table";
@@ -3491,6 +3510,7 @@ interface PageRouteChildren {
   PageDocsApiRichTextSuggestionReactRoute: typeof PageDocsApiRichTextSuggestionReactRoute;
   PageDocsApiRichTextWebRoute: typeof PageDocsApiRichTextWebRoute;
   PageDocsApiSelectionRoute: typeof PageDocsApiSelectionRoute;
+  PageDocsApiSheetRoute: typeof PageDocsApiSheetRoute;
   PageDocsApiTanstackTableRoute: typeof PageDocsApiTanstackTableRoute;
   PageDocsApiUiPrimitivesReactRoute: typeof PageDocsApiUiPrimitivesReactRoute;
   PageDocsApiWebRoute: typeof PageDocsApiWebRoute;
@@ -3664,6 +3684,7 @@ const PageRouteChildren: PageRouteChildren = {
     PageDocsApiRichTextSuggestionReactRoute,
   PageDocsApiRichTextWebRoute: PageDocsApiRichTextWebRoute,
   PageDocsApiSelectionRoute: PageDocsApiSelectionRoute,
+  PageDocsApiSheetRoute: PageDocsApiSheetRoute,
   PageDocsApiTanstackTableRoute: PageDocsApiTanstackTableRoute,
   PageDocsApiUiPrimitivesReactRoute: PageDocsApiUiPrimitivesReactRoute,
   PageDocsApiWebRoute: PageDocsApiWebRoute,

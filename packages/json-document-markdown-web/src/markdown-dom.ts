@@ -13,6 +13,7 @@ interface RenderedRun {
   readonly element: HTMLElement;
   text?: Text;
   children: RenderedRun[];
+  dispose?: () => void;
 }
 interface Surface {
   readonly parser: MarkdownParser;
@@ -24,8 +25,12 @@ interface Surface {
 }
 
 export interface MarkdownDOMOptions {
+  /** Keep inline syntax concealed during editing, e.g. an embedded document-table cell. */
+  readonly revealSyntax?: boolean;
   /** Enables task controls using the existing source editor and its history. */
   readonly editor?: TextEditor;
+  /** Mount a table Hand in a source-excluded island. Return its disposal callback. */
+  readonly mountTable?: (element: HTMLElement, position: () => number) => () => void;
 }
 
 /** Source-preserving CommonMark/GFM DOM; all editing still uses source coordinates. */
@@ -37,7 +42,7 @@ export function createMarkdownDOMAdapter(options: MarkdownDOMOptions = {}): Text
     if (surface.selection === selection || (selection && surface.selection?.anchor === selection.anchor && surface.selection.focus === selection.focus)) return;
     const visit = ({ element, run, children }: RenderedRun): void => {
       if (run.owner) {
-        const active = selection !== null && Math.max(selection.anchor, selection.focus) >= run.owner.from && Math.min(selection.anchor, selection.focus) <= run.owner.to;
+        const active = options.revealSyntax !== false && selection !== null && Math.max(selection.anchor, selection.focus) >= run.owner.from && Math.min(selection.anchor, selection.focus) <= run.owner.to;
         if (run.conceal) element.hidden = run.conceal === "always" || !active;
         else if (run.kind === "imagePreview") element.hidden = active;
         else if (element.getAttribute("data-markdown-active") !== String(active)) element.setAttribute("data-markdown-active", String(active));
@@ -67,7 +72,7 @@ export function createMarkdownDOMAdapter(options: MarkdownDOMOptions = {}): Text
           const edit = diffText(previous, source)!;
           surface.parser.update(edit.from, edit.to, edit.insert);
         }
-        surface.runs = reconcileRuns(root, surface.runs, sourceRuns(surface.parser.projection), (run, input, action) => {
+        surface.runs = reconcileRuns(root, surface.runs, sourceRuns(surface.parser.projection, !!options.mountTable), (run, input, action) => {
           const editor = options.editor;
           const task = run.task!;
           const current = surface!.parser.projection.source;
@@ -81,7 +86,7 @@ export function createMarkdownDOMAdapter(options: MarkdownDOMOptions = {}): Text
             : editor[action]();
           if (!result.ok) input.checked = task.checked;
           if (input.isConnected) input.focus({preventScroll:true});
-        }, !!options.editor && root.getAttribute("contenteditable") !== "false");
+        }, !!options.editor && root.getAttribute("contenteditable") !== "false", options.mountTable);
         renderTextCaretBoundary(root, source);
         surface.observer.takeRecords();
         surface.dirty = false;
@@ -108,7 +113,7 @@ export function createMarkdownDOMAdapter(options: MarkdownDOMOptions = {}): Text
 
 /** Reuse unchanged prefixes/suffixes and preserve text-node identity while typing. */
 function reconcileRuns(parent: HTMLElement, previous: RenderedRun[], next: ReadonlyArray<SourceRun>,
-  onTaskChange: (run: SourceRun, input: HTMLInputElement, action: TaskAction) => void, tasksEnabled: boolean): RenderedRun[] {
+  onTaskChange: (run: SourceRun, input: HTMLInputElement, action: TaskAction) => void, tasksEnabled: boolean, mountTable?: MarkdownDOMOptions["mountTable"]): RenderedRun[] {
   const matches = (entry: RenderedRun, run: SourceRun) => entry.run.kind === run.kind && entry.run.value === run.value;
   let prefix = 0;
   while (prefix < previous.length && prefix < next.length && matches(previous[prefix]!, next[prefix]!)) prefix++;
@@ -130,7 +135,9 @@ function reconcileRuns(parent: HTMLElement, previous: RenderedRun[], next: Reado
       entry.text ??= parent.ownerDocument.createTextNode(run.value);
       if (entry.text.data !== run.value) entry.text.data = run.value;
       if (element.childNodes.length !== 1 || element.firstChild !== entry.text) element.replaceChildren(entry.text);
-    } else entry.children = reconcileRuns(element, entry.children, run.children ?? [], onTaskChange, tasksEnabled);
+    } else if (run.table && mountTable) {
+      entry.dispose ??= mountTable(element, () => entry!.run.table!.from);
+    } else entry.children = reconcileRuns(element, entry.children, run.children ?? [], onTaskChange, tasksEnabled, mountTable);
     if (run.task) {
       const input = element as HTMLInputElement;
       input.checked = run.task.checked;
@@ -149,6 +156,8 @@ function reconcileRuns(parent: HTMLElement, previous: RenderedRun[], next: Reado
     entry.run = run;
     result.push(entry);
   }
+  const dispose = (entry: RenderedRun) => {entry.dispose?.(); entry.children.forEach(dispose);};
+  for (const entry of previous) if (!result.includes(entry)) dispose(entry);
   while (cursor) { const nextSibling = cursor.nextSibling; cursor.remove(); cursor = nextSibling; }
   return result;
 }

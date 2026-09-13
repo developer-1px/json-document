@@ -616,6 +616,11 @@ createEditingSession<Selection extends JSONValue>(options: EditingSessionOptions
 ```ts
 createKanbanEditor(source: EditingDocumentSource<KanbanDocument>, options?: EditingHistoryOptions): KanbanEditor
 ```
+## `createMarkdownTableEditor`
+
+```ts
+createMarkdownTableEditor(text: TextEditor, position: () => number): SheetEditor
+```
 ## `createObjectEditor`
 
 ```ts
@@ -634,7 +639,7 @@ createOrderEditor(source: EditingDocumentSource<OrderDocument>, options?: Editin
 ## `createSheetEditor`
 
 ```ts
-createSheetEditor(source: EditingDocumentSource<SheetDocument>, options?: EditingHistoryOptions): SheetEditor
+createSheetEditor(source: EditingDocumentSource<SheetDocument>, options?: SheetEditorOptions): SheetEditor
 ```
 ## `createTextEditor`
 
@@ -1524,6 +1529,11 @@ interface SheetColumn extends Record<string, JSONValue> {
   readonly label: string;
 }
 ```
+## `sheetColumnLabel`
+
+```ts
+sheetColumnLabel(index: number): string
+```
 ## `SheetDocument`
 
 ```ts
@@ -1536,6 +1546,8 @@ interface SheetDocument extends Record<string, JSONValue> {
 
 ```ts
 interface SheetEditor {
+  readonly capabilities: {readonly resize: boolean};
+  readonly structure: SheetStructureActions;
   readonly snapshot: EditingSnapshot<SheetSelection>;
   readonly selectedCells: ReadonlyArray<SheetCell>;
   selectedCellsIn(topology: SheetTopology): ReadonlyArray<SheetCell>;
@@ -1547,10 +1559,29 @@ interface SheetEditor {
   subscribe(listener: (snapshot: EditingSnapshot<SheetSelection>) => void): () => void;
 }
 ```
+## `SheetEditorOptions`
+
+```ts
+interface SheetEditorOptions extends EditingHistoryOptions {
+  /** False for formats such as GFM that cannot persist row heights or column widths. */
+  readonly resize?: boolean;
+  readonly structure?: SheetStructurePolicy;
+  /** Restore selection when projecting a new source snapshot; missing cells are reconciled. */
+  readonly selection?: SheetSelection;
+}
+```
 ## `SheetIntent`
 
 ```ts
 type SheetIntent =
+  | SheetStructureIntent
+  | { readonly type: "column.resize"; readonly columnId: string; readonly width: number }
+  | { readonly type: "row.resize"; readonly rowId: string; readonly height: number }
+  | { readonly type: "selection.range"; readonly range: SheetRange }
+  | { readonly type: "selection.row"; readonly rowId: string }
+  | { readonly type: "selection.column"; readonly columnId: string }
+  | { readonly type: "range.fill"; readonly source: SheetRange; readonly target: SheetRange }
+  | { readonly type: "selection.navigate"; readonly direction: SheetTraversalDirection; readonly topology?: SheetTopology }
   | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
@@ -1568,12 +1599,18 @@ type SheetIntent =
       readonly rowId: string;
       readonly columnId: string;
       readonly value: JSONValue;
+      readonly preserveSelection?: boolean;
     }
   | {
       readonly type: "clipboard.paste";
       readonly clipboard: SheetClipboard;
       readonly topology?: SheetTopology;
     };
+```
+## `sheetNavigationTarget`
+
+```ts
+sheetNavigationTarget(topology: GridTopology, selection: SheetSelection, direction: SheetTraversalDirection): { readonly point: GridPoint; readonly preserveRange: boolean; } | null
 ```
 ## `SheetPoint`
 
@@ -1604,17 +1641,49 @@ interface SheetRow extends Record<string, JSONValue> {
 ```ts
 interface SheetSelection extends Record<string, JSONValue> {
   readonly kind: "range";
-  /** Primary range aliases retained for single-range consumers. */
+  /** Anchor of the primary range; focus is the active cell and may move inside that range. */
   readonly anchor: SheetPoint | null;
   readonly focus: SheetPoint | null;
   readonly ranges: ReadonlyArray<SheetRange>;
   readonly primaryIndex: number | null;
 }
 ```
+## `SheetStructureActions`
+
+```ts
+interface SheetStructureActions {
+  readonly insertRow: SheetStructureIntent;
+  readonly insertColumn: SheetStructureIntent;
+  readonly deleteRow: SheetStructureIntent | null;
+  readonly deleteColumn: SheetStructureIntent | null;
+}
+```
+## `SheetStructureIntent`
+
+```ts
+type SheetStructureIntent =
+  | { readonly type: "row.insert"; readonly index: number; readonly row?: SheetRow }
+  | { readonly type: "row.delete"; readonly rowId: string }
+  | { readonly type: "column.insert"; readonly index: number; readonly column?: SheetColumn }
+  | { readonly type: "column.delete"; readonly columnId: string };
+```
+## `SheetStructurePolicy`
+
+```ts
+interface SheetStructurePolicy {
+  readonly headerRows?: number;
+  readonly minimumColumns?: number;
+}
+```
 ## `SheetTopology`
 
 ```ts
 type SheetTopology = GridTopology;
+```
+## `SheetTraversalDirection`
+
+```ts
+type SheetTraversalDirection = "previous" | "next" | "up" | "down";
 ```
 ## `TextChange`
 

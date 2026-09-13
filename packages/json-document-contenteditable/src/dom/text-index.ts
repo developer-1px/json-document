@@ -18,7 +18,7 @@ export function textDOMIndex(root: HTMLElement): TextDOMIndex {
   if (!cached) {
     const observer = new MutationObserver(records => { if (records.length) cached!.dirty = true; });
     cached = { observer, dirty: true, index: null };
-    observer.observe(root, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ["data-contenteditable-caret"] });
+    observer.observe(root, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ["data-contenteditable-caret", "data-text-decoration"] });
     indexes.set(root, cached);
   }
   if (cached.dirty || cached.observer.takeRecords().length) {
@@ -33,7 +33,8 @@ function buildIndex(root: HTMLElement): TextDOMIndex {
   const projections = new Map<Node, NodeText>();
   const project = (node: Node): NodeText => {
     let result: NodeText;
-    if (node.nodeType === 3) result = { value: (node as Text).data, children: [], offsets: [] };
+    if (node.nodeType === 1 && (node as Element).hasAttribute("data-text-decoration")) result = { value: "", children: [], offsets: [] };
+    else if (node.nodeType === 3) result = { value: (node as Text).data, children: [], offsets: [] };
     else if (isElement(node, "br")) result = { value: (node as Element).hasAttribute("data-contenteditable-caret") ? "" : "\n", children: [], offsets: [0] };
     else {
       const parts: string[] = [];

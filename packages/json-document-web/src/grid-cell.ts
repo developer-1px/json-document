@@ -9,6 +9,18 @@ export interface WebGridCellAddressElement {
   getAttribute(name: string): string | null;
 }
 
+/** Resolve captured pointer coordinates against rendered cells, including nested inline content. */
+export function hitTestWebGrid<ElementType extends WebGridCellAddressElement & {closest(selectors:string): ElementType | null}>(root: {
+  readonly ownerDocument: {elementFromPoint(x:number,y:number): ElementType | null};
+  contains(element:NoInfer<ElementType>): boolean;
+}, point: {readonly x: number; readonly y: number}): GridPoint | null {
+  const element = root.ownerDocument.elementFromPoint(point.x, point.y)?.closest("[data-grid-row-id][data-grid-column-id]");
+  if (!element || !root.contains(element)) return null;
+  const rowId = element.getAttribute("data-grid-row-id");
+  const columnId = element.getAttribute("data-grid-column-id");
+  return rowId !== null && columnId !== null ? {rowId, columnId} : null;
+}
+
 export interface WebGridCellAddressRoot<Cell extends WebGridCellAddressElement> {
   querySelectorAll(selectors: string): ArrayLike<Cell>;
 }

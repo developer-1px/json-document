@@ -2,13 +2,14 @@ import type { MarkdownNode, MarkdownNodeKind, MarkdownProjection, MarkdownMarker
 
 interface SourceRange { readonly from: number; readonly to: number }
 export interface SourceRun extends SourceRange {
-  readonly kind: MarkdownNodeKind | "source" | "delimiter" | "imagePreview" | "taskControl";
+  readonly kind: MarkdownNodeKind | "source" | "delimiter" | "imagePreview" | "taskControl" | "tableControl";
   readonly tag: string;
   readonly attributes: Readonly<Record<string, string>>;
   readonly value?: string;
   readonly children?: ReadonlyArray<SourceRun>;
   readonly owner?: SourceRange;
   readonly conceal?: boolean | "always";
+  readonly table?: SourceRange;
   readonly task?: { readonly from: number; readonly checked: boolean };
   readonly projection?: { readonly to: number; readonly following?: number; readonly atomic?: boolean };
 }
@@ -33,7 +34,7 @@ function safeURL(value: string | undefined, image = false): string | undefined {
 }
 
 /** A source-complete tree: visual decoration never adds text to the document. */
-export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
+export function sourceRuns(projection: MarkdownProjection, editableTables = false): SourceRun[] {
   const { source } = projection;
   const definitions = new Map<string, MarkdownNode>();
   const collect = (nodes: ReadonlyArray<MarkdownNode>) => {
@@ -142,6 +143,14 @@ export function sourceRuns(projection: MarkdownProjection): SourceRun[] {
     return result;
   };
   const visit = (node: MarkdownNode, parent?: MarkdownNode, index = 0, table?: MarkdownNode): SourceRun => {
+    if (editableTables && node.kind === "table" && !parent) return {
+      kind: "table", tag: "span", from: node.from, to: node.to, attributes: {"data-markdown-kind": "table", "data-markdown-sheet": ""},
+      projection: {to: node.to, atomic: true}, children: [
+        {...plain(node.from, node.to), attributes: {hidden: "", "data-text-projection-source": ""}},
+        {kind: "tableControl", tag: "span", from: node.to, to: node.to, table: node,
+          attributes: {"data-text-decoration": "", contenteditable: "false"}},
+      ],
+    };
     const attributes: Record<string, string> = { "data-markdown-kind": node.kind };
     if (node.depth) { attributes.role = "heading"; attributes["aria-level"] = String(node.depth); attributes["data-depth"] = String(node.depth); }
     if (node.kind === "list") attributes.role = "list";

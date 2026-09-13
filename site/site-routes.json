@@ -253,7 +253,10 @@
         "/demo/selection"
       ]
     },
-    "parentPath": "/docs/editing"
+    "parentPath": "/docs/editing",
+    "documentIncludes": [
+      "packages/json-document-selection/docs/grid-traversal.md"
+    ]
   },
   {
     "path": "/docs/api/editing",
@@ -264,7 +267,8 @@
     "documentIncludes": [
       "packages/json-document-editing/docs/object-selection.md",
       "packages/json-document-editing/docs/calendar-profile.md",
-      "packages/json-document-editing/docs/text.md"
+      "packages/json-document-editing/docs/text.md",
+      "packages/json-document-editing/docs/sheet.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-editing",
@@ -395,7 +399,8 @@
     "documentIncludes": [
       "packages/json-document-web/docs/clipboard.md",
       "packages/json-document-web/docs/text-clipboard.md",
-      "packages/json-document-web/docs/interaction-recording.md"
+      "packages/json-document-web/docs/interaction-recording.md",
+      "packages/json-document-web/docs/text-keys.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-web",
@@ -451,7 +456,10 @@
         "/connectors/react"
       ]
     },
-    "parentPath": "/docs/connectors"
+    "parentPath": "/docs/connectors",
+    "documentIncludes": [
+      "packages/json-document-react/docs/rename-session.md"
+    ]
   },
   {
     "path": "/docs/api/react-hook-form",
@@ -556,7 +564,9 @@
     "language": "ko",
     "documentIncludes": [
       "packages/json-document-affordance/docs/plane-select.md",
-      "packages/json-document-affordance/docs/resize.md"
+      "packages/json-document-affordance/docs/resize.md",
+      "packages/json-document-affordance/docs/cell-editing.md",
+      "packages/json-document-affordance/docs/grid-interaction.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-affordance",
@@ -1988,5 +1998,21 @@
     "language": "ko",
     "navigationGroup": "Editing",
     "documentSource": "docs/public/editing.md"
+  },
+  {
+    "path": "/docs/api/sheet",
+    "label": "API · Sheet",
+    "title": "Sheet API - json-document",
+    "description": "SheetHand의 표 편집 UI와 public API입니다.",
+    "language": "ko",
+    "module": {
+      "packageName": "@interactive-os/json-document-sheet",
+      "usagePaths": [
+        "/demo/sheet"
+      ]
+    },
+    "documentIncludes": [
+      "packages/json-document-sheet/docs/editing.md"
+    ]
   }
 ]

@@ -1,41 +1,14 @@
-import { useRef, useState } from "react";
-import { ClipboardPaste, Copy, PaintBucket, Redo2, Scissors, Undo2 } from "lucide-react";
+import { MarkdownCellEditor, MarkdownRenderer } from "@interactive-os/json-document-markdown-react";
+import { useState } from "react";
+import { createJSONDocument } from "@interactive-os/json-document";
+import { createMarkdownTableEditor } from "@interactive-os/json-document-editing";
+import { createSheetEditor, createTextEditor, sheetColumnLabel, type SheetDocument } from "@interactive-os/json-document-editing";
+import { ProductShell, Tabs } from "@interactive-os/json-document-ui-primitives-react";
+import { SheetHand } from "@interactive-os/json-document-sheet";
+import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import {
-  createSheetEditor,
-  jsonCellText,
-  type EditingResult,
-  type SheetClipboard,
-  type SheetDocument,
-  type SheetEditor,
-  type SheetIntent,
-  type SheetSelection,
-} from "@interactive-os/json-document-editing";
-import { useEditingObservation, useGridEditing } from "@interactive-os/json-document-react";
-import {
-  createWebClipboardSurface,
-  createWebClipboardTextWriter,
-  findWebGridCell,
-  gridBoundary,
-  moveGridPoint,
-  rovingFocusItemProps,
-  sheetClipboardCodec,
-  isWebEditingHostTarget,
-  webGridCellAddressProps,
-} from "@interactive-os/json-document-web";
-import {
-  historyAffordance,
-  editingCommandFromWebKeyboardStroke,
-  applyAffordance,
-  selectAllAffordance,
-} from "@interactive-os/json-document-affordance";
-import { Field, GridCell } from "@interactive-os/json-document-ui-primitives-react";
-import { Inspector } from "../../shared/ui/inspector";
-import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
-import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
-import { editingItemProps } from "@interactive-os/json-document-react";
+import { Inspector } from "../../shared/ui/inspector";
 
 const initialSheet: SheetDocument = {
   columns: [
@@ -51,226 +24,22 @@ const initialSheet: SheetDocument = {
   ],
 };
 
-const clipboardTextWriter = createWebClipboardTextWriter();
-
 export function SheetDemo() {
-  const [editor] = useState<SheetEditor>(() => createSheetEditor(initialSheet));
-  const [clipboard, setClipboard] = useState<SheetClipboard | null>(null);
-  const observation = useEditingObservation<SheetIntent>("Ready");
-  const [clipboardSurface] = useState(() => createWebClipboardSurface({
-    codec: sheetClipboardCodec,
-    read: () => editor.copy(),
-    cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
-    paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
-    onResult(result) {
-      if (!result.ok) return observation.announce(result.code);
-      if (result.operation !== "paste") setClipboard(result.payload);
-      if (result.operation === "cut") observation.observeResult(result.result);
-      const verb = result.operation === "copy" ? "Copied" : result.operation === "cut" ? "Cut" : "Pasted";
-      observation.announce(`${verb} ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`);
-    },
-  }));
-  const surfaceRef = useRef<HTMLElement>(null);
+  const [sheet] = useState(() => createSheetEditor(initialSheet));
+  const [text] = useState(() => createTextEditor(createJSONDocument("| 문법 | 표현 |\n| --- | --- |\n| 강조 | **굵게** |")));
+  const [markdown] = useState(() => createMarkdownTableEditor(text, () => 0));
+  const [mode, setMode] = useState<"sheet" | "markdown">("sheet");
+  const editor = mode === "sheet" ? sheet : markdown;
+  const snapshot = useEditingSnapshot(editor);
+  const source = useEditingSnapshot(text);
 
-  function dispatchIntent(intent: SheetIntent) {
-    const result: EditingResult<SheetSelection> = editor.dispatch(intent);
-    return observation.observe(intent, result);
-  }
-
-  function run(action: () => { readonly ok: boolean }, successMessage: string) {
-    return observation.run(action, successMessage, "That action is not available here");
-  }
-
-  const focus = editor.snapshot.selection.focus;
-  const editing = useGridEditing({
-    source: editor,
-    selectedPoints: editor.selectedCells,
-    focusPoint: focus,
-    onSelect: (point, mode) => {
-      const { rowId, columnId } = point;
-      run(
-        () => dispatchIntent({ type: "selection.set", rowId, columnId, mode }),
-        mode === "extend" ? "Range extended" : mode === "toggle" ? "Range toggled" : "Cell selected",
-      );
-    },
-    keyboard: {
-      resolve: (stroke) => editingCommandFromWebKeyboardStroke(stroke),
-      focusPoint: () => editor.snapshot.selection.focus ?? undefined,
-      neighbor: (point, command) => {
-        const sheet = editor.snapshot.value as SheetDocument;
-        const topology = {
-          rowIds: sheet.rows.map((row) => row.id),
-          columnIds: sheet.columns.map((column) => column.id),
-        };
-        const next = command.type === "move"
-          ? moveGridPoint(topology, point, command.direction)
-          : gridBoundary(topology, point, command.edge);
-        return next;
-      },
-      onDelete: () => {
-        run(() => dispatchIntent({ type: "selection.fill", value: null }), "Selected cells cleared");
-      },
-      onUndo: () => {
-        run(() => editor.undo(), "Undone");
-      },
-      onRedo: () => {
-        run(() => editor.redo(), "Redone");
-      },
-      afterMove: (point) => focusCell(surfaceRef.current, point),
-      ignoreCommand: (command, context) => (
-        context.inField
-        && ((command.type === "toggle" && context.event.key === " ")
-          || (command.type === "delete" && context.event.key === "Backspace"))
-      ),
-    },
-  });
-  const snapshot = editing.snapshot;
-  const sheet = snapshot.value as SheetDocument;
-  const commands = historyAffordance(snapshot).hand;
-
-  function copySelection() {
-    const next = editor.copy();
-    if (next === null) return observation.announce("Select a cell first");
-    setClipboard(next);
-    void writeClipboardText(next.text);
-    observation.announce(`Copied ${next.cells.length} × ${next.cells[0]?.length ?? 0} cells`);
-  }
-
-  function cutSelection() {
-    const next = editor.cut();
-    if (next === null) return observation.announce("Select a cell first");
-    setClipboard(next.clipboard);
-    observation.observeResult(next.result);
-    void writeClipboardText(next.clipboard.text);
-    observation.announce(next.result.ok
-      ? `Cut ${next.clipboard.cells.length} × ${next.clipboard.cells[0]?.length ?? 0} cells`
-      : next.result.code);
-  }
-
-  function pasteSelection() {
-    if (clipboard === null) return observation.announce("Copy cells first");
-    run(
-      () => dispatchIntent({ type: "clipboard.paste", clipboard }),
-      `Pasted ${clipboard.cells.length} × ${clipboard.cells[0]?.length ?? 0} cells`,
-    );
-  }
-
-  async function writeClipboardText(text: string) {
-    const result = await clipboardTextWriter.writeText(text);
-    if (!result.ok) observation.announce(result.reason ?? result.code);
-  }
-
-  return (
-    <DemoPage documentation={(
-        <PageHeader
-          illustration="braces"
-          title="Sheet"
-          aside={(
-          <div className={classes("text-right", ui.text.meta)}>
-            <div>{editor.selectedCells.length} cells · {snapshot.selection.ranges.length} ranges · revision {snapshot.revision}</div>
-            <div aria-live="polite">{observation.announcement}</div>
-          </div>
-          )}
-        >A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageHeader>
-
-    )}>
-        <ProductShell
-          toolbarLabel="Sheet actions"
-          toolbar={(
-            <>
-              <Command label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></Command>
-              <Command label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></Command>
-              <Command label="Paste" onClick={pasteSelection} disabled={clipboard === null}><ClipboardPaste aria-hidden="true" size={16} /></Command>
-              <Command label="Fill selected" onClick={() => run(
-                () => dispatchIntent({ type: "selection.fill", value: "Selected" }),
-                "Selected cells filled",
-              )}><PaintBucket aria-hidden="true" size={16} /></Command>
-              <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Command label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></Command>
-              <Command label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></Command>
-              <output data-testid="sheet-clipboard-tsv" className={classes("ml-auto self-center whitespace-pre", ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</output>
-            </>
-          )}
-          inspector={(
-            <Inspector placement="inline" items={[
-              { label: "Canonical JSON", meta: "stable row + column ids", value: snapshot.value, testId: "sheet-canonical-json", size: "tall" },
-              { label: "intent", meta: observation.lastIntent ? observation.lastIntent.type : "dispatch only", value: observation.lastIntent, testId: "sheet-intent-json", size: "compact" },
-              { label: "result", meta: observation.lastResult?.ok === false ? observation.lastResult.code : observation.lastResult?.ok ? "ok" : "none yet", value: observation.lastResult, testId: "sheet-result-json", size: "compact" },
-              { label: "Selection", value: snapshot.selection, testId: "sheet-selection-json", size: "compact" },
-            ]} />
-          )}
-        >
-          <section
-            ref={surfaceRef}
-            aria-label="Editable sheet"
-            tabIndex={0}
-            {...clipboardSurface}
-            onKeyDown={(event) => {
-              if (isWebEditingHostTarget(event.currentTarget, event.target)) {
-                applyAffordance(selectAllAffordance(event, {
-                  allSelected: editor.selectedCells.length === sheet.rows.length * sheet.columns.length,
-                }, { repeat: "preserve" }), {
-                  hand: (hand) => {
-                    if (hand.type !== "select-all") return;
-                    run(() => dispatchIntent({ type: "selection.select-all" }), "All cells selected");
-                    event.preventDefault();
-                  },
-                });
-              }
-              if (!event.defaultPrevented) editing.getKeyDownHandler()(event);
-            }}
-            className={classes("min-w-0 overflow-auto", ui.state.focus)}
-          >
-            <table role="grid" aria-label="Project sheet" aria-multiselectable="true" className={classes("w-full min-w-[34rem]", ui.surface.table, ui.text.body)}>
-              <thead>
-                <tr>
-                  <th className={classes("w-10 px-2 py-2 text-center", ui.surface.gridIndex, ui.text.meta)} aria-label="Row number" />
-                  {sheet.columns.map((column) => (
-                    <th key={column.id} scope="col" className={classes("px-3 py-2", ui.surface.gridHead, ui.text.heading)}>{column.label}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {sheet.rows.map((row, rowIndex) => (
-                  <tr key={row.id}>
-                    <th scope="row" className={classes("px-2 py-2 text-center", ui.surface.gridIndex, ui.text.meta)}>{rowIndex + 1}</th>
-                    {sheet.columns.map((column) => {
-                      const point = { rowId: row.id, columnId: column.id };
-                      const item = editing.getCell(point);
-                      return (
-                        <GridCell
-                          key={column.id}
-                          {...webGridCellAddressProps(point)}
-                          {...rovingFocusItemProps(item.getIsFocus())}
-                          data-row-id={row.id}
-                          data-column-id={column.id}
-                          className={classes("p-0", ui.surface.gridCell)}
-                          {...editingItemProps(item)}
-                        >
-                            <Field
-                              label={`${column.label} row ${rowIndex + 1}`}
-                              presentation="seamless"
-                              value={jsonCellText(row.cells[column.id])}
-                              onValueChange={(value) => run(
-                                () => dispatchIntent({ type: "cell.commit", rowId: row.id, columnId: column.id, value }),
-                                `${column.label} committed`,
-                              )}
-                              className="w-full min-w-0"
-                            />
-                        </GridCell>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click or Mod+Space toggles a cell. Arrows move by the visible grid; Shift+arrows extend it. Delete clears selected cells. Fill selected changes every selected cell in one transaction.</p>
-          </section>
-        </ProductShell>
-    </DemoPage>
-  );
-}
-
-function focusCell(surface: HTMLElement | null, point: { readonly rowId: string; readonly columnId: string }) {
-  findWebGridCell<HTMLElement>(surface, point)?.querySelector<HTMLInputElement>("input")?.focus();
+  return <DemoPage documentation={<PageHeader illustration="braces" title="Sheet">셀을 선택하고 F2 또는 더블클릭으로 편집하세요. Enter는 아래로 이동합니다. 방향키·Tab으로 이동하고 Shift로 범위를 확장합니다.</PageHeader>}>
+    <Tabs label="문서 형식" value={mode} onValueChange={setMode} options={[{id: "sheet", label: "Sheet"}, {id: "markdown", label: "Markdown"}]} tabId={value => `sheet-${value}-tab`} panelId={value => `sheet-${value}-panel`} />
+    <section role="tabpanel" id={`sheet-${mode}-panel`} aria-labelledby={`sheet-${mode}-tab`}>
+    <ProductShell inspector={<Inspector placement="inline" items={[
+      {label: mode === "sheet" ? "Canonical JSON" : "Markdown 원문", value: mode === "sheet" ? snapshot.value : source.value, testId: "sheet-canonical-json", size: "tall"},
+      {label: "Selection", meta: `열 좌표 A–${sheetColumnLabel((snapshot.value as SheetDocument).columns.length ? (snapshot.value as SheetDocument).columns.length - 1 : 0)}`, value: snapshot.selection, testId: "sheet-selection-json", size: "compact"},
+    ]} />}><SheetHand key={mode} editor={editor} label="Project sheet" headerRow={mode === "markdown"} profile={mode === "markdown" ? "document-table" : "spreadsheet-grid"} {...(mode === "markdown" ? {renderCell:(value:string) => <MarkdownRenderer content={value} components={{p:({children}) => <span>{children}</span>}} />,renderEditor:(props:import("@interactive-os/json-document-sheet").SheetCellEditorProps) => <MarkdownCellEditor {...props} />} : {})} /></ProductShell>
+    </section>
+  </DemoPage>;
 }

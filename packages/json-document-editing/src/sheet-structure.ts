@@ -1,0 +1,61 @@
+import type { SheetColumn, SheetDocument, SheetRow, SheetSelection } from "./sheet.js";
+
+export type SheetStructureIntent =
+  | { readonly type: "row.insert"; readonly index: number; readonly row?: SheetRow }
+  | { readonly type: "row.delete"; readonly rowId: string }
+  | { readonly type: "column.insert"; readonly index: number; readonly column?: SheetColumn }
+  | { readonly type: "column.delete"; readonly columnId: string };
+
+export interface SheetStructurePolicy {
+  readonly headerRows?: number;
+  readonly minimumColumns?: number;
+}
+export interface SheetStructureActions {
+  readonly insertRow: SheetStructureIntent;
+  readonly insertColumn: SheetStructureIntent;
+  readonly deleteRow: SheetStructureIntent | null;
+  readonly deleteColumn: SheetStructureIntent | null;
+}
+
+/** Zero-based spreadsheet column coordinates: A … Z, AA … AZ, BA … */
+export function sheetColumnLabel(index: number): string {
+  if (!Number.isSafeInteger(index) || index < 0) throw new RangeError("Column index must be a nonnegative safe integer");
+  let remaining = index + 1, label = "";
+  while (remaining > 0) { remaining--; label = String.fromCharCode(65 + remaining % 26) + label; remaining = Math.floor(remaining / 26); }
+  return label;
+}
+
+export function sheetStructureViolation(document: SheetDocument, intent: SheetStructureIntent, policy: SheetStructurePolicy): string | null {
+  const headerRows = policy.headerRows ?? 0;
+  if (intent.type === "row.insert" && intent.index < headerRows) return "sheet.header-protected";
+  if (intent.type === "row.delete" && document.rows.findIndex(row => row.id === intent.rowId) >= 0 && document.rows.findIndex(row => row.id === intent.rowId) < headerRows) return "sheet.header-protected";
+  if (intent.type === "column.delete" && document.columns.length <= (policy.minimumColumns ?? 0)) return "sheet.minimum-columns";
+  return null;
+}
+
+export function sheetStructureActions(document: SheetDocument, selection: SheetSelection, policy: SheetStructurePolicy): SheetStructureActions {
+  const focus = selection.focus;
+  const row = document.rows.findIndex(row => row.id === focus?.rowId);
+  const column = document.columns.findIndex(column => column.id === focus?.columnId);
+  const deleteRow: SheetStructureIntent | null = row < 0 ? null : {type: "row.delete", rowId: focus!.rowId};
+  const deleteColumn: SheetStructureIntent | null = column < 0 ? null : {type: "column.delete", columnId: focus!.columnId};
+  return {
+    insertRow: {type: "row.insert", index: Math.max(policy.headerRows ?? 0, row + 1)},
+    insertColumn: {type: "column.insert", index: column + 1},
+    deleteRow: deleteRow && !sheetStructureViolation(document, deleteRow, policy) ? deleteRow : null,
+    deleteColumn: deleteColumn && !sheetStructureViolation(document, deleteColumn, policy) ? deleteColumn : null,
+  };
+}
+
+export function createSheetRow(document: SheetDocument): SheetRow {
+  return {id: availableId(document.rows, "row"), cells: Object.fromEntries(document.columns.map(column => [column.id, ""]))};
+}
+export function createSheetColumn(document: SheetDocument): SheetColumn {
+  return {id: availableId(document.columns, "column"), label: sheetColumnLabel(document.columns.length)};
+}
+function availableId(values: ReadonlyArray<{readonly id: string}>, prefix: string): string {
+  const ids = new Set(values.map(value => value.id));
+  let index = 1;
+  while (ids.has(`${prefix}-${index}`)) index++;
+  return `${prefix}-${index}`;
+}
