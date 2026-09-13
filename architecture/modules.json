@@ -248,7 +248,16 @@
     ],
     "responsibility": "선택·이동·취소 등 입력 독립 조작 의미와 수명",
     "entrypoint": "packages/json-document-affordance/src/index.ts",
-    "subpaths": [],
+    "subpaths": [
+      {
+        "packageName": "@interactive-os/json-document-affordance/axis-resize",
+        "entrypoint": "packages/json-document-affordance/src/axis-resize.ts"
+      },
+      {
+        "packageName": "@interactive-os/json-document-affordance/grid-fill",
+        "entrypoint": "packages/json-document-affordance/src/grid-fill.ts"
+      }
+    ],
     "referencePath": "packages/json-document-affordance/docs/api-reference.md"
   },
   {

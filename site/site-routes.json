@@ -253,7 +253,10 @@
         "/demo/selection"
       ]
     },
-    "parentPath": "/docs/editing"
+    "parentPath": "/docs/editing",
+    "documentIncludes": [
+      "packages/json-document-selection/docs/grid-traversal.md"
+    ]
   },
   {
     "path": "/docs/api/editing",
@@ -562,7 +565,8 @@
     "documentIncludes": [
       "packages/json-document-affordance/docs/plane-select.md",
       "packages/json-document-affordance/docs/resize.md",
-      "packages/json-document-affordance/docs/cell-editing.md"
+      "packages/json-document-affordance/docs/cell-editing.md",
+      "packages/json-document-affordance/docs/grid-interaction.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-affordance",

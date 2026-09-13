@@ -13,10 +13,10 @@ test("Sheet selects ranges, edits deliberately, moves, copies, pastes and undoes
  await page.getByRole("button",{name:"실행 취소",exact:true}).click();
  await expect(cells.nth(7)).toHaveText("Review");
  await cells.nth(0).click(); await cells.nth(0).press("ArrowRight"); await expect(cells.nth(1)).toBeFocused();
- await cells.nth(1).press("Enter");
+ await cells.nth(1).press("F2");
  const input=grid.getByRole("textbox"); await input.fill("Changed"); await input.press("Escape");
  await expect(cells.nth(1)).toHaveText("Draft");
- await cells.nth(1).press("Enter"); await input.fill("Changed"); await input.press("Tab");
+ await cells.nth(1).press("F2"); await input.fill("Changed"); await input.press("Tab");
  await expect(cells.nth(1)).toHaveText("Changed"); await expect(cells.nth(2)).toBeFocused();
  await cells.nth(2).press("Shift+Tab"); await expect(cells.nth(1)).toBeFocused();
  await page.getByRole("button",{name:"열 추가",exact:true}).click(); await expect(cells).toHaveCount(16);
@@ -93,4 +93,46 @@ test("table actions stay icon-only and editing preserves cell geometry", async (
   await input.press("Escape");
   expect(await cell.boundingBox()).toEqual(before); expect(await grid.boundingBox()).toEqual(gridBefore);
  }
+});
+
+test("Sheet preserves its selected rectangle during Tab/Enter entry and Ctrl+Enter fill", async ({page}) => {
+ await page.goto('/demo/sheet');const grid=page.getByRole('grid'),cells=grid.getByRole('gridcell');
+ await cells.nth(0).click();await cells.nth(4).click({modifiers:['Shift']});
+ await cells.nth(4).press('Tab');await expect(cells.nth(0)).toBeFocused();
+ await cells.nth(0).press('Enter');await expect(cells.nth(3)).toBeFocused();
+ await cells.nth(3).press('F2');let input=grid.getByRole('textbox');await input.fill('edited');await input.press('Enter');
+ await expect(cells.nth(1)).toBeFocused();await expect(grid.locator('[data-selected="true"]')).toHaveCount(4);
+ await cells.nth(1).press('F2');input=grid.getByRole('textbox');await input.fill('filled');await input.press('Control+Enter');
+ for(const i of [0,1,3,4]) await expect(cells.nth(i)).toHaveText('filled');
+ await page.getByRole('button',{name:'실행 취소',exact:true}).click();await expect(cells.nth(3)).toHaveText('edited');await expect(cells.nth(0)).toHaveText('Alpha');
+});
+
+test("drag selection, fill handle, row/column selection and resize use document transactions", async ({page}) => {
+ await page.goto('/demo/sheet');const grid=page.getByRole('grid'),cells=grid.getByRole('gridcell');
+ const start=await cells.nth(0).boundingBox(),end=await cells.nth(4).boundingBox();
+ await page.mouse.move(start!.x+20,start!.y+12);await page.mouse.down();await page.mouse.move(end!.x+20,end!.y+12,{steps:8});await page.mouse.up();
+ await expect(grid.locator('[data-selected="true"]')).toHaveCount(4);
+ await grid.getByRole('button',{name:'선택 범위 채우기'}).click();
+ await expect(cells.nth(6)).toHaveText('Alpha');await expect(cells.nth(7)).toHaveText('Draft');
+ await page.getByRole('button',{name:'실행 취소',exact:true}).click();await expect(cells.nth(6)).toHaveText('Gamma');
+ await grid.getByRole('button',{name:'Name 열 선택',exact:true}).click();await expect(grid.locator('[data-selected="true"]')).toHaveCount(4);
+ await grid.getByRole('button',{name:'2행 선택',exact:true}).click();await expect(grid.locator('[data-selected="true"]')).toHaveCount(3);
+ const before=(await cells.nth(0).boundingBox())!.width;
+ await grid.getByRole('button',{name:'Name 열 너비 조절'}).press('ArrowRight');
+ expect((await cells.nth(0).boundingBox())!.width).toBeGreaterThan(before);
+ await page.getByRole('button',{name:'실행 취소',exact:true}).click();
+ expect((await cells.nth(0).boundingBox())!.width).toBeCloseTo(before,0);
+});
+
+test("Bear keeps inline formatting visible during cell editing and refuses unsupported layout", async ({page}) => {
+ await page.goto('/applications/bear');const grid=page.getByRole('grid'),cell=grid.getByRole('gridcell').last();
+ await expect(grid.getByRole('button',{name:/너비 조절|높이 조절/})).toHaveCount(0);
+ await expect(cell.locator('strong')).toBeVisible();await cell.scrollIntoViewIfNeeded();const before=await cell.boundingBox();
+ const weight=await cell.locator('strong').evaluate(el=>getComputedStyle(el).fontWeight);
+ await cell.dblclick();const input=grid.getByRole('textbox');
+ await expect(input.locator('strong')).toBeVisible();
+ expect(await input.locator('strong').evaluate(el=>getComputedStyle(el).fontWeight)).toBe(weight);
+ await expect(input.locator('[data-markdown-delimiter]').first()).toBeHidden();
+ expect(await cell.boundingBox()).toEqual(before);await input.press('Escape');
+ await expect(cell.locator('strong')).toBeVisible();expect(await cell.boundingBox()).toEqual(before);
 });

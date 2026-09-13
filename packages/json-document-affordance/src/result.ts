@@ -15,6 +15,7 @@ export type AffordanceHand =
     readonly operation: SelectOperation;
     readonly rect?: AffordanceRect;
     readonly objectIds?: ReadonlyArray<string>;
+    readonly axis?: "row" | "column";
   }
   | { readonly type: "move"; readonly direction: AffordanceMoveDirection; readonly operation: "replace" | "extend" }
   | { readonly type: "boundary"; readonly edge: "start" | "end"; readonly operation: "replace" | "extend" }
@@ -46,7 +47,7 @@ export type AffordanceHand =
     readonly edge?: "start" | "end";
     readonly operation: "replace" | "extend";
   }
-  | { readonly type: "rename"; readonly action: "begin" | "commit" | "cancel"; readonly initialText?: string; readonly move?: "up" | "down" }
+  | { readonly type: "rename"; readonly action: "begin" | "commit" | "cancel"; readonly initialText?: string; readonly move?: "up" | "down"; readonly target?: "selection" }
   | { readonly type: "activate" }
   | {
     readonly type: "press";

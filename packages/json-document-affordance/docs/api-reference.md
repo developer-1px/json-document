@@ -38,6 +38,7 @@ type AffordanceHand =
     readonly operation: SelectOperation;
     readonly rect?: AffordanceRect;
     readonly objectIds?: ReadonlyArray<string>;
+    readonly axis?: "row" | "column";
   }
   | { readonly type: "move"; readonly direction: AffordanceMoveDirection; readonly operation: "replace" | "extend" }
   | { readonly type: "boundary"; readonly edge: "start" | "end"; readonly operation: "replace" | "extend" }
@@ -69,7 +70,7 @@ type AffordanceHand =
     readonly edge?: "start" | "end";
     readonly operation: "replace" | "extend";
   }
-  | { readonly type: "rename"; readonly action: "begin" | "commit" | "cancel"; readonly initialText?: string; readonly move?: "up" | "down" }
+  | { readonly type: "rename"; readonly action: "begin" | "commit" | "cancel"; readonly initialText?: string; readonly move?: "up" | "down"; readonly target?: "selection" }
   | { readonly type: "activate" }
   | {
     readonly type: "press";
@@ -244,12 +245,22 @@ caretCursor(direction: "horizontal" | "vertical"): "text" | "vertical-text"
 ## `cellEditingAffordance`
 
 ```ts
-cellEditingAffordance(stroke: WebKeyboardStroke, state: { readonly editing: boolean; readonly allSelected: boolean; }): AffordancePreview
+cellEditingAffordance(stroke: WebKeyboardStroke, state: { readonly editing: boolean; readonly allSelected: boolean; readonly enter?: "edit" | "move"; }): AffordancePreview
+```
+## `clampResizeValue`
+
+```ts
+clampResizeValue(value: number, bounds: ResizeBounds): number
 ```
 ## `clickCountAffordance`
 
 ```ts
 clickCountAffordance(detail: number): AffordancePreview
+```
+## `collapseResizeValue`
+
+```ts
+collapseResizeValue(current: number, previous: number | null, bounds: ResizeBounds, defaultValue: number): { value: number; previous: number | null; }
 ```
 ## `commitAffordance`
 
@@ -432,6 +443,11 @@ editingCommandFromWebKeyboardStroke(stroke: WebKeyboardStroke): WebKeyboardComma
 ```ts
 escapeAffordance(input: { readonly key?: string; readonly type?: string; readonly grabbing?: boolean; readonly selected?: boolean; }): AffordancePreview
 ```
+## `extendGridFill`
+
+```ts
+extendGridFill(source: GridFillBounds, point: { readonly row: number; readonly column: number; }, bounds: { readonly rowCount: number; readonly columnCount: number; }): GridFillBounds
+```
 ## `FloatingAlignment`
 
 ```ts
@@ -530,6 +546,13 @@ interface GestureSessionOptions<Gesture extends GestureState> {
 ```ts
 interface GestureState {
   readonly type: string;
+}
+```
+## `GridFillBounds`
+
+```ts
+interface GridFillBounds {
+  readonly rMin: number; readonly rMax: number; readonly cMin: number; readonly cMax: number;
 }
 ```
 ## `historyAffordance`
@@ -862,6 +885,14 @@ interface RenameSessionSnapshot<Key> {
 ```ts
 resizeAffordance(origin: Point, point: Point, edge: ResizeEdge, modifiers?: { readonly shiftKey?: boolean; readonly altKey?: boolean; }, size?: Pick<Rect, "width" | "height">): AffordancePreview
 ```
+## `ResizeBounds`
+
+```ts
+interface ResizeBounds {
+  min: number
+  max?: number
+}
+```
 ## `ResizeEdge`
 
 ```ts
@@ -875,6 +906,11 @@ type ResizeHandleDescriptor = {
   readonly edge: ResizeEdge;
   readonly cursor?: InteractionHandleCursorPolicy;
 };
+```
+## `resizeValueForKey`
+
+```ts
+resizeValueForKey(current: number, key: string, shiftKey: boolean, axis: "x" | "y", bounds: ResizeBounds): number | null
 ```
 ## `resolveAffordanceKey`
 
@@ -895,6 +931,11 @@ type SelectOperation = "replace" | "extend" | "toggle";
 
 ```ts
 snapAffordance(point: Point, options: { readonly grid: number; readonly disable?: boolean; }): AffordancePreview
+```
+## `storedResizeValue`
+
+```ts
+storedResizeValue(value: number, bounds: ResizeBounds): number
 ```
 ## `treeAffordance`
 
@@ -1027,4 +1068,50 @@ wheelAffordance(input: { readonly deltaX?: number; readonly deltaY?: number; rea
 
 ```ts
 zoomAffordance(input: { readonly key?: string; }): AffordancePreview
+```
+## `@interactive-os/json-document-affordance/axis-resize`
+
+아래 API는 package root가 아닌 이 subpath에서 import합니다.
+### `clampResizeValue`
+
+```ts
+clampResizeValue(value: number, bounds: ResizeBounds): number
+```
+### `collapseResizeValue`
+
+```ts
+collapseResizeValue(current: number, previous: number | null, bounds: ResizeBounds, defaultValue: number): { value: number; previous: number | null; }
+```
+### `ResizeBounds`
+
+```ts
+interface ResizeBounds {
+  min: number
+  max?: number
+}
+```
+### `resizeValueForKey`
+
+```ts
+resizeValueForKey(current: number, key: string, shiftKey: boolean, axis: "x" | "y", bounds: ResizeBounds): number | null
+```
+### `storedResizeValue`
+
+```ts
+storedResizeValue(value: number, bounds: ResizeBounds): number
+```
+## `@interactive-os/json-document-affordance/grid-fill`
+
+아래 API는 package root가 아닌 이 subpath에서 import합니다.
+### `extendGridFill`
+
+```ts
+extendGridFill(source: GridFillBounds, point: { readonly row: number; readonly column: number; }, bounds: { readonly rowCount: number; readonly columnCount: number; }): GridFillBounds
+```
+### `GridFillBounds`
+
+```ts
+interface GridFillBounds {
+  readonly rMin: number; readonly rMax: number; readonly cMin: number; readonly cMax: number;
+}
 ```

@@ -7,13 +7,14 @@ export interface MarkdownEditingBindingOptions {
   readonly editor: TextEditor;
   readonly root: HTMLElement;
   readonly mountTable?: MarkdownDOMOptions["mountTable"];
+  readonly revealSyntax?: boolean;
 }
 
 /** Connect Markdown DOM, syntax-owned Enter, and the editor's existing history. */
-export function createMarkdownEditingBinding({editor, root, mountTable}: MarkdownEditingBindingOptions): ContentEditableBinding {
+export function createMarkdownEditingBinding({editor, root, mountTable, revealSyntax}: MarkdownEditingBindingOptions): ContentEditableBinding {
   return createContentEditableBinding({
     document: editor.document, pointer: editor.pointer, editor, root,
-    dom: createMarkdownDOMAdapter({editor, ...(mountTable ? {mountTable} : {})}),
+    dom: createMarkdownDOMAdapter({editor, ...(mountTable ? {mountTable} : {}), ...(revealSyntax === undefined ? {} : {revealSyntax})}),
     indent(editor, direction) {
       const next = indentMarkdownList(editor.text, editor.snapshot.selection, direction);
       return next ? editor.replace(next.value, next.selection) : null;

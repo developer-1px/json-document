@@ -1,3 +1,11 @@
+import gridTraversalSource from "../../../../packages/json-document-selection/src/interaction/grid-traversal.ts?raw";
+import sheetNavigationSource from "../../../../packages/json-document-editing/src/sheet-navigation.ts?raw";
+import sheetAxisResizeSource from "../../../../packages/json-document-sheet/src/sheet-axis-resize.tsx?raw";
+import sheetRangeSelectionSource from "../../../../packages/json-document-sheet/src/sheet-range-selection.tsx?raw";
+import sheetFillHandleSource from "../../../../packages/json-document-sheet/src/sheet-fill-handle.tsx?raw";
+import axisResizeSource from "../../../../packages/json-document-affordance/src/axis-resize.ts?raw";
+import gridFillSource from "../../../../packages/json-document-affordance/src/grid-fill.ts?raw";
+import markdownCellEditorSource from "../../../../packages/json-document-markdown-react/src/MarkdownCellEditor.tsx?raw";
 import sheetStructureSource from "../../../../packages/json-document-editing/src/sheet-structure.ts?raw";
 import cellEditingSource from "../../../../packages/json-document-affordance/src/cell-editing.ts?raw";
 import renameSessionBindingSource from "../../../../packages/json-document-react/src/use-rename-session.ts?raw";
@@ -216,6 +224,14 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-selection/src/interaction/grid-traversal.ts", gridTraversalSource],
+  ["packages/json-document-editing/src/sheet-navigation.ts", sheetNavigationSource],
+  ["packages/json-document-sheet/src/sheet-axis-resize.tsx", sheetAxisResizeSource],
+  ["packages/json-document-sheet/src/sheet-range-selection.tsx", sheetRangeSelectionSource],
+  ["packages/json-document-sheet/src/sheet-fill-handle.tsx", sheetFillHandleSource],
+  ["packages/json-document-affordance/src/axis-resize.ts", axisResizeSource],
+  ["packages/json-document-affordance/src/grid-fill.ts", gridFillSource],
+  ["packages/json-document-markdown-react/src/MarkdownCellEditor.tsx", markdownCellEditorSource],
   ["packages/json-document-editing/src/sheet-structure.ts", sheetStructureSource],
   ["packages/json-document-affordance/src/cell-editing.ts", cellEditingSource],
   ["packages/json-document-react/src/use-rename-session.ts", renameSessionBindingSource],
@@ -407,8 +423,11 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
-  ["packages/json-document-editing/src/sheet.ts", ["packages/json-document-editing/src/sheet-structure.ts"]],
-  ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", ["packages/json-document-editing/src/markdown-table.ts"]],
+  ["packages/json-document-sheet/src/sheet-hand.tsx", ["packages/json-document-sheet/src/sheet-axis-resize.tsx", "packages/json-document-sheet/src/sheet-range-selection.tsx", "packages/json-document-sheet/src/sheet-fill-handle.tsx"]],
+  ["packages/json-document-editing/src/sheet-navigation.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
+  ["packages/json-document-web/src/keyboard.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
+  ["packages/json-document-editing/src/sheet.ts", ["packages/json-document-editing/src/sheet-structure.ts", "packages/json-document-editing/src/sheet-navigation.ts"]],
+  ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", ["packages/json-document-editing/src/markdown-table.ts", "packages/json-document-markdown-react/src/MarkdownCellEditor.tsx"]],
   ["packages/json-document-markdown/src/list-editing.ts", ["packages/json-document-markdown/src/source-edit.ts"]],
   ["packages/json-document-markdown/src/paragraph.ts", ["packages/json-document-markdown/src/list-editing.ts", "packages/json-document-markdown/src/source-edit.ts"]],
   ["routes/markdown-caret/MarkdownCaretRoute.tsx", ["app/interaction-recording/InteractionRecordingControls.tsx"]],
@@ -417,6 +436,42 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-selection",
+    symbol: "traverseGrid",
+    sourcePath: "packages/json-document-selection/src/interaction/grid-traversal.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "sheetNavigationTarget",
+    sourcePath: "packages/json-document-editing/src/sheet-navigation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "extendGridFill",
+    sourcePath: "packages/json-document-affordance/src/grid-fill.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "storedResizeValue",
+    sourcePath: "packages/json-document-affordance/src/axis-resize.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "resizeValueForKey",
+    sourcePath: "packages/json-document-affordance/src/axis-resize.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-react",
+    symbol: "MarkdownCellEditor",
+    sourcePath: "packages/json-document-markdown-react/src/MarkdownCellEditor.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "hitTestWebGrid",
+    sourcePath: "packages/json-document-web/src/grid-cell.ts",
+  },
+
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "sheetColumnLabel",

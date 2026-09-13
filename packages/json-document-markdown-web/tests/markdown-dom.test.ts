@@ -173,3 +173,13 @@ test("hidden quote prefix deletes as one source unit and leaves extra spaces", (
   expect(dom.resolveDeletionSelection!(root, {anchor:2, focus:2}, "backward")).toEqual({anchor:0, focus:2});
   expect(dom.observe(root).value).toBe(source);
 });
+
+test('embedded cell editing conceals syntax while retaining source coordinates',()=>{
+ const root=document.createElement('div');document.body.append(root);
+ const source='**한글** and *text*';const dom=createMarkdownDOMAdapter({revealSyntax:false});
+ dom.render(root,source,{anchor:2,focus:4});
+ expect(root.querySelector('strong')?.textContent).toContain('한글');
+ expect([...root.querySelectorAll<HTMLElement>('[data-markdown-delimiter]')].every(el=>el.hidden)).toBe(true);
+ expect(dom.restoreSelection(root,{anchor:2,focus:4})).toBe(true);
+ expect(dom.observe(root)).toEqual({value:source,selection:{anchor:2,focus:4}});
+});

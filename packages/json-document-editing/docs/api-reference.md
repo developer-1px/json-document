@@ -1546,6 +1546,7 @@ interface SheetDocument extends Record<string, JSONValue> {
 
 ```ts
 interface SheetEditor {
+  readonly capabilities: {readonly resize: boolean};
   readonly structure: SheetStructureActions;
   readonly snapshot: EditingSnapshot<SheetSelection>;
   readonly selectedCells: ReadonlyArray<SheetCell>;
@@ -1562,6 +1563,8 @@ interface SheetEditor {
 
 ```ts
 interface SheetEditorOptions extends EditingHistoryOptions {
+  /** False for formats such as GFM that cannot persist row heights or column widths. */
+  readonly resize?: boolean;
   readonly structure?: SheetStructurePolicy;
   /** Restore selection when projecting a new source snapshot; missing cells are reconciled. */
   readonly selection?: SheetSelection;
@@ -1572,6 +1575,13 @@ interface SheetEditorOptions extends EditingHistoryOptions {
 ```ts
 type SheetIntent =
   | SheetStructureIntent
+  | { readonly type: "column.resize"; readonly columnId: string; readonly width: number }
+  | { readonly type: "row.resize"; readonly rowId: string; readonly height: number }
+  | { readonly type: "selection.range"; readonly range: SheetRange }
+  | { readonly type: "selection.row"; readonly rowId: string }
+  | { readonly type: "selection.column"; readonly columnId: string }
+  | { readonly type: "range.fill"; readonly source: SheetRange; readonly target: SheetRange }
+  | { readonly type: "selection.navigate"; readonly direction: SheetTraversalDirection; readonly topology?: SheetTopology }
   | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
@@ -1589,12 +1599,18 @@ type SheetIntent =
       readonly rowId: string;
       readonly columnId: string;
       readonly value: JSONValue;
+      readonly preserveSelection?: boolean;
     }
   | {
       readonly type: "clipboard.paste";
       readonly clipboard: SheetClipboard;
       readonly topology?: SheetTopology;
     };
+```
+## `sheetNavigationTarget`
+
+```ts
+sheetNavigationTarget(topology: GridTopology, selection: SheetSelection, direction: SheetTraversalDirection): { readonly point: GridPoint; readonly preserveRange: boolean; } | null
 ```
 ## `SheetPoint`
 
@@ -1625,7 +1641,7 @@ interface SheetRow extends Record<string, JSONValue> {
 ```ts
 interface SheetSelection extends Record<string, JSONValue> {
   readonly kind: "range";
-  /** Primary range aliases retained for single-range consumers. */
+  /** Anchor of the primary range; focus is the active cell and may move inside that range. */
   readonly anchor: SheetPoint | null;
   readonly focus: SheetPoint | null;
   readonly ranges: ReadonlyArray<SheetRange>;
@@ -1663,6 +1679,11 @@ interface SheetStructurePolicy {
 
 ```ts
 type SheetTopology = GridTopology;
+```
+## `SheetTraversalDirection`
+
+```ts
+type SheetTraversalDirection = "previous" | "next" | "up" | "down";
 ```
 ## `TextChange`
 

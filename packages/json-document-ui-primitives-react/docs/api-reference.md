@@ -168,6 +168,8 @@ GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & { readonly selected: bo
 ```ts
 type InteractionHandleBindingOptions<ElementType extends Element = HTMLElement> = {
   readonly descriptor: InteractionHandleDescriptor;
+  /** Delegated surfaces capture on the hit item so native click/double-click retain their target. */
+  readonly captureTarget?: (event: PointerEvent<ElementType>) => ElementType;
   readonly onHandle: (event: InteractionHandleEvent, input: PointerEvent<ElementType>) => void;
 };
 ```

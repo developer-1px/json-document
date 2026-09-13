@@ -164,6 +164,11 @@ focusWebItem<Item extends WebFocusableItem>(root: WebFocusItemRoot<Item> | null,
 ```ts
 gridBoundary(topology: GridTopology, point: GridPoint, edge: "start" | "end"): GridPoint | null
 ```
+## `hitTestWebGrid`
+
+```ts
+hitTestWebGrid<ElementType extends WebGridCellAddressElement & { closest(selectors: string): ElementType | null; }>(root: { readonly ownerDocument: { elementFromPoint(x: number, y: number): ElementType | null; }; contains(element: NoInfer<ElementType>): boolean; }, point: { readonly x: number; readonly y: number; }): GridPoint | null
+```
 ## `isWebComposingKey`
 
 ```ts

@@ -1,3 +1,4 @@
+import { MarkdownCellEditor, MarkdownRenderer } from "@interactive-os/json-document-markdown-react";
 import { useState } from "react";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createMarkdownTableEditor } from "@interactive-os/json-document-editing";
@@ -32,13 +33,13 @@ export function SheetDemo() {
   const snapshot = useEditingSnapshot(editor);
   const source = useEditingSnapshot(text);
 
-  return <DemoPage documentation={<PageHeader illustration="braces" title="Sheet">셀을 선택하고 Enter 또는 더블클릭으로 편집하세요. 방향키·Tab으로 이동하고 Shift로 범위를 확장합니다.</PageHeader>}>
+  return <DemoPage documentation={<PageHeader illustration="braces" title="Sheet">셀을 선택하고 F2 또는 더블클릭으로 편집하세요. Enter는 아래로 이동합니다. 방향키·Tab으로 이동하고 Shift로 범위를 확장합니다.</PageHeader>}>
     <Tabs label="문서 형식" value={mode} onValueChange={setMode} options={[{id: "sheet", label: "Sheet"}, {id: "markdown", label: "Markdown"}]} tabId={value => `sheet-${value}-tab`} panelId={value => `sheet-${value}-panel`} />
     <section role="tabpanel" id={`sheet-${mode}-panel`} aria-labelledby={`sheet-${mode}-tab`}>
     <ProductShell inspector={<Inspector placement="inline" items={[
       {label: mode === "sheet" ? "Canonical JSON" : "Markdown 원문", value: mode === "sheet" ? snapshot.value : source.value, testId: "sheet-canonical-json", size: "tall"},
       {label: "Selection", meta: `열 좌표 A–${sheetColumnLabel((snapshot.value as SheetDocument).columns.length ? (snapshot.value as SheetDocument).columns.length - 1 : 0)}`, value: snapshot.selection, testId: "sheet-selection-json", size: "compact"},
-    ]} />}><SheetHand key={mode} editor={editor} label="Project sheet" headerRow={mode === "markdown"} /></ProductShell>
+    ]} />}><SheetHand key={mode} editor={editor} label="Project sheet" headerRow={mode === "markdown"} profile={mode === "markdown" ? "document-table" : "spreadsheet-grid"} {...(mode === "markdown" ? {renderCell:(value:string) => <MarkdownRenderer content={value} components={{p:({children}) => <span>{children}</span>}} />,renderEditor:(props:import("@interactive-os/json-document-sheet").SheetCellEditorProps) => <MarkdownCellEditor {...props} />} : {})} /></ProductShell>
     </section>
   </DemoPage>;
 }

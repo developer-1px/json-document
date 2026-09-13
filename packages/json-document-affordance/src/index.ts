@@ -153,3 +153,8 @@ export {
 } from "./select.js";
 
 export { cellEditingAffordance } from "./cell-editing.js";
+
+export { clampResizeValue, storedResizeValue, resizeValueForKey, collapseResizeValue } from "./axis-resize.js";
+export type { ResizeBounds } from "./axis-resize.js";
+export { extendGridFill } from "./grid-fill.js";
+export type { GridFillBounds } from "./grid-fill.js";

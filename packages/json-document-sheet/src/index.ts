@@ -1,1 +1,1 @@
-export { SheetHand, type SheetHandProps } from "./sheet-hand.js";
+export { SheetHand, type SheetHandProps, type SheetCellEditorProps } from "./sheet-hand.js";

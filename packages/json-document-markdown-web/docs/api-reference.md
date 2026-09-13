@@ -14,12 +14,14 @@ createMarkdownDOMAdapter(options?: MarkdownDOMOptions): TextDOMAdapter
 ## `createMarkdownEditingBinding`
 
 ```ts
-createMarkdownEditingBinding({ editor, root, mountTable }: MarkdownEditingBindingOptions): ContentEditableBinding
+createMarkdownEditingBinding({ editor, root, mountTable, revealSyntax }: MarkdownEditingBindingOptions): ContentEditableBinding
 ```
 ## `MarkdownDOMOptions`
 
 ```ts
 interface MarkdownDOMOptions {
+  /** Keep inline syntax concealed during editing, e.g. an embedded document-table cell. */
+  readonly revealSyntax?: boolean;
   /** Enables task controls using the existing source editor and its history. */
   readonly editor?: TextEditor;
   /** Mount a table Hand in a source-excluded island. Return its disposal callback. */
@@ -33,5 +35,6 @@ interface MarkdownEditingBindingOptions {
   readonly editor: TextEditor;
   readonly root: HTMLElement;
   readonly mountTable?: MarkdownDOMOptions["mountTable"];
+  readonly revealSyntax?: boolean;
 }
 ```

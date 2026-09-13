@@ -25,6 +25,8 @@ interface Surface {
 }
 
 export interface MarkdownDOMOptions {
+  /** Keep inline syntax concealed during editing, e.g. an embedded document-table cell. */
+  readonly revealSyntax?: boolean;
   /** Enables task controls using the existing source editor and its history. */
   readonly editor?: TextEditor;
   /** Mount a table Hand in a source-excluded island. Return its disposal callback. */
@@ -40,7 +42,7 @@ export function createMarkdownDOMAdapter(options: MarkdownDOMOptions = {}): Text
     if (surface.selection === selection || (selection && surface.selection?.anchor === selection.anchor && surface.selection.focus === selection.focus)) return;
     const visit = ({ element, run, children }: RenderedRun): void => {
       if (run.owner) {
-        const active = selection !== null && Math.max(selection.anchor, selection.focus) >= run.owner.from && Math.min(selection.anchor, selection.focus) <= run.owner.to;
+        const active = options.revealSyntax !== false && selection !== null && Math.max(selection.anchor, selection.focus) >= run.owner.from && Math.min(selection.anchor, selection.focus) <= run.owner.to;
         if (run.conceal) element.hidden = run.conceal === "always" || !active;
         else if (run.kind === "imagePreview") element.hidden = active;
         else if (element.getAttribute("data-markdown-active") !== String(active)) element.setAttribute("data-markdown-active", String(active));

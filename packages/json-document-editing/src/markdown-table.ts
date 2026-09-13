@@ -21,7 +21,7 @@ export function createMarkdownTableEditor(text: TextEditor, position: () => numb
     const table = readMarkdownTable(observed, position());
     const width = table?.align.length || table?.rows[0]?.length || 0;
     const columns = Array.from({length: width}, (_, i) => ({id: `c${i}`, label: sheetColumnLabel(i)}));
-    sheet = createSheetEditor({columns, rows: (table?.rows ?? []).map((row, i) => ({id: `r${i}`, cells: Object.fromEntries(columns.map((column, j) => [column.id, row[j] ?? ""]))}))}, {structure: {headerRows: 1, minimumColumns: 1}, ...(selected ? {selection: selected} : {})});
+    sheet = createSheetEditor({columns, rows: (table?.rows ?? []).map((row, i) => ({id: `r${i}`, cells: Object.fromEntries(columns.map((column, j) => [column.id, row[j] ?? ""]))}))}, {resize:false, structure: {headerRows: 1, minimumColumns: 1}, ...(selected ? {selection: selected} : {})});
   };
   const snapshot = () => {read(); return {...sheet.snapshot, revision, canUndo: text.snapshot.canUndo, canRedo: text.snapshot.canRedo};};
   const publish = () => {revision++; const next = snapshot(); listeners.forEach(listener => listener(next));};
@@ -31,7 +31,7 @@ export function createMarkdownTableEditor(text: TextEditor, position: () => numb
     if (!table) return {ok: false, code: "table.unavailable"};
     const result = sheet.dispatch(intent);
     if (!result.ok) return result;
-    if (intent.type === "selection.set" || intent.type === "selection.select-all") {publish(); return {ok: true, snapshot: snapshot()};}
+    if (intent.type === "selection.set" || intent.type === "selection.select-all" || intent.type === "selection.navigate" || intent.type === "selection.range" || intent.type === "selection.row" || intent.type === "selection.column") {publish(); return {ok: true, snapshot: snapshot()};}
     return commit(table);
   };
   const commit = (table: MarkdownTable): EditingResult<SheetSelection> => {
@@ -54,6 +54,7 @@ export function createMarkdownTableEditor(text: TextEditor, position: () => numb
     publish(); return {ok: true, snapshot: snapshot()};
   };
   return {
+    get capabilities() {read(); return sheet.capabilities;},
     get structure() {read(); return sheet.structure;},
     get snapshot() {return snapshot();},
     get selectedCells() {read(); return sheet.selectedCells;},

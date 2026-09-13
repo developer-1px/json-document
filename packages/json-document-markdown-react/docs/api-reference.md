@@ -11,6 +11,11 @@ Markdown 렌더링·편집 표면과 React 수명 연결의 public entrypoint입
 ```ts
 createMarkdownTableEditor(text: TextEditor, position: () => number): SheetEditor
 ```
+## `MarkdownCellEditor`
+
+```ts
+MarkdownCellEditor({ label, value, onValueChange, style, onKeyDown, onBlur }: SheetCellEditorProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
 ## `MarkdownComponents`
 
 ```ts

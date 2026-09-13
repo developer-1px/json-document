@@ -48,6 +48,26 @@ emptyMaterializedRangeSelection<Point>(): MaterializedRangeSelection<Point>
 ```ts
 emptyRangeSelection<Point>(): RangeSelection<Point>
 ```
+## `GridTraversalIndex`
+
+```ts
+interface GridTraversalIndex {
+  readonly rowIndex: number;
+  readonly columnIndex: number;
+}
+```
+## `GridTraversalOptions`
+
+```ts
+interface GridTraversalOptions {
+  readonly rowCount: number;
+  readonly columnCount: number;
+  readonly order: "row-major" | "column-major";
+  readonly reverse?: boolean;
+  /** Cycle inside an explicitly selected rectangle. Outside a selection, stop at the boundary. */
+  readonly wrap?: boolean;
+}
+```
 ## `idlePointerInteraction`
 
 ```ts
@@ -483,4 +503,9 @@ interface SpatialIndex<Key, Point, Region> {
   hitPoint(point: Point, mode: "topmost" | "deepest"): Key | null;
   hitRegion(region: Region, mode: "intersects" | "contains"): readonly Key[];
 }
+```
+## `traverseGrid`
+
+```ts
+traverseGrid(index: GridTraversalIndex, options: GridTraversalOptions): GridTraversalIndex | null
 ```

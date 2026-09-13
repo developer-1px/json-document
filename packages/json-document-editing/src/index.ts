@@ -234,3 +234,5 @@ export { diffText, type TextChange } from "./text-change.js";
 export { sheetColumnLabel } from "./sheet-structure.js";
 export type { SheetStructureIntent, SheetStructurePolicy, SheetStructureActions } from "./sheet-structure.js";
 export { createMarkdownTableEditor } from "./markdown-table.js";
+export { sheetNavigationTarget } from "./sheet-navigation.js";
+export type { SheetTraversalDirection } from "./sheet-navigation.js";
