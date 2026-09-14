@@ -39,7 +39,7 @@ fixture, copy, layout-only CSS, tests와 generated route는 제외합니다.
 
 ${ownerClosed
   ? `${name}의 모델·검증·의미 연산·projection은 \`${audit.closure.owner}\`가 소유합니다. Editing·Selection·React 없이 소비할 수 있으며 기존 Editing export는 호환 경로로 유지합니다. 소유권 확정은 wire Stable 승격을 뜻하지 않습니다.`
-  : `${name}은 현재 Document Type 후보입니다. 기존 package와 Hands에서 실제 책임을 옮기거나 완료를 선언하지 않았습니다.`}
+  : "statusNote" in profile ? profile.statusNote : `${name}은 현재 Document Type 후보입니다. 기존 package와 Hands에서 실제 책임을 옮기거나 완료를 선언하지 않았습니다.`}
 
 ## 목표 경계 · TBD
 

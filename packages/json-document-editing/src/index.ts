@@ -240,3 +240,7 @@ export {sheetSelectionSummary} from "./sheet-summary.js";
 export {parseSheetClipboardText} from "./sheet-text-clipboard.js";
 export {createProjectedSheetEditor, type ProjectedSheetOptions, type ProjectedSheetSource} from "./projected-sheet.js";
 export {createCanvasSheet, createObjectSheetEditor, sheetEmbeddedDocumentType} from "./object-sheet.js";
+
+export {planSheetIntent} from "./sheet-plan.js";
+export type {SheetPlanResult} from "./sheet-plan.js";
+export type {SheetAvailability} from "./sheet.js";

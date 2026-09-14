@@ -37,6 +37,7 @@
     { "path": "./packages/json-document-rich-text-react" },
     { "path": "./packages/json-document-collaboration" },
     { "path": "./packages/contenteditable-collaboration" },
-    { "path": "./packages/json-document-sheet" }
+    { "path": "./packages/json-document-sheet" },
+    { "path": "./packages/json-document-sheet-document" }
   ]
 }

@@ -1,3 +1,6 @@
+import {dispatchSheetIntent} from "./sheet-plan.js";
+import type {SheetDocument,SheetColumn,SheetRow} from "@interactive-os/json-document-sheet-document";
+export type {SheetDocument,SheetColumn,SheetRow} from "@interactive-os/json-document-sheet-document";
 import { createSheetRow, createSheetColumn, sheetStructureActions, sheetStructureViolation, type SheetStructureIntent, type SheetStructurePolicy, type SheetStructureActions } from "./sheet-structure.js";
 import {
   buildPointer,
@@ -27,21 +30,6 @@ import {
 } from "./range-selection.js";
 import { jsonCellText } from "./cell-text.js";
 import { sheetNavigationTarget, type SheetTraversalDirection } from "./sheet-navigation.js";
-
-export interface SheetColumn extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly label: string;
-}
-
-export interface SheetRow extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly cells: Readonly<Record<string, JSONValue>>;
-}
-
-export interface SheetDocument extends Record<string, JSONValue> {
-  readonly columns: ReadonlyArray<SheetColumn>;
-  readonly rows: ReadonlyArray<SheetRow>;
-}
 
 export interface SheetPoint extends Record<string, JSONValue> {
   readonly rowId: string;
@@ -120,7 +108,10 @@ export type SheetIntent =
       readonly topology?: SheetTopology;
     };
 
+export type SheetAvailability = "ready" | "missing" | "invalid" | "readonly";
+
 export interface SheetEditor {
+  readonly availability: SheetAvailability;
   readonly capabilities: {readonly resize: boolean};
   readonly structure: SheetStructureActions;
   readonly snapshot: EditingSnapshot<SheetSelection>;
@@ -146,11 +137,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
   const document = resolveDocumentSource(source);
   const initial = document.value as SheetDocument;
   assertSheetDocument(initial);
-  const firstRow = initial.rows[0];
-  const firstColumn = initial.columns[0];
-  const initialSelection = options.selection
-    ? withPrimaryAliases(reconcileRangeSelection(options.selection, point => initial.rows.some(row => row.id === point.rowId) && initial.columns.some(column => column.id === point.columnId) ? point : null), options.selection.focus && initial.rows.some(row => row.id === options.selection?.focus?.rowId) && initial.columns.some(column => column.id === options.selection?.focus?.columnId) ? options.selection.focus : null)
-    : firstRow && firstColumn ? collapsed(firstRow.id, firstColumn.id) : emptySelection();
+  const initialSelection = reconcileSheetSelection(initial, options.selection);
   const session = createEditingSession({
     ...options,
     document,
@@ -162,6 +149,22 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
     }), selection.focus && (value as SheetDocument).rows.some(row => row.id === selection.focus?.rowId)
       && (value as SheetDocument).columns.some(column => column.id === selection.focus?.columnId) ? selection.focus : null),
   });
+  const editor=bindSheetEditing(session, options);
+  editor.dispatch=intent=>dispatchSheetIntent(session,intent,options);
+  return editor;
+}
+
+/** Shared selection reconciliation for standalone and parent-owned documents. */
+export function reconcileSheetSelection(initial:SheetDocument, selection?:SheetSelection):SheetSelection {
+  const firstRow=initial.rows[0],firstColumn=initial.columns[0];
+  if(!selection)return firstRow && firstColumn ? collapsed(firstRow.id,firstColumn.id):emptySelection();
+  const exists=(point:SheetPoint)=>initial.rows.some(row=>row.id === point.rowId) && initial.columns.some(column=>column.id === point.columnId);
+  return withPrimaryAliases(reconcileRangeSelection(selection,point=>exists(point)?point:null),selection.focus && exists(selection.focus)?selection.focus:null);
+}
+
+/** Internal binding: one command implementation, independent of document/history storage. */
+export function bindSheetEditing(session:EditingSession<SheetSelection>,options:SheetEditorOptions={}):SheetEditor {
+  const initial=session.snapshot.value as SheetDocument;
   let indexedDocument: SheetDocument | undefined = initial;
   let indexedSheet: SheetIndex | undefined = createSheetIndex(initial);
 
@@ -287,6 +290,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
         columns = columns.filter(column => column.id !== intent.columnId);
         rows = rows.map(row => { const cells = {...row.cells}; delete cells[intent.columnId]; return {...row, cells}; });
       }
+      try {assertSheetDocument({...current,rows,columns});} catch {return failure("sheet.invalid-document");}
       const focus = session.snapshot.selection.focus;
       const oldRow = current.rows.findIndex(row => row.id === focus?.rowId);
       const oldColumn = current.columns.findIndex(column => column.id === focus?.columnId);
@@ -383,6 +387,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
   }
 
   return {
+    get availability() {return "ready" as const;},
     get capabilities() {return {resize: options.resize !== false};},
     get structure() { return sheetStructureActions(value(), session.snapshot.selection, options.structure ?? {}); },
     get snapshot() { return session.snapshot; },

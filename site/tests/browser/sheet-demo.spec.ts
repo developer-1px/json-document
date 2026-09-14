@@ -136,3 +136,11 @@ test("Bear keeps inline formatting visible during cell editing and refuses unsup
  expect(await cell.boundingBox()).toEqual(before);await input.press('Escape');
  await expect(cell.locator('strong')).toBeVisible();expect(await cell.boundingBox()).toEqual(before);
 });
+
+test("Sheet Document API resolves its own route and links to executable table Usage",async({page})=>{
+  await page.goto('/docs/api/sheet-document');
+  await expect(page.getByRole('heading',{level:1,name:'Sheet Document API'})).toBeVisible();
+  await expect(page.getByRole('heading',{level:2,name:'sheetDocumentSchema',exact:true})).toBeVisible();
+  await page.getByRole('link',{name:'표 편집',exact:true}).click();
+  await expect(page.getByRole('grid',{name:'Project sheet'})).toBeVisible();
+});

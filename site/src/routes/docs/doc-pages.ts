@@ -19,6 +19,7 @@ function docPage(path: string) {
 }
 
 export const docPages = {
+  sheetDocumentApi: docPage("/docs/api/sheet-document"),
   sheetApi: docPage("/docs/api/sheet"),
   quickStart: docPage("/docs/quick-start"),
   modules: docPage("/docs/modules"),

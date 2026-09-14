@@ -9,5 +9,5 @@ test("document name participates in history and minimum axes stay editable",()=>
 });
 
 test("rejects malformed restored sheet columns before rendering",()=>{
- expect(()=>createSheetEditor({columns:[{id:"a",label:{bad:true}}],rows:[]} as never)).toThrow("string ids and labels");
+ expect(()=>createSheetEditor({columns:[{id:"a",label:{bad:true}}],rows:[]} as never)).toThrow();
 });

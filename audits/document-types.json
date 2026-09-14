@@ -92,6 +92,7 @@
       "symbol": "CalendarDocument"
     },
     "sheet": {
+      "statusNote": "표 스키마·타입·검증·생성은 Sheet Document 정본으로 이동했습니다. [소유자 API](/docs/api/sheet-document)를 Bear·Canvas·Sheet가 함께 사용합니다. Intent·변경 계획·부모 문서 연결은 Editing이 소유하며, 전체 Document Type Profile의 Stable 승격과 형제 레포 통합은 이 범위에서 선언하지 않습니다.",
       "why": "grid cell 값은 안정된 row·column identity와 좌표 관계를 유지해야 배열 index 변화에도 의미가 보존되기 때문입니다.",
       "does": "column, row와 column-keyed cell 모델을 정의하고 grid topology와 range projection의 기반을 제공합니다.",
       "schema": "interface SheetColumn { readonly id: string; readonly label: string }\ninterface SheetRow { readonly id: string; readonly cells: Readonly<Record<string, JSONValue>> }\ninterface SheetDocument {\n  readonly columns: ReadonlyArray<SheetColumn>;\n  readonly rows: ReadonlyArray<SheetRow>;\n}",
@@ -102,7 +103,7 @@
         { "name": "rows[].id", "description": "selection과 range가 배열 위치와 무관하게 row를 참조하는 identity입니다." },
         { "name": "rows[].cells", "description": "column id를 key로 JSON cell value를 저장합니다. 알려진 column만 key로 사용해야 합니다." }
       ],
-      "sourcePath": "packages/json-document-editing/src/sheet.ts",
+      "sourcePath": "packages/json-document-sheet-document/src/schema.ts",
       "symbol": "SheetDocument"
     },
     "kanban": {

@@ -10,7 +10,8 @@
     { "path": "../json-document-calendar-document" },
     { "path": "../json-document" },
     { "path": "../json-document-selection" },
-    { "path": "../json-document-markdown" }
+    { "path": "../json-document-markdown" },
+    { "path": "../json-document-sheet-document" }
   ],
   "include": ["src/**/*.ts"]
 }
