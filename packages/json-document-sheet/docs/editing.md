@@ -26,7 +26,7 @@ const editor = createSheetEditor({columns: [{id: 'a', label: 'A'}], rows: [{id: 
 
 ## 문서 표와 기존 Sheet의 입력 정책
 
-`profile="spreadsheet-grid"`가 기본값입니다. Enter/Shift+Enter는 세로 이동, F2/더블클릭은 편집 시작입니다. `profile="document-table"`에서는 Enter로 편집을 시작합니다. 편집 중 Enter/Tab은 확정 후 이동하며 사각 선택은 유지됩니다. Sheet의 Ctrl+Enter는 초안을 선택된 셀들에 한 번에 채웁니다. Shift+Space/Control+Space로 행/열을 선택할 수 있습니다.
+`profile="spreadsheet-grid"`가 기본값입니다. Mac에서는 `spreadsheet-mac` 정책이 자동 적용되어 Enter로 편집을 시작합니다. 다른 플랫폼에서는 Enter/Shift+Enter는 세로 이동, F2/더블클릭은 편집 시작입니다. `profile="spreadsheet-mac"`으로 명시하거나 `GridEditingProfile` 객체로 정책을 고정할 수도 있습니다. `profile="document-table"`에서는 Enter로 편집을 시작합니다. 편집 중 Enter/Tab은 확정 후 이동하며 사각 선택은 유지됩니다. Sheet의 Ctrl+Enter는 초안을 선택된 셀들에 한 번에 채웁니다. Shift+Space/Control+Space로 행/열을 선택할 수 있습니다.
 
 포인터 드래그, 행/열 헤더 선택, 채우기 핸들을 제공합니다. 채우기 핸들을 드래그하면 값 패턴을 반복하고 클릭 또는 키보드 활성화는 아래 한 행에 반복합니다. 수식 자동 보정 및 숫자 수열 생성은 이 Hand의 기본 채우기 계약에 포함되지 않습니다.
 
@@ -39,3 +39,44 @@ const editor = createSheetEditor({columns: [{id: 'a', label: 'A'}], rows: [{id: 
 `profile`에는 기본 이름 또는 Affordance의 `GridEditingProfile` 값을 전달할 수 있습니다. `SheetCellEditorProps.initialSelection`을 포맷 편집기가 소비하므로 직접 타이핑의 첫 글자가 전체 선택되어 다음 글자에 덮이지 않습니다. `onDeactivate`는 초안이 없는 Escape에서 호출됩니다. Canvas는 이를 바깥 객체 포커스에 연결하고 Bear는 기존 `onExit` 경계를 유지합니다.
 
 표 클립보드는 Web의 `sheetClipboardRepresentations`로 내부 JSON과 외부 텍스트를 함께 처리합니다. 행열 헤더 선택 후에는 활성 셀로 포커스를 넘겨 키보드 이동을 이어갑니다. 확대·축소된 DOM/SVG에 있을 때 리사이즈는 Web의 layout 좌표 변환을 소비합니다.
+
+## 공유 문서와 독립 View
+
+```live-demo
+/demo/sheet-views
+```
+
+[두 View Usage](/demo/sheet-views)는 하나의 SheetEditor에서 `createView()`를 두 번 호출합니다.
+값·변경·History는 원본 편집기가 소유하고, 선택·편집 draft·포커스·스크롤과 표시 순서는
+각 View/Hand에 남습니다. Host가 문서를 복제하거나 양방향 subscribe 동기화를 구현하지 않습니다.
+
+```ts
+const source = createSheetEditor(document);
+const left = source.createView();
+const right = source.createView({rowOrder: ["gamma", "beta", "alpha"], columnOrder: ["owner", "status", "name"]});
+// <SheetHand editor={left} profile="spreadsheet-grid" />
+// <SheetHand editor={right} profile="document-table" />
+```
+
+Hand는 `editor.grid`의 행·열 순서를 렌더하고 모든 명령은 같은 topology를 사용합니다.
+행·열 순서는 ID 목록이며 삭제된 ID는 빠지고 새 ID는 문서 순서로 뒤에 붙습니다.
+필터·정렬 식·병합 셀·원격 참조 저장 형식은 이 계약에 포함하지 않습니다.
+
+## Sheet Hands 지원 조합 · RC 범위
+
+| 책임 | 정본과 지원 계약 |
+| --- | --- |
+| Schema | Sheet Document의 공통 스키마, 행·열 ID, JSON 셀, 크기 검증 |
+| Topology / Selection | Editing의 GridTopology와 ID 기반 직사각형 범위, View별 독립 선택 |
+| Intent / Planning | SheetIntent와 planSheetIntent; 표시 순서에서 문서 ID로 적용 |
+| Clipboard | primary 직사각형, 현재 View 순서, native JSON/외부 TSV |
+| History | 원본 문서/부모 편집기가 한 번 기록; View 사이의 편집 그룹 분리 |
+| Readonly | 선택·복사는 허용; 수정·붙여넣기·잘라내기·구조·Undo/Redo 차단 |
+| Affordance | document-table의 Enter 편집, spreadsheet-grid의 Enter 이동 |
+| Hand | 동일 SheetHand와 renderCell/renderEditor 슬롯; 편집 전후 형태 유지 |
+
+독립 Sheet, Markdown 표 편집기, Canvas 내장 표 편집기에서 같은 `createView` 계약을
+사용할 수 있습니다. 별도로 저장된 Markdown과 Canvas 문서가 자동으로 같은 데이터가
+되는 것은 아닙니다. Markdown의 행·열 ID는 현재 위치에서 투영되므로 영속 ID 참조
+프로파일을 제공한다는 의미가 아닙니다. Markdown 구조 변경을 가로질러 같은 논리 셀을
+추적하는 영속 ID 계약은 제공하지 않습니다. 전체 Official Hands SDK의 Stable 선언도 아닙니다.

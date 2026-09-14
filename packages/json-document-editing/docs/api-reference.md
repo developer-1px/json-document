@@ -1545,6 +1545,11 @@ interface ProjectedSheetSource {
   redo(): {readonly ok:boolean;readonly code?:string};
 }
 ```
+## `projectSheetGrid`
+
+```ts
+projectSheetGrid(document: SheetDocument, order?: SheetViewOptions): SheetGrid
+```
 ## `projectTreeVisibility`
 
 ```ts
@@ -1596,6 +1601,8 @@ type SheetDocument = z.infer<typeof sheetDocumentSchema>;
 ```ts
 interface SheetEditor {
   readonly availability: SheetAvailability;
+  readonly grid: SheetGrid;
+  createView(options?:SheetViewOptions):SheetEditor;
   readonly capabilities: {readonly resize: boolean};
   readonly structure: SheetStructureActions;
   readonly snapshot: EditingSnapshot<SheetSelection>;
@@ -1612,7 +1619,7 @@ interface SheetEditor {
 ## `SheetEditorOptions`
 
 ```ts
-interface SheetEditorOptions extends EditingHistoryOptions {
+interface SheetEditorOptions extends EditingHistoryOptions, SheetViewOptions {
   /** False for formats such as GFM that cannot persist row heights or column widths. */
   readonly resize?: boolean;
   readonly structure?: SheetStructurePolicy;
@@ -1625,6 +1632,14 @@ interface SheetEditorOptions extends EditingHistoryOptions {
 ```ts
 const sheetEmbeddedDocumentType: "sheet/1"
 ```
+## `SheetGrid`
+
+```ts
+interface SheetGrid extends GridTopology {
+  readonly rows:ReadonlyArray<SheetRow>;
+  readonly columns:ReadonlyArray<SheetColumn>;
+}
+```
 ## `SheetIntent`
 
 ```ts
@@ -1636,7 +1651,7 @@ type SheetIntent =
   | { readonly type: "selection.range"; readonly range: SheetRange }
   | { readonly type: "selection.row"; readonly rowId: string }
   | { readonly type: "selection.column"; readonly columnId: string }
-  | { readonly type: "range.fill"; readonly source: SheetRange; readonly target: SheetRange }
+  | { readonly type: "range.fill"; readonly source: SheetRange; readonly target: SheetRange; readonly topology?:SheetTopology }
   | { readonly type: "selection.navigate"; readonly direction: SheetTraversalDirection; readonly topology?: SheetTopology }
   | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
@@ -1748,6 +1763,16 @@ type SheetTopology = GridTopology;
 
 ```ts
 type SheetTraversalDirection = "previous" | "next" | "up" | "down";
+```
+## `SheetViewOptions`
+
+```ts
+interface SheetViewOptions {
+  readonly rowOrder?:ReadonlyArray<string>;
+  readonly columnOrder?:ReadonlyArray<string>;
+  readonly readOnly?:()=>boolean;
+  readonly selection?:SheetSelection;
+}
 ```
 ## `TextChange`
 

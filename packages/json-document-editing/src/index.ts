@@ -244,3 +244,6 @@ export {createCanvasSheet, createObjectSheetEditor, sheetEmbeddedDocumentType} f
 export {planSheetIntent} from "./sheet-plan.js";
 export type {SheetPlanResult} from "./sheet-plan.js";
 export type {SheetAvailability} from "./sheet.js";
+
+export {projectSheetGrid} from "./sheet-view.js";
+export type {SheetGrid,SheetViewOptions} from "./sheet-view.js";

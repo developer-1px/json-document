@@ -20,3 +20,12 @@ test("creation validates counts and sizes",()=>{
  expect(()=>createSheetDocument({rows:-1})).toThrow();expect(()=>createSheetDocument({columnWidth:NaN})).toThrow();
  expect(createSheetDocument({rows:0,columns:0})).toEqual({rows:[],columns:[]});
 });
+
+test("partial row and column schemas enforce the same size constraints as a document",async()=>{
+ const {sheetRowSchema,sheetColumnSchema}=await import("../src/index.js");
+ for(const size of [-1,0,NaN,Infinity,"large"]){
+  const column={id:"a",label:"A",width:size},row={id:"r",cells:{a:""},height:size};
+  expect(sheetColumnSchema.safeParse(column).success).toBe(false);expect(sheetDocumentSchema.safeParse({columns:[column],rows:[]}).success).toBe(false);
+  expect(sheetRowSchema.safeParse(row).success).toBe(false);expect(sheetDocumentSchema.safeParse({columns:[{id:"a",label:"A"}],rows:[row]}).success).toBe(false);
+ }
+});

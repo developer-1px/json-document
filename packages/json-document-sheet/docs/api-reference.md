@@ -34,8 +34,8 @@ interface SheetHandProps {
   readonly coordinateHeaders?: boolean;
   /** Header row presentation only; structure restrictions belong to editor.structure. */
   readonly headerRow?: boolean;
-  /** Document tables activate editing with Enter; spreadsheets use Enter for sequential entry. */
-  readonly profile?: "document-table" | "spreadsheet-grid" | GridEditingProfile;
+  /** Spreadsheet Enter starts editing on Mac; explicit policy objects override platform defaults. */
+  readonly profile?: keyof typeof gridEditingProfiles | GridEditingProfile;
   readonly onDeactivate?: () => void;
   readonly onExit?: (edge: "before" | "after") => void;
   readonly renderCell?: (value: string) => ReactNode;

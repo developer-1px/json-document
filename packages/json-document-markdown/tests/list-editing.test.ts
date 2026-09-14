@@ -48,3 +48,38 @@ test("Tab accounts for tab-expanded list marker padding", () => {
   expect(result.value).toBe("-\tone\n    -\ttwo");
   expect(indentMarkdownList(result.value,result.selection,"outdent")?.value).toBe("-\tone\n-\ttwo");
 });
+
+test("empty nested items leave one level at a time, preserving task and quote prefixes",()=>{
+ for(const [source,expected] of [
+  ["- parent\n  - ","- parent\n- "],
+  ["- parent\n  -","- parent\n-"],
+  ["- parent\n  - child\n    - ","- parent\n  - child\n  - "],
+  ["> - parent\n>   - [ ] ","> - parent\n> - [ ] "],
+  ["1. parent\n   1. ","1. parent\n2. "],
+  ["- parent\r\n  - ","- parent\r\n- "],
+ ]) {
+  const result=enter(source!);expect(result.value).toBe(expected);
+  expect(result.selection).toEqual({anchor:expected!.length,focus:expected!.length});
+ }
+});
+test("outdent preserves the following siblings under the original parent",()=>{
+ const source="- parent\n  - moving\n    - child\n  - staying\n- next";
+ const at=source.indexOf("moving")+3;
+ const result=indent(source,"outdent",at)!;
+ expect(result.value).toBe("- parent\n  - staying\n- moving\n  - child\n- next");
+ expect(result.selection.focus).toBe(result.value.indexOf("moving")+3);
+});
+test("outdent a backward sibling range preserves trailing parent content and CRLF",()=>{
+ const source="- parent\r\n  - first\r\n  - second\r\n  - stays\r\n\r\n  paragraph\r\n- next";
+ const result=indent(source,"outdent",source.indexOf("second")+6,source.indexOf("first"))!;
+ expect(result.value).toBe("- parent\r\n  - stays\r\n\r\n  paragraph\r\n- first\r\n- second\r\n- next");
+ expect(result.selection.anchor).toBe(result.value.indexOf("second")+6);
+ expect(result.selection.focus).toBe(result.value.indexOf("first"));
+});
+
+test("empty middle item promotes past remaining siblings instead of adopting them",()=>{
+ const source="> - parent\n>   - \n>   - stays";
+ const result=enter(source,source.indexOf("\n>   - stays"));
+ expect(result.value).toBe("> - parent\n>   - stays\n> - ");
+ expect(result.selection.focus).toBe(result.value.length);
+});

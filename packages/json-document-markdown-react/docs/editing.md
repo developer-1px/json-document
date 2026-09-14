@@ -44,3 +44,5 @@ Markdown Web과 공용 contenteditable 투영을 사용합니다.
 `MarkdownCellEditor`는 `SheetCellEditorProps`의 초안을 편집하는 포맷 소유 컴포넌트입니다. `SheetHand.renderEditor`로 연결하며, 확정 전에는 표 원문을 변경하지 않습니다. 기존 Markdown DOM binding에 `revealSyntax:false`를 사용하므로 편집 시에도 strong/emphasis 등 표시를 유지합니다. 초안 입력 수명과 한글 조합은 contenteditable 정본 binding이 담당하고 최종 확정·취소·표 이동은 Hand가 담당합니다.
 
 [Sheet Usage](/demo/sheet)의 Markdown 탭과 [Bear](/applications/bear)가 같은 연결을 사용합니다. Markdown cell editor를 사용할 때 기존 `markdown-editor.css`도 함께 로드해야 합니다.
+
+Bear의 rich Markdown 리스트는 같은 Markdown Web binding을 사용합니다. Tab은 앞 형제 아래로, Shift+Tab은 부모 다음 형제로 항목과 자식을 함께 이동합니다. Enter는 항목을 분할·이어 쓰며 빈 중첩 항목에서는 한 단계 밖으로, 최상위에서는 리스트 밖으로 나갑니다. 내어쓴 항목 뒤의 형제들은 원래 부모 아래에 남습니다. Tree의 펼침·선택 어포던스는 이 텍스트 편집 계약에 포함하지 않습니다.

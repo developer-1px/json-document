@@ -38,6 +38,12 @@ for (const path of ["packages/json-document-editing/src/markdown-table.ts", "pac
 if (!hasNamedImport(readSource("packages/json-document-canvas/src/canvas-sheet-object.tsx"), "@interactive-os/json-document-sheet", "SheetHand")) throw new Error("Canvas must consume SheetHand");
 if (!hasNamedImport(readSource("packages/json-document-sheet/src/sheet-axis-resize.tsx"), "@interactive-os/json-document-web", "projectWebClientDeltaToElement")) throw new Error("Sheet resize must project client coordinates");
 
+// Modifier meaning belongs to Web even when the consumer is already a shared package.
+for (const path of ["packages/json-document-react/src/use-editing.ts", "packages/json-document-sheet/src/sheet-range-selection.tsx"]) {
+  const source=readSource(path);
+  if (!hasNamedImport(source,"@interactive-os/json-document-web","selectionOperationFromModifiers") || /(?:event|input)\.shiftKey\s*\?\s*"extend"/.test(source)) throw new Error(`${path} duplicates Web selection modifier translation`);
+}
+
 const annotationDemo = readSource("routes/annotation-demo/AnnotationDemoRoute.tsx");
 for (const symbol of ["AnnotationHand", "useAnnotationOutput"]) {
   if (!hasNamedImport(annotationDemo, "@interactive-os/json-document-annotation", symbol)) throw new Error(`Annotation Demo must consume the canonical ${symbol}`);

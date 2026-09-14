@@ -121,3 +121,5 @@ React `MarkdownEditingSurface`와 직접 Web 소비는 이 API를 함께 사용�
 [Usage](/demo/markdown-caret)의 소스에서 binding과 문법 명령까지 추적할 수 있습니다.
 
 `createMarkdownEditingBinding`은 Markdown의 목록 Enter 및 `indentMarkdownList`를 contenteditable의 `insertBreak`·`indent` 주입 경계에 연결합니다. Tab/Shift+Tab은 목록에서만 소비하고 IME 조합 중에는 실행하지 않습니다. source·선택 변경은 기존 editor.replace 한 번이므로 Undo/Redo 역시 한 번입니다. React와 직접 Web 소비가 같은 명령을 사용합니다.
+
+순서 없는 목록의 불릿은 리스트 깊이 1부터 채움·윤곽선을 번갈아 표시합니다. 중첩 번호 목록도 깊이에 포함하며, 들여쓰기/내어쓰기로 구조가 바뀌면 같은 DOM 투영에서 다시 계산합니다. 마커의 크기와 편집 전후 위치는 유지합니다.

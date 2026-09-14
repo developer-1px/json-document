@@ -37,3 +37,12 @@ test("unchanged cell commits and selection changes do not write the parent",()=>
  expect(sheet.dispatch({type:"cell.commit",rowId:"row-1",columnId:"column-1",value:""}).ok).toBe(true);
  expect(write).not.toHaveBeenCalled();
 });
+
+test("readonly projected tables cannot undo or redo parent changes",()=>{
+ const parent=createSheetEditor(createSheetDocument());
+ parent.dispatch({type:"cell.commit",rowId:"row-1",columnId:"column-1",value:"saved"});
+ const sheet=createProjectedSheetEditor({source:parent,read:()=>parent.snapshot.value,write:()=>({ok:false}),readOnly:()=>true});
+ const before=parent.snapshot.value;
+ expect(sheet.undo()).toEqual({ok:false,code:"table.readonly"});expect(parent.snapshot.value).toBe(before);
+ parent.undo();const undone=parent.snapshot.value;expect(sheet.redo()).toEqual({ok:false,code:"table.readonly"});expect(parent.snapshot.value).toBe(undone);
+});
