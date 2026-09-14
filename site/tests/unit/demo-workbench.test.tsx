@@ -169,6 +169,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-selection/src/interaction/grid-traversal.ts",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
       "packages/json-document-editing/src/document.ts",
     ]);
@@ -186,6 +187,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-selection/src/interaction/grid-traversal.ts",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
       "packages/json-document-editing/src/document.ts",
     ]);
@@ -201,6 +203,7 @@ describe("Demo definition and source discovery", () => {
       "/docs/api/web",
       "/docs/api/selection",
       "/docs/api/web",
+      "/docs/api/editing",
       "/docs/api/react",
       "/docs/api/editing",
     ]);
@@ -224,6 +227,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-selection/src/interaction/grid-traversal.ts",
       "packages/json-document-ui-primitives-react/src/toolbar.tsx",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-editing/src/database.ts",
       "packages/json-document/src/foundation/json/serializable.ts",
       "packages/json-document-editing/src/topology.ts",
@@ -252,6 +256,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-editing/src/object.ts",
       "packages/json-document-object-document/src/object-model.ts",
       "packages/json-document-object-document/src/object-style.ts",
@@ -323,6 +328,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-selection/src/interaction/grid-traversal.ts",
       "packages/json-document-editing/src/tree.ts",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-react/src/use-tree-editing.ts",
       "packages/json-document-editing/src/tree-visibility.ts",
     ]);

@@ -131,18 +131,18 @@ export function sourceRuns(projection: MarkdownProjection, editableTables = fals
     return [parent?.kind === "table" || parent?.kind === "tableRow"
       ? {...run, attributes:{...run.attributes, "data-markdown-table-gap":""}} : run];
   };
-  const children = (nodes: ReadonlyArray<MarkdownNode>, from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode): SourceRun[] => {
+  const children = (nodes: ReadonlyArray<MarkdownNode>, from: number, to: number, parent?: MarkdownNode, table?: MarkdownNode, listDepth = 0): SourceRun[] => {
     const result: SourceRun[] = [];
     let cursor = from;
     for (const [index, node] of nodes.entries()) {
       if (node.from > cursor) result.push(...gap(cursor, node.from, parent, table));
-      result.push(visit(node, parent, index, table));
+      result.push(visit(node, parent, index, table, listDepth));
       cursor = node.to;
     }
     if (cursor < to) result.push(...gap(cursor, to, parent, table));
     return result;
   };
-  const visit = (node: MarkdownNode, parent?: MarkdownNode, index = 0, table?: MarkdownNode): SourceRun => {
+  const visit = (node: MarkdownNode, parent?: MarkdownNode, index = 0, table?: MarkdownNode, listDepth = 0): SourceRun => {
     if (editableTables && node.kind === "table" && !parent) return {
       kind: "table", tag: "span", from: node.from, to: node.to, attributes: {"data-markdown-kind": "table", "data-markdown-sheet": ""},
       projection: {to: node.to, atomic: true}, children: [
@@ -153,7 +153,11 @@ export function sourceRuns(projection: MarkdownProjection, editableTables = fals
     };
     const attributes: Record<string, string> = { "data-markdown-kind": node.kind };
     if (node.depth) { attributes.role = "heading"; attributes["aria-level"] = String(node.depth); attributes["data-depth"] = String(node.depth); }
-    if (node.kind === "list") attributes.role = "list";
+    if (node.kind === "list") {
+      listDepth++;
+      attributes.role = "list";
+      attributes["data-markdown-bullet"] = listDepth % 2 ? "fill" : "outline";
+    }
     if (node.kind === "listItem") {
       attributes.role = "listitem";
       if (node.checked !== null && node.checked !== undefined) attributes["data-checked"] = String(node.checked);
@@ -176,7 +180,7 @@ export function sourceRuns(projection: MarkdownProjection, editableTables = fals
     const title = node.title ?? definition?.title;
     if (title) attributes.title = title;
     let content: SourceRun[];
-    if (node.children) content = children(node.children, node.from, node.to, node, node.kind === "table" ? node : table);
+    if (node.children) content = children(node.children, node.from, node.to, node, node.kind === "table" ? node : table, listDepth);
     else if (image && url) {
       content = [raw(node.from, node.to, node, true), {
         kind: "imagePreview", tag: "img", from: node.from, to: node.from,

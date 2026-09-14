@@ -3,6 +3,7 @@ import { docPages, type DocPageId } from "./doc-pages";
 import { DocumentationPage } from "./DocumentationPage";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
+  sheetDocumentApi: "braces",
   quickStart: "terminal",
   modules: "braces",
   handsSupport: "cursor",

@@ -15,6 +15,8 @@ const sheetHand = readSource("packages/json-document-sheet/src/sheet-hand.tsx");
 for (const [packageName, symbol] of [
   ["@interactive-os/json-document-react", "useRenameSession"],
   ["@interactive-os/json-document-affordance", "cellEditingAffordance"],
+  ["@interactive-os/json-document-affordance", "resolveGridEditActivation"],
+  ["@interactive-os/json-document-web", "sheetClipboardRepresentations"],
   ["@interactive-os/json-document-web", "moveGridPoint"],
   ["@interactive-os/json-document-ui-primitives-react", "Field"],
 ]) {
@@ -27,6 +29,20 @@ if (!sheetHand.includes("editor.structure")) throw new Error("Sheet Hand must co
 if (existsSync(join(repositoryRoot, "packages/json-document-markdown-react/src/markdown-table-editor.ts"))) throw new Error("Markdown source editing must not return to the React owner");
 const markdownTableEditor = readSource("packages/json-document-editing/src/markdown-table.ts");
 if (/from\s+["'](?:react|react-dom)(?:\/[^"']*)?["']/.test(markdownTableEditor)) throw new Error("Markdown source editor must stay framework independent");
+
+// Embedded tables share the projection lifecycle and the exact same cell surface.
+for (const path of ["packages/json-document-editing/src/markdown-table.ts", "packages/json-document-editing/src/object-sheet.ts"]) {
+  const source = readSource(path);
+  if (!hasNamedImport(source, "./projected-sheet.js", "createProjectedSheetEditor") || /new Set|let unsubscribe/.test(source)) throw new Error(`${path} bypasses the projected Sheet lifecycle`);
+}
+if (!hasNamedImport(readSource("packages/json-document-canvas/src/canvas-sheet-object.tsx"), "@interactive-os/json-document-sheet", "SheetHand")) throw new Error("Canvas must consume SheetHand");
+if (!hasNamedImport(readSource("packages/json-document-sheet/src/sheet-axis-resize.tsx"), "@interactive-os/json-document-web", "projectWebClientDeltaToElement")) throw new Error("Sheet resize must project client coordinates");
+
+// Modifier meaning belongs to Web even when the consumer is already a shared package.
+for (const path of ["packages/json-document-react/src/use-editing.ts", "packages/json-document-sheet/src/sheet-range-selection.tsx"]) {
+  const source=readSource(path);
+  if (!hasNamedImport(source,"@interactive-os/json-document-web","selectionOperationFromModifiers") || /(?:event|input)\.shiftKey\s*\?\s*"extend"/.test(source)) throw new Error(`${path} duplicates Web selection modifier translation`);
+}
 
 const annotationDemo = readSource("routes/annotation-demo/AnnotationDemoRoute.tsx");
 for (const symbol of ["AnnotationHand", "useAnnotationOutput"]) {

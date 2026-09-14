@@ -1,3 +1,4 @@
+import {sheetDocumentSchema} from "@interactive-os/json-document-sheet-document";
 import { MarkdownCellEditor, MarkdownRenderer } from "@interactive-os/json-document-markdown-react";
 import { useState } from "react";
 import { createJSONDocument } from "@interactive-os/json-document";
@@ -25,7 +26,7 @@ const initialSheet: SheetDocument = {
 };
 
 export function SheetDemo() {
-  const [sheet] = useState(() => createSheetEditor(initialSheet));
+  const [sheet] = useState(() => createSheetEditor(sheetDocumentSchema.parse(initialSheet)));
   const [text] = useState(() => createTextEditor(createJSONDocument("| 문법 | 표현 |\n| --- | --- |\n| 강조 | **굵게** |")));
   const [markdown] = useState(() => createMarkdownTableEditor(text, () => 0));
   const [mode, setMode] = useState<"sheet" | "markdown">("sheet");

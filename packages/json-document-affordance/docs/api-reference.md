@@ -548,6 +548,20 @@ interface GestureState {
   readonly type: string;
 }
 ```
+## `GridEditingProfile`
+
+```ts
+interface GridEditingProfile {
+  readonly enter: "edit" | "move";
+  /** Existing-content activation (F2/double click); replacement typing always places the caret at the end. */
+  readonly editSelection: "all" | "end";
+}
+```
+## `gridEditingProfiles`
+
+```ts
+const gridEditingProfiles: Readonly<Record<"document-table" | "spreadsheet-grid" | "spreadsheet-mac", GridEditingProfile>>
+```
 ## `GridFillBounds`
 
 ```ts
@@ -864,7 +878,7 @@ renameAffordance(input: Pick<WebKeyboardStroke, "key"> | { readonly type: "point
 ```ts
 interface RenameSession<Key> {
   getSnapshot(): RenameSessionSnapshot<Key> | null;
-  begin(key: Key, label: string): void;
+  begin(key: Key, label: string, initialSelection?: "all" | "end"): void;
   update(draft: string): void;
   handleKey(key: string): boolean;
   handlePointer(key: Key, label: string, detail: number, timeStamp: number): boolean;
@@ -878,6 +892,7 @@ interface RenameSession<Key> {
 interface RenameSessionSnapshot<Key> {
   readonly key: Key;
   readonly draft: string;
+  readonly initialSelection?: "all" | "end";
 }
 ```
 ## `resizeAffordance`
@@ -916,6 +931,11 @@ resizeValueForKey(current: number, key: string, shiftKey: boolean, axis: "x" | "
 
 ```ts
 resolveAffordanceKey(stroke: WebKeyboardStroke): AffordancePreview
+```
+## `resolveGridEditActivation`
+
+```ts
+resolveGridEditActivation(profile: GridEditingProfile, existingText: string, replacementText?: string): { draft: string; initialSelection: "all" | "end"; }
 ```
 ## `selectAllAffordance`
 

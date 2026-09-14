@@ -1,6 +1,6 @@
 import {useRef, type RefObject} from "react";
 import type {GridPoint, SheetEditor} from "@interactive-os/json-document-editing";
-import {hitTestWebGrid, findWebGridCell} from "@interactive-os/json-document-web";
+import {hitTestWebGrid, findWebGridCell,selectionOperationFromModifiers} from "@interactive-os/json-document-web";
 import {useInteractionHandle} from "@interactive-os/json-document-ui-primitives-react";
 import {idlePointerInteraction, reducePressInteraction, type PointerInteractionState} from "@interactive-os/json-document-selection";
 
@@ -20,7 +20,7 @@ export function useSheetRangeSelection(editor: SheetEditor, surface: RefObject<H
     const point = surface.current && hitTestWebGrid(surface.current, event.point);
     if (!point) {if(event.phase === "commit") drag.current=idlePointerInteraction();return;}
     if (event.phase === "start") {
-      const operation = input.shiftKey ? "extend" : input.metaKey || input.ctrlKey ? "toggle" : "replace";
+      const operation = selectionOperationFromModifiers(input);
       drag.current=reducePressInteraction(idlePointerInteraction<GridPoint>(),{phase:"start",point,pointerId:String(input.pointerId),operation}).state;
       editor.dispatch({type:"selection.set",...point,mode:operation});
       findWebGridCell<HTMLElement>(surface.current, point)?.focus({preventScroll:true});

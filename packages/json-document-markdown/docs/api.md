@@ -120,8 +120,10 @@ DOM·History는 소유하지 않으며 소비자가 반환값을 기존 TextEdit
 
 ## 목록 편집
 
-`insertMarkdownParagraph(source, selection)`는 파서가 인식한 목록에서도 동작합니다. 본문은 같은 항목 문법으로 이어 쓰고 번호 목록은 다음 번호, task는 미체크 상태로 이어 씁니다. 빈 항목은 목록 접두사를 제거하고 일반 문단 경계를 남깁니다. 감싼 인용 접두사는 유지합니다. 코드·HTML 내부는 목록처럼 보이는 문자만으로 이어 쓰지 않습니다. 빈 task 초안 `[ ]`도 목록 종료 대상으로 처리합니다.
+`insertMarkdownParagraph(source, selection)`는 파서가 인식한 목록에서도 동작합니다. 본문은 같은 항목 문법으로 이어 쓰고 번호 목록은 다음 번호, task는 미체크 상태로 이어 씁니다. 빈 중첩 항목은 한 단계 내어쓰고, 최상위 빈 항목은 목록 접두사를 제거해 일반 문단 경계를 남깁니다. 감싼 인용 접두사는 유지합니다. 코드·HTML 내부는 목록처럼 보이는 문자만으로 이어 쓰지 않습니다. 빈 task 초안 `[ ]`도 목록 종료 대상으로 처리합니다.
 
-`indentMarkdownList(source, selection, direction: "indent" | "outdent"): MarkdownSourceEdit | null`은 선택한 형제 항목과 하위 내용을 함께 이동합니다. Tab은 앞 형제의 본문 들여쓰기 폭을 사용하고 Shift+Tab은 부모 목록으로 승격합니다. 중첩 번호는 1부터, 승격 번호는 부모 다음부터 시작합니다. 첫 항목의 들여쓰기와 최상위 내어쓰기는 변경 없이 반환하며 목록 밖에서는 `null`입니다. 원문 CRLF와 선택 방향을 보존하며 변경된 들여쓰기는 공백으로 표현합니다.
+`indentMarkdownList(source, selection, direction: "indent" | "outdent"): MarkdownSourceEdit | null`은 선택한 형제 항목과 하위 내용을 함께 이동합니다. Tab은 앞 형제의 본문 들여쓰기 폭을 사용하고 Shift+Tab은 부모의 전체 하위 내용 다음 형제로 승격합니다. 뒤에 남는 형제와 부모의 후속 문단은 원래 부모 아래에 유지합니다. 중첩 번호는 1부터, 승격 번호는 부모 다음부터 시작합니다. 첫 항목의 들여쓰기와 최상위 내어쓰기는 변경 없이 반환하며 목록 밖에서는 `null`입니다. 원문 CRLF와 선택 방향을 보존하며 변경된 들여쓰기는 공백으로 표현합니다.
 
 `MarkdownSourceEdit`는 `{ value, selection: { anchor, focus } }`입니다. 원문·선택은 UTF-16 offset이며 원문 범위 밖 선택은 RangeError입니다. 명령은 DOM·키 이벤트·History를 소유하지 않습니다. [Usage](/demo/markdown-caret)에서 Web binding을 통해 실행합니다.
+
+Bear의 빈 중첩 목록 초안은 한 글자를 입력하기 전 setext 제목 밑줄이나 lazy continuation으로 파싱될 수 있습니다. 목록 내부의 빈 단일 마커 편집 문맥에서만 목록 의도를 복원하며, 일반 제목·코드 문법을 변경하지 않습니다. [Bear Usage](/applications/bear)에서 Tab/Shift+Tab·Enter를 실행할 수 있고 원문 선택과 Undo/Redo는 기존 TextEditor가 소유합니다.

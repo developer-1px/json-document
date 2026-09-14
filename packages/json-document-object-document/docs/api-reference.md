@@ -49,12 +49,13 @@ type CanvasObjectDraft = ObjectDraft & (
   | (CanvasTextFormat & { readonly kind: "rectangle" | "ellipse" | "sticky-note"; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
   | { readonly kind: "path"; readonly points: ReadonlyArray<ObjectPoint>; readonly strokeWidth: number }
   | { readonly kind: "image"; readonly source: string }
+  | { readonly kind: "embedded-document"; readonly documentType: string; readonly document: JSONValue }
 );
 ```
 ## `CanvasObjectKind`
 
 ```ts
-type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "sticky-note" | "path" | "image";
+type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "sticky-note" | "path" | "image" | "embedded-document";
 ```
 ## `CanvasTextFormat`
 
@@ -65,6 +66,11 @@ interface CanvasTextFormat {
   readonly textAlign?: "left" | "center" | "right";
 }
 ```
+## `createCanvasEmbeddedDocument`
+
+```ts
+createCanvasEmbeddedDocument(documentType: string, document: JSONValue, bounds: ObjectBounds, label: string): Extract<CanvasObjectDraft, { kind: "embedded-document"; }>
+```
 ## `createCanvasImage`
 
 ```ts
@@ -73,7 +79,7 @@ createCanvasImage(image: { readonly source: string; readonly width: number; read
 ## `createCanvasObject`
 
 ```ts
-createCanvasObject(kind: Exclude<CanvasObjectKind, "path" | "image">, bounds: ObjectBounds, style: { readonly color: string; readonly label: string; readonly fontSize?: number; readonly textColor?: string; }): CanvasObjectDraft
+createCanvasObject(kind: Exclude<CanvasObjectKind, "path" | "image" | "embedded-document">, bounds: ObjectBounds, style: { readonly color: string; readonly label: string; readonly fontSize?: number; readonly textColor?: string; }): CanvasObjectDraft
 ```
 ## `createCanvasPath`
 
@@ -126,6 +132,7 @@ type ObjectOperation =
   | { readonly type: "fill"; readonly objectIds: ReadonlyArray<string>; readonly color: string }
   | { readonly type: "style"; readonly objectIds: ReadonlyArray<string>; readonly style: Partial<ObjectStyle> }
   | { readonly type: "remove"; readonly objectIds: ReadonlyArray<string> }
+  | { readonly type: "embedded-document"; readonly objectId: string; readonly document: JSONValue }
   | { readonly type: "text"; readonly objectId: string; readonly text: string }
   | { readonly type: "replace"; readonly document: ObjectDocument };
 ```

@@ -1,3 +1,4 @@
+import {createCanvasSheet} from "@interactive-os/json-document-editing";
 import { useEffect, useMemo, useReducer, useRef, useState, type ClipboardEvent, type KeyboardEvent, type PointerEvent } from "react";
 import { commitAffordance, createGestureSession, createPlaneSelectProfile, resizeAffordance, type InteractionHandleEvent, type PlaneSelectProfile, type PlaneSelectSelection, type ResizeEdge } from "@interactive-os/json-document-affordance";
 import { assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, projectObjectText, readObjectStyle, transformObject, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint, type ObjectStyle } from "@interactive-os/json-document-object-document";
@@ -6,7 +7,7 @@ import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { routeWebClipboardEvent, createWebKeyboardAdapter, createWebPointerSession, isWebEditableTarget, projectWebClientPointToSVG, webSVGViewportFromElement } from "@interactive-os/json-document-web";
 import { createCanvasClipboardBinding } from "./canvas-clipboard.js";
 
-export type CanvasTool = "select" | Exclude<CanvasObjectKind, "image">;
+export type CanvasTool = "select" | "table" | Exclude<CanvasObjectKind, "image" | "embedded-document">;
 export interface CanvasCreationStyle {
   readonly color: string;
   readonly textColor: string;
@@ -17,7 +18,7 @@ export interface CanvasCreationStyle {
 }
 
 type Gesture = { readonly base: CanvasDocument } & (
-  | { readonly type: "create"; readonly tool: Exclude<CanvasObjectKind, "path" | "image">; readonly start: ObjectPoint; readonly point: ObjectPoint; readonly dragged: boolean }
+  | { readonly type: "create"; readonly tool: "table" | Exclude<CanvasObjectKind, "path" | "image" | "embedded-document">; readonly start: ObjectPoint; readonly point: ObjectPoint; readonly dragged: boolean }
   | { readonly type: "draw"; readonly points: ReadonlyArray<ObjectPoint> }
   | { readonly type: "resize"; readonly object: CanvasObject; readonly start: ObjectPoint; readonly point: ObjectPoint; readonly edge: ResizeEdge;
       readonly pointerId: number; readonly shiftKey: boolean; readonly altKey: boolean; readonly selection: ObjectSelection }
@@ -28,7 +29,7 @@ const keyboard = createWebKeyboardAdapter();
 const commands = createWebKeyboardAdapter<"cancel">({ defaults: false, keymap: { Escape: "cancel" } });
 
 /** Owns Canvas interaction composition, never document or history state. */
-export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile) {
+export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile, activateEmbedded?: (objectId: string) => void) {
   const snapshot = useEditingSnapshot(editor);
   const document = useMemo(() => { assertCanvasDocument(snapshot.value); return snapshot.value; }, [snapshot.value]);
   const surface = useRef<SVGSVGElement>(null);
@@ -149,6 +150,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     // A default-sized object belongs to the completed click, never its press preview.
     if (click && !committing) return null;
     if (!click && start.x === point.x && start.y === point.y) return null;
+    if (gesture.tool === "table") return createCanvasSheet({x:click ? start.x:Math.min(start.x,point.x),y:click ? start.y:Math.min(start.y,point.y),width:click ? 480:Math.abs(point.x-start.x),height:click ? 280:Math.abs(point.y-start.y)});
     return createCanvasObject(gesture.tool, {
       x: click ? start.x : Math.min(start.x, point.x), y: click ? start.y : Math.min(start.y, point.y),
       width: click ? (gesture.tool === "text" ? 280 : gesture.tool === "sticky-note" ? 200 : 160) : Math.abs(point.x - start.x),
@@ -270,7 +272,10 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
       else if (selectedAction.type === "delete") remove();
       else if (selectedAction.type === "duplicate") duplicate(selectedAction.keys);
       else if (selectedAction.type === "translate") dispatch({ type: "object.translate", objectIds: selectedAction.keys, dx: selectedAction.dx, dy: selectedAction.dy });
-      else if (selectedAction.type === "edit") editText(selectedAction.key);
+      else if (selectedAction.type === "edit") {
+        const object=current().objects.find(object=>object.id === selectedAction.key);
+        if(object?.kind === "embedded-document") activateEmbedded?.(object.id);else editText(selectedAction.key);
+      }
       setTool("select"); return;
     }
     if (commands.resolve(event) === "cancel") { event.preventDefault(); setTool("select"); return; }

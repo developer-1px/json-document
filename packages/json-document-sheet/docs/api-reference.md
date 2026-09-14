@@ -12,6 +12,7 @@ Sheet와 Markdown 표의 셀 선택·편집·구조 조작 UI 조합의 public e
 interface SheetCellEditorProps {
   readonly label: string;
   readonly value: string;
+  readonly initialSelection?: "all" | "end";
   readonly style: CSSProperties;
   readonly onValueChange: (value: string) => void;
   readonly onKeyDown: KeyboardEventHandler<HTMLElement>;
@@ -21,7 +22,7 @@ interface SheetCellEditorProps {
 ## `SheetHand`
 
 ```ts
-SheetHand({ editor, label, headerRow, coordinateHeaders, profile, renderCell, renderEditor, onExit }: SheetHandProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+SheetHand({ editor, label, headerRow, coordinateHeaders, profile, renderCell, renderEditor, onExit, onDeactivate }: SheetHandProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
 ## `SheetHandProps`
 
@@ -33,8 +34,9 @@ interface SheetHandProps {
   readonly coordinateHeaders?: boolean;
   /** Header row presentation only; structure restrictions belong to editor.structure. */
   readonly headerRow?: boolean;
-  /** Document tables activate editing with Enter; spreadsheets use Enter for sequential entry. */
-  readonly profile?: "document-table" | "spreadsheet-grid";
+  /** Spreadsheet Enter starts editing on Mac; explicit policy objects override platform defaults. */
+  readonly profile?: keyof typeof gridEditingProfiles | GridEditingProfile;
+  readonly onDeactivate?: () => void;
   readonly onExit?: (edge: "before" | "after") => void;
   readonly renderCell?: (value: string) => ReactNode;
   /** Format-owned editor, e.g. Markdown. Receives a draft contract, never document/history ownership. */

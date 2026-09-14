@@ -1,3 +1,14 @@
+import sheetViewSource from "../../../../packages/json-document-editing/src/sheet-view.ts?raw";
+import sheetPlanSource from "../../../../packages/json-document-editing/src/sheet-plan.ts?raw";
+import sheetDocumentCreateSource from "../../../../packages/json-document-sheet-document/src/create.ts?raw";
+import sheetDocumentSchemaSource from "../../../../packages/json-document-sheet-document/src/schema.ts?raw";
+import gridEditingProfileSource from "../../../../packages/json-document-affordance/src/grid-editing-profile.ts?raw";
+import elementCoordinateSource from "../../../../packages/json-document-web/src/element-coordinate.ts?raw";
+import sheetTextClipboardSource from "../../../../packages/json-document-editing/src/sheet-text-clipboard.ts?raw";
+import projectedSheetSource from "../../../../packages/json-document-editing/src/projected-sheet.ts?raw";
+import objectSheetSource from "../../../../packages/json-document-editing/src/object-sheet.ts?raw";
+import embeddedDocumentSource from "../../../../packages/json-document-object-document/src/embedded-document.ts?raw";
+import canvasSheetObjectSource from "../../../../packages/json-document-canvas/src/canvas-sheet-object.tsx?raw";
 import storedDocumentSource from "../../../../packages/json-document-web/src/stored-document.ts?raw";
 import sheetSummarySource from "../../../../packages/json-document-editing/src/sheet-summary.ts?raw";
 import gridTraversalSource from "../../../../packages/json-document-selection/src/interaction/grid-traversal.ts?raw";
@@ -226,6 +237,19 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-affordance/src/grid-editing-profile.ts", gridEditingProfileSource],
+  ["packages/json-document-web/src/element-coordinate.ts", elementCoordinateSource],
+  ["packages/json-document-editing/src/sheet-text-clipboard.ts", sheetTextClipboardSource],
+  ["packages/json-document-editing/src/projected-sheet.ts", projectedSheetSource],
+  ["packages/json-document-sheet-document/src/schema.ts", sheetDocumentSchemaSource],
+  ["packages/json-document-sheet-document/src/create.ts", sheetDocumentCreateSource],
+  ["packages/json-document-editing/src/sheet-plan.ts", sheetPlanSource],
+  ["packages/json-document-editing/src/sheet-view.ts", sheetViewSource],
+
+  ["packages/json-document-editing/src/object-sheet.ts", objectSheetSource],
+  ["packages/json-document-object-document/src/embedded-document.ts", embeddedDocumentSource],
+  ["packages/json-document-canvas/src/canvas-sheet-object.tsx", canvasSheetObjectSource],
+
   ["packages/json-document-web/src/stored-document.ts", storedDocumentSource],
   ["packages/json-document-editing/src/sheet-summary.ts", sheetSummarySource],
   ["packages/json-document-selection/src/interaction/grid-traversal.ts", gridTraversalSource],
@@ -427,10 +451,14 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["packages/json-document-editing/src/markdown-table.ts",["packages/json-document-editing/src/projected-sheet.ts"]],
+  ["packages/json-document-editing/src/object-sheet.ts",["packages/json-document-editing/src/projected-sheet.ts", "packages/json-document-object-document/src/embedded-document.ts"]],
+  ["packages/json-document-canvas/src/canvas-hand.tsx",["packages/json-document-canvas/src/canvas-sheet-object.tsx"]],
+
   ["packages/json-document-sheet/src/sheet-hand.tsx", ["packages/json-document-sheet/src/sheet-axis-resize.tsx", "packages/json-document-sheet/src/sheet-range-selection.tsx", "packages/json-document-sheet/src/sheet-fill-handle.tsx"]],
   ["packages/json-document-editing/src/sheet-navigation.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
   ["packages/json-document-web/src/keyboard.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
-  ["packages/json-document-editing/src/sheet.ts", ["packages/json-document-editing/src/sheet-structure.ts", "packages/json-document-editing/src/sheet-navigation.ts"]],
+  ["packages/json-document-editing/src/sheet.ts", ["packages/json-document-editing/src/sheet-view.ts", "packages/json-document-editing/src/sheet-plan.ts", "packages/json-document-sheet-document/src/schema.ts", "packages/json-document-sheet-document/src/create.ts", "packages/json-document-editing/src/sheet-structure.ts", "packages/json-document-editing/src/sheet-navigation.ts"]],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", ["packages/json-document-editing/src/markdown-table.ts", "packages/json-document-markdown-react/src/MarkdownCellEditor.tsx"]],
   ["packages/json-document-markdown/src/list-editing.ts", ["packages/json-document-markdown/src/source-edit.ts"]],
   ["packages/json-document-markdown/src/paragraph.ts", ["packages/json-document-markdown/src/list-editing.ts", "packages/json-document-markdown/src/source-edit.ts"]],
@@ -440,8 +468,93 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
-  {packageName:"@interactive-os/json-document-web",symbol:"createWebStoredDocument",sourcePath:"packages/json-document-web/src/stored-document.ts"},
-  {packageName:"@interactive-os/json-document-editing",symbol:"sheetSelectionSummary",sourcePath:"packages/json-document-editing/src/sheet-summary.ts"},
+  {packageName: "@interactive-os/json-document-web", symbol: "webKeyboardPlatform", sourcePath: "packages/json-document-web/src/keyboard.ts"},
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "resolveGridEditActivation",
+    sourcePath: "packages/json-document-affordance/src/grid-editing-profile.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "gridEditingProfiles",
+    sourcePath: "packages/json-document-affordance/src/grid-editing-profile.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "projectWebClientDeltaToElement",
+    sourcePath: "packages/json-document-web/src/element-coordinate.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "sheetClipboardRepresentations",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "parseSheetClipboardText",
+    sourcePath: "packages/json-document-editing/src/sheet-text-clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-sheet-document",
+    symbol: "createSheetDocument",
+    sourcePath: "packages/json-document-sheet-document/src/create.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-sheet-document",
+    symbol: "sheetDocumentSchema",
+    sourcePath: "packages/json-document-sheet-document/src/schema.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-sheet-document",
+    symbol: "assertSheetDocument",
+    sourcePath: "packages/json-document-sheet-document/src/schema.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "planSheetIntent",
+    sourcePath: "packages/json-document-editing/src/sheet-plan.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createProjectedSheetEditor",
+    sourcePath: "packages/json-document-editing/src/projected-sheet.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createCanvasSheet",
+    sourcePath: "packages/json-document-editing/src/object-sheet.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createObjectSheetEditor",
+    sourcePath: "packages/json-document-editing/src/object-sheet.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "sheetEmbeddedDocumentType",
+    sourcePath: "packages/json-document-editing/src/object-sheet.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-object-document",
+    symbol: "createCanvasEmbeddedDocument",
+    sourcePath: "packages/json-document-object-document/src/embedded-document.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-canvas",
+    symbol: "CanvasSheetObject",
+    sourcePath: "packages/json-document-canvas/src/canvas-sheet-object.tsx",
+  },
+
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebStoredDocument",
+    sourcePath: "packages/json-document-web/src/stored-document.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "sheetSelectionSummary",
+    sourcePath: "packages/json-document-editing/src/sheet-summary.ts",
+  },
   {
     packageName: "@interactive-os/json-document-selection",
     symbol: "traverseGrid",
@@ -481,7 +594,7 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "sheetColumnLabel",
-    sourcePath: "packages/json-document-editing/src/sheet-structure.ts",
+    sourcePath: "packages/json-document-sheet-document/src/create.ts",
   },
   {
     packageName: "@interactive-os/json-document-react",

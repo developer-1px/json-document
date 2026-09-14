@@ -60,6 +60,7 @@ export type ObjectIntent =
   | { readonly type: "object.create"; readonly object: ObjectDraft }
   | { readonly type: "object.duplicate"; readonly objectIds: ReadonlyArray<string>; readonly placement?: ObjectPastePlacement }
   | { readonly type: "object.remove"; readonly objectIds: ReadonlyArray<string> }
+  | { readonly type: "object.document"; readonly objectId: string; readonly document: JSONValue }
   | { readonly type: "object.text"; readonly objectId: string; readonly text: string }
   | { readonly type: "document.replace"; readonly document: ObjectDocument }
   | {
@@ -148,6 +149,7 @@ export function createObjectEditor(
       const object = { ...intent.object, id };
       return apply({ type: "insert", objects: [object] }, selectionFor([object.id]), intent.type);
     }
+    if (intent.type === "object.document") return apply({type:"embedded-document",objectId:intent.objectId,document:intent.document},session.snapshot.selection,intent.type);
     if (intent.type === "object.text") {
       return apply({ type: "text", objectId: intent.objectId, text: intent.text }, selectionForTargets([intent.objectId]), intent.type);
     }

@@ -18,6 +18,7 @@ export function cellEditingAffordance(stroke: WebKeyboardStroke, state: {readonl
     if (action === "enter" || action === "previous") return {hand: {type: "rename", action: "commit", move: action === "previous" ? "up" : "down"}};
     return {hand: null};
   }
+  if (action === "cancel") return {hand:{type:"cancel"}};
   const all = selectAllAffordance(stroke, state, {repeat: "preserve"});
   if (all.hand) return all;
   if (stroke.key === " " && !stroke.metaKey && !stroke.altKey && stroke.ctrlKey !== stroke.shiftKey) return {hand:{type:"select",operation:"replace",axis:stroke.ctrlKey ? "column" : "row"}};

@@ -11,6 +11,7 @@ export {
   objectClipboardCodec,
   orderClipboardCodec,
   sheetClipboardCodec,
+  sheetClipboardRepresentations,
   treeClipboardCodec,
 } from "./clipboard.js";
 export { selectionOperationFromModifiers } from "./modifiers.js";
@@ -150,3 +151,6 @@ export type {
 export { textClipboardCodec } from "./clipboard.js";
 export { hitTestWebGrid } from "./grid-cell.js";
 export {createWebStoredDocument, type WebStoredDocument, type WebStoredDocumentOptions, type WebStoredDocumentSource, type WebDocumentSaveState} from "./stored-document.js";
+export {projectWebClientDeltaToElement} from "./element-coordinate.js";
+
+export {webKeyboardPlatform} from "./keyboard.js";

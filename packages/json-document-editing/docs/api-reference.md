@@ -581,6 +581,11 @@ createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: 
 ```ts
 createCanvasClipboard(content: CanvasClipboardContent, options: CanvasClipboardOptions): ObjectClipboard
 ```
+## `createCanvasSheet`
+
+```ts
+createCanvasSheet(bounds: ObjectBounds, options?: { rows?: number; columns?: number; }): CanvasObjectDraft
+```
 ## `createDatabaseEditor`
 
 ```ts
@@ -631,10 +636,20 @@ createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: Edit
 ```ts
 createObjectPasteSession(editor: ObjectEditor, options?: { readonly placement?: ObjectPastePlacement; readonly onResult?: (result: EditingResult<ObjectSelection>) => void; readonly onPendingChange?: (pending: boolean) => void; }): ObjectPasteSession
 ```
+## `createObjectSheetEditor`
+
+```ts
+createObjectSheetEditor(parent: ObjectEditor, objectId: string): SheetEditor
+```
 ## `createOrderEditor`
 
 ```ts
 createOrderEditor(source: EditingDocumentSource<OrderDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): OrderEditor
+```
+## `createProjectedSheetEditor`
+
+```ts
+createProjectedSheetEditor(options: ProjectedSheetOptions): SheetEditor
 ```
 ## `createSheetEditor`
 
@@ -1317,6 +1332,7 @@ type ObjectIntent =
   | { readonly type: "object.create"; readonly object: ObjectDraft }
   | { readonly type: "object.duplicate"; readonly objectIds: ReadonlyArray<string>; readonly placement?: ObjectPastePlacement }
   | { readonly type: "object.remove"; readonly objectIds: ReadonlyArray<string> }
+  | { readonly type: "object.document"; readonly objectId: string; readonly document: JSONValue }
   | { readonly type: "object.text"; readonly objectId: string; readonly text: string }
   | { readonly type: "document.replace"; readonly document: ObjectDocument }
   | {
@@ -1470,10 +1486,20 @@ interface OrderSelection extends Record<string, JSONValue> {
 ```ts
 parseCalendarView(value: unknown): CalendarView | null
 ```
+## `parseSheetClipboardText`
+
+```ts
+parseSheetClipboardText(text: string): SheetClipboard | null
+```
 ## `planCalendarSelectionMove`
 
 ```ts
 planCalendarSelectionMove(events: ReadonlyArray<CalendarEvent>, occurrences: ReadonlyArray<CalendarOccurrenceSelection>, anchor: CalendarOccurrencePoint, target: CalendarSelectionMoveTarget, options?: { readonly scope?: "this" | "this-and-following" | "all"; readonly createId?: () => string; readonly primary?: CalendarOccurrencePoint; }): CalendarSelectionMovePlan
+```
+## `planSheetIntent`
+
+```ts
+planSheetIntent(document: SheetDocument, selection: SheetSelection, intent: SheetIntent, options?: SheetEditorOptions): SheetPlanResult
 ```
 ## `previewCalendarAllDay`
 
@@ -1495,10 +1521,44 @@ previewCalendarTimeGrid(events: ReadonlyArray<CalendarEvent>, release: CalendarT
 ```ts
 projectCalendarOccurrences(events: ReadonlyArray<CalendarEvent>, rangeStart: string, rangeEnd: string): ReadonlyArray<CalendarOccurrence>
 ```
+## `ProjectedSheetOptions`
+
+```ts
+interface ProjectedSheetOptions {
+  readonly source: ProjectedSheetSource;
+  /** Null means absent; a present value is validated by the canonical Sheet schema. */
+  readonly read: () => unknown;
+  readonly write: (value: SheetDocument) => {readonly ok:boolean;readonly code?:string};
+  readonly readOnly?:()=>boolean;
+  readonly sheet?: SheetEditorOptions;
+  /** Formats with position-based IDs remap selection after structural edits. */
+  readonly mapSelection?: (selection:SheetSelection,value:SheetDocument) => SheetSelection;
+}
+```
+## `ProjectedSheetSource`
+
+```ts
+interface ProjectedSheetSource {
+  readonly snapshot: {readonly value: JSONValue;readonly canUndo: boolean;readonly canRedo: boolean};
+  subscribe(listener: () => void): () => void;
+  undo(): {readonly ok:boolean;readonly code?:string};
+  redo(): {readonly ok:boolean;readonly code?:string};
+}
+```
+## `projectSheetGrid`
+
+```ts
+projectSheetGrid(document: SheetDocument, order?: SheetViewOptions): SheetGrid
+```
 ## `projectTreeVisibility`
 
 ```ts
 projectTreeVisibility(nodes: ReadonlyArray<TreeNode>, expandedIds: ReadonlySet<string>): TreeVisibility
+```
+## `SheetAvailability`
+
+```ts
+type SheetAvailability = "ready" | "missing" | "invalid" | "readonly";
 ```
 ## `SheetCell`
 
@@ -1524,10 +1584,7 @@ const sheetClipboardFormat: { mimeType: "application/vnd.interactive-os.sheet+js
 ## `SheetColumn`
 
 ```ts
-interface SheetColumn extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly label: string;
-}
+type SheetColumn = z.infer<typeof sheetColumnSchema>;
 ```
 ## `sheetColumnLabel`
 
@@ -1537,15 +1594,15 @@ sheetColumnLabel(index: number): string
 ## `SheetDocument`
 
 ```ts
-interface SheetDocument extends Record<string, JSONValue> {
-  readonly columns: ReadonlyArray<SheetColumn>;
-  readonly rows: ReadonlyArray<SheetRow>;
-}
+type SheetDocument = z.infer<typeof sheetDocumentSchema>;
 ```
 ## `SheetEditor`
 
 ```ts
 interface SheetEditor {
+  readonly availability: SheetAvailability;
+  readonly grid: SheetGrid;
+  createView(options?:SheetViewOptions):SheetEditor;
   readonly capabilities: {readonly resize: boolean};
   readonly structure: SheetStructureActions;
   readonly snapshot: EditingSnapshot<SheetSelection>;
@@ -1562,12 +1619,25 @@ interface SheetEditor {
 ## `SheetEditorOptions`
 
 ```ts
-interface SheetEditorOptions extends EditingHistoryOptions {
+interface SheetEditorOptions extends EditingHistoryOptions, SheetViewOptions {
   /** False for formats such as GFM that cannot persist row heights or column widths. */
   readonly resize?: boolean;
   readonly structure?: SheetStructurePolicy;
   /** Restore selection when projecting a new source snapshot; missing cells are reconciled. */
   readonly selection?: SheetSelection;
+}
+```
+## `sheetEmbeddedDocumentType`
+
+```ts
+const sheetEmbeddedDocumentType: "sheet/1"
+```
+## `SheetGrid`
+
+```ts
+interface SheetGrid extends GridTopology {
+  readonly rows:ReadonlyArray<SheetRow>;
+  readonly columns:ReadonlyArray<SheetColumn>;
 }
 ```
 ## `SheetIntent`
@@ -1581,7 +1651,7 @@ type SheetIntent =
   | { readonly type: "selection.range"; readonly range: SheetRange }
   | { readonly type: "selection.row"; readonly rowId: string }
   | { readonly type: "selection.column"; readonly columnId: string }
-  | { readonly type: "range.fill"; readonly source: SheetRange; readonly target: SheetRange }
+  | { readonly type: "range.fill"; readonly source: SheetRange; readonly target: SheetRange; readonly topology?:SheetTopology }
   | { readonly type: "selection.navigate"; readonly direction: SheetTraversalDirection; readonly topology?: SheetTopology }
   | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
@@ -1613,6 +1683,11 @@ type SheetIntent =
 ```ts
 sheetNavigationTarget(topology: GridTopology, selection: SheetSelection, direction: SheetTraversalDirection): { readonly point: GridPoint; readonly preserveRange: boolean; } | null
 ```
+## `SheetPlanResult`
+
+```ts
+type SheetPlanResult = {readonly ok:true;readonly plan:EditingPlan<SheetSelection>} | {readonly ok:false;readonly code:string};
+```
 ## `SheetPoint`
 
 ```ts
@@ -1632,10 +1707,7 @@ interface SheetRange extends Record<string, JSONValue> {
 ## `SheetRow`
 
 ```ts
-interface SheetRow extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly cells: Readonly<Record<string, JSONValue>>;
-}
+type SheetRow = z.infer<typeof sheetRowSchema>;
 ```
 ## `SheetSelection`
 
@@ -1691,6 +1763,16 @@ type SheetTopology = GridTopology;
 
 ```ts
 type SheetTraversalDirection = "previous" | "next" | "up" | "down";
+```
+## `SheetViewOptions`
+
+```ts
+interface SheetViewOptions {
+  readonly rowOrder?:ReadonlyArray<string>;
+  readonly columnOrder?:ReadonlyArray<string>;
+  readonly readOnly?:()=>boolean;
+  readonly selection?:SheetSelection;
+}
 ```
 ## `TextChange`
 

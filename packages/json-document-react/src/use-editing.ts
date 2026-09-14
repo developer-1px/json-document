@@ -1,3 +1,4 @@
+import {selectionOperationFromModifiers} from "@interactive-os/json-document-web";
 import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import type { JSONValue } from "@interactive-os/json-document";
 import type { EditingSnapshot } from "@interactive-os/json-document-editing";
@@ -116,9 +117,7 @@ export interface Editing<Selection extends JSONValue, Key extends string = strin
 }
 
 export function selectionModeFromModifiers(event: EditingPressEvent): EditingSelectionMode {
-  if (event.shiftKey) return "extend";
-  if (event.metaKey || event.ctrlKey) return "toggle";
-  return "replace";
+  return selectionOperationFromModifiers({shiftKey:!!event.shiftKey,metaKey:!!event.metaKey,ctrlKey:!!event.ctrlKey});
 }
 
 export function useEditing<Selection extends JSONValue, Key extends string = string>(

@@ -3,7 +3,8 @@ import { getObjectStyle, projectObjectText, type CanvasObject, type ObjectTextPr
 import type { InteractionHandleEvent, ResizeEdge } from "@interactive-os/json-document-affordance";
 import { contentInteractionAttributes, Field, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 
-export function CanvasObjectView({ object, hideText = false }: { readonly object: CanvasObject; readonly hideText?: boolean }): ReactNode {
+export function CanvasObjectView({ object, hideText = false, renderEmbedded }: { readonly object: CanvasObject; readonly hideText?: boolean; readonly renderEmbedded?: (object: Extract<CanvasObject,{kind:"embedded-document"}>) => ReactNode }): ReactNode {
+  if (object.kind === "embedded-document" && renderEmbedded) return renderEmbedded(object);
   const style = getObjectStyle(object);
   if (object.kind === "image") return <image href={object.source} x={object.x} y={object.y} width={object.width} height={object.height} preserveAspectRatio="none" />;
   if (object.kind === "path") {

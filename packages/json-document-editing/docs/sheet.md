@@ -31,3 +31,11 @@ editor.dispatch(editor.structure.insertRow);
 ## 기본 Sheet 애플리케이션
 
 `sheet.rename` Intent는 문서의 `name`을 History에 포함해 변경합니다. `structure.minimumRows`와 `minimumColumns`로 빈 축으로 인한 편집 불능을 방지합니다. `sheetSelectionSummary(editor)`는 활성 셀의 A1 좌표 및 선택/입력 셀 수를 제공합니다. `/applications/sheet`는 이 API와 SheetHand 및 Web 로컬 저장을 조합합니다.
+
+## 내장 표와 부모 History
+
+`createProjectedSheetEditor({source, read, write, sheet, mapSelection})`는 부모 source에서 표 값을 읽고, 표 명령의 결과만 부모에 기록합니다. 선택 이동은 부모를 쓰지 않습니다. Undo/Redo는 부모에게 위임합니다. `mapSelection`은 Markdown처럼 직렬화 후 위치 기반 ID가 바뀌는 형식에서 사용합니다.
+
+`createObjectSheetEditor(parent, objectId)`는 Object의 `embedded-document` / `sheet/1` payload에 연결합니다. `createCanvasSheet(bounds, {rows?, columns?})`는 기본 4행·3열의 표 객체 초안을 생성합니다. `object.document` Intent는 내장 문서 값만 변경하므로 바깥 객체의 위치와 선택을 보존합니다. Markdown과 Canvas 모두 같은 projection lifecycle을 소비하며 개별 어댑터에는 읽기·쓰기·ID 변환만 남습니다.
+
+`parseSheetClipboardText(text)`는 외부 탭 구분 표를 SheetClipboard로 읽습니다. CRLF, 인용부호로 감싼 탭/줄바꿈과 이중 인용부호를 처리하고 짧은 행은 빈 셀로 보충합니다. 닫히지 않은 인용부호는 거절합니다.

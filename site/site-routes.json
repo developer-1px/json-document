@@ -285,7 +285,8 @@
       "packages/json-document-editing/docs/object-selection.md",
       "packages/json-document-editing/docs/calendar-profile.md",
       "packages/json-document-editing/docs/text.md",
-      "packages/json-document-editing/docs/sheet.md"
+      "packages/json-document-editing/docs/sheet.md",
+      "packages/json-document-editing/docs/sheet-contract.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-editing",
@@ -293,7 +294,9 @@
         "/demo/history",
         "/demo/clipboard",
         "/demo/markdown-caret",
-        "/applications/sheet"
+        "/applications/sheet",
+        "/demo/canvas",
+        "/demo/sheet-views"
       ]
     },
     "parentPath": "/docs/editing"
@@ -419,7 +422,8 @@
       "packages/json-document-web/docs/text-clipboard.md",
       "packages/json-document-web/docs/interaction-recording.md",
       "packages/json-document-web/docs/text-keys.md",
-      "packages/json-document-web/docs/stored-document.md"
+      "packages/json-document-web/docs/stored-document.md",
+      "packages/json-document-web/docs/grid-embedding.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-web",
@@ -427,7 +431,8 @@
         "/adapters/keyboard",
         "/adapters/clipboard",
         "/demo/viewport",
-        "/applications/sheet"
+        "/applications/sheet",
+        "/demo/canvas"
       ]
     },
     "parentPath": "/docs/adapters"
@@ -592,7 +597,8 @@
       "packageName": "@interactive-os/json-document-affordance",
       "usagePaths": [
         "/affordances/handles",
-        "/demo/viewport"
+        "/demo/viewport",
+        "/demo/canvas"
       ]
     },
     "parentPath": "/docs/affordance"
@@ -760,7 +766,8 @@
     "description": "Canvas 입력·preview·UI 조합의 API와 Usage입니다.",
     "language": "ko",
     "documentIncludes": [
-      "packages/json-document-canvas/docs/api.md"
+      "packages/json-document-canvas/docs/api.md",
+      "packages/json-document-canvas/docs/embedded-sheet.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-canvas",
@@ -1145,6 +1152,14 @@
     "label": "Sheet",
     "title": "Sheet - json-document",
     "description": "A simple minimal sheet: select cells, type, and fill a rectangle.",
+    "navigationGroup": "Hands",
+    "sidebar": false
+  },
+  {
+    "path": "/demo/sheet-views",
+    "label": "Sheet Views",
+    "title": "Shared Sheet Views - json-document",
+    "description": "같은 표 문서를 독립적인 선택과 표시 순서로 편집하는 두 View입니다.",
     "navigationGroup": "Hands",
     "sidebar": false
   },
@@ -2029,11 +2044,31 @@
       "packageName": "@interactive-os/json-document-sheet",
       "usagePaths": [
         "/demo/sheet",
-        "/applications/sheet"
+        "/applications/sheet",
+        "/demo/canvas",
+        "/demo/sheet-views"
       ]
     },
     "documentIncludes": [
       "packages/json-document-sheet/docs/editing.md"
     ]
+  },
+  {
+    "path": "/docs/api/sheet-document",
+    "label": "API · Sheet Document",
+    "title": "Sheet Document API - json-document",
+    "description": "공통 표 스키마·타입·검증·생성 계약입니다.",
+    "language": "ko",
+    "documentIncludes": [
+      "packages/json-document-sheet-document/docs/api.md"
+    ],
+    "module": {
+      "packageName": "@interactive-os/json-document-sheet-document",
+      "usagePaths": [
+        "/applications/sheet",
+        "/demo/sheet-views"
+      ]
+    },
+    "parentPath": "/docs/document-types"
   }
 ]

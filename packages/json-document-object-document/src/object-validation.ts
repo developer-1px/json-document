@@ -27,11 +27,12 @@ export function assertObjectDocument(value: unknown): void {
     if ((object.width as number) < 0 || (object.height as number) < 0) throw new TypeError(`Object dimensions must not be negative: ${JSON.stringify(object.id)}.`);
     if (object.kind !== undefined) {
       if (typeof object.color !== "string") throw new TypeError("Canvas objects require a color string.");
-      if (!["text", "rectangle", "ellipse", "sticky-note", "path", "image"].includes(object.kind as string)) throw new TypeError("Unknown Object kind.");
+      if (!["text", "rectangle", "ellipse", "sticky-note", "path", "image", "embedded-document"].includes(object.kind as string)) throw new TypeError("Unknown Object kind.");
       if (!positive(object.width) || !positive(object.height)) throw new TypeError("Canvas object dimensions must be positive.");
       if (object.kind === "text" && !positive(object.fontSize)) throw new TypeError("Text fontSize must be positive and finite.");
       const styleKeys = Object.keys(getObjectStyle(object as unknown as DocumentObject)).filter((key) => key !== "color");
       assertObjectStyle(Object.fromEntries(styleKeys.filter((key) => Object.hasOwn(object, key)).map((key) => [key, object[key]])));
+      if (object.kind === "embedded-document" && (typeof object.documentType !== "string" || !object.documentType || !("document" in object))) throw new TypeError("Embedded objects require a document type and value.");
       if (object.kind === "image") assertCanvasImageSource(object.source);
       if (object.kind === "path") {
         if (!positive(object.strokeWidth) || !Array.isArray(object.points) || object.points.length < 2) throw new TypeError("Path requires a positive strokeWidth and at least two points.");

@@ -28,7 +28,7 @@ for (const [prefix,next,nested] of [["- ","- ","  - "],["1. ","2. ","   1. "],["
     await page.keyboard.press("Enter"); await page.keyboard.press("Enter");
     await expect.poll(()=>editor.textContent()).toBe(prefix+"first\n"+next+"second\n\n");
     await page.keyboard.insertText("outside");
-    await expect(editor.locator('[data-markdown-kind="list"]')).not.toContainText("outside");
+    await expect(editor.locator('[data-markdown-kind="list"]').filter({hasText:"outside"})).toHaveCount(0);
   });
 }
 test("backward selection indents sibling items and their child together", async ({page}) => {
@@ -50,4 +50,41 @@ test("ordinary text Tab releases focus and selected list syntax highlights its p
   await page.screenshot({path:test.info().outputPath("list-selection.png")});
   await source(editor,"plain"); await page.keyboard.press("Tab"); await expect(editor).not.toBeFocused();
   await expect.poll(()=>editor.textContent()).toBe("plain");
+});
+
+test("Bear promotes an empty nested item one level per Enter and keeps the insertion caret", async({page})=>{
+ await page.goto("/applications/bear"); const editor=page.getByRole("textbox",{name:"Markdown 문서"});
+ const original="- parent\n  - child\n    - ";
+ await source(editor,original);
+ await page.keyboard.press("Enter");
+ await expect.poll(()=>editor.textContent()).toBe("- parent\n  - child\n  - ");
+ await page.keyboard.press("Enter");
+ await expect.poll(()=>editor.textContent()).toBe("- parent\n  - child\n- ");
+ await page.keyboard.press("ControlOrMeta+z");
+ await expect.poll(()=>editor.textContent()).toBe("- parent\n  - child\n  - ");
+ await page.keyboard.press("ControlOrMeta+Shift+z");
+ await expect.poll(()=>editor.textContent()).toBe("- parent\n  - child\n- ");
+ await page.keyboard.insertText("sibling");
+ await expect.poll(()=>editor.textContent()).toBe("- parent\n  - child\n- sibling");
+ await page.keyboard.press("Enter");await page.keyboard.press("Enter");await page.keyboard.insertText("outside");
+ await expect(editor.locator('[data-markdown-kind="list"]').filter({hasText:"outside"})).toHaveCount(0);
+});
+test("Bear outdents an item with its child without adopting following siblings",async({page})=>{
+ await page.goto("/applications/bear");const editor=page.getByRole("textbox",{name:"Markdown 문서"});
+ const original="- parent\n  - moving\n    - child\n  - staying\n- next";
+ await source(editor,original);await select(editor,original.indexOf("moving")+3);
+ await page.keyboard.press("Shift+Tab");
+ const promoted="- parent\n  - staying\n- moving\n  - child\n- next";
+ await expect.poll(()=>editor.textContent()).toBe(promoted);
+ await page.keyboard.press("ControlOrMeta+z");await expect.poll(()=>editor.textContent()).toBe(original);
+ await page.keyboard.press("ControlOrMeta+Shift+z");await expect.poll(()=>editor.textContent()).toBe(promoted);
+ await page.keyboard.insertText("X");await expect.poll(()=>editor.textContent()).toBe(promoted.replace("moving","movXing"));
+});
+test("Bear splits rich list text with Enter and retains descendants",async({page})=>{
+ await page.goto("/applications/bear");const editor=page.getByRole("textbox",{name:"Markdown 문서"});
+ const original="- **bold** tail\n  - child";
+ await source(editor,original);await select(editor,original.indexOf("tail"));await page.keyboard.press("Enter");
+ await expect.poll(()=>editor.textContent()).toBe("- **bold** \n- tail\n  - child");
+ await page.keyboard.insertText("new ");await expect.poll(()=>editor.textContent()).toBe("- **bold** \n- new tail\n  - child");
+ await expect(editor.locator("strong")).toHaveText("**bold**");
 });

@@ -67,11 +67,12 @@ export function createTypeaheadSession<Key>(options: {
 export interface RenameSessionSnapshot<Key> {
   readonly key: Key;
   readonly draft: string;
+  readonly initialSelection?: "all" | "end";
 }
 
 export interface RenameSession<Key> {
   getSnapshot(): RenameSessionSnapshot<Key> | null;
-  begin(key: Key, label: string): void;
+  begin(key: Key, label: string, initialSelection?: "all" | "end"): void;
   update(draft: string): void;
   handleKey(key: string): boolean;
   handlePointer(key: Key, label: string, detail: number, timeStamp: number): boolean;
@@ -111,8 +112,8 @@ export function createRenameSession<Key>(options: ({
   }
   return {
     getSnapshot: () => snapshot,
-    begin(key, label) {
-      publish({ key, draft: label });
+    begin(key, label, initialSelection) {
+      publish({ key, draft: label, ...(initialSelection ? {initialSelection} : {}) });
     },
     update(draft) {
       if (snapshot !== null) publish({ ...snapshot, draft });

@@ -8,7 +8,8 @@ test("Bear shows only a centered document and supports editing with undo", async
   await expect(editor).toBeVisible();
   await expect(page).toHaveTitle("Bear");
   await expect(page.getByRole("navigation")).toHaveCount(0);
-  await expect(page.locator("main").getByRole("button")).toHaveCount(0);
+  // Embedded Sheet controls belong to the document; Bear has no surrounding toolbar.
+  await expect(page.locator("main button:not([data-sheet-hand] button)")).toHaveCount(0);
   const bounds = await editor.boundingBox();
   expect(Math.abs(bounds!.x + bounds!.width / 2 - page.viewportSize()!.width / 2)).toBeLessThan(2);
   await editor.click();
