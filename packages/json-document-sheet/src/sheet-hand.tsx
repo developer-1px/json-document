@@ -39,7 +39,7 @@ export interface SheetHandProps {
 export function SheetHand({editor, label = "표 편집", headerRow = false, coordinateHeaders = false, profile = "spreadsheet-grid", renderCell, renderEditor, onExit, onDeactivate}: SheetHandProps) {
   const policy = typeof profile === "string" ? gridEditingProfiles[profile] : profile;
   const snapshot = useEditingSnapshot(editor);
-  const sheet = snapshot.value as SheetDocument;
+  const sheet = editor.grid;
   const available = editor.availability;
   const editable = available === "ready";
   const surface = useRef<HTMLDivElement>(null);
@@ -49,7 +49,7 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, coor
   const [fillPreview,setFillPreview] = useState<SheetRange | null>(null);
   const pointer = useSheetRangeSelection(editor, surface);
   const focus = snapshot.selection.focus;
-  const topology = {rowIds: sheet.rows.map(row => row.id), columnIds: sheet.columns.map(column => column.id)};
+  const topology = sheet;
   const primaryRange = snapshot.selection.primaryIndex === null ? undefined : snapshot.selection.ranges[snapshot.selection.primaryIndex];
   const primaryBounds = primaryRange && gridRangeBounds(topology,primaryRange);
   const fillCells = new Set(fillPreview ? gridCellsInRange(topology,fillPreview).map(gridPointKey) : []);
@@ -118,8 +118,8 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, coor
       <Command disabled={!editable} label="열 추가" onClick={() => report(editor.dispatch(structure.insertColumn))}><AxisActionIcon axis="column" action="add" /></Command>
       <Command label="행 삭제" disabled={!editable || !structure.deleteRow} onClick={() => structure.deleteRow && report(editor.dispatch(structure.deleteRow))}><AxisActionIcon axis="row" action="remove" /></Command>
       <Command label="열 삭제" disabled={!editable || !structure.deleteColumn} onClick={() => structure.deleteColumn && report(editor.dispatch(structure.deleteColumn))}><AxisActionIcon axis="column" action="remove" /></Command>
-      <Command label="실행 취소" disabled={!snapshot.canUndo} onClick={() => report(editor.undo())}><Undo2 aria-hidden="true" size={16} /></Command>
-      <Command label="다시 실행" disabled={!snapshot.canRedo} onClick={() => report(editor.redo())}><Redo2 aria-hidden="true" size={16} /></Command>
+      <Command label="실행 취소" disabled={!editable || !snapshot.canUndo} onClick={() => report(editor.undo())}><Undo2 aria-hidden="true" size={16} /></Command>
+      <Command label="다시 실행" disabled={!editable || !snapshot.canRedo} onClick={() => report(editor.redo())}><Redo2 aria-hidden="true" size={16} /></Command>
     </Toolbar>
     <div style={{overflowX: "auto"}} {...clipboard}>
       <table role="grid" aria-label={label} aria-multiselectable="true" aria-readonly={!editable} style={{borderCollapse: "collapse", width: "100%"}}>

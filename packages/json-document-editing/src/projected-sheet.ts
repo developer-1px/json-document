@@ -41,9 +41,10 @@ export function createProjectedSheetEditor(options:ProjectedSheetOptions):SheetE
     }
     if(availability === "ready" || availability === "readonly")availability=options.readOnly?.() ? "readonly":"ready";
   };
-  const snapshot=():EditingSnapshot<SheetSelection>=>{read();return {value:document,selection,revision,canUndo:options.source.snapshot.canUndo,canRedo:options.source.snapshot.canRedo};};
+  const snapshot=():EditingSnapshot<SheetSelection>=>{read();return {value:document,selection,revision,canUndo:availability === "ready" && options.source.snapshot.canUndo,canRedo:availability === "ready" && options.source.snapshot.canRedo};};
   const publish=()=>{revision++;const next=snapshot();for(const listener of listeners)listener(next);};
   const history=(action:"undo"|"redo")=>{
+    read();if(availability !== "ready")return {ok:false as const,code:`table.${availability}`};
     committing=true;let result:ReturnType<ProjectedSheetSource["undo"]>;
     try{result=options.source[action]();}finally{committing=false;}
     publish();return result.ok ? {ok:true as const,snapshot:snapshot()}:{ok:false as const,code:result.code ?? "history.unavailable"};
@@ -71,7 +72,7 @@ export function createProjectedSheetEditor(options:ProjectedSheetOptions):SheetE
   };
   const editor=bindSheetEditing(session,options.sheet);
   return {...editor,
-    get availability(){read();return availability;},
+    get availability(){read();return availability;},get grid(){return editor.grid;},
     get capabilities(){return editor.capabilities;},get structure(){return editor.structure;},get snapshot(){return snapshot();},get selectedCells(){return editor.selectedCells;},
     dispatch(intent){read();if(availability === "missing" || availability === "invalid")return {ok:false,code:`table.${availability}`};return dispatchSheetIntent(session,intent,options.sheet);},
   };

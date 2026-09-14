@@ -295,7 +295,8 @@
         "/demo/clipboard",
         "/demo/markdown-caret",
         "/applications/sheet",
-        "/demo/canvas"
+        "/demo/canvas",
+        "/demo/sheet-views"
       ]
     },
     "parentPath": "/docs/editing"
@@ -1151,6 +1152,14 @@
     "label": "Sheet",
     "title": "Sheet - json-document",
     "description": "A simple minimal sheet: select cells, type, and fill a rectangle.",
+    "navigationGroup": "Hands",
+    "sidebar": false
+  },
+  {
+    "path": "/demo/sheet-views",
+    "label": "Sheet Views",
+    "title": "Shared Sheet Views - json-document",
+    "description": "같은 표 문서를 독립적인 선택과 표시 순서로 편집하는 두 View입니다.",
     "navigationGroup": "Hands",
     "sidebar": false
   },
@@ -2036,7 +2045,8 @@
       "usagePaths": [
         "/demo/sheet",
         "/applications/sheet",
-        "/demo/canvas"
+        "/demo/canvas",
+        "/demo/sheet-views"
       ]
     },
     "documentIncludes": [
@@ -2055,7 +2065,8 @@
     "module": {
       "packageName": "@interactive-os/json-document-sheet-document",
       "usagePaths": [
-        "/applications/sheet"
+        "/applications/sheet",
+        "/demo/sheet-views"
       ]
     },
     "parentPath": "/docs/document-types"

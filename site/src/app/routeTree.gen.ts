@@ -51,6 +51,7 @@ import { Route as PageDemoObjectRouteImport } from "./routes/_page/demo/object";
 import { Route as PageDemoOrderRouteImport } from "./routes/_page/demo/order";
 import { Route as PageDemoSelectionRouteImport } from "./routes/_page/demo/selection";
 import { Route as PageDemoSheetRouteImport } from "./routes/_page/demo/sheet";
+import { Route as PageDemoSheetViewsRouteImport } from "./routes/_page/demo/sheet-views";
 import { Route as PageDemoTopologyRouteImport } from "./routes/_page/demo/topology";
 import { Route as PageDemoTreeRouteImport } from "./routes/_page/demo/tree";
 import { Route as PageDemoUiPrimitivesRouteImport } from "./routes/_page/demo/ui-primitives";
@@ -397,6 +398,11 @@ const PageDemoSelectionRoute = PageDemoSelectionRouteImport.update({
 const PageDemoSheetRoute = PageDemoSheetRouteImport.update({
   id: "/demo/sheet",
   path: "/demo/sheet",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoSheetViewsRoute = PageDemoSheetViewsRouteImport.update({
+  id: "/demo/sheet-views",
+  path: "/demo/sheet-views",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoTopologyRoute = PageDemoTopologyRouteImport.update({
@@ -1148,6 +1154,7 @@ export interface FileRoutesByFullPath {
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
   "/demo/sheet": typeof PageDemoSheetRoute;
+  "/demo/sheet-views": typeof PageDemoSheetViewsRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
   "/demo/tree": typeof PageDemoTreeRoute;
   "/demo/ui-primitives": typeof PageDemoUiPrimitivesRoute;
@@ -1323,6 +1330,7 @@ export interface FileRoutesByTo {
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
   "/demo/sheet": typeof PageDemoSheetRoute;
+  "/demo/sheet-views": typeof PageDemoSheetViewsRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
   "/demo/tree": typeof PageDemoTreeRoute;
   "/demo/ui-primitives": typeof PageDemoUiPrimitivesRoute;
@@ -1500,6 +1508,7 @@ export interface FileRoutesById {
   "/_page/demo/order": typeof PageDemoOrderRoute;
   "/_page/demo/selection": typeof PageDemoSelectionRoute;
   "/_page/demo/sheet": typeof PageDemoSheetRoute;
+  "/_page/demo/sheet-views": typeof PageDemoSheetViewsRoute;
   "/_page/demo/topology": typeof PageDemoTopologyRoute;
   "/_page/demo/tree": typeof PageDemoTreeRoute;
   "/_page/demo/ui-primitives": typeof PageDemoUiPrimitivesRoute;
@@ -1677,6 +1686,7 @@ export interface FileRouteTypes {
     | "/demo/order"
     | "/demo/selection"
     | "/demo/sheet"
+    | "/demo/sheet-views"
     | "/demo/topology"
     | "/demo/tree"
     | "/demo/ui-primitives"
@@ -1852,6 +1862,7 @@ export interface FileRouteTypes {
     | "/demo/order"
     | "/demo/selection"
     | "/demo/sheet"
+    | "/demo/sheet-views"
     | "/demo/topology"
     | "/demo/tree"
     | "/demo/ui-primitives"
@@ -2028,6 +2039,7 @@ export interface FileRouteTypes {
     | "/_page/demo/order"
     | "/_page/demo/selection"
     | "/_page/demo/sheet"
+    | "/_page/demo/sheet-views"
     | "/_page/demo/topology"
     | "/_page/demo/tree"
     | "/_page/demo/ui-primitives"
@@ -2467,6 +2479,13 @@ declare module "@tanstack/react-router" {
       path: "/demo/sheet";
       fullPath: "/demo/sheet";
       preLoaderRoute: typeof PageDemoSheetRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/sheet-views": {
+      id: "/_page/demo/sheet-views";
+      path: "/demo/sheet-views";
+      fullPath: "/demo/sheet-views";
+      preLoaderRoute: typeof PageDemoSheetViewsRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/topology": {
@@ -3431,6 +3450,7 @@ interface PageRouteChildren {
   PageDemoOrderRoute: typeof PageDemoOrderRoute;
   PageDemoSelectionRoute: typeof PageDemoSelectionRoute;
   PageDemoSheetRoute: typeof PageDemoSheetRoute;
+  PageDemoSheetViewsRoute: typeof PageDemoSheetViewsRoute;
   PageDemoTopologyRoute: typeof PageDemoTopologyRoute;
   PageDemoTreeRoute: typeof PageDemoTreeRoute;
   PageDemoUiPrimitivesRoute: typeof PageDemoUiPrimitivesRoute;
@@ -3604,6 +3624,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoOrderRoute: PageDemoOrderRoute,
   PageDemoSelectionRoute: PageDemoSelectionRoute,
   PageDemoSheetRoute: PageDemoSheetRoute,
+  PageDemoSheetViewsRoute: PageDemoSheetViewsRoute,
   PageDemoTopologyRoute: PageDemoTopologyRoute,
   PageDemoTreeRoute: PageDemoTreeRoute,
   PageDemoUiPrimitivesRoute: PageDemoUiPrimitivesRoute,

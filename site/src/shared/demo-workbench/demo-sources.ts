@@ -1,3 +1,4 @@
+import sheetViewSource from "../../../../packages/json-document-editing/src/sheet-view.ts?raw";
 import sheetPlanSource from "../../../../packages/json-document-editing/src/sheet-plan.ts?raw";
 import sheetDocumentCreateSource from "../../../../packages/json-document-sheet-document/src/create.ts?raw";
 import sheetDocumentSchemaSource from "../../../../packages/json-document-sheet-document/src/schema.ts?raw";
@@ -243,6 +244,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-sheet-document/src/schema.ts", sheetDocumentSchemaSource],
   ["packages/json-document-sheet-document/src/create.ts", sheetDocumentCreateSource],
   ["packages/json-document-editing/src/sheet-plan.ts", sheetPlanSource],
+  ["packages/json-document-editing/src/sheet-view.ts", sheetViewSource],
 
   ["packages/json-document-editing/src/object-sheet.ts", objectSheetSource],
   ["packages/json-document-object-document/src/embedded-document.ts", embeddedDocumentSource],
@@ -456,7 +458,7 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-sheet/src/sheet-hand.tsx", ["packages/json-document-sheet/src/sheet-axis-resize.tsx", "packages/json-document-sheet/src/sheet-range-selection.tsx", "packages/json-document-sheet/src/sheet-fill-handle.tsx"]],
   ["packages/json-document-editing/src/sheet-navigation.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
   ["packages/json-document-web/src/keyboard.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
-  ["packages/json-document-editing/src/sheet.ts", ["packages/json-document-editing/src/sheet-plan.ts", "packages/json-document-sheet-document/src/schema.ts", "packages/json-document-sheet-document/src/create.ts", "packages/json-document-editing/src/sheet-structure.ts", "packages/json-document-editing/src/sheet-navigation.ts"]],
+  ["packages/json-document-editing/src/sheet.ts", ["packages/json-document-editing/src/sheet-view.ts", "packages/json-document-editing/src/sheet-plan.ts", "packages/json-document-sheet-document/src/schema.ts", "packages/json-document-sheet-document/src/create.ts", "packages/json-document-editing/src/sheet-structure.ts", "packages/json-document-editing/src/sheet-navigation.ts"]],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", ["packages/json-document-editing/src/markdown-table.ts", "packages/json-document-markdown-react/src/MarkdownCellEditor.tsx"]],
   ["packages/json-document-markdown/src/list-editing.ts", ["packages/json-document-markdown/src/source-edit.ts"]],
   ["packages/json-document-markdown/src/paragraph.ts", ["packages/json-document-markdown/src/list-editing.ts", "packages/json-document-markdown/src/source-edit.ts"]],

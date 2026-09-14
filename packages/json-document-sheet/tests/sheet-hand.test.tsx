@@ -40,3 +40,15 @@ test("a rejected commit retains the draft and does not navigate or close editing
  expect(screen.queryByRole("textbox")).toBeNull();
  expect((editor.snapshot.value as SheetDocument).rows[0]!.cells.a).toBe("retained");
 });
+
+test("readonly View exposes current values and blocks toolbar and keyboard history",()=>{
+ const owner=createSheetEditor({columns:[{id:"a",label:"A"}],rows:[{id:"r",cells:{a:"one"}}]});
+ owner.dispatch({type:"cell.commit",rowId:"r",columnId:"a",value:"saved"});
+ const view=owner.createView({readOnly:()=>true}),before=owner.snapshot.value;
+ render(<SheetHand editor={view}/>);
+ expect((screen.getByRole("button",{name:"실행 취소"}) as HTMLButtonElement).disabled).toBe(true);
+ expect((screen.getByRole("button",{name:"행 추가"}) as HTMLButtonElement).disabled).toBe(true);
+ fireEvent.doubleClick(screen.getByText("saved"));expect(screen.queryByRole("textbox")).toBeNull();
+ fireEvent.keyDown(screen.getByRole("gridcell"),{key:"z",ctrlKey:true});
+ expect(owner.snapshot.value).toBe(before);
+});
