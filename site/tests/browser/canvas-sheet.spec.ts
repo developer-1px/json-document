@@ -32,3 +32,18 @@ test("replacement typing, external paste, header focus and scaled resize share t
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('json-document.sheet.v1')!).columns[0].width)).toBe(130);
  await page.goto('/applications/bear');const bearCell=page.getByRole('gridcell').nth(2);await bearCell.click();await page.keyboard.type('abc');await page.keyboard.press('Enter');await expect(bearCell).toHaveText('abc');
 });
+
+test("table preview survives horizontal, vertical and tiny creation drags",async({page})=>{
+ const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+ for(const [dx,dy] of [[90,0],[0,90],[1,1]]) {
+  await page.goto('/demo/canvas');await page.getByRole('button',{name:'표',exact:true}).click();
+  const surface=page.locator('[data-canvas-slide]'),box=await surface.boundingBox();
+  const x=box!.x+box!.width*.15,y=box!.y+box!.height*.2;
+  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+dx!,y+dy!,{steps:4});
+  await expect(surface).toBeVisible();await page.mouse.up();
+  const object=page.locator('[data-canvas-object]');await expect(object).toHaveCount(1);
+  expect(Number(await object.getAttribute('width'))).toBeGreaterThan(0);expect(Number(await object.getAttribute('height'))).toBeGreaterThan(0);
+  await page.getByRole('toolbar',{name:'Canvas tools'}).getByRole('button',{name:'실행 취소',exact:true}).click();await expect(object).toHaveCount(0);
+ }
+ expect(errors).toEqual([]);
+});

@@ -135,3 +135,5 @@ Canvas slice 범위 밖입니다. 이 RC 프로파일은 독립 구현 간 Stabl
 `kind: "embedded-document"`는 `documentType: string`과 `document: JSONValue`를 공간 객체 안에 보관합니다. `createCanvasEmbeddedDocument(documentType, document, bounds, label)`이 초안을 생성합니다. Object 모델은 payload를 보존하고 구체 문서 schema를 중복 정의하지 않습니다. `embedded-document` operation은 해당 객체의 document 필드만 원자적으로 교체합니다.
 
 Editing의 `createCanvasSheet` / `createObjectSheetEditor`가 `sheet/1` payload 모델과 부모 History 연결을 소유합니다. Canvas는 `CanvasSheetObject`로 동일 SheetHand를 SVG 안에 조합합니다. 내장 문서는 객체 복제·Clipboard·JSON 직렬화·변형에서도 유지됩니다. 알 수 없는 documentType은 payload를 보존하며, 소비자가 지원 여부를 표시합니다.
+
+생성 중 한 축만 움직인 드래그도 처리할 수 있도록 `createCanvasEmbeddedDocument`는 유한한 너비·높이를 최소 1 layout 단위로 보정합니다. 일반 도형 생성과 같은 규칙이며, 저장 문서 검증의 양수 조건과 비유한 좌표 거부는 유지합니다.
