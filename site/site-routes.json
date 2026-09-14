@@ -285,7 +285,8 @@
       "packages/json-document-editing/docs/object-selection.md",
       "packages/json-document-editing/docs/calendar-profile.md",
       "packages/json-document-editing/docs/text.md",
-      "packages/json-document-editing/docs/sheet.md"
+      "packages/json-document-editing/docs/sheet.md",
+      "packages/json-document-editing/docs/sheet-contract.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-editing",
@@ -2041,5 +2042,22 @@
     "documentIncludes": [
       "packages/json-document-sheet/docs/editing.md"
     ]
+  },
+  {
+    "path": "/docs/api/sheet-document",
+    "label": "API · Sheet Document",
+    "title": "Sheet Document API - json-document",
+    "description": "공통 표 스키마·타입·검증·생성 계약입니다.",
+    "language": "ko",
+    "documentIncludes": [
+      "packages/json-document-sheet-document/docs/api.md"
+    ],
+    "module": {
+      "packageName": "@interactive-os/json-document-sheet-document",
+      "usagePaths": [
+        "/applications/sheet"
+      ]
+    },
+    "parentPath": "/docs/document-types"
   }
 ]

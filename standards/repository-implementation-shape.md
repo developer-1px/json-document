@@ -333,3 +333,5 @@ Source를 이동하는 이슈는 다음을 모두 증명한다.
 정본을 우회하지 않는다. Naming 변경이 함께 필요하면
 `standards/repository-naming.md`를 먼저 통과한다. Public API, runtime 동작 또는
 versioned protocol 변경은 각 contract의 별도 승인과 검증을 사용한다.
+
+- `packages/json-document-sheet-document`: Document Types. 공통 표 스키마·타입·검증·생성 정본이며 Editing·UI에 의존하지 않습니다.

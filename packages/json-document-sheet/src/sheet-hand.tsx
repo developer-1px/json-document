@@ -1,5 +1,5 @@
 import { Rows3, Columns3, Plus, Minus, Undo2, Redo2 } from "lucide-react";
-import { useMemo, useRef, useState, type ReactNode, type KeyboardEvent, type CSSProperties, type KeyboardEventHandler, type FocusEventHandler } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type KeyboardEvent, type CSSProperties, type KeyboardEventHandler, type FocusEventHandler } from "react";
 import { sheetColumnLabel, jsonCellText, gridRangeBounds, gridCellsInRange, gridPointKey, type SheetRange, type SheetDocument, type SheetEditor, type GridPoint } from "@interactive-os/json-document-editing";
 import { editingItemProps, useEditingSnapshot, useGridEditing, useRenameSession } from "@interactive-os/json-document-react";
 import { cellEditingAffordance, gridEditingProfiles, resolveGridEditActivation, editingCommandFromWebKeyboardStroke, type GridEditingProfile } from "@interactive-os/json-document-affordance";
@@ -40,6 +40,8 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, coor
   const policy = typeof profile === "string" ? gridEditingProfiles[profile] : profile;
   const snapshot = useEditingSnapshot(editor);
   const sheet = snapshot.value as SheetDocument;
+  const available = editor.availability;
+  const editable = available === "ready";
   const surface = useRef<HTMLDivElement>(null);
   const [message, setMessage] = useState("");
   const [columnPreview, setColumnPreview] = useState<{id:string;size:number} | null>(null);
@@ -66,7 +68,12 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, coor
     tryCommit: (point, value) => report(editor.dispatch({type: "cell.commit", ...point, value, preserveSelection: true})),
     onFinish: focusCell,
   });
+  useEffect(() => {
+    const current=rename.session.getSnapshot();
+    if (!editable || current && (!sheet.rows.some(row=>row.id === current.key.rowId) || !sheet.columns.some(column=>column.id === current.key.columnId))) rename.session.cancel();
+  }, [editable, sheet, rename.session]);
   const beginEdit = (point: GridPoint, replacement?: string) => {
+    if (!editable) return;
     const activation=resolveGridEditActivation(policy,jsonCellText(sheet.rows.find(row=>row.id === point.rowId)?.cells[point.columnId]),replacement);
     rename.session.begin(point,activation.draft,activation.initialSelection);
   };
@@ -107,23 +114,23 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, coor
   return <div data-sheet-hand="" ref={surface} onKeyDown={keyDown} onBeforeInput={event => event.stopPropagation()} onInput={event => event.stopPropagation()}
     onPointerDown={event => {event.stopPropagation();if (!draft) pointer.onPointerDown(event);}} onLostPointerCapture={pointer.onLostPointerCapture}>
     <Toolbar label="표 작업" style={{display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8, fontSize: 13}}>
-      <Command label="행 추가" onClick={() => report(editor.dispatch(structure.insertRow))}><AxisActionIcon axis="row" action="add" /></Command>
-      <Command label="열 추가" onClick={() => report(editor.dispatch(structure.insertColumn))}><AxisActionIcon axis="column" action="add" /></Command>
-      <Command label="행 삭제" disabled={!structure.deleteRow} onClick={() => structure.deleteRow && report(editor.dispatch(structure.deleteRow))}><AxisActionIcon axis="row" action="remove" /></Command>
-      <Command label="열 삭제" disabled={!structure.deleteColumn} onClick={() => structure.deleteColumn && report(editor.dispatch(structure.deleteColumn))}><AxisActionIcon axis="column" action="remove" /></Command>
+      <Command disabled={!editable} label="행 추가" onClick={() => report(editor.dispatch(structure.insertRow))}><AxisActionIcon axis="row" action="add" /></Command>
+      <Command disabled={!editable} label="열 추가" onClick={() => report(editor.dispatch(structure.insertColumn))}><AxisActionIcon axis="column" action="add" /></Command>
+      <Command label="행 삭제" disabled={!editable || !structure.deleteRow} onClick={() => structure.deleteRow && report(editor.dispatch(structure.deleteRow))}><AxisActionIcon axis="row" action="remove" /></Command>
+      <Command label="열 삭제" disabled={!editable || !structure.deleteColumn} onClick={() => structure.deleteColumn && report(editor.dispatch(structure.deleteColumn))}><AxisActionIcon axis="column" action="remove" /></Command>
       <Command label="실행 취소" disabled={!snapshot.canUndo} onClick={() => report(editor.undo())}><Undo2 aria-hidden="true" size={16} /></Command>
       <Command label="다시 실행" disabled={!snapshot.canRedo} onClick={() => report(editor.redo())}><Redo2 aria-hidden="true" size={16} /></Command>
     </Toolbar>
     <div style={{overflowX: "auto"}} {...clipboard}>
-      <table role="grid" aria-label={label} aria-multiselectable="true" style={{borderCollapse: "collapse", width: "100%"}}>
+      <table role="grid" aria-label={label} aria-multiselectable="true" aria-readonly={!editable} style={{borderCollapse: "collapse", width: "100%"}}>
         <colgroup><col />{sheet.columns.map(column => <col key={column.id} style={{width:columnPreview?.id === column.id ? columnPreview.size : typeof column.width === "number" ? column.width : undefined}} />)}</colgroup>
         <thead><tr><th aria-label="행 번호" />{sheet.columns.map((column,columnIndex) => <th key={column.id} scope="col" style={{position:"relative"}}>
           <button type="button" aria-label={`${coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label} 열 선택`} onClick={() => {editor.dispatch({type:"selection.column",columnId:column.id});const point=editor.snapshot.selection.focus;if(point) focusCell(point);}} style={{border:0,background:"transparent",font:"inherit",color:"inherit",padding:0}}>{coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label}</button>
-          {editor.capabilities.resize && <SheetAxisResize axis="x" label={`${coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label} 열 너비 조절`} onPreview={size => setColumnPreview(size === null ? null : {id:column.id,size})} onCommit={width => report(editor.dispatch({type:"column.resize",columnId:column.id,width}))} />}
+          {editable && editor.capabilities.resize && <SheetAxisResize axis="x" label={`${coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label} 열 너비 조절`} onPreview={size => setColumnPreview(size === null ? null : {id:column.id,size})} onCommit={width => report(editor.dispatch({type:"column.resize",columnId:column.id,width}))} />}
         </th>)}</tr></thead>
         <tbody>{sheet.rows.map((row, index) => <tr key={row.id} style={{height:rowPreview?.id === row.id ? rowPreview.size : typeof row.height === "number" ? row.height : undefined}}><th scope="row" style={{position:"relative"}}>
           <button type="button" aria-label={`${index + 1}행 선택`} onClick={() => {editor.dispatch({type:"selection.row",rowId:row.id});const point=editor.snapshot.selection.focus;if(point) focusCell(point);}} style={{border:0,background:"transparent",font:"inherit",color:"inherit",padding:0}}>{headerRow && index === 0 ? "제목" : index + (headerRow ? 0 : 1)}</button>
-          {editor.capabilities.resize && <SheetAxisResize axis="y" label={`${index + 1}행 높이 조절`} onPreview={size => setRowPreview(size === null ? null : {id:row.id,size})} onCommit={height => report(editor.dispatch({type:"row.resize",rowId:row.id,height}))} />}
+          {editable && editor.capabilities.resize && <SheetAxisResize axis="y" label={`${index + 1}행 높이 조절`} onPreview={size => setRowPreview(size === null ? null : {id:row.id,size})} onCommit={height => report(editor.dispatch({type:"row.resize",rowId:row.id,height}))} />}
         </th>{sheet.columns.map(column => {
           const point = {rowId: row.id, columnId: column.id}; const item = editing.getCell(point);
           const active = draft?.key.rowId === row.id && draft.key.columnId === column.id;
@@ -141,12 +148,13 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, coor
             {editorProps && (renderEditor ? renderEditor(editorProps) : <Field label={editorProps.label} value={editorProps.value} style={editorProps.style} onValueChange={editorProps.onValueChange} onBlur={editorProps.onBlur} onKeyDown={editorProps.onKeyDown} presentation="seamless" autoFocus
               onFocus={event => {const input=event.currentTarget;if(editorProps.initialSelection === "end") input.setSelectionRange(input.value.length,input.value.length);else input.select();}} onPointerDown={event => event.stopPropagation()}
               />)}
-            {!draft && primaryRange && primaryBounds && row.id === topology.rowIds[primaryBounds.rowEnd] && column.id === topology.columnIds[primaryBounds.columnEnd]
+            {editable && !draft && primaryRange && primaryBounds && row.id === topology.rowIds[primaryBounds.rowEnd] && column.id === topology.columnIds[primaryBounds.columnEnd]
               && <SheetFillHandle editor={editor} topology={topology} range={primaryRange} surface={surface} onPreview={setFillPreview} />}
           </GridCell>;
         })}</tr>)}</tbody>
       </table>
     </div>
+    {available !== "ready" && <output role="status">{available === "readonly" ? "읽기 전용 표" : available === "missing" ? "표가 삭제되었습니다" : "표 데이터를 읽을 수 없습니다"}</output>}
     {message && <output role="status">{message}</output>}
   </div>;
 }

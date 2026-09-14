@@ -430,5 +430,16 @@
     "entrypoint": "packages/json-document-sheet/src/index.ts",
     "subpaths": [],
     "referencePath": "packages/json-document-sheet/docs/api-reference.md"
+  },
+  {
+    "packageName": "@interactive-os/json-document-sheet-document",
+    "sourceDirectory": "packages/json-document-sheet-document",
+    "positions": [
+      "Document Types"
+    ],
+    "responsibility": "표 정본 스키마·타입·검증·생성",
+    "entrypoint": "packages/json-document-sheet-document/src/index.ts",
+    "subpaths": [],
+    "referencePath": "packages/json-document-sheet-document/docs/api-reference.md"
   }
 ]

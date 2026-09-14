@@ -17,7 +17,13 @@
     "provenance": true,
     "tag": "next"
   },
-  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "docs", "LICENSE"],
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo",
+    "README.md",
+    "docs",
+    "LICENSE"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -38,7 +44,8 @@
     "@interactive-os/json-document-calendar-document": "^0.1.0-rc.0",
     "@interactive-os/json-document": "^3.0.0",
     "@interactive-os/json-document-selection": "^0.1.0-rc.0",
-    "@interactive-os/json-document-markdown": "^0.1.0-rc.0"
+    "@interactive-os/json-document-markdown": "^0.1.0-rc.0",
+    "@interactive-os/json-document-sheet-document": "^0.1.0-rc.0"
   },
   "devDependencies": {
     "@interactive-os/json-document-object-document": "*",
@@ -48,6 +55,7 @@
     "@types/node": "^25.9.0",
     "typescript": "^5.0.0",
     "vitest": "^4.1.7",
-    "@interactive-os/json-document-markdown": "*"
+    "@interactive-os/json-document-markdown": "*",
+    "@interactive-os/json-document-sheet-document": "*"
   }
 }

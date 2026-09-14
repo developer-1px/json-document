@@ -1,5 +1,6 @@
+import {createSheetDocument} from "@interactive-os/json-document-sheet-document";
 import {useEffect, useState, useSyncExternalStore} from "react";
-import {createSheetEditor, sheetColumnLabel, sheetSelectionSummary, type SheetDocument} from "@interactive-os/json-document-editing";
+import {createSheetEditor, sheetSelectionSummary, type SheetDocument} from "@interactive-os/json-document-editing";
 import {useEditingSnapshot} from "@interactive-os/json-document-react";
 import {createWebStoredDocument} from "@interactive-os/json-document-web";
 import {SheetHand} from "@interactive-os/json-document-sheet";
@@ -7,14 +8,9 @@ import {Command, Field} from "@interactive-os/json-document-ui-primitives-react"
 import {Save} from "lucide-react";
 import "./sheet-application.css";
 
-function blankSheet(): SheetDocument {
-  const columns = Array.from({length:12}, (_,index) => ({id:`column-${index + 1}`,label:sheetColumnLabel(index),width:120}));
-  return {name:"제목 없는 시트",columns,rows:Array.from({length:40},(_,index) => ({id:`row-${index + 1}`,height:32,cells:Object.fromEntries(columns.map(column => [column.id,""]))}))};
-}
-
 export function SheetApplication() {
   const [stored] = useState(() => createWebStoredDocument({key:"json-document.sheet.v1",storage:() => window.localStorage,
-    create:() => createSheetEditor(blankSheet(),{structure:{minimumRows:1,minimumColumns:1}}),
+    create:() => createSheetEditor(createSheetDocument({rows:40,columns:12,name:"제목 없는 시트",columnWidth:120,rowHeight:32}),{structure:{minimumRows:1,minimumColumns:1}}),
     restore:value => createSheetEditor(value as SheetDocument,{structure:{minimumRows:1,minimumColumns:1}})}));
   const editor = stored.source;
   const snapshot = useEditingSnapshot(editor);

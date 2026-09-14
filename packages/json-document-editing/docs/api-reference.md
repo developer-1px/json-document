@@ -1496,6 +1496,11 @@ parseSheetClipboardText(text: string): SheetClipboard | null
 ```ts
 planCalendarSelectionMove(events: ReadonlyArray<CalendarEvent>, occurrences: ReadonlyArray<CalendarOccurrenceSelection>, anchor: CalendarOccurrencePoint, target: CalendarSelectionMoveTarget, options?: { readonly scope?: "this" | "this-and-following" | "all"; readonly createId?: () => string; readonly primary?: CalendarOccurrencePoint; }): CalendarSelectionMovePlan
 ```
+## `planSheetIntent`
+
+```ts
+planSheetIntent(document: SheetDocument, selection: SheetSelection, intent: SheetIntent, options?: SheetEditorOptions): SheetPlanResult
+```
 ## `previewCalendarAllDay`
 
 ```ts
@@ -1521,8 +1526,10 @@ projectCalendarOccurrences(events: ReadonlyArray<CalendarEvent>, rangeStart: str
 ```ts
 interface ProjectedSheetOptions {
   readonly source: ProjectedSheetSource;
-  readonly read: () => SheetDocument | null;
+  /** Null means absent; a present value is validated by the canonical Sheet schema. */
+  readonly read: () => unknown;
   readonly write: (value: SheetDocument) => {readonly ok:boolean;readonly code?:string};
+  readonly readOnly?:()=>boolean;
   readonly sheet?: SheetEditorOptions;
   /** Formats with position-based IDs remap selection after structural edits. */
   readonly mapSelection?: (selection:SheetSelection,value:SheetDocument) => SheetSelection;
@@ -1542,6 +1549,11 @@ interface ProjectedSheetSource {
 
 ```ts
 projectTreeVisibility(nodes: ReadonlyArray<TreeNode>, expandedIds: ReadonlySet<string>): TreeVisibility
+```
+## `SheetAvailability`
+
+```ts
+type SheetAvailability = "ready" | "missing" | "invalid" | "readonly";
 ```
 ## `SheetCell`
 
@@ -1567,10 +1579,7 @@ const sheetClipboardFormat: { mimeType: "application/vnd.interactive-os.sheet+js
 ## `SheetColumn`
 
 ```ts
-interface SheetColumn extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly label: string;
-}
+type SheetColumn = z.infer<typeof sheetColumnSchema>;
 ```
 ## `sheetColumnLabel`
 
@@ -1580,15 +1589,13 @@ sheetColumnLabel(index: number): string
 ## `SheetDocument`
 
 ```ts
-interface SheetDocument extends Record<string, JSONValue> {
-  readonly columns: ReadonlyArray<SheetColumn>;
-  readonly rows: ReadonlyArray<SheetRow>;
-}
+type SheetDocument = z.infer<typeof sheetDocumentSchema>;
 ```
 ## `SheetEditor`
 
 ```ts
 interface SheetEditor {
+  readonly availability: SheetAvailability;
   readonly capabilities: {readonly resize: boolean};
   readonly structure: SheetStructureActions;
   readonly snapshot: EditingSnapshot<SheetSelection>;
@@ -1661,6 +1668,11 @@ type SheetIntent =
 ```ts
 sheetNavigationTarget(topology: GridTopology, selection: SheetSelection, direction: SheetTraversalDirection): { readonly point: GridPoint; readonly preserveRange: boolean; } | null
 ```
+## `SheetPlanResult`
+
+```ts
+type SheetPlanResult = {readonly ok:true;readonly plan:EditingPlan<SheetSelection>} | {readonly ok:false;readonly code:string};
+```
 ## `SheetPoint`
 
 ```ts
@@ -1680,10 +1692,7 @@ interface SheetRange extends Record<string, JSONValue> {
 ## `SheetRow`
 
 ```ts
-interface SheetRow extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly cells: Readonly<Record<string, JSONValue>>;
-}
+type SheetRow = z.infer<typeof sheetRowSchema>;
 ```
 ## `SheetSelection`
 

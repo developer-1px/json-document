@@ -1,5 +1,8 @@
-import type {JSONValue} from "@interactive-os/json-document";
-import {createSheetEditor,type SheetDocument,type SheetEditor,type SheetEditorOptions,type SheetSelection} from "./sheet.js";
+import {dispatchSheetIntent} from "./sheet-plan.js";
+import {applyPatch,jsonEqual,type JSONValue} from "@interactive-os/json-document";
+import {assertSheetDocument} from "@interactive-os/json-document-sheet-document";
+import {bindSheetEditing,reconcileSheetSelection,type SheetDocument,type SheetEditor,type SheetEditorOptions,type SheetSelection,type SheetAvailability} from "./sheet.js";
+import type {EditingSession,EditingSnapshot} from "./session.js";
 
 export interface ProjectedSheetSource {
   readonly snapshot: {readonly value: JSONValue;readonly canUndo: boolean;readonly canRedo: boolean};
@@ -7,55 +10,69 @@ export interface ProjectedSheetSource {
   undo(): {readonly ok:boolean;readonly code?:string};
   redo(): {readonly ok:boolean;readonly code?:string};
 }
+export type {SheetAvailability} from "./sheet.js";
 export interface ProjectedSheetOptions {
   readonly source: ProjectedSheetSource;
-  readonly read: () => SheetDocument | null;
+  /** Null means absent; a present value is validated by the canonical Sheet schema. */
+  readonly read: () => unknown;
   readonly write: (value: SheetDocument) => {readonly ok:boolean;readonly code?:string};
+  readonly readOnly?:()=>boolean;
   readonly sheet?: SheetEditorOptions;
   /** Formats with position-based IDs remap selection after structural edits. */
   readonly mapSelection?: (selection:SheetSelection,value:SheetDocument) => SheetSelection;
 }
 
-/** One projection lifecycle for embedded tables. Only the parent records persisted history. */
+/** Bind the common Sheet commands directly to the parent's transaction and history. */
 export function createProjectedSheetEditor(options:ProjectedSheetOptions):SheetEditor {
-  let observed:JSONValue|undefined,engine:SheetEditor,available=false,revision=0;
-  let selection:SheetSelection|undefined;
-  const listeners=new Set<Parameters<SheetEditor["subscribe"]>[0]>();
+  const empty:SheetDocument={rows:[],columns:[]};
+  let observed:JSONValue|undefined,document=empty,availability:SheetAvailability="missing",revision=0;
+  let selection=reconcileSheetSelection(empty,options.sheet?.selection),initialized=false,committing=false;
+  const listeners=new Set<(snapshot:EditingSnapshot<SheetSelection>)=>void>();
   let unsubscribe:(()=>void)|undefined;
   const read=()=>{
     const value=options.source.snapshot.value;
-    if(engine && observed === value) return;
-    observed=value;
-    const document=options.read();available=document !== null;
-    engine=createSheetEditor(document ?? {rows:[],columns:[]},{...options.sheet,selection:selection ?? engine?.snapshot.selection});
-    selection=undefined;
+    if(observed !== value){
+      observed=value;
+      const candidate=options.read();
+      if(candidate === null || candidate === undefined){availability="missing";document=empty;}
+      else {try{assertSheetDocument(candidate);document=candidate;availability="ready";}catch{availability="invalid";document=empty;}}
+      selection=reconcileSheetSelection(document,initialized ? selection:options.sheet?.selection);
+      initialized=true;
+    }
+    if(availability === "ready" || availability === "readonly")availability=options.readOnly?.() ? "readonly":"ready";
   };
-  const snapshot=()=>{read();return {...engine.snapshot,revision,canUndo:options.source.snapshot.canUndo,canRedo:options.source.snapshot.canRedo};};
+  const snapshot=():EditingSnapshot<SheetSelection>=>{read();return {value:document,selection,revision,canUndo:options.source.snapshot.canUndo,canRedo:options.source.snapshot.canRedo};};
   const publish=()=>{revision++;const next=snapshot();for(const listener of listeners)listener(next);};
-  const commit=()=>{
-    const value=engine.snapshot.value as SheetDocument;
-    selection=options.mapSelection?.(engine.snapshot.selection,value) ?? engine.snapshot.selection;
-    const result=options.write(value);
-    if(!result.ok) selection=undefined;
-    observed=undefined;publish();
-    return result.ok ? {ok:true as const,snapshot:snapshot()} : {ok:false as const,code:result.code ?? "table.commit-failed"};
-  };
   const history=(action:"undo"|"redo")=>{
-    const result=options.source[action]();publish();
-    return result.ok ? {ok:true as const,snapshot:snapshot()} : {ok:false as const,code:result.code ?? "history.unavailable"};
+    committing=true;let result:ReturnType<ProjectedSheetSource["undo"]>;
+    try{result=options.source[action]();}finally{committing=false;}
+    publish();return result.ok ? {ok:true as const,snapshot:snapshot()}:{ok:false as const,code:result.code ?? "history.unavailable"};
   };
-  return {
-    get capabilities(){read();return engine.capabilities;},get structure(){read();return engine.structure;},get snapshot(){return snapshot();},
-    get selectedCells(){read();return engine.selectedCells;},selectedCellsIn(topology){read();return engine.selectedCellsIn(topology);},
-    dispatch(intent){
-      read();if(!available)return {ok:false,code:"table.unavailable"};
-      const before=engine.snapshot.value,result=engine.dispatch(intent);if(!result.ok)return result;
-      if(engine.snapshot.value === before){publish();return {ok:true,snapshot:snapshot()};}
-      return commit();
+  const session:EditingSession<SheetSelection>={
+    get snapshot(){return snapshot();},
+    apply(plan){
+      read();if(availability !== "ready")return {ok:false,code:`table.${availability}`};
+      const next=applyPatch(document,plan.operations);
+      if(!next.ok)return {ok:false,code:"sheet.invalid-plan"};
+      try{assertSheetDocument(next.value);}catch{return {ok:false,code:"sheet.invalid-document"};}
+      if(jsonEqual(document,next.value)){selection=plan.selectionAfter;publish();return {ok:true,snapshot:snapshot()};}
+      const pending=options.mapSelection?.(plan.selectionAfter,next.value) ?? plan.selectionAfter;
+      committing=true;let result:ReturnType<ProjectedSheetOptions["write"]>;
+      try{result=options.write(next.value);}finally{committing=false;}
+      // A failed write leaves selection and the visible document at the parent's state.
+      observed=undefined;read();
+      if(result.ok)selection=reconcileSheetSelection(document,pending);
+      publish();return result.ok ? {ok:true,snapshot:snapshot()}:{ok:false,code:result.code ?? "table.commit-failed"};
     },
-    copy(topology){read();return available ? engine.copy(topology):null;},
-    cut(topology){read();if(!available)return null;const result=engine.cut(topology);return result && {clipboard:result.clipboard,result:result.result.ok ? commit():result.result};},
+    select(next){selection=next;publish();return snapshot();},
+    reconcile(fn){read();selection=fn(selection,document);publish();return snapshot();},
     undo:()=>history("undo"),redo:()=>history("redo"),
-    subscribe(listener){listeners.add(listener);unsubscribe ??= options.source.subscribe(publish);return ()=>{listeners.delete(listener);if(!listeners.size){unsubscribe?.();unsubscribe=undefined;}};},
+    subscribe(listener){listeners.add(listener);unsubscribe ??= options.source.subscribe(()=>{if(!committing)publish();});return ()=>{listeners.delete(listener);if(!listeners.size){unsubscribe?.();unsubscribe=undefined;}};},
+  };
+  const editor=bindSheetEditing(session,options.sheet);
+  return {...editor,
+    get availability(){read();return availability;},
+    get capabilities(){return editor.capabilities;},get structure(){return editor.structure;},get snapshot(){return snapshot();},get selectedCells(){return editor.selectedCells;},
+    dispatch(intent){read();if(availability === "missing" || availability === "invalid")return {ok:false,code:`table.${availability}`};return dispatchSheetIntent(session,intent,options.sheet);},
   };
 }

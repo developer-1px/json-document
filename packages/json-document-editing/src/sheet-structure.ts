@@ -1,3 +1,4 @@
+export {createSheetRow,createSheetColumn,sheetColumnLabel} from "@interactive-os/json-document-sheet-document";
 import type { SheetColumn, SheetDocument, SheetRow, SheetSelection } from "./sheet.js";
 
 export type SheetStructureIntent =
@@ -16,14 +17,6 @@ export interface SheetStructureActions {
   readonly insertColumn: SheetStructureIntent;
   readonly deleteRow: SheetStructureIntent | null;
   readonly deleteColumn: SheetStructureIntent | null;
-}
-
-/** Zero-based spreadsheet column coordinates: A … Z, AA … AZ, BA … */
-export function sheetColumnLabel(index: number): string {
-  if (!Number.isSafeInteger(index) || index < 0) throw new RangeError("Column index must be a nonnegative safe integer");
-  let remaining = index + 1, label = "";
-  while (remaining > 0) { remaining--; label = String.fromCharCode(65 + remaining % 26) + label; remaining = Math.floor(remaining / 26); }
-  return label;
 }
 
 export function sheetStructureViolation(document: SheetDocument, intent: SheetStructureIntent, policy: SheetStructurePolicy): string | null {
@@ -47,17 +40,4 @@ export function sheetStructureActions(document: SheetDocument, selection: SheetS
     deleteRow: deleteRow && !sheetStructureViolation(document, deleteRow, policy) ? deleteRow : null,
     deleteColumn: deleteColumn && !sheetStructureViolation(document, deleteColumn, policy) ? deleteColumn : null,
   };
-}
-
-export function createSheetRow(document: SheetDocument): SheetRow {
-  return {id: availableId(document.rows, "row"), cells: Object.fromEntries(document.columns.map(column => [column.id, ""]))};
-}
-export function createSheetColumn(document: SheetDocument): SheetColumn {
-  return {id: availableId(document.columns, "column"), label: sheetColumnLabel(document.columns.length)};
-}
-function availableId(values: ReadonlyArray<{readonly id: string}>, prefix: string): string {
-  const ids = new Set(values.map(value => value.id));
-  let index = 1;
-  while (ids.has(`${prefix}-${index}`)) index++;
-  return `${prefix}-${index}`;
 }

@@ -16,7 +16,7 @@ test("Canvas creates and edits a shared Sheet object with parent history and JSO
  await grid.getByRole('button',{name:'A 열 너비 조절'}).press('ArrowRight');
  await cells.first().press('Escape');await toolbar.getByRole('button',{name:'JSON',exact:true}).click();
  const json=page.getByRole('textbox',{name:'Canvas JSON document'}),saved=JSON.parse(await json.inputValue());
- expect(saved.objects[0].document.rows[0].cells.c0).toBe('abc');expect(saved.objects[0].document.columns[0].width).toBeGreaterThan(120);
+ expect(saved.objects[0].document.rows[0].cells[saved.objects[0].document.columns[0].id]).toBe('abc');expect(saved.objects[0].document.columns[0].width).toBeGreaterThan(120);
  await page.getByRole('button',{name:'JSON 열기',exact:true}).click();await object.dblclick();await expect(cells.first()).toHaveText('abc');
  expect(errors).toEqual([]);
 });
