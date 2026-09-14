@@ -1,6 +1,6 @@
 import { assertMarkdownSelection, type MarkdownSourceEdit } from "./source-edit.js";
 import { projectMarkdown, type MarkdownProjection } from "./projection.js";
-import type { MarkdownNode } from "./nodes.js";
+import { editNode, type MarkdownNode } from "./nodes.js";
 
 type Selection = MarkdownSourceEdit["selection"];
 interface Item {
@@ -38,6 +38,18 @@ function items(source: string, projection: MarkdownProjection): Item[] {
   visit(projection.nodes,null,null);
   return result;
 }
+/** Empty nested markers can parse as setext/lazy text until their first character is typed. */
+function editingItems(source:string, projection:MarkdownProjection, offset:number):Item[] {
+  const parsed=items(source,projection), start=lineStart(source,offset), end=lineEnd(source,offset);
+  if(parsed.some(item=>item.lineFrom === start) || !itemAt(source,parsed,offset)
+    || !/^(?:[ \t]*>[ \t]?)*[ \t]*(?:[-+*]|\d{1,9}[.)])[ \t]*(?:\[[ xX]\][ \t]*)?\r?$/.test(source.slice(start,end))) return parsed;
+  const at=end-(source[end-1] === "\r" ? 1 : 0);
+  const placeholder=/[ \t]$/.test(source.slice(start,at)) ? "x":" x";
+  const draft=projectMarkdown(source.slice(0,at)+placeholder+source.slice(at));
+  const map=(position:number)=>position>at ? Math.max(at,position-placeholder.length):position;
+  return items(source,{...draft,source,nodes:draft.nodes.map(node=>editNode(node,at,at+placeholder.length,"")),
+    markers:draft.markers.map(marker=>({...marker,from:map(marker.from),to:map(marker.to)}))});
+}
 function itemAt(source: string, entries: Item[], offset: number): Item | undefined {
   return entries.filter(item => offset >= item.lineFrom && offset <= lineEnd(source,item.node.to)).at(-1);
 }
@@ -49,11 +61,12 @@ function insideCode(nodes: readonly MarkdownNode[], offset: number): boolean {
 export function continueMarkdownList(source: string, selection: Selection, projection: MarkdownProjection): MarkdownSourceEdit | null {
   const from = Math.min(selection.anchor,selection.focus), to = Math.max(selection.anchor,selection.focus);
   if (insideCode(projection.nodes,from)) return null;
-  const entry = itemAt(source,items(source,projection),from);
+  const entry = itemAt(source,editingItems(source,projection,from),from);
   if (!entry || from < entry.bodyFrom) return null;
   const end = lineEnd(source,from), start = lineStart(source,from);
   const newline = source.includes("\r\n") ? "\r\n" : "\n";
   if (from === to && start === entry.lineFrom && !source.slice(entry.bodyFrom,end).trim()) {
+    if (entry.parent) return indentMarkdownList(source,selection,"outdent");
     // Remove only this list prefix; an enclosing quote remains a quote.
     const quote = source.slice(entry.lineFrom,entry.quoteEnd);
     const boundary = entry.lineFrom > 0 && !quote ? newline : "";
@@ -81,7 +94,8 @@ export function continueMarkdownList(source: string, selection: Selection, proje
 /** Indent/outdent selected sibling items with their descendants; null outside lists. */
 export function indentMarkdownList(source: string, selection: Selection, direction: "indent" | "outdent"): MarkdownSourceEdit | null {
   assertMarkdownSelection(source,selection);
-  const projection = projectMarkdown(source), entries = items(source,projection);
+  const projection = projectMarkdown(source);
+  const entries = editingItems(source,projection,Math.min(selection.anchor,selection.focus));
   const from = Math.min(selection.anchor,selection.focus), to = Math.max(selection.anchor,selection.focus);
   if (insideCode(projection.nodes,from)) return null;
   const first = itemAt(source,entries,from), last = itemAt(source,entries,to > from ? to-1 : to);
@@ -96,6 +110,22 @@ export function indentMarkdownList(source: string, selection: Selection, directi
   const selected = entries.filter(item => item.list === a!.list && item.index >= a!.index && item.index <= b!.index);
   const previous = entries.find(item => item.list === a!.list && item.index === a!.index-1);
   if (direction === "indent" && !previous || direction === "outdent" && !a.parent) return {value:source,selection};
+  // Promote after the complete parent subtree. Merely removing indentation here
+  // would silently adopt the following siblings/paragraphs as children of the moved item.
+  if (direction === "outdent") {
+    const tailFrom = lineEnd(source,b.node.to)+1;
+    const end = lineEnd(source,a.parent!.node.to);
+    const parentEnd = end-(source[end-1] === "\r" ? 1 : 0);
+    if (tailFrom < parentEnd) {
+      const newline = source.includes("\r\n") ? "\r\n" : "\n";
+      const start = a.lineFrom;
+      const moved = source.slice(start,tailFrom).replace(/\r?\n$/, "");
+      const tail = source.slice(tailFrom,parentEnd);
+      const value = source.slice(0,start)+tail+newline+moved+source.slice(parentEnd);
+      const map = (offset:number) => start+tail.length+newline.length+Math.min(offset-start,moved.length);
+      return indentMarkdownList(value,{anchor:map(selection.anchor),focus:map(selection.focus)},direction);
+    }
+  }
   const width = direction === "indent" ? previous!.contentIndent : a.indentColumns-a.parent!.indentColumns;
   if (width <= 0) return {value:source,selection};
   const edits: Array<{from:number; to:number; insert:string}> = [];

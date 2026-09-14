@@ -63,6 +63,8 @@
   block-size: var(--markdown-marker-size);
   vertical-align: -.12em;
 }
+[data-markdown-bullet="fill"] { --markdown-bullet-fill: currentColor; }
+[data-markdown-bullet="outline"] { --markdown-bullet-fill: transparent; }
 [data-markdown-list-style="unordered"]::before {
   content: "";
   position: absolute;
@@ -72,7 +74,9 @@
   top: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: currentColor;
+  box-sizing: border-box;
+  border: 1px solid currentColor;
+  background: var(--markdown-bullet-fill, currentColor);
 }
 [data-markdown-list-style="ordered"] { min-inline-size: var(--markdown-marker-size); text-align: end; font-variant-numeric: tabular-nums; }
 [data-markdown-marker="task"] { padding-inline-end: .25em; box-sizing: content-box; }
