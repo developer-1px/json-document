@@ -28,3 +28,15 @@ test("copy, paste and fill follow the reordered View and update the other View",
  await expect(cell(left,'gamma','owner')).toHaveText('가');await expect(cell(left,'gamma','status')).toHaveText('나');await expect(cell(left,'beta','owner')).toHaveText('다');await expect(cell(left,'beta','status')).toHaveText('라');
  await cell(right,'gamma','owner').click();await right.getByRole('button',{name:'선택 범위 채우기'}).click();await expect(cell(left,'beta','owner')).toHaveText('가');
 });
+
+test("Mac Enter opens editing and commits into the other View",async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,"platform",{get:()=>"MacIntel"}));
+ await page.goto('/demo/sheet-views');
+ const left=page.getByRole('grid',{name:'기본 순서 표'}),right=page.getByRole('grid',{name:'다른 순서 표'});
+ await cell(left,'alpha','name').click();await cell(left,'alpha','name').press('Enter');
+ await expect(left.getByRole('textbox')).toHaveValue('Alpha');
+ await left.getByRole('textbox').fill('Mac Enter');await left.getByRole('textbox').press('Enter');
+ await expect(left.getByRole('textbox')).toHaveCount(0);
+ await expect(cell(right,'alpha','name')).toHaveText('Mac Enter');
+ await expect(cell(left,'beta','name')).toBeFocused();
+});

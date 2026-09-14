@@ -1,8 +1,8 @@
-import { afterEach, expect, test } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { createSheetEditor, type SheetDocument } from "@interactive-os/json-document-editing";
 import { SheetHand } from "../src/index.js";
-afterEach(cleanup);
+afterEach(()=>{cleanup();vi.restoreAllMocks();});
 test("edit commits once, Escape cancels, structural commands undo", () => {
  const editor = createSheetEditor({columns:[{id:"a",label:"A"}],rows:[{id:"1",cells:{a:"one"}},{id:"2",cells:{a:"two"}}]});
  render(<SheetHand editor={editor}/>);
@@ -52,3 +52,18 @@ test("readonly View exposes current values and blocks toolbar and keyboard histo
  fireEvent.keyDown(screen.getByRole("gridcell"),{key:"z",ctrlKey:true});
  expect(owner.snapshot.value).toBe(before);
 });
+
+ test.each(["MacIntel", "Win32"])("spreadsheet Enter follows %s keyboard policy", platform=>{
+ vi.spyOn(window.navigator,"platform","get").mockReturnValue(platform);
+ const editor=createSheetEditor({columns:[{id:"a",label:"A"}],rows:[{id:"1",cells:{a:"one"}},{id:"2",cells:{a:"two"}}]});
+ render(<SheetHand editor={editor}/>);
+ fireEvent.keyDown(screen.getAllByRole("gridcell")[0]!,{key:"Enter"});
+ if(platform === "MacIntel") {
+   expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("one");
+   fireEvent.change(screen.getByRole("textbox"),{target:{value:"edited"}});
+   fireEvent.keyDown(screen.getByRole("textbox"),{key:"Enter"});
+   expect((editor.snapshot.value as SheetDocument).rows[0]!.cells.a).toBe("edited");
+ }
+ expect(screen.queryByRole("textbox")).toBeNull();
+ expect(editor.snapshot.selection.focus?.rowId).toBe("2");
+ });

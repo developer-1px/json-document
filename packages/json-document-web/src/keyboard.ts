@@ -163,3 +163,8 @@ export function isWebComposingKey(event: {readonly isComposing?: boolean; readon
 export function webKeyboardText(stroke: WebKeyboardStroke): string | null {
   return !stroke.metaKey && !stroke.ctrlKey && !stroke.altKey && Array.from(stroke.key).length === 1 && stroke.key >= " " ? stroke.key : null;
 }
+
+/** Resolve keyboard platform from the owning window; SSR and unknown platforms use standard keys. */
+export function webKeyboardPlatform(environment: {readonly platform:string; readonly maxTouchPoints?:number} | undefined = typeof navigator === "undefined" ? undefined : navigator): "mac" | "standard" {
+  return environment && /^Mac/.test(environment.platform) && !((environment.maxTouchPoints ?? 0) > 1) ? "mac" : "standard";
+}

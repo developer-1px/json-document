@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, type KeyboardEven
 import { sheetColumnLabel, jsonCellText, gridRangeBounds, gridCellsInRange, gridPointKey, type SheetRange, type SheetDocument, type SheetEditor, type GridPoint } from "@interactive-os/json-document-editing";
 import { editingItemProps, useEditingSnapshot, useGridEditing, useRenameSession } from "@interactive-os/json-document-react";
 import { cellEditingAffordance, gridEditingProfiles, resolveGridEditActivation, editingCommandFromWebKeyboardStroke, type GridEditingProfile } from "@interactive-os/json-document-affordance";
-import { isWebComposingKey, createWebClipboardSurface, findWebGridCell, gridBoundary, moveGridPoint, rovingFocusItemProps, sheetClipboardCodec, sheetClipboardRepresentations, webGridCellAddressProps } from "@interactive-os/json-document-web";
+import { webKeyboardPlatform, isWebComposingKey, createWebClipboardSurface, findWebGridCell, gridBoundary, moveGridPoint, rovingFocusItemProps, sheetClipboardCodec, sheetClipboardRepresentations, webGridCellAddressProps } from "@interactive-os/json-document-web";
 import { Command, Toolbar, GridCell, Field } from "@interactive-os/json-document-ui-primitives-react";
 import {SheetAxisResize} from "./sheet-axis-resize.js";
 import {useSheetRangeSelection} from "./sheet-range-selection.js";
@@ -26,8 +26,8 @@ export interface SheetHandProps {
   readonly coordinateHeaders?: boolean;
   /** Header row presentation only; structure restrictions belong to editor.structure. */
   readonly headerRow?: boolean;
-  /** Document tables activate editing with Enter; spreadsheets use Enter for sequential entry. */
-  readonly profile?: "document-table" | "spreadsheet-grid" | GridEditingProfile;
+  /** Spreadsheet Enter starts editing on Mac; explicit policy objects override platform defaults. */
+  readonly profile?: keyof typeof gridEditingProfiles | GridEditingProfile;
   readonly onDeactivate?: () => void;
   readonly onExit?: (edge: "before" | "after") => void;
   readonly renderCell?: (value: string) => ReactNode;
@@ -37,7 +37,7 @@ export interface SheetHandProps {
 
 /** Shared cell selection, edit mode, clipboard and structural controls. Data/history stay with editor. */
 export function SheetHand({editor, label = "표 편집", headerRow = false, coordinateHeaders = false, profile = "spreadsheet-grid", renderCell, renderEditor, onExit, onDeactivate}: SheetHandProps) {
-  const policy = typeof profile === "string" ? gridEditingProfiles[profile] : profile;
+  const policy = typeof profile === "string" ? gridEditingProfiles[profile === "spreadsheet-grid" && webKeyboardPlatform() === "mac" ? "spreadsheet-mac" : profile] : profile;
   const snapshot = useEditingSnapshot(editor);
   const sheet = editor.grid;
   const available = editor.availability;

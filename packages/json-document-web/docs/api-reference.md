@@ -767,6 +767,11 @@ type WebKeyboardCommand =
   | { readonly type: "undo" }
   | { readonly type: "redo" };
 ```
+## `webKeyboardPlatform`
+
+```ts
+webKeyboardPlatform(environment?: { readonly platform: string; readonly maxTouchPoints?: number; } | undefined): "mac" | "standard"
+```
 ## `WebKeyboardStroke`
 
 ```ts

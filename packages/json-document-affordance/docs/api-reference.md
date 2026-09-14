@@ -560,7 +560,7 @@ interface GridEditingProfile {
 ## `gridEditingProfiles`
 
 ```ts
-const gridEditingProfiles: Readonly<Record<"document-table" | "spreadsheet-grid", GridEditingProfile>>
+const gridEditingProfiles: Readonly<Record<"document-table" | "spreadsheet-grid" | "spreadsheet-mac", GridEditingProfile>>
 ```
 ## `GridFillBounds`
 

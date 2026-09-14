@@ -26,7 +26,7 @@ const editor = createSheetEditor({columns: [{id: 'a', label: 'A'}], rows: [{id: 
 
 ## 문서 표와 기존 Sheet의 입력 정책
 
-`profile="spreadsheet-grid"`가 기본값입니다. Enter/Shift+Enter는 세로 이동, F2/더블클릭은 편집 시작입니다. `profile="document-table"`에서는 Enter로 편집을 시작합니다. 편집 중 Enter/Tab은 확정 후 이동하며 사각 선택은 유지됩니다. Sheet의 Ctrl+Enter는 초안을 선택된 셀들에 한 번에 채웁니다. Shift+Space/Control+Space로 행/열을 선택할 수 있습니다.
+`profile="spreadsheet-grid"`가 기본값입니다. Mac에서는 `spreadsheet-mac` 정책이 자동 적용되어 Enter로 편집을 시작합니다. 다른 플랫폼에서는 Enter/Shift+Enter는 세로 이동, F2/더블클릭은 편집 시작입니다. `profile="spreadsheet-mac"`으로 명시하거나 `GridEditingProfile` 객체로 정책을 고정할 수도 있습니다. `profile="document-table"`에서는 Enter로 편집을 시작합니다. 편집 중 Enter/Tab은 확정 후 이동하며 사각 선택은 유지됩니다. Sheet의 Ctrl+Enter는 초안을 선택된 셀들에 한 번에 채웁니다. Shift+Space/Control+Space로 행/열을 선택할 수 있습니다.
 
 포인터 드래그, 행/열 헤더 선택, 채우기 핸들을 제공합니다. 채우기 핸들을 드래그하면 값 패턴을 반복하고 클릭 또는 키보드 활성화는 아래 한 행에 반복합니다. 수식 자동 보정 및 숫자 수열 생성은 이 Hand의 기본 채우기 계약에 포함되지 않습니다.
 
