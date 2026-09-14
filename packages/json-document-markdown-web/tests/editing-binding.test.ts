@@ -66,3 +66,14 @@ test("IME owns Tab until list text is committed, then Enter uses the list comman
   vi.runAllTimers();
   expect(editor.text).toBe("- one\n- 한\n- ");
 });
+
+test("empty nested Enter is one history step and restores its source selection",()=>{
+ const original="- parent\n  - ";
+ const {root,editor}=setup(original);
+ root.dispatchEvent(new InputEvent("beforeinput",{inputType:"insertParagraph",cancelable:true}));
+ expect(editor.text).toBe("- parent\n- ");
+ expect(editor.snapshot.selection).toEqual({anchor:11,focus:11});
+ editor.undo();expect(editor.text).toBe(original);
+ expect(editor.snapshot.selection).toEqual({anchor:original.length,focus:original.length});
+ editor.redo();expect(editor.text).toBe("- parent\n- ");
+});
