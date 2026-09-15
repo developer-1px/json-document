@@ -158,3 +158,51 @@ const unbind = binding.bind();
 `ContentEditableBindingOptions.indent(editor, direction)`는 문법 소유 Tab 명령을 주입합니다. `direction`은 `"indent" | "outdent"`입니다. 반환값 `null`은 native focus 이동을 유지하고 EditingResult가 있으면 키를 소비합니다. 키 해석은 Web keyboard adapter, IME·입력 lease 배타성은 binding이 소유합니다. 수정키 조합이나 IME 조합 중에는 호출하지 않습니다.
 
 투영 구간에 선택이 겹치면 `data-text-projection-selected`를 표시해 보이는 기호 영역에 선택 배경을 그립니다. 투명한 원문 글자의 native 선택 배경은 숨겨 이중 표시를 막으며, 복사·선택 offset은 그대로 유지합니다.
+
+## 가상 선택 표시
+
+`bindTextSelectionOverlay(root, dom = plainTextDOMAdapter): () => void`는 현재 DOM
+Selection을 읽고 편집 DOM 밖의 표시 레이어에 선택 배경과 커서를 그립니다.
+반환 함수를 호출하면 observer·이벤트·레이어를 제거하고 native 표시를 복원합니다.
+한 root에는 한 번만 연결합니다. 별도 선택 store·키보드·드래그·History는 없습니다.
+
+```ts
+import { bindTextSelectionOverlay, plainTextDOMAdapter } from "@interactive-os/json-document-contenteditable";
+import "@interactive-os/json-document-contenteditable/text-selection.css";
+
+const disposeSelection = bindTextSelectionOverlay(root, plainTextDOMAdapter);
+// root 제거 전에 호출
+disposeSelection();
+```
+
+`createContentEditableBinding({ ..., selectionRendering: "virtual" })`는 같은 모듈의
+수명을 binding에 연결합니다. 기본값은 `"native"`입니다.
+Markdown Web binding과 React `MarkdownEditingSurface`도 같은 옵션을 전달하며,
+Markdown 스타일시트는 가상 선택 CSS를 포함합니다. Bear와
+[Markdown Usage](/demo/markdown-caret)가 이 옵션을 사용합니다. Usage의 Source에서
+binding → overlay → geometry와 스타일 구현을 확인할 수 있습니다.
+
+선택 텍스트의 실제 Range 조각을 줄별로 측정하고, 겹치거나 맞닿은 구간만 합칩니다.
+같은 줄의 본문과 작은 불릿은 높이를 맞추지만 선택하지 않은 가로 공백까지 채우지 않습니다.
+`TextDOMAdapter.getTextProjections(root)`는 `createTextProjectionDOMAdapter`가 소유하는
+동일한 투영 구간을 제공합니다. 선택한 불릿·체크박스·표는 해당 구간의 박스를 사용하며
+투명한 원문을 중복 표시하지 않습니다. 커서는 live DOM의 줄바꿈 위치와 방향을 보존하고,
+투영 안에서는 기존 before/after 가장자리 규칙을 사용합니다.
+
+`data-text-selection-excluded`는 원문·DOM 위치를 유지하며 선택 배경만 제외합니다.
+Markdown은 목록 들여쓰기와 제목 구분 공백에 이를 선언합니다.
+`data-text-decoration`은 기존 계약대로 원문에서도 제외되며 표시 대상으로 수집하지 않습니다.
+숨겨진 문법의 Range 조각도 수집하지 않습니다.
+
+CSS 변수 `--text-selection-background`로 반투명 선택 색을,
+`--text-selection-caret`로 커서 색을 편집 root에서 지정합니다. 기본값은 시스템 Highlight의
+28%와 현재 글자색입니다. reduced-motion에서는 커서를 깜빡이지 않습니다.
+선택 변경·입력·DOM 변화·요소 크기·폰트 로딩·스크롤·viewport 변화는 한 animation frame으로
+모아 재측정합니다. overflow 조상과 viewport 경계에서 표시를 자릅니다.
+
+현재 지원 범위는 수평 contenteditable입니다. IME 조합, forced-colors, 수직 writing-mode,
+측정할 수 없는 커서, root 외부 선택에서는 native 표시로 돌아갑니다. root가 focus를 잃으면
+가상 표시를 제거하여 중첩 checkbox/Sheet 편집기의 선택을 가리지 않습니다.
+레이어는 pointer-events:none·aria-hidden이며 native 접근성 트리는 그대로 유지됩니다.
+회전/skew 변환이나 body에 새 fixed containing block을 만드는 transform은 지원 범위가 아닙니다.
+실제 OS IME 후보창·터치 선택 핸들·스크린리더는 별도의 수동 검증이 필요합니다.

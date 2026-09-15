@@ -36,6 +36,9 @@ import markdownTasksSource from "../../../../packages/json-document-markdown/src
 import markdownMarkersSource from "../../../../packages/json-document-markdown/src/markers.ts?raw";
 import textProjectionSource from "../../../../packages/json-document-contenteditable/src/dom/text-projection.ts?raw";
 import textProjectionCSSSource from "../../../../packages/json-document-contenteditable/src/dom/text-projection.css?raw";
+import textSelectionOverlaySource from "../../../../packages/json-document-contenteditable/src/dom/text-selection-overlay.ts?raw";
+import textSelectionGeometrySource from "../../../../packages/json-document-contenteditable/src/dom/text-selection-geometry.ts?raw";
+import textSelectionCSSSource from "../../../../packages/json-document-contenteditable/src/dom/text-selection.css?raw";
 import interactionRecordingSource from "../../../../packages/json-document-web/src/interaction-recording.ts?raw";
 import interactionRecordingDOMSource from "../../../../packages/json-document-web/src/interaction-recording-dom.ts?raw";
 import interactionRecordingArchiveSource from "../../../../packages/json-document-web/src/interaction-recording-archive.ts?raw";
@@ -435,6 +438,9 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-contenteditable/src/dom/plain-text.ts", plainTextDOMSource],
   ["packages/json-document-contenteditable/src/dom/text-projection.ts", textProjectionSource],
   ["packages/json-document-contenteditable/src/dom/text-projection.css", textProjectionCSSSource],
+  ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts", textSelectionOverlaySource],
+  ["packages/json-document-contenteditable/src/dom/text-selection-geometry.ts", textSelectionGeometrySource],
+  ["packages/json-document-contenteditable/src/dom/text-selection.css", textSelectionCSSSource],
   ["packages/json-document-contenteditable/src/dom/text-index.ts", textDOMIndexSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
   ["packages/json-document-collaboration/src/editing-index.ts", collaborationEditingSource],
@@ -451,6 +457,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["packages/json-document-contenteditable/src/lease.ts", ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts"]],
+  ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts", ["packages/json-document-contenteditable/src/dom/text-selection-geometry.ts", "packages/json-document-contenteditable/src/dom/text-selection.css"]],
   ["packages/json-document-editing/src/markdown-table.ts",["packages/json-document-editing/src/projected-sheet.ts"]],
   ["packages/json-document-editing/src/object-sheet.ts",["packages/json-document-editing/src/projected-sheet.ts", "packages/json-document-object-document/src/embedded-document.ts"]],
   ["packages/json-document-canvas/src/canvas-hand.tsx",["packages/json-document-canvas/src/canvas-sheet-object.tsx"]],
@@ -1218,6 +1226,10 @@ const registeredPublicUsages = [
   },
   ...["packages/json-document-contenteditable/src/dom/text-projection.ts", "packages/json-document-contenteditable/src/dom/text-projection.css"].map(sourcePath => ({
     packageName: "@interactive-os/json-document-contenteditable", symbol: "createTextProjectionDOMAdapter", sourcePath,
+  })),
+  ...["text-selection-overlay.ts", "text-selection-geometry.ts", "text-selection.css"].map(file => ({
+    packageName: "@interactive-os/json-document-contenteditable", symbol: "bindTextSelectionOverlay",
+    sourcePath: `packages/json-document-contenteditable/src/dom/${file}`,
   })),
   ...["createTextNavigationDOMAdapter"].flatMap(symbol => [
     { packageName: "@interactive-os/json-document-contenteditable", symbol, sourcePath: "packages/json-document-contenteditable/src/dom/text-navigation.ts" },

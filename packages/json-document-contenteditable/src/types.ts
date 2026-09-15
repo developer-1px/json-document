@@ -1,5 +1,6 @@
 import type { JSONDocument, Pointer } from "@interactive-os/json-document";
 import type { EditingResult, TextEditor, TextSelection } from "@interactive-os/json-document-editing";
+import type { TextProjection } from "./dom/text-projection.js";
 export type { TextSelection } from "@interactive-os/json-document-editing";
 
 export interface DOMObservation {
@@ -13,6 +14,8 @@ export interface TextDOMSelectionOptions {
 }
 
 export interface TextDOMAdapter {
+  /** Source intervals with an atomic visual representation, shared with selection painting. */
+  getTextProjections?(root: HTMLElement): ReadonlyArray<TextProjection>;
   observe(root: HTMLElement): DOMObservation;
   render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
   restoreSelection(root: HTMLElement, selection: TextSelection, options?: TextDOMSelectionOptions): boolean;
@@ -31,6 +34,8 @@ export interface ContentEditableBindingOptions {
   readonly pointer: Pointer;
   readonly root: HTMLElement;
   readonly dom?: TextDOMAdapter;
+  /** Opt in to virtual selection/caret painting; native input and selection remain authoritative. */
+  readonly selectionRendering?: "native" | "virtual";
   /** Optional canonical source editor; replaces direct commits with selection-restoring Editing transactions. */
   readonly editor?: TextEditor;
   /** Syntax-owned Enter command; paste and native composition text keep their original content. */

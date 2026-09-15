@@ -22,6 +22,7 @@ export function MarkdownCaretRoute() {
   }>
     <div className="mx-auto grid w-full max-w-3xl gap-8 py-6">
       <MarkdownEditingSurface
+        selectionRendering="virtual"
         editor={editor}
         aria-label="Markdown 편집"
         data-testid="markdown-editor"

@@ -76,6 +76,8 @@ const plainTextDOMAdapter: TextDOMAdapter
 
 ```ts
 interface TextDOMAdapter {
+  /** Source intervals with an atomic visual representation, shared with selection painting. */
+  getTextProjections?(root: HTMLElement): ReadonlyArray<TextProjection>;
   observe(root: HTMLElement): DOMObservation;
   render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
   restoreSelection(root: HTMLElement, selection: TextSelection, options?: TextDOMSelectionOptions): boolean;

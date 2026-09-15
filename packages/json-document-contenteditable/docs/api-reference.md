@@ -2,10 +2,15 @@
 
 **탐색 분류:** Adapter
 
-DOM 입력·IME·선택 복원·기호 투영·화면 줄 탐색의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 저장소의 아키텍처 등록에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
+DOM 입력·IME·선택 복원·기호 투영·화면 줄 탐색·가상 선택 표시의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 저장소의 아키텍처 등록에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
 
 > 이 문서는 `packages/json-document-contenteditable/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `bindTextSelectionOverlay`
+
+```ts
+bindTextSelectionOverlay(root: HTMLElement, dom?: TextDOMAdapter): () => void
+```
 ## `ContentEditable`
 
 ```ts
@@ -29,6 +34,8 @@ interface ContentEditableBindingOptions {
   readonly pointer: Pointer;
   readonly root: HTMLElement;
   readonly dom?: TextDOMAdapter;
+  /** Opt in to virtual selection/caret painting; native input and selection remain authoritative. */
+  readonly selectionRendering?: "native" | "virtual";
   /** Optional canonical source editor; replaces direct commits with selection-restoring Editing transactions. */
   readonly editor?: TextEditor;
   /** Syntax-owned Enter command; paste and native composition text keep their original content. */
@@ -57,7 +64,7 @@ interface ContentEditableProps {
 ## `createContentEditableBinding`
 
 ```ts
-createContentEditableBinding({ document, dom, pointer, root, editor, insertBreak, indent, }: ContentEditableBindingOptions): ContentEditableBinding
+createContentEditableBinding({ document, dom, pointer, root, editor, insertBreak, indent, selectionRendering, }: ContentEditableBindingOptions): ContentEditableBinding
 ```
 ## `createTextNavigationDOMAdapter`
 
@@ -96,6 +103,8 @@ restoreTextDOMSelection(root: HTMLElement, selection: TextSelection, options?: T
 
 ```ts
 interface TextDOMAdapter {
+  /** Source intervals with an atomic visual representation, shared with selection painting. */
+  getTextProjections?(root: HTMLElement): ReadonlyArray<TextProjection>;
   observe(root: HTMLElement): DOMObservation;
   render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
   restoreSelection(root: HTMLElement, selection: TextSelection, options?: TextDOMSelectionOptions): boolean;

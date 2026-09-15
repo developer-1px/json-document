@@ -14,7 +14,7 @@ createMarkdownDOMAdapter(options?: MarkdownDOMOptions): TextDOMAdapter
 ## `createMarkdownEditingBinding`
 
 ```ts
-createMarkdownEditingBinding({ editor, root, mountTable, revealSyntax }: MarkdownEditingBindingOptions): ContentEditableBinding
+createMarkdownEditingBinding({ editor, root, mountTable, revealSyntax, selectionRendering }: MarkdownEditingBindingOptions): ContentEditableBinding
 ```
 ## `MarkdownDOMOptions`
 
@@ -36,5 +36,6 @@ interface MarkdownEditingBindingOptions {
   readonly root: HTMLElement;
   readonly mountTable?: MarkdownDOMOptions["mountTable"];
   readonly revealSyntax?: boolean;
+  readonly selectionRendering?: ContentEditableBindingOptions["selectionRendering"];
 }
 ```

@@ -1,6 +1,7 @@
 import { registerWebInteractionSource, traceWebInteraction } from "@interactive-os/json-document-web/interaction-recording";
 import { selectAllAffordance } from "@interactive-os/json-document-affordance";
 import { plainTextDOMAdapter } from "./dom/plain-text.js";
+import { bindTextSelectionOverlay } from "./dom/text-selection-overlay.js";
 import { createWebClipboardBinding, createWebKeyboardAdapter, isWebEditingHostTarget, textClipboardCodec } from "@interactive-os/json-document-web";
 import type {
   ContentEditableBinding,
@@ -35,6 +36,7 @@ export function createContentEditableBinding({
   editor,
   insertBreak = (editor) => editor.insert("\n"),
   indent,
+  selectionRendering = "native",
 }: ContentEditableBindingOptions): ContentEditableBinding {
   if (editor && (editor.document !== document || editor.pointer !== pointer)) {
     throw new TypeError("contenteditable editor must own the bound document and pointer");
@@ -44,6 +46,7 @@ export function createContentEditableBinding({
   let trailingTimer: ReturnType<typeof setTimeout> | null = null;
   let renderedDocument: RenderedDocument | null = null;
   let bound = false;
+  let disposeSelection: (() => void) | undefined;
   let unsubscribeDocument: (() => void) | null = null;
   let rendering = false;
   let compositionEnter: { timeStamp: number; keyCode: number; released: boolean } | null = null;
@@ -481,6 +484,8 @@ export function createContentEditableBinding({
     dom.resetNavigation?.(root);
     if (!bound) return;
     bound = false;
+    disposeSelection?.();
+    disposeSelection = undefined;
     for (const type of ROOT_EVENTS) {
       root.removeEventListener(type, boundHandle, true);
     }
@@ -517,6 +522,7 @@ export function createContentEditableBinding({
         for (const type of ["copy", "cut", "paste"]) root.addEventListener(type, onClipboard as EventListener);
       }
       renderLatest(undefined, true);
+      if (selectionRendering === "virtual") disposeSelection = bindTextSelectionOverlay(root, dom);
       let active = true;
       return () => {
         if (!active) return;

@@ -25,14 +25,16 @@
     "README.md",
     "LICENSE",
     "docs",
-    "src/dom/text-projection.css"
+    "src/dom/text-projection.css",
+    "src/dom/text-selection.css"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./text-projection.css": "./src/dom/text-projection.css"
+    "./text-projection.css": "./src/dom/text-projection.css",
+    "./text-selection.css": "./src/dom/text-selection.css"
   },
   "scripts": {
     "clean": "rm -rf dist",

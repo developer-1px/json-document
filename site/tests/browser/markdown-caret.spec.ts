@@ -53,8 +53,8 @@ async function paste(page: Page, text: string) {
 test.beforeEach(async ({ page }) => {
   await page.goto("/demo/markdown-caret");
   await expect(page.getByTestId("markdown-editor")).toBeVisible();
-  const initial = await model(page);
-  await select(page, 0, initial.length);
+  // Product select-all excludes the embedded Sheet's source-free UI island.
+  await page.getByTestId("markdown-editor").press("ControlOrMeta+a");
   await paste(page, source);
   await expect.poll(() => model(page)).toBe(source);
 });

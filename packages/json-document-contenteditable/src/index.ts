@@ -13,3 +13,4 @@ export type {
 } from "./types.js";
 export { createTextProjectionDOMAdapter, type TextProjection } from "./dom/text-projection.js";
 export { createTextNavigationDOMAdapter } from "./dom/text-navigation.js";
+export { bindTextSelectionOverlay } from "./dom/text-selection-overlay.js";

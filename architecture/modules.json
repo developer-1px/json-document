@@ -147,7 +147,7 @@
     "positions": [
       "Adapter"
     ],
-    "responsibility": "DOM 입력·IME·선택 복원·기호 투영·화면 줄 탐색",
+    "responsibility": "DOM 입력·IME·선택 복원·기호 투영·화면 줄 탐색·가상 선택 표시",
     "entrypoint": "packages/json-document-contenteditable/src/index.ts",
     "subpaths": [],
     "referencePath": "packages/json-document-contenteditable/docs/api-reference.md"

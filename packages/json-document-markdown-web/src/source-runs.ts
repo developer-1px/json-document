@@ -83,6 +83,13 @@ export function sourceRuns(projection: MarkdownProjection, editableTables = fals
     let cursor = from;
     const append = (start: number, end: number) => {
       if (end <= start) return;
+      const lineStart = source.lastIndexOf("\n", end - 1) + 1;
+      if (/^[ \t]+$/.test(source.slice(lineStart, end)) && projection.markers.some(marker => marker.kind === "list" && marker.from === end)) {
+        const indent = Math.max(start, lineStart);
+        if (indent > start) runs.push(plain(start, indent));
+        runs.push({...plain(indent, end), attributes: {"data-text-selection-excluded": ""}});
+        return;
+      }
       // Destinations and labels remain ordinary text when syntax is revealed.
       if (conceal && parent?.kind !== "inlineCode" && /\S/.test(source.slice(start, end))) {
         for (const part of source.slice(start, end).matchAll(/\s+|\S+/g)) {
@@ -117,7 +124,7 @@ export function sourceRuns(projection: MarkdownProjection, editableTables = fals
       runs.push(run);
       cursor = run.to;
       if (heading && cursor < to && /[ \t]/.test(source[cursor]!)) {
-        runs.push({...plain(cursor, cursor + 1), attributes:{"data-markdown-heading-separator":"", "aria-hidden":"true"}});
+        runs.push({...plain(cursor, cursor + 1), attributes:{"data-markdown-heading-separator":"", "data-text-selection-excluded":"", "aria-hidden":"true"}});
         cursor++;
       }
     }

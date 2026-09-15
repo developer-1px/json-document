@@ -6,20 +6,21 @@ import { createRoot } from "react-dom/client";
 import { SheetHand } from "@interactive-os/json-document-sheet";
 import { createMarkdownTableEditor } from "@interactive-os/json-document-editing";
 import type { TextEditor } from "@interactive-os/json-document-editing";
-import { createMarkdownEditingBinding } from "@interactive-os/json-document-markdown-web";
+import { createMarkdownEditingBinding, type MarkdownEditingBindingOptions } from "@interactive-os/json-document-markdown-web";
 
 export interface MarkdownEditingSurfaceProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "contentEditable"> {
   readonly editor: TextEditor;
+  readonly selectionRendering?: MarkdownEditingBindingOptions["selectionRendering"];
 }
 
 /** Markdown source editing, independent of the Rich Text document and renderer. */
-export function MarkdownEditingSurface({ editor, style, ...props }: MarkdownEditingSurfaceProps) {
+export function MarkdownEditingSurface({ editor, style, selectionRendering = "native", ...props }: MarkdownEditingSurfaceProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     const disposals = new Set<() => void>();
-    const binding = createMarkdownEditingBinding({editor, root, mountTable(element, position) {
+    const binding = createMarkdownEditingBinding({editor, root, selectionRendering, mountTable(element, position) {
       const reactRoot = createRoot(element);
       const table = createMarkdownTableEditor(editor, position);
       reactRoot.render(<SheetHand editor={table} profile="document-table" headerRow onExit={edge => {
@@ -34,6 +35,6 @@ export function MarkdownEditingSurface({ editor, style, ...props }: MarkdownEdit
     }});
     const unbind = binding.bind();
     return () => {unbind(); disposals.forEach(dispose => dispose());};
-  }, [editor]);
+  }, [editor, selectionRendering]);
   return <div {...props} ref={rootRef} role="textbox" aria-multiline="true" contentEditable suppressContentEditableWarning style={{ ...style, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }} />;
 }

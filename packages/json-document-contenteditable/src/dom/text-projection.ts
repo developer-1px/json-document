@@ -17,22 +17,21 @@ export function createTextProjectionDOMAdapter(
   projections: (root: HTMLElement) => ReadonlyArray<TextProjection>,
 ): TextDOMAdapter {
   const paint = (root: HTMLElement, selection: TextSelection | null): void => {
-    let active = false;
-    for (const region of projections(root)) {
+    const regions = projections(root), caret = textProjectionCaret(regions, selection);
+    for (const region of regions) {
       const selected = selection !== null && selection.anchor !== selection.focus
         && Math.max(selection.anchor,selection.focus) > region.from && Math.min(selection.anchor,selection.focus) < region.to;
       if (region.element.hasAttribute("data-text-projection-selected") !== selected) region.element.toggleAttribute("data-text-projection-selected", selected);
-      const focus = selection?.anchor === selection?.focus ? selection?.focus : undefined;
-      const edge = !active && focus !== undefined && focus >= region.from && focus <= region.to
-        ? (focus - region.from < region.to - focus ? "before" : "after") : null;
+      const edge = caret?.region === region ? caret.edge : null;
       if (edge) {
-        active = true;
         if (region.element.getAttribute("data-text-projection-edge") !== edge) region.element.setAttribute("data-text-projection-edge", edge);
       } else region.element.removeAttribute("data-text-projection-edge");
     }
-    if (root.hasAttribute("data-text-projection-caret") !== active) root.toggleAttribute("data-text-projection-caret", active);
+    if (root.hasAttribute("data-text-projection-caret") !== !!caret) root.toggleAttribute("data-text-projection-caret", !!caret);
   };
   return {
+    ...base,
+    getTextProjections: projections,
     observe: root => base.observe(root),
     render(root, value, selection = null) {
       base.render(root, value, selection);
@@ -87,4 +86,12 @@ export function createTextProjectionDOMAdapter(
       return base.resolveHorizontalSelection?.(root, selection, direction, extend) ?? null;
     },
   };
+}
+
+/** The same projection edge is used by native-fallback CSS and virtual painting. */
+export function textProjectionCaret(regions: ReadonlyArray<TextProjection>, selection: TextSelection | null): {region: TextProjection; edge: "before" | "after"} | null {
+  if (!selection || selection.anchor !== selection.focus) return null;
+  const focus = selection.focus;
+  const region = regions.find(region => focus >= region.from && focus <= region.to);
+  return region ? {region, edge: focus - region.from < region.to - focus ? "before" : "after"} : null;
 }

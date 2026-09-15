@@ -1,4 +1,5 @@
 @import "@interactive-os/json-document-contenteditable/text-projection.css";
+@import "@interactive-os/json-document-contenteditable/text-selection.css";
 
 /* Source and shared syntax presentation. */
 [data-markdown-editor] {

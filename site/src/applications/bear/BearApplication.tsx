@@ -45,6 +45,7 @@ export function BearApplication() {
   return (
     <main className="min-h-dvh bg-background-canvas text-foreground-default">
       <MarkdownEditingSurface
+        selectionRendering="virtual"
         editor={editor}
         aria-label="Markdown 문서"
         spellCheck={false}
