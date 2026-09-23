@@ -28,8 +28,8 @@ if (clipboard) {
 
 잘라내기는 먼저 같은 payload를 만든 뒤 선택한 내용을 문서에서 제거합니다.
 제거가 성공하면 History에 변경이 기록됩니다. Sheet `cut()`은 고른 칸을
-비웁니다. Database는 칸을 지우지 않고 복사와 붙여넣기만 합니다. 붙여넣기는
-payload의 구조화된 데이터를 새 위치에 적용합니다.
+비우고, Database `cut()`은 고른 칸을 각 property의 기본값으로 비웁니다.
+붙여넣기는 payload의 구조화된 데이터를 새 위치에 적용합니다.
 
 ```ts
 const cut = editor.cut();

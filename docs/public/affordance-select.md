@@ -59,11 +59,11 @@ const editing = useEditing({
 - Shift+click 추가/제거
 - Mod+click은 `nestedId`가 있을 때만 자식
 - Mod+A `selectAllAffordance`
+- Home / End / PageUp / PageDown은 `resolveAffordanceKey`의 boundary
 - 잠긴 객체는 [Not-allowed](affordance-forbid.md)
 
 ## TBD
 
-- Home / End / PageUp / PageDown은 `resolveAffordanceKey`의 boundary
 - selection follows focus vs focus-only move는 [Focus](affordance-focus.md)
 - 글 단어·줄 범위는 [Double-click](affordance-double-click.md)·
   [Triple-click](affordance-triple-click.md)·[Caret](affordance-caret.md)

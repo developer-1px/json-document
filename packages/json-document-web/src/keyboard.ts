@@ -46,12 +46,17 @@ export const defaultWebKeymap: WebKeymap = Object.freeze({
   End: boundary("end", "replace"),
   "Shift-Home": boundary("start", "extend"),
   "Shift-End": boundary("end", "extend"),
+  PageUp: boundary("start", "replace"),
+  PageDown: boundary("end", "replace"),
+  "Shift-PageUp": boundary("start", "extend"),
+  "Shift-PageDown": boundary("end", "extend"),
   Space: { type: "toggle" },
   "Mod-Space": { type: "toggle" },
   Delete: { type: "delete" },
   Backspace: { type: "delete" },
   "Mod-z": { type: "undo" },
   "Mod-Shift-z": { type: "redo" },
+  "Mod-y": { type: "redo" },
 });
 
 export function createWebKeyboardAdapter(): WebKeyboardAdapter;

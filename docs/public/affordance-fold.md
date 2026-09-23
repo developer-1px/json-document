@@ -41,26 +41,34 @@ applyAffordance(
 받습니다. expand/collapse는 호스트 접힘 집합으로, move는 json-document
 선택으로 갑니다.
 
-## TBD
+## Accordion / Disclosure
+
+Enter와 Space는 머문 섹션 하나를 접거나 폅니다. `disclosureAffordance`는
+현재 접힘 상태를 받아 반대 hand를 돌려줍니다.
 
 ```ts
 function onKeyDown(event: KeyboardEvent) {
-  const hand = disclosureAffordance({
-    key: event.key,
-    expanded: expanded.has(sectionId),
-  });
-  if (hand === "expand") setExpanded((current) => new Set(current).add(sectionId));
-  if (hand === "collapse") {
-    setExpanded((current) => {
-      const next = new Set(current);
-      next.delete(sectionId);
-      return next;
-    });
-  }
+  applyAffordance(
+    disclosureAffordance({ key: event.key, expanded: expanded.has(sectionId) }),
+    {
+      hand: (hand) => {
+        if (hand.type === "expand") {
+          setExpanded((current) => new Set(current).add(sectionId));
+          return;
+        }
+        setExpanded((current) => {
+          const next = new Set(current);
+          next.delete(sectionId);
+          return next;
+        });
+      },
+    },
+  );
 }
 ```
 
-- Accordion / Disclosure의 Enter·Space 접힘
+## TBD
+
 - `aria-expanded`와 호스트 접힘 집합의 동기
 - 가로 나무에서 위·아래가 접힘인지 이웃인지
 

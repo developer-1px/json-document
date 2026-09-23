@@ -446,6 +446,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
     codec: databaseClipboardCodec,
     representations: clipboardRepresentations,
     read: () => editor.copy(topology),
+    cut: () => editor.cut(topology)?.result ?? { ok: false, code: "selection.empty" },
     paste: (clipboard) => editor.dispatch({ type: "clipboard.paste", clipboard, topology }),
     onResult(result) {
       if (!result.ok) {
@@ -453,6 +454,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
         return;
       }
       if (result.operation === "copy") announce("Selection copied");
+      if (result.operation === "cut") emit("cell.commit", "Selection cut");
       if (result.operation === "paste") emit("cell.commit", "Selection pasted");
     },
   });
@@ -514,6 +516,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
         tabIndex={0}
         onKeyDown={keyDown}
         onCopy={clipboardSurface.onCopy}
+        onCut={props.readOnly ? undefined : clipboardSurface.onCut}
         onPaste={props.readOnly ? undefined : clipboardSurface.onPaste}
       >
         <table ref={tableRef} role="grid" aria-label={props.labels.ariaLabel} aria-multiselectable="true">

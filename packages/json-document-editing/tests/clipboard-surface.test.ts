@@ -47,6 +47,6 @@ describe("editing clipboard surface", () => {
     expect(object.cut()?.clipboard.text).toBe("A");
     expect(tree.cut({ visibleIds: ["a"] })?.clipboard.text).toBe("A");
     expect(sheet.cut()?.clipboard.text).toBe("A");
-    expect("cut" in database).toBe(false);
+    expect(database.cut()?.clipboard.text).toBe("A");
   });
 });

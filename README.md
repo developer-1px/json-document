@@ -24,11 +24,39 @@ stateless JSON Patch
 
 공식 사이트: https://developer-1px.github.io/json-document/
 
+## 빠른 시작
+
+```sh
+npm install @interactive-os/json-document
+```
+
+```ts
+import { createJSONDocument } from "@interactive-os/json-document";
+
+const document = createJSONDocument({ title: "Draft", cards: [] });
+
+const unsubscribe = document.subscribe((change) => {
+  console.log(change.applied);
+});
+
+document.commit([
+  { op: "replace", path: "/title", value: "Plan" },
+  { op: "add", path: "/cards/-", value: { id: "c1", title: "첫 카드" } },
+]);
+
+console.log(document.at("/cards/0/title")); // { ok: true, ... }
+unsubscribe();
+```
+
+읽기(`value`, `at`, `query`), 검사(`validatePatch`), 적용(`commit`),
+구독(`subscribe`)이 계약의 전부입니다. 전체 시그니처는
+[docs/public/api.md](docs/public/api.md)에 있습니다.
+
 ## 문서 지도
 
 | 목적 | 위치 |
 | --- | --- |
-| 빠른 사용 예제 | [docs/public/quickstart.md](docs/public/quickstart.md) |
+| 빠른 사용 예제 | [빠른 시작](#빠른-시작) |
 | JSON Document 개념 | [docs/public/overview.md](docs/public/overview.md) |
 | JSON Document API | [docs/public/api.md](docs/public/api.md) |
 | 편집 개념 | [docs/public/selection.md](docs/public/selection.md), [history](docs/public/history.md), [clipboard](docs/public/clipboard.md), [topology](docs/public/topology.md) |

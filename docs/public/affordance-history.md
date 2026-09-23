@@ -1,7 +1,7 @@
 # Undo
 
-Undo는 값과 선택을 함께 되돌리는 손입니다. Mod+Z는 undo, Mod+Shift+Z는
-redo입니다. 버튼은 `canUndo` / `canRedo`를 읽어 꺼집니다.
+Undo는 값과 선택을 함께 되돌리는 손입니다. Mod+Z는 undo, Mod+Shift+Z와
+Mod+Y는 redo입니다. 버튼은 `canUndo` / `canRedo`를 읽어 꺼집니다.
 
 ```ts
 import {
@@ -32,16 +32,21 @@ History 기록 자체는 Editing이 가지고, 어포던스는 그 손을 닫습
 `disabled`를 가지므로 버튼 상태에 직접 사용할 수 있습니다. History 기록과
 실행은 Editing/Host가 계속 소유합니다.
 
-## TBD
+## 키보드
+
+`editingCommandFromWebKeyboardStroke`가 Mod+Z, Mod+Shift+Z, Mod+Y를 같은
+undo/redo hand로 돌려줍니다.
 
 ```ts
 function onKeyDown(event: KeyboardEvent) {
   const command = editingCommandFromWebKeyboardStroke(event);
+  if (command?.type === "undo") editor.undo();
   if (command?.type === "redo") editor.redo();
 }
 ```
 
-- Mod+Y redo 변종
+## TBD
+
 - 연속 입력의 묶음 단위
 - 협업 replica에서 내 기여만 되돌리기는 Collaboration History
 

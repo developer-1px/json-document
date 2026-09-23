@@ -649,6 +649,7 @@ interface DatabaseEditor {
   tableTopology(viewId: string): DatabaseTopology;
   selectedCellsIn(topology: DatabaseTopology): ReadonlyArray<DatabaseCell>;
   copy(topology?: DatabaseTopology): DatabaseClipboard | null;
+  cut(topology?: DatabaseTopology): { readonly clipboard: DatabaseClipboard; readonly result: EditingResult<DatabaseSelection> } | null;
   undo(): EditingResult<DatabaseSelection>;
   redo(): EditingResult<DatabaseSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<DatabaseSelection>) => void): () => void;

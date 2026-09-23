@@ -12,8 +12,8 @@ import {
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import type { EditingHistoryOptions } from "./history.js";
-import { reconcileRangeSelection } from "./range-selection.js";
-import { isClipboardJSONValue, isClipboardRecord } from "./clipboard.js";
+import { reconcileRangeSelection, selectRangePoint } from "./range-selection.js";
+import { cutEditingClipboard, isClipboardJSONValue, isClipboardRecord } from "./clipboard.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds } from "./topology.js";
 import { acceptsDatabaseValue, defaultDatabaseValue } from "./database-property-value.js";
 import { assertDatabaseDocument, assertDatabaseView } from "./database-validation.js";
@@ -21,9 +21,8 @@ import {
   collapsedRangeSelection,
   emptyRangeSelection,
   primaryRange,
-  selectRangePoint,
-  type RangeSelectionState,
-} from "./range-selection.js";
+  type RangeSelection,
+} from "@interactive-os/json-document-selection";
 import { jsonCellText } from "./cell-text.js";
 
 export type DatabasePropertyType = "title" | "text" | "number" | "select" | "checkbox";
@@ -172,6 +171,7 @@ export interface DatabaseEditor {
   tableTopology(viewId: string): DatabaseTopology;
   selectedCellsIn(topology: DatabaseTopology): ReadonlyArray<DatabaseCell>;
   copy(topology?: DatabaseTopology): DatabaseClipboard | null;
+  cut(topology?: DatabaseTopology): { readonly clipboard: DatabaseClipboard; readonly result: EditingResult<DatabaseSelection> } | null;
   undo(): EditingResult<DatabaseSelection>;
   redo(): EditingResult<DatabaseSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<DatabaseSelection>) => void): () => void;
@@ -318,6 +318,37 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
     };
   }
 
+  function cut(topology?: DatabaseTopology): { readonly clipboard: DatabaseClipboard; readonly result: EditingResult<DatabaseSelection> } | null {
+    return cutEditingClipboard(() => copy(topology), () => {
+      const document = value();
+      const databaseIndex = index(document);
+      const axes = resolveTopology(document, topology, databaseIndex);
+      const range = primaryRange(session.snapshot.selection);
+      const bounds = range === null ? null : gridRangeBounds(databaseGrid(axes), {
+        anchor: { rowId: range.anchor.recordId, columnId: range.anchor.propertyId },
+        focus: { rowId: range.focus.recordId, columnId: range.focus.propertyId },
+      });
+      if (bounds === null) return failure("selection.empty");
+      const operations: JSONPatchOperation[] = [];
+      for (const recordId of axes.recordIds.slice(bounds.rowStart, bounds.rowEnd + 1)) {
+        const recordIndex = databaseIndex.recordIndexById.get(recordId)!;
+        for (const propertyId of axes.propertyIds.slice(bounds.columnStart, bounds.columnEnd + 1)) {
+          const property = databaseIndex.propertyById.get(propertyId)!;
+          operations.push({
+            op: "replace",
+            path: buildPointer(["records", recordIndex, "values", propertyId]),
+            value: defaultDatabaseValue(property),
+          });
+        }
+      }
+      return session.apply({
+        operations,
+        selectionAfter: session.snapshot.selection,
+        origin: "clipboard.cut",
+      });
+    });
+  }
+
   return {
     get snapshot() { return session.snapshot; },
     dispatch,
@@ -328,6 +359,7 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
       return selectedCells(value(), session.snapshot.selection, topology, index());
     },
     copy,
+    cut,
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),
@@ -535,7 +567,7 @@ function emptySelection(): DatabaseSelection {
   return withPrimaryAliases(emptyRangeSelection());
 }
 
-function withPrimaryAliases(selection: RangeSelectionState<DatabasePoint>): DatabaseSelection {
+function withPrimaryAliases(selection: RangeSelection<DatabasePoint>): DatabaseSelection {
   const primary = primaryRange(selection);
   return {
     kind: "range",

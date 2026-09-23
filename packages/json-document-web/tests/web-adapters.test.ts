@@ -626,6 +626,12 @@ describe("Web keyboard Adapter", () => {
       .toEqual({ type: "delete" });
     expect(adapter.resolve({ key: "z", shiftKey: true, metaKey: false, ctrlKey: true }))
       .toEqual({ type: "redo" });
+    expect(adapter.resolve({ key: "y", shiftKey: false, metaKey: false, ctrlKey: true }))
+      .toEqual({ type: "redo" });
+    expect(adapter.resolve({ key: "PageUp", shiftKey: false, metaKey: false, ctrlKey: false }))
+      .toEqual({ type: "boundary", edge: "start", operation: "replace" });
+    expect(adapter.resolve({ key: "PageDown", shiftKey: true, metaKey: false, ctrlKey: false }))
+      .toEqual({ type: "boundary", edge: "end", operation: "extend" });
     expect(adapter.resolve({ key: "c", shiftKey: false, metaKey: true, ctrlKey: false })).toBeNull();
   });
 
