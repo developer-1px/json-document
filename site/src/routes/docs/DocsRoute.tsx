@@ -4,7 +4,10 @@ import { DocumentationPage } from "./DocumentationPage";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "package",
+  concepts: "sleep",
   foundation: "braces",
+  buildingBlocks: "braces",
+  editing: "branch",
   howWeBuild: "branch",
   applications: "peek",
   documentTypes: "braces",
@@ -73,6 +76,8 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   jsonDocumentApi: "patch",
   selectionApi: "patch",
   editingApi: "patch",
+  objectDocumentApi: "braces",
+  canvasApi: "peek",
   reactApi: "connector",
   reactHookFormApi: "connector",
   ajvApi: "connector",
@@ -84,8 +89,12 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   uiPrimitivesApi: "patch",
   animationApi: "patch",
   markdownReactApi: "patch",
+  markdownApi: "terminal",
+  markdownWebApi: "cursor",
   databaseApi: "database",
+  annotationApi: "cursor",
   calendarApi: "database",
+  calendarDocumentApi: "database",
   webApi: "terminal",
   contenteditableApi: "cursor",
   richTextApi: "terminal",
@@ -208,8 +217,9 @@ export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
   const page = docPages[pageId];
   return (
     <DocumentationPage
-      title={page.heading ?? page.label}
+      title={page.heading ?? page.title.replace(/ - json-document$/, "")}
       source={page.source}
+      sourcePath={page.documentSource}
       illustration={docIllustrations[pageId]}
     />
   );

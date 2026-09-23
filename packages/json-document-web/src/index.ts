@@ -1,5 +1,8 @@
+export { routeWebClipboardEvent } from "./clipboard-event.js";
 export {
   createWebClipboardBinding,
+  captureWebClipboardPaste,
+  type WebHTMLClipboardPaste,
   createWebJSONClipboardRepresentation,
   createWebClipboardSurface,
   createWebClipboardTextWriter,
@@ -11,7 +14,7 @@ export {
   treeClipboardCodec,
 } from "./clipboard.js";
 export { selectionOperationFromModifiers } from "./modifiers.js";
-export { isWebEditableTarget, isWebEditingHostTarget, textInputFromControl } from "./input.js";
+export { isWebEditableTarget, isWebEditingHostTarget, textInputFromControl, textSelectionFromControl } from "./input.js";
 export { pressInteractionFromWeb } from "./press.js";
 export { focusWebItem, webFocusItemProps } from "./focus-item.js";
 export { findWebGridCell, webGridCellAddressProps } from "./grid-cell.js";
@@ -30,6 +33,9 @@ export { createWebViewportPositionPorts } from "./viewport-position.js";
 export { createWebAnchoredFloatingPositionPorts } from "./anchored-floating-position.js";
 export { projectWebClientPointToSVG, webSVGViewportFromElement } from "./svg-coordinate.js";
 export { readWebRasterFile } from "./raster-source.js";
+export { readWebRasterFiles, type WebRasterFileContent, type WebRasterFilesResult } from "./raster-files.js";
+export { parseWebHTMLFragment, type WebHTMLFragment, type WebHTMLNode } from "./html-fragment.js";
+export { parseWebClipboardHTML, readWebHTMLClipboard, type WebHTMLClipboardContent, type WebHTMLClipboardPart, type WebHTMLClipboardResult } from "./html-clipboard.js";
 export { composerAttachmentCandidateFromWebFile, composerAttachmentCandidatesFromWebClipboard, composerAttachmentCandidatesFromWebFiles, fileCandidateFromWebFile, fileCandidatesFromWebClipboard, fileCandidatesFromWebFiles } from "./file-intake.js";
 export { renderWebAnnotationRaster } from "./annotation-raster.js";
 export { registerWebVirtualSelectionScope } from "./virtual-selection-scope.js";
@@ -65,6 +71,7 @@ export type {
 } from "./anchored-floating-position.js";
 export type {
   WebClipboardBinding,
+  WebClipboardPaste,
   WebClipboardBindingOptions,
   WebClipboardCodec,
   WebClipboardData,
@@ -118,7 +125,7 @@ export type {
 } from "./viewport-position.js";
 export type { WebKanbanTargetElement } from "./kanban-drop-target.js";
 export type { WebClientPoint, WebSVGElement, WebSVGViewport } from "./svg-coordinate.js";
-export type { WebRasterFile, WebRasterSourceResult } from "./raster-source.js";
+export type { WebRasterFile, WebRasterReadSignal, WebRasterSourceResult } from "./raster-source.js";
 export type { WebComposerClipboardEvent, WebComposerFile, WebComposerFileList, WebFileCandidate, WebFileCandidateList, WebFileClipboardEvent } from "./file-intake.js";
 export type { WebAnnotationRasterResult, WebAnnotationRasterStyle } from "./annotation-raster.js";
 export type {
@@ -138,3 +145,4 @@ export type {
   WebGridCellAddressElement,
   WebGridCellAddressRoot,
 } from "./grid-cell.js";
+export { textClipboardCodec } from "./clipboard.js";

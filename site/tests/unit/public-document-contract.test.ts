@@ -30,7 +30,8 @@ describe("public documentation contract", () => {
   });
 
   test("accepts the exact published llms source against the canonical Core contract", () => {
-    expect(symbolCount).toBe(23);
+    expect(symbolCount).toBe(25);
+    for (const symbol of publicContract.root.values) expect(llms).toContain(symbol);
     expect(findings(llms)).toEqual([]);
   });
 

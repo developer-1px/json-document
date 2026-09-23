@@ -8,7 +8,9 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import type { SelectionHistoryEntry } from "@interactive-os/json-document-selection";
+import { observeHistoryInvalidation } from "./history-invalidation.js";
 import { invertEditingPatch } from "./invert-patch.js";
+import { expandTextHistory, restoreHistoryPatch, storeHistoryPatch, type StoredHistoryOperation } from "./history-patch.js";
 import type { EditingHistoryOptions, EditingHistoryResult, EditingHistoryStatus } from "./history.js";
 
 export interface EditingDocumentChange {
@@ -57,7 +59,7 @@ export interface EditingSession<Selection extends JSONValue> {
 }
 
 interface HistoryEntry<Selection extends JSONValue>
-  extends SelectionHistoryEntry<Selection, JSONPatchOperation> {
+  extends SelectionHistoryEntry<Selection, StoredHistoryOperation> {
   readonly group?: string;
 }
 
@@ -68,6 +70,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
   let undoStack: HistoryEntry<Selection>[] = [];
   let redoStack: HistoryEntry<Selection>[] = [];
   let activeHistoryGroup: string | undefined;
+  let historyInvalidation: { readonly changed: boolean } | undefined;
   let isCommitting = false;
   let observedValue = document.value;
   let unsubscribeDocument: (() => void) | null = null;
@@ -87,7 +90,8 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
   let isNotifying = false;
 
   function ownSelection(value: Selection): Selection {
-    // JSON Document owns detachment and immutable JSON values, including selection.
+    // Selection families may alias anchor/focus/points. JSON serialization lowers
+    // that graph to a tree before Core validates and owns the immutable snapshot.
     return createJSONDocument(clone(value)).value as Selection;
   }
 
@@ -142,10 +146,12 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       }
       const nextHistory = options.history?.status();
       const historyChanged = nextHistory?.revision !== observedHistory?.revision;
+      const localHistoryChanged = historyInvalidation?.changed === true;
       const latest = document.value;
       if (jsonEqual(observedValue, latest)) {
-        if (!historyChanged) return;
+        if (!historyChanged && !localHistoryChanged) return;
         observedHistory = nextHistory;
+        if (localHistoryChanged) clearLocalHistory();
       } else {
         const before = observedValue;
         const replay = options.mapSelection && change !== undefined ? applyPatch(before, change.applied) : null;
@@ -155,9 +161,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
         observedValue = latest;
         observedHistory = nextHistory;
         selection = nextSelection;
-        undoStack = [];
-        redoStack = [];
-        activeHistoryGroup = undefined;
+        clearLocalHistory();
       }
       revision += 1;
       change = undefined;
@@ -165,6 +169,18 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       // before a caller can read the state or author another mutation.
       publish();
     }
+  }
+
+  function clearLocalHistory(): void {
+    undoStack = [];
+    redoStack = [];
+    activeHistoryGroup = undefined;
+    historyInvalidation = undefined;
+  }
+
+  function trackLocalHistory(followedByChange: boolean, pendingOwnChange?: JSONAppliedChange): void {
+    if (options.history || undoStack.length + redoStack.length === 0) return;
+    historyInvalidation = followedByChange ? { changed: true } : observeHistoryInvalidation(document, pendingOwnChange);
   }
 
   function commit(
@@ -182,7 +198,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       // reentrant document write needs a replay to recover the earlier value.
       const replay = notifications > 1 ? applyPatch(before, result.change.applied) : null;
       observedValue = replay?.ok ? replay.value : document.value;
-      return result;
+      return { ...result, followedByChange: notifications > 1, pendingOwnChange: notifications === 0 ? result.change : undefined };
     } finally {
       release();
       isCommitting = false;
@@ -221,20 +237,29 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       return { ok: true, snapshot: publish() };
     }
 
-    const inverse = options.history ? [] : invertEditingPatch(document, plan.operations);
+    const inverse = options.history || plan.history === "ignore" ? [] : invertEditingPatch(document, plan.operations);
     if (inverse === null) {
       const validation = document.validatePatch(plan.operations);
       return validation.ok ? { ok: false, code: "history.inverse-unavailable" } : validation;
     }
+    const ignoredHistory = plan.history === "ignore" ? {
+      undo: expandTextHistory(beforeValue, undoStack, "inverse"),
+      redo: expandTextHistory(beforeValue, redoStack, "forward"),
+    } : null;
+    if (ignoredHistory && (!ignoredHistory.undo || !ignoredHistory.redo)) return { ok: false, code: "history.inverse-unavailable" };
     const result = commit(plan.operations, {
       editing: {
         origin: plan.origin,
-        selectionBefore: clone(beforeSelection),
-        selectionAfter: clone(selectionAfter),
+        selectionBefore: beforeSelection,
+        selectionAfter,
       },
     });
     if (!result.ok) return result;
 
+    if (ignoredHistory && result.change.applied.length > 0) {
+      undoStack = ignoredHistory.undo!;
+      redoStack = ignoredHistory.redo!;
+    }
     selection = selectionAfter;
     revision += 1;
     const historyStatus = options.history?.status();
@@ -247,39 +272,41 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
     }
     if (!options.history && plan.history !== "ignore" && result.change.applied.length > 0) {
       const entry: HistoryEntry<Selection> = {
-        forward: result.change.applied,
-        inverse,
+        ...storeHistoryPatch(result.change.applied, inverse, plan.historyGroup),
         selectionBefore: beforeSelection,
         selectionAfter: selection,
         ...(plan.historyGroup === undefined ? {} : { group: plan.historyGroup }),
       };
       const previous = undoStack.at(-1);
       if (previous && plan.historyGroup !== undefined && activeHistoryGroup === plan.historyGroup && previous.group === plan.historyGroup) {
-        undoStack = [...undoStack.slice(0, -1), {
+        undoStack[undoStack.length - 1] = {
           ...entry,
           forward: [...previous.forward, ...entry.forward],
           inverse: [...entry.inverse, ...previous.inverse],
           selectionBefore: previous.selectionBefore,
-        }];
+        };
       } else {
-        undoStack = [...undoStack, entry];
+        undoStack.push(entry);
       }
       activeHistoryGroup = plan.historyGroup;
       redoStack = [];
     }
+    if (result.change.applied.length > 0) trackLocalHistory(result.followedByChange, result.pendingOwnChange);
     return { ok: true, snapshot: publishCommit(), change: result.change };
   }
 
   function restore(entry: HistoryEntry<Selection>, direction: "undo" | "redo"): EditingResult<Selection> {
-    const operations = direction === "undo" ? entry.inverse : entry.forward;
+    const operations = restoreHistoryPatch(document, direction === "undo" ? entry.inverse : entry.forward);
+    if (operations === null) return { ok: false as const, code: "history.text-source-stale" };
     const nextSelection = direction === "undo" ? entry.selectionBefore : entry.selectionAfter;
     const result = commit(operations, {
-      editing: { origin: direction, selectionAfter: clone(nextSelection) },
+      editing: { origin: direction, selectionAfter: nextSelection },
     });
     if (!result.ok) return result;
     selection = nextSelection;
     revision += 1;
     activeHistoryGroup = undefined;
+    if (result.change.applied.length > 0) trackLocalHistory(result.followedByChange, result.pendingOwnChange);
     return { ok: true, snapshot: currentSnapshot(), change: result.change };
   }
 
@@ -350,8 +377,8 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       if (!entry) return { ok: false, code: "history.empty" };
       const result = restore(entry, "undo");
       if (result.ok) {
-        undoStack = undoStack.slice(0, -1);
-        redoStack = [...redoStack, entry];
+        undoStack.pop();
+        redoStack.push(entry);
         return { ...result, snapshot: publishCommit() };
       }
       return result;
@@ -364,8 +391,8 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       if (!entry) return { ok: false, code: "history.empty" };
       const result = restore(entry, "redo");
       if (result.ok) {
-        redoStack = redoStack.slice(0, -1);
-        undoStack = [...undoStack, entry];
+        redoStack.pop();
+        undoStack.push(entry);
         return { ...result, snapshot: publishCommit() };
       }
       return result;

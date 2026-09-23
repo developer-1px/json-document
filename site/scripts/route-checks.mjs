@@ -53,6 +53,12 @@ export function validateSiteRoutes(routes, fail) {
     if (route.heading !== undefined && (typeof route.heading !== "string" || route.heading.trim() === "")) {
       fail(`site route ${route.path} has an invalid heading.`);
     }
+    if (route.documentSource !== undefined && !/^docs\/(?:public|api-reference)\/[^/]+\.md$/.test(route.documentSource)) {
+      fail(`site route ${route.path} has an invalid documentation source.`);
+    }
+    if (route.documentIncludes !== undefined && (!Array.isArray(route.documentIncludes) || route.documentIncludes.some((source) => typeof source !== "string" || !/^packages\/[^/]+\/docs\/[^/]+\.md$/.test(source)))) {
+      fail(`site route ${route.path} has invalid owner documentation includes.`);
+    }
     if (route.chrome !== undefined && route.chrome !== "app") {
       fail(`site route ${route.path} has an invalid chrome.`);
     }
@@ -81,7 +87,8 @@ export function validateSiteRoutes(routes, fail) {
       files.add(file);
     }
 
-    const navigationLabel = `${route.navigationGroup ?? "hidden"}:${route.label}`;
+    const labelScope = route.parentPath ?? route.navigationGroup ?? (route.sidebar === false ? route.path : "root");
+    const navigationLabel = `${labelScope}:${route.label}`;
     if (labels.has(navigationLabel)) fail(`site navigation group contains duplicate label ${route.label}.`);
     labels.add(navigationLabel);
 

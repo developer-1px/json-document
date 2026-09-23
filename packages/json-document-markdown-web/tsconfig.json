@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig/library-dom.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
+  "references": [
+    {
+      "path": "../json-document-markdown"
+    },
+    {
+      "path": "../json-document-contenteditable"
+    },
+    {
+      "path": "../json-document-editing"
+    }
+  ],
+  "include": [
+    "src/**/*.ts"
+  ]
+}

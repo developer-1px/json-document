@@ -74,9 +74,10 @@ export function useJSONDocumentForm<
   changeSource?: Pick<JSONDocument, "subscribe" | "at">,
 ): JSONDocumentFormBinding<Values, Selection> {
   const snapshot = useEditingSnapshot(session);
+  const defaultValues = useMemo(() => cloneFormValues<Values>(snapshot.value), [snapshot.value]);
   const form = useForm<Values, unknown, Values>({
     ...options.form,
-    defaultValues: cloneFormValues<Values>(snapshot.value) as DefaultValues<Values>,
+    defaultValues: defaultValues as DefaultValues<Values>,
   });
   const [result, setResult] = useState<EditingResult<Selection> | null>(null);
   const canonicalValue = useRef(snapshot.value);
@@ -159,7 +160,7 @@ function syncAppliedChange<Values extends FieldValues>(
 }
 
 function syncPointers(operations: ReadonlyArray<JSONPatchOperation>): string[] | null {
-  const pointers: string[] = [];
+  const pointers = new Set<string>();
   for (const operation of operations) {
     if (operation.op === "test") continue;
     if (operation.path === "") return null;
@@ -169,18 +170,20 @@ function syncPointers(operations: ReadonlyArray<JSONPatchOperation>): string[] |
     if (structural) segments.pop();
     const pointer = buildPointer(segments);
     if (pointer === "") return null;
-    pointers.push(pointer);
+    pointers.add(pointer);
     if ((operation.op === "move" || operation.op === "copy") && operation.from !== "") {
       const from = parsePointer(operation.from);
       from.pop();
       if (from.length === 0) return null;
-      pointers.push(buildPointer(from));
+      pointers.add(buildPointer(from));
     }
   }
-  return pointers.filter((pointer, index) => (
-    pointers.indexOf(pointer) === index
-    && !pointers.some((other) => other !== pointer && pointer.startsWith(`${other}/`))
-  ));
+  return [...pointers].filter((pointer) => {
+    for (let end = pointer.lastIndexOf("/"); end > 0; end = pointer.lastIndexOf("/", end - 1)) {
+      if (pointers.has(pointer.slice(0, end))) return false;
+    }
+    return true;
+  });
 }
 
 function fieldPath(pointer: string): string | null {

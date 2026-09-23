@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
-const owner = read("packages/json-document-editing/src/calendar-occurrence.ts");
-const ownerIndex = read("packages/json-document-editing/src/index.ts");
+const owner = read("packages/json-document-calendar-document/src/calendar-occurrence.ts");
+const ownerIndex = read("packages/json-document-calendar-document/src/index.ts");
 const ownerTest = read("packages/json-document-editing/tests/calendar-editor.test.ts");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 const inspector = read("packages/json-document-calendar/src/calendar-event-inspector.tsx");
@@ -22,11 +22,11 @@ forbid(inspector, /as CalendarRecurrence\["freq"\]/);
 forbid(inspector, /Math\.max\(1, Math\.floor\(Number\(event\.target\.value\)/);
 forbid(inspector, /recurrence:\s*\{\s*\.\.\.selectedEvent\.recurrence!/);
 forbid(inspector, /selectedEvent\.recurrence!/);
-requireText(usage, "Editing\n`calendarRecurrenceWithFrequency`");
-requireText(sources, 'sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts"');
+requireText(usage, "@interactive-os/json-document-calendar-document");
+requireText(sources, 'sourcePath: "packages/json-document-calendar-document/src/calendar-occurrence.ts"');
 requireText(browserTest, "Calendar recurrence inspector applies canonical model transitions");
 
-console.log("Calendar recurrence transition guard ok; Editing owner/tests, three Host handlers, Usage, and source registration checked.");
+console.log("Calendar recurrence transition guard ok; Document Type owner/tests, three Host handlers, Usage, and source registration checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

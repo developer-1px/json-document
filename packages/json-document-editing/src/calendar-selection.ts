@@ -1,4 +1,9 @@
-import type { CalendarEvent, CalendarIntent } from "./calendar.js";
+import type {
+  CalendarIntent,
+} from "./calendar.js";
+import type {
+  CalendarEvent,
+} from "@interactive-os/json-document-calendar-document";
 
 export type CalendarEventPatch = {
   readonly title?: string;

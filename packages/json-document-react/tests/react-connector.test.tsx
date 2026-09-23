@@ -57,6 +57,44 @@ describe("React Connector", () => {
     expect(inputs).toEqual([{ text: "Alps", offset: 4 }]);
   });
 
+  test("keeps native directional ranges when Document publishes their focus offset", () => {
+    const editor = createDocumentEditor({ blocks: [{ id: "a", text: "Alpha" }] });
+    function View() {
+      const snapshot = useEditingSnapshot(editor);
+      return <DocumentTextControl
+        aria-label="Bound Document text"
+        text="Alpha"
+        offset={snapshot.selection.ranges[0]?.focus.offset ?? null}
+        onCaretRange={(anchor, focus, mode) => {
+          editor.dispatch({ type: "selection.set", blockId: "a", offset: anchor });
+          if (mode === "extend" || anchor !== focus) {
+            editor.dispatch({ type: "selection.set", blockId: "a", offset: focus, mode: "extend" });
+          }
+        }}
+        onTextInput={() => {}}
+      />;
+    }
+    render(<View />);
+    const control = screen.getByRole("textbox", { name: "Bound Document text" }) as HTMLTextAreaElement;
+    act(() => { control.focus(); });
+    for (const [start, end, direction, anchor, focus] of [
+      [2, 4, "forward", 2, 4],
+      [1, 2, "backward", 2, 1],
+      [3, 3, "none", 3, 3],
+    ] as const) {
+      control.setSelectionRange(start, end, direction);
+      fireEvent.select(control);
+      expect(editor.snapshot.selection.ranges).toEqual([{
+        anchor: { blockId: "a", offset: anchor }, focus: { blockId: "a", offset: focus },
+      }]);
+      expect([control.selectionStart, control.selectionEnd]).toEqual([start, end]);
+      if (direction !== "none") expect(control.selectionDirection).toBe(direction);
+    }
+    expect(editor.snapshot).toMatchObject({ value: { blocks: [{ id: "a", text: "Alpha" }] }, canUndo: false, canRedo: false });
+    act(() => { editor.dispatch({ type: "selection.set", blockId: "a", offset: 0 }); });
+    expect([control.selectionStart, control.selectionEnd]).toEqual([0, 0]);
+  });
+
   test("exposes the shared document through the official Connector entry point", () => {
     const document = createJSONDocument({ title: "Draft" });
     function View() {

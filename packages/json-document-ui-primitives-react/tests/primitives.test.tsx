@@ -111,6 +111,25 @@ describe("UI Primitives", () => {
     expect(screen.queryByRole("dialog", { name: "Delete document" })).toBeNull();
   });
 
+  test("icon Popover reuses Command tooltips, dismisses outside, and restores focus only on Escape", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [open, setOpen] = useState(false);
+      return <><Popover label="Style" trigger={<span aria-hidden="true">◇</span>} triggerPresentation="icon" open={open} onOpenChange={setOpen}><button>Inside</button></Popover><button>Outside</button></>;
+    }
+    render(<Harness />);
+    const trigger = screen.getByRole("button", { name: "Style" });
+    expect(trigger.getAttribute("data-ui-control")).toBe("command");
+    expect(document.getElementById(trigger.getAttribute("aria-describedby")!)?.textContent).toBe("Style");
+    await user.click(trigger); await user.click(screen.getByRole("button", { name: "Inside" }));
+    expect(screen.getByRole("dialog", { name: "Style" })).toBeTruthy();
+    await user.keyboard("{Escape}"); expect(document.activeElement).toBe(trigger);
+    await user.click(trigger); const outside = screen.getByRole("button", { name: "Outside" }); await user.click(outside);
+    expect(screen.queryByRole("dialog", { name: "Style" })).toBeNull(); expect(document.activeElement).toBe(outside);
+    await user.click(trigger); await user.tab(); await user.tab();
+    expect(screen.queryByRole("dialog", { name: "Style" })).toBeNull(); expect(document.activeElement).toBe(outside);
+  });
+
   test("Dialog moves focus inside, traps Tab, and restores the invoking control", async () => {
     const user = userEvent.setup();
     function Harness() {
@@ -268,6 +287,22 @@ describe("UI Primitives", () => {
     expect(screen.getByRole("button", { name: "Item" }).dataset).toMatchObject({ selected: "true", focus: "true" });
     expect(screen.getByRole("button", { name: "Details" }).getAttribute("aria-controls")).toBe("panel");
     expect(screen.getByRole("button", { name: "Details" }).getAttribute("aria-expanded")).toBe("true");
+  });
+
+  test("Toggle labels default to icon presentation while text tooltips and explicit presentations remain intact", () => {
+    render(<>
+      <Toggle label="Draw" pressed><svg aria-hidden="true" /></Toggle>
+      <Toggle tooltip="Show details" pressed={false}>Details</Toggle>
+      <Toggle label="Full label" presentation="button" pressed={false}>Full label</Toggle>
+    </>);
+    const icon = screen.getByRole("button", { name: "Draw" });
+    expect(icon.getAttribute("data-ui-presentation")).toBe("icon");
+    expect(icon.getAttribute("aria-pressed")).toBe("true");
+    expect(icon.getAttribute("aria-describedby")).toBe(screen.getByRole("tooltip", { name: "Draw" }).id);
+    const text = screen.getByRole("button", { name: "Details" });
+    expect(text.getAttribute("data-ui-presentation")).toBe("button");
+    expect(text.getAttribute("aria-describedby")).toBe(screen.getByRole("tooltip", { name: "Show details" }).id);
+    expect(screen.getByRole("button", { name: "Full label" }).getAttribute("data-ui-presentation")).toBe("button");
   });
 
   test("Command can preserve an editing surface focus during pointer activation", () => {

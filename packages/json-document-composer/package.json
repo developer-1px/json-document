@@ -21,12 +21,14 @@
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
+    "@interactive-os/json-document-web": "^0.1.0-rc.0",
     "@interactive-os/json-document": "^3.0.0",
     "@interactive-os/json-document-file-intake": "^0.1.0-rc.0",
     "@interactive-os/json-document-rich-text-suggestion": "^0.1.0-rc.0",
     "@interactive-os/json-document-rich-text": "^0.1.0-rc.0"
   },
   "devDependencies": {
+    "@interactive-os/json-document-web": "*",
     "@interactive-os/json-document": "*",
     "@interactive-os/json-document-file-intake": "*",
     "@interactive-os/json-document-rich-text-suggestion": "*",

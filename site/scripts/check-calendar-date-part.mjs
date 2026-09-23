@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
-const owner = read("packages/json-document-editing/src/calendar-validation.ts");
-const ownerIndex = read("packages/json-document-editing/src/index.ts");
+const owner = read("packages/json-document-calendar-document/src/calendar-validation.ts");
+const ownerIndex = read("packages/json-document-calendar-document/src/index.ts");
 const ownerTest = read("packages/json-document-editing/tests/calendar-validation.test.ts");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 const inspector = read("packages/json-document-calendar/src/calendar-event-inspector.tsx");
@@ -16,9 +16,9 @@ requireCount(host, "calendarDatePart(", 2);
 requireCount(inspector, "calendarDatePart(", 1);
 forbid(host, /\.slice\(0,\s*10\)/);
 requireText(usage, 'symbol: "calendarDatePart"');
-requireText(usage, 'sourcePath: "packages/json-document-editing/src/calendar-validation.ts"');
+requireText(usage, 'sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts"');
 
-console.log("Calendar date-part guard ok; Editing owner, public export, contract test, Usage, and three Host consumers checked.");
+console.log("Calendar date-part guard ok; Document Type owner, public export, contract test, Usage, and three Host consumers checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

@@ -93,20 +93,34 @@ test("Mention Hands가 가상 포커스와 atom 경계 삭제를 완성한다", 
   expect(pageErrors).toEqual([]);
 });
 
-test("클립보드 파일 paste를 undo 가능한 attachment로 저장한다", async ({ page }) => {
+test("실제 Clipboard 이미지 내용을 미리보기와 undo 가능한 attachment로 저장한다", async ({ page }) => {
   await page.goto("/demo/composer");
   const editor = page.getByLabel("Agent Chat Composer");
   await editor.click();
-  await editor.evaluate((element) => {
+  await editor.evaluate(async (element) => {
+    const raster = document.createElement("canvas");
+    raster.width = 64;
+    raster.height = 32;
+    const context = raster.getContext("2d")!;
+    context.fillStyle = "#2864dc";
+    context.fillRect(0, 0, 64, 32);
+    const blob = await new Promise<Blob>((resolve) => raster.toBlob((value) => resolve(value!), "image/png"));
     const clipboard = new DataTransfer();
-    clipboard.items.add(new File(["image"], "pasted.png", { type: "image/png" }));
+    clipboard.items.add(new File([blob], "pasted.png", { type: "image/png" }));
     element.dispatchEvent(new ClipboardEvent("paste", { bubbles: true, cancelable: true, clipboardData: clipboard }));
   });
 
   await expect(page.getByLabel("첨부 파일")).toContainText("pasted.png");
   await expect(page.getByTestId("composer-draft-json")).toContainText('"kind": "image"');
+  await expect(page.getByTestId("composer-draft-json")).toContainText("data:image/png;base64,");
+  const preview = page.getByRole("img", { name: "pasted.png" });
+  await expect(preview).toBeVisible();
+  expect(await preview.evaluate((element) => (element as HTMLImageElement).naturalWidth)).toBe(64);
   await editor.press("Control+z");
   await expect(page.getByLabel("첨부 파일")).not.toBeVisible();
+  await editor.press("Control+Shift+z");
+  await expect(preview).toBeVisible();
+  await expect(page.getByTestId("composer-draft-json")).toContainText('"width": 64');
 });
 
 test("빈 Composer에 처음 입력할 때 React DOM 삭제 오류가 발생하지 않는다", async ({ page }) => {

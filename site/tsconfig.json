@@ -6,6 +6,10 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
+      "@interactive-os/json-document-markdown": ["../packages/json-document-markdown/src/index.ts"],
+      "@interactive-os/json-document-markdown-web": ["../packages/json-document-markdown-web/src/index.ts"],
+      "@interactive-os/json-document-object-document": ["../packages/json-document-object-document/src/index.ts"],
+      "@interactive-os/json-document-canvas": ["../packages/json-document-canvas/src/index.ts"],
       "@interactive-os/json-document": ["../packages/json-document/src/application/document/index.ts"],
       "@interactive-os/json-document-editing": ["../packages/json-document-editing/src/index.ts"],
       "@interactive-os/json-document-calendar": ["../packages/json-document-calendar/src/index.ts"],
@@ -31,6 +35,7 @@
       "@interactive-os/json-document-rich-text-react": ["../packages/json-document-rich-text-react/src/index.tsx"],
       "@interactive-os/json-document-zod": ["../packages/json-document-zod/src/index.ts"],
       "@interactive-os/json-document-database": ["../packages/json-document-database/src/index.ts"],
+      "@interactive-os/json-document-annotation": ["../packages/json-document-annotation/src/index.ts"],
       "@interactive-os/json-document-collaboration": ["../packages/json-document-collaboration/src/index.ts"],
       "@interactive-os/json-document-collaboration/text": ["../packages/json-document-collaboration/src/text-index.ts"],
       "@interactive-os/json-document-collaboration/editing": ["../packages/json-document-collaboration/src/editing-index.ts"],

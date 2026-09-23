@@ -1,5 +1,21 @@
 # Repository agent instructions
 
+## Local verification and remote workflows
+
+This is a solo-maintained project. Agents own change-scoped local verification
+before handoff: run the relevant tests, type checks, builds, and browser flows.
+Report the commands, results, and any unexecuted or failing checks separately.
+An absent remote check must not be reported as a pass.
+
+Pull requests do not automatically run full CI. Main pushes run the Pages
+build/deploy workflow; release tags retain package verification on a clean
+runner. Full CI and the extended collaboration soak are manual workflows.
+Do not wait for automatic PR checks or routinely dispatch manual CI to recreate
+the removed gate. Use remote full verification when deliberately requested.
+
+Keep product tests and verification commands available. The local workflow and
+manual commands are documented in the root README's development section.
+
 ## Canonical module principle
 
 This repository follows **the same role, the same responsibility, the same

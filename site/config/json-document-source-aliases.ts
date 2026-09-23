@@ -7,6 +7,14 @@ export interface SourceAlias {
 
 export function jsonDocumentSourceAliases(): SourceAlias[] {
   return [
+    { find: "@interactive-os/json-document-markdown", replacement: sourceFile("packages/json-document-markdown/src/index.ts") },
+    { find: "@interactive-os/json-document-markdown-web", replacement: sourceFile("packages/json-document-markdown-web/src/index.ts") },
+    { find: "@interactive-os/json-document-object-document", replacement: sourceFile("packages/json-document-object-document/src/index.ts") },
+    { find: "@interactive-os/json-document-canvas", replacement: sourceFile("packages/json-document-canvas/src/index.ts") },
+    {
+      find: "@interactive-os/json-document-calendar-document",
+      replacement: sourceFile("packages/json-document-calendar-document/src/index.ts"),
+    },
     {
       find: "@interactive-os/json-document-a2ui",
       replacement: sourceFile("packages/json-document-a2ui/src/index.ts"),
@@ -74,6 +82,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
     {
       find: "@interactive-os/json-document-database",
       replacement: sourceFile("packages/json-document-database/src/index.ts"),
+    },
+    {
+      find: "@interactive-os/json-document-annotation",
+      replacement: sourceFile("packages/json-document-annotation/src/index.ts"),
     },
     {
       find: "@interactive-os/json-document-tanstack-table",

@@ -37,6 +37,24 @@ describe("Composer React integration", () => {
     fireEvent.keyDown(screen.getByTestId("mod-keyboard"), { key: "Enter", ctrlKey: true });
     expect(modSubmit).toHaveBeenCalledTimes(1);
   });
+
+  test.each(["metaKey", "ctrlKey"] as const)("preserves Alt through the real %s history event path", (modifier) => {
+    render(<ComposerHostHarness host="history" config={hostConfig("Fast", "enter")} submit={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "history-text" }));
+    const target = screen.getByTestId("history-keyboard");
+    const draft = screen.getByTestId("history-draft");
+    const inserted = draft.textContent;
+    expect(inserted).toContain("hello");
+    expect(fireEvent.keyDown(target, { key: "z", [modifier]: true, altKey: true })).toBe(true);
+    expect(draft.textContent).toBe(inserted);
+    expect(fireEvent.keyDown(target, { key: "z", [modifier]: true })).toBe(false);
+    expect(draft.textContent).not.toContain("hello");
+    const undone = draft.textContent;
+    expect(fireEvent.keyDown(target, { key: "Z", [modifier]: true, shiftKey: true, altKey: true })).toBe(true);
+    expect(draft.textContent).toBe(undone);
+    expect(fireEvent.keyDown(target, { key: "Z", [modifier]: true, shiftKey: true })).toBe(false);
+    expect(draft.textContent).toBe(inserted);
+  });
 });
 
 function hostConfig<Model extends string>(model: Model, submit: "enter" | "mod-enter"): ComposerHostConfig<Model> {
@@ -57,7 +75,7 @@ function ComposerHostHarness<Model extends string>(props: { readonly host: strin
     ports: { createId: () => `${props.host}-${++id}`, submit: props.submit },
     labels: { mentionSuggestions: `${props.host} mentions`, skillSuggestions: `${props.host} skills` },
   });
-  return <div data-testid={`${props.host}-keyboard`} onKeyDown={composer.handleKeyDown}>
+  return <div data-testid={`${props.host}-keyboard`} onKeyDown={composer.handleKeyDown} onKeyDownCapture={composer.handleHistoryKeyDown}>
     <button aria-label={`${props.host}-text`} onClick={() => composer.insertText("hello")}>text</button>
     <output data-testid={`${props.host}-draft`}>{JSON.stringify(composer.document.value)}</output>
   </div>;

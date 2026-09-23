@@ -1,3 +1,15 @@
+// Published compatibility exports; implementations belong to Calendar Document Type.
+export {
+  calendarAllDayLayout,
+  calendarBusyDates,
+  calendarEventsInMonth,
+  calendarEventsOnDay,
+  calendarMonthDayLayout,
+  calendarMonthWeekLayout,
+  calendarNowMarker,
+  calendarTimedLayout,
+  calendarVisibleEvents,
+} from "@interactive-os/json-document-calendar-document";
 export { createDocumentEditor, documentClipboardFormat, documentSelectionFocus } from "./document.js";
 export { cutEditingClipboard } from "./clipboard.js";
 export type { EditingClipboardCut } from "./clipboard.js";
@@ -16,26 +28,21 @@ export type { GridPoint, GridRangeBounds, GridTopology, LineTopology } from "./t
 export { createDatabaseEditor, databaseClipboardFormat, nextDatabasePropertySort } from "./database.js";
 export { acceptsDatabaseValue, databaseValueFromText, defaultDatabaseValue } from "./database-property-value.js";
 export { createObjectEditor, objectClipboardFormat } from "./object.js";
+export { createCanvasClipboard, type CanvasClipboardContent, type CanvasClipboardItem, type CanvasClipboardOptions } from "./canvas-clipboard.js";
+export { createObjectPasteSession, type ObjectPasteSession, type ObjectPastePreparation } from "./object-paste-session.js";
+export { createEditingPreparationQueue, type EditingPreparationQueue, type EditingPreparation, type EditingPreparationFailure } from "./preparation-queue.js";
 export { createOrderEditor, orderClipboardFormat } from "./order.js";
 export { createEditingSession } from "./session.js";
-export { createEditingId } from "./identity.js";
+export { createEditingId, createEditingIdAllocator } from "./identity.js";
 export type { EditingHistory, EditingHistoryOptions, EditingHistoryResult, EditingHistoryStatus } from "./history.js";
 export { createSheetEditor, sheetClipboardFormat } from "./sheet.js";
 export { createTreeEditor, treeClipboardFormat } from "./tree.js";
 export { projectTreeVisibility, treeVisibilityNeighbor } from "./tree-visibility.js";
 export { createKanbanEditor } from "./kanban.js";
 export {
-  calendarAllDayLayout,
-  calendarBusyDates,
-  calendarEventsInMonth,
-  calendarEventsOnDay,
-  calendarMonthDayLayout,
-  calendarMonthWeekLayout,
-  calendarNowMarker,
   calendarOccurrenceTopology,
-  calendarTimedLayout,
-  calendarVisibleEvents,
   createCalendarEditor,
+  parseCalendarView,
   calendarClipboardFormat,
 } from "./calendar.js";
 export {
@@ -43,7 +50,7 @@ export {
   calendarRecurrenceWithInterval,
   calendarRecurrenceWithUntil,
   projectCalendarOccurrences,
-} from "./calendar-occurrence.js";
+} from "@interactive-os/json-document-calendar-document";
 export {
   calendarOccurrenceAfterIntent,
   calendarOccurrenceForInspector,
@@ -67,12 +74,12 @@ export {
   calendarShiftInstant,
   formatCalendarInstant,
   isCalendarAllDay,
-  parseCalendarView,
-} from "./calendar-validation.js";
-export { ANNOTATION_PROFILE_V1, createAnnotationEditor } from "./annotation.js";
+} from "@interactive-os/json-document-calendar-document";
+export { ANNOTATION_PROFILE_V1, annotationResizeHandle, annotationSelectorBounds, createAnnotationEditor, transformAnnotationSelector } from "./annotation.js";
 export { assertAnnotationDocument } from "./annotation-validation.js";
 export type {
   Annotation,
+  AnnotationBounds,
   AnnotationDocument,
   AnnotationEditor,
   AnnotationIntent,
@@ -80,18 +87,24 @@ export type {
   AnnotationPresentation,
   AnnotationSelection,
   AnnotationSelector,
+  AnnotationSelectorTransform,
   AnnotationSource,
 } from "./annotation.js";
 export type {
   DatabaseCell,
   DatabaseClipboard,
+  DatabaseColumnProjection,
   DatabaseDocument,
   DatabaseEditor,
   DatabaseFilter,
+  DatabaseFilterGroup,
+  DatabaseFilterOperator,
+  DatabaseGroup,
   DatabaseIntent,
   DatabasePoint,
   DatabaseProperty,
   DatabasePropertyType,
+  DatabaseProjection,
   DatabaseRange,
   DatabaseRecord,
   DatabaseSelection,
@@ -199,7 +212,7 @@ export type {
   CalendarSelectionMovePlan,
   CalendarSelectionMoveTarget,
 } from "./calendar-selection-move.js";
-export type { CalendarOccurrence } from "./calendar-occurrence.js";
+export type { CalendarOccurrence } from "@interactive-os/json-document-calendar-document";
 export type {
   CalendarAllDayHandle,
   CalendarAllDayPointerIntent,
@@ -214,3 +227,5 @@ export type {
   CalendarTimeGridPointerIntent,
   CalendarTimeGridPointerRelease,
 } from "./calendar-time-grid-pointer.js";
+export { createTextEditor, clampTextSelection, type TextEditor, type TextSelection } from "./text.js";
+export { diffText, type TextChange } from "./text-change.js";

@@ -6,6 +6,11 @@ scope whose copy text comes from the canonical Rich Text model projection.
 
 Official React renderer and `contenteditable` surface for the json-document Rich Text v1 profile.
 
+An editor's `pointer` may bind the root, a nested JSON Pointer, or its URI
+fragment form. The surface reads that snapshot through Core's `readPointer`
+without cloning the document. Escaped keys and fragment addresses retain the
+same rendering, change observation, and history behavior as ordinary pointers.
+
 `RichTextRenderer` renders canonical semantic HTML. `RichTextEditorSurface` connects that rendering to the official editor, DOM Selection, `beforeinput`, IME, Clipboard, and history integration.
 
 ```tsx

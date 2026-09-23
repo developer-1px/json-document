@@ -6,7 +6,9 @@ import composerCommandsSource from "../../../packages/json-document-composer/src
 import composerSchemaSource from "../../../packages/json-document-composer/src/schema.ts?raw";
 import composerReferenceAtomSource from "../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";
 import composerLifecycleSource from "../../../packages/json-document-composer-react/src/use-composer.tsx?raw";
+import composerAttachmentsSource from "../../../packages/json-document-composer-react/src/attachments.ts?raw";
 import composerCommandMenuSource from "../../../packages/json-document-composer-react/src/command-menu.ts?raw";
+import { discoverDemoSources } from "../../src/shared/demo-workbench/demo-sources";
 
 afterEach(cleanup);
 
@@ -17,6 +19,8 @@ describe("Agent Chat Composer Hands", () => {
     expect(composerDemoSource).toContain("useComposer(");
     expect(composerDemoSource).not.toContain("addComposerAttachments(");
     expect(composerDemoSource).not.toContain("fileCandidatesFromWebFiles(");
+    expect(composerDemoSource).not.toContain("parseWebClipboardHTML(");
+    expect(composerDemoSource).not.toContain("readWebHTMLClipboard(");
     expect(composerDemoSource).not.toContain("composerAttachmentCandidatesFromWebFiles(");
     expect(composerDemoSource).not.toContain("composer-placeholder-box");
     expect(composerDemoSource).toContain('placeholder="작업을 입력하세요"');
@@ -35,11 +39,33 @@ describe("Agent Chat Composer Hands", () => {
     expect(composerDemoSource).not.toContain('id === "skill"');
     expect(composerDemoSource).not.toContain('id === "agent"');
     expect(composerDemoSource).toContain("addActions.find((action) => action.id === id)?.run()");
-    expect(composerLifecycleSource).toContain("addComposerAttachments(");
-    expect(composerLifecycleSource).toContain("fileCandidatesFromWebFiles(");
+    expect(composerLifecycleSource).toContain("useComposerAttachments(");
+    expect(composerAttachmentsSource).toContain("addComposerAttachments(");
+    expect(composerAttachmentsSource).toContain("fileCandidatesFromWebFiles(");
+    expect(composerAttachmentsSource).toContain("readWebRasterFiles(");
+    expect(composerAttachmentsSource).toContain("readWebHTMLClipboard(");
+    expect(composerAttachmentsSource).toContain("createEditingPreparationQueue<");
     expect(composerCommandMenuSource).toContain("useRichTextSuggestion(");
     expect(composerCommandMenuSource).toContain("useRichTextMentionSuggestions(");
     expect(composerLifecycleSource).toContain("<ComposerReferenceAtom");
+  });
+
+  test("exposes the attachment preparation owners with API references in Source", async () => {
+    const sources = await discoverDemoSources("routes/composer-demo/ComposerDemoRoute.tsx");
+    for (const path of [
+      "packages/json-document-composer-react/src/attachments.ts",
+      "packages/json-document-composer/src/commands.ts",
+      "packages/json-document-file-intake/src/raster-content.ts",
+      "packages/json-document-web/src/raster-files.ts",
+      "packages/json-document-web/src/html-clipboard.ts",
+      "packages/json-document-web/src/html-fragment.ts",
+      "packages/json-document-editing/src/preparation-queue.ts",
+    ]) {
+      const source = sources.find((entry) => entry.path === path);
+      expect(source, path).toBeDefined();
+      expect(source?.referencePath).toMatch(/^\/docs\/api\//);
+      expect(await source?.load()).toBeTruthy();
+    }
   });
 
   test("delegates file intake and mention responsibilities to their canonical owners", () => {
@@ -71,6 +97,9 @@ describe("Agent Chat Composer Hands", () => {
     expect(screen.getByTestId("composer-draft-json").textContent).toContain("요구사항.md");
     expect(screen.getByRole("button", { name: "전송 (Enter)" }).hasAttribute("disabled")).toBe(false);
 
+    const draftBefore = screen.getByTestId("composer-draft-json").textContent;
+    expect(fireEvent.keyDown(screen.getByTestId("agent-chat-composer"), { key: "z", metaKey: true, altKey: true })).toBe(true);
+    expect(screen.getByTestId("composer-draft-json").textContent).toBe(draftBefore);
     fireEvent.keyDown(screen.getByTestId("agent-chat-composer"), { key: "z", metaKey: true });
     expect(screen.queryByText("요구사항.md")).toBeNull();
     fireEvent.keyDown(screen.getByTestId("agent-chat-composer"), { key: "z", metaKey: true, shiftKey: true });
@@ -84,7 +113,7 @@ describe("Agent Chat Composer Hands", () => {
   test("opens the Cstar-shaped add and model layers from real controls", () => {
     render(<ComposerDemoRoute />);
     fireEvent.click(screen.getByRole("button", { name: "추가" }));
-    expect(screen.getByRole("menuitem", { name: /파일 업로드/ })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: /파일 첨부/ })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: /스킬/ })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: /에이전트/ })).toBeTruthy();
 
@@ -93,6 +122,17 @@ describe("Agent Chat Composer Hands", () => {
     expect(screen.getByRole("option", { name: /GPT-5.6/ })).toBeTruthy();
     expect(screen.getByRole("option", { name: /Claude Sonnet/ })).toBeTruthy();
     expect(screen.queryByText(/HCX/)).toBeNull();
+  });
+
+  test("shows mixed HTML as unsupported without silently dropping part of the draft", async () => {
+    render(<ComposerDemoRoute />);
+    const before = screen.getByTestId("composer-draft-json").textContent;
+    fireEvent.paste(screen.getByLabelText("Agent Chat Composer"), { clipboardData: {
+      types: ["text/html", "text/plain"], files: [],
+      getData: (type: string) => type === "text/html" ? '<p>보존할 글</p><img src="data:image/png;base64,AQID">' : "보존할 글",
+    } });
+    expect(await screen.findByText("글과 이미지가 함께 있는 HTML 붙여넣기는 아직 지원하지 않습니다. 내용을 나누어 붙여넣어 주세요.")).toBeTruthy();
+    expect(screen.getByTestId("composer-draft-json").textContent).toBe(before);
   });
 
   test("routes dropped files through the same canonical attachment context", () => {

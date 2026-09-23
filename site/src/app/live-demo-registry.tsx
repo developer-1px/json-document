@@ -28,6 +28,7 @@ const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
   "/demo/ui-primitives": demo(() => import("../routes/ui-primitives-catalog/UiPrimitivesCatalogRoute"), "UiPrimitivesCatalogRoute", "routes/ui-primitives-catalog/UiPrimitivesCatalogRoute.tsx"),
   "/demo/animation": demo(() => import("../routes/animation-demo/AnimationDemoRoute"), "AnimationDemoRoute", "routes/animation-demo/AnimationDemoRoute.tsx"),
   "/demo/markdown": demo(() => import("../routes/markdown-demo/MarkdownDemoRoute"), "MarkdownDemoRoute", "routes/markdown-demo/MarkdownDemoRoute.tsx"),
+  "/demo/markdown-caret": demo(() => import("../routes/markdown-caret/MarkdownCaretRoute"), "MarkdownCaretRoute", "routes/markdown-caret/MarkdownCaretRoute.tsx"),
   "/demo/database": demo(() => import("../routes/database-demo/DatabaseDemoRoute"), "DatabaseDemoRoute", "routes/database-demo/DatabaseDemoRoute.tsx"),
   "/demo/composer": demo(() => import("../routes/composer-demo/ComposerDemoRoute"), "ComposerDemoRoute", "routes/composer-demo/ComposerDemoRoute.tsx"),
   "/demo/annotation": demo(() => import("../routes/annotation-demo/AnnotationDemoRoute"), "AnnotationDemoRoute", "routes/annotation-demo/AnnotationDemoRoute.tsx"),

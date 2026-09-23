@@ -12,14 +12,14 @@ export type BreadcrumbCrumb = {
 const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
 
 const groupLandings: Record<SiteNavigationGroup, BreadcrumbCrumb> = {
-  Introduction: { path: "/docs", label: "Introduce" },
-  "JSON Document": { path: "/docs/foundation", label: "JSON Document" },
+  Introduction: { path: "/docs", label: "Introduction" },
+  "JSON Document": { path: "/docs/api", label: "JSON Document" },
   "Document Types": { path: "/docs/document-types", label: "Document Types" },
-  Editing: { path: "/docs/intent-guide", label: "Editing" },
+  Editing: { path: "/docs/editing", label: "Editing" },
   Collaboration: { path: "/docs/collaboration", label: "Collaboration" },
-  Adapter: { path: "/docs/adapters", label: "Platform Adapters" },
-  Connector: { path: "/docs/connectors", label: "Ecosystem Connectors" },
-  Affordance: { path: "/docs/affordance", label: "Affordances" },
+  Adapter: { path: "/docs/adapters", label: "Adapter" },
+  Connector: { path: "/docs/connectors", label: "Connector" },
+  Affordance: { path: "/docs/affordance", label: "Affordance" },
   "UI Primitives": { path: "/docs/ui-primitives", label: "UI Primitives" },
   Hands: { path: "/editors", label: "Hands" },
   Artifact: { path: "/viewer", label: "Artifact" },
@@ -42,7 +42,7 @@ export function breadcrumbTrail(
       : undefined;
   }
 
-  const directSection = siteSections.find((section) => section.path === route.path && section.groups.length === 0);
+  const directSection = siteSections.find((section) => section.path === route.path);
   const group = routeGroup(route, routes);
   if (directSection) {
     stack[0] = { path: directSection.path, label: directSection.label };

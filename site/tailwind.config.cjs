@@ -3,6 +3,7 @@ module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{ts,tsx}",
+    "../packages/json-document-canvas/src/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {

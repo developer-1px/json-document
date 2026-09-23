@@ -32,8 +32,10 @@ test("Zod Connector Live Demo opens a Database workspace from a Zod schema witho
   await page.getByRole("button", { name: "Delete selected" }).click();
   await expect(page.locator("tr[data-record-id='t4']")).toHaveCount(0);
 
+  await page.getByLabel("Filter").click();
+  await page.getByRole("button", { name: "Add filter" }).click();
   await page.getByRole("combobox", { name: "Filter property" }).selectOption("status");
-  await page.getByRole("combobox", { name: "Filter value" }).selectOption("backlog");
+  await page.getByRole("textbox", { name: "Filter value" }).fill("backlog");
   await expect(page.locator("tr[data-record-id]")).toHaveCount(1);
   expect(errors).toEqual([]);
 });

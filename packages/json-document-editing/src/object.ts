@@ -1,6 +1,4 @@
 import {
-  buildPointer,
-  type JSONPatchOperation,
   type JSONValue,
 } from "@interactive-os/json-document";
 import {
@@ -14,24 +12,14 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { createEditingId } from "./identity.js";
+import { createEditingId, createEditingIdAllocator } from "./identity.js";
 import type { EditingHistoryOptions } from "./history.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
-import { assertObjectDocument } from "./object-validation.js";
-
-export interface DocumentObject extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly label: string;
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-  readonly color: string;
-}
-
-export interface ObjectDocument extends Record<string, JSONValue> {
-  readonly objects: ReadonlyArray<DocumentObject>;
-}
+import {
+  assertObjectDocument, planObjectOperation, transformObject,
+  type DocumentObject, type ObjectDocument, type ObjectDraft, type ObjectOperation, type ObjectStyle,
+} from "@interactive-os/json-document-object-document";
+export type { DocumentObject, ObjectDocument } from "@interactive-os/json-document-object-document";
 
 export interface ObjectSelection extends Record<string, JSONValue> {
   readonly kind: "explicit";
@@ -41,42 +29,48 @@ export interface ObjectSelection extends Record<string, JSONValue> {
 
 export type ObjectSelectionMode = "replace" | "extend" | "add" | "subtract" | "toggle";
 
-export interface ObjectClipboard extends Record<string, JSONValue> {
+export type ObjectClipboard = Record<string, JSONValue> & {
   readonly type: "application/vnd.interactive-os.objects+json";
   readonly objects: ReadonlyArray<DocumentObject>;
   readonly text: string;
-}
+  /** Optional for legacy payloads; remapped to the corresponding new ID on paste. */
+  readonly primaryKey?: string | null;
+};
 
 export const objectClipboardFormat = {
   mimeType: "application/vnd.interactive-os.objects+json" as const,
   parse(value: unknown): ObjectClipboard | null {
-    return isClipboardRecord(value)
-      && value.type === this.mimeType
-      && typeof value.text === "string"
-      && Array.isArray(value.objects)
-      && value.objects.every((item) => isClipboardRecord(item)
-        && typeof item.id === "string" && typeof item.label === "string"
-        && typeof item.x === "number" && typeof item.y === "number"
-        && typeof item.width === "number" && typeof item.height === "number"
-        && typeof item.color === "string")
-      ? value as ObjectClipboard : null;
+    if (!isClipboardRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
+    if (!Array.isArray(value.objects) || value.objects.some((object) => !isClipboardRecord(object) || typeof object.color !== "string")) return null;
+    try {
+      assertObjectDocument(value);
+      if (value.primaryKey !== undefined && value.primaryKey !== null && !value.objects.some((object) => object.id === value.primaryKey)) return null;
+      return value as ObjectClipboard;
+    } catch { return null; }
   },
 };
 
 export interface ObjectPastePlacement {
-  readonly type: "offset";
+  readonly type: "offset" | "cascade";
   readonly dx: number;
   readonly dy: number;
 }
 
 export type ObjectIntent =
+  | { readonly type: "object.create"; readonly object: ObjectDraft }
+  | { readonly type: "object.duplicate"; readonly objectIds: ReadonlyArray<string>; readonly placement?: ObjectPastePlacement }
+  | { readonly type: "object.remove"; readonly objectIds: ReadonlyArray<string> }
+  | { readonly type: "object.text"; readonly objectId: string; readonly text: string }
+  | { readonly type: "document.replace"; readonly document: ObjectDocument }
   | {
       readonly type: "selection.set";
       readonly objectIds: ReadonlyArray<string>;
       readonly mode?: ObjectSelectionMode;
+      readonly primaryKey?: string;
     }
   | { readonly type: "selection.remove" }
   | { readonly type: "selection.fill"; readonly color: string }
+  | { readonly type: "selection.style"; readonly style: Partial<ObjectStyle> }
   | {
       readonly type: "object.translate";
       readonly objectIds: ReadonlyArray<string>;
@@ -147,6 +141,21 @@ export function createObjectEditor(
   }
 
   function dispatch(intent: ObjectIntent): EditingResult<ObjectSelection> {
+    if (intent.type === "object.create") {
+      const allocate = createEditingIdAllocator(value().objects.map((object) => object.id), createId, "object");
+      let id: string;
+      try { id = allocate(); } catch (error) { return { ok: false, code: "object.identity-unavailable", reason: error instanceof Error ? error.message : String(error) }; }
+      const object = { ...intent.object, id };
+      return apply({ type: "insert", objects: [object] }, selectionFor([object.id]), intent.type);
+    }
+    if (intent.type === "object.text") {
+      return apply({ type: "text", objectId: intent.objectId, text: intent.text }, selectionForTargets([intent.objectId]), intent.type);
+    }
+    if (intent.type === "document.replace") {
+      // A profile-specific session cannot silently become another document type.
+      if (value().profile !== intent.document?.profile) return failure("object.profile-mismatch");
+      return apply({ type: "replace", document: intent.document }, selectionFor([]), intent.type);
+    }
     if (intent.type === "selection.set") {
       const available = new Set(value().objects.map((object) => object.id));
       if (intent.objectIds.some((id) => !available.has(id))) {
@@ -156,95 +165,91 @@ export function createObjectEditor(
         type: intent.mode === "extend" ? "add" : intent.mode ?? "replace",
         keys: intent.objectIds,
       };
-      const selection = selectionFamily.transition(
+      const context = selectionContext();
+      let selection = selectionFamily.transition(
         session.snapshot.selection,
         command,
-        selectionContext(),
+        context,
       ).state;
+      if (intent.primaryKey !== undefined) {
+        if (!selectionFamily.targets(selection, context).includes(intent.primaryKey)) return failure("selection.primary-not-selected");
+        selection = selectionFamily.transition(selection, { type: "set-primary", key: intent.primaryKey }, context).state;
+      }
       return success(session.select(selectionFor(
-        selectionFamily.targets(selection, selectionContext()),
+        selectionFamily.targets(selection, context),
         selection.primaryKey,
       )));
     }
 
     if (intent.type === "object.translate") {
-      const objects = value().objects;
-      const moving = new Set(intent.objectIds);
-      if (intent.objectIds.some((id) => !objects.some((object) => object.id === id))) {
-        return failure("selection.object-not-found");
-      }
-      return session.apply({
-        operations: objects.flatMap((object, index) => {
-          if (!moving.has(object.id)) return [];
-          return [
-            { op: "replace", path: buildPointer(["objects", index, "x"]), value: object.x + intent.dx },
-            { op: "replace", path: buildPointer(["objects", index, "y"]), value: object.y + intent.dy },
-          ];
-        }),
-        selectionAfter: selectionFor(intent.objectIds),
-        origin: intent.type,
-      });
+      return apply({ type: "transform", objectIds: intent.objectIds, transform: { dx: intent.dx, dy: intent.dy } }, selectionForTargets(intent.objectIds), intent.type);
     }
 
     if (intent.type === "object.resize") {
-      const objects = value().objects;
-      const resizing = new Set(intent.objectIds);
-      if (intent.objectIds.some((id) => !objects.some((object) => object.id === id))) {
-        return failure("selection.object-not-found");
-      }
-      return session.apply({
-        operations: objects.flatMap((object, index) => {
-          if (!resizing.has(object.id)) return [];
-          const width = Math.max(1, object.width + intent.dw);
-          const height = Math.max(1, object.height + intent.dh);
-          return [
-            { op: "replace", path: buildPointer(["objects", index, "x"]), value: object.x + intent.dx },
-            { op: "replace", path: buildPointer(["objects", index, "y"]), value: object.y + intent.dy },
-            { op: "replace", path: buildPointer(["objects", index, "width"]), value: width },
-            { op: "replace", path: buildPointer(["objects", index, "height"]), value: height },
-          ];
-        }),
-        selectionAfter: selectionFor(intent.objectIds),
-        origin: intent.type,
-      });
+      return apply({ type: "transform", objectIds: intent.objectIds, transform: { dx: intent.dx, dy: intent.dy, dw: intent.dw, dh: intent.dh } }, selectionForTargets(intent.objectIds), intent.type);
+    }
+
+    if (intent.type === "object.remove") return removeSelected(intent.objectIds, intent.type);
+
+    if (intent.type === "object.duplicate") {
+      const ids = new Set(intent.objectIds);
+      const source = value().objects.filter((object) => ids.has(object.id));
+      if (source.length !== ids.size) return failure("selection.object-not-found");
+      if (source.length === 0) return failure("selection.empty");
+      return insertCopies(source, session.snapshot.selection.primaryKey, intent.placement ?? { type: "offset", dx: 24, dy: 24 }, intent.type);
     }
 
     if (intent.type === "clipboard.paste") {
-      const objects = value().objects;
-      const pasted = cloneObjectsWithUniqueIds(intent.clipboard.objects, objects, createId).map((object) => ({
-        ...object,
-        x: object.x + (intent.placement?.dx ?? 0),
-        y: object.y + (intent.placement?.dy ?? 0),
-      }));
-      if (pasted.length === 0) return failure("clipboard.empty");
-      return session.apply({
-        operations: pasted.map((object, offset) => ({
-          op: "add",
-          path: `/objects/${objects.length + offset}`,
-          value: object,
-        })),
-        selectionAfter: selectionFor(pasted.map((object) => object.id)),
-        origin: intent.type,
-      });
+      if (!objectClipboardFormat.parse(intent.clipboard)) return failure("clipboard.invalid");
+      if (intent.clipboard.objects.length === 0) return failure("clipboard.empty");
+      return insertCopies(intent.clipboard.objects, intent.clipboard.primaryKey ?? null, intent.placement, intent.type);
     }
 
     const selected = selectedObjects();
     if (selected.length === 0) return failure("selection.empty");
     if (intent.type === "selection.fill") {
-      const objects = value().objects;
-      const operations: JSONPatchOperation[] = selected.map((object) => ({
-        op: "replace",
-        path: buildPointer(["objects", objects.findIndex((candidate) => candidate.id === object.id), "color"]),
-        value: intent.color,
-      }));
-      return session.apply({
-        operations,
-        selectionAfter: session.snapshot.selection,
-        origin: intent.type,
-      });
+      return apply({ type: "fill", objectIds: selected.map((object) => object.id), color: intent.color }, session.snapshot.selection, intent.type);
+    }
+    if (intent.type === "selection.style") {
+      return apply({ type: "style", objectIds: selected.map((object) => object.id), style: intent.style }, session.snapshot.selection, intent.type);
     }
 
-    return removeSelected(selected.map((object) => object.id));
+    return intent.type === "selection.remove" ? removeSelected(selected.map((object) => object.id)) : failure("object.unsupported-intent");
+  }
+
+  function selectionForTargets(ids: readonly string[]): ObjectSelection {
+    const selection = session.snapshot.selection;
+    const selected = new Set(selection.keys);
+    return ids.length > 0 && ids.every((id) => selected.has(id)) ? selection : selectionFor(ids);
+  }
+
+  function insertCopies(source: readonly DocumentObject[], primaryKey: string | null, placement: ObjectPastePlacement | undefined, origin: string): EditingResult<ObjectSelection> {
+    let dx = placement?.dx ?? 0, dy = placement?.dy ?? 0;
+    if (![dx, dy].every(Number.isFinite)) return failure("object.invalid");
+    if (placement?.type === "cascade") {
+      if (dx === 0 && dy === 0) return failure("object.invalid");
+      const occupied = new Set(value().objects.map((object) => `${object.x}:${object.y}`));
+      const anchor = source[0]!;
+      let step = 1;
+      while (occupied.has(`${anchor.x + dx}:${anchor.y + dy}`)) {
+        if (++step > occupied.size + 1) return failure("object.invalid");
+        dx = placement.dx * step; dy = placement.dy * step;
+      }
+    }
+    if (source.some((object) => !Number.isFinite(object.x + dx) || !Number.isFinite(object.y + dy))) return failure("object.invalid");
+    let copies: DocumentObject[];
+    try {
+      copies = cloneObjectsWithUniqueIds(source, value().objects, createId).map((object) => transformObject(object, { dx, dy }));
+    } catch (error) {
+      return { ok: false, code: "object.identity-unavailable", reason: error instanceof Error ? error.message : String(error) };
+    }
+    const primary = copies[source.findIndex((object) => object.id === primaryKey)]?.id ?? copies.at(-1)!.id;
+    return apply({ type: "insert", objects: copies }, selectionFor(copies.map((object) => object.id), primary), origin);
+  }
+
+  function apply(operation: ObjectOperation, selectionAfter: ObjectSelection, origin: string): EditingResult<ObjectSelection> {
+    const plan = planObjectOperation(value(), operation);
+    return plan.ok ? session.apply({ operations: plan.operations, selectionAfter, origin }) : plan;
   }
 
   function copy(): ObjectClipboard | null {
@@ -254,13 +259,15 @@ export function createObjectEditor(
       type: "application/vnd.interactive-os.objects+json",
       objects,
       text: objects.map((object) => object.label).join("\n"),
+      primaryKey: session.snapshot.selection.primaryKey,
     };
   }
 
-  function removeSelected(ids: ReadonlyArray<string>): EditingResult<ObjectSelection> {
+  function removeSelected(ids: ReadonlyArray<string>, origin = "selection.remove"): EditingResult<ObjectSelection> {
     const objects = value().objects;
     if (ids.length === 0) return failure("selection.empty");
     const selectedIds = new Set(ids);
+    if (ids.some((id) => !objects.some((object) => object.id === id))) return failure("selection.object-not-found");
     const indices = objects
       .map((object, index) => selectedIds.has(object.id) ? index : -1)
       .filter((index) => index >= 0)
@@ -268,11 +275,7 @@ export function createObjectEditor(
     const remaining = objects.filter((object) => !selectedIds.has(object.id));
     const firstRemoved = Math.min(...indices);
     const next = remaining[Math.min(firstRemoved, remaining.length - 1)];
-    return session.apply({
-      operations: indices.map((index) => ({ op: "remove", path: buildPointer(["objects", index]) })),
-      selectionAfter: selectionFor(next ? [next.id] : []),
-      origin: "selection.remove",
-    });
+    return apply({ type: "remove", objectIds: [...selectedIds] }, selectionFor(next ? [next.id] : []), origin);
   }
 
   return {
@@ -280,20 +283,11 @@ export function createObjectEditor(
     get selectedObjects() { return selectedObjects(); },
     dispatch,
     copy,
-    cut: () => cutEditingClipboard(copy, () => removeSelected(selectedObjects().map((object) => object.id))),
+    cut: () => cutEditingClipboard(copy, (clipboard) => removeSelected(clipboard.objects.map((object) => object.id))),
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),
   };
-}
-
-function createUniqueId(objects: ReadonlyArray<DocumentObject>, createId: () => string): string {
-  const existing = new Set(objects.map((object) => object.id));
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    const id = createId();
-    if (!existing.has(id)) return id;
-  }
-  throw new Error("createId did not produce a unique object id");
 }
 
 function cloneObjectsWithUniqueIds(
@@ -301,12 +295,8 @@ function cloneObjectsWithUniqueIds(
   existing: ReadonlyArray<DocumentObject>,
   createId: () => string,
 ): DocumentObject[] {
-  const occupied = [...existing];
-  return source.map((object) => {
-    const copy = { ...object, id: createUniqueId(occupied, createId) };
-    occupied.push(copy);
-    return copy;
-  });
+  const allocateId = createEditingIdAllocator([...existing, ...source].map((object) => object.id), createId, "object");
+  return source.map((object) => ({ ...object, id: allocateId() }));
 }
 
 function selectionFor(

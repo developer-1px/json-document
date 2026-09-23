@@ -123,8 +123,8 @@ try {
   if (packageJson.dependencies !== undefined) {
     throw new Error("The v3 kernel must not publish runtime dependencies.");
   }
-  if (rootValueExports.length !== 10 || rootTypeExports.length !== 13) {
-    throw new Error("The root contract must contain exactly 10 values and 13 types.");
+  if (rootValueExports.length !== 12 || rootTypeExports.length !== 13) {
+    throw new Error("The root contract must contain exactly 12 values and 13 types.");
   }
 
   const packResult = JSON.parse(run(

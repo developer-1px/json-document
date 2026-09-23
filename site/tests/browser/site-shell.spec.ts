@@ -30,15 +30,15 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("y mandatory");
   await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
-  await navigation.getByRole("button", { name: "Introduce" }).click();
-  await expect(navigation.getByRole("group", { name: "Introduce" }).getByRole("link")).toHaveText([
+  await navigation.getByRole("button", { name: "Introduction" }).click();
+  await expect(navigation.getByRole("group", { name: "Introduction" }).getByRole("link")).toHaveText([
     "Why",
     "Concept Map",
     "How We Build",
   ]);
   await navigation.getByRole("button", { name: "Foundation" }).click();
   await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
-  await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: "Overview", exact: true })).toBeVisible();
+  await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: "Overview", exact: true }).first()).toBeVisible();
   await navigation.getByRole("button", { name: "Building Blocks" }).click();
   await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Hands" }).click();
@@ -54,7 +54,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await navigation.getByRole("button", { name: "Artifact" }).click();
   await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText([
-    "Document · Presentation · Spreadsheet",
+    "Content Prototype · TBD",
   ]);
   await navigation.getByRole("button", { name: "Applications" }).click();
   await expect(navigation.getByRole("group", { name: "Applications" }).getByRole("link")).toHaveText([
@@ -62,9 +62,9 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Calendar",
     "AI Agent",
   ]);
-  await expect(navigation.getByRole("link", { name: "Reference", exact: true })).toHaveAttribute("href", "/docs/api");
+  await expect(navigation.getByRole("link", { name: "JSON Document Protocol", exact: true })).toHaveAttribute("href", "/docs/api");
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
-    "Introduce",
+    "Introduction",
     "Foundation",
     "Building Blocks",
     "Hands",
@@ -83,7 +83,7 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(page.locator("[data-home-scene]")).toHaveCount(5);
 
   const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(siteNavigation.getByRole("group", { name: "Introduce" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Introduction" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Foundation" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Hands" })).toBeVisible();
@@ -126,29 +126,33 @@ test("Document Types publishes a TBD responsibility boundary", async ({ page }) 
   await expect(page).toHaveTitle("Document Types · TBD - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "Document Types · TBD" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "책임", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "후보 · TBD" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "현재 소유자와 후보" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "Foundation" })).toHaveAttribute("href", "/docs/foundation");
   await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByText("Overview · TBD")).toBeVisible();
 });
 
-test("Document Type candidate submenu keeps ownership explicitly TBD", async ({ page }) => {
+test("Calendar Document Type exposes its RC owner while unrelated candidates remain TBD", async ({ page }) => {
   await page.goto("/docs/document-types/calendar");
 
-  await expect(page).toHaveTitle("Calendar Document Type · TBD - json-document");
-  await expect(page.getByRole("heading", { level: 1, name: "Calendar Document Type · TBD" })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "확정에 필요한 증거" })).toBeVisible();
+  await expect(page).toHaveTitle("Calendar Document Type · RC - json-document");
+  await expect(page.getByRole("heading", { level: 1, name: "Calendar Document Type · RC" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "확정 증거와 남은 범위" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "소스 기반 감사 현황" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "왜 필요한가" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "무엇을 하는가" })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "현재 관찰된 schema · TBD" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "현재 RC 모델" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 3, name: "필드 설명" })).toBeVisible();
   await expect(page.getByRole("cell", { name: "start / end / allDay", exact: true })).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "On this page" }).getByRole("link", { name: "현재 관찰된 schema · TBD" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "On this page" }).getByRole("link", { name: "현재 RC 모델" })).toBeVisible();
   await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await expect(page.getByText("packages/json-document-editing/src/calendar.ts", { exact: true })).toBeVisible();
-  await expect(page.getByText("10개 책임 occurrence", { exact: false })).toBeVisible();
-  await expect(page.getByRole("cell", { name: "mislocated module", exact: true }).first()).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "Calendar · TBD" })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByText("packages/json-document-calendar-document/src/calendar-model.ts", { exact: true })).toBeVisible();
+  await expect(page.getByText("12개 책임 occurrence", { exact: false })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "mislocated module", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "Calendar · RC" })).toHaveAttribute("aria-current", "page");
+  await page.getByRole("link", { name: "소유자 API 계약", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Calendar Document Type 계약 · RC", exact: true })).toBeVisible();
+  await page.goto("/docs/document-types/sheet");
+  await expect(page.getByRole("heading", { level: 1, name: "Sheet Document Type · TBD" })).toBeVisible();
 });
 
 test("official docs routes render with route metadata in a real browser", async ({ page }) => {
@@ -162,16 +166,17 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("heading", { level: 3, name: "값을 다루는 하나의 계약" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Introduce" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
+  await expect(siteNavigation.getByRole("group", { name: "Introduction" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
   await siteNavigation.getByRole("button", { name: "Building Blocks" }).click();
-  await siteNavigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Overview", exact: true }).nth(1).click();
+  await siteNavigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Overview", exact: true }).nth(2).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(0);
 
-  await siteNavigation.getByRole("link", { name: "Reference", exact: true }).click();
-  await expect(page).toHaveTitle("json-document API - json-document");
-  await expect(page.getByRole("heading", { level: 1, name: "json-document API" })).toBeVisible();
+  await siteNavigation.getByRole("button", { name: "Foundation" }).click();
+  await siteNavigation.getByRole("link", { name: "JSON Document Protocol", exact: true }).click();
+  await expect(page).toHaveTitle("JSON Document Protocol - json-document");
+  await expect(page.getByRole("heading", { level: 1, name: "JSON Document Protocol" })).toBeVisible();
 });
 
 test("Editing docs and API demos keep one Korean reading flow", async ({ page }) => {
@@ -545,21 +550,26 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   const selectedCell = page.locator('[role="gridcell"][data-selected="true"]').first();
   expect(await selectedCell.evaluate((element) => ({
     backgroundColor: getComputedStyle(element).backgroundColor,
-    borderColor: getComputedStyle(element).borderColor,
+    borderLeftWidth: getComputedStyle(element).borderLeftWidth,
+    borderRightWidth: getComputedStyle(element).borderRightWidth,
+    boxShadow: getComputedStyle(element).boxShadow,
   }))).toEqual({
     backgroundColor: "rgb(255, 255, 255)",
     borderColor: "rgb(229, 231, 235) rgb(229, 231, 235) rgb(216, 209, 197)",
   });
+  await selectedCell.focus();
+  await expect.poll(() => selectedCell.evaluate((element) => getComputedStyle(element).boxShadow))
+    .toBe("rgb(222, 109, 85) 0px 0px 0px 2px inset");
   expect(await page.getByRole("combobox").first().evaluate(controlSnapshot)).toMatchObject({
-    backgroundColor: "rgb(255, 255, 255)",
-    borderColor: "rgb(216, 209, 197)",
+    backgroundColor: "rgba(0, 0, 0, 0)",
+    boxShadow: "none",
   });
 });
 
 test("official site uses window scroll with sticky desktop navigation", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto("/docs/api");
-  await expect(page.getByRole("heading", { level: 1, name: "json-document API" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "JSON Document Protocol" })).toBeVisible();
 
   await page.evaluate(() => window.scrollTo(0, 1200));
 

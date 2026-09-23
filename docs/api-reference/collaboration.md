@@ -1,8 +1,8 @@
 # @interactive-os/json-document-collaboration API
 
-**Owner:** Collaboration
+**탐색 분류:** Collaboration
 
-replica, history, text collaboration runtime의 public entrypoint입니다. 아래 항목은 package root에서 import할 수 있는 안정된 public API이며 internal 경로는 계약이 아닙니다.
+replica, history, text collaboration runtime의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 사이트에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
 
 > 이 문서는 `packages/json-document-collaboration/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
@@ -503,6 +503,181 @@ interface HistoryStatus {
 
 ```ts
 restoreHistoryRuntime(input: unknown, options: CollaborationRestoreOptions): HistoryRestoreResult
+```
+## `@interactive-os/json-document-collaboration/text`
+
+아래 API는 package root가 아닌 이 subpath에서 import합니다.
+### `createTextRuntime`
+
+```ts
+createTextRuntime(initial: unknown, options: CollaborationRuntimeOptions): TextRuntime
+```
+### `History`
+
+```ts
+interface History {
+  status(): HistoryStatus;
+  canUndo(): JSONPatchValidationResult;
+  undo(): HistoryResult;
+  canRedo(): JSONPatchValidationResult;
+  redo(): HistoryResult;
+}
+```
+### `HistoryResult`
+
+```ts
+type HistoryResult =
+  | {
+      readonly ok: true;
+      readonly changeId: ChangeId;
+      readonly target: ChangeId;
+      readonly didChangeDocument: boolean;
+      /** This operation's applied change; null when it only changes causal history. */
+      readonly change: JSONAppliedChange | null;
+      /** Captured before subscribers can author a later transition. */
+      readonly status: HistoryStatus & {
+        readonly canUndo: boolean;
+        readonly canRedo: boolean;
+      };
+    }
+  | {
+      readonly ok: false;
+      readonly code: string;
+      readonly reason?: string;
+    };
+```
+### `HistoryStatus`
+
+```ts
+interface HistoryStatus {
+  readonly undoTarget: ChangeId | null;
+  readonly redoTarget: ChangeId | null;
+  readonly undoDepth: number;
+  readonly redoDepth: number;
+  readonly revision: number;
+}
+```
+### `restoreTextRuntime`
+
+```ts
+restoreTextRuntime(input: unknown, options: CollaborationRestoreOptions): TextRestoreResult
+```
+### `Text`
+
+```ts
+interface Text {
+  capture(pointer: string): TextCaptureResult;
+  plan(
+    capture: TextCapture,
+    observation: TextObservation,
+  ): TextPlanResult;
+  commit(
+    plan: TextPlan,
+    options?: JSONDocumentCommitOptions,
+  ): TextCommitResult;
+}
+```
+### `TextCapture`
+
+```ts
+interface TextCapture {
+  readonly pointer: string;
+  readonly target: MemberId;
+  readonly textNode: TextNodeId;
+  readonly value: string;
+}
+```
+### `TextCaptureResult`
+
+```ts
+type TextCaptureResult =
+  | {
+      readonly ok: true;
+      readonly capture: TextCapture;
+    }
+  | {
+      readonly ok: false;
+      readonly code: string;
+      readonly reason: string;
+    };
+```
+### `TextCommitResult`
+
+```ts
+type TextCommitResult =
+  | {
+      readonly ok: true;
+      readonly change: JSONAppliedChange;
+      readonly changeId: ChangeId | null;
+      readonly didChangeDocument: boolean;
+      readonly value: string;
+      readonly selection: TextSelection | null;
+    }
+  | {
+      readonly ok: false;
+      readonly code: string;
+      readonly reason: string;
+    };
+```
+### `TextObservation`
+
+```ts
+interface TextObservation {
+  readonly value: string;
+  readonly selection?: TextSelection;
+}
+```
+### `TextPlan`
+
+```ts
+interface TextPlan {
+  readonly pointer: string;
+  readonly value: string;
+  readonly selection?: TextSelection;
+}
+```
+### `TextPlanResult`
+
+```ts
+type TextPlanResult =
+  | {
+      readonly ok: true;
+      readonly plan: TextPlan;
+    }
+  | {
+      readonly ok: false;
+      readonly code: string;
+      readonly reason: string;
+    };
+```
+### `TextRestoreResult`
+
+```ts
+type TextRestoreResult =
+  | {
+      readonly ok: true;
+      readonly runtime: TextRuntime;
+    }
+  | {
+      readonly ok: false;
+      readonly code: string;
+      readonly reason: string;
+    };
+```
+### `TextRuntime`
+
+```ts
+interface TextRuntime extends HistoryRuntime {
+  readonly text: Text;
+}
+```
+### `TextSelection`
+
+```ts
+interface TextSelection {
+  readonly anchor: number;
+  readonly focus: number;
+}
 ```
 ## `@interactive-os/json-document-collaboration/editing`
 

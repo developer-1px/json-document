@@ -1,163 +1,114 @@
 # Concept Map
 
-이 사이트의 권장 읽기 순서와 package 의존 방향은 같은 것이 아닙니다.
-먼저 Core를 배우고 실제 편집 경험까지 읽어 가지만, 필요한 책임은 아래처럼
-Core 주위에 선택적으로 붙습니다.
-
-```txt
-                         ┌─ Editing ─ Selection · Intent · History
-local JSON Document ─────┤
-                         ├─ Document Types ─ profile · model · schema · operations
-                         ├─ Adapter ─ platform contract
-collaborative Document ──┤
-                         ├─ Connector ─ named ecosystem
-                         └─ optional domain / UI composition
-
-Affordance ─ input grammar ─┐
-UI Primitives ─ standard UI ├─ Host가 장르별 Hands를 조합
-Rich Text 등 domain ────────┘
-
-Hands를 surface에 조합한 결과가 사람이 다루는 Artifact가 됩니다. Artifact는
-navigation이나 workflow를 소유하지 않는 콘텐츠입니다. Application은 Artifact와
-다른 콘텐츠를 runtime과 제품 정책에 놓아 실제 제품 경험으로 제공합니다.
-```
-
-이 그림의 선은 허용된 의존·조합 방향입니다. 모든 노드를 순서대로 설치하라는
-뜻이 아닙니다. Adapter와 Connector는 서로의 선행 계층이 아니며, 각각 플랫폼과
-외부 라이브러리가 필요할 때 고릅니다. Collaboration은 다음 계층이 아니라
-같은 `JSONDocument` 계약의 다른 구현입니다.
-
-권장 읽기 순서는 `Foundation → Building Blocks → Hands → Artifact → Application`입니다.
-Foundation 안에서는 JSON Document, Document Types, Editing과 Collaboration을,
-Building Blocks에서는 Adapter, Connector, Affordance와 UI Primitives를 읽습니다.
-이 순서는 학습을 위한 서사일 뿐 package dependency를 주장하지 않습니다.
-Collaboration은 Core의 대체 구현과 profile 포함 관계로 Foundation 안에서 읽습니다.
-
-프로젝트가 책임을 발견하는 방향은 이 읽기·구현 방향과 반대입니다.
+목표는 같은 역할과 책임이 하나의 정본 모듈을 갖고, Application이 그 공개 API를
+조합하는 구조입니다. 아래는 읽기 순서와 책임 지도입니다. 모든 package가 차례로
+의존하는 직렬 계층은 아닙니다.
 
 ```text
-구현 의존: Foundation → Building Blocks → Hands → Artifact → Application
-책임 발견: Application → 책임 발견 → Canonical Module → Application
+Foundation
+├─ JSON Document ─ value / at / query / validatePatch / commit / subscribe
+│  └─ Local 또는 Collaboration 구현
+├─ Document Types ─ model / schema / invariants / operations / projections
+│  └─ 후보별 owner 수렴과 계약 확정 · TBD
+└─ Editing ─ Selection / Topology / Intent / Clipboard / History
+
+Building Blocks
+├─ Adapter ─ 플랫폼 입력·출력
+├─ Connector ─ 이름 있는 외부 생태계
+├─ Affordance ─ 조작 의미·수명주기
+└─ UI Primitives ─ 재사용 UI
+
+Hands ─ 장르별로 함께 검증된 편집 조합
+└─ Official Hands Profile의 완성 조건 · TBD
+
+Artifact ─ Application 안에서 사람이 다루는 콘텐츠
+└─ 현재 visual prototype의 문서·Hands 계약 연결 · TBD
+
+Applications ─ 조합·실행 순서·제품 정책·layout·외부 인스턴스 주입
 ```
 
-먼저 제품을 만들고 실제 사용 흐름에서 반복되는 책임을 찾습니다. 추출된 책임은
-canonical owner와 public API를 얻고, Application은 임시 구현 대신 그 API를 다시
-소비합니다. 자세한 순환은 [How We Build](how-we-build.md)에서 설명합니다.
+Adapter와 Connector는 서로의 선행 계층이 아닙니다. 필요한 플랫폼과 생태계를
+독립적으로 선택합니다. Collaboration도 Editing 앞이나 뒤의 필수 단계가 아니라
+같은 `JSONDocument` 계약의 다른 구현입니다.
 
-## JSON Document
+## Foundation의 프로토콜
 
-JSON Document는 현재 값을 보관하고, JSON Pointer와 JSONPath로 위치를 찾고,
-JSON Patch를 검사해 적용합니다. 적용된 변경은 구독자에게 전달합니다.
+[Foundation](foundation.md)은 값·의미·작업·관찰의 경계를 설명합니다.
 
-이 계약에는 화면이나 편집 장르가 들어가지 않습니다. 문서, 표, 보드의
-생김새가 달라도 값의 주소와 변경 형식은 여기서 같습니다. 공개 호출은
-[API](api.md)에 정리되어 있습니다.
+| 경계 | 현재 계약 | 목표와 남은 일 |
+| --- | --- | --- |
+| JSON Document | 여섯 member와 JSON 표준 연산; Core v3 Stable | UI·장르별 edit verb를 Core에 추가하지 않음 |
+| Document Type | 의미·모델·유효성·연산·Projection이라는 책임 경계 | 후보별 canonical owner와 공개 계약의 수렴 · TBD |
+| Editing | Intent → EditingPlan → Session.apply → commit → EditingSnapshot | Hands별 필수 행동과 조합 적합성의 동결 · TBD |
+| Collaboration | 같은 document 계약과 base → History → Text profile | 각 profile의 지원 범위로 사용; 모든 Hands의 협업 보장과 구별 |
 
-## Editing
+[JSON Document Protocol](api.md)과 [Editing Protocol](editing.md)에서 실제 경계를
+건너는 값을 봅니다. Copy는 읽기이고 선택만 바꾸는 작업에는 document commit이
+필요하지 않습니다. 로컬 inverse History와 actor-local 협업 History는 이름이
+같아도 복원 의미와 소유자가 다릅니다.
 
-Editing은 문서 값 옆에 편집 중에만 필요한 상태를 둡니다. 화면에서 들어온
-요청은 Intent가 되고, Selection은 대상을, Topology는 보이는 순서를,
-Clipboard는 옮길 내용을 기억합니다. History는 값과 선택을 함께 되돌립니다.
-
-Editing은 화면을 그리지 않습니다. 화면이 보낸 Intent를 현재 문서와 편집
-상태에 적용합니다. 시작점은 [Intent guide](intent-guide.md)입니다.
-
-## Document Types
+## Document Types · TBD
 
 Document Type은 특정 JSON Document가 무엇을 의미하고 어떤 상태와 변경이
 유효한지를 정의합니다. Profile, Document Model, Schema와 invariant,
 Document Operation, Projection이 이 책임에 속합니다.
 
-Document Type은 selection, History 같은 편집 lifecycle이나 화면 표현을
-소유하지 않습니다. 현재 후보와 아직 결정하지 않은 소유권은
-[Document Types · TBD](document-types.md)에 정리되어 있습니다.
+현재 Rich Text·Order·Object·Tree·Database·Calendar·Sheet·Kanban·Annotation은
+분류 후보입니다. [Document Types](document-types.md)에서 현재 관찰된 schema,
+소유권 감사와 완료 조건을 봅니다. 이름이 등록됐다고 package 재배치가 완료된
+것은 아닙니다. 같은 Calendar라도 Document Type, Hand와 Application은 다른 책임입니다.
 
-## Adapter
+## Building Blocks
 
-Adapter는 keyboard, clipboard, contenteditable 같은 플랫폼 계약을 공개
-API에 맞춰 번역합니다. 예를 들어 key chord는 의미 command가 되고,
-브라우저의 clipboard event는 Editing의 copy, cut, paste로 이어집니다.
+[Building Blocks](building-blocks.md)는 서로 독립적인 네 책임을 제공합니다.
 
-Adapter는 책임 종류입니다. Web Adapter는 Editing을 소비하지만
-Contenteditable Adapter는 JSON Document와 DOM/React lifecycle을 직접 잇습니다.
-따라서 모든 Adapter가 Editing 다음 dependency라는 뜻은 아닙니다.
+| 위치 | 소유하는 것 | 안내 |
+| --- | --- | --- |
+| Adapter | keyboard·clipboard·native input 같은 플랫폼 계약의 번역 | [Adapter](adapters.md) |
+| Connector | React·Zod·Ajv·TanStack Table·A2UI 같은 외부 계약의 연결 | [Connector](connectors.md) |
+| Affordance | 선택·drag·resize·취소 같은 조작 의미와 수명주기 | [Affordance](affordance.md) |
+| UI Primitives | 표준 control·focus·overlay와 반복 UI 행동 | [UI Primitives](ui-primitives.md) |
 
-플랫폼마다 다른 event와 lifecycle은 [Adapter](adapters.md)가 맡습니다.
-
-## Connector
-
-Connector는 React, Zod, Ajv, TanStack Table처럼 이름 있는 라이브러리의
-입출력을 기존 계약에 연결합니다. 문서 변경을 React 구독으로 전달하거나,
-화면에 보이는 행과 열을 Sheet의 Topology로 바꾸는 식입니다.
-
-라이브러리를 교체해도 문서와 편집 계약은 바뀌지 않습니다. 지원 범위는
-[Connector](connectors.md)에 있습니다. Connector는 JSON Document, Editing,
-Hands capability 중 자신이 연결하는 계약에 직접 붙으며 Adapter를 전제로 하지
-않습니다.
-
-## Affordance
-
-Affordance는 고르기, 입력하기, 접기, drag, undo처럼 사람이 이미 알고 있는
-조작을 정의합니다. 일부 API는 Adapter가 만든 command를 받고, 일부 Web 편의
-API는 event-shaped input을 내부 Adapter와 함께 해석합니다. 각 reference의
-입력 type이 어느 경계인지 정본입니다.
-
-화면의 모양은 host가 정합니다. 입력의 의미와 조합은
-[Affordance](affordance.md)에서 다룹니다.
+예를 들어 Contenteditable Adapter는 JSON Document와 DOM lifecycle을 직접
+연결할 수 있습니다. 모든 Adapter가 Editing을 거쳐야 한다는 뜻은 아닙니다.
+외부 생태계를 교체해도 문서 고유 의미를 Connector에서 다시 정의하지 않습니다.
 
 ## Hands
 
-Hands는 Core와 필요한 선택 책임을 조합해 사람과 agent가 artifact를 다루게
-하는 장르별 완료 기준입니다.
-Order는 한 줄 목록을 집어 옮기고, Object는 key를 고치며, Tree는 가지를
-접습니다. Composer는 agent에게 지시와 맥락을 건네는 손이고, Mention은
-안정적인 대상을 글 안에 넣는 손입니다. 둘은 아직 TBD입니다.
+Hands는 장르의 문서와 Intent, Selection/Clipboard/History, 대표 Affordance,
+platform lifecycle을 실제 편집 경험으로 닫은 조합입니다. 하나의 공통 superclass나
+만능 package 이름이 아닙니다.
 
-Hands는 하나의 공통 package나 화면 component 이름이 아닙니다. 장르 document와
-Intent, Selection/Clipboard/History, 대표 Affordance, platform lifecycle이 실제
-Host 조합에서 함께 동작해야 닫힙니다. 재사용 책임은 owner package API로,
-제품 고유 정책은 이름 붙은 Host module로 남습니다. 현재 증거와 목록은
-[Hands](hands.md)에 있습니다.
+[Hands](hands.md)의 Live Demo와 owner API는 현재 구현의 증거입니다.
+[Official Hands · TBD](official-hands.md)는 디자인과 제품 정책은 열어 두고
+기본 편집을 완성된 SDK로 제공하려는 목표입니다. 구현이 있는 것과 Profile의
+지원 입력·실패·선택 복원·호환성 조건이 모두 닫힌 것은 구별합니다.
 
-## Artifact
+## Artifact · TBD
 
-Artifact는 독립 App이 아니라 앞의 책임을 조합해 사람이 보고 고칠 수 있게 만든
-Application 내부 콘텐츠입니다. navigation, workflow와 제품 정책은 소유하지 않습니다.
-MD, PPT, Sheet는 서로 다른 화면과 Hands를 사용해도 같은 문서와 편집 계약을
-공유할 수 있습니다.
+Artifact는 navigation과 workflow를 소유하지 않는 Application 내부 콘텐츠입니다.
+서로 다른 Hands를 사용해도 같은 문서·편집 계약으로 사람이 보고 고칠 수 있어야 합니다.
 
-현재 Artifact 페이지는 file compatibility나 Core/Hands interoperability를
-증명하지 않는 visual prototype입니다. 여러 artifact surface를 한 Host chrome에
-놓는 정보 구조와 시각 가설만 확인하며, 실제 계약 증거는 각 Hands Live Demo와
-package test에서 봅니다.
+현재 [Artifact](/viewer)는 MD·PPT·Sheet surface를 한 Host chrome에 놓는 visual
+prototype입니다. JSON Document/Hands 연결, 편집 후 복원과 파일 호환성의 증거는
+아직 없습니다. 모양을 전환할 수 있다는 사실을 상호운용이나 완성된 편집의
+증거로 세지 않습니다.
 
-## Application
+## Applications
 
-Application은 Artifact와 Hands를 실제 제품 경험으로 제공하는 최종 composition
-root입니다. 주요 화면 영역과 실행 순서, URL과 navigation, 제품 copy와 fixture,
-concrete runtime 연결은 Application에 남습니다. 문서의 의미, editing lifecycle,
-platform translation과 반복 UI처럼 같은 역할과 책임을 갖는 코드는 canonical
-module로 추출됩니다.
+Application은 Artifact와 Hands를 실제 제품 경험으로 조합합니다. 실행 순서,
+URL과 navigation, 권한·copy·fixture·layout과 concrete runtime 연결을 소유합니다.
+모델·의미 연산·selection·history·gesture·플랫폼 번역·projection·재사용 UI는
+각 canonical module의 책임입니다. 한 제품에서만 쓰여도 이 경계는 같습니다.
 
-[Calendar와 AI Agent](/applications)는 제품에서 발견한 책임과 App에 남은 정책을
-함께 보여 줍니다. Calendar Document Type, Calendar Hand와 Calendar Application은
-같은 이름을 공유하지만 서로 다른 owner입니다.
-
-## Collaboration
-
-Collaboration은 JSON Document 계약을 여러 참여자의 인과 변경으로 구현합니다.
-로컬 구현과 마찬가지로 값을 읽고, 변경을 적용하고, 결과를 구독하지만 내부
-기록은 참여자의 변경 순서와 수렴을 다룹니다.
-
-Collaboration은 Foundation 안에서 JSON Document와 같은 계약의 대체 구현으로 읽습니다.
-협업 document를 Editing에 주입할 수 있지만 History command는 editor-local
-History 대신 actor-local `runtime.history`로 연결해야 합니다. base → History →
-Text profile의 포함 관계는 [Collaboration](collaboration.md)에 있습니다.
+[Calendar와 AI Agent](applications.md)는 현재 제품에서 드러난 조합을 보여 줍니다.
+읽기 순서는 Foundation에서 Application으로 가지만, 책임을 발견하는 작업은
+Application에서 시작해 정본 API를 만들고 제품이 다시 소비하는 순환입니다.
+이 과정은 [How We Build](how-we-build.md)에 있습니다.
 
 ## Reference vertical: Rich Text
 
-Rich Text는 새 최상위 계층이 아니라 이 책임 graph를 끝까지 적용한 대표
-vertical입니다. JSON Document와 Selection/Editing 위에 versioned domain schema를
-두고, Web와 React integration을 분리한 뒤 Host UI가 조합합니다. profile,
-conformance vector와 browser evidence는 다른 Hands가 경계를 판단할 때 참고하는
-구현 증거입니다.
+Rich Text는 새 최상위 계층이 아니라 이 책임 지도를 적용한 대표 vertical입니다.
+문서 의미와 Editing 위에 Web Adapter, React Connector, 장르별 UI를 조합합니다.
+현재 profile·적합성·browser 증거는 다른 Hands가 경계를 판단할 때 참고할 수 있지만
+모든 Document Type과 Hands의 완료를 대신하지는 않습니다.

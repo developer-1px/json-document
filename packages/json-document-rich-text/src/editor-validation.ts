@@ -1,4 +1,4 @@
-import { createJSONDocument, type JSONDocument, type JSONValue, type Pointer } from "@interactive-os/json-document";
+import { readPointer, type JSONDocument, type JSONValue, type Pointer } from "@interactive-os/json-document";
 import { getActiveRichTextInstrument } from "./instrument.js";
 import { hasRichTextContent, isRichTextDocument, type RichTextDocument, type RichTextNode } from "./model.js";
 import type { RichTextSchema } from "./schema.js";
@@ -13,8 +13,9 @@ export function readRichTextDocument(document: JSONDocument, pointer: Pointer): 
 }
 
 export function readRichTextSnapshot(value: JSONValue, pointer: Pointer): RichTextDocument {
-  if (pointer === "" && isRichTextDocument(value)) return value;
-  return readRichTextDocument(createJSONDocument(value), pointer);
+  const result = readPointer(value, pointer);
+  if (!result.ok || !isRichTextDocument(result.value)) throw new TypeError(`Rich Text document was not found at ${JSON.stringify(pointer)}.`);
+  return result.value;
 }
 
 export function validateLocalOrFallback(next: RichTextDocument, path: ReadonlyArray<number>, schema: RichTextSchema): ReturnType<typeof validateRichText> {

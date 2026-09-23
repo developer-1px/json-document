@@ -1,3 +1,4 @@
+import type { JSONValue } from "@interactive-os/json-document";
 import { describe, expect, test } from "vitest";
 import { createSheetEditor, type SheetDocument } from "../src/index.js";
 
@@ -15,6 +16,28 @@ const initial: SheetDocument = {
 };
 
 describe("sheet editing vertical slice", () => {
+
+  test("rejects non-JSON paste before cloning and preserves selection, redo, and publication", () => {
+    const editor = createSheetEditor(initial);
+    expect(editor.dispatch({ type: "cell.commit", rowId: "r1", columnId: "score", value: 9 }).ok).toBe(true);
+    expect(editor.undo().ok).toBe(true);
+    const before = editor.snapshot;
+    let publications = 0;
+    const unsubscribe = editor.subscribe(() => { publications++; });
+    const cycle: unknown[] = [];
+    cycle.push(cycle);
+    for (const value of [NaN, Infinity, new Date(0), Array(1), cycle, { nested: undefined }]) {
+      expect(editor.dispatch({
+        type: "clipboard.paste",
+        clipboard: { type: "application/vnd.interactive-os.sheet+json", cells: [[value as JSONValue]], text: "x" },
+      })).toMatchObject({ ok: false, code: "clipboard.invalid" });
+      expect(editor.snapshot).toEqual(before);
+    }
+    expect(publications).toBe(0);
+    expect(editor.snapshot.canRedo).toBe(true);
+    expect(editor.redo().ok).toBe(true);
+    unsubscribe();
+  });
   test("selects a rectangular range and copies row-major JSON with TSV", () => {
     const editor = createSheetEditor(initial);
 

@@ -3,10 +3,12 @@ export {
   appendSegment,
   applyPatch,
   buildPointer,
+  isJSONValue,
   jsonEqual,
   parentPointer,
   parseArrayIndex,
   parsePointer,
+  readPointer,
   trackPointer,
   tryParsePointer,
 } from "./protocol.js";

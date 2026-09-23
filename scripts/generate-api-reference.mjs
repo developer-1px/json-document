@@ -2,14 +2,15 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
-import { apiReferencePackages } from "../docs/api-reference/packages.mjs";
+import { apiReferenceCoverageErrors, apiReferencePackages } from "../docs/api-reference/packages.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const check = process.argv.includes("--check");
 const configPath = join(root, "tsconfig.build.json");
 const parsed = ts.parseJsonConfigFileContent(ts.readConfigFile(configPath, ts.sys.readFile).config, ts.sys, root);
 const entrypoints = apiReferencePackages.flatMap(({ entrypoint, subpaths }) => [entrypoint, ...subpaths.map((subpath) => subpath.entrypoint)]).map((entrypoint) => join(root, entrypoint));
-const sourcePaths = Object.fromEntries(apiReferencePackages.map(({ packageName, entrypoint }) => [packageName, [entrypoint]]));
+const sourcePaths = Object.fromEntries(apiReferencePackages.flatMap((descriptor) =>
+  [descriptor, ...descriptor.subpaths].map(({ packageName, entrypoint }) => [packageName, [entrypoint]])));
 const program = ts.createProgram([...new Set([...parsed.fileNames, ...entrypoints])], {
   ...parsed.options,
   baseUrl: root,
@@ -20,7 +21,9 @@ const program = ts.createProgram([...new Set([...parsed.fileNames, ...entrypoint
   noEmit: true,
 });
 const checker = program.getTypeChecker();
-const failures = [];
+const manifests = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).workspaces
+  .map((workspace) => JSON.parse(readFileSync(join(root, workspace, "package.json"), "utf8")));
+const failures = apiReferenceCoverageErrors(manifests);
 let exportCount = 0;
 const siteRoutes = JSON.parse(readFileSync(join(root, "site/site-routes.json"), "utf8"));
 
@@ -60,8 +63,11 @@ function clean(signature) {
 
 for (const descriptor of apiReferencePackages) {
   const referencePath = `/docs/api/${descriptor.slug}`;
-  const ownerRoutes = siteRoutes.filter((route) => route.path === referencePath && route.navigationGroup === descriptor.owner);
-  if (ownerRoutes.length !== 1) failures.push(`${descriptor.packageName} owner route`);
+  const referenceRoutes = siteRoutes.filter((route) =>
+    route.path === referencePath
+    && route.navigationGroup === descriptor.navigationGroup
+    && route.documentSource === `docs/api-reference/${descriptor.slug}.md`);
+  if (referenceRoutes.length !== 1) failures.push(`${descriptor.packageName} owner reference route`);
   const entry = program.getSourceFile(join(root, descriptor.entrypoint));
   if (!entry) throw new Error(`public entrypoint를 찾을 수 없습니다: ${descriptor.entrypoint}`);
   const moduleSymbol = checker.getSymbolAtLocation(entry);
@@ -89,9 +95,9 @@ for (const descriptor of apiReferencePackages) {
   const output = [
     `# ${descriptor.packageName} API`,
     "",
-    `**Owner:** ${descriptor.owner}`,
+    `**탐색 분류:** ${descriptor.navigationGroup}`,
     "",
-    `${descriptor.responsibility}의 public entrypoint입니다. 아래 항목은 package root에서 import할 수 있는 안정된 public API이며 internal 경로는 계약이 아닙니다.`,
+    `${descriptor.responsibility}의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 사이트에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.`,
     "",
     `> 이 문서는 \`${descriptor.entrypoint}\`에서 생성됩니다. API를 변경한 뒤 \`npm run docs:api\`를 실행하세요.`,
     "",

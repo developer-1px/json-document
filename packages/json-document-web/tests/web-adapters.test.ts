@@ -46,6 +46,7 @@ import {
   selectionOperationFromModifiers,
   sheetClipboardCodec,
   textInputFromControl,
+  textSelectionFromControl,
   webFocusItemProps,
   webGridCellAddressProps,
   webKanbanCardProps,
@@ -53,6 +54,22 @@ import {
   type WebClipboardData,
   type WebClipboardEvent,
 } from "../src/index.js";
+
+describe("native text selection projection", () => {
+  test.each([
+    { selectionStart: 2, selectionEnd: 4, selectionDirection: "forward", expected: { anchor: 2, focus: 4 } },
+    { selectionStart: 1, selectionEnd: 4, selectionDirection: "backward", expected: { anchor: 4, focus: 1 } },
+    { selectionStart: 2, selectionEnd: 2, selectionDirection: "none", expected: { anchor: 2, focus: 2 } },
+    { selectionStart: -1, selectionEnd: 99, selectionDirection: "backward", expected: { anchor: 5, focus: 0 } },
+    { selectionStart: null, selectionEnd: null, selectionDirection: null, expected: { anchor: 5, focus: 5 } },
+  ] as const)("preserves anchor/focus for $selectionDirection $selectionStart:$selectionEnd", ({ expected, ...selection }) => {
+    expect(textSelectionFromControl({ currentTarget: { value: "Alpha", ...selection } })).toEqual(expected);
+  });
+
+  test("accepts an existing cursor-only control as a collapsed selection", () => {
+    expect(textSelectionFromControl({ currentTarget: { value: "Alpha", selectionStart: 2 } })).toEqual({ anchor: 2, focus: 2 });
+  });
+});
 
 describe("Web file intake translation", () => {
   const files = [
@@ -340,12 +357,9 @@ describe("Web clipboard Adapter", () => {
       views: [{
         id: "all",
         name: "All",
-        type: "table",
-        propertyOrder: ["title"],
-        propertyVisibility: { title: true },
-        propertyWidths: {},
-        sort: null,
-        filter: null,
+        ownership: "personal",
+        layout: "table",
+        projection: { search: "", filter: { id: "all:root", conjunction: "and", items: [] }, sorts: [], groups: [], columns: [{ propertyId: "title", visible: true, width: null, pinned: null }] },
       }],
     });
     const databaseBinding = createWebClipboardBinding({
@@ -380,7 +394,7 @@ describe("Web clipboard Adapter", () => {
 
     const unavailable = event(null);
     expect(binding.cut(unavailable)).toMatchObject({ ok: false, code: "clipboard.unavailable" });
-    expect(unavailable.defaultPrevented).toBe(false);
+    expect(unavailable.defaultPrevented).toBe(true);
     expect(cutAttempts).toBe(0);
     expect((editor.snapshot.value as BlockDocument).blocks.map((block) => block.id)).toEqual(["a", "b"]);
 
@@ -633,6 +647,24 @@ describe("Web keyboard Adapter", () => {
     expect(adapter.resolve({ key: "PageDown", shiftKey: true, metaKey: false, ctrlKey: false }))
       .toEqual({ type: "boundary", edge: "end", operation: "extend" });
     expect(adapter.resolve({ key: "c", shiftKey: false, metaKey: true, ctrlKey: false })).toBeNull();
+  });
+
+  test("preserves modifiers while allowing explicit product chord assignments", () => {
+    const product = createWebKeyboardAdapter({
+      defaults: false,
+      keymap: { "Mod-Alt-z": { type: "undo" }, "Mod-Backspace": { type: "delete" } },
+    });
+    for (const modifiers of [{ metaKey: true, ctrlKey: false }, { metaKey: false, ctrlKey: true }]) {
+      const undo = { key: "Z", shiftKey: false, altKey: true, ...modifiers };
+      const remove = { key: "Backspace", shiftKey: false, ...modifiers };
+      expect(adapter.resolve(undo)).toBeNull();
+      expect(adapter.resolve(remove)).toBeNull();
+      expect(product.resolve(undo)).toEqual({ type: "undo" });
+      expect(product.resolve(remove)).toEqual({ type: "delete" });
+      expect(product.resolve({ ...undo, altKey: false })).toBeNull();
+      expect(adapter.resolve({ ...undo, altKey: false })).toEqual({ type: "undo" });
+      expect(adapter.resolve({ ...undo, altKey: false, shiftKey: true })).toEqual({ type: "redo" });
+    }
   });
 
   test("lets the host replace chords without inventing editing commands", () => {

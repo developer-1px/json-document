@@ -1,8 +1,8 @@
 # @interactive-os/json-document-web API
 
-**Owner:** Adapter
+**탐색 분류:** Adapter
 
-Web platform adapter의 public entrypoint입니다. 아래 항목은 package root에서 import할 수 있는 안정된 public API이며 internal 경로는 계약이 아닙니다.
+Web platform adapter의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 사이트에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
 
 > 이 문서는 `packages/json-document-web/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
@@ -35,6 +35,12 @@ calendarKeyFromWebRow<Key>(clientX: number, bounds: { readonly left: number; rea
 
 ```ts
 calendarMinutesFromWebGrid(clientY: number, bounds: { readonly top: number; readonly height: number; }, options: { readonly hourStart: number; readonly hourEnd: number; readonly stepMinutes: number; }): number
+```
+## `captureWebClipboardPaste`
+
+```ts
+captureWebClipboardPaste<Payload extends WebClipboardPayload = WebClipboardPayload>(event: WebClipboardEvent, options: { readonly codec?: WebClipboardCodec<Payload>; readonly files?: boolean; readonly text?: boolean; readonly html?: never; readonly delegatedMimeTypes?: ReadonlyArray<string>; }): WebClipboardPaste<Payload>
+captureWebClipboardPaste<Payload extends WebClipboardPayload = WebClipboardPayload>(event: WebClipboardEvent, options: { readonly codec?: WebClipboardCodec<Payload>; readonly files?: boolean; readonly text?: boolean; readonly html?: "images"; readonly delegatedMimeTypes?: ReadonlyArray<string>; }): WebHTMLClipboardPaste<Payload>
 ```
 ## `chordFromStroke`
 
@@ -198,6 +204,16 @@ const objectClipboardCodec: WebClipboardCodec<ObjectClipboard>
 ```ts
 const orderClipboardCodec: WebClipboardCodec<OrderClipboard>
 ```
+## `parseWebClipboardHTML`
+
+```ts
+parseWebClipboardHTML(html: string): WebHTMLClipboardContent | null
+```
+## `parseWebHTMLFragment`
+
+```ts
+parseWebHTMLFragment(html: string): WebHTMLFragment | null
+```
 ## `pressInteractionFromWeb`
 
 ```ts
@@ -213,10 +229,20 @@ projectWebClientPointToSVG(point: WebClientPoint, viewport: WebSVGViewport): Web
 ```ts
 projectWebWidgetState(state: WebWidgetState): WebWidgetARIA
 ```
+## `readWebHTMLClipboard`
+
+```ts
+readWebHTMLClipboard(content: WebHTMLClipboardContent, options: Parameters<typeof readWebRasterFiles>[1] & { readonly currentCount?: number; }): Promise<WebHTMLClipboardResult>
+```
 ## `readWebRasterFile`
 
 ```ts
-readWebRasterFile(file: WebRasterFile): Promise<WebRasterSourceResult>
+readWebRasterFile(file: WebRasterFile, options?: { readonly signal?: WebRasterReadSignal; }): Promise<WebRasterSourceResult>
+```
+## `readWebRasterFiles`
+
+```ts
+readWebRasterFiles(files: ReadonlyArray<WebFileCandidate>, options: { readonly policy: FileAcceptancePolicy; readonly maxImagePixels: number; readonly signal?: WebRasterReadSignal; readonly readRaster?: typeof readWebRasterFile; }): Promise<WebRasterFilesResult>
 ```
 ## `registerWebVirtualSelectionScope`
 
@@ -227,6 +253,11 @@ registerWebVirtualSelectionScope(document: object, options: WebVirtualSelectionS
 
 ```ts
 renderWebAnnotationRaster(options: { readonly document: AnnotationDocument; readonly sourceId: string; readonly sourceURL: string; readonly style: WebAnnotationRasterStyle; }): Promise<WebAnnotationRasterResult>
+```
+## `routeWebClipboardEvent`
+
+```ts
+routeWebClipboardEvent<Result>(root: object, event: { readonly target?: object | null; readonly defaultPrevented?: boolean; preventDefault(): void; }, operation: "copy" | "cut" | "paste", handle: () => Result): Result | null
 ```
 ## `rovingFocusItemProps`
 
@@ -243,10 +274,20 @@ selectionOperationFromModifiers(modifiers: WebModifierState): Extract<SelectionO
 ```ts
 const sheetClipboardCodec: WebClipboardCodec<SheetClipboard>
 ```
+## `textClipboardCodec`
+
+```ts
+const textClipboardCodec: WebClipboardCodec<{ readonly type: "text/plain"; readonly text: string; }>
+```
 ## `textInputFromControl`
 
 ```ts
 textInputFromControl(event: WebTextControlEvent): WebTextInput
+```
+## `textSelectionFromControl`
+
+```ts
+textSelectionFromControl(event: WebTextControlEvent): SelectionRange<number>
 ```
 ## `treeClipboardCodec`
 
@@ -401,6 +442,7 @@ interface WebClipboardCodec<Payload extends WebClipboardPayload> {
 ```ts
 interface WebClipboardData {
   readonly types: ReadonlyArray<string>;
+  readonly files?: WebFileCandidateList;
   getData(format: string): string;
   setData(format: string, data: string): void;
 }
@@ -409,9 +451,21 @@ interface WebClipboardData {
 
 ```ts
 interface WebClipboardEvent {
+  readonly target?: object | null;
+  readonly currentTarget?: object | null;
+  readonly defaultPrevented?: boolean;
   readonly clipboardData: WebClipboardData | null;
   preventDefault(): void;
 }
+```
+## `WebClipboardPaste`
+
+```ts
+type WebClipboardPaste<Payload extends WebClipboardPayload> =
+  | { readonly ok: true; readonly type: "structured"; readonly payload: Payload }
+  | { readonly ok: true; readonly type: "files"; readonly files: ReadonlyArray<WebFileCandidate> }
+  | { readonly ok: true; readonly type: "text"; readonly text: string }
+  | Extract<WebClipboardResult<never, never>, { readonly ok: false }>;
 ```
 ## `WebClipboardPayload`
 
@@ -442,9 +496,9 @@ type WebClipboardResult<Payload extends WebClipboardPayload, EditingResult> =
 
 ```ts
 interface WebClipboardSurface<Payload extends WebClipboardPayload, EditingResult> {
-  readonly onCopy: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
-  readonly onCut: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
-  readonly onPaste: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
+  readonly onCopy: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult> | null;
+  readonly onCut: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult> | null;
+  readonly onPaste: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult> | null;
 }
 ```
 ## `WebClipboardTextPort`
@@ -599,6 +653,45 @@ webGridCellAddressProps(point: GridPoint): WebGridCellAddressAttributes
 ```ts
 interface WebGridCellAddressRoot<Cell extends WebGridCellAddressElement> {
   querySelectorAll(selectors: string): ArrayLike<Cell>;
+}
+```
+## `WebHTMLClipboardContent`
+
+```ts
+interface WebHTMLClipboardContent { readonly parts: ReadonlyArray<WebHTMLClipboardPart> }
+```
+## `WebHTMLClipboardPart`
+
+```ts
+type WebHTMLClipboardPart =
+  | { readonly type: "text"; readonly text: string }
+  | { readonly type: "image"; readonly source: string; readonly label: string };
+```
+## `WebHTMLClipboardPaste`
+
+```ts
+type WebHTMLClipboardPaste<Payload extends WebClipboardPayload> = WebClipboardPaste<Payload>
+  | { readonly ok: true; readonly type: "html"; readonly content: WebHTMLClipboardContent };
+```
+## `WebHTMLClipboardResult`
+
+```ts
+type WebHTMLClipboardResult =
+  | { readonly ok: true; readonly parts: ReadonlyArray<Extract<WebHTMLClipboardPart, { readonly type: "text" }> | ({ readonly type: "image" } & WebRasterFileContent)> }
+  | { readonly ok: false; readonly code: string; readonly reason?: string };
+```
+## `WebHTMLFragment`
+
+```ts
+interface WebHTMLFragment { readonly childNodes: ArrayLike<WebHTMLNode> }
+```
+## `WebHTMLNode`
+
+```ts
+interface WebHTMLNode {
+  readonly nodeType: number;
+  readonly textContent: string | null;
+  readonly childNodes: ArrayLike<WebHTMLNode>;
 }
 ```
 ## `WebJSONClipboardFormat`
@@ -764,12 +857,36 @@ interface WebRasterFile {
   readonly type: string;
 }
 ```
+## `WebRasterFileContent`
+
+```ts
+interface WebRasterFileContent {
+  readonly candidate: FileCandidate;
+  readonly image: RasterImageContent;
+}
+```
+## `WebRasterFilesResult`
+
+```ts
+type WebRasterFilesResult =
+  | { readonly ok: true; readonly files: ReadonlyArray<WebRasterFileContent> }
+  | { readonly ok: false; readonly code: string; readonly reason?: string };
+```
+## `WebRasterReadSignal`
+
+```ts
+interface WebRasterReadSignal {
+  readonly aborted: boolean;
+  addEventListener(type: "abort", listener: () => void, options?: { readonly once?: boolean }): void;
+  removeEventListener(type: "abort", listener: () => void): void;
+}
+```
 ## `WebRasterSourceResult`
 
 ```ts
 type WebRasterSourceResult =
   | { readonly ok: true; readonly dataURL: string; readonly width: number; readonly height: number }
-  | { readonly ok: false; readonly code: "raster.read-failed" | "raster.decode-failed"; readonly reason?: string };
+  | { readonly ok: false; readonly code: "raster.read-failed" | "raster.decode-failed" | "raster.cancelled"; readonly reason?: string };
 ```
 ## `WebSVGElement`
 
@@ -798,6 +915,8 @@ webSVGViewportFromElement(svg: WebSVGElement): WebSVGViewport
 interface WebTextControl {
   readonly value: string;
   readonly selectionStart: number | null;
+  readonly selectionEnd?: number | null;
+  readonly selectionDirection?: "forward" | "backward" | "none" | null;
 }
 ```
 ## `WebTextControlEvent`

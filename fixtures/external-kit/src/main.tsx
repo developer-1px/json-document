@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Database, DatabaseOperationError, createDatabaseResource, createDatabaseView, type DatabaseFilterGroup, type DatabaseOperations, type DatabaseViewDocument } from "@interactive-os/json-document-database";
+import { Database, DatabaseOperationError, createDatabaseResource, createDatabaseView, type DatabaseFilter, type DatabaseFilterGroup, type DatabaseOperations, type DatabaseTableView } from "@interactive-os/json-document-database";
 import "@interactive-os/json-document-database/styles.css";
 import * as z from "zod/v4";
 import "./styles.css";
@@ -10,7 +10,7 @@ type Task = z.infer<typeof taskSchema>;
 const resource = createDatabaseResource<Task>({ id: "delivery-tasks", schema: taskSchema, getRowId: (row) => row.id, createDraft: () => ({ title: "", owner: "", points: 0, status: "backlog", shipped: false }) });
 const allTasks = createDatabaseView("all", "All delivery", ["title", "owner", "points", "status", "shipped"], "shared");
 const triageBase = createDatabaseView("triage", "My triage", ["status", "title", "owner", "points", "shipped"]);
-const triageView: DatabaseViewDocument = { ...triageBase, projection: { ...triageBase.projection, filter: { id: "triage:root", conjunction: "and", items: [{ id: "open", propertyId: "status", operator: "not-equals", value: "done" }] }, columns: [{ propertyId: "status", visible: true, width: 150, pinned: "start" }, { propertyId: "title", visible: true, width: 300 }, { propertyId: "owner", visible: true, width: 150 }, { propertyId: "points", visible: true, width: 110 }, { propertyId: "shipped", visible: true, width: 120 }] } };
+const triageView: DatabaseTableView = { ...triageBase, projection: { ...triageBase.projection, filter: { id: "triage:root", conjunction: "and", items: [{ id: "open", propertyId: "status", operator: "not-equals", value: "done" }] }, columns: [{ propertyId: "status", visible: true, width: 150, pinned: "start" }, { propertyId: "title", visible: true, width: 300, pinned: null }, { propertyId: "owner", visible: true, width: 150, pinned: null }, { propertyId: "points", visible: true, width: 110, pinned: null }, { propertyId: "shipped", visible: true, width: 120, pinned: null }] } };
 
 let serverRows = Array.from({ length: 240 }, (_, index): Task => ({ id: `task-${index + 1}`, title: ["Triage customer feedback", "Polish billing settings", "Publish changelog", "Archive legacy exports"][index % 4]! + (index < 4 ? "" : ` ${index + 1}`), owner: ["Ada", "Lin", "Mina", "Theo"][index % 4]!, points: (index % 8) + 1, status: ["backlog", "progress", "done"][index % 3] as Task["status"], shipped: index % 3 === 2 }));
 let failureMode: "none" | "network" | "conflict" = "none";
@@ -69,9 +69,10 @@ function DatabaseApp() {
 
 function matchesGroup(row: Task, group: DatabaseFilterGroup): boolean {
   if (group.items.length === 0) return true;
-  const results = group.items.map((item) => "propertyId" in item ? matchesRule(row, item.propertyId, item.operator, item.value) : matchesGroup(row, item));
+  const results = group.items.map((item) => isFilter(item) ? matchesRule(row, item.propertyId, item.operator, item.value) : matchesGroup(row, item));
   return group.conjunction === "and" ? results.every(Boolean) : results.some(Boolean);
 }
+function isFilter(item: DatabaseFilter | DatabaseFilterGroup): item is DatabaseFilter { return typeof item.propertyId === "string"; }
 function matchesRule(row: Task, propertyId: string, operator: string, expected: unknown): boolean {
   const actual = row[propertyId as keyof Task];
   if (operator === "equals") return String(actual) === String(expected);

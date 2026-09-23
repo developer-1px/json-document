@@ -30,6 +30,7 @@ if (calendarTemporalViolations(goodFixture, "conforming fixture").length !== 0) 
 }
 
 const files = [
+  ...collect(path.join(repositoryRoot, "packages/json-document-calendar-document/src"), /^calendar.*\.ts$/),
   ...collect(path.join(repositoryRoot, "packages/json-document-editing/src"), /^calendar.*\.ts$/),
   ...collect(path.join(repositoryRoot, "packages/json-document-calendar/src"), /\.[jt]sx?$/),
   path.join(repositoryRoot, "packages/json-document-calendar/src/date-values.ts"),

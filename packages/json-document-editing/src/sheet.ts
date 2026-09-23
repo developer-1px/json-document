@@ -1,5 +1,6 @@
 import {
   buildPointer,
+  isJSONValue,
   type JSONPatchOperation,
   type JSONValue,
 } from "@interactive-os/json-document";
@@ -11,8 +12,8 @@ import {
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import type { EditingHistoryOptions } from "./history.js";
-import { reconcileRangeSelection, selectRangePoint } from "./range-selection.js";
-import { cutEditingClipboard, isClipboardJSONValue, isClipboardRecord } from "./clipboard.js";
+import { reconcileRangeSelection, replaceRangeSelection, selectRangePoint } from "./range-selection.js";
+import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds, type GridTopology } from "./topology.js";
 import { assertSheetDocument, assertUniqueSheetIds } from "./sheet-validation.js";
 import {
@@ -73,15 +74,16 @@ export interface SheetClipboard extends Record<string, JSONValue> {
 export const sheetClipboardFormat = {
   mimeType: "application/vnd.interactive-os.sheet+json" as const,
   parse(value: unknown): SheetClipboard | null {
-    if (!isClipboardRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
+    if (!isJSONValue(value) || !isClipboardRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
     if (!Array.isArray(value.cells) || value.cells.length === 0 || !Array.isArray(value.cells[0])) return null;
     const width = value.cells[0].length;
-    return width > 0 && value.cells.every((row) => Array.isArray(row) && row.length === width && row.every(isClipboardJSONValue))
+    return width > 0 && value.cells.every((row) => Array.isArray(row) && row.length === width)
       ? value as SheetClipboard : null;
   },
 };
 
 export type SheetIntent =
+  | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
       readonly rowId: string;
@@ -195,6 +197,18 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
   }
 
   function dispatch(intent: SheetIntent): EditingResult<SheetSelection> {
+    if (intent.type === "selection.select-all") {
+      const { rowIds, columnIds } = resolveTopology(value(), intent.topology, index());
+      const firstRow = rowIds[0];
+      const firstColumn = columnIds[0];
+      const lastRow = rowIds.at(-1);
+      const lastColumn = columnIds.at(-1);
+      const selection = replaceRangeSelection(session.snapshot.selection,
+        firstRow !== undefined && firstColumn !== undefined && lastRow !== undefined && lastColumn !== undefined
+          ? { anchor: { rowId: firstRow, columnId: firstColumn }, focus: { rowId: lastRow, columnId: lastColumn } }
+          : null, sameSheetPoint);
+      return success(session.select(withPrimaryAliases(selection)));
+    }
     if (intent.type === "selection.set") {
       const point = resolvePoint(value(), intent.rowId, intent.columnId, index());
       if (point === null) return failure("selection.cell-not-found");
@@ -290,6 +304,7 @@ function paste(
   topology?: SheetTopology,
   index?: SheetIndex,
 ): EditingResult<SheetSelection> {
+  if (!isJSONValue(clipboard)) return failure("clipboard.invalid");
   const focus = session.snapshot.selection.focus;
   if (focus === null) return failure("selection.empty");
   if (clipboard.cells.length === 0 || clipboard.cells.some((row) => row.length === 0)) {

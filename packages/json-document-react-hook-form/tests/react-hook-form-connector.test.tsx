@@ -1,11 +1,13 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, test } from "vitest";
+import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { createJSONDocument, type JSONDocument } from "@interactive-os/json-document";
+import { createEditingSession } from "@interactive-os/json-document-editing";
+import { createFormControl } from "react-hook-form";
 import { useReactConnector } from "@interactive-os/json-document-react";
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 
-import { useReactHookFormConnector } from "../src/index.js";
+import { useJSONDocumentForm, useReactHookFormConnector } from "../src/index.js";
 
 interface ProfileForm {
   profile: {
@@ -17,6 +19,98 @@ interface ProfileForm {
 afterEach(cleanup);
 
 describe("React Hook Form Connector", () => {
+  test("does not clone an unchanged snapshot on rerender or selection updates", () => {
+    const document = createJSONDocument({ items: Array.from({ length: 10_000 }, (_, id) => ({ id })) });
+    const session = createEditingSession({ document, selection: null });
+    const hook = renderHook(() => useJSONDocumentForm(session));
+    const stringify = vi.spyOn(JSON, "stringify");
+    try {
+      for (let index = 0; index < 10; index++) hook.rerender();
+      act(() => { session.select(null); });
+      expect(stringify.mock.calls.filter(([value]) => value === document.value)).toHaveLength(0);
+      act(() => { hook.result.current.form.setValue("items.0.id", 99); });
+      expect(document.at("/items/0/id")).toMatchObject({ value: 0 });
+    } finally { stringify.mockRestore(); }
+  });
+
+  test("initializes replaced form controls and follows session/document replacement", () => {
+    const first = createProfileDocument();
+    const second = createJSONDocument({ profile: { title: "Second", role: "editor" } });
+    const controls = [createFormControl<ProfileForm>().formControl, createFormControl<ProfileForm>().formControl];
+    const hook = renderHook(({ document, formControl }) => useReactHookFormConnector<ProfileForm>(document, {
+      form: { formControl },
+    }), { initialProps: { document: first, formControl: controls[0]! } });
+    act(() => { hook.result.current.form.setValue("profile.title", "Local"); });
+    hook.rerender({ document: first, formControl: controls[0]! });
+    expect(hook.result.current.form.getValues("profile.title")).toBe("Local");
+    hook.rerender({ document: first, formControl: controls[1]! });
+    expect(hook.result.current.form.getValues("profile.title")).toBe("Draft");
+    hook.rerender({ document: second, formControl: controls[1]! });
+    expect(hook.result.current.form.getValues()).toEqual(second.value);
+    act(() => { first.commit([{ op: "replace", path: "/profile/title", value: "Old source" }]); });
+    expect(hook.result.current.form.getValues("profile.title")).toBe("Second");
+  });
+
+  test("deduplicates a large pointer batch and retains unrelated drafts", () => {
+    const document = createJSONDocument({
+      fields: Object.fromEntries(Array.from({ length: 1_000 }, (_, index) => [`field${index}`, 0])),
+      draft: "original",
+    });
+    const session = createEditingSession({ document, selection: null });
+    const source = { at: vi.fn(document.at), subscribe: document.subscribe };
+    const hook = renderHook(() => useJSONDocumentForm(session, {}, source));
+    act(() => { hook.result.current.form.setValue("draft", "local"); });
+    const some = vi.spyOn(Array.prototype, "some");
+    try {
+      act(() => {
+        document.commit(Array.from({ length: 2_000 }, (_, index) => ({
+          op: "replace" as const, path: `/fields/field${index % 1_000}`, value: index,
+        })));
+      });
+      expect(some.mock.contexts.filter((value) => (
+        Array.isArray(value) && value.length > 100 && typeof value[0] === "string" && value[0].startsWith("/fields/")
+      ))).toHaveLength(0);
+    } finally { some.mockRestore(); }
+    expect(source.at).toHaveBeenCalledTimes(1_000);
+    expect(hook.result.current.form.getValues("fields.field999")).toBe(1_999);
+    expect(hook.result.current.form.getValues("draft")).toBe("local");
+  });
+
+  test("syncs ancestors, structural move/copy parents and escaped/root fallbacks", () => {
+    const document = createJSONDocument({ left: [{ n: 1 }], right: [{ n: 2 }], draft: "original", "a/b": { n: 0 } });
+    const session = createEditingSession({ document, selection: null });
+    const source = { at: vi.fn(document.at), subscribe: document.subscribe };
+    const hook = renderHook(() => useJSONDocumentForm(session, {}, source));
+    act(() => { hook.result.current.form.setValue("draft", "local"); });
+    act(() => {
+      document.commit([
+        { op: "replace", path: "/left/0/n", value: 3 },
+        { op: "move", from: "/left/0", path: "/right/1" },
+        { op: "copy", from: "/right/0", path: "/left/0" },
+      ]);
+    });
+    expect(source.at.mock.calls.map(([path]) => path)).toEqual(["/right", "/left"]);
+    expect(hook.result.current.form.getValues("right")).toEqual([{ n: 2 }, { n: 3 }]);
+    expect(hook.result.current.form.getValues("draft")).toBe("local");
+    act(() => { document.commit([{ op: "replace", path: "/a~1b/n", value: 4 }]); });
+    expect(hook.result.current.form.getValues()).toEqual(document.value);
+    source.at.mockClear();
+    act(() => { document.commit([{ op: "replace", path: "", value: { title: "root" } }]); });
+    expect(source.at).not.toHaveBeenCalled();
+    expect(hook.result.current.form.getValues()).toEqual({ title: "root" });
+  });
+
+  test("keeps JSON conversion for Date and omitted optional values in form payloads", async () => {
+    const document = createJSONDocument({ rows: [] });
+    const hook = renderHook(() => useReactHookFormConnector<{ rows: Array<{ date: Date; optional?: string | undefined }> }>(document));
+    act(() => {
+      hook.result.current.form.setValue("rows", [{ date: new Date("2026-01-01T00:00:00Z"), optional: undefined }]);
+    });
+    await act(async () => { await hook.result.current.submit(); });
+    expect(hook.result.current.result).toMatchObject({ ok: true });
+    expect(document.value).toEqual({ rows: [{ date: "2026-01-01T00:00:00.000Z" }] });
+  });
+
   test("keeps drafts local, then commits all submitted fields as one history entry", async () => {
     const document = createProfileDocument();
     render(<ProfileEditor document={document} />);

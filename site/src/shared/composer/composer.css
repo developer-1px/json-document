@@ -51,6 +51,8 @@
 .composer-file { display: flex; width: 220px; min-width: 220px; align-items: center; gap: 10px; padding: 9px 10px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-surface); background: var(--color-background-canvas); }
 .composer-file-ic { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border-radius: var(--radius-control); background: var(--color-background-subtle); color: var(--color-foreground-muted); }
 .composer-file-info { display: grid; min-width: 0; flex: 1; }
+.composer-file-preview { width: 48px; height: 48px; flex: 0 0 48px; object-fit: contain; }
+.composer-attachment-status { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--color-foreground-muted); font-size: 12px; }
 .composer-file-name { overflow: hidden; color: var(--color-foreground-strong); font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .composer-file-size { color: var(--color-foreground-muted); font-size: 11px; }
 .composer-file-remove { border: 0; background: transparent; color: var(--color-foreground-muted); font-size: 18px; cursor: pointer; }

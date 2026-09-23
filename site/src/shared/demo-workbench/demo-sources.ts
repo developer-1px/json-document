@@ -1,15 +1,36 @@
+import textChangeSource from "../../../../packages/json-document-editing/src/text-change.ts?raw";
+import markdownSyntaxSource from "../../../../packages/json-document-markdown/src/syntax.ts?raw";
+import markdownParserSource from "../../../../packages/json-document-markdown/src/parser.ts?raw";
+import clipboardEventSource from "../../../../packages/json-document-web/src/clipboard-event.ts?raw";
 import type { CodeLanguage } from "../ui/code-tokens";
+import objectModelSource from "../../../../packages/json-document-object-document/src/object-model.ts?raw";
+import objectStyleSource from "../../../../packages/json-document-object-document/src/object-style.ts?raw";
+import objectValidationSource from "../../../../packages/json-document-object-document/src/object-validation.ts?raw";
+import objectOperationSource from "../../../../packages/json-document-object-document/src/object-operation.ts?raw";
+import objectProjectionSource from "../../../../packages/json-document-object-document/src/object-projection.ts?raw";
+import canvasHandSource from "../../../../packages/json-document-canvas/src/canvas-hand.tsx?raw";
+import canvasInteractionSource from "../../../../packages/json-document-canvas/src/use-canvas-hand.ts?raw";
+import canvasObjectViewSource from "../../../../packages/json-document-canvas/src/canvas-object-view.tsx?raw";
+import canvasStyleControlsSource from "../../../../packages/json-document-canvas/src/canvas-style-controls.tsx?raw";
+import canvasClipboardSource from "../../../../packages/json-document-canvas/src/canvas-clipboard.ts?raw";
+import canvasClipboardEditingSource from "../../../../packages/json-document-editing/src/canvas-clipboard.ts?raw";
+import objectPasteSessionSource from "../../../../packages/json-document-editing/src/object-paste-session.ts?raw";
+import editingPreparationQueueSource from "../../../../packages/json-document-editing/src/preparation-queue.ts?raw";
+import editingSnapshotSource from "../../../../packages/json-document-react/src/editing-snapshot.ts?raw";
 import pointerTrackingSource from "../../../../packages/json-document/src/foundation/patch/track.ts?raw";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
+import calendarDocumentModelSource from "../../../../packages/json-document-calendar-document/src/calendar-model.ts?raw";
+import calendarDocumentProjectionSource from "../../../../packages/json-document-calendar-document/src/calendar-projection.ts?raw";
 import calendarEditingSource from "../../../../packages/json-document-editing/src/calendar.ts?raw";
+import calendarEventPlanSource from "../../../../packages/json-document-calendar-document/src/calendar-operation.ts?raw";
 import calendarAllDayPointerSource from "../../../../packages/json-document-editing/src/calendar-allday-pointer.ts?raw";
 import calendarMonthPointerSource from "../../../../packages/json-document-editing/src/calendar-month-pointer.ts?raw";
 import calendarTimeGridPointerSource from "../../../../packages/json-document-editing/src/calendar-time-grid-pointer.ts?raw";
-import calendarOccurrenceSource from "../../../../packages/json-document-editing/src/calendar-occurrence.ts?raw";
+import calendarOccurrenceSource from "../../../../packages/json-document-calendar-document/src/calendar-occurrence.ts?raw";
 import calendarPreviewSource from "../../../../packages/json-document-editing/src/calendar-preview.ts?raw";
 import calendarSelectionSource from "../../../../packages/json-document-editing/src/calendar-selection.ts?raw";
 import calendarSelectionMoveSource from "../../../../packages/json-document-editing/src/calendar-selection-move.ts?raw";
-import calendarValidationSource from "../../../../packages/json-document-editing/src/calendar-validation.ts?raw";
+import calendarValidationSource from "../../../../packages/json-document-calendar-document/src/calendar-validation.ts?raw";
 import calendarEventLabelSource from "../../../../packages/json-document-calendar/src/calendar-event-label.ts?raw";
 import dateControlsSource from "../../../../packages/json-document-calendar/src/date-controls.tsx?raw";
 import dateGridSource from "../../../../packages/json-document-calendar/src/date-grid.tsx?raw";
@@ -18,9 +39,17 @@ import calendarTimeGridSource from "../../../../packages/json-document-calendar/
 import calendarEventInspectorSource from "../../../../packages/json-document-calendar/src/calendar-event-inspector.tsx?raw";
 import animationSource from "../../../../packages/json-document-animation-react/src/animations.tsx?raw";
 import markdownRendererSource from "../../../../packages/json-document-markdown-react/src/MarkdownRenderer.tsx?raw";
+import markdownEditingSource from "../../../../packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx?raw";
+import markdownProjectionSource from "../../../../packages/json-document-markdown/src/projection.ts?raw";
+import markdownDOMSource from "../../../../packages/json-document-markdown-web/src/markdown-dom.ts?raw";
+import markdownSourceRunsSource from "../../../../packages/json-document-markdown-web/src/source-runs.ts?raw";
+import textEditingSource from "../../../../packages/json-document-editing/src/text.ts?raw";
 import dateValuesSource from "../../../../packages/json-document-calendar/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
+import affordanceSelectSource from "../../../../packages/json-document-affordance/src/select.ts?raw";
+import planeSelectSource from "../../../../packages/json-document-affordance/src/plane-select.ts?raw";
+import affordanceDragSource from "../../../../packages/json-document-affordance/src/drag.ts?raw";
 import viewportPositionSource from "../../../../packages/json-document-affordance/src/viewport-position.ts?raw";
 import anchoredFloatingPositionSource from "../../../../packages/json-document-affordance/src/anchored-floating-position.ts?raw";
 import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
@@ -33,10 +62,15 @@ import virtualSelectionReactSource from "../../../../packages/json-document-reac
 import anchoredFloatingPositionReactSource from "../../../../packages/json-document-react/src/use-anchored-floating-position.ts?raw";
 import documentTextControlSource from "../../../../packages/json-document-react/src/use-document-text-control.ts?raw";
 import documentEditingSource from "../../../../packages/json-document-editing/src/document.ts?raw";
+import orderEditingSource from "../../../../packages/json-document-editing/src/order.ts?raw";
+import treeEditorSource from "../../../../packages/json-document-editing/src/tree.ts?raw";
+import sheetEditingSource from "../../../../packages/json-document-editing/src/sheet.ts?raw";
 import editingClipboardSource from "../../../../packages/json-document-editing/src/clipboard.ts?raw";
 import editingSessionSource from "../../../../packages/json-document-editing/src/session.ts?raw";
 import editingIdentitySource from "../../../../packages/json-document-editing/src/identity.ts?raw";
 import editingHistorySource from "../../../../packages/json-document-editing/src/history.ts?raw";
+import editingHistoryPatchSource from "../../../../packages/json-document-editing/src/history-patch.ts?raw";
+import editingHistoryInvalidationSource from "../../../../packages/json-document-editing/src/history-invalidation.ts?raw";
 import editingInverseSource from "../../../../packages/json-document-editing/src/invert-patch.ts?raw";
 import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
 import kanbanEditingSource from "../../../../packages/json-document-editing/src/kanban.ts?raw";
@@ -64,9 +98,17 @@ import contentInteractionAffordanceSource from "../../../../packages/json-docume
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
 import databasePropertyValueSource from "../../../../packages/json-document-editing/src/database-property-value.ts?raw";
 import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
+import annotationSelectionSource from "../../../../packages/json-document-editing/src/annotation-selection.ts?raw";
+import annotationOutputSource from "../../../../packages/json-document-annotation/src/annotation-output.ts?raw";
+import annotationHandSource from "../../../../packages/json-document-annotation/src/annotation-hand.tsx?raw";
+import databasePropertyControlSource from "../../../../packages/json-document-database/src/database-property-control.tsx?raw";
+import databaseViewControlsSource from "../../../../packages/json-document-database/src/database-view-controls.tsx?raw";
 import annotationEditingSource from "../../../../packages/json-document-editing/src/annotation.ts?raw";
 import webSVGCoordinateSource from "../../../../packages/json-document-web/src/svg-coordinate.ts?raw";
 import webRasterSource from "../../../../packages/json-document-web/src/raster-source.ts?raw";
+import webRasterFilesSource from "../../../../packages/json-document-web/src/raster-files.ts?raw";
+import webHTMLFragmentSource from "../../../../packages/json-document-web/src/html-fragment.ts?raw";
+import webHTMLClipboardSource from "../../../../packages/json-document-web/src/html-clipboard.ts?raw";
 import webAnnotationRasterSource from "../../../../packages/json-document-web/src/annotation-raster.ts?raw";
 import uiMenuSource from "../../../../packages/json-document-ui-primitives-react/src/menu.tsx?raw";
 import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
@@ -90,8 +132,10 @@ import composerInteractionSource from "../../../../packages/json-document-compos
 import composerSuggestionsSource from "../../../../packages/json-document-composer/src/suggestions.ts?raw";
 import composerReferenceAtomSource from "../../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";
 import composerReactLifecycleSource from "../../../../packages/json-document-composer-react/src/use-composer.tsx?raw";
+import composerAttachmentsSource from "../../../../packages/json-document-composer-react/src/attachments.ts?raw";
 import composerCommandMenuSource from "../../../../packages/json-document-composer-react/src/command-menu.ts?raw";
 import fileIntakeSource from "../../../../packages/json-document-file-intake/src/index.ts?raw";
+import rasterContentSource from "../../../../packages/json-document-file-intake/src/raster-content.ts?raw";
 import suggestionSource from "../../../../packages/json-document-rich-text-suggestion/src/index.ts?raw";
 import suggestionReactSource from "../../../../packages/json-document-rich-text-suggestion-react/src/index.ts?raw";
 import mentionSource from "../../../../packages/json-document-rich-text-suggestion/src/mention.ts?raw";
@@ -101,9 +145,15 @@ import richTextReactSurfaceSource from "../../../../packages/json-document-rich-
 import richTextRenderStoreSource from "../../../../packages/json-document-rich-text-react/src/render-store.ts?raw";
 import uiFileSizeSource from "../../../../packages/json-document-file-intake/src/file-size.ts?raw";
 import coreDocumentSource from "../../../../packages/json-document/src/application/document/create.ts?raw";
+import corePointerReadSource from "../../../../packages/json-document/src/foundation/protocol/read.ts?raw";
+import coreJSONValidationSource from "../../../../packages/json-document/src/foundation/json/serializable.ts?raw";
+import selectionKeySource from "../../../../packages/json-document-selection/src/key/index.ts?raw";
 import selectionRangeSource from "../../../../packages/json-document-selection/src/range/index.ts?raw";
 import selectionMaterializedRangeSource from "../../../../packages/json-document-selection/src/range/materialized.ts?raw";
 import contentEditableReactSource from "../../../../packages/json-document-contenteditable/src/content-editable.tsx?raw";
+import contentEditableLeaseSource from "../../../../packages/json-document-contenteditable/src/lease.ts?raw";
+import plainTextDOMSource from "../../../../packages/json-document-contenteditable/src/dom/plain-text.ts?raw";
+import textDOMIndexSource from "../../../../packages/json-document-contenteditable/src/dom/text-index.ts?raw";
 import collaborationCreateSource from "../../../../packages/json-document-collaboration/src/create.ts?raw";
 import collaborationEditingSource from "../../../../packages/json-document-collaboration/src/editing-index.ts?raw";
 import collaborationContentEditableSource from "../../../../packages/contenteditable-collaboration/src/lease.ts?raw";
@@ -126,9 +176,15 @@ export type DemoSourceFile = {
 };
 
 const packageReferencePaths = new Map([
+  ["packages/json-document-markdown/", "/docs/api/markdown"],
+  ["packages/json-document-markdown-web/", "/docs/api/markdown-web"],
+  ["packages/json-document-object-document/", "/docs/api/object-document"],
+  ["packages/json-document-canvas/", "/docs/api/canvas"],
   ["packages/json-document/", "/docs/api/json-document"],
   ["packages/json-document-selection/", "/docs/api/selection"],
   ["packages/json-document-editing/", "/docs/api/editing"],
+  ["packages/json-document-calendar/", "/docs/api/calendar"],
+  ["packages/json-document-calendar-document/", "/docs/api/calendar-document"],
   ["packages/json-document-react/", "/docs/api/react"],
   ["packages/json-document-react-hook-form/", "/docs/api/react-hook-form"],
   ["packages/json-document-ajv/", "/docs/api/ajv"],
@@ -140,6 +196,7 @@ const packageReferencePaths = new Map([
   ["packages/json-document-animation-react/", "/docs/api/animation-react"],
   ["packages/json-document-markdown-react/", "/docs/api/markdown-react"],
   ["packages/json-document-database/", "/docs/api/database"],
+  ["packages/json-document-annotation/", "/docs/api/annotation"],
   ["packages/json-document-web/", "/docs/api/web"],
   ["packages/json-document-contenteditable/", "/docs/api/contenteditable"],
   ["packages/json-document-rich-text/", "/docs/api/rich-text"],
@@ -171,16 +228,39 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-web/src/clipboard-event.ts", clipboardEventSource],
+  ["packages/json-document-editing/src/preparation-queue.ts", editingPreparationQueueSource],
+  ["packages/json-document-web/src/raster-files.ts", webRasterFilesSource],
+  ["packages/json-document-web/src/html-fragment.ts", webHTMLFragmentSource],
+  ["packages/json-document-web/src/html-clipboard.ts", webHTMLClipboardSource],
+  ["packages/json-document-file-intake/src/raster-content.ts", rasterContentSource],
+  ["packages/json-document-composer-react/src/attachments.ts", composerAttachmentsSource],
+  ["packages/json-document-object-document/src/object-model.ts", objectModelSource],
+  ["packages/json-document-object-document/src/object-style.ts", objectStyleSource],
+  ["packages/json-document-object-document/src/object-validation.ts", objectValidationSource],
+  ["packages/json-document-object-document/src/object-operation.ts", objectOperationSource],
+  ["packages/json-document-object-document/src/object-projection.ts", objectProjectionSource],
+  ["packages/json-document-canvas/src/canvas-hand.tsx", canvasHandSource],
+  ["packages/json-document-canvas/src/use-canvas-hand.ts", canvasInteractionSource],
+  ["packages/json-document-canvas/src/canvas-object-view.tsx", canvasObjectViewSource],
+  ["packages/json-document-canvas/src/canvas-style-controls.tsx", canvasStyleControlsSource],
+  ["packages/json-document-canvas/src/canvas-clipboard.ts", canvasClipboardSource],
+  ["packages/json-document-editing/src/canvas-clipboard.ts", canvasClipboardEditingSource],
+  ["packages/json-document-editing/src/object-paste-session.ts", objectPasteSessionSource],
+  ["packages/json-document-react/src/editing-snapshot.ts", editingSnapshotSource],
   ["packages/json-document/src/foundation/patch/track.ts", pointerTrackingSource],
+  ["packages/json-document-calendar-document/src/calendar-model.ts", calendarDocumentModelSource],
+  ["packages/json-document-calendar-document/src/calendar-projection.ts", calendarDocumentProjectionSource],
   ["packages/json-document-editing/src/calendar.ts", calendarEditingSource],
   ["packages/json-document-editing/src/calendar-allday-pointer.ts", calendarAllDayPointerSource],
   ["packages/json-document-editing/src/calendar-month-pointer.ts", calendarMonthPointerSource],
   ["packages/json-document-editing/src/calendar-time-grid-pointer.ts", calendarTimeGridPointerSource],
-  ["packages/json-document-editing/src/calendar-occurrence.ts", calendarOccurrenceSource],
+  ["packages/json-document-calendar-document/src/calendar-occurrence.ts", calendarOccurrenceSource],
   ["packages/json-document-editing/src/calendar-preview.ts", calendarPreviewSource],
+  ["packages/json-document-calendar-document/src/calendar-operation.ts", calendarEventPlanSource],
   ["packages/json-document-editing/src/calendar-selection.ts", calendarSelectionSource],
   ["packages/json-document-editing/src/calendar-selection-move.ts", calendarSelectionMoveSource],
-  ["packages/json-document-editing/src/calendar-validation.ts", calendarValidationSource],
+  ["packages/json-document-calendar-document/src/calendar-validation.ts", calendarValidationSource],
   ["packages/json-document-calendar/src/calendar-event-label.ts", calendarEventLabelSource],
   ["packages/json-document-calendar/src/date-controls.tsx", dateControlsSource],
   ["packages/json-document-calendar/src/date-grid.tsx", dateGridSource],
@@ -189,10 +269,19 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-calendar/src/calendar-event-inspector.tsx", calendarEventInspectorSource],
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
+  ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
+  ["packages/json-document-markdown/src/projection.ts", markdownProjectionSource],
+  ["packages/json-document-editing/src/text-change.ts", textChangeSource],
+  ["packages/json-document-markdown/src/syntax.ts", markdownSyntaxSource],
+  ["packages/json-document-markdown/src/parser.ts", markdownParserSource],
+  ["packages/json-document-markdown-web/src/markdown-dom.ts", markdownDOMSource],
+  ["packages/json-document-markdown-web/src/source-runs.ts", markdownSourceRunsSource],
+  ["packages/json-document-editing/src/text.ts", textEditingSource],
   ["packages/json-document-calendar/src/date-values.ts", dateValuesSource],
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
   ["packages/json-document-react/src/use-editing.ts", editingItemSource],
   ["packages/json-document-affordance/src/session.ts", affordanceSessionSource],
+  ["packages/json-document-affordance/src/select.ts", affordanceSelectSource],
   ["packages/json-document-affordance/src/viewport-position.ts", viewportPositionSource],
   ["packages/json-document-affordance/src/anchored-floating-position.ts", anchoredFloatingPositionSource],
   ["packages/json-document-web/src/focus-item.ts", webFocusItemSource],
@@ -205,11 +294,16 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/use-anchored-floating-position.ts", anchoredFloatingPositionReactSource],
   ["packages/json-document-react/src/use-document-text-control.ts", documentTextControlSource],
   ["packages/json-document-editing/src/document.ts", documentEditingSource],
+  ["packages/json-document-editing/src/order.ts", orderEditingSource],
+  ["packages/json-document-editing/src/tree.ts", treeEditorSource],
+  ["packages/json-document-editing/src/sheet.ts", sheetEditingSource],
   ["packages/json-document-editing/src/clipboard.ts", editingClipboardSource],
   ["packages/json-document-editing/src/session.ts", editingSessionSource],
   ["packages/json-document-editing/src/identity.ts", editingIdentitySource],
   ["packages/json-document-editing/src/history.ts", editingHistorySource],
+  ["packages/json-document-editing/src/history-patch.ts", editingHistoryPatchSource],
   ["packages/json-document-editing/src/invert-patch.ts", editingInverseSource],
+  ["packages/json-document-editing/src/history-invalidation.ts", editingHistoryInvalidationSource],
   ["packages/json-document-editing/src/object.ts", objectEditingSource],
   ["packages/json-document-editing/src/kanban.ts", kanbanEditingSource],
   ["packages/json-document-editing/src/topology.ts", editingTopologySource],
@@ -231,11 +325,18 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
   ["packages/json-document-affordance/src/gesture-session.ts", gestureSessionSource],
+  ["packages/json-document-affordance/src/plane-select.ts", planeSelectSource],
+  ["packages/json-document-affordance/src/drag.ts", affordanceDragSource],
   ["packages/json-document-affordance/src/interaction-handle.ts", interactionHandleSource],
   ["packages/json-document-affordance/src/content-interaction.ts", contentInteractionAffordanceSource],
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
   ["packages/json-document-editing/src/database-property-value.ts", databasePropertyValueSource],
   ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
+  ["packages/json-document-annotation/src/annotation-hand.tsx", annotationHandSource],
+  ["packages/json-document-annotation/src/annotation-output.ts", annotationOutputSource],
+  ["packages/json-document-editing/src/annotation-selection.ts", annotationSelectionSource],
+  ["packages/json-document-database/src/database-property-control.tsx", databasePropertyControlSource],
+  ["packages/json-document-database/src/database-view-controls.tsx", databaseViewControlsSource],
   ["packages/json-document-editing/src/annotation.ts", annotationEditingSource],
   ["packages/json-document-web/src/svg-coordinate.ts", webSVGCoordinateSource],
   ["packages/json-document-web/src/raster-source.ts", webRasterSource],
@@ -273,9 +374,15 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-rich-text-react/src/render-store.ts", richTextRenderStoreSource],
   ["packages/json-document-file-intake/src/file-size.ts", uiFileSizeSource],
   ["packages/json-document/src/application/document/create.ts", coreDocumentSource],
+  ["packages/json-document/src/foundation/protocol/read.ts", corePointerReadSource],
+  ["packages/json-document/src/foundation/json/serializable.ts", coreJSONValidationSource],
   ["packages/json-document-selection/src/range/index.ts", selectionRangeSource],
+  ["packages/json-document-selection/src/key/index.ts", selectionKeySource],
   ["packages/json-document-selection/src/range/materialized.ts", selectionMaterializedRangeSource],
   ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
+  ["packages/json-document-contenteditable/src/lease.ts", contentEditableLeaseSource],
+  ["packages/json-document-contenteditable/src/dom/plain-text.ts", plainTextDOMSource],
+  ["packages/json-document-contenteditable/src/dom/text-index.ts", textDOMIndexSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
   ["packages/json-document-collaboration/src/editing-index.ts", collaborationEditingSource],
   ["packages/contenteditable-collaboration/src/lease.ts", collaborationContentEditableSource],
@@ -290,7 +397,74 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-tanstack-table/src/index.ts", tanStackTableSource],
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
+const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["packages/json-document-editing/src/text.ts", ["packages/json-document-editing/src/session.ts"]],
+  ["packages/json-document-editing/src/session.ts", ["packages/json-document-editing/src/history-patch.ts"]],
+  ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
+]);
 const registeredPublicUsages = [
+  ...["createWebClipboardSurface", "routeWebClipboardEvent"].flatMap(symbol => [
+    { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/clipboard-event.ts" },
+    { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/input.ts" },
+  ]),
+  { packageName: "@interactive-os/json-document-web", symbol: "parseWebHTMLFragment", sourcePath: "packages/json-document-web/src/html-fragment.ts" },
+  ...["captureWebClipboardPaste", "parseWebClipboardHTML", "readWebHTMLClipboard"].flatMap((symbol) => [
+    { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/html-clipboard.ts" },
+    { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/html-fragment.ts" },
+  ]),
+  { packageName: "@interactive-os/json-document-editing", symbol: "createEditingPreparationQueue", sourcePath: "packages/json-document-editing/src/preparation-queue.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createObjectPasteSession", sourcePath: "packages/json-document-editing/src/preparation-queue.ts" },
+  { packageName: "@interactive-os/json-document-web", symbol: "readWebRasterFiles", sourcePath: "packages/json-document-web/src/raster-files.ts" },
+  ...["assertRasterImageSource", "assertRasterImageContent", "RasterImageContent"].map((symbol) => ({ packageName: "@interactive-os/json-document-file-intake", symbol, sourcePath: "packages/json-document-file-intake/src/raster-content.ts" })),
+  { packageName: "@interactive-os/json-document-composer-react", symbol: "useComposer", sourcePath: "packages/json-document-composer-react/src/attachments.ts" },
+  ...(["CanvasHand", "useCanvasHand", "createCanvasClipboardBinding"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-canvas", symbol, sourcePath: "packages/json-document-canvas/src/canvas-clipboard.ts" })),
+  { packageName: "@interactive-os/json-document-editing", symbol: "createCanvasClipboard", sourcePath: "packages/json-document-editing/src/canvas-clipboard.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createObjectPasteSession", sourcePath: "packages/json-document-editing/src/object-paste-session.ts" },
+  { packageName: "@interactive-os/json-document-web", symbol: "captureWebClipboardPaste", sourcePath: "packages/json-document-web/src/clipboard.ts" },
+  {
+    packageName: "@interactive-os/json-document-canvas",
+    symbol: "CanvasHand",
+    sourcePath: "packages/json-document-canvas/src/canvas-hand.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-canvas",
+    symbol: "CanvasHand",
+    sourcePath: "packages/json-document-canvas/src/use-canvas-hand.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-canvas",
+    symbol: "CanvasHand",
+    sourcePath: "packages/json-document-canvas/src/canvas-object-view.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-canvas",
+    symbol: "CanvasHand",
+    sourcePath: "packages/json-document-canvas/src/canvas-style-controls.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-canvas",
+    symbol: "useCanvasHand",
+    sourcePath: "packages/json-document-canvas/src/use-canvas-hand.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "useEditingSnapshot",
+    sourcePath: "packages/json-document-react/src/editing-snapshot.ts",
+  },
+  ...(["ObjectDocument", "CanvasDocument", "DocumentObject", "CanvasObject", "CanvasObjectKind", "CanvasTextFormat"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-model.ts" })),
+  ...(["getObjectStyle", "readObjectStyle", "assertObjectStyle", "ObjectStyle", "ObjectStyleSelection"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-style.ts" })),
+  ...(["assertObjectDocument", "assertCanvasDocument", "assertCanvasImageSource", "parseCanvasDocument", "serializeCanvasDocument"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-validation.ts" })),
+  ...(["createCanvasObject", "createCanvasPath", "createCanvasImage", "projectObject", "projectObjectText", "ObjectTextProjection", "transformObject"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-object-document", symbol, sourcePath: "packages/json-document-object-document/src/object-projection.ts" })),
+  {
+    packageName: "@interactive-os/json-document-object-document",
+    symbol: "planObjectOperation",
+    sourcePath: "packages/json-document-object-document/src/object-operation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "textSelectionFromControl",
+    sourcePath: "packages/json-document-web/src/input.ts",
+  },
   {
     packageName: "@interactive-os/json-document-web",
     symbol: "isWebEditingHostTarget",
@@ -300,6 +474,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "createEditingSession",
     sourcePath: "packages/json-document-editing/src/session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createEditingSession",
+    sourcePath: "packages/json-document-editing/src/history-patch.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createEditingSession",
+    sourcePath: "packages/json-document-editing/src/history-invalidation.ts",
   },
   {
     packageName: "@interactive-os/json-document-calendar",
@@ -357,9 +541,44 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-web/src/point-target.ts",
   },
   {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "CalendarDocument",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-model.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "validateCalendarDocument",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "assertCalendarDocument",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "planCalendarEventRemoval",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-operation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "planCalendarOccurrenceRemoval",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-operation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "planCalendarVisibility",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-operation.ts",
+  },
+  {
     packageName: "@interactive-os/json-document-editing",
     symbol: "createCalendarEditor",
     sourcePath: "packages/json-document-editing/src/calendar.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar-document",
+    symbol: "planCalendarEventEdit",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-operation.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",
@@ -367,19 +586,19 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-editing/src/calendar.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarMonthDayLayout",
-    sourcePath: "packages/json-document-editing/src/calendar.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-projection.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarMonthWeekLayout",
-    sourcePath: "packages/json-document-editing/src/calendar.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-projection.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarBusyDates",
-    sourcePath: "packages/json-document-editing/src/calendar.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-projection.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",
@@ -397,24 +616,24 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-editing/src/calendar-time-grid-pointer.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "projectCalendarOccurrences",
-    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-occurrence.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarRecurrenceWithFrequency",
-    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-occurrence.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarRecurrenceWithInterval",
-    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-occurrence.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarRecurrenceWithUntil",
-    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-occurrence.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",
@@ -442,39 +661,39 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-editing/src/calendar-selection.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarAllDaySpan",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarDocumentCalendars",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarDocumentCalendar",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarDatePart",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "calendarIntervalLastDate",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "parseCalendarView",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-editing/src/calendar.ts",
   },
   {
-    packageName: "@interactive-os/json-document-editing",
+    packageName: "@interactive-os/json-document-calendar-document",
     symbol: "formatCalendarInstant",
-    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+    sourcePath: "packages/json-document-calendar-document/src/calendar-validation.ts",
   },
   {
     packageName: "@interactive-os/json-document-web",
@@ -484,6 +703,11 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-web",
     symbol: "createWebKeyboardAdapter",
+    sourcePath: "packages/json-document-web/src/keyboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "chordFromStroke",
     sourcePath: "packages/json-document-web/src/keyboard.ts",
   },
   {
@@ -530,6 +754,56 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-markdown-react",
     symbol: "MarkdownRenderer",
     sourcePath: "packages/json-document-markdown-react/src/MarkdownRenderer.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-react",
+    symbol: "MarkdownEditingSurface",
+    sourcePath: "packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownDOMAdapter",
+    sourcePath: "packages/json-document-markdown-web/src/markdown-dom.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownDOMAdapter",
+    sourcePath: "packages/json-document-markdown-web/src/source-runs.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown",
+    symbol: "createMarkdownParser",
+    sourcePath: "packages/json-document-markdown/src/parser.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown",
+    symbol: "createMarkdownParser",
+    sourcePath: "packages/json-document-markdown/src/syntax.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "diffText",
+    sourcePath: "packages/json-document-editing/src/text-change.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown",
+    symbol: "projectMarkdown",
+    sourcePath: "packages/json-document-markdown/src/syntax.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "diffText",
+    sourcePath: "packages/json-document-editing/src/text-change.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown",
+    symbol: "projectMarkdown",
+    sourcePath: "packages/json-document-markdown/src/projection.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createTextEditor",
+    sourcePath: "packages/json-document-editing/src/text.ts",
   },
   ...([
     "AuroraMass",
@@ -644,6 +918,16 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document",
+    symbol: "readPointer",
+    sourcePath: "packages/json-document/src/foundation/protocol/read.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document",
+    symbol: "isJSONValue",
+    sourcePath: "packages/json-document/src/foundation/json/serializable.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document",
     symbol: "trackPointer",
     sourcePath: "packages/json-document/src/foundation/patch/track.ts",
   },
@@ -673,8 +957,38 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-contenteditable/src/content-editable.tsx",
   },
   {
+    packageName: "@interactive-os/json-document-contenteditable",
+    symbol: "createContentEditableBinding",
+    sourcePath: "packages/json-document-contenteditable/src/lease.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-contenteditable",
+    symbol: "plainTextDOMAdapter",
+    sourcePath: "packages/json-document-contenteditable/src/dom/plain-text.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-contenteditable",
+    symbol: "plainTextDOMAdapter",
+    sourcePath: "packages/json-document-contenteditable/src/dom/text-index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "clampTextSelection",
+    sourcePath: "packages/json-document-editing/src/text.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "textClipboardCodec",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
     packageName: "@interactive-os/json-document-editing",
     symbol: "createEditingId",
+    sourcePath: "packages/json-document-editing/src/identity.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createEditingIdAllocator",
     sourcePath: "packages/json-document-editing/src/identity.ts",
   },
   {
@@ -927,6 +1241,27 @@ const registeredPublicUsages = [
     symbol: "createAnnotationEditor",
     sourcePath: "packages/json-document-editing/src/annotation.ts",
   },
+  // Public editor implementation spans its domain projection and the Key owner.
+  ...["packages/json-document-editing/src/annotation-selection.ts", "packages/json-document-selection/src/key/index.ts"].map((sourcePath) => ({
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createAnnotationEditor",
+    sourcePath,
+  })),
+  ...["transformAnnotationSelector", "annotationSelectorBounds", "annotationResizeHandle"].map((symbol) => ({
+    packageName: "@interactive-os/json-document-editing",
+    symbol,
+    sourcePath: "packages/json-document-editing/src/annotation.ts",
+  })),
+  {
+    packageName: "@interactive-os/json-document-annotation",
+    symbol: "AnnotationHand",
+    sourcePath: "packages/json-document-annotation/src/annotation-hand.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-annotation",
+    symbol: "useAnnotationOutput",
+    sourcePath: "packages/json-document-annotation/src/annotation-output.ts",
+  },
   {
     packageName: "@interactive-os/json-document-react",
     symbol: "editingItemProps",
@@ -949,6 +1284,31 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-affordance",
+    symbol: "selectAllAffordance",
+    sourcePath: "packages/json-document-affordance/src/select.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "deleteAffordance",
+    sourcePath: "packages/json-document-affordance/src/select.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createDocumentEditor",
+    sourcePath: "packages/json-document-editing/src/document.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createOrderEditor",
+    sourcePath: "packages/json-document-editing/src/order.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createTreeEditor",
+    sourcePath: "packages/json-document-editing/src/tree.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
     symbol: "createLineFocusSession",
     sourcePath: "packages/json-document-affordance/src/session.ts",
   },
@@ -965,6 +1325,16 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-web",
     symbol: "createWebClipboardSurface",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebClipboardBinding",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "objectClipboardCodec",
     sourcePath: "packages/json-document-web/src/clipboard.ts",
   },
   {
@@ -1011,6 +1381,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "documentSelectionFocus",
     sourcePath: "packages/json-document-editing/src/document.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createSheetEditor",
+    sourcePath: "packages/json-document-editing/src/sheet.ts",
   },
   {
     packageName: "@interactive-os/json-document-react",
@@ -1081,6 +1456,36 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-affordance",
     symbol: "createCanvasGestureSession",
     sourcePath: "packages/json-document-affordance/src/canvas-gesture-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/plane-select.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/select.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/drag.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createPlaneSelectProfile",
+    sourcePath: "packages/json-document-affordance/src/gesture-session.ts",
+  },
+  ...["dragAffordance", "resizeAffordance", "marqueeAffordance", "marqueeHitsAffordance"].map((symbol) => ({
+    packageName: "@interactive-os/json-document-affordance",
+    symbol,
+    sourcePath: "packages/json-document-affordance/src/drag.ts",
+  })),
+  {
+    packageName: "@interactive-os/json-document-selection",
+    symbol: "createKeySelectionFamily",
+    sourcePath: "packages/json-document-selection/src/key/index.ts",
   },
   {
     packageName: "@interactive-os/json-document-affordance",
@@ -1165,6 +1570,7 @@ async function discoverSourceClosure(entry: string): Promise<ReadonlyArray<DemoS
     visited.add(path);
     paths.push(path);
     const source = await loadSource(path);
+    for (const implementation of registeredImplementationSources.get(path) ?? []) await visit(implementation);
     for (const specifier of relativeSpecifiers(source)) {
       const resolved = resolveSource(path, specifier);
       if (resolved !== undefined) await visit(resolved);

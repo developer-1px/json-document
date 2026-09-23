@@ -94,6 +94,12 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 평면 위 객체에서 손은 선택 도구가 기본입니다. 빈 곳과 객체 히트가 다르고,
 고른 집합이 곧 옮길 대상입니다.
 
+최소 평면 문법은 [`createPlaneSelectProfile`](/docs/api/affordance)로 조합되어
+[Canvas Usage](/demo/canvas)에서 실행됩니다. 아래 표에는 단일 Affordance로만 제공되는
+더 넓은 기능도 포함됩니다. 축 고정·Alt 복제·Mod+D·nudge는 프로파일에 연결되어 있습니다.
+그룹·중첩 선택·snap·zoom/pan은 이 최소 프로파일의
+지원 범위가 아닙니다.
+
 근거 축: [Figma 레이어 선택](https://help.figma.com/hc/en-us/articles/360040449873-Select-layers-and-objects),
 [FigJam 선택·이동](https://help.figma.com/hc/en-us/articles/1500004292221-Select-move-and-order-objects-in-FigJam),
 [Illustrator 기본 단축키](https://helpx.adobe.com/illustrator/using/default-keyboard-shortcuts.html),
@@ -108,7 +114,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | 손 | 함의 | 수렴 | 상태 |
 | --- | --- | --- | --- |
 | 객체 click | 그 객체만 replace | 안정 | [닫힘](affordance-select.md) |
-| 이미 고른 객체 click (수정 키 없음) | 집합 유지. 다음 드래그의 대상은 집합 전부 | 안정 | [닫힘](affordance-select.md) |
+| 이미 고른 객체 press (수정 키 없음) | 집합 유지. drag는 집합 전부, drag 없이 release하면 단일 선택 | 안정 | [닫힘](affordance-select.md) |
 | 안 고른 객체 click | 집합을 그 객체 하나로 바꿈. 드래그 대상도 그 하나 | 안정 | [닫힘](affordance-select.md) |
 | Shift+click | 집합에 더하거나, 이미 있으면 뺌 | 안정 | [닫힘](affordance-select.md) |
 | Mod+click (⌘/Ctrl) | 호스트가 `nestedId`를 줄 때만 자식. 없으면 일반 click. 리스트박스 토글이 아님 | 갈림 | [닫힘](affordance-select.md) |

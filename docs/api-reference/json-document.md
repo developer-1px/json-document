@@ -1,8 +1,8 @@
 # @interactive-os/json-document API
 
-**Owner:** JSON Document
+**탐색 분류:** JSON Document
 
-Core document 값·주소·patch 계약의 public entrypoint입니다. 아래 항목은 package root에서 import할 수 있는 안정된 public API이며 internal 경로는 계약이 아닙니다.
+Core document 값·주소·patch 계약의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 사이트에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
 
 > 이 문서는 `packages/json-document/src/application/document/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
@@ -25,6 +25,11 @@ buildPointer(segments: ReadonlyArray<string | number>, options?: { readonly uriF
 
 ```ts
 createJSONDocument(initial: unknown, options?: JSONDocumentOptions): JSONDocument
+```
+## `isJSONValue`
+
+```ts
+isJSONValue(value: unknown): value is JSONValue
 ```
 ## `JSONAppliedChange`
 
@@ -166,6 +171,11 @@ type QueryResult =
       readonly code: string;
       readonly reason?: string;
     };
+```
+## `readPointer`
+
+```ts
+readPointer(value: JSONValue, pointer: Pointer): ReadResult
 ```
 ## `ReadResult`
 

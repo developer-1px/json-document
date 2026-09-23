@@ -1,26 +1,39 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { Command } from "./controls.js";
 
 export function Popover(props: {
   readonly label: string;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly trigger: ReactNode;
+  readonly triggerPresentation?: "label" | "icon";
   readonly children: ReactNode;
   readonly className?: string;
   readonly panelClassName?: string;
 }): ReactNode {
   const id = `json-document-popover-${useId().replaceAll(":", "")}`;
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const rootRef = useRef<HTMLSpanElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   useEffect(() => { if (props.open) panelRef.current?.focus(); }, [props.open]);
+  useEffect(() => {
+    if (!props.open) return;
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) props.onOpenChange(false);
+    };
+    document.addEventListener("pointerdown", dismissOutside, true);
+    return () => document.removeEventListener("pointerdown", dismissOutside, true);
+  }, [props.open, props.onOpenChange]);
   const close = () => {
     props.onOpenChange(false);
-    queueMicrotask(() => triggerRef.current?.focus());
+    queueMicrotask(() => rootRef.current?.querySelector<HTMLButtonElement>("button")?.focus());
   };
+  const triggerProps = { "aria-label": props.label, "aria-haspopup": "dialog", "aria-controls": id, "aria-expanded": props.open, onClick: () => props.onOpenChange(!props.open) } as const;
   return (
-    <span className={props.className} data-ui-presentation="popover">
-      <button ref={triggerRef} type="button" aria-label={props.label} aria-haspopup="dialog" aria-controls={id} aria-expanded={props.open} onClick={() => props.onOpenChange(!props.open)}>{props.trigger}</button>
-      {props.open ? <div ref={panelRef} id={id} role="dialog" aria-label={props.label} tabIndex={-1} className={props.panelClassName} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); close(); } }}>{props.children}</div> : null}
+    <span ref={rootRef} className={props.className} data-ui-presentation="popover" onBlur={(event) => {
+      if (props.open && event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) props.onOpenChange(false);
+    }}>
+      {props.triggerPresentation === "icon" ? <Command {...triggerProps} label={props.label}>{props.trigger}</Command> : <button type="button" {...triggerProps}>{props.trigger}</button>}
+      {props.open ? <div ref={panelRef} id={id} role="dialog" aria-label={props.label} tabIndex={-1} className={props.panelClassName} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); } }}>{props.children}</div> : null}
     </span>
   );
 }

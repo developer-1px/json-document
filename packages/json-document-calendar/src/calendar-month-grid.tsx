@@ -9,6 +9,9 @@ import {
   type Ref,
 } from "react";
 import {
+  type CalendarOccurrenceTopologySnapshot,
+} from "@interactive-os/json-document-editing";
+import {
   calendarAllDaySpan,
   calendarEventsOnDay,
   calendarIntervalLastDate,
@@ -16,8 +19,7 @@ import {
   calendarMonthWeekLayout,
   isCalendarAllDay,
   type CalendarEvent,
-  type CalendarOccurrenceTopologySnapshot,
-} from "@interactive-os/json-document-editing";
+} from "@interactive-os/json-document-calendar-document";
 import { selectionModeFromModifiers } from "@interactive-os/json-document-react";
 import {
   contentInteractionAttributes,
@@ -124,6 +126,7 @@ export const CalendarMonthGrid = forwardRef<CalendarMonthGridHandle, CalendarMon
 
     return (
       <div
+        ref={interactions.rootRef}
         role="grid"
         aria-label={props.labels.grid}
         aria-multiselectable="true"

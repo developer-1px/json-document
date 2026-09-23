@@ -3,7 +3,7 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { createEditingId } from "./identity.js";
+import { createEditingId, createEditingIdAllocator } from "./identity.js";
 import type { EditingHistoryOptions } from "./history.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
@@ -11,7 +11,7 @@ import {
   emptyRangeSelection,
   type RangeSelection,
 } from "@interactive-os/json-document-selection";
-import { reconcileRangeSelection, selectRangePoint } from "./range-selection.js";
+import { reconcileRangeSelection, replaceRangeSelection, selectRangePoint } from "./range-selection.js";
 import { lineInterval, lineTopology } from "./topology.js";
 import { assertOrderDocument } from "./order-validation.js";
 import {
@@ -63,6 +63,7 @@ export const orderClipboardFormat = {
 };
 
 export type OrderIntent =
+  | { readonly type: "selection.select-all" }
   | {
       readonly type: "selection.set";
       readonly itemId: string;
@@ -116,6 +117,14 @@ export function createOrderEditor(
 
   function dispatch(intent: OrderIntent): EditingResult<OrderSelection> {
     const items = value().items;
+    if (intent.type === "selection.select-all") {
+      const first = items[0];
+      const last = items.at(-1);
+      const selection = replaceRangeSelection(session.snapshot.selection,
+        first && last ? { anchor: { itemId: first.id }, focus: { itemId: last.id } } : null,
+        (left, right) => left.itemId === right.itemId);
+      return success(session.select(asOrderSelection(selection)));
+    }
     if (intent.type === "selection.set") {
       if (!items.some((item) => item.id === intent.itemId)) return failure("selection.item-not-found");
       const point: OrderPoint = { itemId: intent.itemId };
@@ -221,26 +230,13 @@ function rangesFor(items: ReadonlyArray<OrderItem>): OrderSelection {
   };
 }
 
-function createUniqueId(items: ReadonlyArray<OrderItem>, createId: () => string): string {
-  const existing = new Set(items.map((item) => item.id));
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    const id = createId();
-    if (!existing.has(id)) return id;
-  }
-  throw new Error("createId did not produce a unique order item id");
-}
-
 function cloneItemsWithUniqueIds(
   source: ReadonlyArray<OrderItem>,
   existing: ReadonlyArray<OrderItem>,
   createId: () => string,
 ): OrderItem[] {
-  const occupied = [...existing];
-  return source.map((item) => {
-    const copy = { ...item, id: createUniqueId(occupied, createId) };
-    occupied.push(copy);
-    return copy;
-  });
+  const allocateId = createEditingIdAllocator(existing.map((item) => item.id), createId, "order item");
+  return source.map((item) => ({ ...item, id: allocateId() }));
 }
 
 function success(snapshot: EditingSnapshot<OrderSelection>): EditingResult<OrderSelection> {

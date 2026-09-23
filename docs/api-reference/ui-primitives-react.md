@@ -1,8 +1,8 @@
 # @interactive-os/json-document-ui-primitives-react API
 
-**Owner:** UI Primitives
+**탐색 분류:** UI Primitives
 
-표준 React UI primitive의 public entrypoint입니다. 아래 항목은 package root에서 import할 수 있는 안정된 public API이며 internal 경로는 계약이 아닙니다.
+표준 React UI primitive의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 사이트에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
 
 > 이 문서는 `packages/json-document-ui-primitives-react/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
@@ -223,7 +223,7 @@ type MenuItem = {
 ## `Popover`
 
 ```ts
-Popover(props: { readonly label: string; readonly open: boolean; readonly onOpenChange: (open: boolean) => void; readonly trigger: ReactNode; readonly children: ReactNode; readonly className?: string; readonly panelClassName?: string; }): ReactNode
+Popover(props: { readonly label: string; readonly open: boolean; readonly onOpenChange: (open: boolean) => void; readonly trigger: ReactNode; readonly triggerPresentation?: "label" | "icon"; readonly children: ReactNode; readonly className?: string; readonly panelClassName?: string; }): ReactNode
 ```
 ## `ProductCanvas`
 
@@ -296,7 +296,7 @@ Tabs<T extends string | number>(props: { readonly label: string; readonly value:
 ## `Toggle`
 
 ```ts
-Toggle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & ControlAffordanceProps & { readonly pressed: boolean; readonly presentation?: "button" | "chip"; readonly label?: string; readonly tooltip?: string; }): ReactNode
+Toggle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & ControlAffordanceProps & { readonly pressed: boolean; readonly presentation?: "button" | "chip" | "icon"; readonly label?: string; readonly tooltip?: string; }): ReactNode
 ```
 ## `Toolbar`
 

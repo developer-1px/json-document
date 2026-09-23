@@ -203,3 +203,56 @@ async function drawPath(page: Page, points: ReadonlyArray<{ x: number; y: number
   for (const point of points.slice(1)) await page.mouse.move(point.x, point.y, { steps: 4 });
   await page.mouse.up();
 }
+
+test("output preserves exact document state across save, restore and raster preview", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  await page.getByRole("button", { name: "Like", exact: true }).click();
+  await canvas.click({ position: { x: 240, y: 220 } });
+  await page.getByText("Annotation output", { exact: true }).click();
+  const saved = await structured(page);
+  expect(Object.keys(saved).sort()).toEqual(["annotations", "id", "profile", "sources"]);
+  await page.getByRole("button", { name: "Save state", exact: true }).click();
+  await page.getByRole("button", { name: "Delete annotation", exact: true }).click();
+  expect((await structured(page)).annotations).toHaveLength(0);
+  await page.getByRole("button", { name: "Restore state", exact: true }).click();
+  expect(await structured(page)).toEqual(saved);
+  await expect(page.locator('[data-annotation-id][data-selected="true"]')).toHaveCount(0);
+  await page.getByRole("tab", { name: "Image", exact: true }).click();
+  await expect(page.getByTestId("annotation-image-output")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Download PNG", exact: true })).toHaveAttribute("href", /^data:image\/png/);
+});
+
+test("modified Delete is ignored while ordinary Delete and Undo share the editing contract", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  await canvas.focus();
+  await canvas.press("l");
+  await canvas.click({ position: { x: 240, y: 220 } });
+  await canvas.focus();
+  await canvas.press("Alt+Backspace");
+  expect((await structured(page)).annotations).toHaveLength(1);
+  await canvas.press("Delete");
+  expect((await structured(page)).annotations).toHaveLength(0);
+  await canvas.press("ControlOrMeta+z");
+  expect((await structured(page)).annotations).toHaveLength(1);
+  await expect(page.locator('[data-annotation-id][data-selected="true"]')).toHaveCount(1);
+});
+
+
+test("source tabs connect Annotation Usage to each canonical responsibility", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const workbench = page.getByRole("region", { name: "Demo workbench" });
+  await workbench.getByRole("tab", { name: "AnnotationDemoRoute.tsx", exact: true }).click();
+  for (const [file, code, api] of [
+    ["annotation-hand.tsx", "useInteractionHandle", "annotation"],
+    ["annotation-output.ts", "export function useAnnotationOutput", "annotation"],
+    ["annotation.ts", "transformAnnotationSelector", "editing"],
+    ["annotation-selection.ts", "family.transition", "editing"],
+    ["index.ts", "createKeySelectionFamily", "selection"],
+  ]) {
+    await workbench.getByRole("tab", { name: file, exact: true }).click();
+    await expect(workbench.getByRole("tabpanel").locator("pre")).toContainText(code!);
+    await expect(workbench.getByRole("link", { name: "API Reference" })).toHaveAttribute("href", `/docs/api/${api}`);
+  }
+});

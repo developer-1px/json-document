@@ -21,8 +21,8 @@ export function ArtifactViewerRoute() {
 
   return (
     <>
-      <PageHeader label="Artifact · Content Prototype" title="Application이 다루는 콘텐츠 계약을 검증합니다." illustration="peek">
-        navigation이나 workflow를 소유하지 않고, 서로 다른 Application 안에서 계속 편집할 수 있는 content surface를 기록합니다.
+      <PageHeader title="Artifact · TBD" illustration="peek">
+        Application 안에서 MD·PPT·Sheet를 다루는 visual prototype입니다. JSON Document와 Hands의 연결, 파일 호환성과 Undo/Redo는 아직 검증하지 않았습니다.
       </PageHeader>
 
       <ProductShell
@@ -44,12 +44,11 @@ export function ArtifactViewerRoute() {
       </ProductShell>
 
       <section className={styles.futureMap()} aria-labelledby="viewer-model-title">
-        <p className={ui.text.label}>Dependency map</p>
-        <h2 id="viewer-model-title" className={ui.text.section}>Core와 Hands가 Application 안의 Artifact를 만듭니다.</h2>
+        <h2 id="viewer-model-title" className={ui.text.section}>목표와 완료 조건 · TBD</h2>
         <ol>
-          <li><strong>Core</strong><span>사람과 agent의 변경을 같은 계약에 남깁니다.</span></li>
-          <li><strong>Hands</strong><span>사람에게 익숙한 편집 도구를 붙입니다.</span></li>
-          <li><strong>Artifact</strong><span>Application 안에서 계속 다룰 수 있는 콘텐츠가 됩니다.</span></li>
+          <li><strong>현재</strong><span>한 Host chrome에서 콘텐츠 모양을 전환하는 시각 가설을 확인합니다.</span></li>
+          <li><strong>목표</strong><span>Document Type과 Hands를 연결해 콘텐츠를 편집하고 선택·History를 복원합니다.</span></li>
+          <li><strong>완료 증거</strong><span>정본 API·Usage·Source와 실제 편집·저장·다시 열기의 검증이 필요합니다. navigation과 workflow는 Application에 남습니다.</span></li>
         </ol>
       </section>
     </>

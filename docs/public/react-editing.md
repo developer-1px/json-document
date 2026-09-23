@@ -248,7 +248,15 @@ import { DocumentTextControl } from "@interactive-os/json-document-react";
 
 `useDocumentTextControl(options)`은 같은 계약을 `ref`와 `props`로 반환합니다.
 Host가 textarea element를 직접 구성해야 할 때 사용합니다. 두 API 모두
-Web의 `textInputFromControl`과 Affordance의 caret/click 계약을 합성합니다.
+Web의 `textInputFromControl`, `textSelectionFromControl`과 Affordance의
+caret/click 계약을 합성합니다. `onCaretRange`의 `from`, `to`는 방향을 보존하는
+anchor, focus입니다. 역방향 선택에서는 `from > to`일 수 있습니다.
+
+네이티브 focus가 전달한 `offset`과 같으면 이미 선택된 범위를 유지하고, 다른
+`offset`이면 커서를 그 위치로 복원합니다. offset 하나로 과거의 네이티브 범위를
+재구성하지는 않습니다. `DocumentTextControl`이 있는 textarea의 방향키·Shift 선택은
+네이티브 입력이 담당하므로 외부 구조 탐색 binding에 `keyboard.text`를 중복 연결할
+필요가 없습니다.
 Host는 `rows`, class, 제품 문구와 실제 Document Intent dispatch를 소유합니다.
 
 Document selection의 primary point만 필요하면 Editing의

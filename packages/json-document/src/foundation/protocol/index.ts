@@ -2,6 +2,8 @@ import { trackPointer as trackPointerInternal } from "../patch/track.js";
 import type { Pointer } from "../pointer/core.js";
 import type { JSONPatchOperation, JSONValue } from "./contract.js";
 
+export { readPointer } from "./read.js";
+
 export {
   applyOwnedProtocolPatch,
   applyProtocolPatch,

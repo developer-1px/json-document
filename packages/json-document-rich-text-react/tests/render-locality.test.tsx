@@ -2,7 +2,7 @@
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-import { createJSONDocument } from "@interactive-os/json-document";
+import { buildPointer, createJSONDocument } from "@interactive-os/json-document";
 import { createRichTextEditor } from "@interactive-os/json-document-rich-text";
 import { createRichTextBlockFixture } from "./support/fixture.js";
 import { act } from "react";
@@ -18,6 +18,32 @@ import {
 import { createRichTextRenderStore } from "../src/render-store.js";
 
 describe("Rich Text React locality", () => {
+  it.each([false, true])("observes nested edits, history, and external changes (fragment: %s)", (uriFragment) => {
+    const key = "a/b~ #한";
+    const value = createRichTextBlockFixture(3, { idPrefix: "nested" });
+    const document = createJSONDocument({ [key]: value });
+    const pointer = buildPointer([key], { uriFragment });
+    const editor = createRichTextEditor({ document, pointer, selection: collapsed("nested-text-1", 1) });
+    const store = createRichTextRenderStore(editor);
+    let changed = 0;
+    const unsubscribe = store.subscribeNode("nested-text-1", () => { changed++; });
+    const untouched = store.getNode("nested-0");
+    expect(editor.dispatch({ type: "text.insert", text: "y" }).ok).toBe(true);
+    expect(changed).toBe(1);
+    expect(store.getNode("nested-text-1")).toMatchObject({ text: "xy" });
+    expect(store.getNode("nested-0")).toBe(untouched);
+    expect(lastRenderStoreBlockScan()).toBe(1);
+    expect(editor.undo().ok).toBe(true);
+    expect(store.getNode("nested-text-1")).toMatchObject({ text: "x" });
+    expect(editor.redo().ok).toBe(true);
+    expect(store.getNode("nested-text-1")).toMatchObject({ text: "xy" });
+    expect(document.commit([{ op: "replace", path: buildPointer([key, "content", 1, "content", 0, "text"]), value: "remote" }]).ok).toBe(true);
+    expect(store.getNode("nested-text-1")).toMatchObject({ text: "remote" });
+    expect(store.getNode("nested-0")).toBe(untouched);
+    expect(editor.pointer).toBe(pointer);
+    unsubscribe();
+  });
+
   it("catches up after disconnected structural and leaf edits", () => {
     const editor = createRichTextEditor({
       document: createJSONDocument(createRichTextBlockFixture(3, { idPrefix: "offline" })),
@@ -59,6 +85,15 @@ describe("Rich Text React locality", () => {
     expect(createRichTextRenderStore(editor).getBlockIds()).toEqual(["move-1", "move-2", "move-0"]);
     expect([...container.querySelectorAll("p[data-rich-text-node-id]")].map((node) => node.getAttribute("data-rich-text-node-id"))).toEqual(["move-1", "move-2", "move-0"]);
     await act(async () => root.unmount());
+    // UI subscriptions are gone; the one-shot local History marker remains.
+    expect(active).toBe(1);
+    const valueAfterMove = inner.value;
+    expect(inner.commit([{ op: "replace", path: "/content/0/content/0/text", value: "external" }]).ok).toBe(true);
+    expect(active).toBe(0);
+    expect(inner.commit([{ op: "replace", path: "/content/0/content/0/text", value: "x" }]).ok).toBe(true);
+    expect(inner.value).toEqual(valueAfterMove);
+    expect(editor.snapshot.canUndo).toBe(false);
+    expect(editor.undo()).toMatchObject({ ok: false, code: "history.empty" });
     expect(active).toBe(0);
   });
 

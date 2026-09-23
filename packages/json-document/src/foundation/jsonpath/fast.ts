@@ -1,5 +1,6 @@
+import { appendSegment } from "../pointer/core.js";
 import type { FilterExpr, Match, Query } from "./ast.js";
-import { compiledRegex, escapeSeg, objectHasOwn, plainRegexLiteral } from "./support.js";
+import { compiledRegex, objectHasOwn, plainRegexLiteral } from "./support.js";
 
 interface ArrayWildcardFieldQuery {
   arrayName: string;
@@ -16,8 +17,8 @@ export function evaluateArrayWildcardField(query: Query, root: unknown): Match[]
   const array = rootObject[simple.arrayName];
   if (!Array.isArray(array)) return null;
 
-  const rootPointer = "/" + escapeSeg(simple.arrayName);
-  const fieldPointer = "/" + escapeSeg(simple.fieldName);
+  const rootPointer = appendSegment("", simple.arrayName);
+  const fieldPointer = appendSegment("", simple.fieldName);
   const matches = new Array<Match>(array.length);
   let matchCount = 0;
   for (let index = 0; index < array.length; index += 1) {
@@ -70,7 +71,7 @@ export function evaluateArrayRegexFilter(query: Query, root: unknown): Match[] |
   const regex = literal === null ? compiledRegex(filter.pattern, filter.full) : null;
   if (literal === null && regex === null) return [];
 
-  const arrayPointer = "/" + escapeSeg(arraySelector.name);
+  const arrayPointer = appendSegment("", arraySelector.name);
   const matches = new Array<Match>(array.length);
   let matchCount = 0;
   for (let index = 0; index < array.length; index += 1) {
@@ -122,8 +123,8 @@ export function matchArrayWildcardFieldPointers(query: Query, root: unknown): st
   const array = rootObject[simple.arrayName];
   if (!Array.isArray(array)) return null;
 
-  const rootPointer = "/" + escapeSeg(simple.arrayName);
-  const fieldPointer = "/" + escapeSeg(simple.fieldName);
+  const rootPointer = appendSegment("", simple.arrayName);
+  const fieldPointer = appendSegment("", simple.fieldName);
   const pointers = new Array<string>(array.length);
   let pointerCount = 0;
   for (let index = 0; index < array.length; index += 1) {

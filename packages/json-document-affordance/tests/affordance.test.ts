@@ -44,7 +44,7 @@ import {
   wheelAffordance,
   zoomAffordance,
 } from "../src/index.js";
-import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
+import { createWebKeyboardAdapter, pressInteractionFromWeb } from "@interactive-os/json-document-web";
 
 describe("Affordance sessions", () => {
   test("owns drag, resize, and control handle descriptor, cursor, delta, and lifecycle semantics", () => {
@@ -699,17 +699,6 @@ describe("dropAffordance", () => {
   });
 });
 
-describe("selectAllAffordance", () => {
-  test("toggles Mod+A between select-all and clear", () => {
-    expect(selectAllAffordance({ key: "a", metaKey: true, ctrlKey: false }, { allSelected: false }).hand)
-      .toEqual({ type: "select-all" });
-    expect(selectAllAffordance({ key: "a", metaKey: true, ctrlKey: false }, { allSelected: true }).hand)
-      .toEqual({ type: "clear" });
-    expect(selectAllAffordance({ key: "a", metaKey: false, ctrlKey: false }, { allSelected: false }).hand)
-      .toBeNull();
-  });
-});
-
 describe("drag constrain and copy", () => {
   test("Shift constrains to the dominant axis and Alt shows copy", () => {
     expect(dragAffordance({ x: 0, y: 0 }, { x: 12, y: 3 }, { shiftKey: true }).hand)
@@ -833,5 +822,40 @@ describe("snapAffordance disable key", () => {
   test("Mod disable is the closed snap-off hand", () => {
     expect(snapAffordance({ x: 47, y: 51 }, { grid: 8, disable: true }).hand)
       .toEqual({ type: "translate", dx: 47, dy: 51 });
+  });
+});
+
+
+describe("default keyboard modifier contract", () => {
+  const keyboard = createWebKeyboardAdapter();
+  for (let mask = 0; mask < 16; mask++) {
+    const modifiers = { metaKey: !!(mask & 1), ctrlKey: !!(mask & 2), shiftKey: !!(mask & 4), altKey: !!(mask & 8) };
+    test(`preserves all modifier facts (${mask})`, () => {
+      for (const key of ["Delete", "Backspace"]) {
+        const stroke = { key, ...modifiers };
+        expect(deleteAffordance(stroke).hand).toEqual(mask === 0 ? { type: "delete" } : null);
+        expect(deleteAffordance(stroke).hand).toEqual(keyboard.resolve(stroke));
+      }
+      for (const key of ["z", "Z"]) {
+        const stroke = { key, ...modifiers };
+        expect(resolveAffordanceKey(stroke).hand).toEqual(keyboard.resolve(stroke));
+        expect(editingCommandFromWebKeyboardStroke(stroke)).toEqual(keyboard.resolve(stroke));
+      }
+      for (const key of ["a", "A"]) {
+        const stroke = { key, ...modifiers };
+        const selected = (modifiers.metaKey || modifiers.ctrlKey) && !modifiers.shiftKey && !modifiers.altKey;
+        expect(selectAllAffordance(stroke, { allSelected: true }, { repeat: "preserve" }).hand)
+          .toEqual(selected ? { type: "select-all" } : null);
+        expect(selectAllAffordance(stroke, { allSelected: true }).hand)
+          .toEqual(selected ? { type: "clear" } : null);
+      }
+    });
+  }
+
+  test("keeps legacy partial inputs without inventing modifiers", () => {
+    expect(deleteAffordance({ key: "Backspace" }).hand).toEqual({ type: "delete" });
+    expect(deleteAffordance({}).hand).toBeNull();
+    expect(selectAllAffordance({ key: "a", metaKey: true, ctrlKey: false }, { allSelected: false }).hand)
+      .toEqual({ type: "select-all" });
   });
 });

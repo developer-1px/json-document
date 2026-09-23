@@ -1,6 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { calendarBusyDates, type CalendarEvent } from "@interactive-os/json-document-editing";
+import {
+  calendarBusyDates,
+  type CalendarEvent,
+} from "@interactive-os/json-document-calendar-document";
 import {
   addCalendarMonths,
   calendarCellInterval,

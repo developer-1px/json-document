@@ -91,4 +91,11 @@ describe("Official Rich Text Web clipboard", () => {
     expect(parsed?.slice.content).toMatchObject([{ content: [{ text: "safe text", marks: [] }] }]);
     expect(parsed?.html).not.toContain("javascript:");
   });
+
+  it("uses the inert Web parser without turning active/foreign content into document text", () => {
+    let id = 0;
+    const parsed = parseRichTextHTML('<script>bad()</script><style>body{color:red}</style><svg><text>foreign</text></svg><p><strong>Kept</strong></p>', () => `id-${++id}`);
+    expect(parsed?.text).toBe("Kept");
+    expect(parsed?.html).toBe("<p><strong>Kept</strong></p>");
+  });
 });

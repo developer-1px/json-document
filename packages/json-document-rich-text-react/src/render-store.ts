@@ -1,3 +1,4 @@
+import { buildPointer, parsePointer, readPointer, type JSONValue } from "@interactive-os/json-document";
 import {
   appliedOperationsFor,
   hasRichTextContent,
@@ -22,7 +23,7 @@ export interface RichTextRenderStore {
 }
 
 export function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore {
-  const pointer = editor.pointer ?? "";
+  const pointer = buildPointer(parsePointer(editor.pointer ?? ""));
   let document = documentAtPointer(editor.snapshot.value, pointer);
   let blockIds: ReadonlyArray<string> = document.content.map((node) => node.id);
   let placeholderBlockId: string | null = null;
@@ -231,14 +232,10 @@ function relativeOperations(
   });
 }
 
-function documentAtPointer(value: unknown, pointer: string): RichTextDocument {
-  if (pointer === "") return value as RichTextDocument;
-  let current = value;
-  for (const segment of pointer.slice(1).split("/").map((part) => part.replaceAll("~1", "/").replaceAll("~0", "~"))) {
-    if (current === null || typeof current !== "object") throw new TypeError(`Rich Text document was not found at ${JSON.stringify(pointer)}.`);
-    current = (current as Readonly<Record<string, unknown>>)[segment];
-  }
-  return current as RichTextDocument;
+function documentAtPointer(value: JSONValue, pointer: string): RichTextDocument {
+  const result = readPointer(value, pointer);
+  if (!result.ok) throw new TypeError(`Rich Text document was not found at ${JSON.stringify(pointer)}.`);
+  return result.value as RichTextDocument;
 }
 
 function contentStructureChanged(

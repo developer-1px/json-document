@@ -1,8 +1,7 @@
 # Official Hands · TBD
 
-> **TBD** — 이 페이지는 Official Hands의 제품 방향을 설명하는 초안입니다.
-> 새로운 public contract, package boundary, kit admission 기준 또는
-> compatibility 약속을 확정하지 않습니다.
+Official Hands의 목표와 남은 경계를 설명하는 초안입니다. 새로운 public contract,
+package boundary, kit admission 기준 또는 compatibility 약속을 확정하지 않습니다.
 
 Official Hands는 디자인과 제품 데이터는 자유롭게 바꿀 수 있지만, 사람이
 편집을 끝내는 데 필요한 기능은 이미 구현되어 있는 SDK를 지향합니다.
@@ -25,36 +24,29 @@ Get from Official Hands
 
 ## 왜 Official인가
 
-문서, 목록, 표, 나무와 캔버스 편집기는 오랫동안 비슷한 행동으로
-수렴했습니다. click은 선택하고, modifier-click은 선택을 토글하며, Shift는
-범위를 확장합니다. Escape는 진행 중인 행동을 취소하고 undo는 변경 전
-상태로 돌아갑니다.
+문서, 목록, 표, 나무와 캔버스 편집기는 오랫동안 선택, 복사, 붙여넣기,
+실행 취소 같은 행동을 공유해 왔습니다. 선택만 바꾸면 내용은 유지되고,
+범위 확장은 기준점을 보존하며, 편집은 내용과 다음 작업 위치를 함께 정합니다.
 
 Official은 제품 취향을 임의로 정한다는 뜻이 아닙니다. 여러 편집기에서
 반복해서 검증된 기대를 기본 동작으로 제공한다는 뜻입니다.
 
-```text
-자의적인 product opinion
-└─ "Kanban card에는 반드시 dueDate가 있다"
-
-수렴한 editing opinion
-├─ "Shift 선택은 범위를 확장한다"
-├─ "Escape는 진행 중인 상호작용을 취소한다"
-└─ "undo는 document와 Selection을 함께 복원한다"
-```
+공통 규칙과 입력 관습은 구별합니다. 범위를 확장한다는 의미는 Selection에
+있고, Shift+click을 그 의미에 연결하는 일은 Adapter와 Affordance에 있습니다.
+포커스가 이동할 때 선택도 바꿀지, 전체 선택 상태에서 Mod+A를 다시 누르면
+선택을 해제할지는 사용하는 편집 방식이 정합니다.
 
 대부분의 사용자는 Official Hands만으로 편집기를 완성할 수 있어야 합니다.
 Custom Hands는 기본 경로가 아니라 제품에만 있는 차이를 위한 escape hatch입니다.
 
-## 하나의 Hands Profile
+## Hands Profile · TBD
 
 완성된 Hands는 행동 함수만 모은 package가 아닙니다. 그 행동이 항상 같은
 뜻을 갖게 하는 최소 profile을 함께 제공합니다.
 
 ```text
 Official Hands Profile
-├─ minimum schema와 canonical shape
-├─ stable identity와 structural invariant
+├─ Document Type Profile 참조: schema · identity · invariant
 ├─ Selection specialization
 ├─ Topology interpretation
 ├─ Intent vocabulary
@@ -70,22 +62,48 @@ row identity, column identity와 cell addressability를 먼저 정해야 합니�
 Sheet다운 편집 행동이 무엇을 대상으로 하는지 안정적으로 정하기 위해
 필요합니다.
 
+최소 schema와 의미 연산의 owner는 [Document Type](document-types.md)입니다.
+Hands Profile은 이 계약을 참조하고 Editing·Adapter·Affordance·Connector·UI를
+함께 선택합니다. Hands가 각 책임을 다시 구현하거나 Host가 빈칸을 메우는 구조가
+아닙니다.
+
+### 공통 규칙과 profile의 선택
+
+공통 편집 규칙은 Selection과 Editing이 소유합니다. Profile은 그 규칙이 자신의
+문서에서 무엇을 대상으로 하며 어떤 결과를 만드는지 결정합니다. 다음 표는 현재
+구현을 이해하기 위한 예입니다.
+
+| 작업 | Document | Sheet | Rich Text |
+| --- | --- | --- | --- |
+| Copy 대상 | 선택된 블록 전체 | primary 직사각형 | 선택된 텍스트와 구조 |
+| Paste 위치 | 기본적으로 마지막 선택 블록 뒤 | focus 셀부터 | 선택 구간에 적용 |
+| Cut의 제거 | 선택 블록 제거 | primary 직사각형의 셀 값 비우기 | 선택 구간 제거 |
+
+같은 Copy라도 무엇을 복사하는지는 profile의 약속입니다. 사용자는 각 profile에서
+지원하는 작업, 여러 선택 범위의 처리, 붙여넣기 경계, 작업 후 선택 위치와 Undo
+단위를 알 수 있어야 합니다. 작업 자체의 미지원과 현재 선택 때문에 실행할 수 없는
+상태도 구별합니다.
+
+이 구분은 새로운 공통 editor interface를 요구하지 않습니다. 기존 editor API와
+Selection family, EditingSession을 사용하면서 입력부터 편집 결과까지 같은 의미를
+유지하는 조합을 지향합니다.
+
 ## 자유롭게 남겨 두는 것
 
 Official Hands가 최소 profile을 제공해도 완성 제품을 대신 소유하지는 않습니다.
 
 ```text
-Official Hands가 소유
-├─ 장르다운 편집을 성립시키는 최소 shape
-├─ identity와 structural invariant
-├─ 수렴한 편집 행동
-└─ 함께 검증된 기본 조합
+Official Hands Profile이 연결
+├─ Document Type의 shape·identity·invariant
+├─ Editing의 Selection·Intent·Clipboard·History
+├─ Adapter·Affordance·Connector·UI의 편집 경로
+└─ 함께 검증할 지원 범위와 기본 조합
 
 Host가 소유
-├─ 업무 field와 business rule
-├─ permission과 workflow
-├─ persistence와 collaboration policy
-├─ rendering과 layout
+├─ 제품별 정책 값·권한·copy·fixture
+├─ workflow와 실행 순서
+├─ persistence·collaboration의 구체 인스턴스 주입
+├─ UI composition과 layout
 └─ visual design
 ```
 
@@ -93,6 +111,9 @@ Host가 소유
 automation에서 전혀 다르게 보일 수 있습니다. Hands는 object identity,
 Selection, translate와 resize의 의미를 유지하고 Host는 표현과 제품 정책을
 결정합니다.
+
+재사용 가능한 업무 모델·규칙과 rendering 행동은 각각 문서 의미와 UI의 정본
+모듈에 둡니다. 제품에서 선택하는 정책 값과 모듈 자체의 의미를 구별합니다.
 
 ## Affordance까지 닫기
 
@@ -161,14 +182,27 @@ Core는 어떤 Hands도 강제하지 않습니다. 사용자가 Official Hands�
 Affordance와 Adapter가 사람이 작업을 끝낼 수 있는 하나의 kit로 조합되는
 방식을 검토합니다.
 
-## 열린 질문
+## 사용자가 기대할 계약
 
-- Official Hands로 인정할 최소 완료 증거는 무엇인가?
-- 수렴한 기본 동작과 제품별 policy를 어떤 기준으로 가르는가?
-- profile의 configuration과 extension은 어느 수준까지 compatibility를 약속하는가?
-- minimum schema에 Host field를 연결하는 공통 방식은 무엇인가?
-- 여러 Official Hands가 같은 document에서 조합될 때 identity와 History를 어떻게 공유하는가?
-- Custom Hands로 내려가야 하는 명확한 신호는 무엇인가?
+Official profile의 지향점은 구현이 바뀌어도 같은 지원 입력에서 같은 편집 의미를
+얻는 것입니다. 선택하고, 편집하고, 복사하고, 되돌리는 전체 흐름이 그 약속에
+포함됩니다. Keyboard나 pointer로 실행해도 해당 editor를 직접 호출해도 같은
+편집 의도는 같은 문서와 Selection의 결과로 이어져야 합니다.
 
-이 질문이 닫히기 전에는 Official Hands 후보를 완성된 SDK contract로
-설명하지 않습니다.
+구체적인 profile별 필수 작업, Host field 연결, 여러 Hand가 공유하는 History
+단위는 아직 확정하지 않았습니다. 현재 후보 목록과 위 동작 예시는 완성된 SDK의
+호환성 보장이 아닙니다.
+
+## 현재 증거와 완료 조건 · TBD
+
+| 경계 | 현재 있는 것 | 완료에 필요한 것 |
+| --- | --- | --- |
+| 문서 의미 | 각 editor와 package의 모델·연산 | Document Type owner와 Profile 참조의 수렴 |
+| 편집 작업 | 기존 Intent와 EditingSession 공통 의미 | Profile별 지원/의도적 미지원/미구현 및 결과·실패 조건 |
+| 실제 입력 | Hands Live Demo와 platform binding | keyboard·pointer·Clipboard·취소·Undo/Redo가 이어지는 적합성 증거 |
+| 공개 사용 | package API와 Usage·Source | Host의 같은 책임 우회 구현 없이 조합되는 완료 경로 |
+| 호환성 | 개별 구현과 Profile의 증거 | 기본값·중첩 맥락·공유 History와 변경 정책의 명시 |
+
+이 조건을 닫기 전에는 Official Hands를 완성된 SDK나 모든 장르가 상호운용하는
+Stable 계약으로 표시하지 않습니다. 목표를 미리 드러내되 현재 동작의 증거와
+미확정 설계를 섞지 않습니다.

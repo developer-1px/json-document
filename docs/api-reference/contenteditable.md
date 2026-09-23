@@ -1,8 +1,8 @@
 # @interactive-os/json-document-contenteditable API
 
-**Owner:** Adapter
+**탐색 분류:** Adapter
 
-contenteditable platform adapter의 public entrypoint입니다. 아래 항목은 package root에서 import할 수 있는 안정된 public API이며 internal 경로는 계약이 아닙니다.
+contenteditable platform adapter의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 사이트에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
 
 > 이 문서는 `packages/json-document-contenteditable/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
@@ -29,6 +29,8 @@ interface ContentEditableBindingOptions {
   readonly pointer: Pointer;
   readonly root: HTMLElement;
   readonly dom?: TextDOMAdapter;
+  /** Optional canonical source editor; replaces direct commits with selection-restoring Editing transactions. */
+  readonly editor?: TextEditor;
 }
 ```
 ## `ContentEditableBindingResult`
@@ -51,7 +53,7 @@ interface ContentEditableProps {
 ## `createContentEditableBinding`
 
 ```ts
-createContentEditableBinding({ document, dom, pointer, root, }: ContentEditableBindingOptions): ContentEditableBinding
+createContentEditableBinding({ document, dom, pointer, root, editor, }: ContentEditableBindingOptions): ContentEditableBinding
 ```
 ## `DOMObservation`
 
@@ -66,20 +68,22 @@ interface DOMObservation {
 ```ts
 const plainTextDOMAdapter: TextDOMAdapter
 ```
+## `renderTextCaretBoundary`
+
+```ts
+renderTextCaretBoundary(root: HTMLElement, value: string): void
+```
 ## `TextDOMAdapter`
 
 ```ts
 interface TextDOMAdapter {
   observe(root: HTMLElement): DOMObservation;
-  render(root: HTMLElement, value: string): void;
+  render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
   restoreSelection(root: HTMLElement, selection: TextSelection): boolean;
 }
 ```
 ## `TextSelection`
 
 ```ts
-interface TextSelection {
-  readonly anchor: number;
-  readonly focus: number;
-}
+type TextSelection = { readonly anchor: number; readonly focus: number };
 ```

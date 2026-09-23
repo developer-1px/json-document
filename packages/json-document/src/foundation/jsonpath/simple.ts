@@ -1,6 +1,7 @@
+import { appendSegment } from "../pointer/core.js";
 import type { Match, Query, Selector } from "./ast.js";
 import { matchArrayWildcardFieldPointers } from "./fast.js";
-import { escapeSeg, normalizeSliceIndex, objectHasOwn } from "./support.js";
+import { normalizeSliceIndex, objectHasOwn } from "./support.js";
 
 export function evaluateSinglePathQuery(query: Query, root: unknown): Match[] | null {
   if (query.segments.length === 0) return [{ pointer: "", value: root }];
@@ -17,7 +18,7 @@ export function evaluateSinglePathQuery(query: Query, root: unknown): Match[] | 
       const object = value as Record<string, unknown>;
       if (!objectHasOwn.call(object, selector.name)) return [];
       value = object[selector.name];
-      pointer += "/" + escapeSeg(selector.name);
+      pointer = appendSegment(pointer, selector.name);
       continue;
     }
 
@@ -100,7 +101,7 @@ function applySimpleSelector(
       const object = value as Record<string, unknown>;
       if (!objectHasOwn.call(object, selector.name)) return true;
       nextValues?.push(object[selector.name]);
-      nextPointers.push(pointer + "/" + escapeSeg(selector.name));
+      nextPointers.push(appendSegment(pointer, selector.name));
       return true;
     }
     case "index": {
@@ -144,7 +145,7 @@ function applySimpleSelector(
       for (let index = 0; index < keys.length; index += 1) {
         const key = keys[index]!;
         nextValues?.push(object[key]);
-        nextPointers.push(pointer + "/" + escapeSeg(key));
+        nextPointers.push(appendSegment(pointer, key));
       }
       return true;
     }
@@ -165,7 +166,7 @@ function applySimpleMatchSelector(
       const object = value as Record<string, unknown>;
       if (!objectHasOwn.call(object, selector.name)) return true;
       next.push({
-        pointer: match.pointer + "/" + escapeSeg(selector.name),
+        pointer: appendSegment(match.pointer, selector.name),
         value: object[selector.name],
       });
       return true;
@@ -209,7 +210,7 @@ function applySimpleMatchSelector(
       const keys = Object.keys(object);
       for (let index = 0; index < keys.length; index += 1) {
         const key = keys[index]!;
-        next.push({ pointer: match.pointer + "/" + escapeSeg(key), value: object[key] });
+        next.push({ pointer: appendSegment(match.pointer, key), value: object[key] });
       }
       return true;
     }

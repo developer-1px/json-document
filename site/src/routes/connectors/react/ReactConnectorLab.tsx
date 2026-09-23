@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Plus, Redo2, Undo2 } from "lucide-react";
-import { createJSONDocument, trackPointer, type JSONValue } from "@interactive-os/json-document";
+import { createJSONDocument, isJSONValue, readPointer, trackPointer, type JSONValue } from "@interactive-os/json-document";
 import { documentSelectionFocus, type BlockDocument } from "@interactive-os/json-document-editing";
 import {
   DocumentTextControl,
@@ -29,7 +29,35 @@ export function ReactConnectorLab() {
       <EditingSnapshotLab />
       <UseEditingLab />
       <PointerTrackingLab />
+      <JSONValueLab />
     </div>
+  );
+}
+
+function JSONValueLab() {
+  const samples = [
+    { label: "Nested value", value: { "a/b~": [{ title: "Draft" }] }, pointer: "#/a~1b~0/0/title" },
+    { label: "Non-finite number", value: { score: NaN }, pointer: "/score" },
+    { label: "Sparse array", value: Array(1), pointer: "/0" },
+  ];
+  const [index, setIndex] = useState(0);
+  const sample = samples[index]!;
+  const input: unknown = sample.value;
+  const valid = isJSONValue(input);
+  const result = valid ? readPointer(input, sample.pointer) : null;
+  return (
+    <section aria-label="JSON value boundary" className="lg:col-span-2">
+      <h2 className={ui.text.heading}>Read a JSON snapshot</h2>
+      <p className={ui.text.meta}>Validate incoming values, then resolve an address without copying the snapshot.</p>
+      <div className="flex gap-2">
+        {samples.map((item, index) => <Command key={item.label} onClick={() => setIndex(index)}>{item.label}</Command>)}
+      </div>
+      <p className={ui.text.meta}><output data-testid="json-value-valid">{valid ? "Valid JSON value" : "Not a JSON value"}</output></p>
+      <Inspector label="Inspect JSON value" items={[
+        { label: "Pointer", testId: "json-value-pointer", value: sample.pointer },
+        { label: "Read result", testId: "json-value-read", value: result },
+      ]} />
+    </section>
   );
 }
 

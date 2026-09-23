@@ -2,8 +2,6 @@ name: Collaboration Soak
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 19 * * 1"
 
 permissions:
   contents: read

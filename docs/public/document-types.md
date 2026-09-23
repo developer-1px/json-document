@@ -2,7 +2,8 @@
 
 Document Type은 특정 JSON Document가 무엇을 의미하고 어떤 상태와 변경이
 유효한지를 정의하는 생태계 위치입니다. 이 페이지는 책임 이름과 경계만
-확정하며, 기존 package와 Hands의 실제 소유권 재배치는 아직 결정하지 않습니다.
+확정합니다. Calendar와 Object는 공개 소유자와 소비 경계를 확정했고, 나머지 후보의 실제
+소유권 재배치는 아직 결정하지 않았습니다.
 
 ```text
 Document Type
@@ -57,27 +58,57 @@ Document Type은 DOM event, pointer gesture, React lifecycle, 화면 layout과 �
 `Domain`은 business bounded context와 혼동되고, `Genre`는 제품 설명과 기술 계약의
 경계를 드러내지 않으므로 이 생태계 위치의 정본 이름으로 사용하지 않습니다.
 
-## 후보 · TBD
+## 현재 소유자와 후보
 
-현재 사이트에서 다음 항목이 Document Type 후보입니다.
+Calendar의 정본 소유자는 `@interactive-os/json-document-calendar-document`입니다.
+모델·검증·의미 연산·projection은 이 package에, 선택·Clipboard·History는 Editing에,
+입력과 UI 조합은 Calendar Hands에 둡니다. Editing의 기존 문서 관련 export는
+동일 구현을 가리키는 호환 경로입니다.
+
+[Calendar Document Type](/docs/document-types/calendar)에서 공개 API, Usage/Source와
+책임 감사 증거를 확인할 수 있습니다. 이 소유권 확정은 RC 계약을 Stable wire
+프로파일로 승격하거나 나머지 후보의 완료를 선언하지 않습니다.
+
+Object와 단일 슬라이드 Canvas 프로파일의 정본 소유자는
+`@interactive-os/json-document-object-document`입니다. 기존 `createObjectEditor`가 이를
+소비하며 `@interactive-os/json-document-canvas` Hand가 두 Canvas Host의 입력·UI를
+닫습니다. [Object 소유권 감사](/docs/document-types/object)와 [Canvas Usage/Source](/docs/api/canvas)를 참고하세요.
+
+현재 사이트에서 다음 항목을 추적합니다.
+
+Markdown은 원문 문자열을 JSONDocument에 저장하는 별도의 실험입니다.
+`@interactive-os/json-document-markdown`이 문법의 source 위치 projection을 소유하고,
+Editing이 문자열 선택·이력을, Markdown Web과 contenteditable이 DOM·native 입력을
+소유합니다. Rich Text 모델로 변환하지 않습니다. [Markdown API](/docs/api/markdown)와
+[caret Usage](/demo/markdown-caret)에서 strong 한 문단의 동작과 범위를 확인합니다.
 
 ```text
 Document Types · TBD
 ├── Rich Text
 ├── Order
-├── Object
+├── Object · RC 공개 소유자 확정
 ├── Tree
 ├── Database
-├── Calendar
+├── Calendar · RC 공개 소유자 확정
 ├── Sheet
 ├── Kanban
 └── Annotation
 ```
 
-이 목록은 분류 후보이지 완료 선언이 아닙니다. 각 후보는 모델, invariant,
+Calendar·Object 이외의 목록은 분류 후보이지 완료 선언이 아닙니다. 각 후보는 모델, invariant,
 operation과 projection의 실제 owner를 감사한 뒤에만 이 위치로 이동할 수
 있습니다. 그때까지 기존 package/API 이름, 모듈 배치와 Hands 내비게이션은
 유지합니다.
+
+## 현재와 목표 사이
+
+현재 구현의 schema와 API는 후보를 검토할 근거입니다. 목표는 model·invariant·
+operation·projection이 한 Document Type owner에서 나오고, Editing과 UI가 그
+공개 계약을 소비하는 것입니다. 편집 lifecycle·DOM geometry 관찰·React 구독은
+각자의 이웃 책임에 남습니다.
+
+Calendar와 Object는 공개 소유자와 소스 기반 책임 감사를 연결했습니다.
+다른 후보도 이름이나 schema 표만으로 소유권 검토를 완료했다고 간주하지 않습니다.
 
 ## 완료 조건 · TBD
 

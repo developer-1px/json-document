@@ -10,6 +10,13 @@ const databasePropertyConsumers = [
   "packages/json-document-database/src/database-hands.tsx",
   "packages/json-document-zod/src/database-document.ts",
 ];
+const annotationDemo = readSource("routes/annotation-demo/AnnotationDemoRoute.tsx");
+for (const symbol of ["AnnotationHand", "useAnnotationOutput"]) {
+  if (!hasNamedImport(annotationDemo, "@interactive-os/json-document-annotation", symbol)) throw new Error(`Annotation Demo must consume the canonical ${symbol}`);
+}
+for (const localResponsibility of ["createGestureSession", "projectWebClientPointToSVG", "function AnnotationShape", "function CommentComposer", "presentStructuredSnapshot", "JSON.stringify", "JSON.parse", "renderWebAnnotationRaster"]) {
+  if (annotationDemo.includes(localResponsibility)) throw new Error(`Annotation Demo owns displaced behavior: ${localResponsibility}`);
+}
 const entries = [...registrySource.matchAll(/^\s*"\/[^"]+"[^\n]+"(routes\/[^"]+)"\),?$/gm)].map((match) => match[1]);
 const usages = [...sourceRegistry.matchAll(/packageName:\s*["']([^"']+)["'],\s*\n\s*symbol:\s*["']([^"']+)["'],\s*\n\s*sourcePath:\s*["']([^"']+)["']/g)].map((match) => ({
   packageName: match[1],
@@ -51,6 +58,16 @@ for (const path of sourceFiles(siteSourceRoot)) {
   if (!allowedRawPreSources.has(relative) && /<pre\b/.test(readFileSync(path, "utf8"))) {
     throw new Error(`${relative} renders a copyable raw <pre> outside the canonical CodeBlock surface`);
   }
+}
+
+const databaseContracts = readSource("packages/json-document-database/src/contracts.ts");
+if (/DatabaseViewDocument/.test(databaseContracts)) throw new Error("Database Hand declares a parallel saved-view model");
+const databaseHands = readSource("packages/json-document-database/src/database-hands.tsx");
+if (/JSON\.stringify\(before\)|JSON\.stringify\(row\)/.test(databaseHands)) throw new Error("Database remote updates infer patches from full records");
+for (const path of ["packages/json-document-database/src/database-hand.tsx", "packages/json-document-database/src/database-hands.tsx"]) if (!readSource(path).includes('from "./database-view-controls.js"')) throw new Error(`${path} bypasses canonical Database view controls`);
+const defaultCell = readSource("packages/json-document-database/src/database-hand.tsx").match(/function DefaultCell[\s\S]*?function filterItems/)?.[0] ?? "";
+for (const source of [defaultCell, databaseHands.match(/export function DatabaseRecordPanel[\s\S]*?export function DatabaseWorkspace/)?.[0] ?? ""]) {
+  if (/property\.type === ["'](?:checkbox|select|number)["']/.test(source)) throw new Error("Database property controls bypass the canonical React owner");
 }
 
 const visited = new Set();

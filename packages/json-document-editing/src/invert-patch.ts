@@ -13,7 +13,7 @@ import {
 export function invertEditingPatch(document: JSONDocument, operations: ReadonlyArray<JSONPatchOperation>): ReadonlyArray<JSONPatchOperation> | null {
   const isolated = operations.length > 1 || operations.some((op) => op.op === "move" || op.op === "copy");
   const working = isolated ? createJSONDocument(document.value) : document;
-  let inverse: JSONPatchOperation[] = [];
+  const inverse: JSONPatchOperation[] = [];
   for (const operation of operations) {
     if (tryParsePointer(operation.path) === null) return null;
     let step: JSONPatchOperation[] = [];
@@ -67,9 +67,9 @@ export function invertEditingPatch(document: JSONDocument, operations: ReadonlyA
       step = [{ op: operation.op === "replace" ? "replace" : "add", path: operation.path, value: previous.value }];
       if (isolated && !working.commit([operation]).ok) return null;
     } else if (isolated && !working.commit([operation]).ok) return null;
-    inverse = [...step, ...inverse];
+    for (let index = step.length - 1; index >= 0; index -= 1) inverse.push(step[index]!);
   }
-  return inverse;
+  return inverse.reverse();
 }
 
 function insertionPath(document: JSONDocument, path: string): string | null {

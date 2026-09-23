@@ -1,10 +1,28 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { trackPointer, type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
 import { createCollaborationRuntime } from "../../src/index.js";
+import { createInitialTree } from "../../src/tree.js";
+import { patchBetweenTrees } from "../../src/document-patch.js";
 
 const options = { epochId: "tracking/v1", ruleset: { id: "tracking", digest: "v1" } };
 
 describe("remote structural notification", () => {
+  test("looks up a wide object's keys without rescanning siblings for each key", () => {
+    const before = Object.fromEntries(Array.from({ length: 5_000 }, (_, index) => [`field${index}`, index]));
+    const after = { ...before, field2500: -1 };
+    const beforeTree = createInitialTree(before, "wide");
+    const afterTree = createInitialTree(after, "wide");
+    const find = vi.spyOn(Array.prototype, "find");
+    try {
+      const operations = patchBetweenTrees(before, after, beforeTree, afterTree);
+      const siblingSearches = find.mock.contexts.filter((value) => (
+        Array.isArray(value) && value.length > 100 && value[0] && "key" in value[0]
+      ));
+      expect(siblingSearches).toHaveLength(0);
+      expect(operations).toEqual([{ op: "replace", path: "/field2500", value: -1 }]);
+    } finally { find.mockRestore(); }
+  });
+
   test.each([
     { name: "move then edit", initial: { items: [{ label: "a" }, { label: "b" }] }, pointer: "/items/0/label", patch: [{ op: "move", from: "/items/0", path: "/items/1" }, { op: "replace", path: "/items/1/label", value: "edited" }], expected: "/items/1/label" },
     { name: "escaped object member", initial: { "a/b": { label: "a" } }, pointer: "/a~1b/label", patch: [{ op: "move", from: "/a~1b", path: "/~0" }], expected: "/~0/label" },
@@ -18,6 +36,7 @@ describe("remote structural notification", () => {
     { name: "object swap", initial: { a: { label: "a" }, b: { label: "b" } }, pointer: "/a/label", patch: [{ op: "move", from: "/a", path: "/temp" }, { op: "move", from: "/b", path: "/a" }, { op: "move", from: "/temp", path: "/b" }], expected: "/b/label" },
     { name: "move out before replacing its parent", initial: { left: { item: { label: "a" } }, right: {} }, pointer: "/left/item/label", patch: [{ op: "move", from: "/left/item", path: "/right/item" }, { op: "replace", path: "/left", value: {} }], expected: "/right/item/label" },
     { name: "root array reorder", initial: [{ label: "a" }, { label: "b" }], pointer: "/0/label", patch: [{ op: "move", from: "/0", path: "/1" }], expected: "/1/label" },
+    { name: "successive key swaps and a replaced container", initial: { a: { item: { label: "a" } }, b: { label: "b" }, __json_document_transfer__: 1, __json_document_transfer___: 2 }, pointer: "/a/item/label", patch: [{ op: "move", from: "/a/item", path: "/temp" }, { op: "replace", path: "/a", value: {} }, { op: "move", from: "/b", path: "/a/new" }, { op: "move", from: "/temp", path: "/b" }, { op: "replace", path: "/a/new/label", value: "edited" }], expected: "/b/label" },
   ] as const)("$name preserves the address of the same member", ({ initial, pointer, patch, expected }) => {
     const local = createCollaborationRuntime(initial, { ...options, actorId: "local" });
     const remote = createCollaborationRuntime(initial, { ...options, actorId: "remote" });

@@ -1,4 +1,4 @@
-import type { JSONValue } from "@interactive-os/json-document";
+import { buildPointer, type JSONValue } from "@interactive-os/json-document";
 import {
   acceptsDatabaseValue,
   defaultDatabaseValue,
@@ -76,7 +76,7 @@ export function databaseDocumentFromZod(
       return failure(
         "schema_violation",
         issue?.message ?? "Record failed Zod validation.",
-        issue === undefined ? `/${index}` : recordPointer(index, issue.path),
+        issue === undefined ? `/${index}` : buildPointer([index, ...issue.path.map(String)]),
       );
     }
 
@@ -115,12 +115,15 @@ export function databaseDocumentFromZod(
       views: [{
         id: "table",
         name: "All records",
-        type: "table",
-        propertyOrder,
-        propertyVisibility: {},
-        propertyWidths: {},
-        sort: null,
-        filter: null,
+        ownership: "personal",
+        layout: "table",
+        projection: {
+          search: "",
+          filter: { id: "table:root", conjunction: "and", items: [] },
+          sorts: [],
+          groups: [],
+          columns: propertyOrder.map((propertyId) => ({ propertyId, visible: true, width: null, pinned: null })),
+        },
       }],
     },
   };
@@ -226,14 +229,6 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 
 function displayName(key: string): string {
   return key.length === 0 ? key : `${key[0]!.toUpperCase()}${key.slice(1)}`;
-}
-
-function recordPointer(index: number, path: ReadonlyArray<PropertyKey>): string {
-  return `/${[index, ...path].map((segment) => escapePointerToken(String(segment))).join("/")}`;
-}
-
-function escapePointerToken(token: string): string {
-  return token.replace(/~/g, "~0").replace(/\//g, "~1");
 }
 
 function failure(

@@ -6,7 +6,7 @@ const ledger = JSON.parse(readFileSync(join(root, "audits/document-types.json"),
 const siteRoutes = JSON.parse(readFileSync(join(root, "site/site-routes.json"), "utf8"));
 const allowed = new Set(["canonical consumer", "Host composition", "duplicate implementation", "canonical API gap", "missing canonical module", "mislocated module", "out of scope", "unverified"]);
 const expectedCandidates = siteRoutes
-  .filter((route) => route.navigationGroup === "Document Types" && route.path !== "/docs/document-types")
+  .filter((route) => route.navigationGroup === "Document Types" && route.path.startsWith("/docs/document-types/"))
   .map((route) => route.path.slice("/docs/document-types/".length));
 
 if (JSON.stringify(ledger.candidates) !== JSON.stringify(expectedCandidates)) throw new Error("Document Type audit candidates do not match the TBD navigation denominator");
@@ -51,8 +51,25 @@ const calendar = ledger.audits.calendar;
 for (const role of ["Document Model", "Validation", "Projection", "Document Operation", "Editing lifecycle", "Affordance", "Web Adapter", "Hand composition", "Reusable UI behavior", "Host composition"]) {
   if (!calendar.occurrences.some((occurrence) => occurrence.role === role)) throw new Error(`Calendar audit is missing role: ${role}`);
 }
-if (calendar.status !== "audited-tbd" || !calendar.occurrences.some((occurrence) => !["canonical consumer", "Host composition"].includes(occurrence.disposition))) {
-  throw new Error("Calendar must remain audited-tbd while nonconforming occurrences remain");
+const remaining = calendar.occurrences.filter((occurrence) => !["canonical consumer", "Host composition"].includes(occurrence.disposition));
+if (calendar.status !== (remaining.length === 0 ? "owner-closed" : "audited-tbd")) {
+  throw new Error("Calendar audit status must reflect its remaining ownership gaps");
+}
+if (calendar.status === "owner-closed") {
+  const closure = calendar.closure;
+  if (!Array.isArray(closure?.verification) || closure.verification.length === 0) throw new Error("Calendar closure needs executable verification evidence");
+  for (const path of [closure.publicEntry, closure.referencePath, closure.sourceRegistration, ...closure.verification]) {
+    if (typeof path !== "string" || !existsSync(join(root, path))) throw new Error(`Calendar closure evidence missing: ${path}`);
+  }
+  for (const path of [closure.apiPath, closure.usagePath, closure.usagePagePath?.split("#")[0]]) {
+    if (!siteRoutes.some((route) => route.path === path)) throw new Error(`Calendar closure route missing: ${path}`);
+  }
+  const manifest = JSON.parse(readFileSync(join(root, "packages/json-document-calendar-document/package.json"), "utf8"));
+  if (closure.owner !== manifest.name) throw new Error("Calendar closure owner must match its public package");
+  const dependencies = Object.keys({ ...manifest.dependencies, ...manifest.peerDependencies });
+  if (dependencies.some((name) => ["@interactive-os/json-document-editing", "@interactive-os/json-document-selection", "@interactive-os/json-document-calendar", "react"].includes(name))) {
+    throw new Error("Calendar Document Type must remain usable without Editing, Selection or React");
+  }
 }
 
 console.log(`Document Type audits ok; candidates=${ledger.candidates.length}; candidate profiles=${Object.keys(ledger.candidateProfiles).length}; audited=${Object.keys(ledger.audits).length}; Calendar occurrences=${calendar.occurrences.length}.`);

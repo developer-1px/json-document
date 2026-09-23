@@ -1,7 +1,8 @@
-import { createJSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument, type JSONValue } from "@interactive-os/json-document";
 import { describe, expect, it } from "vitest";
 import {
   createRichTextSchema,
+  createRichTextEditor,
   createRichTextTopology,
   normalizeRichText,
   richTextSchemaV1,
@@ -47,6 +48,55 @@ const canonical: RichTextDocument = {
 };
 
 describe("Official Rich Text schema", () => {
+  it("keeps normalization values and patch payloads independently mutable", () => {
+    const input = {
+      profile: canonical.profile, id: "doc", type: "doc",
+      content: [{ id: "p", type: "paragraph", content: [
+        { id: "a", type: "text", text: "A", marks: [] },
+        { id: "b", type: "text", text: "B", marks: [] },
+      ] }],
+    };
+    const normalized = normalizeRichText(input);
+    if (!normalized.ok) throw new Error(normalized.reason);
+    const operation = normalized.operations.find((operation) => operation.path === "/content/0/content");
+    expect(operation).toMatchObject({ op: "replace", value: [{ text: "AB" }] });
+    if (operation?.op !== "replace") throw new Error("missing normalization patch");
+    (operation.value as Array<{ text: string }>)[0]!.text = "patch-only";
+    expect(normalized.value.content[0]).toMatchObject({ content: [{ text: "AB" }] });
+    input.content[0]!.content[0]!.text = "input-only";
+    expect(normalized.value.content[0]).toMatchObject({ content: [{ text: "AB" }] });
+  });
+
+  it("rejects non-JSON extension attrs before normalization or history changes", () => {
+    const schema = createRichTextSchema({ profile: "urn:example:json-attrs:1", nodes: {
+      "com.example/data": { group: "block", atom: true, attrs: { value: { required: true, validate: () => true } }, content: null, allowedMarks: "none" },
+    } });
+    const document = createJSONDocument({ profile: schema.profile, id: "doc", type: "doc", content: [
+      { id: "data", type: "com.example/data", attrs: { value: null } },
+    ] });
+    const editor = createRichTextEditor({ document, schema });
+    const before = editor.snapshot;
+    let publications = 0;
+    const unsubscribe = editor.subscribe(() => { publications++; });
+    const cycle: unknown[] = [];
+    cycle.push(cycle);
+    for (const value of [NaN, Infinity, new Date(0), Array(1), cycle]) {
+      const attrs = { value: value as JSONValue };
+      expect(editor.dispatch({ type: "node.set-attrs", nodeId: "data", attrs }))
+        .toMatchObject({ ok: false, code: "rich-text.schema-violation" });
+      expect(editor.dispatch({ type: "clipboard.paste", clipboard: {
+        type: "application/vnd.interactive-os.rich-text+json", text: "", html: "",
+        slice: { profile: schema.profile, openStart: 0, openEnd: 0, content: [{ id: "copy", type: "com.example/data", attrs }] },
+      } })).toMatchObject({ ok: false, code: "rich-text.clipboard-invalid" });
+      expect(editor.snapshot).toEqual(before);
+    }
+    expect(publications).toBe(0);
+    expect(editor.dispatch({ type: "node.set-attrs", nodeId: "data", attrs: { value: { nested: [1, null] } } }).ok).toBe(true);
+    expect(editor.undo().ok).toBe(true);
+    expect(editor.snapshot.value).toEqual(before.value);
+    unsubscribe();
+  });
+
   it("reports a schema failure when local validation cannot resolve the parent type", () => {
     const nodes = Object.fromEntries(Object.entries(richTextSchemaV1.nodes).filter(([type]) => type !== "blockquote"));
     const options = { schema: { ...richTextSchemaV1, nodes } };

@@ -54,7 +54,7 @@ describe("DatabaseHand", () => {
     fireEvent.blur(status);
     expect(onRecordsChange).toHaveBeenCalledWith(
       expect.arrayContaining([expect.objectContaining({ id: "a", status: "done" })]),
-      expect.objectContaining({ origin: "cell.commit" }),
+      expect.objectContaining({ origin: "cell.commit", updates: [{ recordId: "a", patch: { status: "done" } }] }),
     );
   });
 

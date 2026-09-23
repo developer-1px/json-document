@@ -72,6 +72,12 @@ Package는 같은 도구를 쓴다는 이유가 아니라 독립 배포, 외부 
 | Validation | State를 바꾸지 않는 입력·candidate 검사 | Transformation과 normalization |
 | Test support | Production-shaped fixture와 test host | 배포 public API |
 
+이 표는 package 내부의 역할 분류이며 사이트의 읽기 레이어와 다르다.
+Document Type은 문서 고유의 Domain model·Domain operation·Projection을 소유하는
+생태계 위치다. 후보별 package 재배치는 아직 TBD이며 아래 현재 package 모형을
+이름만으로 이동시키지 않는다. Hands 내비게이션에서 읽는 React integration도
+실제 주책임이 framework lifecycle이면 Connector다.
+
 한 module에 여러 역할이 보이더라도 같은 이유로 항상 함께 바뀌고 독립 경계를
 만들 수 없다면 하나의 책임으로 유지한다. 표의 행마다 파일을 하나씩 만들지
 않는다.
@@ -192,6 +198,18 @@ Site / Host product
 Kernel의 대체 구현이며 Editing의 하위 구현이 아니다. Selection은 dependency-free
 foundation으로 유지한다.
 
+### 의미를 보존하는 책임 경계
+
+이동하거나 교체하는 구현은 기존 owner의 관찰 가능한 계약을 보존한다.
+Core는 [v3 profile](json-document-v3/profile.md), Editing의 상태·관찰·복원은
+[EditingSession 계약](editing-session.md), 플랫폼 입력 수명은
+[DOM lifecycle](dom-editing-lifecycle.md)을 따른다. Domain은 자신의 유효한 연산과
+다음 선택을 결정하고 Host는 그 public API에 제품 정책 값과 외부 인스턴스를 연결한다.
+
+이 경계는 package 내부 파일 모양이나 현재 export 개수를 동결하지 않는다.
+구현 모양의 통일을 이유로 local/causal History, 선택 family, 플랫폼 입력과
+도메인 연산처럼 다른 의미를 합치거나 소비자에 공통 동작을 다시 구현하지 않는다.
+
 ## Test와 benchmark 배치
 
 - 배포 source는 `src/`, package contract test는 `tests/`, 성능 기준선은
@@ -204,7 +222,7 @@ foundation으로 유지한다.
 
 ## 현재 package 분류
 
-아래 표는 현재 29개 library package를 이 문서의 모형으로 빠짐없이 분류한다.
+아래 표는 library package를 이 문서의 모형으로 빠짐없이 분류한다.
 `후속`은 이 RFC가 source를 이동하지 않고 별도 이슈가 책임짐을 뜻한다.
 
 | Package path | 정본 모형 | 현재 판단 |
@@ -221,10 +239,16 @@ foundation으로 유지한다.
 | `packages/json-document-affordance` | Responsibility family | select/fold/drag/history 책임 file과 root facade 유지 |
 | `packages/json-document-ui-primitives-react` | React UI Primitive family | 수렴한 Hands의 minimalist surface와 framework lifecycle을 책임별 module로 유지 |
 | `packages/json-document-animation-react` | React UI Primitive family | 생성 대기의 시각 언어를 책임 module과 stylesheet로 유지 |
-| `packages/json-document-markdown-react` | React projection family | 불완전한 스트리밍 Markdown의 복구 투영, GFM renderer, customization contract와 stylesheet를 유지 |
+| `packages/json-document-markdown-react` | React projection family | 읽기 전용 streaming/GFM renderer와 원문 편집 surface의 React 조합. 원문 문법과 DOM은 Markdown·Markdown Web owner를 소비 |
+| `packages/json-document-markdown` | Document Type projection | Markdown 원문을 정본으로 보존하고 CommonMark strong의 UTF-16 source 범위를 투영 |
+| `packages/json-document-markdown-web` | Web DOM adapter | Markdown source 좌표와 delimiter 표시를 contenteditable DOM 계약으로 변환 |
 | `packages/json-document-zod` | Composite Connector | validator와 Database translation을 책임 file로 분리한 현재 모양 유지 |
 | `packages/json-document-database` | Product-facing Hand | 기본 admin UI와 customization contract를 소유하고 headless domain package를 내부 구현으로 조합 |
+| `packages/json-document-annotation` | Product-facing Hand | Annotation 도구, gesture-to-Intent, SVG projection, transient preview와 comment UI를 소유 |
 | `packages/json-document-calendar` | Product-facing Hand | Calendar editor 관찰, occurrence focus, naming, Web pointer interaction lifecycle을 정본 hook으로 유지 |
+| `packages/json-document-canvas` | Product-facing Hand | Object Editing을 통한 단일 슬라이드 생성·편집·gesture·React UI 조합 |
+| `packages/json-document-object-document` | Document Type | 기존 Object와 Canvas 프로파일의 model·validation·operation·projection·JSON 정본. Core만 의존 |
+| `packages/json-document-calendar-document` | Document Type | Calendar model·validation·operation·projection의 공개 소유자. Editing·Selection·React peer 없이 독립 소비하며 기존 Editing export는 호환 경로 유지 |
 | `packages/json-document-tanstack-table` | Single-native Connector | 하나의 Table/Sheet binding으로 flat 유지 |
 | `packages/json-document-web` | Adapter family | keyboard/clipboard/input/modifier 책임 file과 root facade 유지 |
 | `packages/json-document-contenteditable` | Composite Adapter | React entry, binding, DOM adapter 책임 분리 유지 |

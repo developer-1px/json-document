@@ -36,7 +36,7 @@ import {
 import { applyAffordance, commitAffordance, resizeAffordance } from "@interactive-os/json-document-affordance";
 
 function onPointerMove(event: PointerEvent, edge: "se") {
-  applyAffordance(resizeAffordance(origin, { x: event.clientX, y: event.clientY }, edge, event), {
+  applyAffordance(resizeAffordance(origin, { x: event.clientX, y: event.clientY }, edge, event, initialSize), {
     cursor: (cursor) => {
       event.currentTarget.style.cursor = cursor;
     },
@@ -48,7 +48,7 @@ function onPointerMove(event: PointerEvent, edge: "se") {
 
 function onPointerUp(event: PointerEvent, objectId: string, edge: "se") {
   const committed = commitAffordance(
-    resizeAffordance(origin, { x: event.clientX, y: event.clientY }, edge, event),
+    resizeAffordance(origin, { x: event.clientX, y: event.clientY }, edge, event, initialSize),
   );
   if (!committed) return;
   applyAffordance(committed, {
@@ -66,6 +66,12 @@ function onPointerUp(event: PointerEvent, objectId: string, edge: "se") {
   });
 }
 ```
+
+`initialSize`는 press 시점의 `{ width, height }`입니다. `origin`·`point`와 크기는
+같은 좌표계를 사용합니다. 초기 크기를 제공해야 Shift가 실제 객체 비율을 유지하고
+최소 크기에서도 반대편 고정점이 보존됩니다. 네 변은 한 축을 조절하고, Shift와 함께
+잡으면 다른 축은 중심 기준으로 조절합니다. 자세한 API와 실제 Canvas Usage는
+[소유 패키지의 Resize 계약](/docs/api/affordance)에서 확인할 수 있습니다.
 
 커서는 호스트 화면 상태이고, 확정된 크기만 json-document로 갑니다.
 분할선 화살표는 APG Window Splitter와 같고, Shift는 비율, Alt는 가운데

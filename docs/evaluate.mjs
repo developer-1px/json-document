@@ -1,15 +1,20 @@
-import { readFileSync, readdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { validateLlmsContract, validatePublicPackageReferences } from "./public-contract-checks.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 
-const apiReferenceCheck = spawnSync(process.execPath, ["scripts/generate-api-reference.mjs", "--check"], { cwd: root, encoding: "utf8" });
-if (apiReferenceCheck.status !== 0) {
-  process.stderr.write(apiReferenceCheck.stderr || apiReferenceCheck.stdout);
-  process.exit(apiReferenceCheck.status ?? 1);
+for (const args of [
+  ["scripts/generate-api-reference.mjs", "--check"],
+  ["--test", "docs/api-reference/packages.test.mjs", "site/scripts/route-checks.test.mjs"],
+]) {
+  const result = spawnSync(process.execPath, args, { cwd: root, encoding: "utf8" });
+  if (result.status !== 0) {
+    process.stderr.write(result.stderr || result.stdout);
+    process.exit(result.status ?? 1);
+  }
 }
 
 function read(path) {
@@ -32,7 +37,7 @@ function filesUnder(path) {
     .flatMap((entry) => {
       if (
         entry.isDirectory()
-        && [".git", ".npm-cache", "node_modules", "dist", "build", "coverage", "test-results"].includes(entry.name)
+        && [".git", ".worktrees", ".npm-cache", "node_modules", "dist", "build", "coverage", "test-results"].includes(entry.name)
       ) {
         return [];
       }
@@ -52,6 +57,8 @@ const publicDocs = {
   applications: read("docs/public/applications.md"),
   concepts: read("docs/public/concepts.md"),
   foundation: read("docs/public/foundation.md"),
+  buildingBlocks: read("docs/public/building-blocks.md"),
+  editing: read("docs/public/editing.md"),
   howWeBuild: read("docs/public/how-we-build.md"),
   documentTypes: read("docs/public/document-types.md"),
   selection: read("docs/public/selection.md"),
@@ -123,6 +130,7 @@ const surfaces = {
   ajvReadme: read("packages/json-document-ajv/README.md"),
   zodReadme: read("packages/json-document-zod/README.md"),
   databaseReadme: read("packages/json-document-database/README.md"),
+  annotationReadme: read("packages/json-document-annotation/README.md"),
   tanstackTableReadme: read("packages/json-document-tanstack-table/README.md"),
   webReadme: read("packages/json-document-web/README.md"),
   contenteditableReadme: read("packages/json-document-contenteditable/README.md"),
@@ -138,92 +146,73 @@ const publicContract = readJson("packages/json-document/public-contract.json");
 const rootPackage = readJson("package.json");
 const implementationShape = read("standards/repository-implementation-shape.md");
 const domEditingLifecycle = read("standards/dom-editing-lifecycle.md");
+const editingSession = read("standards/editing-session.md");
 
-if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
-  "adapter-clipboard.md",
-  "adapter-contenteditable.md",
-  "adapter-grid-cell.md",
-  "adapter-interaction.md",
-  "adapter-keyboard.md",
-  "adapter-virtual-selection.md",
-  "adapters.md",
-  "affordance-activate.md",
-  "affordance-cancel.md",
-  "affordance-caret.md",
-  "affordance-context-menu.md",
-  "affordance-contextual.md",
-  "affordance-copy-drag.md",
-  "affordance-delete.md",
-  "affordance-double-click.md",
-  "affordance-drag.md",
-  "affordance-drop.md",
-  "affordance-focus.md",
-  "affordance-fold.md",
-  "affordance-forbid.md",
-  "affordance-handles.md",
-  "affordance-history.md",
-  "affordance-hover.md",
-  "affordance-marquee.md",
-  "affordance-nudge.md",
-  "affordance-pan.md",
-  "affordance-rename.md",
-  "affordance-resize.md",
-  "affordance-scroll.md",
-  "affordance-select.md",
-  "affordance-snap.md",
-  "affordance-triple-click.md",
-  "affordance-typeahead.md",
-  "affordance-zoom.md",
-  "affordance.md",
-  "animation.md",
-  "api.md",
-  "applications.md",
-  "clipboard.md",
-  "collaboration-history.md",
-  "collaboration-lease.md",
-  "collaboration-lifecycle.md",
-  "collaboration-replica.md",
-  "collaboration-text.md",
-  "collaboration.md",
-  "composer.md",
-  "concepts.md",
-  "connector-a2ui.md",
-  "connector-ajv.md",
-  "connector-react-hook-form.md",
-  "connector-react.md",
-  "connector-tanstack-table.md",
-  "connector-zod-validate.md",
-  "connector-zod.md",
-  "connectors.md",
-  "database.md",
-  "document-types.md",
-  "foundation.md",
-  "hands.md",
-  "history.md",
-  "how-we-build.md",
-  "intent-guide.md",
-  "intent.md",
-  "llms.txt",
-  "mention.md",
-  "object.md",
-  "official-hands.md",
-  "order.md",
-  "overview.md",
-  "react-editing.md",
-  "selection.md",
-  "topology.md",
-  "tree.md",
-  "ui-primitives.md",
-])) {
-  fail("docs/public: only the active v3 guides and llms.txt may remain.");
+const documentRoutes = readJson("site/site-routes.json").filter((route) => route.documentSource !== undefined);
+for (const route of documentRoutes) {
+  for (const source of route.documentIncludes ?? []) {
+    if (!/^packages\/[^/]+\/docs\/[^/]+\.md$/.test(source) || !existsSync(join(root, source))) fail(`Invalid owner documentation inclusion: ${source}`);
+  }
+}
+const registeredSources = documentRoutes.map((route) => route.documentSource);
+for (const source of registeredSources) {
+  if (!/^docs\/(?:public|api-reference)\/[^/]+\.md$/.test(source) || !existsSync(join(root, source))) {
+    fail(`Invalid documentation source registration: ${source}`);
+  }
+}
+if (new Set(registeredSources).size !== registeredSources.length) fail("Documentation sources must have one canonical route.");
+for (const directory of ["docs/public", "docs/api-reference"]) {
+  const actual = fileNames(directory).filter((name) => directory === "docs/public" || name.endsWith(".md"));
+  const registered = registeredSources.filter((source) => dirname(source) === directory).map((source) => basename(source));
+  if (directory === "docs/public") registered.push("llms.txt");
+  registered.sort();
+  if (JSON.stringify(actual) !== JSON.stringify(registered)) fail(`${directory}: Markdown files must match registered pages.`);
+}
+
+// File links are repository-relative; site Markdown uses the same registered source path.
+const linkedDocuments = [
+  "README.md", "docs/README.md", "docs/changelog.md",
+  ...registeredSources,
+  ...rootPackage.workspaces.filter((workspace) => workspace !== "site").map((workspace) => `${workspace}/README.md`),
+  ...filesUnder("standards").filter((path) => path.endsWith(".md")),
+];
+for (const path of linkedDocuments) {
+  for (const [, href] of read(path).matchAll(/(?<!!)\[[^\]\n]*\]\(([^)\s]+)\)/g)) {
+    if (/^(?:[a-z][a-z\d+.-]*:|[/#?])/i.test(href)) continue;
+    const target = href.split(/[?#]/)[0];
+    if (target && !existsSync(join(root, dirname(path), decodeURIComponent(target)))) {
+      fail(`${path}: missing relative link target ${href}`);
+    }
+  }
 }
 
 if (JSON.stringify(fileNames("standards")) !== JSON.stringify([
   "dom-editing-lifecycle.md",
+  "editing-grammar.md",
+  "editing-session.md",
   "repository-implementation-shape.md",
   "repository-naming.md",
 ])) {
-  fail("standards: repository naming and implementation shape must be the only repository-wide standard files.");
+  fail("standards: only repository naming, implementation shape, DOM editing lifecycle, EditingSession contract, and the editing grammar design may appear at the root.");
+}
+
+// Each normative session rule must retain a concrete behavior case at its owner.
+// This checks evidence references; package test execution checks the behavior itself.
+const sessionRules = new Set([...editingSession.matchAll(/^\| (ES-[A-Z-]+) \| (?!\[)/gm)].map((match) => match[1]));
+const sessionEvidence = [...editingSession.matchAll(/^\| (ES-[A-Z-]+) \| \[[^\]]+\]\(([^)]+)\) \| `([^`]+)` \|$/gm)];
+if (sessionRules.size === 0) fail("EditingSession: missing normative rules.");
+for (const rule of sessionRules) {
+  if (!sessionEvidence.some((match) => match[1] === rule)) fail(`EditingSession: ${rule} has no behavior evidence.`);
+}
+for (const [, rule, path, name] of sessionEvidence) {
+  if (!sessionRules.has(rule)) fail(`EditingSession: evidence refers to unknown rule ${rule}.`);
+  const target = join("standards", path);
+  if (!existsSync(join(root, target)) || !read(target).includes(JSON.stringify(name))) {
+    fail(`EditingSession: ${rule} lost behavior evidence ${path}: ${name}.`);
+  }
+}
+for (const [, path] of editingSession.matchAll(/\]\(([^)]+)\)/g)) {
+  if (!existsSync(join(root, "standards", path))) fail(`EditingSession: missing local reference ${path}.`);
 }
 
 for (const token of [
@@ -264,11 +253,12 @@ const misplacedMarkdown = filesUnder("").filter((path) => {
   return path.endsWith(".md")
     && !path.startsWith("docs/")
     && !path.startsWith("standards/")
+    && !rootPackage.workspaces.some((workspace) => workspace.startsWith("packages/") && path.startsWith(`${workspace}/docs/`))
     && name !== "README.md"
     && name !== "AGENTS.md";
 });
 if (misplacedMarkdown.length > 0) {
-  fail(`docs layout: non-README markdown must live under docs/: ${misplacedMarkdown.join(", ")}.`);
+  fail(`docs layout: non-README markdown must live under docs/, standards/, or a registered package's docs/: ${misplacedMarkdown.join(", ")}.`);
 }
 
 for (const [name, source] of Object.entries(surfaces)) {

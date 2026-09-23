@@ -1,6 +1,8 @@
 import type { JSONValue } from "@interactive-os/json-document";
 
 export { formatFileSize } from "./file-size.js";
+export { assertRasterImageContent, assertRasterImageSource } from "./raster-content.js";
+export type { RasterImageContent } from "./raster-content.js";
 
 export interface FileCandidate extends Record<string, JSONValue> {
   readonly name: string;

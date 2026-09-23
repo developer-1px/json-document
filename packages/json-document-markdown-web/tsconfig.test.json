@@ -1,0 +1,14 @@
+{
+  "extends": [
+    "./tsconfig.json",
+    "../../tsconfig/test-dom.json"
+  ],
+  "compilerOptions": {
+    "rootDir": "../.."
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "vitest.config.ts"
+  ]
+}

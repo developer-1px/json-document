@@ -53,12 +53,12 @@ export function Command(
 export function Toggle(
   props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & ControlAffordanceProps & {
     readonly pressed: boolean;
-    readonly presentation?: "button" | "chip";
+    readonly presentation?: "button" | "chip" | "icon";
     readonly label?: string;
     readonly tooltip?: string;
   },
 ): ReactNode {
-  const { "aria-label": ariaLabel, affordance, children, label, onMouseDown, presentation = "button", preserveFocus = false, pressed, tooltip, type = "button", ...buttonProps } = props;
+  const { "aria-label": ariaLabel, affordance, children, label, onMouseDown, presentation = label ? "icon" : "button", preserveFocus = false, pressed, tooltip, type = "button", ...buttonProps } = props;
   const accessibleLabel = label ?? ariaLabel;
   const tooltipId = useId();
   const button = (

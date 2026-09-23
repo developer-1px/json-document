@@ -46,7 +46,7 @@ export function HomeRoute() {
             제품을 먼저 만들고, 그 안에서 발견한 책임을 모듈과 부품으로 되돌립니다.
           </p>
           <div className={homeStyles.actions()}>
-            <ActionLink to="/docs" kind="prominent">Introduce부터 읽기</ActionLink>
+            <ActionLink to="/docs" kind="prominent">Introduction부터 읽기</ActionLink>
             <ActionLink to="/applications">Applications 보기</ActionLink>
           </div>
           <a className={homeStyles.scrollCue()} href="#foundation-title">이야기를 따라 내려가기</a>
@@ -72,11 +72,11 @@ export function HomeRoute() {
         <p className={homeStyles.eyebrow()}>Hands &amp; Artifact</p>
         <h2 id="hands-artifact-title" className={homeStyles.sceneTitle()}>Hands가 Artifact를 만지고 편집합니다.</h2>
         <p className={homeStyles.sceneDescription()}>
-          Hands는 사람과 agent의 편집 도구입니다. Artifact는 내비게이션 없는 앱의 콘텐츠이며, 문서·프레젠테이션·스프레드시트로 이어집니다.
+          Hands는 편집 책임을 조합하고 Artifact는 Application 안의 콘텐츠가 됩니다. Official Hands Profile과 Artifact의 실제 계약 연결은 아직 TBD입니다.
         </p>
         <div className={homeStyles.actions()}>
           <ActionLink to="/editors" kind="prominent">Hands 보기</ActionLink>
-          <ActionLink to="/viewer">Artifact 보기</ActionLink>
+          <ActionLink to="/viewer">Artifact · TBD</ActionLink>
         </div>
       </HomeScene>
 

@@ -68,22 +68,26 @@ export function prepareCheckpoint(input: unknown): PreparedCheckpoint {
       rawPayload.reason ?? "checkpoint payload must contain only JSON values",
     );
   }
+  const ownedPayload = rawPayload.value as Readonly<Record<string, JSONValue>>;
   if (
-    input.payload.kind !== "json-document-collaboration/checkpoint"
-    || input.payload.version !== 1
+    ownedPayload.kind !== "json-document-collaboration/checkpoint"
+    || ownedPayload.version !== 1
   ) {
     return invalid("checkpoint payload kind or version is unsupported");
   }
 
-  const base = applyPatch(input.payload.base, []);
-  if (!base.ok) {
-    return invalid(base.reason ?? "checkpoint base must be JSON");
+  const base = ownedPayload.base;
+  // Only missing fields still need Core's non-JSON diagnostic; present fields
+  // were already validated and detached with the complete payload.
+  if (base === undefined || ownedPayload.membership === undefined) {
+    const missing = applyPatch(undefined, []);
+    if (!missing.ok) return invalid(missing.reason!);
   }
-  const membership = prepareMembership(input.payload.membership);
+  const membership = prepareMembership(ownedPayload.membership!);
   if (!membership.ok) return membership;
   const bundle = prepareBundle({
-    epoch: input.payload.epoch,
-    changes: input.payload.changes,
+    epoch: ownedPayload.epoch,
+    changes: ownedPayload.changes,
   });
   if (!bundle.ok) return bundle;
   for (let index = 1; index < bundle.bundle.changes.length; index += 1) {
@@ -99,7 +103,7 @@ export function prepareCheckpoint(input: unknown): PreparedCheckpoint {
       );
     }
   }
-  if (bundle.bundle.epoch.baseDigest !== fingerprintJSON(base.value)) {
+  if (bundle.bundle.epoch.baseDigest !== fingerprintJSON(base!)) {
     return invalid("checkpoint base does not match epoch baseDigest");
   }
   if (
@@ -115,7 +119,7 @@ export function prepareCheckpoint(input: unknown): PreparedCheckpoint {
     kind: "json-document-collaboration/checkpoint" as const,
     version: 1 as const,
     epoch: bundle.bundle.epoch,
-    base: base.value,
+    base: base!,
     membership: membership.membership,
     changes: bundle.bundle.changes,
   });
@@ -202,7 +206,7 @@ export function verifyCheckpointProof(
 }
 
 function prepareMembership(
-  input: unknown,
+  input: JSONValue,
 ):
   | {
       readonly ok: true;
@@ -210,25 +214,19 @@ function prepareMembership(
     }
   | { readonly ok: false; readonly reason: string } {
   if (input === null) return { ok: true, membership: null };
-  const validated = applyPatch(input, []);
-  if (!validated.ok) {
-    return invalid(
-      validated.reason ?? "checkpoint membership must contain only JSON values",
-    );
-  }
   if (
-    !isRecord(validated.value)
-    || validated.value.version !== 1
-    || !Array.isArray(validated.value.members)
+    !isRecord(input)
+    || input.version !== 1
+    || !Array.isArray(input.members)
   ) {
     return invalid("checkpoint membership must be null or a version 1 list");
   }
   try {
     const membership = canonicalMembership(
-      validated.value as unknown as CollaborationMembership,
+      input as unknown as CollaborationMembership,
     );
     if (
-      canonicalStringify(validated.value)
+      canonicalStringify(input)
       !== canonicalStringify(membership as unknown as JSONValue)
     ) {
       return invalid("checkpoint membership must be canonical");

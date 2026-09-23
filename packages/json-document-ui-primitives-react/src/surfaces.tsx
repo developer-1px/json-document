@@ -1,4 +1,4 @@
-import { useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type HTMLAttributes, type PointerEvent, type ReactNode, type TdHTMLAttributes } from "react";
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type HTMLAttributes, type PointerEvent, type ReactNode, type TdHTMLAttributes } from "react";
 import {
   createInteractionHandleSession,
   interactionHandleCursor,
@@ -49,6 +49,12 @@ export function useInteractionHandle<ElementType extends Element = HTMLElement>(
   const [interaction] = useState(() => createInteractionHandleSession());
   const [active, setActive] = useState(false);
   const stopNativeContinuation = useRef<(() => void) | null>(null);
+  useEffect(() => () => {
+    stopNativeContinuation.current?.();
+    const active = pointer.getSnapshot();
+    if (active) pointer.cancel(active.pointerId);
+    interaction.cancel();
+  }, [pointer, interaction]);
   const sessionActive = active || interaction.getSnapshot() !== null;
 
   function point(event: PointerEvent<ElementType>) {

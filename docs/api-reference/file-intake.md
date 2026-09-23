@@ -1,11 +1,21 @@
 # @interactive-os/json-document-file-intake API
 
-**Owner:** Artifact
+**탐색 분류:** Artifact
 
-플랫폼 독립 파일 후보와 수용 정책의 public entrypoint입니다. 아래 항목은 package root에서 import할 수 있는 안정된 public API이며 internal 경로는 계약이 아닙니다.
+플랫폼 독립 파일 후보와 수용 정책의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 사이트에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
 
 > 이 문서는 `packages/json-document-file-intake/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `assertRasterImageContent`
+
+```ts
+assertRasterImageContent(value: unknown): asserts value is RasterImageContent
+```
+## `assertRasterImageSource`
+
+```ts
+assertRasterImageSource(source: unknown): asserts source is string
+```
 ## `FileAcceptancePolicy`
 
 ```ts
@@ -35,6 +45,15 @@ type FileIntakeResult<Candidate extends FileCandidate = FileCandidate> =
 
 ```ts
 formatFileSize(bytes: number): string
+```
+## `RasterImageContent`
+
+```ts
+interface RasterImageContent extends Record<string, JSONValue> {
+  readonly source: string;
+  readonly width: number;
+  readonly height: number;
+}
 ```
 ## `validateFileCandidates`
 

@@ -1,8 +1,9 @@
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, renderHook, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import { DemoWorkbench } from "../../src/shared/demo-workbench/DemoWorkbench";
 import { defineDemo } from "../../src/shared/demo-workbench/define-demo";
 import { discoverDemoSources } from "../../src/shared/demo-workbench/demo-sources";
+import { useClipboardLab } from "../../src/routes/editing-demos/useClipboardLab";
 
 afterEach(cleanup);
 
@@ -54,6 +55,78 @@ describe("DemoWorkbench", () => {
 });
 
 describe("Demo definition and source discovery", () => {
+  test("Canvas Usage imports the reusable Plane Select profile and exposes its canonical closure", async () => {
+    const sources = await discoverDemoSources("routes/canvas-demo/CanvasDemoRoute.tsx");
+    expect(await sources[0]!.load()).toContain("createPlaneSelectProfile()");
+    for (const [path, reference] of [
+      ["packages/json-document-affordance/src/plane-select.ts", "/docs/api/affordance"],
+      ["packages/json-document-affordance/src/drag.ts", "/docs/api/affordance"],
+      ["packages/json-document-affordance/src/select.ts", "/docs/api/affordance"],
+      ["packages/json-document-affordance/src/gesture-session.ts", "/docs/api/affordance"],
+      ["packages/json-document-selection/src/key/index.ts", "/docs/api/selection"],
+      ["packages/json-document-editing/src/object.ts", "/docs/api/editing"],
+      ["packages/json-document-web/src/clipboard.ts", "/docs/api/web"],
+      ["packages/json-document-canvas/src/use-canvas-hand.ts", "/docs/api/canvas"],
+      ["packages/json-document-canvas/src/canvas-clipboard.ts", "/docs/api/canvas"],
+      ["packages/json-document-editing/src/canvas-clipboard.ts", "/docs/api/editing"],
+      ["packages/json-document-editing/src/object-paste-session.ts", "/docs/api/editing"],
+      ["packages/json-document-editing/src/preparation-queue.ts", "/docs/api/editing"],
+      ["packages/json-document-web/src/raster-source.ts", "/docs/api/web"],
+      ["packages/json-document-web/src/raster-files.ts", "/docs/api/web"],
+      ["packages/json-document-web/src/html-clipboard.ts", "/docs/api/web"],
+      ["packages/json-document-web/src/html-fragment.ts", "/docs/api/web"],
+      ["packages/json-document-file-intake/src/raster-content.ts", "/docs/api/file-intake"],
+      ["packages/json-document-file-intake/src/index.ts", "/docs/api/file-intake"],
+    ]) {
+      const file = sources.find((source) => source.path === path);
+      expect(file, path).toBeDefined(); expect(file!.referencePath).toBe(reference);
+      expect(await file!.load()).not.toBe("");
+    }
+  });
+  test("Calendar Usage exposes the shared edit plan and each canonical owner's API", async () => {
+    const sources = await discoverDemoSources("routes/calendar-demo/CalendarDemoRoute.tsx");
+    const plan = sources.find((file) => file.path === "packages/json-document-calendar-document/src/calendar-operation.ts");
+    expect(plan?.referencePath).toBe("/docs/api/calendar-document");
+    expect(await plan!.load()).toContain("export function planCalendarEventEdit");
+    const validation = sources.find((file) => file.path === "packages/json-document-calendar-document/src/calendar-validation.ts");
+    expect(validation?.referencePath).toBe("/docs/api/calendar-document");
+    expect(await validation!.load()).toContain("export function validateCalendarDocument");
+    const hand = sources.find((file) => file.path === "packages/json-document-calendar/src/use-calendar-hand.ts");
+    expect(hand?.referencePath).toBe("/docs/api/calendar");
+    expect(await hand!.load()).toContain("export function useCalendarHand");
+  });
+
+  test("exercises and exposes the canonical ID allocator in Clipboard Usage", async () => {
+    const hook = renderHook(useClipboardLab);
+    act(() => { hook.result.current.copy(); });
+    act(() => { hook.result.current.paste(); });
+    act(() => { hook.result.current.paste(); });
+    const value = hook.result.current.snapshot.value as { blocks: Array<{ id: string }> };
+    expect(value.blocks).toHaveLength(5);
+    expect(new Set(value.blocks.map((block) => block.id)).size).toBe(5);
+    expect(value.blocks.filter((block) => block.id.startsWith("clipboard-block-"))).toHaveLength(2);
+    const sources = await discoverDemoSources("routes/editing-demos/ClipboardDemoRoute.tsx");
+    const owner = sources.find((file) => file.path === "packages/json-document-editing/src/identity.ts");
+    expect(owner?.referencePath).toMatch(/^\/docs\/api\//);
+    expect(await owner!.load()).toContain("export function createEditingIdAllocator");
+  });
+
+  test("Annotation Usage exposes the Hand, output, geometry, selection projection and Key owner", async () => {
+    const sources = await discoverDemoSources("routes/annotation-demo/AnnotationDemoRoute.tsx");
+    for (const path of [
+      "packages/json-document-annotation/src/annotation-hand.tsx",
+      "packages/json-document-annotation/src/annotation-output.ts",
+      "packages/json-document-editing/src/annotation.ts",
+      "packages/json-document-editing/src/annotation-selection.ts",
+      "packages/json-document-selection/src/key/index.ts",
+    ]) {
+      const file = sources.find((source) => source.path === path);
+      expect(file, path).toBeDefined();
+      expect(await file!.load()).not.toBe("");
+      expect(file!.referencePath).toMatch(/^\/docs\/api\//);
+    }
+  });
+
   test("exposes the canonical editing-host predicate in clipboard Usage", async () => {
     const sources = await discoverDemoSources("routes/adapters/clipboard/ClipboardAdapterDemoRoute.tsx");
     const input = sources.find((file) => file.path === "packages/json-document-web/src/input.ts");
@@ -65,6 +138,9 @@ describe("Demo definition and source discovery", () => {
     const session = sources.find((file) => file.path === "packages/json-document-editing/src/session.ts");
     expect(session).toBeDefined();
     expect(await session!.load()).toContain("reconcileSelection");
+    const invalidation = sources.find((file) => file.path === "packages/json-document-editing/src/history-invalidation.ts");
+    expect(invalidation).toBeDefined();
+    expect(await invalidation!.load()).toContain("observeHistoryInvalidation");
     const renderStore = sources.find((file) => file.path === "packages/json-document-rich-text-react/src/render-store.ts");
     expect(renderStore).toBeDefined();
     expect(await renderStore!.load()).toContain("appliedOperationsFor");
@@ -83,10 +159,14 @@ describe("Demo definition and source discovery", () => {
     const document = await discoverDemoSources("routes/document-demo/DocumentDemoRoute.tsx");
     expect(document.map((file) => file.path)).toEqual([
       "routes/document-demo/DocumentDemoRoute.tsx",
+      "packages/json-document-web/src/clipboard-event.ts",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
       "packages/json-document-editing/src/document.ts",
@@ -96,10 +176,14 @@ describe("Demo definition and source discovery", () => {
     expect(source).toContain("export function DocumentDemoRoute()");
     expect(source).toContain('from "@interactive-os/json-document-react"');
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.path)).toEqual([
+      "packages/json-document-web/src/clipboard-event.ts",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
       "packages/json-document-editing/src/document.ts",
@@ -107,10 +191,14 @@ describe("Demo definition and source discovery", () => {
     ]);
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.referencePath)).toEqual([
+      "/docs/api/web",
+      "/docs/api/web",
       "/docs/api/ui-primitives-react",
       "/docs/api/ui-primitives-react",
       "/docs/api/react",
       "/docs/api/react",
+      "/docs/api/affordance",
+      "/docs/api/web",
       "/docs/api/web",
       "/docs/api/react",
       "/docs/api/editing",
@@ -125,16 +213,21 @@ describe("Demo definition and source discovery", () => {
       "routes/database-demo/initial-database.ts",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-database/src/database-hand.tsx",
-      "packages/json-document-web/src/keyboard.ts",
+      "packages/json-document-database/src/database-property-control.tsx",
+      "packages/json-document-editing/src/database-property-value.ts",
+      "packages/json-document-ui-primitives-react/src/input-controls.tsx",
+      "packages/json-document-database/src/database-view-controls.tsx",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-web/src/clipboard-event.ts",
+      "packages/json-document-web/src/input.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-ui-primitives-react/src/toolbar.tsx",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-editing/src/database.ts",
+      "packages/json-document/src/foundation/json/serializable.ts",
       "packages/json-document-selection/src/range/index.ts",
-      "packages/json-document-editing/src/database-property-value.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
-      "packages/json-document-ui-primitives-react/src/input-controls.tsx",
       "packages/json-document-ui-primitives-react/src/surfaces.tsx",
       "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-affordance/src/interaction-handle.ts",
@@ -145,29 +238,49 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-affordance/src/session.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
+      "packages/json-document-editing/src/order.ts",
+      "packages/json-document-selection/src/range/index.ts",
     ]);
   });
 
   test("registers the Object owner source next to Object demo usage", async () => {
     expect((await discoverDemoSources("routes/object-demo/ObjectDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/object-demo/ObjectDemoRoute.tsx",
+      "packages/json-document-web/src/clipboard-event.ts",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-editing/src/object.ts",
+      "packages/json-document-object-document/src/object-model.ts",
+      "packages/json-document-object-document/src/object-style.ts",
+      "packages/json-document-object-document/src/object-validation.ts",
+      "packages/json-document-file-intake/src/raster-content.ts",
+      "packages/json-document/src/application/document/create.ts",
+      "packages/json-document-object-document/src/object-projection.ts",
+      "packages/json-document-object-document/src/object-operation.ts",
+      "packages/json-document-selection/src/key/index.ts",
     ]);
   });
 
-  test("registers React and Web Grid owner sources next to Sheet usage", async () => {
-    expect((await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx")).map((file) => file.path)).toEqual([
+  test("registers the Sheet editor, React and Web Grid owners next to Sheet usage", async () => {
+    const sources = await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx");
+    expect(sources.map((file) => file.path)).toEqual([
       "routes/sheet-demo/SheetDemo.tsx",
+      "packages/json-document-web/src/clipboard-event.ts",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet.ts",
+      "packages/json-document/src/foundation/json/serializable.ts",
+      "packages/json-document-selection/src/range/index.ts",
       "packages/json-document-react/src/use-grid-editing.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
@@ -176,6 +289,9 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-affordance/src/interaction-handle.ts",
     ]);
+    const owner = sources.find((file) => file.path === "packages/json-document-editing/src/sheet.ts")!;
+    expect(owner.referencePath).toBe("/docs/api/editing");
+    expect(await owner.load()).toContain("export function createSheetEditor");
   });
 
   test("registers the Composer lifecycle owner and its canonical domain closure next to Usage", async () => {
@@ -186,6 +302,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-composer/src/commands.ts",
       "packages/json-document-composer/src/host-config.ts",
       "packages/json-document-composer/src/interaction.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-rich-text-suggestion/src/index.ts",
       "packages/json-document-rich-text-suggestion-react/src/index.ts",
       "packages/json-document-composer-react/src/use-composer.tsx",
@@ -207,10 +324,16 @@ describe("Demo definition and source discovery", () => {
   test("registers Tree visibility and React binding sources next to Tree usage", async () => {
     expect((await discoverDemoSources("routes/tree-demo/TreeDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/tree-demo/TreeDemoRoute.tsx",
+      "packages/json-document-web/src/clipboard-event.ts",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
+      "packages/json-document-editing/src/tree.ts",
+      "packages/json-document-selection/src/range/index.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-tree-editing.ts",
       "packages/json-document-editing/src/tree-visibility.ts",
@@ -223,6 +346,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-editing/src/kanban.ts",
+      "packages/json-document-selection/src/key/index.ts",
       "packages/json-document-web/src/kanban-drop-target.ts",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-web/src/drag-drop-session.ts",
@@ -234,20 +358,39 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-affordance/src/content-interaction.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-editing/src/kanban.ts",
+      "packages/json-document-selection/src/key/index.ts",
       "packages/json-document-web/src/kanban-drop-target.ts",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-affordance/src/board-drag-session.ts",
+      "packages/json-document-affordance/src/drag.ts",
     ]);
   });
 
-  test("registers the Canvas gesture owner source next to Canvas usages", async () => {
-    expect((await discoverDemoSources("routes/canvas-demo/CanvasDemoRoute.tsx")).map((file) => file.path)).toContain(
-      "packages/json-document-affordance/src/canvas-gesture-session.ts",
-    );
-    expect((await discoverDemoSources("routes/widgets/CanvasWidgetRoute.tsx")).map((file) => file.path)).toContain(
-      "packages/json-document-affordance/src/canvas-gesture-session.ts",
-    );
+  test("registers the canonical Canvas Hand, Object document, Editing and gesture closure for both Hosts", async () => {
+    for (const entry of ["routes/canvas-demo/CanvasDemoRoute.tsx", "routes/widgets/CanvasWidgetRoute.tsx"]) {
+      const paths = (await discoverDemoSources(entry)).map((file) => file.path);
+      expect(paths).toEqual(expect.arrayContaining([
+        "packages/json-document-canvas/src/canvas-hand.tsx",
+        "packages/json-document-canvas/src/canvas-style-controls.tsx",
+        "packages/json-document-canvas/src/use-canvas-hand.ts",
+        "packages/json-document-canvas/src/canvas-object-view.tsx",
+        "packages/json-document-object-document/src/object-model.ts",
+        "packages/json-document-object-document/src/object-style.ts",
+        "packages/json-document-object-document/src/object-validation.ts",
+        "packages/json-document-object-document/src/object-operation.ts",
+        "packages/json-document-object-document/src/object-projection.ts",
+        "packages/json-document-editing/src/object.ts",
+        "packages/json-document-affordance/src/gesture-session.ts",
+        "packages/json-document-affordance/src/drag.ts",
+        "packages/json-document-react/src/editing-snapshot.ts",
+      ]));
+      const hand = (await discoverDemoSources(entry)).find((file) => file.path === "packages/json-document-canvas/src/use-canvas-hand.ts")!;
+      expect(await hand.load()).toContain("resizeAffordance(gesture.start, gesture.point, gesture.edge, gesture, gesture.object)");
+      const style = (await discoverDemoSources(entry)).find((file) => file.path === "packages/json-document-object-document/src/object-style.ts")!;
+      expect(style.referencePath).toBe("/docs/api/object-document");
+      expect(await style.load()).toContain("export function readObjectStyle");
+    }
   });
 
   test("keeps each Editing concept lab API next to its owning route", async () => {

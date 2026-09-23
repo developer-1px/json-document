@@ -1,8 +1,8 @@
 # @interactive-os/json-document-affordance API
 
-**Owner:** Affordance
+**탐색 분류:** Affordance
 
-입력 문법과 interaction session의 public entrypoint입니다. 아래 항목은 package root에서 import할 수 있는 안정된 public API이며 internal 경로는 계약이 아닙니다.
+입력 문법과 interaction session의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 사이트에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
 
 > 이 문서는 `packages/json-document-affordance/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
@@ -364,10 +364,15 @@ createInteractionHandleSession(): InteractionHandleSession
 ```ts
 createLineFocusSession<Key extends string>(options: { readonly initialKey?: Key | null; readonly onFocus: (key: Key | null) => void; readonly wrap?: boolean; }): LineFocusSession<Key>
 ```
+## `createPlaneSelectProfile`
+
+```ts
+createPlaneSelectProfile(options?: PlaneSelectProfileOptions): PlaneSelectProfile
+```
 ## `createRenameSession`
 
 ```ts
-createRenameSession<Key>(options: { readonly onCommit: (key: Key, draft: string) => void; readonly onCancel?: (key: Key, draft: string) => void; readonly onFinish?: (key: Key) => void; readonly onSnapshot?: (snapshot: RenameSessionSnapshot<Key> | null) => void; }): RenameSession<Key>
+createRenameSession<Key>(options: ({ readonly onCommit: (key: Key, draft: string) => void; readonly tryCommit?: never; } | { readonly tryCommit: (key: Key, draft: string) => boolean; readonly onCommit?: never; }) & { readonly onCancel?: (key: Key, draft: string) => void; readonly onFinish?: (key: Key) => void; readonly onSnapshot?: (snapshot: RenameSessionSnapshot<Key> | null) => void; }): RenameSession<Key>
 ```
 ## `createTypeaheadSession`
 
@@ -382,7 +387,7 @@ createViewportPositionSession<Key>(options: ViewportPositionOptions<Key>): Viewp
 ## `deleteAffordance`
 
 ```ts
-deleteAffordance(input: { readonly key?: string; }): AffordancePreview
+deleteAffordance(input: Partial<WebKeyboardStroke>): AffordancePreview
 ```
 ## `disclosureAffordance`
 
@@ -701,6 +706,99 @@ panAffordance(input: { readonly spaceKey?: boolean; readonly buttons?: number; r
 ```ts
 planeHitAffordance(input: { readonly hitId: string; readonly selectedIds: ReadonlyArray<string>; readonly shiftKey?: boolean; readonly metaKey?: boolean; readonly ctrlKey?: boolean; readonly nestedId?: string; readonly locked?: boolean; }): AffordancePreview
 ```
+## `PlaneSelectCommit`
+
+```ts
+interface PlaneSelectCommit {
+  readonly selection: PlaneSelectSelection;
+  readonly translation: PlaneSelectTranslation | null;
+}
+```
+## `PlaneSelectContext`
+
+```ts
+interface PlaneSelectContext {
+  readonly items: ReadonlyArray<Rect & { readonly id: string }>;
+  readonly selection: PlaneSelectSelection;
+}
+```
+## `PlaneSelectInput`
+
+```ts
+interface PlaneSelectInput extends PlaneSelectModifiers {
+  readonly point: Point;
+  readonly hitKey: string | null;
+}
+```
+## `PlaneSelectKeyResult`
+
+```ts
+type PlaneSelectKeyResult =
+  | { readonly type: "selection"; readonly selection: PlaneSelectSelection }
+  | { readonly type: "delete"; readonly keys: readonly string[] }
+  | { readonly type: "duplicate"; readonly keys: readonly string[] }
+  | { readonly type: "translate"; readonly keys: readonly string[]; readonly dx: number; readonly dy: number }
+  | { readonly type: "edit"; readonly key: string }
+  | { readonly type: "cancel" };
+```
+## `PlaneSelectModifiers`
+
+```ts
+interface PlaneSelectModifiers {
+  readonly shiftKey?: boolean;
+  readonly altKey?: boolean;
+}
+```
+## `PlaneSelectPreview`
+
+```ts
+interface PlaneSelectPreview {
+  readonly selection: PlaneSelectSelection;
+  readonly marquee: Rect | null;
+  readonly translation: PlaneSelectTranslation | null;
+}
+```
+## `PlaneSelectProfile`
+
+```ts
+interface PlaneSelectProfile {
+  begin(context: PlaneSelectContext, input: PlaneSelectInput): PlaneSelectPreview;
+  preview(point: Point, modifiers?: PlaneSelectModifiers): PlaneSelectPreview | null;
+  commit(point: Point, modifiers?: PlaneSelectModifiers): PlaneSelectCommit | null;
+  /** Reproject a stationary drag when a modifier changes; omitted preview modifiers retain this state. */
+  updateModifiers(modifiers: PlaneSelectModifiers): PlaneSelectPreview | null;
+  cancel(reason?: GestureCancelReason): void;
+  getPreview(): PlaneSelectPreview | null;
+  /** Discrete activation (e.g. Space), not focus. Shift toggles, plain activation replaces. */
+  select(context: PlaneSelectContext, key: string | null, shiftKey?: boolean): PlaneSelectSelection;
+  /** Native editable/IME ownership is checked by the platform binding before calling. */
+  keyDown(stroke: WebKeyboardStroke, context: PlaneSelectContext, grabbing?: boolean): PlaneSelectKeyResult | null;
+}
+```
+## `PlaneSelectProfileOptions`
+
+```ts
+interface PlaneSelectProfileOptions {
+  /** In the input coordinate space. Defaults to 3; movement is latched once crossed. */
+  readonly dragThreshold?: number;
+  readonly contain?: "intersect" | "inside";
+}
+```
+## `PlaneSelectSelection`
+
+```ts
+type PlaneSelectSelection = Extract<KeySelection, { readonly kind: "explicit" }>;
+```
+## `PlaneSelectTranslation`
+
+```ts
+interface PlaneSelectTranslation {
+  readonly operation: "move" | "copy";
+  readonly keys: readonly string[];
+  readonly dx: number;
+  readonly dy: number;
+}
+```
 ## `Point`
 
 ```ts
@@ -768,7 +866,7 @@ interface RenameSessionSnapshot<Key> {
 ## `resizeAffordance`
 
 ```ts
-resizeAffordance(origin: Point, point: Point, edge: ResizeEdge, modifiers?: { readonly shiftKey?: boolean; readonly altKey?: boolean; }): AffordancePreview
+resizeAffordance(origin: Point, point: Point, edge: ResizeEdge, modifiers?: { readonly shiftKey?: boolean; readonly altKey?: boolean; }, size?: Pick<Rect, "width" | "height">): AffordancePreview
 ```
 ## `ResizeEdge`
 
@@ -792,7 +890,7 @@ resolveAffordanceKey(stroke: WebKeyboardStroke): AffordancePreview
 ## `selectAllAffordance`
 
 ```ts
-selectAllAffordance(stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey">, state: { readonly allSelected: boolean; }): AffordancePreview
+selectAllAffordance(stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey"> & Partial<Pick<WebKeyboardStroke, "shiftKey" | "altKey">>, state: { readonly allSelected: boolean; }, options?: { readonly repeat?: "preserve" | "toggle"; }): AffordancePreview
 ```
 ## `SelectOperation`
 

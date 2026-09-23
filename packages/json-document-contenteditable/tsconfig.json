@@ -5,6 +5,13 @@
     "outDir": "dist",
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
-  "references": [{ "path": "../json-document" }, { "path": "../json-document-web" }],
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "references": [
+    { "path": "../json-document" },
+    { "path": "../json-document-web" },
+    { "path": "../json-document-editing" }
+  ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
 }

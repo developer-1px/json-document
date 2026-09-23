@@ -106,13 +106,13 @@ Initial value와 patch payload, metadata, exposed document value/change는 docum
 
 ## 공개 root
 
-Root는 23개 public symbol만 공개합니다.
+Root의 공개 계약은 `public-contract.json`으로 검사합니다.
 
 ```txt
 values
   applyPatch, createJSONDocument
   appendSegment, buildPointer, parentPointer, parsePointer
-  jsonEqual, parseArrayIndex, trackPointer, tryParsePointer
+  isJSONValue, jsonEqual, parseArrayIndex, readPointer, trackPointer, tryParsePointer
 
 types
   JSONValue, Pointer, JSONPatchOperation
@@ -128,6 +128,30 @@ history와 clipboard는 optional editing companion이 조합하고, framework bi
 `/react` subpath를 공개하지 않습니다.
 
 ## 순수 core
+
+`isJSONValue(value: unknown): value is JSONValue`는 Core의 JSON tree 제약을
+검사합니다. 값을 복제하거나 정규화하지 않습니다. 유한하지 않은 숫자, 희소 배열,
+접근자·symbol 속성, 비표준 객체, 순환 또는 공유 객체 참조는 거절합니다.
+도메인 schema의 추가 조건은 각 도메인이 검사합니다.
+
+`readPointer(value: JSONValue, pointer: Pointer): ReadResult`는 `document.at`과
+동일한 주소 해석을 값에 직접 적용합니다. 일반 Pointer와 URI fragment를 지원하고,
+실패는 `invalid_pointer` 또는 `path_not_found`로 반환합니다. 입력은 이미 유효한
+JSON이어야 하며, 반환한 값은 원본 참조입니다. 입력을 복제·동결하거나 소유하지
+않으므로 immutable snapshot을 읽을 때도 참조 동일성이 유지됩니다.
+
+```ts
+import { isJSONValue, readPointer } from "@interactive-os/json-document";
+
+const input: unknown = { "a/b~": [{ title: "Draft" }] };
+if (isJSONValue(input)) {
+  const result = readPointer(input, "#/a~1b~0/0/title");
+  // { ok: true, path: "#/a~1b~0/0/title", value: "Draft" }
+}
+```
+
+실행 가능한 Usage와 구현 source는 site의 `/connectors/react`에서 확인할 수
+있습니다. 이 stateless API는 `JSONDocument`의 여섯 멤버를 늘리지 않습니다.
 
 `applyPatch`는 schema, session, UI 없이 ordered atomic JSON Patch를 적용합니다.
 
@@ -176,15 +200,22 @@ const body = JSON.stringify(operations);
 body satisfies string;
 ```
 
-## Connector와 host 경계
+## 생태계와 Host 경계
 
 Form, data-grid, outliner, rich text, persistence/collaboration extension은 여섯
-member `JSONDocument`를 포트로 받는 것이 권장됩니다. DOM focus, geometry,
-keyboard, system clipboard, filesystem, network, formula, CRDT와 OT는 host가
-소유합니다.
+member `JSONDocument`를 포트로 받습니다. 문서 고유 모델·의미 연산·Projection은
+Document Type, 선택·작업·History는 Editing, 플랫폼 입력과 DOM lifecycle은
+Adapter의 책임입니다. 이 기능을 Core나 Host에 재구현하지 않습니다.
 
 React, Zod와 TanStack Table 같은 외부 생태계의 반복되는 integration은 Root가
 아니라 `@interactive-os/json-document-<target>` 공식 Connector가 제공합니다.
+Host는 제품 정책 값·copy·fixture·layout, 정본 모듈의 조합·실행 순서와
+구체 외부 인스턴스 주입을 소유합니다.
 
-- GitHub Wiki: https://github.com/developer-1px/json-document/wiki
-- Extension guide: https://github.com/developer-1px/json-document/wiki/Labs-and-Extensions
+현재 package 배치와 목표 책임의 수렴은 구별합니다. Document Type 후보와
+Official Hands Profile의 전체 완료는 아직 TBD이며 Core v3의 Stable 계약을
+확장하지 않습니다.
+
+- [Concept Map](../../docs/public/concepts.md)
+- [Building Blocks](../../docs/public/building-blocks.md)
+- [Document Types · TBD](../../docs/public/document-types.md)

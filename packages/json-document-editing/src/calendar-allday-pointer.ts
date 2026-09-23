@@ -1,7 +1,12 @@
-import type { CalendarEvent, CalendarIntent } from "./calendar.js";
-import { calendarEventRecurrence } from "./calendar-occurrence.js";
+import type {
+  CalendarIntent,
+} from "./calendar.js";
+import type {
+  CalendarEvent,
+} from "@interactive-os/json-document-calendar-document";
+import { calendarEventRecurrence, resolveCalendarOccurrence } from "@interactive-os/json-document-calendar-document";
 import { bindCalendarMonthIntent } from "./calendar-month-pointer.js";
-import { addCalendarDate, calendarAllDaySpan, calendarDaysBetween, parseCalendarDate } from "./calendar-validation.js";
+import { addCalendarDate, calendarAllDaySpan, calendarDaysBetween, parseCalendarDate } from "@interactive-os/json-document-calendar-document";
 
 export type CalendarAllDayHandle = "body" | "start" | "end";
 
@@ -75,12 +80,12 @@ export function bindCalendarAllDayIntent(
   if (intent.type !== "event.resize") return intent;
   if (event === undefined || calendarEventRecurrence(event) === null) return intent;
   const start = occurrenceStart ?? event.start;
-  if (scope === "all") return intent;
+  const end = resolveCalendarOccurrence([event], { eventId: event.id, occurrenceStart: start })?.end;
   return {
     type: "occurrence.edit",
     eventId: intent.eventId,
     occurrenceStart: start,
     scope,
-    ...(intent.edge === "start" ? { start: intent.instant } : { end: intent.instant }),
+    ...(intent.edge === "start" ? { start: intent.instant, ...(end === undefined ? {} : { end }) } : { end: intent.instant }),
   };
 }

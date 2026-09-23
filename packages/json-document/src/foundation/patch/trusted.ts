@@ -1,7 +1,7 @@
 import { jsonSerializableError } from "../json/serializable.js";
 import { applyOpRaw, validateOperationPointers, validateOperationShape } from "./apply.js";
 import { normalizeAppliedOp, normalizeOp } from "./container.js";
-import { validatedStrategies, applyFastPatchStrategies, trustedStrategies } from "./fast/apply.js";
+import { applyFastPatchStrategies } from "./fast/apply.js";
 import { fail, ok } from "./result.js";
 import { applyTrustedValueMutation } from "./value.js";
 import type {
@@ -20,7 +20,7 @@ export function applyTrustedPatch<T>(
   const singleValueFast = applySingleTrustedValuePatch(state, ops, valuesTrusted);
   if (singleValueFast !== null) return singleValueFast as TrustedApplyResult<T>;
 
-  const fast = applyFastPatchStrategies(state, ops, trustedStrategies, valuesTrusted);
+  const fast = applyFastPatchStrategies(state, ops, valuesTrusted);
   if (fast !== null) return { state: fast.state as T, result: ok, applied: fast.applied };
 
   let cur: unknown = state;
@@ -50,23 +50,6 @@ export function applyTrustedPatch<T>(
     cur = r.state;
   }
   return { state: cur as T, result: ok, applied: normalized };
-}
-
-export function applyValidatedPatch<T>(
-  state: T,
-  ops: ReadonlyArray<JSONPatchOperation>,
-): TrustedApplyResult<T> {
-  if (!Array.isArray(ops)) return { state, result: fail("invalid_pointer", "patch must be an array"), applied: [] };
-
-  if (ops.length === 1 && 0 in ops) {
-    const single = applyValidatedSingleTrustedValuePatch(state, ops[0]!);
-    if (single !== null) return single as TrustedApplyResult<T>;
-  }
-
-  const fast = applyFastPatchStrategies(state, ops, validatedStrategies, true);
-  if (fast !== null) return { state: fast.state as T, result: ok, applied: fast.applied };
-
-  return applyTrustedPatch(state, ops, { valuesTrusted: true });
 }
 
 function applySingleTrustedValuePatch(
@@ -100,29 +83,5 @@ function applySingleTrustedValuePatch(
     return { state, result: fail(applied.error, applied.reason ? `op[0]: ${applied.reason}` : "op[0]", applied.pointer), applied: [] };
   }
 
-  return { state: applied.state, result: ok, applied: [normalized] };
-}
-
-function applyValidatedSingleTrustedValuePatch(
-  state: unknown,
-  op: JSONPatchOperation,
-): TrustedApplyResult<unknown> | null {
-  if (op === null || typeof op !== "object" || (op.op !== "add" && op.op !== "replace") || typeof op.path !== "string" || !("value" in op)) {
-    return null;
-  }
-  const pointerError = validateOperationPointers(op);
-  if (pointerError) {
-    return {
-      state,
-      result: fail(pointerError.error, `op[0]: ${pointerError.reason}`, pointerError.pointer),
-      applied: [],
-    };
-  }
-  const normalized = op.op === "add" && op.path.endsWith("/-") ? normalizeOp(op, state) : op;
-  if (normalized.op !== "add" && normalized.op !== "replace") return null;
-  const applied = applyTrustedValueMutation(state, normalized);
-  if ("error" in applied) {
-    return { state, result: fail(applied.error, applied.reason ? `op[0]: ${applied.reason}` : "op[0]", applied.pointer), applied: [] };
-  }
   return { state: applied.state, result: ok, applied: [normalized] };
 }

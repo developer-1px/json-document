@@ -60,7 +60,7 @@ function AppShell() {
                 key={section.id}
                 to={section.path}
                 activePath={route.path}
-                className={classes(ui.nav.railItem, section.separated ? ui.nav.railSeparatedItem : undefined, ui.nav.current)}
+                className={classes(ui.nav.railItem, ui.nav.current)}
               >
                 <span className="sr-only">{section.label}</span>
                 <NavigationLayerIcon section={section.id} />
@@ -100,28 +100,18 @@ function AppShell() {
               item.navigationGroup !== undefined
               && section.groups.includes(item.navigationGroup)
               && item.sidebar !== false
-              && !item.path.startsWith("/docs/api")
+              && !item.path.startsWith("/docs/api/")
             );
+            const landingRoute = siteRoutes.find((item) => item.path === section.path && item.navigationGroup === undefined);
             const sectionLabelId = `site-navigation-${section.id}`;
             const open = openSections.has(section.id);
-            if (section.groups.length === 0) return (
-              <ActionLink
-                key={section.id}
-                to={section.path}
-                activePath={route.path}
-                className={classes(ui.nav.item, section.separated ? ui.nav.separatedGroup : undefined, ui.nav.current)}
-              >
-                <NavigationLayerIcon section={section.id} className="shrink-0" />
-                {section.label}
-              </ActionLink>
-            );
             if (sectionRoutes.length === 0) return null;
             return (
               <div
                 key={section.id}
                 role="group"
                 aria-label={section.label}
-                className={classes("grid content-start", section.separated ? ui.nav.separatedGroup : undefined)}
+                className="grid content-start"
               >
                 <DisclosureButton
                   className={classes(ui.nav.groupToggle, activeSection?.id === section.id ? ui.nav.groupActive : ui.nav.groupIdle)}
@@ -148,6 +138,7 @@ function AppShell() {
                   data-open={open ? "true" : undefined}
                   hidden={!open}
                 >
+                  {open && landingRoute ? <NavItem item={landingRoute} currentPath={route.path} routes={siteRoutes} depth={0} /> : null}
                   {open
                     ? section.groups.map((group) => {
                       const groupRoutes = sectionRoutes.filter((item) => {

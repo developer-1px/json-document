@@ -57,8 +57,13 @@ unsubscribe();
 | 목적 | 위치 |
 | --- | --- |
 | 빠른 사용 예제 | [빠른 시작](#빠른-시작) |
+| 목표 구조와 TBD | [Concept Map](docs/public/concepts.md), [Foundation](docs/public/foundation.md) |
 | JSON Document 개념 | [docs/public/overview.md](docs/public/overview.md) |
-| JSON Document API | [docs/public/api.md](docs/public/api.md) |
+| JSON Document Protocol | [docs/public/api.md](docs/public/api.md) |
+| Editing Protocol | [docs/public/editing.md](docs/public/editing.md) |
+| Document Types · TBD | [후보와 완료 조건](docs/public/document-types.md) |
+| Official Hands · TBD | [Profile의 목표와 현재 증거](docs/public/official-hands.md) |
+| Building Blocks | [독립적인 네 책임](docs/public/building-blocks.md) |
 | 편집 개념 | [docs/public/selection.md](docs/public/selection.md), [history](docs/public/history.md), [clipboard](docs/public/clipboard.md), [topology](docs/public/topology.md) |
 | Adapter | [docs/public/adapters.md](docs/public/adapters.md) |
 | Connector | [docs/public/connectors.md](docs/public/connectors.md) |
@@ -96,7 +101,10 @@ Editing, Adapter, Connector와 collaboration package는 독립 version과 releas
 lifecycle을 가집니다. Selection, clipboard, history는 editing companion이
 제공하는 headless lifecycle 위에서 도메인별 모델을 조합합니다. 플랫폼 계약은
 공식 Adapter가 맡고, external framework와 schema의 반복 glue는 공식 Connector가
-맡으며, persistence와 제품별 UI 의미는 host가 소유합니다.
+맡습니다. Host는 조합·실행 순서·제품 정책 값·copy·fixture·layout과 구체
+persistence 인스턴스 주입을 소유합니다. 재사용 모델·연산·투영·UI 행동은 각
+정본 모듈에 둡니다. Document Type 후보와 Official Hands의 전체 Profile은
+아직 TBD이며 기존 package/API의 존재만으로 완료를 선언하지 않습니다.
 일반 DOM과 Input Events 정규화가 필요한 제품은 별도 수명 주기의
 `@interactive-os/editable`도 검토할 수 있습니다.
 
@@ -117,12 +125,15 @@ optional editing companion이 제공하는 것:
 - range-set과 set-selection transition family
 - Document·Order·Sheet·Object·Tree domain slice와 selection-restoring history
 
-편집 제품이 계속 소유하는 것:
+Application/Host가 소유하는 것:
 
-- rendering, DOM focus, keyboard, drag/drop UI와 geometry hit-test
-- DOM focus, system clipboard와 제품별 interaction policy
-- formula engine과 제품별 grid projection 정책
-- product command 이름, layout, route, remote protocol
+- 정본 모듈의 조합과 실행 순서
+- 제품의 권한·기본값·copy·fixture·layout·route
+- 구체 persistence·network 인스턴스와 제품별 정책 값의 주입
+
+문서 의미·formula·grid projection은 해당 의미 owner에, DOM focus·keyboard·
+clipboard·geometry 관찰은 Adapter에, 조작 수명주기와 재사용 UI는 Affordance·
+Connector·UI Primitives에 둡니다. Core 밖의 책임이 모두 Host 책임은 아닙니다.
 
 공식 Adapter가 제공하는 것:
 
@@ -151,4 +162,36 @@ npm run docs:evaluate
 npm test -w @interactive-os/json-document
 npm run typecheck -w @interactive-os/json-document
 npm run build -w @interactive-os/json-document
+```
+
+### 검증 운영
+
+1인 개발과 agent의 로컬 검증을 기본으로 합니다. 개발·PR에서는 변경 범위에 맞는
+테스트·타입·빌드·브라우저 검증을 수행하고, 실행 명령과 결과를 인계합니다.
+실행하지 못한 검사와 실패한 검사는 통과와 구분합니다. 자동 CI가 없다는 사실을
+검증 완료로 간주하지 않습니다.
+
+| 시점 | 원격 실행 |
+| --- | --- |
+| PR 생성·갱신 | 자동 전체 CI 없음 |
+| main push | Pages 빌드·배포와 live 확인 |
+| 릴리스 tag | 깨끗한 runner에서 기존 패키지 검증 후 publish |
+| 필요 시 | 전체 CI와 장시간 collaboration soak 수동 실행 |
+
+전체 검증이 필요하면 기존 명령을 사용합니다. 제품 테스트와 검사 CLI는 유지하며,
+변경 영향도 선택기 CLI는 자동 CI의 gate로 사용하지 않습니다.
+
+```sh
+npm run verify
+npm run release:check
+npm run external-kit:verify
+npm run test:collaboration:soak
+```
+
+원격의 깨끗한 환경에서 확인하려면 GitHub Actions의 해당 workflow에서
+`Run workflow`를 선택하거나 아래 명령으로 명시적으로 실행합니다.
+
+```sh
+gh workflow run ci.yml --ref main
+gh workflow run collaboration-soak.yml --ref main
 ```

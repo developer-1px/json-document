@@ -1,12 +1,12 @@
-import { createElement, useRef, type TextareaHTMLAttributes } from "react";
+import { createElement, useLayoutEffect, useRef, type TextareaHTMLAttributes } from "react";
 import {
   applyAffordance,
   caretAffordance,
   caretCursor,
   clickCountAffordance,
 } from "@interactive-os/json-document-affordance";
-import { textInputFromControl, type WebTextInput } from "@interactive-os/json-document-web";
-import { useRestoreTextCursor } from "./use-editing.js";
+import { textInputFromControl, textSelectionFromControl, type WebTextInput } from "@interactive-os/json-document-web";
+import { restoreTextCursor } from "./use-editing.js";
 
 export interface UseDocumentTextControlOptions {
   readonly text: string;
@@ -32,21 +32,30 @@ export interface DocumentTextControlProps extends UseDocumentTextControlOptions,
 /** Composes the official Web input and caret affordances into a React textarea lifecycle. */
 export function useDocumentTextControl(options: UseDocumentTextControlOptions): DocumentTextControlBinding {
   const ref = useRef<HTMLTextAreaElement>(null);
-  useRestoreTextCursor(ref, options.offset);
+  useLayoutEffect(() => {
+    const control = ref.current;
+    if (control === null || options.offset === null) return;
+    // Native selection already owns the range when its focus matches the model.
+    // Echoing that focus as a collapsed cursor would emit another select event.
+    if (textSelectionFromControl({ currentTarget: control }).focus !== options.offset) {
+      restoreTextCursor(control, options.offset);
+    }
+  }, [options.offset]);
 
   return {
     ref,
     props: {
       value: options.text,
       onFocus(event) {
-        const offset = textInputFromControl(event).offset;
-        options.onCaretRange(offset, offset, "replace");
+        const { anchor, focus } = textSelectionFromControl(event);
+        options.onCaretRange(anchor, focus, "replace");
       },
       onClick(event) {
         applyAffordance(caretAffordance({ type: "pointer" }), {
           hand(hand) {
             if (hand.type === "caret") {
-              options.onCaretRange(event.currentTarget.selectionStart, event.currentTarget.selectionEnd, hand.operation);
+              const { anchor, focus } = textSelectionFromControl(event);
+              options.onCaretRange(anchor, focus, hand.operation);
             }
           },
         });
@@ -60,7 +69,8 @@ export function useDocumentTextControl(options: UseDocumentTextControlOptions): 
         applyAffordance(caretAffordance({ type: "pointer", dragging: true }), {
           hand(hand) {
             if (hand.type === "caret") {
-              options.onCaretRange(event.currentTarget.selectionStart, event.currentTarget.selectionEnd, hand.operation);
+              const { anchor, focus } = textSelectionFromControl(event);
+              options.onCaretRange(anchor, focus, hand.operation);
             }
           },
         });

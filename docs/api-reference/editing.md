@@ -1,8 +1,8 @@
 # @interactive-os/json-document-editing API
 
-**Owner:** Editing
+**탐색 분류:** Editing
 
-intent, editor, history 편집 계약의 public entrypoint입니다. 아래 항목은 package root에서 import할 수 있는 안정된 public API이며 internal 경로는 계약이 아닙니다.
+intent, editor, history 편집 계약의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 사이트에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
 
 > 이 문서는 `packages/json-document-editing/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
@@ -25,6 +25,11 @@ interface Annotation extends Record<string, JSONValue> { readonly id: string; re
 
 ```ts
 const ANNOTATION_PROFILE_V1: "urn:interactive-os:json-document:annotation:1"
+```
+## `AnnotationBounds`
+
+```ts
+interface AnnotationBounds extends AnnotationPoint { readonly width: number; readonly height: number }
 ```
 ## `AnnotationDocument`
 
@@ -62,6 +67,11 @@ type AnnotationPresentation =
   | { readonly type: "stroke" }
   | { readonly type: "arrow" };
 ```
+## `annotationResizeHandle`
+
+```ts
+annotationResizeHandle(selector: AnnotationSelector): "end" | "south-east" | null
+```
 ## `AnnotationSelection`
 
 ```ts
@@ -75,6 +85,18 @@ type AnnotationSelector =
   | ({ readonly type: "rectangle"; readonly width: number; readonly height: number } & AnnotationPoint)
   | { readonly type: "path"; readonly points: ReadonlyArray<AnnotationPoint> }
   | { readonly type: "arrow"; readonly from: AnnotationPoint; readonly to: AnnotationPoint };
+```
+## `annotationSelectorBounds`
+
+```ts
+annotationSelectorBounds(selector: AnnotationSelector): AnnotationBounds
+```
+## `AnnotationSelectorTransform`
+
+```ts
+type AnnotationSelectorTransform =
+  | { readonly type: "move"; readonly dx: number; readonly dy: number }
+  | { readonly type: "resize"; readonly handle: "end" | "south-east"; readonly dx: number; readonly dy: number };
 ```
 ## `AnnotationSource`
 
@@ -218,8 +240,8 @@ interface CalendarEditor {
   ): CalendarSelectionDragSource | null;
   dispatch(intent: CalendarIntent): EditingResult<CalendarSelection>;
   copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null;
-  cut(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
-  paste(clipboard: CalendarClipboard, target?: string): EditingResult<CalendarSelection>;
+  cut(source?: ReadonlyArray<CalendarOccurrenceSelection> | CalendarClipboard): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
+  paste(clipboard: CalendarClipboard, target?: string, options?: { readonly calendarId?: string }): EditingResult<CalendarSelection>;
   undo(): EditingResult<CalendarSelection>;
   redo(): EditingResult<CalendarSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<CalendarSelection>) => void): () => void;
@@ -284,37 +306,7 @@ type CalendarIntent =
       readonly target: CalendarSelectionMoveTarget;
       readonly scope?: "this" | "this-and-following" | "all";
     }
-  | {
-      readonly type: "event.create";
-      readonly start: string;
-      readonly end: string;
-      readonly title?: string;
-      readonly allDay?: boolean;
-      readonly calendarId?: string;
-      readonly recurrence?: CalendarRecurrence | null;
-    }
-  | { readonly type: "event.move"; readonly eventId: string; readonly start: string }
-  | { readonly type: "event.resize"; readonly eventId: string; readonly edge: "start" | "end"; readonly instant: string }
-  | { readonly type: "event.move-day"; readonly eventId: string; readonly day: string }
-  | {
-      readonly type: "event.update";
-      readonly eventId: string;
-      readonly title?: string;
-      readonly start?: string;
-      readonly end?: string;
-      readonly allDay?: boolean;
-      readonly calendarId?: string;
-      readonly recurrence?: CalendarRecurrence | null;
-    }
-  | {
-      readonly type: "occurrence.edit";
-      readonly eventId: string;
-      readonly occurrenceStart: string;
-      readonly scope: "this" | "this-and-following" | "all";
-      readonly title?: string;
-      readonly start?: string;
-      readonly end?: string;
-    }
+  | CalendarEventOperation
   | {
       readonly type: "occurrence.remove";
       readonly eventId: string;
@@ -405,11 +397,7 @@ type CalendarOccurrenceRange = {
 ## `CalendarOccurrenceSelection`
 
 ```ts
-interface CalendarOccurrenceSelection {
-  readonly eventId: string;
-  readonly start: string;
-  readonly end: string;
-}
+type CalendarOccurrenceSelection = CalendarOccurrenceInterval;
 ```
 ## `calendarOccurrenceTopology`
 
@@ -548,6 +536,36 @@ calendarVisibleEvents(document: CalendarDocument): ReadonlyArray<CalendarEvent>
 ```ts
 calendarVisibleHourBand(startMinutes: number, endMinutes: number, hourStart: number, hourEnd: number): { readonly startMinutes: number; readonly endMinutes: number; } | null
 ```
+## `CanvasClipboardContent`
+
+```ts
+type CanvasClipboardContent =
+  | { readonly type: "text"; readonly text: string }
+  | { readonly type: "images"; readonly images: ReadonlyArray<{ readonly source: string; readonly width: number; readonly height: number; readonly label: string }> }
+  | { readonly type: "mixed"; readonly items: ReadonlyArray<CanvasClipboardItem> };
+```
+## `CanvasClipboardItem`
+
+```ts
+type CanvasClipboardItem = { readonly type: "text"; readonly text: string }
+  | ({ readonly type: "image" } & Parameters<typeof createCanvasImage>[0]);
+```
+## `CanvasClipboardOptions`
+
+```ts
+interface CanvasClipboardOptions {
+  readonly bounds: ObjectBounds;
+  readonly textColor: string;
+  readonly fontSize: number;
+  readonly imageOffset?: number;
+  readonly contentGap?: number;
+}
+```
+## `clampTextSelection`
+
+```ts
+clampTextSelection(value: string, selection: TextSelection): TextSelection
+```
 ## `createAnnotationEditor`
 
 ```ts
@@ -557,6 +575,11 @@ createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>, option
 
 ```ts
 createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; readonly initialEventIds?: ReadonlyArray<string>; }): CalendarEditor
+```
+## `createCanvasClipboard`
+
+```ts
+createCanvasClipboard(content: CanvasClipboardContent, options: CanvasClipboardOptions): ObjectClipboard
 ```
 ## `createDatabaseEditor`
 
@@ -573,6 +596,16 @@ createDocumentEditor(source: EditingDocumentSource<BlockDocument>, options?: Edi
 ```ts
 createEditingId(prefix: string): string
 ```
+## `createEditingIdAllocator`
+
+```ts
+createEditingIdAllocator(existingIds: Iterable<string>, createId: () => string, subject: string): () => string
+```
+## `createEditingPreparationQueue`
+
+```ts
+createEditingPreparationQueue<Value, Result extends { readonly ok: boolean; }>(options: { readonly apply: (value: Value) => Result; readonly onResult?: (result: Result | EditingPreparationFailure) => void; readonly onPendingChange?: (pending: boolean) => void; readonly cancelCode?: string; readonly errorCode?: string; }): EditingPreparationQueue<Value, Result>
+```
 ## `createEditingSession`
 
 ```ts
@@ -588,6 +621,11 @@ createKanbanEditor(source: EditingDocumentSource<KanbanDocument>, options?: Edit
 ```ts
 createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): ObjectEditor
 ```
+## `createObjectPasteSession`
+
+```ts
+createObjectPasteSession(editor: ObjectEditor, options?: { readonly placement?: ObjectPastePlacement; readonly onResult?: (result: EditingResult<ObjectSelection>) => void; readonly onPendingChange?: (pending: boolean) => void; }): ObjectPasteSession
+```
 ## `createOrderEditor`
 
 ```ts
@@ -597,6 +635,11 @@ createOrderEditor(source: EditingDocumentSource<OrderDocument>, options?: Editin
 
 ```ts
 createSheetEditor(source: EditingDocumentSource<SheetDocument>, options?: EditingHistoryOptions): SheetEditor
+```
+## `createTextEditor`
+
+```ts
+createTextEditor(document: JSONDocument, pointer?: Pointer): TextEditor
 ```
 ## `createTreeEditor`
 
@@ -629,6 +672,11 @@ interface DatabaseClipboard extends Record<string, JSONValue> {
 ```ts
 const databaseClipboardFormat: { mimeType: "application/vnd.interactive-os.database+json"; parse(value: unknown): DatabaseClipboard | null; }
 ```
+## `DatabaseColumnProjection`
+
+```ts
+interface DatabaseColumnProjection extends Record<string, JSONValue> { readonly propertyId: string; readonly visible: boolean; readonly width: number | null; readonly pinned: "start" | "end" | null; }
+```
 ## `DatabaseDocument`
 
 ```ts
@@ -658,11 +706,22 @@ interface DatabaseEditor {
 ## `DatabaseFilter`
 
 ```ts
-interface DatabaseFilter extends Record<string, JSONValue> {
-  readonly propertyId: string;
-  readonly operator: "equals";
-  readonly value: JSONValue;
-}
+interface DatabaseFilter extends Record<string, JSONValue> { readonly id: string; readonly propertyId: string; readonly operator: DatabaseFilterOperator; readonly value: JSONValue; }
+```
+## `DatabaseFilterGroup`
+
+```ts
+interface DatabaseFilterGroup extends Record<string, JSONValue> { readonly id: string; readonly conjunction: "and" | "or"; readonly items: ReadonlyArray<DatabaseFilter | DatabaseFilterGroup>; }
+```
+## `DatabaseFilterOperator`
+
+```ts
+type DatabaseFilterOperator = "equals" | "not-equals" | "contains" | "greater-than" | "greater-than-or-equal" | "less-than" | "less-than-or-equal" | "is-empty";
+```
+## `DatabaseGroup`
+
+```ts
+interface DatabaseGroup extends Record<string, JSONValue> { readonly propertyId: string; readonly direction: "ascending" | "descending"; }
 ```
 ## `DatabaseIntent`
 
@@ -692,11 +751,7 @@ type DatabaseIntent =
   | {
       readonly type: "view.configure";
       readonly viewId: string;
-      readonly propertyOrder?: ReadonlyArray<string>;
-      readonly propertyVisibility?: Readonly<Record<string, boolean>>;
-      readonly propertyWidths?: Readonly<Record<string, number>>;
-      readonly sort?: DatabaseSort | null;
-      readonly filter?: DatabaseFilter | null;
+      readonly projection: DatabaseProjection;
     }
   | {
       readonly type: "clipboard.paste";
@@ -711,6 +766,11 @@ interface DatabasePoint extends Record<string, JSONValue> {
   readonly recordId: string;
   readonly propertyId: string;
 }
+```
+## `DatabaseProjection`
+
+```ts
+interface DatabaseProjection extends Record<string, JSONValue> { readonly search: string; readonly filter: DatabaseFilterGroup; readonly sorts: ReadonlyArray<DatabaseSort>; readonly groups: ReadonlyArray<DatabaseGroup>; readonly columns: ReadonlyArray<DatabaseColumnProjection>; }
 ```
 ## `DatabaseProperty`
 
@@ -773,16 +833,7 @@ interface DatabaseSort extends Record<string, JSONValue> {
 ## `DatabaseTableView`
 
 ```ts
-interface DatabaseTableView extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly name: string;
-  readonly type: "table";
-  readonly propertyOrder: ReadonlyArray<string>;
-  readonly propertyVisibility: Readonly<Record<string, boolean>>;
-  readonly propertyWidths: Readonly<Record<string, number>>;
-  readonly sort: DatabaseSort | null;
-  readonly filter: DatabaseFilter | null;
-}
+interface DatabaseTableView extends Record<string, JSONValue> { readonly id: string; readonly name: string; readonly ownership: "personal" | "shared" | "locked"; readonly layout: "table"; readonly projection: DatabaseProjection; }
 ```
 ## `DatabaseTopology`
 
@@ -801,6 +852,11 @@ databaseValueFromText(property: DatabaseProperty, value: string): string | numbe
 
 ```ts
 defaultDatabaseValue(property: DatabaseProperty): JSONValue
+```
+## `diffText`
+
+```ts
+diffText(before: string, after: string): TextChange | null
 ```
 ## `DocumentBlock`
 
@@ -842,6 +898,7 @@ interface DocumentEditor {
 
 ```ts
 type DocumentIntent =
+  | { readonly type: "selection.select-all" }
   | { readonly type: "selection.set"; readonly blockId: string; readonly mode?: "replace" | "extend" | "toggle"; readonly offset?: number }
   | { readonly type: "text.replace"; readonly blockId: string; readonly text: string; readonly offset?: number }
   | { readonly type: "block.insert"; readonly afterId?: string; readonly text?: string }
@@ -853,14 +910,8 @@ type DocumentIntent =
 ## `DocumentObject`
 
 ```ts
-interface DocumentObject extends Record<string, JSONValue> {
+interface DocumentObject extends ObjectDraft {
   readonly id: string;
-  readonly label: string;
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-  readonly color: string;
 }
 ```
 ## `DocumentPoint`
@@ -979,6 +1030,25 @@ interface EditingPlan<Selection extends JSONValue> {
   readonly history?: "record" | "ignore";
   /** Groups local inverse history. An external history owner defines its own steps. */
   readonly historyGroup?: string;
+}
+```
+## `EditingPreparation`
+
+```ts
+type EditingPreparation<Value> = { readonly ok: true; readonly value: Value } | EditingPreparationFailure;
+```
+## `EditingPreparationFailure`
+
+```ts
+type EditingPreparationFailure = { readonly ok: false; readonly code: string; readonly reason?: string };
+```
+## `EditingPreparationQueue`
+
+```ts
+interface EditingPreparationQueue<Value, Result> {
+  readonly isPending: boolean;
+  enqueue(prepare: () => EditingPreparation<Value> | Promise<EditingPreparation<Value>>, cancelPreparation?: () => void): Promise<Result | EditingPreparationFailure>;
+  cancel(): void;
 }
 ```
 ## `EditingResult`
@@ -1202,11 +1272,13 @@ nextDatabasePropertySort(sort: DatabaseSort | null, propertyId: string): Databas
 ## `ObjectClipboard`
 
 ```ts
-interface ObjectClipboard extends Record<string, JSONValue> {
+type ObjectClipboard = Record<string, JSONValue> & {
   readonly type: "application/vnd.interactive-os.objects+json";
   readonly objects: ReadonlyArray<DocumentObject>;
   readonly text: string;
-}
+  /** Optional for legacy payloads; remapped to the corresponding new ID on paste. */
+  readonly primaryKey?: string | null;
+};
 ```
 ## `objectClipboardFormat`
 
@@ -1238,13 +1310,20 @@ interface ObjectEditor {
 
 ```ts
 type ObjectIntent =
+  | { readonly type: "object.create"; readonly object: ObjectDraft }
+  | { readonly type: "object.duplicate"; readonly objectIds: ReadonlyArray<string>; readonly placement?: ObjectPastePlacement }
+  | { readonly type: "object.remove"; readonly objectIds: ReadonlyArray<string> }
+  | { readonly type: "object.text"; readonly objectId: string; readonly text: string }
+  | { readonly type: "document.replace"; readonly document: ObjectDocument }
   | {
       readonly type: "selection.set";
       readonly objectIds: ReadonlyArray<string>;
       readonly mode?: ObjectSelectionMode;
+      readonly primaryKey?: string;
     }
   | { readonly type: "selection.remove" }
   | { readonly type: "selection.fill"; readonly color: string }
+  | { readonly type: "selection.style"; readonly style: Partial<ObjectStyle> }
   | {
       readonly type: "object.translate";
       readonly objectIds: ReadonlyArray<string>;
@@ -1265,9 +1344,26 @@ type ObjectIntent =
 
 ```ts
 interface ObjectPastePlacement {
-  readonly type: "offset";
+  readonly type: "offset" | "cascade";
   readonly dx: number;
   readonly dy: number;
+}
+```
+## `ObjectPastePreparation`
+
+```ts
+type ObjectPastePreparation =
+  | { readonly ok: true; readonly clipboard: ObjectClipboard }
+  | { readonly ok: false; readonly code: string; readonly reason?: string };
+```
+## `ObjectPasteSession`
+
+```ts
+interface ObjectPasteSession {
+  readonly pending: boolean;
+  enqueue(prepare: () => ObjectPastePreparation | Promise<ObjectPastePreparation>, cancelPreparation?: () => void): Promise<EditingResult<ObjectSelection>>;
+  /** Cancels queued work and releases subscriptions. The session can be reused. */
+  cancel(): void;
 }
 ```
 ## `ObjectSelection`
@@ -1323,6 +1419,7 @@ interface OrderEditor {
 
 ```ts
 type OrderIntent =
+  | { readonly type: "selection.select-all" }
   | {
       readonly type: "selection.set";
       readonly itemId: string;
@@ -1455,6 +1552,7 @@ interface SheetEditor {
 
 ```ts
 type SheetIntent =
+  | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
       readonly rowId: string;
@@ -1519,6 +1617,42 @@ interface SheetSelection extends Record<string, JSONValue> {
 ```ts
 type SheetTopology = GridTopology;
 ```
+## `TextChange`
+
+```ts
+interface TextChange {
+  readonly from: number;
+  readonly to: number;
+  readonly insert: string;
+}
+```
+## `TextEditor`
+
+```ts
+interface TextEditor {
+  readonly document: JSONDocument;
+  readonly pointer: Pointer;
+  readonly text: string;
+  readonly snapshot: EditingSnapshot<TextSelection>;
+  select(selection: TextSelection): EditingSnapshot<TextSelection>;
+  replace(value: string, selection: TextSelection): EditingResult<TextSelection>;
+  insert(text: string): EditingResult<TextSelection>;
+  copy(): string;
+  undo(): EditingResult<TextSelection>;
+  redo(): EditingResult<TextSelection>;
+  subscribe(listener: (snapshot: EditingSnapshot<TextSelection>) => void): () => void;
+}
+```
+## `TextSelection`
+
+```ts
+type TextSelection = { readonly anchor: number; readonly focus: number };
+```
+## `transformAnnotationSelector`
+
+```ts
+transformAnnotationSelector(selector: AnnotationSelector, transform: AnnotationSelectorTransform): AnnotationSelector | null
+```
 ## `TreeClipboard`
 
 ```ts
@@ -1559,6 +1693,7 @@ interface TreeEditor {
 
 ```ts
 type TreeIntent =
+  | { readonly type: "selection.select-all"; readonly topology: TreeTopology }
   | {
       readonly type: "selection.set";
       readonly nodeId: string;

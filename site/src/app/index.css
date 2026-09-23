@@ -94,7 +94,11 @@
 }
 
 @layer components {
-  /* Tailwind recipes own Markdown presentation; CSS only owns stream-state animation. */
+  /* Markdown presentation consumes semantic tokens; streaming adds animation. */
+  [data-markdown-delimiter] {
+    @apply text-foreground-muted;
+  }
+
   [data-markdown-streaming="true"] > :last-child {
     animation: markdown-stream-in 180ms ease-out;
   }
@@ -295,6 +299,10 @@
     @apply absolute left-0 top-full z-20 mt-1 min-w-40;
   }
 
+  .canvas-style-panel {
+    @apply grid max-h-[60vh] w-64 gap-3 overflow-y-auto rounded-control border border-line-subtle bg-background-canvas p-3 text-xs text-foreground-default shadow-overlay outline-none;
+  }
+
   [data-ui-presentation="dialog-backdrop"] {
     @apply fixed inset-0 z-40 grid place-items-center bg-foreground-strong/10;
   }
@@ -367,7 +375,6 @@
   [data-ui-component="contextual-controls"] :is(
     [data-ui-control="command"],
     [data-ui-control="toggle"],
-    [data-ui-control="command"][data-ui-presentation="icon"],
     [data-ui-segment="true"]
   ) {
     @apply rounded-control border-transparent bg-background-subtle/60 shadow-none hover:border-line-subtle hover:bg-background-subtle;
@@ -380,7 +387,6 @@
   [data-ui-toolbar="product"] :is(
     [data-ui-control="command"],
     [data-ui-control="toggle"],
-    [data-ui-control="command"][data-ui-presentation="icon"],
     [data-ui-segment="true"]
   ) {
     @apply rounded-control border-line-subtle/60 bg-background-canvas shadow-none hover:border-line-default hover:bg-background-canvas;
@@ -474,8 +480,12 @@
     transform: rotate(180deg);
   }
 
-  [data-ui-control="command"][data-ui-presentation="icon"] {
+  :is([data-ui-control="command"], [data-ui-control="toggle"])[data-ui-presentation="icon"] {
     @apply flex size-8 min-h-8 cursor-pointer items-center justify-center rounded-control border-0 bg-transparent p-0 text-foreground-default outline-none transition-colors hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-foreground-muted;
+  }
+
+  [data-ui-control="toggle"][data-ui-presentation="icon"][aria-pressed="true"] {
+    @apply bg-background-subtle text-foreground-strong disabled:bg-transparent disabled:text-foreground-muted;
   }
 
   :is([data-ui-component="command-presentation"], [data-ui-component="toggle-presentation"]) {

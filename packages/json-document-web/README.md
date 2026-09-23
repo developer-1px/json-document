@@ -31,11 +31,15 @@ ARIA projection, composite focus, and text input. It translates native `Clipboar
 conventional keyboard chords without rendering UI or deciding product
 keyboard policy.
 
-Once a supported cut has written its payload or a paste has decoded a supported
-payload, the binding cancels the native event before calling the editor. A
+When a cut callback is configured, the binding cancels native cut before attempting
+to write, including unavailable/failed/partial writes. It calls the editor only after
+every representation is written. A supported paste is cancelled after decoding and before editing. A
 rejected edit remains `editing.rejected` and cannot fall through to a browser
 mutation. Unsupported or undecodable paste data keeps its existing pass-through
 behavior.
+
+See the owning [Clipboard event contract](docs/clipboard.md) for captured targets,
+native editable ownership and observable failure semantics.
 
 `registerWebVirtualSelectionScope` coordinates native Select All and copy when a
 surface mounts only part of its model. It selects the mounted root with a real
@@ -68,8 +72,9 @@ const dragDrop = createWebDragDropSession({
 });
 ```
 
-The sessions own platform lifecycle state. Hit testing, valid targets, geometry,
-and document Intent remain in the host.
+세션은 플랫폼 수명주기를 소유합니다. Hit testing과 geometry의 플랫폼 관찰,
+유효 대상과 문서 Intent의 의미는 각각 Adapter와 문서·Editing owner의 계약을
+소비합니다. Host는 제품의 대상·정책 값과 실행 경로를 연결합니다.
 
 `createWebViewportPositionPorts` measures an exact target and its paired tail
 reserve, writes temporary scroll range, performs smooth or instant positioning,
@@ -118,12 +123,12 @@ const keyboard = createWebKeyboardAdapter();
 
 surface.addEventListener("click", (event) => {
   const operation = selectionOperationFromModifiers(event);
-  // The host resolves geometry and dispatches its domain selection intent.
+  // Connect canonical geometry/selection APIs with the product's target.
 });
 
 surface.addEventListener("keydown", (event) => {
   const command = keyboard.resolve(event);
-  // Official adapter output. The host maps it through topology to a domain intent.
+  // Pass the command to the canonical topology/editor API.
 });
 
 input.addEventListener("input", (event) => {
@@ -146,20 +151,38 @@ the formats it enables and their priority, while
 `createWebJSONClipboardRepresentation` owns JSON serialization. The legacy
 named codecs remain compatibility aliases over those domain formats. Clipboard
 surfaces write both the structured json-document MIME payload and its
-`text/plain` projection. Paste
-consumes only a valid structured payload. Parsing arbitrary external plain text
-into domain records or cells remains a host policy.
+`text/plain` projection. `captureWebClipboardPaste` captures an enabled structured
+representation, files, opt-in image-containing HTML (`html: "images"`), or literal
+text before the event expires. `delegatedMimeTypes` leaves recognized formats to
+an existing nested binding before this priority. Its codec is optional. Domain conversion belongs to the canonical
+Editing or Hand API; the Host supplies product policy.
+
+`readWebRasterFiles` validates a PNG/JPEG/WebP batch and prepares its embedded
+content and intrinsic dimensions through `readWebRasterFile`. Canvas and Composer
+share this path. File Intake owns `RasterImageContent`; Web owns reading and
+decoding, not document mutation or server upload. See the
+[Clipboard API and remaining TBD](docs/clipboard.md).
+
+`parseWebHTMLFragment` is the inert platform parser shared with Rich Text Web;
+its nodes are conversion input, never live DOM insertion output.
+`parseWebClipboardHTML` projects ordered text/image sources. `readWebHTMLClipboard`
+checks embedded PNG/JPEG/WebP data URLs before allocating bytes and reuses the
+raster batch reader. It does not fetch external, relative, blob, or cid URLs.
+Canvas consumes mixed content; Composer accepts image-only HTML and explicitly
+rejects mixed text/images until its document profile can represent them.
 
 The official keyboard adapter owns `defaultWebKeymap`. `resolve` returns a
 semantic command or `null`; `moveLinePoint` and `moveGridPoint` locate the
 visible neighbor. The host still decides when a command applies and which
 domain Intent to dispatch.
 
-The clipboard binding calls `preventDefault()` only after a successful copy,
-canonical cut, or canonical paste. Cut writes the selected payload before
-asking the Editing companion to remove it. Missing clipboard data, malformed
-payloads, unsupported cut, and rejected editing results leave native handling
-available.
+The clipboard binding cancels cut before attempting a write, and only removes
+the captured selection after the write succeeds. Copy cancels after writing;
+its synchronous paste cancels after decoding a supported representation and
+before invoking Editing. Decode failures retain that binding's existing
+pass-through. In contrast, `captureWebClipboardPaste` claims a recognized
+representation before decoding, so an invalid structured payload cannot fall
+back to other content. Missing or unrecognized content remains unclaimed.
 
 `createWebClipboardSurface` is the public surface-level orchestration API. It
 projects one binding into `onCopy`, `onCut`, and `onPaste` handlers and reports
@@ -187,11 +210,17 @@ The Adapter owns:
 
 The host owns:
 
-- the event target, canonical focus, when a command applies, and role workflow policy;
-- DOM/canvas geometry and hit testing;
-- external plain-text interpretation and product-specific paste policy;
+- product-specific activation, permissions, and workflow policy;
+- concrete DOM/external instances and visual composition;
+- selection of canonical geometry, editor, focus, and clipboard APIs;
+- product-specific paste policy values;
 - enabled representations and their priority;
-- native text selection, IME, drag/drop, persistence, and remote protocols.
+- composition of canonical text-selection, IME and drag/drop bindings;
+- injection of persistence and remote-system instances.
+
+Native text selection, IME, drag/drop lifecycle, serialization, and reusable UI
+behavior remain at their canonical Adapter, Affordance, Connector, or UI owner.
+Host composition is not an exemption from those module boundaries.
 
 The module does not access `window`, `document`, or `navigator` during import,
 so non-browser tooling can load it safely.
@@ -202,3 +231,59 @@ so non-browser tooling can load it safely.
 | --- | --- |
 | `@interactive-os/json-document-editing` | `>=0.1.0-rc.0 <1` |
 | `@interactive-os/json-document-selection` | `>=0.1.0-rc.0 <1` |
+
+## Cut failure boundary (Draft grammar)
+
+`createWebClipboardBinding` captures the editor payload and writes its
+representations before calling `cut`. A failed write leaves removal uncalled;
+a rejected removal reports `editing.rejected` after native event cancellation.
+Previously written clipboard data can remain in either failure case: the OS
+clipboard and JSONDocument are not one transaction. Headless `editor.cut()`
+returns its captured payload alongside the editing result.
+
+[EG-CUT integration cases](tests/clipboard-rejection.test.ts) use a real
+Document editor to check each write failure, schema-rejected removal, successful
+capture-before-removal, and selection-restoring Undo. Existing unsupported-format
+cases retain their event ownership behavior. These tests exercise the Web event
+port; they do not certify browser-specific clipboard permissions or transport.
+
+## Native text selection
+
+`textSelectionFromControl({ currentTarget })` projects an input or textarea's
+`selectionStart`, `selectionEnd`, and `selectionDirection` into the existing
+`SelectionRange<number>` anchor/focus contract. A backward native selection has
+its anchor at the end and focus at the start. Bounds are clamped to the text.
+A missing `selectionEnd` produces a collapsed selection; a missing direction
+uses start as anchor and end as focus. The existing
+`textInputFromControl` text/offset result is unchanged.
+
+```ts
+import { textSelectionFromControl } from "@interactive-os/json-document-web";
+
+const range = textSelectionFromControl({ currentTarget: textarea });
+// range.anchor and range.focus preserve the native selection direction.
+```
+
+`DocumentTextControl` consumes this public projection in the live
+[Document Usage](https://developer-1px.github.io/json-document/demo); its source
+view links the React binding to this package's `input.ts` implementation and
+[API reference](https://developer-1px.github.io/json-document/docs/api/web).
+
+Default keyboard interpretation has one owner here. `chordFromStroke` folds
+Meta/Control into `Mod`, preserves Alt/Shift, normalizes single-character case,
+and maps the space key to `Space`. Unlisted chords resolve to `null`; for
+example, Mod+Alt+Z and Mod+Backspace have no default structural command.
+`createWebKeyboardAdapter({ keymap, defaults: false })` can explicitly assign
+such chords for a product profile. Affordance consumes the default delete
+mapping; Composer consumes its Undo/Redo mapping. Select-all remains an
+Affordance policy over the canonical chord normalizer, outside
+`WebKeyboardCommand`.
+
+### Clipboard 소유권 라우팅
+
+`createWebClipboardSurface`는 DOM currentTarget/target의 편집 경계를 자동으로 판정합니다.
+`routeWebClipboardEvent`는 같은 경계를 준비·selection 동기화가 있는 소비자에 제공합니다.
+다른 편집영역과 이미 취소된 이벤트는 null로 위임하며 read·onResult를 호출하지 않습니다.
+앱 소유 Cut은 준비 전에 취소합니다. 빈 선택·clipboard 없음·read/encode/write 실패를
+native 소유권의 증거로 사용하지 않습니다. SVG root와 중첩 native 입력도 같은 경계를 씁니다.
+[소유 계약과 Usage](docs/clipboard.md#입력-소유권과-실행-준비)를 참고하세요.

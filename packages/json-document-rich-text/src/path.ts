@@ -1,4 +1,3 @@
-import type { JSONValue } from "@interactive-os/json-document";
 import { getActiveRichTextInstrument } from "./instrument.js";
 import {
   hasRichTextContent,
@@ -63,8 +62,4 @@ export function replaceContentAtPath(
     throw new TypeError("Rich Text path does not address a content container.");
   }
   return replaceNodeAtPath(document, path, { ...container, content } as RichTextNode);
-}
-
-export function detachedValue<Value extends JSONValue>(value: Value): Value {
-  return JSON.parse(JSON.stringify(value)) as Value;
 }

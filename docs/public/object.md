@@ -1,11 +1,15 @@
 # Object
 
 Object는 안정된 ID를 가진 객체를 집는 편집기입니다. 줄 번호가 아니라 키
-가족(key family)을 씁니다. 화면에서 어디를 눌렀는지는 제품이 계산하고,
-editor에는 객체 ID만 넘깁니다.
+가족(key family)을 씁니다. 문서 모델·검증·연산은
+[`Object Document Type`](/docs/api/object-document), 입력·기하의 UI 조합은
+[`Canvas Hand`](/docs/api/canvas)가 소유하고 editor에는 객체 ID와 Intent를 넘깁니다.
 
-색을 채우거나 지우는 요청은 Intent로 들어갑니다. 기하와 히트 테스트는
-editor 밖에 남습니다.
+생성·글자 편집·색 채우기·이동·resize·삭제는 Intent로 들어갑니다. 문서의 기하
+규칙은 Document Type이, 화면 좌표와 hit target은 Adapter와 Hand가 소유합니다.
+Canvas의 스티커 노트와 도형 내부 글도 별도 편집기 없이 같은 `object.text`로
+label을 바꿉니다. 채워진 객체의 본문 글자색은 `selection.style`의 `style.textColor`로,
+채우기는 기존 `color`로 구분합니다.
 
 ## API Reference
 
@@ -20,8 +24,8 @@ ID 정책을 Host가 주입하는 자리입니다.
 ### `ObjectIntent`
 
 `dispatch`가 받는 Object domain command입니다. 공개 variant는
-`selection.set`, `selection.remove`, `selection.fill`, `object.translate`,
-`object.resize`, `clipboard.paste`입니다. DOM event, pointer 좌표, clipboard
+`selection.set`, `selection.remove`, `selection.fill`, `selection.style`, `object.create`, `object.text`,
+`object.translate`, `object.resize`, `object.duplicate`, `object.remove`, `document.replace`, `clipboard.paste`입니다. DOM event, pointer 좌표, clipboard
 event를 Intent에 넣지 않습니다.
 
 ### `ObjectSelectionMode`
@@ -41,6 +45,10 @@ event를 Intent에 넣지 않습니다.
 `clipboard.paste.placement`의 `{ type: "offset", dx, dy }`로 전달합니다. Editor가
 unique ID clone 뒤 placement를 정확히 한 번 적용하므로 clipboard payload에는
 배치 결과를 미리 저장하지 않습니다. placement 생략은 zero offset입니다.
+복제·paste의 primary remap, 새 ID와 원자적 History 계약은 소유 패키지의
+[Object Editing API](/docs/api/editing)에 있습니다. native cut은 성공적으로 쓴 payload의
+ID를 `object.remove`에 전달합니다. Object Demo의 복제 버튼은 OS Clipboard와 별개이며
+copy/cut/paste는 native 이벤트만 사용합니다.
 
 ## 상태의 주인
 
@@ -48,7 +56,7 @@ Object Hands는 서로 다른 수명의 상태를 한 덩어리로 만들지 않
 
 - document state는 객체의 값과 기하를 보존합니다.
 - editing session은 선택과 undo/redo를 보존합니다.
-- host interaction state는 active tool, hover, drag, resize처럼 현재 조작만
+- Hand interaction state는 active tool, text draft, drag, resize처럼 현재 조작만
   보존합니다.
 
 객체를 만드는 작업이 끝나면 그 결과를 현재 선택으로 만듭니다. 예를 들어
@@ -68,6 +76,6 @@ Object Hands는 서로 다른 수명의 상태를 한 덩어리로 만들지 않
 /demo/object
 ```
 
-```live-demo
-/demo/canvas
-```
+[한 장짜리 Canvas의 Usage와 Source](/docs/api/canvas)는 별도 Canvas editor 없이
+이 Object Editing을 사용합니다. Canvas UI는 같은 다중 선택·Clipboard API와
+Affordance의 평면 Select 프로파일을 연결합니다.

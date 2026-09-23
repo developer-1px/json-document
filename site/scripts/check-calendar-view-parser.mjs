@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
-const owner = read("packages/json-document-editing/src/calendar-validation.ts");
+const owner = read("packages/json-document-editing/src/calendar.ts");
 const ownerIndex = read("packages/json-document-editing/src/index.ts");
 const ownerTest = read("packages/json-document-editing/tests/calendar-validation.test.ts");
 const route = read("site/src/routes/calendar-demo/calendar-search.ts");
@@ -15,9 +15,9 @@ requireText(ownerTest, '["day", "week", "month", "year"].map(parseCalendarView)'
 requireText(route, "parseCalendarView(search.view) ?? calendarSearchDefaults.view");
 forbid(route, /new Set\(\["day", "week", "month", "year"\]\)/);
 forbid(route, /as CalendarView/);
-requireText(usage, "`parseCalendarView`가 판별하고");
+requireText(usage, "`parseCalendarView`");
 requireText(sources, 'symbol: "parseCalendarView"');
-requireText(sources, 'sourcePath: "packages/json-document-editing/src/calendar-validation.ts"');
+requireText(sources, 'sourcePath: "packages/json-document-editing/src/calendar.ts"');
 
 console.log("Calendar view parser guard ok; Editing owner, public export, tests, Host composition, Usage, and source registration checked.");
 

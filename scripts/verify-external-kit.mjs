@@ -12,6 +12,7 @@ import { readJson, repositoryRoot } from "./workspace-graph.mjs";
 const kitWorkspaces = [
   "@interactive-os/json-document",
   "@interactive-os/json-document-selection",
+  "@interactive-os/json-document-calendar-document",
   "@interactive-os/json-document-editing",
   "@interactive-os/json-document-rich-text",
   "@interactive-os/json-document-file-intake",
@@ -25,6 +26,7 @@ const kitWorkspaces = [
   "@interactive-os/json-document-react",
   "@interactive-os/json-document-zod",
   "@interactive-os/json-document-database",
+  "@interactive-os/json-document-annotation",
   "@interactive-os/json-document-calendar",
 ];
 const fixtureSource = join(repositoryRoot, "fixtures", "external-kit");

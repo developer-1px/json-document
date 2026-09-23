@@ -3,13 +3,10 @@ import {
   cloneTrustedPlainJson,
 } from "../json/index.js";
 import type { JSONPatchOperation as AppliedPatchOperation } from "../patch/contract.js";
-import {
-  applyValidatedPatch,
-  applyTrustedPatch,
-} from "../patch/trusted.js";
+import { applyTrustedPatch } from "../patch/trusted.js";
 import { parseArrayIndex } from "../pointer/array-index.js";
-import { parsePointer } from "../pointer/core.js";
-import { isSharedArray } from "../json/shared-array.js";
+import { parentPointer, parsePointer, readAt } from "../pointer/core.js";
+import { getSharedArrayOverlay } from "../json/shared-array.js";
 import type {
   JSONAppliedChange,
   JSONPatchFailure,
@@ -38,16 +35,7 @@ export function applyProtocolPatch(
     operations as ReadonlyArray<AppliedPatchOperation>,
   );
   if (!result.result.ok) {
-    return freezeFailure({
-      ok: false,
-      code: result.result.code,
-      ...(result.result.reason === undefined
-        ? {}
-        : { reason: result.result.reason }),
-      ...(result.result.pointer === undefined
-        ? {}
-        : { pointer: result.result.pointer }),
-    });
+    return freezeFailure(result.result);
   }
 
   const ownedValue = operations.length === 0
@@ -75,16 +63,7 @@ export function applyOwnedProtocolPatch(
     operations as ReadonlyArray<AppliedPatchOperation>,
   );
   if (!prepared.result.ok) {
-    return freezeFailure({
-      ok: false,
-      code: prepared.result.code,
-      ...(prepared.result.reason === undefined
-        ? {}
-        : { reason: prepared.result.reason }),
-      ...(prepared.result.pointer === undefined
-        ? {}
-        : { pointer: prepared.result.pointer }),
-    });
+    return freezeFailure(prepared.result);
   }
 
   // Canonical operations own their payloads. Replaying only these validated
@@ -97,7 +76,7 @@ export function applyOwnedProtocolPatch(
     && typeof operation.value === "object"
   ));
   const validated = replayRequired
-    ? applyValidatedPatch(value, applied as ReadonlyArray<AppliedPatchOperation>)
+    ? applyTrustedPatch(value, applied as ReadonlyArray<AppliedPatchOperation>, { valuesTrusted: true })
     : prepared;
   const ownedValue = validated.result.ok
     ? freezeOwnedState(validated.state as JSONValue, applied)
@@ -166,7 +145,9 @@ function freezeAlongOperations(
   value: JSONValue,
   operations: ReadonlyArray<JSONPatchOperation>,
 ): boolean {
-  const paths: string[][] = [];
+  const containers = new Set<object>();
+  const parent = parentPointer(operations.find((operation) => operation.op !== "test")?.path ?? "");
+  const sameParent = operations.every((operation) => operation.op === "test" || parentPointer(operation.path) === parent);
   for (const operation of operations) {
     if (operation.op === "test") continue;
     if (
@@ -175,29 +156,35 @@ function freezeAlongOperations(
     ) {
       return false;
     }
+    let segments: string[];
     try {
-      paths.push(parsePointer(operation.path));
+      segments = parsePointer(operation.path);
     } catch {
       return false;
     }
+    // Array insertion/removal may shift another operation's final address.
+    // Sibling-only writes are safe: every inserted/replaced payload is owned.
+    if (operation.op !== "replace" && !sameParent) {
+      const target = readAt(value, segments.slice(0, -1));
+      if (target.ok && Array.isArray(target.value)) return false;
+    }
+    if (!freezeAlongPath(value, segments, containers)) return false;
   }
-  for (const segments of paths) {
-    if (!freezeAlongPath(value, segments)) return false;
-  }
-  if (value !== null && typeof value === "object" && !isSharedArray(value) && !Object.isFrozen(value)) {
+  if (value !== null && typeof value === "object") containers.add(value);
+  // Freeze each shared ancestor once, after all paths succeed. A fallback must
+  // never mistake a partially frozen ancestor for a fully frozen subtree.
+  for (const container of containers) {
     freezeInspections += 1;
-    Object.freeze(value);
+    if (!getSharedArrayOverlay(container) && !Object.isFrozen(container)) Object.freeze(container);
   }
   return true;
 }
 
-function freezeAlongPath(root: JSONValue, segments: ReadonlyArray<string>): boolean {
-  const stack: object[] = [];
+function freezeAlongPath(root: JSONValue, segments: ReadonlyArray<string>, containers: Set<object>): boolean {
   let current: JSONValue = root;
   for (const segment of segments) {
     if (current === null || typeof current !== "object") return false;
-    freezeInspections += 1;
-    stack.push(current);
+    containers.add(current);
     if (Array.isArray(current)) {
       const index = parseArrayIndex(segment);
       if (index === null || index >= current.length) return false;
@@ -211,17 +198,19 @@ function freezeAlongPath(root: JSONValue, segments: ReadonlyArray<string>): bool
     }
   }
   freezeJSON(current);
-  for (let index = stack.length - 1; index >= 0; index -= 1) {
-    const container = stack[index]!;
-    if (!isSharedArray(container) && !Object.isFrozen(container)) Object.freeze(container);
-  }
   return true;
 }
 
 function freezeJSON<T extends JSONValue>(value: T): T {
   if (value === null || typeof value !== "object") return value;
   freezeInspections += 1;
-  if (isSharedArray(value) || Object.isFrozen(value)) return value;
+  const overlay = getSharedArrayOverlay(value);
+  if (overlay !== undefined) {
+    freezeJSON(overlay.base as JSONValue);
+    for (const child of overlay.replacements.values()) freezeJSON(child as JSONValue);
+    return value;
+  }
+  if (Object.isFrozen(value)) return value;
   for (const child of Object.values(value)) freezeJSON(child as JSONValue);
   Object.freeze(value);
   return value;

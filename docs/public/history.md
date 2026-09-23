@@ -29,7 +29,10 @@ History 항목은 JSON 값이 실제로 바뀐 편집에서 생깁니다. Select
 현재 편집 대상만 바꾸므로 기록을 추가하지 않습니다. 검사를 통과하지 못한
 요청과 문서 값이 그대로인 요청도 되돌릴 값이 없어 기록되지 않습니다.
 
-기본 local history는 외부 문서 변경을 받으면 비워집니다. 다른 참여자의 변경을
+기본 local history는 실제 외부 문서 변경이 있으면 비워집니다. UI 구독자가 없거나
+구독을 해제한 뒤에도 같은 정책을 따릅니다. 외부 변경 후 값이 원래 값으로
+돌아와도 이전 Undo/Redo 기록은 되살아나지 않습니다. 동일 값의 새 snapshot
+reference나 문서 no-op은 기록을 지우지 않습니다. 다른 참여자의 변경을
 보존하며 내 기여만 취소하려면 [Collaborative History](collaboration-history.md)의
 공식 연결 API를 사용합니다. document만 바꾸는 것으로 history 의미까지 바뀌지는 않습니다.
 
