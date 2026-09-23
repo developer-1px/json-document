@@ -59,6 +59,7 @@ export type AffordanceHand =
     readonly source: "keyboard";
     readonly key: "Enter" | "Space";
   }
+  | { readonly type: "grab" }
   | { readonly type: "cancel" }
   | { readonly type: "tab"; readonly direction: "next" | "prev" }
   | { readonly type: "hover"; readonly phase: "hint" | "tooltip" | "highlight" }

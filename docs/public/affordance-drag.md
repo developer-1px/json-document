@@ -81,10 +81,43 @@ Canvas에 한정되지 않은 create/draw/move/resize lifecycle은
 
 좌표 변환, hit test, 잠금 정책, renderer, tool/viewport 정책은 Host 책임입니다.
 
-## TBD
+## 키보드로 옮기기
 
-- 키보드만으로 옮기기 (APG는 드래그의 키보드 대안을 요구함)
-- pointer capture 수명은 Web Adapter의 `createWebPointerSession`이 소유함
+포인터 없이도 같은 옮기기 문법이 성립합니다. Space나 Enter가 고른 대상을
+잡고, 화살표가 이동량을 누적하고(Shift는 10), 같은 키가 놓아 확정하고,
+Escape는 미리보기를 폐기합니다. 이동 없이 놓으면 cancel로 끝나 값이
+바뀌지 않습니다.
+
+```ts
+import { applyAffordance, keyboardDragAffordance } from "@interactive-os/json-document-affordance";
+
+function onKeyDown(event: KeyboardEvent) {
+  applyAffordance(
+    keyboardDragAffordance({
+      key: event.key,
+      shiftKey: event.shiftKey,
+      grabbing,
+      dx: offset.dx,
+      dy: offset.dy,
+    }),
+    {
+      hand: (hand) => {
+        if (hand.type === "grab") setGrabbing(true);
+        if (hand.type === "translate") setOffset({ dx: hand.dx, dy: hand.dy });
+        if (hand.type === "cancel") reset();
+      },
+      commit: (hand) => {
+        if (hand.type !== "translate") return;
+        editor.dispatch({ type: "object.translate", objectIds, dx: hand.dx, dy: hand.dy });
+        reset();
+      },
+    },
+  );
+}
+```
+
+잡힘 상태와 누적 이동량은 호스트 화면 상태입니다. 단위는
+[Nudge](affordance-nudge.md)와 같이 1과 10으로 닫습니다.
 
 ## Live Demo
 

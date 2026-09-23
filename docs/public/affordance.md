@@ -67,7 +67,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Expand/Collapse](affordance-fold.md) | `treeAffordance` | 나무 왼쪽 접힘, 오른쪽 펼침 |
 | [Undo](affordance-history.md) | `historyAffordance` | Mod+Z, Mod+Shift+Z |
 | [Nudge](affordance-nudge.md) | `nudgeAffordance` | 화살표 한 단위, Shift 큰 단위 |
-| [Drag](affordance-drag.md) | `dragAffordance`, `commitAffordance`, `createCanvasGestureSession` | 대상 이동, Canvas gesture preview/commit/cancel |
+| [Drag](affordance-drag.md) | `dragAffordance`, `keyboardDragAffordance`, `commitAffordance`, `createCanvasGestureSession` | 대상 이동, 키보드 잡기·놓기, Canvas gesture preview/commit/cancel |
 | [Marquee](affordance-marquee.md) | `marqueeAffordance`, `commitAffordance` | 빈 곳에서 사각형으로 여러 대상 |
 | [Pan](affordance-pan.md) | `panAffordance` | Space+드래그, grab |
 | [Snap](affordance-snap.md) | `snapAffordance` | 그리드·가이드, 수정 키로 해제 |
@@ -80,7 +80,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Duplicate](affordance-copy-drag.md) | `dragOperation` | Alt/Option 드래그 복제 |
 | [Interaction Handles](affordance-handles.md) | `createInteractionHandleSession`, `DragHandle`, `ResizeHandle`, `ControlHandle` | drag·resize·control 손잡이의 공통 lifecycle |
 | [Resize](affordance-resize.md) | `resizeAffordance` | 모서리 핸들, CSS UI 4 커서 |
-| [Scroll](affordance-scroll.md) | `wheelAffordance` | wheel 팬 |
+| [Scroll](affordance-scroll.md) | `wheelAffordance`, `edgeScrollAffordance` | wheel 팬, 드래그 중 가장자리 autoscroll |
 | [Zoom](affordance-zoom.md) | `wheelAffordance`, `zoomAffordance` | Mod+휠, +/− |
 | [Not-allowed](affordance-forbid.md) | `forbiddenCursor` | not-allowed, 잠긴 객체 |
 | [Focus](affordance-focus.md) | `focusAffordance` | Tab 사이, 화살표 안, 초점 ≠ 선택 |
@@ -136,6 +136,8 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | 미리보기 | 커밋 전 화면만 움직임. 0 이동 mouseup은 선택만 | 안정 | [닫힘](affordance-drag.md) |
 | Shift+드래그 | 축 구속 (가로/세로) | 안정 | [닫힘](affordance-drag.md) |
 | Alt/Option+드래그 | 복제. 원본 남김. `copy` 커서 | 안정 | [닫힘](affordance-copy-drag.md) |
+| 키보드로 옮기기 | Space/Enter 잡기, 화살표 누적(Shift 10), 같은 키 드롭, Escape 취소 | 안정 | [닫힘](affordance-drag.md) |
+| 가장자리 autoscroll | 드래그 중 viewport 가장자리 깊이에 비례해 굴림 | 안정 | [닫힘](affordance-scroll.md) |
 | 드롭 후 선택 | 옮긴 집합이 선택된 채로 남음 | 안정 | [닫힘](affordance-drop.md) |
 | 커밋 전 Escape | 미리보기 폐기, 좌표 불변 | 안정 | [닫힘](affordance-cancel.md) |
 

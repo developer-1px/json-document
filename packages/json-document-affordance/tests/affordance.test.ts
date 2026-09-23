@@ -14,10 +14,12 @@ import {
   dragAffordance,
   dragOperation,
   dropAffordance,
+  edgeScrollAffordance,
   editingCommandFromWebKeyboardStroke,
   escapeAffordance,
   forbiddenCursor,
   historyAffordance,
+  keyboardDragAffordance,
   focusAffordance,
   planeHitAffordance,
   pointerSelect,
@@ -388,6 +390,47 @@ describe("commitAffordance", () => {
       commit: true,
     });
     expect(commitAffordance(dragAffordance({ x: 10, y: 20 }, { x: 10, y: 20 }))).toBeNull();
+  });
+});
+
+describe("keyboardDragAffordance", () => {
+  test("grabs, previews accumulated arrows, and drops as a commit", () => {
+    expect(keyboardDragAffordance({ key: " ", grabbing: false }))
+      .toEqual({ hand: { type: "grab" }, cursor: "grabbing" });
+    expect(keyboardDragAffordance({ key: "ArrowRight", grabbing: true, dx: 0, dy: 0 }))
+      .toEqual({ hand: { type: "translate", dx: 1, dy: 0 }, cursor: "grabbing" });
+    expect(keyboardDragAffordance({ key: "ArrowDown", shiftKey: true, grabbing: true, dx: 1, dy: 0 }))
+      .toEqual({ hand: { type: "translate", dx: 1, dy: 10 }, cursor: "grabbing" });
+    expect(keyboardDragAffordance({ key: "Enter", grabbing: true, dx: 1, dy: 10 }))
+      .toEqual({ hand: { type: "translate", dx: 1, dy: 10 }, commit: true });
+  });
+
+  test("cancels on Escape and on a drop without movement", () => {
+    expect(keyboardDragAffordance({ key: "Escape", grabbing: true, dx: 3, dy: 0 }))
+      .toEqual({ hand: { type: "cancel" } });
+    expect(keyboardDragAffordance({ key: " ", grabbing: true, dx: 0, dy: 0 }))
+      .toEqual({ hand: { type: "cancel" } });
+    expect(keyboardDragAffordance({ key: "a", grabbing: false })).toEqual({ hand: null });
+    expect(keyboardDragAffordance({ key: "a", grabbing: true })).toEqual({ hand: null });
+  });
+});
+
+describe("edgeScrollAffordance", () => {
+  const rect = { x: 0, y: 0, width: 200, height: 100 };
+
+  test("scrolls proportionally to edge depth and stays idle in the middle", () => {
+    expect(edgeScrollAffordance({ point: { x: 100, y: 50 }, rect })).toEqual({ hand: null });
+    expect(edgeScrollAffordance({ point: { x: 0, y: 50 }, rect }))
+      .toEqual({ hand: { type: "translate", dx: -16, dy: 0 } });
+    expect(edgeScrollAffordance({ point: { x: 188, y: 94 }, rect }))
+      .toEqual({ hand: { type: "translate", dx: 8, dy: 12 } });
+  });
+
+  test("clamps outside pointers to full speed and skips axes that cannot host edge zones", () => {
+    expect(edgeScrollAffordance({ point: { x: -40, y: -40 }, rect }))
+      .toEqual({ hand: { type: "translate", dx: -16, dy: -16 } });
+    expect(edgeScrollAffordance({ point: { x: 0, y: 10 }, rect: { x: 0, y: 0, width: 200, height: 40 } }))
+      .toEqual({ hand: { type: "translate", dx: -16, dy: 0 } });
   });
 });
 

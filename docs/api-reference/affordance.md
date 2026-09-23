@@ -82,6 +82,7 @@ type AffordanceHand =
     readonly source: "keyboard";
     readonly key: "Enter" | "Space";
   }
+  | { readonly type: "grab" }
   | { readonly type: "cancel" }
   | { readonly type: "tab"; readonly direction: "next" | "prev" }
   | { readonly type: "hover"; readonly phase: "hint" | "tooltip" | "highlight" }
@@ -412,6 +413,11 @@ dragOperation(modifiers: WebModifierState & { readonly altKey?: boolean; }): Aff
 ```ts
 dropAffordance(input: { readonly canDrop: boolean; readonly operation?: "move" | "copy"; }): AffordancePreview
 ```
+## `edgeScrollAffordance`
+
+```ts
+edgeScrollAffordance(input: { readonly point: Point; readonly rect: Rect; readonly threshold?: number; readonly maxStep?: number; }): AffordancePreview
+```
 ## `editingCommandFromWebKeyboardStroke`
 
 ```ts
@@ -655,6 +661,11 @@ type InteractionHandleSnapshot = {
   readonly origin: Point;
   readonly point: Point;
 };
+```
+## `keyboardDragAffordance`
+
+```ts
+keyboardDragAffordance(input: { readonly key: string; readonly shiftKey?: boolean; readonly grabbing: boolean; readonly dx?: number; readonly dy?: number; }): AffordanceResult
 ```
 ## `LineFocusSession`
 

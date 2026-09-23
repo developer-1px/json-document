@@ -1,9 +1,11 @@
 import {
   type WebModifierState,
 } from "@interactive-os/json-document-web";
-import type {
-  AffordancePreview,
-  AffordanceRect,
+import {
+  commitAffordance,
+  type AffordancePreview,
+  type AffordanceRect,
+  type AffordanceResult,
 } from "./result.js";
 import { interactionHandleCursor } from "./interaction-handle.js";
 
@@ -238,6 +240,63 @@ export function nudgeAffordance(stroke: {
   if (stroke.key === "ArrowDown") return { hand: { type: "nudge", dx: 0, dy: step } };
   if (stroke.key === "ArrowUp") return { hand: { type: "nudge", dx: 0, dy: -step } };
   return { hand: null };
+}
+
+/** Keyboard drag alternative: Space/Enter grabs, arrows accumulate a preview, Space/Enter drops. */
+export function keyboardDragAffordance(input: {
+  readonly key: string;
+  readonly shiftKey?: boolean;
+  readonly grabbing: boolean;
+  readonly dx?: number;
+  readonly dy?: number;
+}): AffordanceResult {
+  const activate = input.key === " " || input.key === "Enter";
+  if (!input.grabbing) {
+    if (activate) return { hand: { type: "grab" }, cursor: "grabbing" };
+    return { hand: null };
+  }
+  if (input.key === "Escape") return { hand: { type: "cancel" } };
+  const dx = input.dx ?? 0;
+  const dy = input.dy ?? 0;
+  if (activate) {
+    return commitAffordance({ hand: { type: "translate", dx, dy } }) ?? { hand: { type: "cancel" } };
+  }
+  const step = input.shiftKey ? 10 : 1;
+  if (input.key === "ArrowRight") return { hand: { type: "translate", dx: dx + step, dy }, cursor: "grabbing" };
+  if (input.key === "ArrowLeft") return { hand: { type: "translate", dx: dx - step, dy }, cursor: "grabbing" };
+  if (input.key === "ArrowDown") return { hand: { type: "translate", dx, dy: dy + step }, cursor: "grabbing" };
+  if (input.key === "ArrowUp") return { hand: { type: "translate", dx, dy: dy - step }, cursor: "grabbing" };
+  return { hand: null };
+}
+
+/** Edge autoscroll while dragging: the deeper into an edge zone, the faster the scroll. */
+export function edgeScrollAffordance(input: {
+  readonly point: Point;
+  readonly rect: Rect;
+  readonly threshold?: number;
+  readonly maxStep?: number;
+}): AffordancePreview {
+  const threshold = input.threshold ?? 24;
+  const maxStep = input.maxStep ?? 16;
+  const dx = edgeScrollStep(input.point.x, input.rect.x, input.rect.x + input.rect.width, threshold, maxStep);
+  const dy = edgeScrollStep(input.point.y, input.rect.y, input.rect.y + input.rect.height, threshold, maxStep);
+  if (dx === 0 && dy === 0) return { hand: null };
+  return { hand: { type: "translate", dx, dy } };
+}
+
+function edgeScrollStep(
+  value: number,
+  start: number,
+  end: number,
+  threshold: number,
+  maxStep: number,
+): number {
+  if (threshold <= 0 || maxStep <= 0 || end - start <= threshold * 2) return 0;
+  const intoStart = start + threshold - value;
+  if (intoStart > 0) return -Math.ceil((Math.min(intoStart, threshold) / threshold) * maxStep);
+  const intoEnd = value - (end - threshold);
+  if (intoEnd > 0) return Math.ceil((Math.min(intoEnd, threshold) / threshold) * maxStep);
+  return 0;
 }
 
 export function dropAffordance(input: {

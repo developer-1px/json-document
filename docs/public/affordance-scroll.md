@@ -58,6 +58,30 @@ Calendar는 이 계약에 `workHourStart` 제품 정책만 주입합니다.
 
 근거: [UI Events wheel](https://www.w3.org/TR/uievents/), [Pointer Events](https://www.w3.org/TR/pointerevents/)
 
-## TBD
+## 드래그 중 가장자리 autoscroll
 
-- 드래그 중 가장자리 autoscroll
+드래그 미리보기 중 포인터가 viewport 가장자리의 threshold 안쪽에 들어오면
+깊이에 비례한 속도로 계속 굴립니다. 손은 속도 계산만 닫고, 호출 주기와
+실제 스크롤은 호스트가 소유합니다.
+
+```ts
+import { applyAffordance, edgeScrollAffordance } from "@interactive-os/json-document-affordance";
+
+function onPointerMove(event: PointerEvent) {
+  const rect = scroller.getBoundingClientRect();
+  applyAffordance(
+    edgeScrollAffordance({
+      point: { x: event.clientX, y: event.clientY },
+      rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+    }),
+    {
+      hand: (hand) => {
+        if (hand.type === "translate") scroller.scrollBy(hand.dx, hand.dy);
+      },
+    },
+  );
+}
+```
+
+`threshold`(기본 24)와 `maxStep`(기본 16)은 호스트가 바꿀 수 있고, 한 축의
+길이가 threshold 두 배 이하이면 그 축은 굴리지 않습니다.
