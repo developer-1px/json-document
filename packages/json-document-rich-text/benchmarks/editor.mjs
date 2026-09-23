@@ -13,10 +13,12 @@ if (!existsSync(distEntry)) {
 const documentEntry = new URL("../../json-document/dist/application/document/index.js", import.meta.url);
 const [
   { createJSONDocument },
-  { createRichTextBlockFixture, createRichTextEditor, createRichTextInstrument, runWithRichTextInstrument },
+  { createRichTextEditor, createRichTextInstrument, runWithRichTextInstrument },
+  { createRichTextBlockFixture },
 ] = await Promise.all([
   import(documentEntry.href),
   import(distEntry.href),
+  import(new URL("./fixture.mjs", import.meta.url).href),
 ]);
 
 const sizes = envList("PERF_RICH_TEXT_BLOCKS", [100, 1_000, 10_000]);

@@ -1,6 +1,6 @@
-import { RICH_TEXT_MENTION_NODE, insertRichTextMentionSuggestion, resolveRichTextMentionSuggestions, type RichTextMentionSuggestion } from "@interactive-os/json-document-rich-text-mention";
+import { RICH_TEXT_MENTION_NODE, insertRichTextMention, type RichTextMentionSuggestion } from "@interactive-os/json-document-rich-text-mention";
 import type { RichTextEditor, RichTextNode, RichTextPoint } from "@interactive-os/json-document-rich-text";
-import type { RichTextSuggestionTrigger } from "@interactive-os/json-document-rich-text-suggestion";
+import { resolveRichTextSuggestions, type RichTextSuggestionTrigger } from "@interactive-os/json-document-rich-text-suggestion";
 import { useRichTextSuggestion, type RichTextSuggestionBinding } from "@interactive-os/json-document-rich-text-suggestion-react";
 import { useSyncExternalStore, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 
@@ -34,13 +34,13 @@ export interface UseRichTextMentionSuggestionsOptions<Suggestion extends RichTex
 }
 
 export function useRichTextMentionSuggestions<Suggestion extends RichTextMentionSuggestion>(options: UseRichTextMentionSuggestionsOptions<Suggestion>): RichTextSuggestionBinding<Suggestion> {
-  const suggestions = resolveRichTextMentionSuggestions(options.trigger, options.suggestions);
+  const trigger = options.trigger?.trigger === "@" ? options.trigger : null;
   return useRichTextSuggestion({
     id: options.id,
     label: options.label,
-    trigger: options.trigger?.trigger === "@" ? options.trigger : null,
-    candidates: suggestions,
-    onAction: (suggestion, trigger) => { insertRichTextMentionSuggestion(options.editor, trigger, suggestion, { createId: options.createId }); },
+    trigger,
+    candidates: trigger === null ? [] : resolveRichTextSuggestions(trigger, options.suggestions),
+    onAction: (suggestion, trigger) => { insertRichTextMention(options.editor, trigger.range, suggestion, { createId: options.createId }); },
   });
 }
 

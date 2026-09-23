@@ -11,7 +11,7 @@ import {
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import type { EditingHistoryOptions } from "./history.js";
-import { reconcileRangeSelection } from "./range-selection.js";
+import { reconcileRangeSelection, selectRangePoint } from "./range-selection.js";
 import { cutEditingClipboard, isClipboardJSONValue, isClipboardRecord } from "./clipboard.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds, type GridTopology } from "./topology.js";
 import { assertSheetDocument, assertUniqueSheetIds } from "./sheet-validation.js";
@@ -19,10 +19,9 @@ import {
   collapsedRangeSelection,
   emptyRangeSelection,
   primaryRange,
-  selectRangePoint,
-  type RangeSelectionState,
+  type RangeSelection,
   type SelectionRange,
-} from "./range-selection.js";
+} from "@interactive-os/json-document-selection";
 import { jsonCellText } from "./cell-text.js";
 
 export interface SheetColumn extends Record<string, JSONValue> {
@@ -422,7 +421,7 @@ function emptySelection(): SheetSelection {
 }
 
 function withPrimaryAliases(
-  selection: RangeSelectionState<SheetPoint>,
+  selection: RangeSelection<SheetPoint>,
 ): SheetSelection {
   const primary = primaryRange(selection);
   return {

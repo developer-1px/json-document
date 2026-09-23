@@ -1,20 +1,15 @@
-export { reduceMarqueeInteraction } from "./marquee.js";
-export { reduceNavigation } from "./keyboard.js";
-export { reducePressInteraction } from "./press.js";
-export { idlePointerInteraction } from "./pointer.js";
-export type {
-  MarqueeContext,
-  MarqueeSelection,
-} from "./marquee.js";
-export type {
-  NavigationCommand,
-  NavigationContext,
-  NavigationResult,
-} from "./keyboard.js";
-export type { PressSelection } from "./press.js";
-export type {
-  InteractionResult,
-  PointerInteractionState,
-  PointerSample,
-  SelectionOperation,
-} from "./pointer.js";
+export type NavigationCommand =
+  | {
+      readonly type: "move";
+      readonly direction: "previous" | "next" | "up" | "down" | "left" | "right";
+      readonly operation: "replace" | "extend";
+    }
+  | {
+      readonly type: "boundary";
+      readonly edge: "start" | "end";
+      readonly operation: "replace" | "extend";
+    }
+  | { readonly type: "activate" }
+  | { readonly type: "cancel" };
+
+export type SelectionOperation = "replace" | "extend" | "toggle" | "add" | "subtract";

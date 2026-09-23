@@ -16,11 +16,6 @@ addComposerAttachments(editor: RichTextEditor, draft: ComposerDraft, attachments
 ```ts
 const COMPOSER_HOST_PROFILE_V1: "urn:interactive-os:json-document:composer-host:1"
 ```
-## `COMPOSER_MENTION_NODE`
-
-```ts
-const COMPOSER_MENTION_NODE: "os.interactive/mention"
-```
 ## `COMPOSER_PROFILE_V1`
 
 ```ts

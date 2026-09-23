@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createRichTextEditor, type RichTextDocument, type RichTextSelection } from "@interactive-os/json-document-rich-text";
+import { RICH_TEXT_MENTION_NODE } from "@interactive-os/json-document-rich-text-mention";
 import {
-  COMPOSER_MENTION_NODE,
   COMPOSER_HOST_PROFILE_V1,
   COMPOSER_PROFILE_V1,
   addComposerAttachments,
@@ -43,9 +43,9 @@ describe("Composer domain", () => {
   });
 
   test("validates mention and skill atoms in the Composer schema", () => {
-    expect(composerSchema.nodes[COMPOSER_MENTION_NODE]?.atom).toBe(true);
-    expect(composerSchema.nodes[COMPOSER_MENTION_NODE]?.attrs.entityId?.validate?.("alpha")).toBe(true);
-    expect(composerSchema.nodes[COMPOSER_MENTION_NODE]?.attrs.entityId?.validate?.("")).toBe(false);
+    expect(composerSchema.nodes[RICH_TEXT_MENTION_NODE]?.atom).toBe(true);
+    expect(composerSchema.nodes[RICH_TEXT_MENTION_NODE]?.attrs.entityId?.validate?.("alpha")).toBe(true);
+    expect(composerSchema.nodes[RICH_TEXT_MENTION_NODE]?.attrs.entityId?.validate?.("")).toBe(false);
   });
 
   test("finds trigger boundaries from document and selection only", () => {

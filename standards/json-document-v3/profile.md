@@ -7,7 +7,7 @@ source release는 `3.0.0`이며 npm publication 전까지 release-prepared 상�
 이 profile은 JSON Document, stateless JSON Patch, validation과 change
 notification이라는 canonical vocabulary만 사용한다. Repository 전체의 concept와
 naming grammar는
-[Concept and Naming Standard](concept-and-naming-standard.md)가 정의한다.
+[Repository Naming Standard](../repository-naming.md)가 정의한다.
 
 이 profile은 문서, 표, 슬라이드, 캔버스, 노트 편집기가 공통으로 의존할
 수 있는 최소 JSON 편집 계약을 정의한다. 구현체는 더 많은 기능을 제공할 수

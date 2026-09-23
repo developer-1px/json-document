@@ -1,7 +1,8 @@
-export * from "./index.js";
 export { createTextRuntime } from "./create.js";
 export { restoreTextRuntime } from "./restore.js";
 export type {
+  ActorId,
+  ChangeId,
   History,
   HistoryResult,
   HistoryStatus,

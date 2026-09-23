@@ -1,8 +1,6 @@
 import { describe, expect, test } from "vitest";
-import {
-  collapsedRangeSelection,
-  selectRangePoint,
-} from "../src/range-selection.js";
+import { collapsedRangeSelection } from "@interactive-os/json-document-selection";
+import { selectRangePoint } from "../src/range-selection.js";
 
 describe("shared range selection state transitions", () => {
   test("replaces, toggles, and extends the primary range without domain knowledge", () => {

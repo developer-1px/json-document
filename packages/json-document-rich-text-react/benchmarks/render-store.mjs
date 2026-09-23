@@ -1,8 +1,6 @@
 import { createJSONDocument } from "@interactive-os/json-document";
-import {
-  createRichTextBlockFixture,
-  createRichTextEditor,
-} from "@interactive-os/json-document-rich-text";
+import { createRichTextEditor } from "@interactive-os/json-document-rich-text";
+import { createRichTextBlockFixture } from "../../json-document-rich-text/benchmarks/fixture.mjs";
 import { benchmarkConfig, measure, reportScaling } from "../../../benchmarks/measure.mjs";
 import { createRichTextRenderStore } from "../dist/render-store.js";
 

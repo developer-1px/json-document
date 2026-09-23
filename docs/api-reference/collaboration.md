@@ -428,6 +428,19 @@ interface TextSpliceOperation {
 ## `@interactive-os/json-document-collaboration/history`
 
 아래 API는 package root가 아닌 이 subpath에서 import합니다.
+### `ActorId`
+
+```ts
+type ActorId = string;
+```
+### `ChangeId`
+
+```ts
+interface ChangeId {
+  readonly actorId: ActorId;
+  readonly counter: number;
+}
+```
 ### `createHistoryRuntime`
 
 ```ts

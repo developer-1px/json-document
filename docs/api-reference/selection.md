@@ -26,13 +26,6 @@ createMaterializedRangeSelectionFamily<Point>(): SelectionFamily<MaterializedRan
 ```ts
 createRangeSelectionFamily<Point, Target = Point>(): SelectionFamily<RangeSelection<Point>, RangeSelectionCommand<Point>, RangeSelectionContext<Point, Target>, RangeSelectionMapping<Point>, Target, SelectionChange>
 ```
-## `EditingMode`
-
-```ts
-type EditingMode<Lease extends string = string> =
-  | { readonly kind: "navigate" }
-  | { readonly kind: "edit"; readonly lease: Lease };
-```
 ## `emptyKeySelection`
 
 ```ts
@@ -47,22 +40,6 @@ emptyMaterializedRangeSelection<Point>(): MaterializedRangeSelection<Point>
 
 ```ts
 emptyRangeSelection<Point>(): RangeSelection<Point>
-```
-## `idlePointerInteraction`
-
-```ts
-idlePointerInteraction<Point>(): PointerInteractionState<Point>
-```
-## `InteractionResult`
-
-```ts
-interface InteractionResult<State, Preview, Commit> {
-  readonly state: State;
-  readonly changed: boolean;
-  readonly preview: Preview | null;
-  readonly commit: Commit | null;
-  readonly canceled: boolean;
-}
 ```
 ## `KeySelection`
 
@@ -107,45 +84,6 @@ interface KeySelectionContext<Key extends string = string> {
 interface KeySelectionMapping<Key extends string = string> {
   mapKey(key: Key): Key | null;
   mapUniverse?(universe: string): string | null;
-}
-```
-## `MarqueeContext`
-
-```ts
-interface MarqueeContext<Key, Point, Region> {
-  readonly regions: RegionBuilder<Point, Region>;
-  readonly spatialIndex: SpatialIndex<Key, Point, Region>;
-  readonly hitMode: "intersects" | "contains";
-}
-```
-## `MarqueeSelection`
-
-```ts
-interface MarqueeSelection<Key, Region> {
-  readonly region: Region;
-  readonly keys: readonly Key[];
-  readonly operation: SelectionOperation;
-}
-```
-## `MaskAlgebra`
-
-```ts
-interface MaskAlgebra<Representation, Region> {
-  empty(): Representation;
-  replace(region: Region): Representation;
-  union(mask: Representation, region: Region): Representation;
-  subtract(mask: Representation, region: Region): Representation;
-  intersect(mask: Representation, region: Region): Representation;
-  xor(mask: Representation, region: Region): Representation;
-  isEmpty(mask: Representation): boolean;
-}
-```
-## `MaskSelection`
-
-```ts
-interface MaskSelection<Representation> {
-  readonly kind: "mask";
-  readonly representation: Representation;
 }
 ```
 ## `MaterializedRangeSelection`
@@ -212,37 +150,6 @@ type NavigationCommand =
   | { readonly type: "activate" }
   | { readonly type: "cancel" };
 ```
-## `NavigationContext`
-
-```ts
-interface NavigationContext<Point, SelectionCommand, Activation = unknown> {
-  move(
-    current: Point | null,
-    direction: Extract<NavigationCommand, { readonly type: "move" }>["direction"],
-  ): Point | null;
-  boundary(edge: "start" | "end"): Point | null;
-  select(point: Point, operation: "replace" | "extend"): SelectionCommand;
-  activate(point: Point): Activation;
-}
-```
-## `NavigationResult`
-
-```ts
-interface NavigationResult<Point, SelectionCommand, Activation> {
-  readonly navigation: NavigationState<Point>;
-  readonly selectionCommand: SelectionCommand | null;
-  readonly activation: Activation | null;
-  readonly canceled: boolean;
-  readonly changed: boolean;
-}
-```
-## `NavigationState`
-
-```ts
-interface NavigationState<Point> {
-  readonly current: Point | null;
-}
-```
 ## `normalizeKeySelection`
 
 ```ts
@@ -265,41 +172,6 @@ interface OrderedTopology<Point, Target> {
   equals(a: Point, b: Point): boolean;
   interval(anchor: Point, focus: Point): readonly Target[];
   reconcilePoint(point: Point): Point | null;
-}
-```
-## `PointerInteractionState`
-
-```ts
-type PointerInteractionState<Point> =
-  | { readonly kind: "idle" }
-  | {
-      readonly kind: "active";
-      readonly pointerId: string;
-      readonly start: Point;
-      readonly current: Point;
-      readonly operation: SelectionOperation;
-    };
-```
-## `PointerSample`
-
-```ts
-type PointerSample<Point> =
-  | {
-      readonly phase: "start";
-      readonly pointerId: string;
-      readonly point: Point;
-      readonly operation: SelectionOperation;
-    }
-  | { readonly phase: "move"; readonly pointerId: string; readonly point: Point }
-  | { readonly phase: "end"; readonly pointerId: string; readonly point: Point }
-  | { readonly phase: "cancel"; readonly pointerId: string };
-```
-## `PressSelection`
-
-```ts
-interface PressSelection<Point> {
-  readonly point: Point;
-  readonly operation: SelectionOperation;
 }
 ```
 ## `primaryRange`
@@ -341,63 +213,16 @@ interface RangeSelectionMapping<Point> {
   mapPoint(point: Point): Point | null;
 }
 ```
-## `reduceMarqueeInteraction`
-
-```ts
-reduceMarqueeInteraction<Key, Point, Region>(state: PointerInteractionState<Point>, sample: PointerSample<Point>, context: MarqueeContext<Key, Point, Region>): InteractionResult<PointerInteractionState<Point>, MarqueeSelection<Key, Region>, MarqueeSelection<Key, Region>>
-```
-## `reduceNavigation`
-
-```ts
-reduceNavigation<Point, SelectionCommand, Activation = unknown>(state: NavigationState<Point>, command: NavigationCommand, context: NavigationContext<Point, SelectionCommand, Activation>): NavigationResult<Point, SelectionCommand, Activation>
-```
-## `reducePressInteraction`
-
-```ts
-reducePressInteraction<Point>(state: PointerInteractionState<Point>, sample: PointerSample<Point>): InteractionResult<PointerInteractionState<Point>, PressSelection<Point>, PressSelection<Point>>
-```
-## `RegionBuilder`
-
-```ts
-interface RegionBuilder<Point, Region> {
-  fromPoints(start: Point, current: Point): Region;
-}
-```
 ## `resolveMaterializedSelectionDragSource`
 
 ```ts
 resolveMaterializedSelectionDragSource<Point>(state: MaterializedRangeSelection<Point>, point: Point, context: MaterializedRangeSelectionContext<Point>): MaterializedSelectionDragSource<Point> | null
-```
-## `ScopedSelection`
-
-```ts
-interface ScopedSelection<Scope extends string, Selection> {
-  readonly scope: Scope;
-  readonly selection: Selection;
-}
 ```
 ## `SelectionChange`
 
 ```ts
 interface SelectionChange {
   readonly lifecycle: SelectionLifecycle;
-}
-```
-## `SelectionEditIntent`
-
-```ts
-interface SelectionEditIntent<Selection, Intent> {
-  readonly selection: Selection;
-  readonly intent: Intent;
-}
-```
-## `SelectionEditResult`
-
-```ts
-interface SelectionEditResult<Selection, Patch> {
-  readonly forward: readonly Patch[];
-  readonly inverse: readonly Patch[];
-  readonly selectionAfter: Selection;
 }
 ```
 ## `SelectionFamily`
@@ -465,22 +290,5 @@ interface SelectionResult<State, Change = unknown> {
   readonly state: State;
   readonly changed: boolean;
   readonly change?: Change;
-}
-```
-## `SelectionSession`
-
-```ts
-interface SelectionSession<Selection, Point, Lease extends string = string> {
-  readonly selection: Selection;
-  readonly navigation: NavigationState<Point>;
-  readonly editing: EditingMode<Lease>;
-}
-```
-## `SpatialIndex`
-
-```ts
-interface SpatialIndex<Key, Point, Region> {
-  hitPoint(point: Point, mode: "topmost" | "deepest"): Key | null;
-  hitRegion(region: Region, mode: "intersects" | "contains"): readonly Key[];
 }
 ```

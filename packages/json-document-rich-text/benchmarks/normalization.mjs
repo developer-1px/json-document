@@ -1,9 +1,9 @@
 import { performance } from "node:perf_hooks";
 import {
-  createRichTextBlockFixture,
   normalizeRichText,
   validateRichText,
 } from "../dist/index.js";
+import { createRichTextBlockFixture } from "./fixture.mjs";
 
 const sizes = (process.env.PERF_RICH_TEXT_NORMALIZE_BLOCKS ?? "1000,10000")
   .split(",")

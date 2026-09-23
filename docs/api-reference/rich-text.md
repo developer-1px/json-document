@@ -11,11 +11,6 @@ Rich Text domain과 editing 계약의 public entrypoint입니다. 아래 항목�
 ```ts
 appliedOperationsFor(value: object): ReadonlyArray<{ readonly op: string; readonly path: string; readonly from?: string; }> | null
 ```
-## `createRichTextBlockFixture`
-
-```ts
-createRichTextBlockFixture(size: number, options?: { readonly text?: string; readonly idPrefix?: string; }): RichTextDocument
-```
 ## `createRichTextEditor`
 
 ```ts

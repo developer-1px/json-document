@@ -7,9 +7,8 @@ import { createEditingSession, type EditingResult, type EditingSession, type Edi
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
-  reconcileRangeSelection,
-  selectRangePoint,
-} from "./range-selection.js";
+} from "@interactive-os/json-document-selection";
+import { reconcileRangeSelection, selectRangePoint } from "./range-selection.js";
 import { lineInterval, lineTopology } from "./topology.js";
 
 export interface DocumentBlock extends Record<string, JSONValue> {

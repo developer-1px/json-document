@@ -6,8 +6,8 @@ import {
   type RichTextPoint,
 } from "@interactive-os/json-document-rich-text";
 import { validateFileCandidates } from "@interactive-os/json-document-file-intake";
-import { insertRichTextMention } from "@interactive-os/json-document-rich-text-mention";
-import { COMPOSER_MENTION_NODE, COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE, type ComposerAttachment, type ComposerAttachmentCandidate, type ComposerDraft, type ComposerReference, type ComposerTrigger } from "./model.js";
+import { RICH_TEXT_MENTION_NODE, insertRichTextMention } from "@interactive-os/json-document-rich-text-mention";
+import { COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE, type ComposerAttachment, type ComposerAttachmentCandidate, type ComposerDraft, type ComposerReference, type ComposerTrigger } from "./model.js";
 import type { ComposerAttachmentPolicy } from "./host-config.js";
 
 export type ComposerCommandResult = ReturnType<RichTextEditor["dispatch"]>;
@@ -64,7 +64,7 @@ export function insertComposerText(editor: RichTextEditor, text: string): Compos
 export function composerText(document: RichTextDocument): string {
   const read = (nodes: ReadonlyArray<RichTextNode>): string => nodes.map((node) => {
     if (node.type === "text" && "text" in node) return node.text;
-    if (node.type === COMPOSER_MENTION_NODE) return `@${referenceLabel(node)}`;
+    if (node.type === RICH_TEXT_MENTION_NODE) return `@${referenceLabel(node)}`;
     if (node.type === COMPOSER_SKILL_NODE) return `/${referenceLabel(node)}`;
     return "content" in node && Array.isArray(node.content) ? read(node.content as ReadonlyArray<RichTextNode>) : "";
   }).join("");

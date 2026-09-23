@@ -4,7 +4,7 @@ export { COMPOSER_HOST_PROFILE_V1, composerHostConfigSchema } from "./host-confi
 export type { ComposerAttachmentPolicy, ComposerHostConfig, ComposerHostModel, ComposerHostPorts, ComposerHostSuggestion, ComposerInteractionPolicy } from "./host-config.js";
 export { composerInteractionFromKeyStroke } from "./interaction.js";
 export type { ComposerInteraction, ComposerKeyStroke } from "./interaction.js";
-export { createComposerDraft, COMPOSER_MENTION_NODE, COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE } from "./model.js";
+export { createComposerDraft, COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE } from "./model.js";
 export { composerSchema } from "./schema.js";
 export { findComposerTrigger } from "./trigger.js";
 export { resolveComposerSuggestions } from "./suggestions.js";

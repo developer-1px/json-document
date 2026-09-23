@@ -3,10 +3,8 @@
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 import { createJSONDocument } from "@interactive-os/json-document";
-import {
-  createRichTextBlockFixture,
-  createRichTextEditor,
-} from "@interactive-os/json-document-rich-text";
+import { createRichTextEditor } from "@interactive-os/json-document-rich-text";
+import { createRichTextBlockFixture } from "./support/fixture.js";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";

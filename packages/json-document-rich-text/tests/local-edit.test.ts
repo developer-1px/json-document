@@ -1,7 +1,7 @@
 import { createJSONDocument } from "@interactive-os/json-document";
 import { describe, expect, it } from "vitest";
+import { createRichTextBlockFixture } from "./support/fixture.js";
 import {
-  createRichTextBlockFixture,
   createRichTextEditor,
   createRichTextInstrument,
   runWithRichTextInstrument,

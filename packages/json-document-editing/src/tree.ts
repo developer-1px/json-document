@@ -5,18 +5,15 @@ import {
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import { createEditingId } from "./identity.js";
 import type { EditingHistoryOptions } from "./history.js";
-import { reconcileRangeSelection } from "./range-selection.js";
+import { reconcileRangeSelection, selectRangePoint } from "./range-selection.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
-  createRangeSelectionFamily,
-  type OrderedTopology,
-} from "@interactive-os/json-document-selection";
-import {
   collapsedRangeSelection,
+  createRangeSelectionFamily,
   emptyRangeSelection,
-  selectRangePoint,
-  type RangeSelectionState,
-} from "./range-selection.js";
+  type OrderedTopology,
+  type RangeSelection,
+} from "@interactive-os/json-document-selection";
 import { lineInterval, lineTopology } from "./topology.js";
 import { assertTreeDocument } from "./tree-validation.js";
 import {
@@ -388,7 +385,7 @@ function emptySelection(): TreeSelection {
   return asTreeSelection(emptyRangeSelection<TreePoint>());
 }
 
-function asTreeSelection(selection: RangeSelectionState<TreePoint>): TreeSelection {
+function asTreeSelection(selection: RangeSelection<TreePoint>): TreeSelection {
   return {
     kind: "range",
     ranges: selection.ranges.map((range) => ({

@@ -1,4 +1,4 @@
-import { RICH_TEXT_PROFILE_V1, type RichTextDocument } from "./model.js";
+import { RICH_TEXT_PROFILE_V1, type RichTextDocument } from "@interactive-os/json-document-rich-text";
 
 export function createRichTextBlockFixture(
   size: number,

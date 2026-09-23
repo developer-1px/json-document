@@ -2,12 +2,14 @@ import { describe, expect, test } from "vitest";
 
 import {
   compactCollaborationCheckpoint,
-  createHistoryRuntime,
-  restoreHistoryRuntime,
   type CollaborationBundle,
   type CollaborationChange,
-  type HistoryRuntime,
   type CollaborationRulesetIdentity,
+} from "../../src/index.js";
+import {
+  createHistoryRuntime,
+  restoreHistoryRuntime,
+  type HistoryRuntime,
 } from "../../src/history-index.js";
 import {
   createTaskBoardHost,

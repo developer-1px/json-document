@@ -9,10 +9,9 @@ import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
-  reconcileRangeSelection,
-  selectRangePoint,
-  type RangeSelectionState,
-} from "./range-selection.js";
+  type RangeSelection,
+} from "@interactive-os/json-document-selection";
+import { reconcileRangeSelection, selectRangePoint } from "./range-selection.js";
 import { lineInterval, lineTopology } from "./topology.js";
 import { assertOrderDocument } from "./order-validation.js";
 import {
@@ -203,7 +202,7 @@ function emptySelection(): OrderSelection {
   return asOrderSelection(emptyRangeSelection<OrderPoint>());
 }
 
-function asOrderSelection(selection: RangeSelectionState<OrderPoint>): OrderSelection {
+function asOrderSelection(selection: RangeSelection<OrderPoint>): OrderSelection {
   return {
     kind: "range",
     ranges: selection.ranges.map((range) => ({

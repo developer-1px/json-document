@@ -17,34 +17,19 @@ export {
   normalizeMaterializedRangeSelection,
   resolveMaterializedSelectionDragSource,
 } from "./range/materialized.js";
-export {
-  idlePointerInteraction,
-  reduceMarqueeInteraction,
-  reduceNavigation,
-  reducePressInteraction,
-} from "./interaction/index.js";
 export type {
   SelectionChange,
   SelectionFamily,
   SelectionLifecycle,
   SelectionResult,
 } from "./core/family.js";
-export type {
-  EditingMode,
-  NavigationState,
-  ScopedSelection,
-  SelectionEditIntent,
-  SelectionEditResult,
-  SelectionHistoryEntry,
-  SelectionSession,
-} from "./core/session.js";
+export type { SelectionHistoryEntry } from "./core/session.js";
 export type {
   KeySelection,
   KeySelectionCommand,
   KeySelectionContext,
   KeySelectionMapping,
 } from "./key/index.js";
-export type { MaskAlgebra, MaskSelection } from "./mask/index.js";
 export type {
   RangeSelection,
   RangeSelectionCommand,
@@ -60,16 +45,5 @@ export type {
   MaterializedSelectionRange,
   MaterializedSelectionDragSource,
 } from "./range/materialized.js";
-export type {
-  InteractionResult,
-  MarqueeContext,
-  MarqueeSelection,
-  NavigationCommand,
-  NavigationContext,
-  NavigationResult,
-  PointerInteractionState,
-  PointerSample,
-  PressSelection,
-  SelectionOperation,
-} from "./interaction/index.js";
-export type { OrderedTopology, RegionBuilder, SpatialIndex } from "./ports/index.js";
+export type { NavigationCommand, SelectionOperation } from "./interaction/index.js";
+export type { OrderedTopology } from "./ports/index.js";

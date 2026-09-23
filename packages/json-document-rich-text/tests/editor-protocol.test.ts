@@ -2,7 +2,8 @@ import { buildPointer, createJSONDocument, trackPointer, type JSONDocument, type
 import { createHistoryRuntime } from "@interactive-os/json-document-collaboration/history";
 import { createDocumentEditor } from "@interactive-os/json-document-editing";
 import { describe, expect, it } from "vitest";
-import { createRichTextBlockFixture, createRichTextEditor, richTextSchemaV1, validateRichText, type RichTextDocument, type RichTextIntent } from "../src/index.js";
+import { createRichTextBlockFixture } from "./support/fixture.js";
+import { createRichTextEditor, richTextSchemaV1, validateRichText, type RichTextDocument, type RichTextIntent } from "../src/index.js";
 
 function rich(text = "hello"): RichTextDocument {
   return { profile: "urn:interactive-os:json-document:rich-text:1", id: "doc", type: "doc", content: [

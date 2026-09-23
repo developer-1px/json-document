@@ -4,14 +4,8 @@ import {
   type RichTextNode,
   type RichTextNodeSpec,
   type RichTextPoint,
-  type RichTextSelection,
 } from "@interactive-os/json-document-rich-text";
-import {
-  findRichTextSuggestionTrigger,
-  resolveRichTextSuggestions,
-  type RichTextSuggestionCandidate,
-  type RichTextSuggestionTrigger,
-} from "@interactive-os/json-document-rich-text-suggestion";
+import type { RichTextSuggestionCandidate } from "@interactive-os/json-document-rich-text-suggestion";
 
 export const RICH_TEXT_MENTION_NODE = "os.interactive/mention" as const;
 
@@ -44,29 +38,6 @@ export const richTextMentionNodeSpec: RichTextNodeSpec = {
 
 export function createRichTextMentionNode(mention: RichTextMention, nodeId: string): RichTextNode {
   return { id: nodeId, type: RICH_TEXT_MENTION_NODE, attrs: { entityId: mention.id, label: mention.label } };
-}
-
-export function findRichTextMentionTrigger(
-  document: import("@interactive-os/json-document-rich-text").RichTextDocument,
-  selection: RichTextSelection,
-): RichTextSuggestionTrigger | null {
-  return findRichTextSuggestionTrigger(document, selection, ["@"]);
-}
-
-export function resolveRichTextMentionSuggestions<Suggestion extends RichTextMentionSuggestion>(
-  trigger: RichTextSuggestionTrigger | null,
-  suggestions: ReadonlyArray<Suggestion>,
-): ReadonlyArray<Suggestion> {
-  return trigger?.trigger === "@" ? resolveRichTextSuggestions(trigger, suggestions) : [];
-}
-
-export function insertRichTextMentionSuggestion(
-  editor: RichTextEditor,
-  trigger: RichTextSuggestionTrigger,
-  suggestion: RichTextMentionSuggestion,
-  options: { readonly createId: () => string },
-): ReturnType<RichTextEditor["dispatch"]> {
-  return insertRichTextMention(editor, trigger.range, suggestion, options);
 }
 
 /** Replaces a text range with one canonical mention atom and a trailing space. */

@@ -1,6 +1,5 @@
 export { appliedOperationsFor } from "./applied-change.js";
 export { createRichTextEditor, tryCreateRichTextEditor } from "./editor.js";
-export { createRichTextBlockFixture } from "./fixture.js";
 export { createRichTextNodeId } from "./identity.js";
 export { createRichTextInstrument, runWithRichTextInstrument } from "./instrument.js";
 export { RICH_TEXT_CLIPBOARD_MIME, RICH_TEXT_PROFILE_V1, hasRichTextContent, isRichTextDocument, isRichTextText } from "./model.js";
