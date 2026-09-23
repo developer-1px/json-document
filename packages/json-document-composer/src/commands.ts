@@ -6,7 +6,7 @@ import {
   type RichTextPoint,
 } from "@interactive-os/json-document-rich-text";
 import { validateFileCandidates } from "@interactive-os/json-document-file-intake";
-import { RICH_TEXT_MENTION_NODE, insertRichTextMention } from "@interactive-os/json-document-rich-text-mention";
+import { RICH_TEXT_MENTION_NODE, insertRichTextMention } from "@interactive-os/json-document-rich-text-suggestion";
 import { COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE, type ComposerAttachment, type ComposerAttachmentCandidate, type ComposerDraft, type ComposerReference, type ComposerTrigger } from "./model.js";
 import type { ComposerAttachmentPolicy } from "./host-config.js";
 

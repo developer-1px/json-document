@@ -1,7 +1,7 @@
 import type { JSONValue } from "@interactive-os/json-document";
 import type { FileCandidate } from "@interactive-os/json-document-file-intake";
 import type { RichTextDocument } from "@interactive-os/json-document-rich-text";
-import type { RichTextMention } from "@interactive-os/json-document-rich-text-mention";
+import type { RichTextMention } from "@interactive-os/json-document-rich-text-suggestion";
 
 export const COMPOSER_PROFILE_V1 = "urn:interactive-os:json-document:composer:1" as const;
 export const COMPOSER_SKILL_NODE = "os.interactive/skill" as const;

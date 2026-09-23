@@ -2,7 +2,7 @@ import { insertComposerReference, type ComposerHostSuggestion } from "@interacti
 import type { RichTextDocument, RichTextEditor } from "@interactive-os/json-document-rich-text";
 import { findRichTextSuggestionTrigger, type RichTextSuggestionCandidate } from "@interactive-os/json-document-rich-text-suggestion";
 import { useRichTextSuggestion, type RichTextSuggestionBinding } from "@interactive-os/json-document-rich-text-suggestion-react";
-import { useRichTextMentionSuggestions } from "@interactive-os/json-document-rich-text-mention-react";
+import { useRichTextMentionSuggestions } from "@interactive-os/json-document-rich-text-suggestion-react";
 
 export interface ComposerCommandMenu<Suggestion extends ComposerHostSuggestion & RichTextSuggestionCandidate> {
   readonly kind: "mention" | "skill" | null;

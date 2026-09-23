@@ -14,7 +14,7 @@ import {
   type ComposerReference,
 } from "@interactive-os/json-document-composer";
 import { useComposer } from "@interactive-os/json-document-composer-react";
-import { RichTextMentionSuggestions } from "@interactive-os/json-document-rich-text-mention-react";
+import { RichTextMentionSuggestions } from "@interactive-os/json-document-rich-text-suggestion-react";
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { DemoPage } from "../demo-workbench/DemoPage";
 import { JsonInspector } from "../ui/json-inspector";

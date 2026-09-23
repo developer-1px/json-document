@@ -1,7 +1,7 @@
 import { COMPOSER_SKILL_NODE } from "@interactive-os/json-document-composer";
 import type { RichTextEditor, RichTextNode } from "@interactive-os/json-document-rich-text";
-import { RICH_TEXT_MENTION_NODE } from "@interactive-os/json-document-rich-text-mention";
-import { RichTextMentionAtom } from "@interactive-os/json-document-rich-text-mention-react";
+import { RICH_TEXT_MENTION_NODE } from "@interactive-os/json-document-rich-text-suggestion";
+import { RichTextMentionAtom } from "@interactive-os/json-document-rich-text-suggestion-react";
 import type { HTMLAttributes, ReactNode } from "react";
 
 export interface ComposerReferenceAtomProps extends HTMLAttributes<HTMLSpanElement> {

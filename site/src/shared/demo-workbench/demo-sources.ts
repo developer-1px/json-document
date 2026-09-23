@@ -94,8 +94,8 @@ import composerCommandMenuSource from "../../../../packages/json-document-compos
 import fileIntakeSource from "../../../../packages/json-document-file-intake/src/index.ts?raw";
 import suggestionSource from "../../../../packages/json-document-rich-text-suggestion/src/index.ts?raw";
 import suggestionReactSource from "../../../../packages/json-document-rich-text-suggestion-react/src/index.ts?raw";
-import mentionSource from "../../../../packages/json-document-rich-text-mention/src/index.ts?raw";
-import mentionReactSource from "../../../../packages/json-document-rich-text-mention-react/src/index.tsx?raw";
+import mentionSource from "../../../../packages/json-document-rich-text-suggestion/src/mention.ts?raw";
+import mentionReactSource from "../../../../packages/json-document-rich-text-suggestion-react/src/mention.tsx?raw";
 import webFileIntakeSource from "../../../../packages/json-document-web/src/file-intake.ts?raw";
 import richTextReactSurfaceSource from "../../../../packages/json-document-rich-text-react/src/index.tsx?raw";
 import richTextRenderStoreSource from "../../../../packages/json-document-rich-text-react/src/render-store.ts?raw";
@@ -146,9 +146,7 @@ const packageReferencePaths = new Map([
   ["packages/json-document-file-intake/", "/docs/api/file-intake"],
   ["packages/json-document-rich-text-suggestion/", "/docs/api/rich-text-suggestion"],
   ["packages/json-document-rich-text-suggestion-react/", "/docs/api/rich-text-suggestion-react"],
-  ["packages/json-document-rich-text-mention/", "/docs/api/rich-text-mention"],
-  ["packages/json-document-rich-text-mention-react/", "/docs/api/rich-text-mention-react"],
-  ["packages/json-document-composer/", "/docs/api/composer"],
+    ["packages/json-document-composer/", "/docs/api/composer"],
   ["packages/json-document-composer-react/", "/docs/api/composer-react"],
   ["packages/json-document-rich-text-web/", "/docs/api/rich-text-web"],
   ["packages/json-document-rich-text-react/", "/docs/api/rich-text-react"],
@@ -268,8 +266,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-file-intake/src/index.ts", fileIntakeSource],
   ["packages/json-document-rich-text-suggestion/src/index.ts", suggestionSource],
   ["packages/json-document-rich-text-suggestion-react/src/index.ts", suggestionReactSource],
-  ["packages/json-document-rich-text-mention/src/index.ts", mentionSource],
-  ["packages/json-document-rich-text-mention-react/src/index.tsx", mentionReactSource],
+  ["packages/json-document-rich-text-suggestion/src/mention.ts", mentionSource],
+  ["packages/json-document-rich-text-suggestion-react/src/mention.tsx", mentionReactSource],
   ["packages/json-document-web/src/file-intake.ts", webFileIntakeSource],
   ["packages/json-document-rich-text-react/src/index.tsx", richTextReactSurfaceSource],
   ["packages/json-document-rich-text-react/src/render-store.ts", richTextRenderStoreSource],
@@ -760,14 +758,14 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-file-intake/src/index.ts",
   },
   {
-    packageName: "@interactive-os/json-document-rich-text-mention",
+    packageName: "@interactive-os/json-document-rich-text-suggestion",
     symbol: "insertRichTextMention",
-    sourcePath: "packages/json-document-rich-text-mention/src/index.ts",
+    sourcePath: "packages/json-document-rich-text-suggestion/src/mention.ts",
   },
   {
-    packageName: "@interactive-os/json-document-rich-text-mention-react",
+    packageName: "@interactive-os/json-document-rich-text-suggestion-react",
     symbol: "RichTextMentionAtom",
-    sourcePath: "packages/json-document-rich-text-mention-react/src/index.tsx",
+    sourcePath: "packages/json-document-rich-text-suggestion-react/src/mention.tsx",
   },
   {
     packageName: "@interactive-os/json-document-composer",

@@ -21,10 +21,10 @@ Mention은 Rich Text extension schema의 inline atom입니다. label은 화면 �
 entity ID가 reference 정체성입니다. Selection과 Clipboard는 atom 전체를 한 단위로
 다루므로 이름 일부만 지우거나 대상 ID를 잃은 평문으로 퇴화하지 않습니다.
 
-`@interactive-os/json-document-rich-text-mention`이
+`@interactive-os/json-document-rich-text-suggestion`이
 `RICH_TEXT_MENTION_NODE`, `richTextMentionNodeSpec`, `insertRichTextMention`을
 소유합니다. React surface는
-`@interactive-os/json-document-rich-text-mention-react`의
+`@interactive-os/json-document-rich-text-suggestion-react`의
 `RichTextMentionAtom`, `useRichTextMentionSuggestions`,
 `RichTextMentionSuggestions`로 같은 node와 후보 UI를 투영합니다. trigger/query/range와
 open/dismiss/active 상태, 키보드·pointer·ARIA focus는 공용 Rich Text Suggestion

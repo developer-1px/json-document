@@ -126,3 +126,16 @@ function findText(nodes: ReadonlyArray<RichTextNode>, id: string): string | null
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
+
+export {
+  RICH_TEXT_MENTION_NODE,
+  createRichTextMentionNode,
+  insertRichTextMention,
+  isRichTextMentionNode,
+  richTextMentionNodeSpec,
+} from "./mention.js";
+export type {
+  RichTextMention,
+  RichTextMentionRange,
+  RichTextMentionSuggestion,
+} from "./mention.js";

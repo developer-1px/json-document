@@ -14,7 +14,7 @@ const composer = useComposer({ id: "agent-composer", config, ports, labels });
 ```
 
 Mention projection delegates to
-`@interactive-os/json-document-rich-text-mention-react`; suggestion interaction is
+`@interactive-os/json-document-rich-text-suggestion-react`; suggestion interaction is
 composed from the canonical suggestion packages.
 
 Product copy, styling, layout, suggestions, and concrete ports remain Host-owned.

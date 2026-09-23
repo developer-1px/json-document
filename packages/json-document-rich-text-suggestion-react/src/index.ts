@@ -126,3 +126,14 @@ export function useRichTextSuggestion<Candidate extends RichTextSuggestionCandid
     reopen,
   };
 }
+
+export {
+  RichTextMentionAtom,
+  RichTextMentionSuggestions,
+  useRichTextMentionSuggestions,
+} from "./mention.js";
+export type {
+  RichTextMentionAtomProps,
+  RichTextMentionSuggestionsProps,
+  UseRichTextMentionSuggestionsOptions,
+} from "./mention.js";

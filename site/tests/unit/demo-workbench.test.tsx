@@ -90,6 +90,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
       "packages/json-document-editing/src/document.ts",
+      "packages/json-document-selection/src/range/index.ts",
     ]);
     const source = await document[0]!.load();
     expect(source).toContain("export function DocumentDemoRoute()");
@@ -102,6 +103,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
       "packages/json-document-editing/src/document.ts",
+      "packages/json-document-selection/src/range/index.ts",
     ]);
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.referencePath)).toEqual([
@@ -112,6 +114,7 @@ describe("Demo definition and source discovery", () => {
       "/docs/api/web",
       "/docs/api/react",
       "/docs/api/editing",
+      "/docs/api/selection",
     ]);
   });
 
@@ -127,6 +130,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-ui-primitives-react/src/toolbar.tsx",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-editing/src/database.ts",
+      "packages/json-document-selection/src/range/index.ts",
       "packages/json-document-editing/src/database-property-value.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
@@ -188,7 +192,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-composer-react/src/command-menu.ts",
       "packages/json-document-composer-react/src/reference-atom.tsx",
       "packages/json-document-file-intake/src/index.ts",
-      "packages/json-document-rich-text-mention/src/index.ts",
+      "packages/json-document-rich-text-suggestion/src/mention.ts",
       "packages/json-document-web/src/file-intake.ts",
       "packages/json-document-rich-text-react/src/index.tsx",
       "packages/json-document-ui-primitives-react/src/controls.tsx",

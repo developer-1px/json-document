@@ -40,7 +40,7 @@ test("기반 패키지 변경은 모든 역방향 소비자를 선택한다", ()
   const plan = createPlan(["packages/json-document/src/index.ts"]);
 
   assert.equal(plan.full, false);
-  assert.equal(plan.packageWorkspaces.length, 26);
+  assert.equal(plan.packageWorkspaces.length, 24);
   assert.equal(plan.standards, true);
   assert.equal(plan.externalKit, true);
   assert.deepEqual(plan.browserSpecs, ["site/tests/browser"]);
@@ -116,8 +116,6 @@ test("선택기가 반환하는 모든 browser 경로가 존재한다", () => {
       "json-document-rich-text",
       "json-document-rich-text-suggestion",
       "json-document-rich-text-suggestion-react",
-      "json-document-rich-text-mention",
-      "json-document-rich-text-mention-react",
       "json-document-rich-text-react",
       "json-document-rich-text-web",
       "json-document-selection",

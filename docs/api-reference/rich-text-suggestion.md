@@ -11,6 +11,11 @@ Rich Text suggestion trigger와 상태 계약의 public entrypoint입니다. 아
 ```ts
 activateRichTextSuggestion(state: RichTextSuggestionState, trigger: RichTextSuggestionTrigger | null, activeId: string | null): RichTextSuggestionState
 ```
+## `createRichTextMentionNode`
+
+```ts
+createRichTextMentionNode(mention: RichTextMention, nodeId: string): RichTextNode
+```
 ## `dismissRichTextSuggestions`
 
 ```ts
@@ -26,6 +31,16 @@ findRichTextSuggestionTrigger(document: RichTextDocument, selection: RichTextSel
 ```ts
 const INITIAL_RICH_TEXT_SUGGESTION_STATE: RichTextSuggestionState
 ```
+## `insertRichTextMention`
+
+```ts
+insertRichTextMention(editor: RichTextEditor, range: RichTextMentionRange, mention: RichTextMention, options: { readonly createId: () => string; }): ReturnType<RichTextEditor["dispatch"]>
+```
+## `isRichTextMentionNode`
+
+```ts
+isRichTextMentionNode(node: RichTextNode): boolean
+```
 ## `reconcileRichTextSuggestionState`
 
 ```ts
@@ -40,6 +55,42 @@ reopenRichTextSuggestions(state: RichTextSuggestionState, trigger: RichTextSugge
 
 ```ts
 resolveRichTextSuggestions<Candidate extends RichTextSuggestionCandidate>(trigger: RichTextSuggestionTrigger | null, candidates: ReadonlyArray<Candidate>): ReadonlyArray<Candidate>
+```
+## `RICH_TEXT_MENTION_NODE`
+
+```ts
+const RICH_TEXT_MENTION_NODE: "os.interactive/mention"
+```
+## `RichTextMention`
+
+```ts
+interface RichTextMention {
+  readonly id: string;
+  readonly label: string;
+}
+```
+## `richTextMentionNodeSpec`
+
+```ts
+const richTextMentionNodeSpec: RichTextNodeSpec
+```
+## `RichTextMentionRange`
+
+```ts
+interface RichTextMentionRange {
+  readonly nodeId: string;
+  readonly from: number;
+  readonly to: number;
+}
+```
+## `RichTextMentionSuggestion`
+
+```ts
+interface RichTextMentionSuggestion extends RichTextMention, RichTextSuggestionCandidate {
+  readonly description?: string;
+  readonly iconUrl?: string;
+  readonly iconText?: string;
+}
 ```
 ## `RichTextSuggestionCandidate`
 

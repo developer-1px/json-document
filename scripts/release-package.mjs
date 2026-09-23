@@ -14,8 +14,6 @@ export const releases = [
   release("json-document-file-intake", "packages/json-document-file-intake/package.json", "@interactive-os/json-document-file-intake"),
   release("json-document-rich-text-suggestion", "packages/json-document-rich-text-suggestion/package.json", "@interactive-os/json-document-rich-text-suggestion"),
   release("json-document-rich-text-suggestion-react", "packages/json-document-rich-text-suggestion-react/package.json", "@interactive-os/json-document-rich-text-suggestion-react"),
-  release("json-document-rich-text-mention", "packages/json-document-rich-text-mention/package.json", "@interactive-os/json-document-rich-text-mention"),
-  release("json-document-rich-text-mention-react", "packages/json-document-rich-text-mention-react/package.json", "@interactive-os/json-document-rich-text-mention-react"),
   release("json-document-composer", "packages/json-document-composer/package.json", "@interactive-os/json-document-composer"),
   release("json-document-composer-react", "packages/json-document-composer-react/package.json", "@interactive-os/json-document-composer-react"),
   release("json-document-web", "packages/json-document-web/package.json", "@interactive-os/json-document-web"),

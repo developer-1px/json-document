@@ -1,7 +1,12 @@
-import { RICH_TEXT_MENTION_NODE, insertRichTextMention, type RichTextMentionSuggestion } from "@interactive-os/json-document-rich-text-mention";
 import type { RichTextEditor, RichTextNode, RichTextPoint } from "@interactive-os/json-document-rich-text";
-import { resolveRichTextSuggestions, type RichTextSuggestionTrigger } from "@interactive-os/json-document-rich-text-suggestion";
-import { useRichTextSuggestion, type RichTextSuggestionBinding } from "@interactive-os/json-document-rich-text-suggestion-react";
+import {
+  RICH_TEXT_MENTION_NODE,
+  insertRichTextMention,
+  resolveRichTextSuggestions,
+  type RichTextMentionSuggestion,
+  type RichTextSuggestionTrigger,
+} from "@interactive-os/json-document-rich-text-suggestion";
+import { useRichTextSuggestion, type RichTextSuggestionBinding } from "./index.js";
 import { useSyncExternalStore, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 
 export interface RichTextMentionAtomProps extends HTMLAttributes<HTMLSpanElement> {

@@ -207,14 +207,6 @@
     "navigationGroup": "Artifact"
   },
   {
-    "path": "/docs/api/rich-text-mention",
-    "label": "API · Rich Text Mention",
-    "title": "Rich Text Mention API - json-document",
-    "description": "@interactive-os/json-document-rich-text-mention의 전체 public API입니다.",
-    "language": "ko",
-    "navigationGroup": "Hands"
-  },
-  {
     "path": "/docs/api/rich-text-suggestion",
     "label": "API · Rich Text Suggestion",
     "title": "Rich Text Suggestion API - json-document",
@@ -227,14 +219,6 @@
     "label": "API · Suggestion React",
     "title": "Rich Text Suggestion React API - json-document",
     "description": "@interactive-os/json-document-rich-text-suggestion-react의 전체 public API입니다.",
-    "language": "ko",
-    "navigationGroup": "Hands"
-  },
-  {
-    "path": "/docs/api/rich-text-mention-react",
-    "label": "API · Mention React",
-    "title": "Rich Text Mention React API - json-document",
-    "description": "@interactive-os/json-document-rich-text-mention-react의 전체 public API입니다.",
     "language": "ko",
     "navigationGroup": "Hands"
   },

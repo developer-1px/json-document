@@ -1,8 +1,7 @@
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createRichTextEditor, createRichTextSchema, type RichTextDocument } from "@interactive-os/json-document-rich-text";
 import { describe, expect, test } from "vitest";
-import { findRichTextSuggestionTrigger, resolveRichTextSuggestions } from "@interactive-os/json-document-rich-text-suggestion";
-import { RICH_TEXT_MENTION_NODE, insertRichTextMention, richTextMentionNodeSpec } from "../src/index.js";
+import { RICH_TEXT_MENTION_NODE, findRichTextSuggestionTrigger, insertRichTextMention, resolveRichTextSuggestions, richTextMentionNodeSpec } from "../src/index.js";
 
 const profile = "urn:example:mention-test:1";
 const schema = createRichTextSchema({ profile, nodes: { [RICH_TEXT_MENTION_NODE]: richTextMentionNodeSpec } });

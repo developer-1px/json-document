@@ -146,8 +146,6 @@ import { Route as PageDocsApiMarkdownReactRouteImport } from "./routes/_page/doc
 import { Route as PageDocsApiReactRouteImport } from "./routes/_page/docs/api/react";
 import { Route as PageDocsApiReactHookFormRouteImport } from "./routes/_page/docs/api/react-hook-form";
 import { Route as PageDocsApiRichTextRouteImport } from "./routes/_page/docs/api/rich-text";
-import { Route as PageDocsApiRichTextMentionRouteImport } from "./routes/_page/docs/api/rich-text-mention";
-import { Route as PageDocsApiRichTextMentionReactRouteImport } from "./routes/_page/docs/api/rich-text-mention-react";
 import { Route as PageDocsApiRichTextReactRouteImport } from "./routes/_page/docs/api/rich-text-react";
 import { Route as PageDocsApiRichTextSuggestionRouteImport } from "./routes/_page/docs/api/rich-text-suggestion";
 import { Route as PageDocsApiRichTextSuggestionReactRouteImport } from "./routes/_page/docs/api/rich-text-suggestion-react";
@@ -888,18 +886,6 @@ const PageDocsApiRichTextRoute = PageDocsApiRichTextRouteImport.update({
   path: "/rich-text",
   getParentRoute: () => PageDocsApiRoute,
 } as any);
-const PageDocsApiRichTextMentionRoute =
-  PageDocsApiRichTextMentionRouteImport.update({
-    id: "/rich-text-mention",
-    path: "/rich-text-mention",
-    getParentRoute: () => PageDocsApiRoute,
-  } as any);
-const PageDocsApiRichTextMentionReactRoute =
-  PageDocsApiRichTextMentionReactRouteImport.update({
-    id: "/rich-text-mention-react",
-    path: "/rich-text-mention-react",
-    getParentRoute: () => PageDocsApiRoute,
-  } as any);
 const PageDocsApiRichTextReactRoute =
   PageDocsApiRichTextReactRouteImport.update({
     id: "/rich-text-react",
@@ -1134,8 +1120,6 @@ export interface FileRoutesByFullPath {
   "/docs/api/react": typeof PageDocsApiReactRoute;
   "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
-  "/docs/api/rich-text-mention": typeof PageDocsApiRichTextMentionRoute;
-  "/docs/api/rich-text-mention-react": typeof PageDocsApiRichTextMentionReactRoute;
   "/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
   "/docs/api/rich-text-suggestion": typeof PageDocsApiRichTextSuggestionRoute;
   "/docs/api/rich-text-suggestion-react": typeof PageDocsApiRichTextSuggestionReactRoute;
@@ -1291,8 +1275,6 @@ export interface FileRoutesByTo {
   "/docs/api/react": typeof PageDocsApiReactRoute;
   "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
-  "/docs/api/rich-text-mention": typeof PageDocsApiRichTextMentionRoute;
-  "/docs/api/rich-text-mention-react": typeof PageDocsApiRichTextMentionReactRoute;
   "/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
   "/docs/api/rich-text-suggestion": typeof PageDocsApiRichTextSuggestionRoute;
   "/docs/api/rich-text-suggestion-react": typeof PageDocsApiRichTextSuggestionReactRoute;
@@ -1450,8 +1432,6 @@ export interface FileRoutesById {
   "/_page/docs/api/react": typeof PageDocsApiReactRoute;
   "/_page/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/_page/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
-  "/_page/docs/api/rich-text-mention": typeof PageDocsApiRichTextMentionRoute;
-  "/_page/docs/api/rich-text-mention-react": typeof PageDocsApiRichTextMentionReactRoute;
   "/_page/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
   "/_page/docs/api/rich-text-suggestion": typeof PageDocsApiRichTextSuggestionRoute;
   "/_page/docs/api/rich-text-suggestion-react": typeof PageDocsApiRichTextSuggestionReactRoute;
@@ -1609,8 +1589,6 @@ export interface FileRouteTypes {
     | "/docs/api/react"
     | "/docs/api/react-hook-form"
     | "/docs/api/rich-text"
-    | "/docs/api/rich-text-mention"
-    | "/docs/api/rich-text-mention-react"
     | "/docs/api/rich-text-react"
     | "/docs/api/rich-text-suggestion"
     | "/docs/api/rich-text-suggestion-react"
@@ -1766,8 +1744,6 @@ export interface FileRouteTypes {
     | "/docs/api/react"
     | "/docs/api/react-hook-form"
     | "/docs/api/rich-text"
-    | "/docs/api/rich-text-mention"
-    | "/docs/api/rich-text-mention-react"
     | "/docs/api/rich-text-react"
     | "/docs/api/rich-text-suggestion"
     | "/docs/api/rich-text-suggestion-react"
@@ -1924,8 +1900,6 @@ export interface FileRouteTypes {
     | "/_page/docs/api/react"
     | "/_page/docs/api/react-hook-form"
     | "/_page/docs/api/rich-text"
-    | "/_page/docs/api/rich-text-mention"
-    | "/_page/docs/api/rich-text-mention-react"
     | "/_page/docs/api/rich-text-react"
     | "/_page/docs/api/rich-text-suggestion"
     | "/_page/docs/api/rich-text-suggestion-react"
@@ -2913,20 +2887,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiRichTextRouteImport;
       parentRoute: typeof PageDocsApiRoute;
     };
-    "/_page/docs/api/rich-text-mention": {
-      id: "/_page/docs/api/rich-text-mention";
-      path: "/rich-text-mention";
-      fullPath: "/docs/api/rich-text-mention";
-      preLoaderRoute: typeof PageDocsApiRichTextMentionRouteImport;
-      parentRoute: typeof PageDocsApiRoute;
-    };
-    "/_page/docs/api/rich-text-mention-react": {
-      id: "/_page/docs/api/rich-text-mention-react";
-      path: "/rich-text-mention-react";
-      fullPath: "/docs/api/rich-text-mention-react";
-      preLoaderRoute: typeof PageDocsApiRichTextMentionReactRouteImport;
-      parentRoute: typeof PageDocsApiRoute;
-    };
     "/_page/docs/api/rich-text-react": {
       id: "/_page/docs/api/rich-text-react";
       path: "/rich-text-react";
@@ -3068,8 +3028,6 @@ interface PageDocsApiRouteChildren {
   PageDocsApiReactRoute: typeof PageDocsApiReactRoute;
   PageDocsApiReactHookFormRoute: typeof PageDocsApiReactHookFormRoute;
   PageDocsApiRichTextRoute: typeof PageDocsApiRichTextRoute;
-  PageDocsApiRichTextMentionRoute: typeof PageDocsApiRichTextMentionRoute;
-  PageDocsApiRichTextMentionReactRoute: typeof PageDocsApiRichTextMentionReactRoute;
   PageDocsApiRichTextReactRoute: typeof PageDocsApiRichTextReactRoute;
   PageDocsApiRichTextSuggestionRoute: typeof PageDocsApiRichTextSuggestionRoute;
   PageDocsApiRichTextSuggestionReactRoute: typeof PageDocsApiRichTextSuggestionReactRoute;
@@ -3101,8 +3059,6 @@ const PageDocsApiRouteChildren: PageDocsApiRouteChildren = {
   PageDocsApiReactRoute: PageDocsApiReactRoute,
   PageDocsApiReactHookFormRoute: PageDocsApiReactHookFormRoute,
   PageDocsApiRichTextRoute: PageDocsApiRichTextRoute,
-  PageDocsApiRichTextMentionRoute: PageDocsApiRichTextMentionRoute,
-  PageDocsApiRichTextMentionReactRoute: PageDocsApiRichTextMentionReactRoute,
   PageDocsApiRichTextReactRoute: PageDocsApiRichTextReactRoute,
   PageDocsApiRichTextSuggestionRoute: PageDocsApiRichTextSuggestionRoute,
   PageDocsApiRichTextSuggestionReactRoute:

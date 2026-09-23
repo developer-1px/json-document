@@ -4,7 +4,6 @@
   "references": [
     { "path": "../json-document" },
     { "path": "../json-document-file-intake" },
-    { "path": "../json-document-rich-text-mention" },
     { "path": "../json-document-rich-text-suggestion" },
     { "path": "../json-document-rich-text" }
   ],

@@ -47,7 +47,7 @@ Selection, IME, structured Clipboard와 history를 기존 Rich Text editor에 �
 Web file·clipboard intake, focus 복구와 submit 실행 순서를 소유합니다. Host를 바꿀 때는
 동일한 binding에 선언적인 config·ports·표현만 주입합니다. `ComposerReferenceAtom`은
 skill projection을 소유하고 mention은
-`@interactive-os/json-document-rich-text-mention-react`의
+`@interactive-os/json-document-rich-text-suggestion-react`의
 `RichTextMentionAtom`을 조립해 접근 가능한 DOM projection으로 렌더링합니다.
 제품 className과 CSS는 Host가 주입합니다.
 

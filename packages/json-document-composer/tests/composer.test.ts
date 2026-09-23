@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createRichTextEditor, type RichTextDocument, type RichTextSelection } from "@interactive-os/json-document-rich-text";
-import { RICH_TEXT_MENTION_NODE } from "@interactive-os/json-document-rich-text-mention";
+import { RICH_TEXT_MENTION_NODE } from "@interactive-os/json-document-rich-text-suggestion";
 import {
   COMPOSER_HOST_PROFILE_V1,
   COMPOSER_PROFILE_V1,

@@ -1,6 +1,6 @@
 import type { Pointer } from "@interactive-os/json-document";
+import type { ChangeId } from "@interactive-os/json-document-collaboration";
 import type {
-  ChangeId,
   TextRuntime,
   TextSelection,
 } from "@interactive-os/json-document-collaboration/text";

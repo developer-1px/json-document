@@ -5,7 +5,7 @@ import {
   type RichTextNodeSpec,
   type RichTextPoint,
 } from "@interactive-os/json-document-rich-text";
-import type { RichTextSuggestionCandidate } from "@interactive-os/json-document-rich-text-suggestion";
+import type { RichTextSuggestionCandidate } from "./index.js";
 
 export const RICH_TEXT_MENTION_NODE = "os.interactive/mention" as const;
 

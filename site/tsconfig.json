@@ -25,8 +25,6 @@
       "@interactive-os/json-document-rich-text-suggestion": ["../packages/json-document-rich-text-suggestion/src/index.ts"],
       "@interactive-os/json-document-rich-text-suggestion-react": ["../packages/json-document-rich-text-suggestion-react/src/index.ts"],
       "@interactive-os/json-document-file-intake": ["../packages/json-document-file-intake/src/index.ts"],
-      "@interactive-os/json-document-rich-text-mention": ["../packages/json-document-rich-text-mention/src/index.ts"],
-      "@interactive-os/json-document-rich-text-mention-react": ["../packages/json-document-rich-text-mention-react/src/index.tsx"],
       "@interactive-os/json-document-composer": ["../packages/json-document-composer/src/index.ts"],
       "@interactive-os/json-document-composer-react": ["../packages/json-document-composer-react/src/index.ts"],
       "@interactive-os/json-document-rich-text-web": ["../packages/json-document-rich-text-web/src/index.ts"],

@@ -1,5 +1,5 @@
 import { createRichTextSchema } from "@interactive-os/json-document-rich-text";
-import { RICH_TEXT_MENTION_NODE, richTextMentionNodeSpec } from "@interactive-os/json-document-rich-text-mention";
+import { RICH_TEXT_MENTION_NODE, richTextMentionNodeSpec } from "@interactive-os/json-document-rich-text-suggestion";
 import { COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE } from "./model.js";
 
 const referenceAttrs = {

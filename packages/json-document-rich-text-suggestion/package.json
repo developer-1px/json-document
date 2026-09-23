@@ -1,7 +1,7 @@
 {
   "name": "@interactive-os/json-document-rich-text-suggestion",
   "version": "0.1.0-rc.0",
-  "description": "Canonical suggestion lifecycle for json-document Rich Text.",
+  "description": "Canonical suggestion lifecycle and entity mention atom for json-document Rich Text.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
@@ -20,5 +20,5 @@
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": { "@interactive-os/json-document-rich-text": "^0.1.0-rc.0" },
-  "devDependencies": { "@interactive-os/json-document-rich-text": "*", "typescript": "^5.0.0", "vitest": "^4.1.7" }
+  "devDependencies": { "@interactive-os/json-document": "*", "@interactive-os/json-document-rich-text": "*", "typescript": "^5.0.0", "vitest": "^4.1.7" }
 }

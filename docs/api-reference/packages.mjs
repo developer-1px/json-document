@@ -20,8 +20,6 @@ export const apiReferencePackages = [
   ["file-intake", "@interactive-os/json-document-file-intake", "packages/json-document-file-intake/src/index.ts", "Artifact", "플랫폼 독립 파일 후보와 수용 정책"],
   ["rich-text-suggestion", "@interactive-os/json-document-rich-text-suggestion", "packages/json-document-rich-text-suggestion/src/index.ts", "Hands", "Rich Text suggestion trigger와 상태 계약"],
   ["rich-text-suggestion-react", "@interactive-os/json-document-rich-text-suggestion-react", "packages/json-document-rich-text-suggestion-react/src/index.ts", "Hands", "Rich Text suggestion React interaction binding"],
-  ["rich-text-mention", "@interactive-os/json-document-rich-text-mention", "packages/json-document-rich-text-mention/src/index.ts", "Hands", "Rich Text entity mention schema와 삽입 계약"],
-  ["rich-text-mention-react", "@interactive-os/json-document-rich-text-mention-react", "packages/json-document-rich-text-mention-react/src/index.tsx", "Hands", "Rich Text mention React projection"],
   ["composer", "@interactive-os/json-document-composer", "packages/json-document-composer/src/index.ts", "Hands", "Composer draft와 reference/trigger command 계약"],
   ["composer-react", "@interactive-os/json-document-composer-react", "packages/json-document-composer-react/src/index.ts", "Hands", "Composer React interaction과 reference projection"],
   ["rich-text-web", "@interactive-os/json-document-rich-text-web", "packages/json-document-rich-text-web/src/index.ts", "Adapter", "Rich Text DOM adapter"],
