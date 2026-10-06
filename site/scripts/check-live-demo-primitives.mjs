@@ -10,8 +10,9 @@ const liveDemoPaths = [...registry.matchAll(/^\s*"([^"]+)": demo\(/gm)].map((mat
 // /connectors/a2ui uses Command for stream-fixture input and the canonical Inspector.
 // /demo/markdown-caret uses MarkdownEditingSurface and the canonical JsonInspector.
 // /demo/sheet-views composes two canonical SheetHands; it adds no route-local controls.
-if (liveDemoPaths.length !== 43) {
-  throw new Error(`Live Demo 감사 집합이 43개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
+// /demo/chat uses ChatBubble and ChatComposer; input and submit remain package-owned.
+if (liveDemoPaths.length !== 44) {
+  throw new Error(`Live Demo 감사 집합이 44개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
 }
 
 const roots = [join(sourceRoot, "routes"), join(sourceRoot, "shared/composer"), join(sourceRoot, "shared/demo-workbench"), join(sourceRoot, "shared/ui")];

@@ -9,11 +9,21 @@ import { A2UI_DEVELOPER_INSTRUCTIONS } from "./a2ui-developer-instructions";
 const CODEX_PATH = "/api/llm-agent";
 const CODEX_MODEL = process.env.CODEX_LLM_MODEL?.trim() || undefined;
 
+// Keep the local chat connection warm between turns; expire idle processes.
+const chatConnections = new Map<string, {
+  child: ReturnType<typeof spawn>;
+  timer: ReturnType<typeof setTimeout>;
+}>();
+
 export function codexAppServer(): Plugin {
   return {
     name: "codex-app-server",
     apply: "serve",
     configureServer(server) {
+      server.httpServer?.once("close", () => {
+        for (const { child, timer } of chatConnections.values()) { clearTimeout(timer); child.kill(); }
+        chatConnections.clear();
+      });
       server.middlewares.use(CODEX_PATH, (req, res) => {
         const sessionMatch = req.url?.match(/^\/sessions\/([^?]+)/);
         if (req.method === "GET" && sessionMatch) {
@@ -21,6 +31,9 @@ export function codexAppServer(): Plugin {
         }
         if (req.method === "GET" && req.url?.startsWith("/sessions")) {
           return listCodexThreads(res);
+        }
+        if (req.method === "POST" && req.url === "/prepare") {
+          return streamCodex("", undefined, "", res, true, true);
         }
         if (req.method !== "POST" || !req.url?.startsWith("/turn")) {
           res.statusCode = 405;
@@ -50,17 +63,31 @@ export function codexAppServer(): Plugin {
             res.statusCode = 400;
             return res.end("사용자 메시지가 비어 있습니다.");
           }
-          streamCodex(prompt, input.threadId || undefined, input.runId, res);
+          streamCodex(prompt, input.threadId || undefined, input.runId, res, input.forwardedProps?.mode === "chat");
         });
       });
     },
   };
 }
 
-function streamCodex(prompt: string, sessionId: string | undefined, requestedRunId: string, res: import("node:http").ServerResponse) {
-  const child = spawn("codex", ["app-server", "--stdio"], { cwd: process.cwd(), stdio: ["pipe", "pipe", "pipe"] });
-  const lines = createInterface({ input: child.stdout });
-  const send = (message: object) => child.stdin.write(`${JSON.stringify(message)}\n`);
+function streamCodex(prompt: string, sessionId: string | undefined, requestedRunId: string, res: import("node:http").ServerResponse, chat = false, prepare = false) {
+  const cached = chat && sessionId ? chatConnections.get(sessionId) : undefined;
+  const warm = cached && !cached.child.killed && cached.child.exitCode === null ? cached : undefined;
+  if (cached && !warm) { clearTimeout(cached.timer); chatConnections.delete(sessionId!); }
+  if (warm) { clearTimeout(warm.timer); chatConnections.delete(sessionId!); }
+  const child = warm?.child ?? spawn("codex", ["app-server", "--stdio"], { cwd: process.cwd(), stdio: ["pipe", "pipe", "pipe"] });
+  child.stderr?.resume();
+  const model = chat ? "gpt-6-luna" : CODEX_MODEL;
+  const developerInstructions = chat
+    ? "Answer the user briefly in their language. This is a plain chat. Do not use tools or inspect files."
+    : A2UI_DEVELOPER_INSTRUCTIONS;
+  const chatConfig = chat ? {
+    baseInstructions: developerInstructions,
+    serviceTier: "priority",
+    config: { model_reasoning_effort: "none", project_doc_max_bytes: 0, "skills.max_context_tokens": 1, "features.apps": false, "features.shell_tool": false, web_search: "disabled" },
+  } : {};
+  const lines = createInterface({ input: child.stdout! });
+  const send = (message: object) => child.stdin!.write(`${JSON.stringify(message)}\n`);
 
   const encoder = new EventEncoder({ accept: String(res.req.headers.accept ?? "text/event-stream") });
   const emit = (event: BaseEvent) => res.write(encoder.encode(event));
@@ -70,7 +97,8 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
   res.setHeader("Cache-Control", "no-store");
 
   lines.on("line", (line) => {
-    let message: { id?: number; method?: string; result?: { thread?: { id: string } }; error?: { message?: string }; params?: { threadId?: string; turnId?: string; itemId?: string; delta?: string; turn?: { id: string; status: string; error?: { message?: string } | null } } };
+    if (completed || res.writableEnded || res.destroyed) return;
+    let message: { id?: number; method?: string; result?: { thread?: { id: string }; config?: { mcp_servers?: Record<string, Record<string, unknown>>; plugins?: Record<string, Record<string, unknown>> } }; error?: { message?: string }; params?: { threadId?: string; turnId?: string; itemId?: string; delta?: string; turn?: { id: string; status: string; error?: { message?: string } | null } } };
     try {
       message = JSON.parse(line) as typeof message;
     } catch {
@@ -81,14 +109,24 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
     }
     if (message.id === 1) {
       send({ method: "initialized" });
-      send(sessionId
-        ? { method: "thread/resume", id: 2, params: { threadId: sessionId, cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", excludeTurns: true, developerInstructions: A2UI_DEVELOPER_INSTRUCTIONS, ...(CODEX_MODEL ? { model: CODEX_MODEL } : {}) } }
-        : { method: "thread/start", id: 2, params: { cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", ephemeral: false, developerInstructions: A2UI_DEVELOPER_INSTRUCTIONS, ...(CODEX_MODEL ? { model: CODEX_MODEL } : {}) } });
+      if (chat) send({ method: "config/read", id: 4, params: { includeLayers: false } });
+      else startThread();
+    } else if (message.id === 4 && message.result?.config && chatConfig.config) {
+      for (const section of ["mcp_servers", "plugins"] as const) {
+        Object.assign(chatConfig.config, {
+          [section]: Object.fromEntries(Object.entries(message.result.config[section] ?? {}).map(([name, settings]) => [name, { ...Object.fromEntries(Object.entries(settings).filter(([, value]) => value !== null)), enabled: false }])),
+        });
+      }
+      startThread();
     } else if (message.id === 2 && message.result?.thread) {
-      const threadId = message.result.thread.id;
-      mappingState = { threadId, runId: requestedRunId };
-      send({ method: "turn/start", id: 3, params: { threadId, input: [{ type: "text", text: prompt, text_elements: [] }] } });
-    } else if (message.id === 2 && message.error) {
+      if (prepare) {
+        mappingState = { threadId: message.result.thread.id, runId: requestedRunId };
+        completed = true;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ threadId: message.result.thread.id }));
+        releaseConnection();
+      } else startTurn(message.result.thread.id);
+    } else if (message.error) {
       emit({ type: EventType.RUN_ERROR, message: message.error.message ?? "Codex thread를 열 수 없습니다." });
       res.end();
       child.kill();
@@ -99,25 +137,53 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
       if (mapped.completed) {
         completed = true;
         res.end();
-        child.kill();
+        releaseConnection();
       }
     }
   });
 
-  child.on("error", (error) => {
+  const onError = (error: Error) => {
     completed = true;
     res.statusCode = 500;
     res.end(error.message);
-  });
-  child.on("close", (code) => {
+  };
+  const onClose = (code: number | null) => {
     if (completed || res.writableEnded || res.destroyed) return;
     completed = true;
     emit({ type: EventType.RUN_ERROR, message: `Codex app-server가 응답을 완료하지 못했습니다. (exit ${code ?? "unknown"})` });
     res.end();
+  };
+  child.once("error", onError);
+  child.once("close", onClose);
+  res.on("close", () => {
+    if (!completed) { lines.close(); child.kill(); }
   });
-  res.on("close", () => child.kill());
 
-  send({ method: "initialize", id: 1, params: { clientInfo: { name: "json-document-dev", title: "JSON Document Dev", version: "0.1.0" }, capabilities: { experimentalApi: true, requestAttestation: false } } });
+  function releaseConnection() {
+    lines.close();
+    child.off("error", onError);
+    child.off("close", onClose);
+    if (chat && mappingState) {
+      const threadId = mappingState.threadId;
+      const timer = setTimeout(() => { chatConnections.delete(threadId); child.kill(); }, 5 * 60_000);
+      timer.unref();
+      chatConnections.set(threadId, { child, timer });
+    } else child.kill();
+  }
+
+  function startThread() {
+    send(sessionId
+      ? { method: "thread/resume", id: 2, params: { threadId: sessionId, cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", excludeTurns: true, ...chatConfig, developerInstructions, ...(model ? { model } : {}) } }
+      : { method: "thread/start", id: 2, params: { cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", ephemeral: false, ...chatConfig, developerInstructions, ...(model ? { model } : {}) } });
+  }
+
+  function startTurn(threadId: string) {
+    mappingState = { threadId, runId: requestedRunId };
+    send({ method: "turn/start", id: 3, params: { threadId, ...(chat ? { effort: "none", serviceTier: "priority" } : {}), input: [{ type: "text", text: prompt, text_elements: [] }] } });
+  }
+
+  if (warm && sessionId) startTurn(sessionId);
+  else send({ method: "initialize", id: 1, params: { clientInfo: { name: "json-document-dev", title: "JSON Document Dev", version: "0.1.0" }, capabilities: { experimentalApi: true, requestAttestation: false } } });
 }
 
 function listCodexThreads(res: import("node:http").ServerResponse) {

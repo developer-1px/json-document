@@ -7,7 +7,7 @@ import {
 } from "@interactive-os/json-document-rich-text";
 import { assertRasterImageContent, validateFileCandidates } from "@interactive-os/json-document-file-intake";
 import { RICH_TEXT_MENTION_NODE, insertRichTextMention } from "@interactive-os/json-document-rich-text-suggestion";
-import { COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE, type ComposerAttachment, type ComposerAttachmentCandidate, type ComposerDraft, type ComposerReference, type ComposerTrigger } from "./model.js";
+import { createComposerDraft, COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE, type ComposerAttachment, type ComposerAttachmentCandidate, type ComposerDraft, type ComposerReference, type ComposerTrigger } from "./model.js";
 import type { ComposerAttachmentPolicy } from "./host-config.js";
 
 export type ComposerCommandResult = ReturnType<RichTextEditor["dispatch"]>;
@@ -68,6 +68,20 @@ export function insertComposerReference(editor: RichTextEditor, trigger: Compose
       html: `<span>${prefix}${reference.label}</span> `,
     },
   });
+}
+
+/** Clear an accepted draft and place the caret in its empty paragraph, as one undoable edit. */
+export function clearComposerDraft(editor: RichTextEditor, draft: ComposerDraft, options: { readonly createId: () => string }): ComposerCommandResult {
+  const paragraphId = options.createId();
+  const next = createComposerDraft({ id: options.createId(), instructionId: options.createId(), paragraphId, model: draft.model });
+  const result = editor.apply([
+    { op: "replace", path: "/id", value: next.id },
+    { op: "replace", path: "/instruction", value: next.instruction },
+    { op: "replace", path: "/attachments", value: next.attachments },
+  ], { origin: "composer.submit.clear" });
+  if (!result.ok) return result;
+  const point: RichTextPoint = { kind: "child", nodeId: paragraphId, offset: 0, affinity: "forward" };
+  return editor.dispatch({ type: "selection.set", selection: { kind: "range", ranges: [{ anchor: point, focus: point }], primaryIndex: 0 } });
 }
 
 export function insertComposerText(editor: RichTextEditor, text: string): ComposerCommandResult { return editor.dispatch({ type: "text.insert", text }); }

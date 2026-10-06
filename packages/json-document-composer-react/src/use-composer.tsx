@@ -1,5 +1,6 @@
 import { createJSONDocument, type JSONDocument } from "@interactive-os/json-document";
 import {
+  clearComposerDraft,
   composerInteractionFromKeyStroke,
   composerSchema,
   createComposerDraft,
@@ -26,6 +27,8 @@ export interface UseComposerOptions<Model extends string, Suggestion extends Com
   readonly id: string;
   readonly config: ComposerHostConfig<Model> & { readonly suggestions: ReadonlyArray<Suggestion> };
   readonly ports: ComposerHostPorts<Model>;
+  /** Clear an accepted, unchanged draft as one undoable edit. Defaults to false. */
+  readonly shouldClearAfterSubmit?: boolean;
   readonly maxImagePixels?: number;
   readonly readRaster?: typeof readWebRasterFile;
   readonly labels: {
@@ -46,6 +49,8 @@ export interface ComposerBinding<Model extends string, Suggestion extends Compos
   readonly isPreparingAttachments: boolean;
   readonly attachmentError: EditingPreparationFailure | null;
   readonly canSubmit: boolean;
+  readonly isSubmitting: boolean;
+  readonly submitError: Error | null;
   cancelAttachments(): void;
   readonly commandKind: "mention" | "skill" | null;
   readonly commandMenu: RichTextSuggestionBinding<Suggestion>;
@@ -89,9 +94,31 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
     ...(options.readRaster ? { readRaster: options.readRaster } : {}),
   });
 
+  const submitting = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<Error | null>(null);
+
   function submit() {
     const current = document.value as ComposerDraft<Model>;
-    if (!intake.hasPending() && hasComposerContent(current)) void ports.submit(current);
+    if (submitting.current || intake.hasPending() || !hasComposerContent(current)) return;
+    submitting.current = true;
+    setIsSubmitting(true);
+    setSubmitError(null);
+    void (async () => {
+      try {
+        await ports.submit(current);
+        // Never discard text or attachments changed while the port was pending.
+        if (options.shouldClearAfterSubmit && document.value === current && !intake.hasPending()) {
+          const cleared = clearComposerDraft(editor, current, { createId: ports.createId });
+          if (!cleared.ok) throw new Error(`Accepted Composer draft could not be cleared: ${cleared.code}`);
+        }
+      } catch (error) {
+        setSubmitError(error instanceof Error ? error : new Error(String(error)));
+      } finally {
+        submitting.current = false;
+        setIsSubmitting(false);
+      }
+    })();
   }
 
   const addWebFiles = intake.addFiles;
@@ -115,6 +142,7 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.defaultPrevented || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
     if (event.key === "Escape" && intake.hasPending() && !event.nativeEvent.isComposing) {
       event.preventDefault(); event.stopPropagation(); intake.cancel(); return;
     }
@@ -133,6 +161,7 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
   }
 
   function handleHistoryKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.defaultPrevented || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
     const interaction = composerInteractionFromKeyStroke({ key: event.key, shiftKey: event.shiftKey, commandKey: event.metaKey || event.ctrlKey, altKey: event.altKey }, config.interaction);
     if (interaction !== "history.undo" && interaction !== "history.redo") return;
     event.preventDefault();
@@ -158,7 +187,9 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
     hasContent: content,
     isPreparingAttachments: intake.isPending,
     attachmentError: intake.error,
-    canSubmit: content && !intake.isPending,
+    canSubmit: content && !intake.isPending && !isSubmitting,
+    isSubmitting,
+    submitError,
     cancelAttachments: intake.cancel,
     commandKind: commandMenu.kind,
     commandMenu: commandMenu.binding,

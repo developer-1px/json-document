@@ -36,3 +36,8 @@ test("rejects missing Usage and product-to-module links", () => {
   assert.ok(failures.some(message => message.includes("known Usage")));
   assert.ok(failures.some(message => message.includes("unknown module")));
 });
+
+test("accepts package-owned documentation as the route source", () => {
+  assert.deepEqual(errors([root, route("/docs/chat", { documentSource: "packages/json-document-ui-primitives-react/docs/chat.md" })]), []);
+  assert.deepEqual(errors([root, route("/docs/chat", { documentSource: "packages/ui/src/chat.tsx" })]), ["site route /docs/chat has an invalid documentation source."]);
+});

@@ -1,4 +1,4 @@
-export { addComposerAttachments, composerText, createComposerAttachments, hasComposerContent, insertComposerReference, insertComposerText, removeComposerAttachment, selectComposerModel } from "./commands.js";
+export { addComposerAttachments, clearComposerDraft, composerText, createComposerAttachments, hasComposerContent, insertComposerReference, insertComposerText, removeComposerAttachment, selectComposerModel } from "./commands.js";
 export type { ComposerAttachmentResult, ComposerCommandResult, ComposerDraftCommandResult } from "./commands.js";
 export { COMPOSER_HOST_PROFILE_V1, composerHostConfigSchema } from "./host-config.js";
 export type { ComposerAttachmentPolicy, ComposerHostConfig, ComposerHostModel, ComposerHostPorts, ComposerHostSuggestion, ComposerInteractionPolicy } from "./host-config.js";

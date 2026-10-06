@@ -32,3 +32,6 @@ File metadata formatting belongs to `@interactive-os/json-document-file-intake`.
 Use `toolbarPresentation="floating"` when a product's controls form a distinct
 functional layer above edge-to-edge content; the default `attached` presentation
 remains part of document flow.
+
+`ChatBubble` owns incoming/outgoing message presentation. Import `chat-bubble.css` once.
+See the owning [Chat API](docs/chat.md) and [Usage](/demo/chat).

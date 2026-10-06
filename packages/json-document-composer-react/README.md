@@ -69,3 +69,6 @@ submit payload를 확인할 수 있습니다. 서버 upload와 OS-native Clipboa
 meaning. Its history capture handler consumes only the default Undo/Redo chord;
 Alt-modified variants leave the event and canonical history untouched. Submit
 and command-menu handling retain the configured Composer policy.
+
+`ChatComposer` composes the canonical text editor and submit lifecycle for compact chat input.
+See the owning [Chat Composer API](docs/chat-composer.md) and [Usage](/demo/chat).

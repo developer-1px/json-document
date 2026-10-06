@@ -4,7 +4,7 @@
   "description": "Official React rendering and contenteditable integration for json-document Rich Text.",
   "type": "module",
   "license": "MIT",
-  "sideEffects": false,
+  "sideEffects": ["./dist/placeholder.css"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/developer-1px/json-document.git",
@@ -17,11 +17,11 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "LICENSE"],
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "docs", "LICENSE"],
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }, "./placeholder.css": "./dist/placeholder.css" },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc -b tsconfig.json",
+    "build": "npm run clean && tsc -b tsconfig.json && cp src/placeholder.css dist/placeholder.css",
     "perf": "npm run build && node benchmarks/render-store.mjs",
     "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
