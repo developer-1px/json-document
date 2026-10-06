@@ -49,7 +49,7 @@ export function ChatDemoRoute() {
     shouldClearAfterSubmit: true,
   });
   return (
-    <DemoPage documentation={<PageHeader label="UI Primitives" title="Chat">메시지를 입력해 보세요. Enter로 보내고 Shift+Enter로 줄을 바꿉니다. {localAgent ? "로컬 Codex · Luna low로 응답합니다." : "이 예제는 현재 화면에서만 동작합니다."}</PageHeader>}>
+    <DemoPage documentation={<PageHeader label="UI Primitives" title="Chat">메시지를 입력해 보세요. Enter로 보내고 Shift+Enter로 줄을 바꿉니다. {localAgent ? "로컬 Codex · Luna · 추론 없음 · Fast로 응답합니다." : "이 예제는 현재 화면에서만 동작합니다."}</PageHeader>}>
       <div className="mx-auto flex min-h-96 w-full max-w-2xl flex-col gap-8 py-6">
         <div role="log" aria-label="대화" className="flex flex-col gap-3">
           {!localAgent && <>

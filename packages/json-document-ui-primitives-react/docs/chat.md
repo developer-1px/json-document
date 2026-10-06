@@ -45,7 +45,9 @@ import "@interactive-os/json-document-ui-primitives-react/chat-bubble.css";
 ## 로컬 모델 응답 테스트
 
 Codex CLI에 로그인한 환경에서 사이트 개발 서버를 실행하고 `/demo/chat?agent=local`을 엽니다.
-기존 로컬 Codex app-server를 통해 `gpt-6-luna`, `low`, Fast(`priority`) 설정으로 응답을 스트리밍합니다.
+기존 로컬 Codex app-server를 통해 `gpt-6-luna`, 추론 없음(`none`), Fast(`priority`) 설정으로 응답을 스트리밍합니다.
 같은 화면의 후속 메시지는 같은 thread를 사용하며, 새로고침하면 새 대화를 시작합니다.
 사이트 내부 client는 `site/src/app/llm-agent-api.ts`, 서버 연결은 `site/config/codex-app-server.ts`가 소유합니다.
 이 연결은 개발 서버 전용이며 기본 Usage와 정적 배포에서는 실제 모델을 호출하지 않습니다.
+
+로컬 채팅은 코딩 지침·스킬 카탈로그·플러그인·도구 문맥을 줄이고 같은 대화의 연결을 재사용합니다. 5분간 사용하지 않은 연결은 종료하며 다음 입력에서 thread를 복원합니다. 일반 Codex 설정 파일은 변경하지 않습니다.
