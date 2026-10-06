@@ -32,6 +32,9 @@ export function codexAppServer(): Plugin {
         if (req.method === "GET" && req.url?.startsWith("/sessions")) {
           return listCodexThreads(res);
         }
+        if (req.method === "POST" && req.url === "/prepare") {
+          return streamCodex("", undefined, "", res, true, true);
+        }
         if (req.method !== "POST" || !req.url?.startsWith("/turn")) {
           res.statusCode = 405;
           return res.end();
@@ -67,7 +70,7 @@ export function codexAppServer(): Plugin {
   };
 }
 
-function streamCodex(prompt: string, sessionId: string | undefined, requestedRunId: string, res: import("node:http").ServerResponse, chat = false) {
+function streamCodex(prompt: string, sessionId: string | undefined, requestedRunId: string, res: import("node:http").ServerResponse, chat = false, prepare = false) {
   const cached = chat && sessionId ? chatConnections.get(sessionId) : undefined;
   const warm = cached && !cached.child.killed && cached.child.exitCode === null ? cached : undefined;
   if (cached && !warm) { clearTimeout(cached.timer); chatConnections.delete(sessionId!); }
@@ -80,7 +83,8 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
     : A2UI_DEVELOPER_INSTRUCTIONS;
   const chatConfig = chat ? {
     baseInstructions: developerInstructions,
-    config: { project_doc_max_bytes: 0, "skills.max_context_tokens": 1, "features.apps": false, "features.shell_tool": false, web_search: "disabled" },
+    serviceTier: "priority",
+    config: { model_reasoning_effort: "none", project_doc_max_bytes: 0, "skills.max_context_tokens": 1, "features.apps": false, "features.shell_tool": false, web_search: "disabled" },
   } : {};
   const lines = createInterface({ input: child.stdout! });
   const send = (message: object) => child.stdin!.write(`${JSON.stringify(message)}\n`);
@@ -93,6 +97,7 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
   res.setHeader("Cache-Control", "no-store");
 
   lines.on("line", (line) => {
+    if (completed || res.writableEnded || res.destroyed) return;
     let message: { id?: number; method?: string; result?: { thread?: { id: string }; config?: { mcp_servers?: Record<string, Record<string, unknown>>; plugins?: Record<string, Record<string, unknown>> } }; error?: { message?: string }; params?: { threadId?: string; turnId?: string; itemId?: string; delta?: string; turn?: { id: string; status: string; error?: { message?: string } | null } } };
     try {
       message = JSON.parse(line) as typeof message;
@@ -114,7 +119,13 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
       }
       startThread();
     } else if (message.id === 2 && message.result?.thread) {
-      startTurn(message.result.thread.id);
+      if (prepare) {
+        mappingState = { threadId: message.result.thread.id, runId: requestedRunId };
+        completed = true;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ threadId: message.result.thread.id }));
+        releaseConnection();
+      } else startTurn(message.result.thread.id);
     } else if (message.error) {
       emit({ type: EventType.RUN_ERROR, message: message.error.message ?? "Codex thread를 열 수 없습니다." });
       res.end();
@@ -126,15 +137,7 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
       if (mapped.completed) {
         completed = true;
         res.end();
-        lines.close();
-        child.off("error", onError);
-        child.off("close", onClose);
-        if (chat) {
-          const threadId = mappingState.threadId;
-          const timer = setTimeout(() => { chatConnections.delete(threadId); child.kill(); }, 5 * 60_000);
-          timer.unref();
-          chatConnections.set(threadId, { child, timer });
-        } else child.kill();
+        releaseConnection();
       }
     }
   });
@@ -155,6 +158,18 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
   res.on("close", () => {
     if (!completed) { lines.close(); child.kill(); }
   });
+
+  function releaseConnection() {
+    lines.close();
+    child.off("error", onError);
+    child.off("close", onClose);
+    if (chat && mappingState) {
+      const threadId = mappingState.threadId;
+      const timer = setTimeout(() => { chatConnections.delete(threadId); child.kill(); }, 5 * 60_000);
+      timer.unref();
+      chatConnections.set(threadId, { child, timer });
+    } else child.kill();
+  }
 
   function startThread() {
     send(sessionId

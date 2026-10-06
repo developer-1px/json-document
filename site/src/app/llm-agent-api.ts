@@ -15,6 +15,15 @@ export async function readLlmAgentSession(sessionId: string): Promise<ReadonlyAr
   return ((await response.json()) as { messages?: ReadonlyArray<LlmAgentMessage> }).messages ?? [];
 }
 
+/** Prepare a local chat thread without sending a user message. */
+export async function prepareLlmAgentChat(signal: AbortSignal): Promise<string> {
+  const response = await fetch("/api/llm-agent/prepare", { method: "POST", signal });
+  if (!response.ok) throw new Error("로컬 채팅을 준비하지 못했습니다.");
+  const result = await response.json() as { threadId?: string };
+  if (!result.threadId) throw new Error("로컬 채팅 thread가 없습니다.");
+  return result.threadId;
+}
+
 export async function streamLlmAgentTurn(options: {
   readonly prompt: string;
   readonly mode?: "chat";
