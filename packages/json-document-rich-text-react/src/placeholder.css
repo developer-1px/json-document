@@ -9,3 +9,7 @@
   pointer-events: none;
   user-select: none;
 }
+
+[data-rich-text-composing] [data-rich-text-placeholder]::before {
+  content: none;
+}

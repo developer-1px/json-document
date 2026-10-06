@@ -101,7 +101,11 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
       editor,
       createId: () => callbacks.current.createId?.() ?? createRichTextNodeId(),
       onAction: (action, result) => callbacks.current.onAction?.(action, result),
-      onCompositionChange: (composing) => store.setComposing(composing),
+      onCompositionChange: (composing) => {
+        // Preserve the browser-owned composition DOM while updating its presentation.
+        root.toggleAttribute("data-rich-text-composing", composing);
+        store.setComposing(composing);
+      },
     });
     bindingRef.current = binding;
     return () => {

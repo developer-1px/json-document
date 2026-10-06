@@ -67,3 +67,33 @@ test("placeholder does not displace the caret and returns after deleting or send
   await assertPlaceholder();
   await expect(input).toBeFocused();
 });
+
+for (const route of ["/demo/chat", "/demo/composer"]) {
+  test(`IME hides the placeholder during composition and restores it on cancellation: ${route}`, async ({ page, browserName }) => {
+    test.skip(browserName !== "chromium");
+    await page.goto(route);
+    const input = route === "/demo/chat"
+      ? page.getByRole("textbox", { name: "메시지", exact: true })
+      : page.getByLabel("Agent Chat Composer", { exact: true });
+    await input.click();
+    const placeholder = input.locator("[data-rich-text-placeholder]");
+    const content = () => placeholder.evaluate(element => getComputedStyle(element, "::before").content);
+    await expect.poll(content).not.toBe("none");
+    const client = await page.context().newCDPSession(page);
+    for (const text of ["ㅎ", "하", "한"]) {
+      await client.send("Input.imeSetComposition", { text, selectionStart: text.length, selectionEnd: text.length });
+      await expect.poll(content).toBe("none");
+      await expect(input).toContainText(text);
+    }
+    await client.send("Input.imeSetComposition", { text: "", selectionStart: 0, selectionEnd: 0 });
+    await expect.poll(content).not.toBe("none");
+    await client.send("Input.imeSetComposition", { text: "한", selectionStart: 1, selectionEnd: 1 });
+    await expect.poll(content).toBe("none");
+    await client.send("Input.insertText", { text: "한" });
+    await expect(input).toHaveText("한");
+    await expect(input).not.toHaveAttribute("data-rich-text-composing");
+    await input.press("Backspace");
+    await expect.poll(content).not.toBe("none");
+    await client.detach();
+  });
+}
