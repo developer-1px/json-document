@@ -36,6 +36,7 @@ export function BearChat({ editor }: { editor: TextEditor }) {
           write: delta => { turn.reply += delta; setMessages(current => [...current]); },
         });
       } catch (error) {
+        request.current?.abort();
         turn.reply += "\n응답을 완료하지 못했습니다. 본문에 반영된 내용은 유지됩니다.";
         setMessages(current => [...current]);
         throw error;
