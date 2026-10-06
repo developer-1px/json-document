@@ -1,3 +1,5 @@
+import textEditSource from "../../../../packages/json-document-editing/src/text-edit.ts?raw";
+import textToolsSource from "../../../../packages/json-document-editing/src/text-tools.ts?raw";
 import sheetViewSource from "../../../../packages/json-document-editing/src/sheet-view.ts?raw";
 import sheetPlanSource from "../../../../packages/json-document-editing/src/sheet-plan.ts?raw";
 import sheetDocumentCreateSource from "../../../../packages/json-document-sheet-document/src/create.ts?raw";
@@ -231,6 +233,7 @@ const packageReferencePaths = new Map(siteRoutes.flatMap(page => page.module ? [
 const sourceModules = import.meta.glob<string>(
   [
     "/src/routes/**/*.{ts,tsx}",
+    "/src/applications/**/*.{ts,tsx}",
     "/src/app/llm-agent-api.ts",
     "/src/shared/**/*.{ts,tsx}",
     "!/src/shared/ui/**",
@@ -246,6 +249,8 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-editing/src/text-edit.ts", textEditSource],
+  ["packages/json-document-editing/src/text-tools.ts", textToolsSource],
   ["packages/json-document-affordance/src/grid-editing-profile.ts", gridEditingProfileSource],
   ["packages/json-document-web/src/element-coordinate.ts", elementCoordinateSource],
   ["packages/json-document-editing/src/sheet-text-clipboard.ts", sheetTextClipboardSource],
@@ -487,6 +492,8 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  { packageName: "@interactive-os/json-document-editing", symbol: "applyTextEdit", sourcePath: "packages/json-document-editing/src/text-edit.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createTextEditorTools", sourcePath: "packages/json-document-editing/src/text-tools.ts" },
   {packageName: "@interactive-os/json-document-web", symbol: "webKeyboardPlatform", sourcePath: "packages/json-document-web/src/keyboard.ts"},
   {
     packageName: "@interactive-os/json-document-affordance",

@@ -103,6 +103,11 @@ type AnnotationSelectorTransform =
 ```ts
 interface AnnotationSource extends Record<string, JSONValue> { readonly id: string; readonly src: string; readonly width: number; readonly height: number }
 ```
+## `applyTextEdit`
+
+```ts
+applyTextEdit(editor: TextEditor, edit: TextEdit): import("<repository>/packages/json-document-editing/src/session").EditingResult<import("<repository>/packages/json-document-editing/src/text").TextSelection>
+```
 ## `assertAnnotationDocument`
 
 ```ts
@@ -660,6 +665,11 @@ createSheetEditor(source: EditingDocumentSource<SheetDocument>, options?: SheetE
 
 ```ts
 createTextEditor(document: JSONDocument, pointer?: Pointer): TextEditor
+```
+## `createTextEditorTools`
+
+```ts
+createTextEditorTools(editor: TextEditor): ({ name: string; description: string; parameters: { type: string; properties: { before?: undefined; after?: undefined; }; required: any[]; additionalProperties: boolean; }; execute: (_args: unknown) => unknown; } | { ...; })[]
 ```
 ## `createTreeEditor`
 
@@ -1782,6 +1792,15 @@ interface TextChange {
   readonly from: number;
   readonly to: number;
   readonly insert: string;
+}
+```
+## `TextEdit`
+
+```ts
+interface TextEdit {
+  readonly source: string;
+  readonly before: string;
+  readonly after: string;
 }
 ```
 ## `TextEditor`

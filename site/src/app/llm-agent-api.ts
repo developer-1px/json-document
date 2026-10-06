@@ -24,9 +24,12 @@ export async function prepareLlmAgentChat(signal: AbortSignal): Promise<string> 
   return result.threadId;
 }
 
+export type LlmAgentTool = { name: string; description: string; parameters: Record<string, unknown>; execute: (args: unknown) => unknown | Promise<unknown> };
+
 export async function streamLlmAgentTurn(options: {
   readonly prompt: string;
   readonly mode?: "chat";
+  readonly tools?: ReadonlyArray<LlmAgentTool>;
   readonly sessionId: string | null;
   readonly onSession: (sessionId: string) => void;
   readonly write: (delta: string) => void;
@@ -40,7 +43,7 @@ export async function streamLlmAgentTurn(options: {
       threadId: options.sessionId ?? "",
       runId: crypto.randomUUID(),
       messages: [{ id: crypto.randomUUID(), role: "user", content: options.prompt }],
-      tools: [],
+      tools: options.tools?.map(({ name, description, parameters }) => ({ name, description, parameters })) ?? [],
       context: [],
       forwardedProps: options.mode ? { mode: options.mode } : {},
     } satisfies RunAgentInput),
@@ -54,9 +57,9 @@ export async function streamLlmAgentTurn(options: {
     buffer += value ?? "";
     const frames = buffer.split(/\r?\n\r?\n/);
     buffer = frames.pop() ?? "";
-    for (const frame of frames) applyAgUiEvent(parseSseEvent(frame), options);
+    for (const frame of frames) await applyAgUiEvent(parseSseEvent(frame), options);
     if (done) {
-      if (buffer.trim()) applyAgUiEvent(parseSseEvent(buffer), options);
+      if (buffer.trim()) await applyAgUiEvent(parseSseEvent(buffer), options);
       return;
     }
   }
@@ -68,11 +71,24 @@ function parseSseEvent(frame: string): AGUIEvent {
   return JSON.parse(data) as AGUIEvent;
 }
 
-function applyAgUiEvent(event: AGUIEvent, options: {
+async function applyAgUiEvent(event: AGUIEvent, options: {
+  readonly tools?: ReadonlyArray<LlmAgentTool>;
+  readonly signal?: AbortSignal;
   readonly onSession: (sessionId: string) => void;
   readonly write: (delta: string) => void;
   readonly onEvent?: (event: AGUIEvent) => void;
 }) {
+  if (event.type === EventType.CUSTOM && event.name === "client-tool") {
+    const call = event.value as { token: string; tool: string; arguments: unknown };
+    const tool = options.tools?.find(tool => tool.name === call.tool);
+    let result: unknown;
+    try { result = tool ? await tool.execute(call.arguments) : { ok: false, code: "tool.unavailable" }; }
+    catch { result = { ok: false, code: "tool.failed" }; }
+    const response = await fetch(`/api/llm-agent/tool-results/${encodeURIComponent(call.token)}`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(result), signal: options.signal,
+    });
+    if (!response.ok) throw new Error("문서 도구 결과를 전달하지 못했습니다.");
+  }
   options.onEvent?.(event);
   if (event.type === EventType.RUN_STARTED) options.onSession(event.threadId);
   else if (event.type === EventType.TEXT_MESSAGE_CONTENT) options.write(event.delta);

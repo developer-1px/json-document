@@ -1,3 +1,4 @@
+import { BearChat } from "./BearChat";
 import { useState } from "react";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createTextEditor } from "@interactive-os/json-document-editing";
@@ -51,6 +52,7 @@ export function BearApplication() {
         spellCheck={false}
         className="mx-auto min-h-dvh w-full max-w-3xl px-6 py-16 text-lg leading-loose focus-visible:outline-none sm:px-12 sm:py-28"
       />
+      {import.meta.env.DEV && <BearChat editor={editor} />}
     </main>
   );
 }

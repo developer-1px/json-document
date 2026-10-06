@@ -88,7 +88,9 @@
       "/docs/api/markdown-web",
       "/docs/api/markdown-react",
       "/docs/api/contenteditable",
-      "/docs/api/web"
+      "/docs/api/web",
+      "/docs/api/composer-react",
+      "/docs/api/ui-primitives-react"
     ],
     "applicationSource": "site/src/app/routes/applications/bear.tsx"
   },
@@ -286,7 +288,8 @@
       "packages/json-document-editing/docs/calendar-profile.md",
       "packages/json-document-editing/docs/text.md",
       "packages/json-document-editing/docs/sheet.md",
-      "packages/json-document-editing/docs/sheet-contract.md"
+      "packages/json-document-editing/docs/sheet-contract.md",
+      "packages/json-document-editing/docs/text-tools.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-editing",
