@@ -158,6 +158,7 @@ export type {
   SheetColumn,
   SheetDocument,
   SheetEditor,
+  SheetEditorOptions,
   SheetIntent,
   SheetPoint,
   SheetRange,
@@ -229,3 +230,20 @@ export type {
 } from "./calendar-time-grid-pointer.js";
 export { createTextEditor, clampTextSelection, type TextEditor, type TextSelection } from "./text.js";
 export { diffText, type TextChange } from "./text-change.js";
+
+export { sheetColumnLabel } from "./sheet-structure.js";
+export type { SheetStructureIntent, SheetStructurePolicy, SheetStructureActions } from "./sheet-structure.js";
+export { createMarkdownTableEditor } from "./markdown-table.js";
+export { sheetNavigationTarget } from "./sheet-navigation.js";
+export type { SheetTraversalDirection } from "./sheet-navigation.js";
+export {sheetSelectionSummary} from "./sheet-summary.js";
+export {parseSheetClipboardText} from "./sheet-text-clipboard.js";
+export {createProjectedSheetEditor, type ProjectedSheetOptions, type ProjectedSheetSource} from "./projected-sheet.js";
+export {createCanvasSheet, createObjectSheetEditor, sheetEmbeddedDocumentType} from "./object-sheet.js";
+
+export {planSheetIntent} from "./sheet-plan.js";
+export type {SheetPlanResult} from "./sheet-plan.js";
+export type {SheetAvailability} from "./sheet.js";
+
+export {projectSheetGrid} from "./sheet-view.js";
+export type {SheetGrid,SheetViewOptions} from "./sheet-view.js";

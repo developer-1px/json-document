@@ -54,14 +54,14 @@ describe("canonical documentation projection", () => {
   });
 
   test.each([
-    ["docs/public/concepts.md", "how-we-build.md", "/docs/how-we-build"],
-    ["docs/public/concepts.md", "document-types.md#후보--tbd", "/docs/document-types#후보--tbd"],
+    ["docs/public/architecture.md", "how-we-build.md", "/docs/how-we-build"],
+    ["docs/public/architecture.md", "document-types.md#후보--tbd", "/docs/document-types#후보--tbd"],
     ["docs/public/adapters.md", "adapter-virtual-selection.md", "/docs/adapter-virtual-selection"],
     ["docs/public/ui-primitives.md", "animation.md", "/docs/animation"],
     ["docs/public/connectors.md", "connector-a2ui.md", "/docs/connector-a2ui"],
     ["docs/public/hands.md", "official-hands.md", "/docs/official-hands"],
-    ["docs/public/connector-a2ui.md", "../api-reference/a2ui.md", "/docs/api/a2ui"],
-    ["docs/api-reference/editing.md", "../public/editing.md?mode=read#입력에서-관찰까지", "/docs/editing?mode=read#입력에서-관찰까지"],
+    ["docs/public/connector-a2ui.md", "../../packages/json-document-a2ui/docs/api-reference.md", "/docs/api/a2ui"],
+    ["packages/json-document-editing/docs/api-reference.md", "../../../docs/public/editing.md?mode=read#입력에서-관찰까지", "/docs/editing?mode=read#입력에서-관찰까지"],
     ["docs/public/connector-a2ui.md", "../../packages/json-document-a2ui/README.md", "https://github.com/developer-1px/json-document/blob/main/packages/json-document-a2ui/README.md"],
     ["docs/public/api.md", "#commit", "#commit"],
     ["docs/public/api.md", "https://example.com/api.md", "https://example.com/api.md"],
@@ -69,7 +69,7 @@ describe("canonical documentation projection", () => {
     expect(decodeURIComponent(rewriteMarkdownHref(href, source)!)).toBe(expected);
   });
 
-  test("registers every document page once, including Concept Map", () => {
+  test("registers every document page once, including Architecture", () => {
     const registered = pageDescriptors.filter((route) => route.documentSource !== undefined);
     expect(Object.values(docPages).map((page) => page.path).sort()).toEqual(registered.map((page) => page.path).sort());
   });

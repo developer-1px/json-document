@@ -1,0 +1,16 @@
+[data-text-selection-overlay] {
+  position: fixed;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+[data-text-selection-overlay] > span { position: absolute; pointer-events: none; }
+[data-text-selection-range] { background: var(--text-selection-background); }
+[data-text-selection-caret] { background: currentColor; animation: text-selection-blink 1s step-end infinite; }
+@keyframes text-selection-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { [data-text-selection-caret] { animation: none; } }
+[data-text-selection-virtual], [data-text-selection-virtual] * { caret-color: transparent !important; }
+[data-text-selection-virtual]::selection, [data-text-selection-virtual] ::selection { background: transparent; }
+[data-text-selection-virtual] [data-text-projection-selected] { background-color: transparent; }
+[data-text-selection-virtual] [data-text-projection-edge]::after { display: none; }

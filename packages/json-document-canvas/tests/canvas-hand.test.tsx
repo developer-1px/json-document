@@ -331,7 +331,7 @@ test("external selection changes supersede a pending preview without a stale sel
 test("every toolbar control shares icon, accessible name and canonical tooltip without losing state", () => {
   const { svg } = setup();
   const toolbar = within(screen.getByRole("toolbar", { name: "Canvas tools" }));
-  const labels = ["선택", "글자", "스티커 노트", "사각형", "타원", "그리기", "실행 취소", "다시 실행", "복제", "삭제", "JSON"];
+  const labels = ["선택", "글자", "스티커 노트", "표", "사각형", "타원", "그리기", "실행 취소", "다시 실행", "복제", "삭제", "JSON"];
   expect(toolbar.getAllByRole("button")).toHaveLength(labels.length);
   for (const label of labels) {
     const button = toolbar.getByRole("button", { name: label });
@@ -771,4 +771,18 @@ test.each(["", "끝의 빈 줄\n", "줄\n\n"])("body display and native input me
   expect(input.value).toBe(label);
   fireEvent.keyDown(input, { key: "Enter", metaKey: true });
   expect(value().objects[0]).toEqual(object); expect(commits).not.toHaveBeenCalled();
+});
+
+test.each([[120,50],[40,110]])("table creation accepts an axis-aligned drag through preview and commit (%s,%s)",(x,y)=>{
+ const {svg,value,commits,editor}=setup();
+ fireEvent.click(screen.getByRole('button',{name:'표'}));
+ fireEvent.pointerDown(svg,event(40,50));
+ fireEvent.pointerMove(svg,event(x,y));
+ expect(commits).not.toHaveBeenCalled();
+ fireEvent.pointerUp(svg,event(x,y));
+ expect(value().objects).toHaveLength(1);
+ expect(value().objects[0]!.width).toBeGreaterThan(0);
+ expect(value().objects[0]!.height).toBeGreaterThan(0);
+ expect(commits).toHaveBeenCalledTimes(1);
+ act(()=>{editor.undo();});expect(value().objects).toHaveLength(0);
 });

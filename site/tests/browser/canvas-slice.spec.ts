@@ -5,7 +5,7 @@ for (const route of ["/demo/canvas", "/widgets/canvas"]) {
     await page.goto(route);
     const toolbar = page.getByRole("toolbar", { name: "Canvas tools" });
     const buttons = toolbar.getByRole("button");
-    await expect(buttons).toHaveCount(10);
+    await expect(buttons).toHaveCount(route === "/demo/canvas" ? 12 : 13);
     for (const button of await buttons.all()) {
       await expect(button).toHaveAttribute("data-ui-presentation", "icon");
       await expect(button.locator('svg[aria-hidden="true"]')).toHaveCount(1);
@@ -76,9 +76,9 @@ test("Canvas Alt-copy, nudge, duplicate and native selected clipboard share atom
   await page.keyboard.down("Alt"); await page.keyboard.down("Shift");
   await page.mouse.move(start.x, start.y); await page.mouse.down(); await page.mouse.move(end.x, end.y);
   await expect(page.locator("[data-canvas-copy-original]")).toHaveCount(2);
-  await expect(page.locator("[data-canvas-object]")).toHaveCount(3);
+  await expect(page.locator("[data-canvas-object]")).toHaveCount(4);
   await page.mouse.up(); await page.keyboard.up("Alt"); await page.keyboard.up("Shift");
-  await expect(page.locator("[data-canvas-object]")).toHaveCount(5);
+  await expect(page.locator("[data-canvas-object]")).toHaveCount(6);
   await expect(page.locator('[data-canvas-object="rectangle"]')).toHaveAttribute("x", "96");
   const selected = page.locator('[data-canvas-object][aria-pressed="true"]');
   expect(Number(await selected.first().getAttribute("y"))).toBeCloseTo(264);
@@ -86,17 +86,18 @@ test("Canvas Alt-copy, nudge, duplicate and native selected clipboard share atom
   expect(Number(await selected.first().getAttribute("x"))).toBeCloseTo(197);
   expect(Number(await selected.first().getAttribute("y"))).toBeCloseTo(274);
   await page.keyboard.press("ControlOrMeta+d");
-  await expect(page.locator("[data-canvas-object]")).toHaveCount(7);
+  await expect(page.locator("[data-canvas-object]")).toHaveCount(8);
   await page.keyboard.press("ControlOrMeta+c"); await page.keyboard.press("ControlOrMeta+v");
-  await expect(page.locator("[data-canvas-object]")).toHaveCount(9);
+  await expect(page.locator("[data-canvas-object]")).toHaveCount(10);
   await expect(selected).toHaveCount(2);
-  await page.keyboard.press("ControlOrMeta+x"); await expect(page.locator("[data-canvas-object]")).toHaveCount(7);
-  await page.keyboard.press("ControlOrMeta+z"); await expect(page.locator("[data-canvas-object]")).toHaveCount(9);
+  await page.keyboard.press("ControlOrMeta+x"); await expect(page.locator("[data-canvas-object]")).toHaveCount(8);
+  await page.keyboard.press("ControlOrMeta+z"); await expect(page.locator("[data-canvas-object]")).toHaveCount(10);
   await expect(selected).toHaveCount(2);
 });
 
 test("Canvas captures real raster bytes before the native event ends and queues subsequent literal text", async ({ page }) => {
   await page.goto("/demo/canvas");
+  await expect(page.locator("[data-canvas-slide]")).toBeVisible();
   const prevented = await page.evaluate(() => {
     const raster = document.createElement("canvas"); raster.width = 1600; raster.height = 800;
     const context = raster.getContext("2d")!; context.fillStyle = "#b6c8e8"; context.fillRect(0, 0, 1600, 800);
@@ -159,11 +160,11 @@ test("Plane Select moves a selected set with one Undo and collapses a plain clic
   await page.mouse.move(start.x, start.y); await page.mouse.down();
   await page.mouse.move(end.x, end.y, { steps: 6 });
   expect(Number(await rectangle.getAttribute("x"))).toBeCloseTo(176);
-  expect(Number(await ellipse.getAttribute("x"))).toBeCloseTo(696);
+  expect(Number(await ellipse.getAttribute("x"))).toBeCloseTo(640);
   await page.mouse.up();
   await page.getByRole("button", { name: "실행 취소" }).click();
   expect(Number(await rectangle.getAttribute("x"))).toBeCloseTo(96);
-  expect(Number(await ellipse.getAttribute("x"))).toBeCloseTo(616);
+  expect(Number(await ellipse.getAttribute("x"))).toBeCloseTo(560);
   await expect(selected).toHaveCount(2);
   await expect(page.getByRole("button", { name: "실행 취소" })).toBeDisabled();
   await rectangle.click(); await expect(selected).toHaveCount(1);
@@ -172,7 +173,7 @@ test("Plane Select moves a selected set with one Undo and collapses a plain clic
 test("Plane Select marquee, cancellation and primary editing share the public profile", async ({ page }) => {
   await page.goto("/widgets/canvas");
   const selected = page.locator('[data-canvas-object][aria-pressed="true"]');
-  const start = await point(page, 50, 230), end = await point(page, 900, 530);
+  const start = await point(page, 50, 230), end = await point(page, 860, 530);
   await page.mouse.move(start.x, start.y); await page.mouse.down(); await page.mouse.move(end.x, end.y);
   await expect(page.locator("[data-canvas-marquee]")).toHaveCount(1); await expect(selected).toHaveCount(2);
   await page.keyboard.press("Escape"); await page.mouse.up();
@@ -184,12 +185,12 @@ test("Plane Select marquee, cancellation and primary editing share the public pr
   await page.locator('[data-canvas-object="title"]').click({ modifiers: ["Shift"] });
   await expect(selected).toHaveCount(3);
   await page.keyboard.press("ControlOrMeta+a"); await page.keyboard.press("ControlOrMeta+a");
-  await expect(selected).toHaveCount(3); await expect(page.locator("[data-resize-edge]")).toHaveCount(4);
+  await expect(selected).toHaveCount(4); await expect(page.locator("[data-resize-edge]")).toHaveCount(8);
   await page.keyboard.press("F2");
   const text = page.getByRole("textbox", { name: "Canvas text", exact: true });
   await text.fill("Reusable selection"); await text.press("ControlOrMeta+Enter");
   await expect(page.locator('[data-canvas-object="title"]')).toHaveAttribute("aria-label", "Reusable selection");
-  await expect(selected).toHaveCount(3);
+  await expect(selected).toHaveCount(4);
   await page.keyboard.press("ControlOrMeta+z");
   await expect(page.locator('[data-canvas-object="title"]')).toHaveAttribute("aria-label", "One slide. Your ideas.");
 });

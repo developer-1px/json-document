@@ -10,6 +10,40 @@ const databasePropertyConsumers = [
   "packages/json-document-database/src/database-hands.tsx",
   "packages/json-document-zod/src/database-document.ts",
 ];
+// Regression: moving a surface into a Hand must not retain its displaced owners.
+const sheetHand = readSource("packages/json-document-sheet/src/sheet-hand.tsx");
+for (const [packageName, symbol] of [
+  ["@interactive-os/json-document-react", "useRenameSession"],
+  ["@interactive-os/json-document-affordance", "cellEditingAffordance"],
+  ["@interactive-os/json-document-affordance", "resolveGridEditActivation"],
+  ["@interactive-os/json-document-web", "sheetClipboardRepresentations"],
+  ["@interactive-os/json-document-web", "moveGridPoint"],
+  ["@interactive-os/json-document-ui-primitives-react", "Field"],
+]) {
+  if (!hasNamedImport(sheetHand, packageName, symbol)) throw new Error(`Sheet Hand bypasses ${symbol}`);
+}
+for (const pattern of [/<input\b/, /\bsetDraft\b/, /\bevent\.key\b/, /String\.fromCharCode/, /Object\.fromEntries/]) {
+  if (pattern.test(sheetHand)) throw new Error(`Sheet Hand retains displaced responsibility: ${pattern}`);
+}
+if (!sheetHand.includes("editor.structure")) throw new Error("Sheet Hand must consume editor structure capabilities");
+if (existsSync(join(repositoryRoot, "packages/json-document-markdown-react/src/markdown-table-editor.ts"))) throw new Error("Markdown source editing must not return to the React owner");
+const markdownTableEditor = readSource("packages/json-document-editing/src/markdown-table.ts");
+if (/from\s+["'](?:react|react-dom)(?:\/[^"']*)?["']/.test(markdownTableEditor)) throw new Error("Markdown source editor must stay framework independent");
+
+// Embedded tables share the projection lifecycle and the exact same cell surface.
+for (const path of ["packages/json-document-editing/src/markdown-table.ts", "packages/json-document-editing/src/object-sheet.ts"]) {
+  const source = readSource(path);
+  if (!hasNamedImport(source, "./projected-sheet.js", "createProjectedSheetEditor") || /new Set|let unsubscribe/.test(source)) throw new Error(`${path} bypasses the projected Sheet lifecycle`);
+}
+if (!hasNamedImport(readSource("packages/json-document-canvas/src/canvas-sheet-object.tsx"), "@interactive-os/json-document-sheet", "SheetHand")) throw new Error("Canvas must consume SheetHand");
+if (!hasNamedImport(readSource("packages/json-document-sheet/src/sheet-axis-resize.tsx"), "@interactive-os/json-document-web", "projectWebClientDeltaToElement")) throw new Error("Sheet resize must project client coordinates");
+
+// Modifier meaning belongs to Web even when the consumer is already a shared package.
+for (const path of ["packages/json-document-react/src/use-editing.ts", "packages/json-document-sheet/src/sheet-range-selection.tsx"]) {
+  const source=readSource(path);
+  if (!hasNamedImport(source,"@interactive-os/json-document-web","selectionOperationFromModifiers") || /(?:event|input)\.shiftKey\s*\?\s*"extend"/.test(source)) throw new Error(`${path} duplicates Web selection modifier translation`);
+}
+
 const annotationDemo = readSource("routes/annotation-demo/AnnotationDemoRoute.tsx");
 for (const symbol of ["AnnotationHand", "useAnnotationOutput"]) {
   if (!hasNamedImport(annotationDemo, "@interactive-os/json-document-annotation", symbol)) throw new Error(`Annotation Demo must consume the canonical ${symbol}`);
@@ -94,9 +128,10 @@ const linkedPackageDirectories = new Set([...visited]
 const missingSources = packageDirectories.filter((directory) => !linkedPackageDirectories.has(directory));
 if (missingSources.length > 0) throw new Error(`canonical source registration missing:\n${missingSources.join("\n")}`);
 
-const apiReferences = readdirSync(join(repositoryRoot, "docs/api-reference")).filter((name) => name.endsWith(".md"));
-if (apiReferences.length !== packageDirectories.length) {
-  throw new Error(`API Reference denominator mismatch: packages=${packageDirectories.length}, references=${apiReferences.length}`);
+for (const directory of packageDirectories) {
+  if (!existsSync(join(repositoryRoot, directory, "docs/api-reference.md"))) {
+    throw new Error(`Package-owned API reference missing: ${directory}`);
+  }
 }
 
 console.log(`Canonical module closure ok; packages=${packageDirectories.length}; live demos=${entries.length}; linked package sources=${linkedPackageDirectories.size}.`);

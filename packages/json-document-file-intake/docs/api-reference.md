@@ -1,0 +1,62 @@
+# @interactive-os/json-document-file-intake API
+
+**탐색 분류:** Document Types
+
+직렬화 가능한 파일 후보·이미지 내용과 수용 검증의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 저장소의 아키텍처 등록에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
+
+> 이 문서는 `packages/json-document-file-intake/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
+
+## `assertRasterImageContent`
+
+```ts
+assertRasterImageContent(value: unknown): asserts value is RasterImageContent
+```
+## `assertRasterImageSource`
+
+```ts
+assertRasterImageSource(source: unknown): asserts source is string
+```
+## `FileAcceptancePolicy`
+
+```ts
+interface FileAcceptancePolicy extends Record<string, JSONValue> {
+  readonly acceptedMediaTypes: ReadonlyArray<string>;
+  readonly maxFiles: number | null;
+  readonly maxBytesPerFile: number | null;
+}
+```
+## `FileCandidate`
+
+```ts
+interface FileCandidate extends Record<string, JSONValue> {
+  readonly name: string;
+  readonly size: number;
+  readonly mediaType: string | null;
+}
+```
+## `FileIntakeResult`
+
+```ts
+type FileIntakeResult<Candidate extends FileCandidate = FileCandidate> =
+  | { readonly ok: true; readonly candidates: ReadonlyArray<Candidate> }
+  | { readonly ok: false; readonly code: "file-intake.invalid" | "file-intake.limit" | "file-intake.media-type" | "file-intake.size"; readonly candidate: Candidate };
+```
+## `formatFileSize`
+
+```ts
+formatFileSize(bytes: number): string
+```
+## `RasterImageContent`
+
+```ts
+interface RasterImageContent extends Record<string, JSONValue> {
+  readonly source: string;
+  readonly width: number;
+  readonly height: number;
+}
+```
+## `validateFileCandidates`
+
+```ts
+validateFileCandidates<Candidate extends FileCandidate>(candidates: ReadonlyArray<Candidate>, policy: FileAcceptancePolicy, options?: { readonly currentCount?: number; }): FileIntakeResult<Candidate>
+```

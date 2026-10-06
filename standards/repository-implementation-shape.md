@@ -246,6 +246,7 @@ Core는 [v3 profile](json-document-v3/profile.md), Editing의 상태·관찰·�
 | `packages/json-document-database` | Product-facing Hand | 기본 admin UI와 customization contract를 소유하고 headless domain package를 내부 구현으로 조합 |
 | `packages/json-document-annotation` | Product-facing Hand | Annotation 도구, gesture-to-Intent, SVG projection, transient preview와 comment UI를 소유 |
 | `packages/json-document-calendar` | Product-facing Hand | Calendar editor 관찰, occurrence focus, naming, Web pointer interaction lifecycle을 정본 hook으로 유지 |
+| `packages/json-document-sheet` | Product-facing Hand | 셀 선택·편집 모드·키보드·클립보드·구조 조작을 정본 SheetEditor 위에서 조합 |
 | `packages/json-document-canvas` | Product-facing Hand | Object Editing을 통한 단일 슬라이드 생성·편집·gesture·React UI 조합 |
 | `packages/json-document-object-document` | Document Type | 기존 Object와 Canvas 프로파일의 model·validation·operation·projection·JSON 정본. Core만 의존 |
 | `packages/json-document-calendar-document` | Document Type | Calendar model·validation·operation·projection의 공개 소유자. Editing·Selection·React peer 없이 독립 소비하며 기존 Editing export는 호환 경로 유지 |
@@ -330,3 +331,5 @@ Source를 이동하는 이슈는 다음을 모두 증명한다.
 정본을 우회하지 않는다. Naming 변경이 함께 필요하면
 `standards/repository-naming.md`를 먼저 통과한다. Public API, runtime 동작 또는
 versioned protocol 변경은 각 contract의 별도 승인과 검증을 사용한다.
+
+- `packages/json-document-sheet-document`: Document Types. 공통 표 스키마·타입·검증·생성 정본이며 Editing·UI에 의존하지 않습니다.

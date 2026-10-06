@@ -6,7 +6,7 @@ const browserChannel = process.env.PLAYWRIGHT_CHANNEL === "bundled"
   ? undefined
   : process.env.PLAYWRIGHT_CHANNEL ?? "chrome";
 const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
-const richTextBrowserSpecs = /rich-text-(?:corpus|demo)\.spec\.ts/;
+const richTextBrowserSpecs = /(?:rich-text-(?:corpus|demo)|text-selection-overlay)\.spec\.ts/;
 
 export default defineConfig({
   testDir: "./tests/browser",

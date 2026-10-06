@@ -1,7 +1,7 @@
 export const legacyPageRedirects = {
   tutorial: {
     from: "/docs/tutorial",
-    to: "/docs/concepts",
+    to: "/docs/architecture",
   },
   contenteditableConnector: {
     from: "/connectors/contenteditable",

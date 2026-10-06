@@ -1,3 +1,49 @@
+import sheetViewSource from "../../../../packages/json-document-editing/src/sheet-view.ts?raw";
+import sheetPlanSource from "../../../../packages/json-document-editing/src/sheet-plan.ts?raw";
+import sheetDocumentCreateSource from "../../../../packages/json-document-sheet-document/src/create.ts?raw";
+import sheetDocumentSchemaSource from "../../../../packages/json-document-sheet-document/src/schema.ts?raw";
+import gridEditingProfileSource from "../../../../packages/json-document-affordance/src/grid-editing-profile.ts?raw";
+import elementCoordinateSource from "../../../../packages/json-document-web/src/element-coordinate.ts?raw";
+import sheetTextClipboardSource from "../../../../packages/json-document-editing/src/sheet-text-clipboard.ts?raw";
+import projectedSheetSource from "../../../../packages/json-document-editing/src/projected-sheet.ts?raw";
+import objectSheetSource from "../../../../packages/json-document-editing/src/object-sheet.ts?raw";
+import embeddedDocumentSource from "../../../../packages/json-document-object-document/src/embedded-document.ts?raw";
+import canvasSheetObjectSource from "../../../../packages/json-document-canvas/src/canvas-sheet-object.tsx?raw";
+import storedDocumentSource from "../../../../packages/json-document-web/src/stored-document.ts?raw";
+import sheetSummarySource from "../../../../packages/json-document-editing/src/sheet-summary.ts?raw";
+import gridTraversalSource from "../../../../packages/json-document-selection/src/interaction/grid-traversal.ts?raw";
+import sheetNavigationSource from "../../../../packages/json-document-editing/src/sheet-navigation.ts?raw";
+import sheetAxisResizeSource from "../../../../packages/json-document-sheet/src/sheet-axis-resize.tsx?raw";
+import sheetRangeSelectionSource from "../../../../packages/json-document-sheet/src/sheet-range-selection.tsx?raw";
+import sheetFillHandleSource from "../../../../packages/json-document-sheet/src/sheet-fill-handle.tsx?raw";
+import axisResizeSource from "../../../../packages/json-document-affordance/src/axis-resize.ts?raw";
+import gridFillSource from "../../../../packages/json-document-affordance/src/grid-fill.ts?raw";
+import markdownCellEditorSource from "../../../../packages/json-document-markdown-react/src/MarkdownCellEditor.tsx?raw";
+import sheetStructureSource from "../../../../packages/json-document-editing/src/sheet-structure.ts?raw";
+import cellEditingSource from "../../../../packages/json-document-affordance/src/cell-editing.ts?raw";
+import renameSessionBindingSource from "../../../../packages/json-document-react/src/use-rename-session.ts?raw";
+import sheetHandSource from "../../../../packages/json-document-sheet/src/sheet-hand.tsx?raw";
+import markdownTableEditorSource from "../../../../packages/json-document-editing/src/markdown-table.ts?raw";
+import markdownTableSource from "../../../../packages/json-document-markdown/src/table-editing.ts?raw";
+import { siteRoutes } from "../../../route-registry.mjs";
+import markdownSourceEditSource from "../../../../packages/json-document-markdown/src/source-edit.ts?raw";
+import markdownListEditingSource from "../../../../packages/json-document-markdown/src/list-editing.ts?raw";
+import markdownBindingSource from "../../../../packages/json-document-markdown-web/src/editing-binding.ts?raw";
+import textNavigationSource from "../../../../packages/json-document-contenteditable/src/dom/text-navigation.ts?raw";
+import caretVisibilitySource from "../../../../packages/json-document-contenteditable/src/dom/caret-visibility.ts?raw";
+import markdownParagraphSource from "../../../../packages/json-document-markdown/src/paragraph.ts?raw";
+import markdownTasksSource from "../../../../packages/json-document-markdown/src/tasks.ts?raw";
+import markdownMarkersSource from "../../../../packages/json-document-markdown/src/markers.ts?raw";
+import textProjectionSource from "../../../../packages/json-document-contenteditable/src/dom/text-projection.ts?raw";
+import textProjectionCSSSource from "../../../../packages/json-document-contenteditable/src/dom/text-projection.css?raw";
+import textSelectionOverlaySource from "../../../../packages/json-document-contenteditable/src/dom/text-selection-overlay.ts?raw";
+import textSelectionGeometrySource from "../../../../packages/json-document-contenteditable/src/dom/text-selection-geometry.ts?raw";
+import textSelectionCSSSource from "../../../../packages/json-document-contenteditable/src/dom/text-selection.css?raw";
+import interactionRecordingSource from "../../../../packages/json-document-web/src/interaction-recording.ts?raw";
+import interactionRecordingDOMSource from "../../../../packages/json-document-web/src/interaction-recording-dom.ts?raw";
+import interactionRecordingArchiveSource from "../../../../packages/json-document-web/src/interaction-recording-archive.ts?raw";
+import markdownNodesSource from "../../../../packages/json-document-markdown/src/nodes.ts?raw";
+import markdownEditorCSSSource from "../../../../packages/json-document-markdown-web/src/markdown-editor.css?raw";
 import textChangeSource from "../../../../packages/json-document-editing/src/text-change.ts?raw";
 import markdownSyntaxSource from "../../../../packages/json-document-markdown/src/syntax.ts?raw";
 import markdownParserSource from "../../../../packages/json-document-markdown/src/parser.ts?raw";
@@ -175,41 +221,7 @@ export type DemoSourceFile = {
   readonly load: () => Promise<string>;
 };
 
-const packageReferencePaths = new Map([
-  ["packages/json-document-markdown/", "/docs/api/markdown"],
-  ["packages/json-document-markdown-web/", "/docs/api/markdown-web"],
-  ["packages/json-document-object-document/", "/docs/api/object-document"],
-  ["packages/json-document-canvas/", "/docs/api/canvas"],
-  ["packages/json-document/", "/docs/api/json-document"],
-  ["packages/json-document-selection/", "/docs/api/selection"],
-  ["packages/json-document-editing/", "/docs/api/editing"],
-  ["packages/json-document-calendar/", "/docs/api/calendar"],
-  ["packages/json-document-calendar-document/", "/docs/api/calendar-document"],
-  ["packages/json-document-react/", "/docs/api/react"],
-  ["packages/json-document-react-hook-form/", "/docs/api/react-hook-form"],
-  ["packages/json-document-ajv/", "/docs/api/ajv"],
-  ["packages/json-document-a2ui/", "/docs/api/a2ui"],
-  ["packages/json-document-zod/", "/docs/api/zod"],
-  ["packages/json-document-tanstack-table/", "/docs/api/tanstack-table"],
-  ["packages/json-document-affordance/", "/docs/api/affordance"],
-  ["packages/json-document-ui-primitives-react/", "/docs/api/ui-primitives-react"],
-  ["packages/json-document-animation-react/", "/docs/api/animation-react"],
-  ["packages/json-document-markdown-react/", "/docs/api/markdown-react"],
-  ["packages/json-document-database/", "/docs/api/database"],
-  ["packages/json-document-annotation/", "/docs/api/annotation"],
-  ["packages/json-document-web/", "/docs/api/web"],
-  ["packages/json-document-contenteditable/", "/docs/api/contenteditable"],
-  ["packages/json-document-rich-text/", "/docs/api/rich-text"],
-  ["packages/json-document-file-intake/", "/docs/api/file-intake"],
-  ["packages/json-document-rich-text-suggestion/", "/docs/api/rich-text-suggestion"],
-  ["packages/json-document-rich-text-suggestion-react/", "/docs/api/rich-text-suggestion-react"],
-    ["packages/json-document-composer/", "/docs/api/composer"],
-  ["packages/json-document-composer-react/", "/docs/api/composer-react"],
-  ["packages/json-document-rich-text-web/", "/docs/api/rich-text-web"],
-  ["packages/json-document-rich-text-react/", "/docs/api/rich-text-react"],
-  ["packages/json-document-collaboration/", "/docs/api/collaboration"],
-  ["packages/contenteditable-collaboration/", "/docs/api/contenteditable-collaboration"],
-] as const);
+const packageReferencePaths = new Map(siteRoutes.flatMap(page => page.module ? [[`${page.module.sourceDirectory}/`, page.path] as const] : []));
 
 const sourceModules = import.meta.glob<string>(
   [
@@ -228,6 +240,38 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-affordance/src/grid-editing-profile.ts", gridEditingProfileSource],
+  ["packages/json-document-web/src/element-coordinate.ts", elementCoordinateSource],
+  ["packages/json-document-editing/src/sheet-text-clipboard.ts", sheetTextClipboardSource],
+  ["packages/json-document-editing/src/projected-sheet.ts", projectedSheetSource],
+  ["packages/json-document-sheet-document/src/schema.ts", sheetDocumentSchemaSource],
+  ["packages/json-document-sheet-document/src/create.ts", sheetDocumentCreateSource],
+  ["packages/json-document-editing/src/sheet-plan.ts", sheetPlanSource],
+  ["packages/json-document-editing/src/sheet-view.ts", sheetViewSource],
+
+  ["packages/json-document-editing/src/object-sheet.ts", objectSheetSource],
+  ["packages/json-document-object-document/src/embedded-document.ts", embeddedDocumentSource],
+  ["packages/json-document-canvas/src/canvas-sheet-object.tsx", canvasSheetObjectSource],
+
+  ["packages/json-document-web/src/stored-document.ts", storedDocumentSource],
+  ["packages/json-document-editing/src/sheet-summary.ts", sheetSummarySource],
+  ["packages/json-document-selection/src/interaction/grid-traversal.ts", gridTraversalSource],
+  ["packages/json-document-editing/src/sheet-navigation.ts", sheetNavigationSource],
+  ["packages/json-document-sheet/src/sheet-axis-resize.tsx", sheetAxisResizeSource],
+  ["packages/json-document-sheet/src/sheet-range-selection.tsx", sheetRangeSelectionSource],
+  ["packages/json-document-sheet/src/sheet-fill-handle.tsx", sheetFillHandleSource],
+  ["packages/json-document-affordance/src/axis-resize.ts", axisResizeSource],
+  ["packages/json-document-affordance/src/grid-fill.ts", gridFillSource],
+  ["packages/json-document-markdown-react/src/MarkdownCellEditor.tsx", markdownCellEditorSource],
+  ["packages/json-document-editing/src/sheet-structure.ts", sheetStructureSource],
+  ["packages/json-document-affordance/src/cell-editing.ts", cellEditingSource],
+  ["packages/json-document-react/src/use-rename-session.ts", renameSessionBindingSource],
+  ["packages/json-document-sheet/src/sheet-hand.tsx", sheetHandSource],
+  ["packages/json-document-editing/src/markdown-table.ts", markdownTableEditorSource],
+  ["packages/json-document-markdown/src/table-editing.ts", markdownTableSource],
+  ["packages/json-document-web/src/interaction-recording.ts", interactionRecordingSource],
+  ["packages/json-document-web/src/interaction-recording-dom.ts", interactionRecordingDOMSource],
+  ["packages/json-document-web/src/interaction-recording-archive.ts", interactionRecordingArchiveSource],
   ["packages/json-document-web/src/clipboard-event.ts", clipboardEventSource],
   ["packages/json-document-editing/src/preparation-queue.ts", editingPreparationQueueSource],
   ["packages/json-document-web/src/raster-files.ts", webRasterFilesSource],
@@ -270,7 +314,17 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
+  ["packages/json-document-markdown-web/src/editing-binding.ts", markdownBindingSource],
+  ["packages/json-document-markdown/src/paragraph.ts", markdownParagraphSource],
+  ["packages/json-document-markdown/src/list-editing.ts", markdownListEditingSource],
+  ["packages/json-document-markdown/src/source-edit.ts", markdownSourceEditSource],
+  ["packages/json-document-contenteditable/src/dom/text-navigation.ts", textNavigationSource],
+  ["packages/json-document-contenteditable/src/dom/caret-visibility.ts", caretVisibilitySource],
+  ["packages/json-document-markdown/src/nodes.ts", markdownNodesSource],
+  ["packages/json-document-markdown-web/src/markdown-editor.css", markdownEditorCSSSource],
   ["packages/json-document-markdown/src/projection.ts", markdownProjectionSource],
+  ["packages/json-document-markdown/src/markers.ts", markdownMarkersSource],
+  ["packages/json-document-markdown/src/tasks.ts", markdownTasksSource],
   ["packages/json-document-editing/src/text-change.ts", textChangeSource],
   ["packages/json-document-markdown/src/syntax.ts", markdownSyntaxSource],
   ["packages/json-document-markdown/src/parser.ts", markdownParserSource],
@@ -382,6 +436,11 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
   ["packages/json-document-contenteditable/src/lease.ts", contentEditableLeaseSource],
   ["packages/json-document-contenteditable/src/dom/plain-text.ts", plainTextDOMSource],
+  ["packages/json-document-contenteditable/src/dom/text-projection.ts", textProjectionSource],
+  ["packages/json-document-contenteditable/src/dom/text-projection.css", textProjectionCSSSource],
+  ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts", textSelectionOverlaySource],
+  ["packages/json-document-contenteditable/src/dom/text-selection-geometry.ts", textSelectionGeometrySource],
+  ["packages/json-document-contenteditable/src/dom/text-selection.css", textSelectionCSSSource],
   ["packages/json-document-contenteditable/src/dom/text-index.ts", textDOMIndexSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
   ["packages/json-document-collaboration/src/editing-index.ts", collaborationEditingSource],
@@ -398,11 +457,187 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["packages/json-document-contenteditable/src/lease.ts", ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts"]],
+  ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts", ["packages/json-document-contenteditable/src/dom/text-selection-geometry.ts", "packages/json-document-contenteditable/src/dom/text-selection.css"]],
+  ["packages/json-document-editing/src/markdown-table.ts",["packages/json-document-editing/src/projected-sheet.ts"]],
+  ["packages/json-document-editing/src/object-sheet.ts",["packages/json-document-editing/src/projected-sheet.ts", "packages/json-document-object-document/src/embedded-document.ts"]],
+  ["packages/json-document-canvas/src/canvas-hand.tsx",["packages/json-document-canvas/src/canvas-sheet-object.tsx"]],
+
+  ["packages/json-document-sheet/src/sheet-hand.tsx", ["packages/json-document-sheet/src/sheet-axis-resize.tsx", "packages/json-document-sheet/src/sheet-range-selection.tsx", "packages/json-document-sheet/src/sheet-fill-handle.tsx"]],
+  ["packages/json-document-editing/src/sheet-navigation.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
+  ["packages/json-document-web/src/keyboard.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
+  ["packages/json-document-editing/src/sheet.ts", ["packages/json-document-editing/src/sheet-view.ts", "packages/json-document-editing/src/sheet-plan.ts", "packages/json-document-sheet-document/src/schema.ts", "packages/json-document-sheet-document/src/create.ts", "packages/json-document-editing/src/sheet-structure.ts", "packages/json-document-editing/src/sheet-navigation.ts"]],
+  ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", ["packages/json-document-editing/src/markdown-table.ts", "packages/json-document-markdown-react/src/MarkdownCellEditor.tsx"]],
+  ["packages/json-document-markdown/src/list-editing.ts", ["packages/json-document-markdown/src/source-edit.ts"]],
+  ["packages/json-document-markdown/src/paragraph.ts", ["packages/json-document-markdown/src/list-editing.ts", "packages/json-document-markdown/src/source-edit.ts"]],
+  ["routes/markdown-caret/MarkdownCaretRoute.tsx", ["app/interaction-recording/InteractionRecordingControls.tsx"]],
   ["packages/json-document-editing/src/text.ts", ["packages/json-document-editing/src/session.ts"]],
   ["packages/json-document-editing/src/session.ts", ["packages/json-document-editing/src/history-patch.ts"]],
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  {packageName: "@interactive-os/json-document-web", symbol: "webKeyboardPlatform", sourcePath: "packages/json-document-web/src/keyboard.ts"},
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "resolveGridEditActivation",
+    sourcePath: "packages/json-document-affordance/src/grid-editing-profile.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "gridEditingProfiles",
+    sourcePath: "packages/json-document-affordance/src/grid-editing-profile.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "projectWebClientDeltaToElement",
+    sourcePath: "packages/json-document-web/src/element-coordinate.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "sheetClipboardRepresentations",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "parseSheetClipboardText",
+    sourcePath: "packages/json-document-editing/src/sheet-text-clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-sheet-document",
+    symbol: "createSheetDocument",
+    sourcePath: "packages/json-document-sheet-document/src/create.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-sheet-document",
+    symbol: "sheetDocumentSchema",
+    sourcePath: "packages/json-document-sheet-document/src/schema.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-sheet-document",
+    symbol: "assertSheetDocument",
+    sourcePath: "packages/json-document-sheet-document/src/schema.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "planSheetIntent",
+    sourcePath: "packages/json-document-editing/src/sheet-plan.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createProjectedSheetEditor",
+    sourcePath: "packages/json-document-editing/src/projected-sheet.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createCanvasSheet",
+    sourcePath: "packages/json-document-editing/src/object-sheet.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createObjectSheetEditor",
+    sourcePath: "packages/json-document-editing/src/object-sheet.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "sheetEmbeddedDocumentType",
+    sourcePath: "packages/json-document-editing/src/object-sheet.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-object-document",
+    symbol: "createCanvasEmbeddedDocument",
+    sourcePath: "packages/json-document-object-document/src/embedded-document.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-canvas",
+    symbol: "CanvasSheetObject",
+    sourcePath: "packages/json-document-canvas/src/canvas-sheet-object.tsx",
+  },
+
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebStoredDocument",
+    sourcePath: "packages/json-document-web/src/stored-document.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "sheetSelectionSummary",
+    sourcePath: "packages/json-document-editing/src/sheet-summary.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-selection",
+    symbol: "traverseGrid",
+    sourcePath: "packages/json-document-selection/src/interaction/grid-traversal.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "sheetNavigationTarget",
+    sourcePath: "packages/json-document-editing/src/sheet-navigation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "extendGridFill",
+    sourcePath: "packages/json-document-affordance/src/grid-fill.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "storedResizeValue",
+    sourcePath: "packages/json-document-affordance/src/axis-resize.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "resizeValueForKey",
+    sourcePath: "packages/json-document-affordance/src/axis-resize.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-react",
+    symbol: "MarkdownCellEditor",
+    sourcePath: "packages/json-document-markdown-react/src/MarkdownCellEditor.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "hitTestWebGrid",
+    sourcePath: "packages/json-document-web/src/grid-cell.ts",
+  },
+
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "sheetColumnLabel",
+    sourcePath: "packages/json-document-sheet-document/src/create.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "useRenameSession",
+    sourcePath: "packages/json-document-react/src/use-rename-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "cellEditingAffordance",
+    sourcePath: "packages/json-document-affordance/src/cell-editing.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "isWebComposingKey",
+    sourcePath: "packages/json-document-web/src/keyboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "webKeyboardText",
+    sourcePath: "packages/json-document-web/src/keyboard.ts",
+  },
+
+  {
+    packageName: "@interactive-os/json-document-sheet",
+    symbol: "SheetHand",
+    sourcePath: "packages/json-document-sheet/src/sheet-hand.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createMarkdownTableEditor",
+    sourcePath: "packages/json-document-editing/src/markdown-table.ts",
+  },
+  ...["readMarkdownTable", "replaceMarkdownTable", "markdownTableBoundary"].map(symbol => ({packageName: "@interactive-os/json-document-markdown", symbol, sourcePath: "packages/json-document-markdown/src/table-editing.ts"})),
+  ...["createWebInteractionRecorder", "traceWebInteraction", "registerWebInteractionSource"].map(symbol => ({ packageName: "@interactive-os/json-document-web/interaction-recording", symbol, sourcePath: "packages/json-document-web/src/interaction-recording.ts" })),
+  ...["createWebRecordingArchive", "bindWebRecordingArchive", "downloadWebInteractionRecording"].map(symbol => ({ packageName: "@interactive-os/json-document-web/interaction-recording", symbol, sourcePath: "packages/json-document-web/src/interaction-recording-archive.ts" })),
   ...["createWebClipboardSurface", "routeWebClipboardEvent"].flatMap(symbol => [
     { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/clipboard-event.ts" },
     { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/input.ts" },
@@ -770,6 +1005,7 @@ const registeredPublicUsages = [
     symbol: "createMarkdownDOMAdapter",
     sourcePath: "packages/json-document-markdown-web/src/source-runs.ts",
   },
+  { packageName: "@interactive-os/json-document-markdown-web", symbol: "createMarkdownDOMAdapter", sourcePath: "packages/json-document-markdown-web/src/markdown-editor.css" },
   {
     packageName: "@interactive-os/json-document-markdown",
     symbol: "createMarkdownParser",
@@ -780,6 +1016,33 @@ const registeredPublicUsages = [
     symbol: "createMarkdownParser",
     sourcePath: "packages/json-document-markdown/src/syntax.ts",
   },
+  { packageName: "@interactive-os/json-document-markdown", symbol: "createMarkdownParser", sourcePath: "packages/json-document-markdown/src/nodes.ts" },
+  {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownEditingBinding",
+    sourcePath: "packages/json-document-markdown-web/src/editing-binding.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownEditingBinding",
+    sourcePath: "packages/json-document-markdown-web/src/markdown-dom.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownEditingBinding",
+    sourcePath: "packages/json-document-markdown-web/src/source-runs.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-web",
+    symbol: "createMarkdownEditingBinding",
+    sourcePath: "packages/json-document-markdown-web/src/markdown-editor.css",
+  },
+  { packageName: "@interactive-os/json-document-markdown", symbol: "indentMarkdownList", sourcePath: "packages/json-document-markdown/src/list-editing.ts" },
+  { packageName: "@interactive-os/json-document-markdown", symbol: "insertMarkdownParagraph", sourcePath: "packages/json-document-markdown/src/paragraph.ts" },
+  { packageName: "@interactive-os/json-document-markdown", symbol: "setMarkdownTaskChecked", sourcePath: "packages/json-document-markdown/src/tasks.ts" },
+  ...["createMarkdownParser", "projectMarkdown", "MarkdownMarker", "MarkdownMarkerKind"].map(symbol => ({
+    packageName: "@interactive-os/json-document-markdown", symbol, sourcePath: "packages/json-document-markdown/src/markers.ts",
+  })),
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "diffText",
@@ -961,6 +1224,18 @@ const registeredPublicUsages = [
     symbol: "createContentEditableBinding",
     sourcePath: "packages/json-document-contenteditable/src/lease.ts",
   },
+  ...["packages/json-document-contenteditable/src/dom/text-projection.ts", "packages/json-document-contenteditable/src/dom/text-projection.css"].map(sourcePath => ({
+    packageName: "@interactive-os/json-document-contenteditable", symbol: "createTextProjectionDOMAdapter", sourcePath,
+  })),
+  ...["text-selection-overlay.ts", "text-selection-geometry.ts", "text-selection.css"].map(file => ({
+    packageName: "@interactive-os/json-document-contenteditable", symbol: "bindTextSelectionOverlay",
+    sourcePath: `packages/json-document-contenteditable/src/dom/${file}`,
+  })),
+  ...["createTextNavigationDOMAdapter"].flatMap(symbol => [
+    { packageName: "@interactive-os/json-document-contenteditable", symbol, sourcePath: "packages/json-document-contenteditable/src/dom/text-navigation.ts" },
+    { packageName: "@interactive-os/json-document-contenteditable", symbol, sourcePath: "packages/json-document-contenteditable/src/dom/caret-visibility.ts" },
+  ]),
+  { packageName: "@interactive-os/json-document-contenteditable", symbol: "restoreTextDOMSelection", sourcePath: "packages/json-document-contenteditable/src/dom/plain-text.ts" },
   {
     packageName: "@interactive-os/json-document-contenteditable",
     symbol: "plainTextDOMAdapter",
@@ -1602,7 +1877,7 @@ function sourceFile(path: string): DemoSourceFile {
   }
   return {
     path,
-    language: path.endsWith(".tsx") ? "tsx" : "typescript",
+    language: path.endsWith(".css") ? "text" : path.endsWith(".tsx") ? "tsx" : "typescript",
     referencePath: [...packageReferencePaths].find(([prefix]) => path.startsWith(prefix))?.[1],
     load: () => loadSource(path),
   };

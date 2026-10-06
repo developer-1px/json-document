@@ -22,4 +22,4 @@ Connector는 SDK envelope 검증, JSONL buffer, 메시지→JSON Patch와 문서
 
 ## Reference
 
-[전체 public API](../api-reference/a2ui.md) · [패키지 README](../../packages/json-document-a2ui/README.md)
+[전체 public API](../../packages/json-document-a2ui/docs/api-reference.md) · [패키지 README](../../packages/json-document-a2ui/README.md)

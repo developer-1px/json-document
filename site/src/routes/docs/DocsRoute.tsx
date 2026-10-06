@@ -3,8 +3,14 @@ import { docPages, type DocPageId } from "./doc-pages";
 import { DocumentationPage } from "./DocumentationPage";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
+  sheetDocumentApi: "braces",
+  quickStart: "terminal",
+  modules: "braces",
+  handsSupport: "cursor",
+  design: "branch",
+  ownership: "branch",
   overview: "package",
-  concepts: "sleep",
+  architecture: "sleep",
   foundation: "braces",
   buildingBlocks: "braces",
   editing: "branch",
@@ -94,6 +100,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   databaseApi: "database",
   annotationApi: "cursor",
   calendarApi: "database",
+  sheetApi: "database",
   calendarDocumentApi: "database",
   webApi: "terminal",
   contenteditableApi: "cursor",

@@ -4,20 +4,15 @@ JSON Document와 Editing은 브라우저 event를 직접 해석하지 않습니�
 플랫폼 계약을 공개 API가 받는 값으로 번역합니다. Adapter를 교체하거나
 제거해도 canonical JSON과 Editing의 의미는 바뀌지 않습니다.
 
-## 공식 Adapter
+## 플랫폼 계약과 모듈
 
-| 계약 | package | 문서 |
-| --- | --- | --- |
-| Keyboard / Press / ARIA | `@interactive-os/json-document-web` | [Keyboard](adapter-keyboard.md) |
-| Grid cell address | `@interactive-os/json-document-web` | [Grid cell](adapter-grid-cell.md) |
-| Pointer / Drag and Drop session | `@interactive-os/json-document-web` | [Interaction](adapter-interaction.md) |
-| SVG coordinate / Raster source / Annotation raster | `@interactive-os/json-document-web` | [Hands](hands.md) |
-| Clipboard | `@interactive-os/json-document-web` | [Clipboard](adapter-clipboard.md) |
-| Virtual Selection | `@interactive-os/json-document-web`, `@interactive-os/json-document-react` | [Virtual Selection](adapter-virtual-selection.md) |
-| Contenteditable | `@interactive-os/json-document-contenteditable` | [Contenteditable](adapter-contenteditable.md) |
+위의 현재 제공 모듈은 실제 API 등록에서 구성합니다. Web의 keyboard·pointer·
+clipboard·geometry, Contenteditable의 입력·선택, Rich Text Web·Markdown Web의
+문서별 DOM 대응을 같은 Adapter 위치에서 찾습니다. 협업 Contenteditable은
+플랫폼 입력 연결과 Collaboration profile에 함께 관련됩니다.
 
-Keyboard, Interaction, Clipboard, Virtual Selection은 같은 package family에 있지만 서로 다른 플랫폼 계약을
-번역합니다. 제품은 필요한 Adapter만 붙입니다.
+하나의 패키지에도 여러 독립 플랫폼 계약이 있습니다. 각 API 문서에서 계약과
+Usage를 확인하고, Usage의 Source에서 정본 구현으로 이동합니다.
 
 ## SVG와 Raster
 

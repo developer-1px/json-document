@@ -1,0 +1,300 @@
+--- a/package.json
++++ b/package.json
+@@ -12,6 +12,7 @@
+     "check": "pnpm lint && pnpm build && pnpm test"
+   },
+   "dependencies": {
++    "@interactive-os/json-document-selection": "^0.1.0-rc.0",
+     "@interactive-os/editable": "file:../editable/packages/editable",
+     "@interactive-os/aria": "file:../apg-patterns",
+     "@interactive-os/aria-kernel": "file:../aria-kernel/legacy/aria-kernel",
+--- a/packages/editable-grid/package.json
++++ b/packages/editable-grid/package.json
+@@ -48,6 +48,7 @@
+     "zod": "^4.0.0"
+   },
+   "dependencies": {
++    "@interactive-os/json-document-affordance": "^0.1.0-rc.0",
+     "@interactive-os/aria": "file:../../../apg-patterns",
+     "@spredsheet/grid": "workspace:*"
+   },
+--- a/packages/editable-grid/src/resizeRules.ts
++++ b/packages/editable-grid/src/resizeRules.ts
+@@ -1,62 +1,8 @@
+-export interface ResizeBounds {
+-  min: number
+-  max?: number
+-}
++import type { ResizeBounds } from '@interactive-os/json-document-affordance/axis-resize'
++export { clampResizeValue, storedResizeValue, resizeValueForKey, collapseResizeValue } from '@interactive-os/json-document-affordance/axis-resize'
++export type { ResizeBounds } from '@interactive-os/json-document-affordance/axis-resize'
+ 
+ export const DEFAULT_COLUMN_WIDTH = 100
+ export const DEFAULT_ROW_HEIGHT = 28
+ export const COLUMN_WIDTH_BOUNDS = { min: 40, max: 400 } satisfies ResizeBounds
+ export const ROW_HEIGHT_BOUNDS = { min: 18, max: 1000 } satisfies ResizeBounds
+-
+-const STEP = 10
+-const LARGE_STEP = 50
+-
+-export function clampResizeValue(value: number, bounds: ResizeBounds): number {
+-  const finite = Number.isFinite(value) ? value : bounds.min
+-  const minClamped = Math.max(bounds.min, finite)
+-  return bounds.max === undefined ? minClamped : Math.min(bounds.max, minClamped)
+-}
+-
+-export function storedResizeValue(value: number, bounds: ResizeBounds): number {
+-  return Math.round(clampResizeValue(value, bounds))
+-}
+-
+-export function resizeValueForKey(
+-  current: number,
+-  key: string,
+-  shiftKey: boolean,
+-  axis: 'x' | 'y',
+-  bounds: ResizeBounds,
+-): number | null {
+-  const step = shiftKey ? LARGE_STEP : STEP
+-  if (key === 'PageUp') return clampResizeValue(current + LARGE_STEP, bounds)
+-  if (key === 'PageDown') return clampResizeValue(current - LARGE_STEP, bounds)
+-  if (key === 'Home') return bounds.min
+-  if (key === 'End') return bounds.max ?? null
+-
+-  const delta =
+-    axis === 'x'
+-      ? key === 'ArrowLeft' ? -step : key === 'ArrowRight' ? step : null
+-      : key === 'ArrowUp' ? -step : key === 'ArrowDown' ? step : null
+-
+-  return delta === null ? null : clampResizeValue(current + delta, bounds)
+-}
+-
+-export function collapseResizeValue(
+-  current: number,
+-  previous: number | null,
+-  bounds: ResizeBounds,
+-  defaultValue: number,
+-): { value: number; previous: number | null } {
+-  const normalizedCurrent = clampResizeValue(current, bounds)
+-  if (normalizedCurrent <= bounds.min) {
+-    return {
+-      value: clampResizeValue(previous ?? defaultValue, bounds),
+-      previous: null,
+-    }
+-  }
+-  return {
+-    value: bounds.min,
+-    previous: normalizedCurrent,
+-  }
+-}
+--- a/packages/grid/README.md
++++ b/packages/grid/README.md
+@@ -1,6 +1,6 @@
+ # @spredsheet/grid
+ 
+-Headless grid editing engine with no runtime dependencies.
++Headless grid editing engine using canonical headless selection and fill contracts.
+ 
+ Scope:
+ 
+@@ -23,7 +23,7 @@
+ 
+ Independence contract:
+ 
+-- no runtime dependencies
++- runtime dependencies are limited to canonical Selection and the DOM-free Affordance grid-fill entrypoint
+ - no React or DOM access
+ - no system clipboard access
+ - no app-specific imports
+@@ -49,3 +49,7 @@
+ - system clipboard calls
+ - aria-kernel/APG behavior
+ - json-document patches/history
++
++## Shared interaction owners
++
++`rangeTabTarget` / `rangeEnterTarget` translate A1 and visible-axis coordinates to `traverseGrid` from `@interactive-os/json-document-selection`. `fillTargetForCell` uses `extendGridFill` from `@interactive-os/json-document-affordance/grid-fill`. Bear and this spreadsheet therefore share traversal order and fill-axis decisions while retaining format-specific writes, formulas, and history.
+--- a/packages/grid/package.json
++++ b/packages/grid/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "@spredsheet/grid",
+   "version": "0.0.0",
+-  "description": "Headless grid editing engine with no runtime dependencies.",
++  "description": "Headless grid editing engine using canonical selection traversal.",
+   "type": "module",
+   "sideEffects": false,
+   "main": "./dist/index.js",
+@@ -23,6 +23,10 @@
+     "test": "vitest run --config vitest.config.ts",
+     "typecheck": "tsc -p tsconfig.json --noEmit"
+   },
++  "dependencies": {
++    "@interactive-os/json-document-affordance": "^0.1.0-rc.0",
++    "@interactive-os/json-document-selection": "^0.1.0-rc.0"
++  },
+   "devDependencies": {
+     "typescript": "~6.0.2",
+     "vitest": "^4.1.5"
+--- a/packages/grid/src/editing/fillHandle.ts
++++ b/packages/grid/src/editing/fillHandle.ts
+@@ -1,3 +1,4 @@
++import { extendGridFill } from '@interactive-os/json-document-affordance/grid-fill'
+ import { cellId, cellKey, colIndex, columnLabel, parseCellId, type Cells } from '../coordinates/a1'
+ import { idsInRect, rectFromIds, rectOfCell, type Rect } from '../geometry/rect'
+ 
+@@ -27,22 +28,7 @@
+ ): Rect | null {
+   const p = parseCellId(targetCellId)
+   if (!p) return null
+-  const ci = colIndex(p.col)
+-  const down = p.row > source.rMax ? p.row - source.rMax : 0
+-  const up = p.row < source.rMin ? source.rMin - p.row : 0
+-  const right = ci > source.cMax ? ci - source.cMax : 0
+-  const left = ci < source.cMin ? source.cMin - ci : 0
+-  if (down === 0 && up === 0 && right === 0 && left === 0) return source
+-  const vertical = Math.max(up, down)
+-  const horizontal = Math.max(left, right)
+-  if (vertical >= horizontal) {
+-    return up > down
+-      ? { ...source, rMin: Math.max(0, p.row) }
+-      : { ...source, rMax: Math.min(bounds.rowCount - 1, p.row) }
+-  }
+-  return left > right
+-    ? { ...source, cMin: Math.max(0, ci) }
+-    : { ...source, cMax: Math.min(bounds.colLetters.length - 1, ci) }
++  return extendGridFill(source, { row: p.row, column: colIndex(p.col) }, { rowCount: bounds.rowCount, columnCount: bounds.colLetters.length })
+ }
+ 
+ export function idsInFillTarget(target: Rect, colLetters: readonly string[]): string[] {
+--- a/packages/grid/src/purity.test.ts
++++ b/packages/grid/src/purity.test.ts
+@@ -13,14 +13,16 @@
+   })
+ 
+ describe('@spredsheet/grid package boundary', () => {
+-  it('has no runtime dependencies', () => {
++  it('depends only on canonical headless interaction contracts', () => {
+     const pkg = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')) as {
+       private?: boolean
+       dependencies?: Record<string, string>
+       peerDependencies?: Record<string, string>
+     }
+     expect(pkg.private).not.toBe(true)
+-    expect(pkg.dependencies ?? {}).toEqual({})
++    expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual([
++      '@interactive-os/json-document-affordance', '@interactive-os/json-document-selection',
++    ])
+     expect(pkg.peerDependencies ?? {}).toEqual({})
+   })
+ 
+@@ -37,7 +39,7 @@
+     ]
+ 
+     const offenders = sourceFiles(root).flatMap((file) => {
+-      const text = readFileSync(file, 'utf8')
++      const text = readFileSync(file, 'utf8').replace(/^import .+ from ['"]@interactive-os\/json-document-(?:selection|affordance\/grid-fill)['"]\r?\n/gm, '')
+       return forbidden.some((pattern) => pattern.test(text)) ? [relative(packageRoot, file)] : []
+     })
+ 
+--- a/packages/grid/src/selection/navigation.ts
++++ b/packages/grid/src/selection/navigation.ts
+@@ -1,3 +1,4 @@
++import { traverseGrid } from '@interactive-os/json-document-selection'
+ import { COL_LETTERS, cellId, cellKey, colIndex, parseCellId, type Cells } from '../coordinates/a1'
+ import { idsInRect, rectFromRefs } from '../geometry/rect'
+ import { selectionRangesFromNumbers, selectionShapeForIds, tagSelectionShape, type SelectionAxisRange } from './metadata'
+@@ -443,13 +444,13 @@
+   const rowIndex = shape.rows.indexOf(ref.row)
+   const colIndex = shape.cols.indexOf(ref.col)
+   if (rowIndex < 0 || colIndex < 0) return null
+-  const colCount = shape.cols.length
+-  const cellCount = shape.rows.length * colCount
+-  const offset = rowIndex * colCount + colIndex
+-  const nextOffset = (offset + (shift ? -1 : 1) + cellCount) % cellCount
+-  const nextRow = shape.rows.at(Math.floor(nextOffset / colCount))
+-  const nextCol = shape.cols.at(nextOffset % colCount)
+-  return nextRow !== undefined && nextCol ? cellId(nextCol, nextRow) : null
++  const next = traverseGrid({ rowIndex, columnIndex: colIndex }, {
++    rowCount: shape.rows.length, columnCount: shape.cols.length,
++    order: 'row-major', reverse: shift, wrap: true,
++  })
++  const nextRow = next && shape.rows.at(next.rowIndex)
++  const nextCol = next && shape.cols.at(next.columnIndex)
++  return nextRow !== null && nextRow !== undefined && nextCol ? cellId(nextCol, nextRow) : null
+ }
+ 
+ const enterTarget = (
+@@ -484,12 +485,13 @@
+   const rowIndex = shape.rows.indexOf(ref.row)
+   const colIndex = shape.cols.indexOf(ref.col)
+   if (rowIndex < 0 || colIndex < 0) return null
+-  const cellCount = shape.rows.length * shape.cols.length
+-  const offset = colIndex * shape.rows.length + rowIndex
+-  const nextOffset = (offset + (shift ? -1 : 1) + cellCount) % cellCount
+-  const nextCol = shape.cols.at(Math.floor(nextOffset / shape.rows.length))
+-  const nextRow = shape.rows.at(nextOffset % shape.rows.length)
+-  return nextRow !== undefined && nextCol ? cellId(nextCol, nextRow) : null
++  const next = traverseGrid({ rowIndex, columnIndex: colIndex }, {
++    rowCount: shape.rows.length, columnCount: shape.cols.length,
++    order: 'column-major', reverse: shift, wrap: true,
++  })
++  const nextRow = next && shape.rows.at(next.rowIndex)
++  const nextCol = next && shape.cols.at(next.columnIndex)
++  return nextRow !== null && nextRow !== undefined && nextCol ? cellId(nextCol, nextRow) : null
+ }
+ 
+ export function homeEndTarget(
+--- a/src/widgets/sheet-grid/hooks/useSheetGrid.ts
++++ b/src/widgets/sheet-grid/hooks/useSheetGrid.ts
+@@ -1,3 +1,4 @@
++import { idlePointerInteraction, reducePressInteraction, type PointerInteractionState } from '@interactive-os/json-document-selection'
+ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+ import { gridDefinition, reducePatternData, type Key, type PatternData, type PatternEvent, type PatternEventReason } from '@interactive-os/aria'
+ import { useGridPattern } from '@interactive-os/aria/react'
+@@ -834,8 +835,7 @@
+ }
+ 
+ export function useSheetGrid({ data, setFocusId, setSelectedIds, setSelectAnchor, startEdit, isEditing, projectedRowIds, projectedColumnIds }: Args) {
+-  const dragAnchor = useRef<string | null>(null)
+-  const dragging = useRef(false)
++  const drag = useRef<PointerInteractionState<string>>(idlePointerInteraction())
+   const suppressNextSelect = useRef(false)
+   const cellHandlersById = useRef(new Map<string, CellHandlers>())
+   const renderCache = useMemo(() => new SheetGridRenderCache(), [])
+@@ -843,7 +843,10 @@
+   const hasRenderProjection = projectedRowIds !== undefined || projectedColumnIds !== undefined
+ 
+   useEffect(() => {
+-    const stopDrag = () => { dragging.current = false }
++    const stopDrag = () => {
++      const current = drag.current
++      if (current.kind === 'active') drag.current = reducePressInteraction(current, { phase: 'end', pointerId: current.pointerId, point: current.current }).state
++    }
+     window.addEventListener('mouseup', stopDrag)
+     return () => window.removeEventListener('mouseup', stopDrag)
+   }, [])
+@@ -1084,18 +1087,18 @@
+         if (event.ctrlKey || event.metaKey) {
+           event.preventDefault()
+           suppressNextSelect.current = true
+-          dragging.current = false
+-          dragAnchor.current = null
++          drag.current = idlePointerInteraction()
+           toggleCell(id)
+           return
+         }
+-        dragging.current = true
+-        dragAnchor.current = id
++        drag.current = reducePressInteraction(idlePointerInteraction<string>(), { phase: 'start', pointerId: 'mouse', point: id, operation: 'replace' }).state
+         selectCell(id)
+       },
+       onMouseEnter: () => {
+-        if (!dragging.current || !dragAnchor.current) return
+-        selectRange(dragAnchor.current, id)
++        const current = drag.current
++        const result = reducePressInteraction(current, { phase: 'move', pointerId: 'mouse', point: id })
++        drag.current = result.state
++        if (current.kind === 'active' && result.preview) selectRange(current.start, result.preview.point)
+       },
+     }
+     cellHandlersById.current.set(id, handlers)

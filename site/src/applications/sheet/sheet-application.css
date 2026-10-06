@@ -1,0 +1,13 @@
+.sheet-application {height:100dvh;display:flex;flex-direction:column;font-size:13px;}
+.sheet-application-heading {display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--color-border-subtle);}
+.sheet-application-heading input {font-size:18px;font-weight:600;max-width:360px;min-width:0;}
+.sheet-application-heading [role="status"] {margin-left:auto;}
+.sheet-application-workspace {flex:1;min-height:0;overflow:auto;}
+.sheet-application-workspace [data-sheet-hand] {min-height:100%;}
+.sheet-application-workspace [role="toolbar"] {position:sticky;top:0;left:0;z-index:3;background:var(--color-background-canvas);padding:8px 16px;}
+.sheet-application-workspace table {table-layout:fixed;min-width:1488px;}
+.sheet-application-workspace table th {height:32px;font-weight:400;}
+.sheet-application-workspace table th:first-child {width:48px;}
+.sheet-application-footer {display:flex;align-items:center;gap:20px;padding:8px 20px;border-top:1px solid var(--color-border-subtle);}
+.sheet-application-help {margin-left:auto;}
+@media(max-width:640px) {.sheet-application-heading {padding:10px;gap:8px;}.sheet-application-heading input {width:180px;}.sheet-application-help {display:none;}}

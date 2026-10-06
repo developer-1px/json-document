@@ -1,3 +1,8 @@
+import {bindSheetView,projectSheetGrid,type SheetGrid,type SheetViewOptions} from "./sheet-view.js";
+import {dispatchSheetIntent} from "./sheet-plan.js";
+import type {SheetDocument,SheetColumn,SheetRow} from "@interactive-os/json-document-sheet-document";
+export type {SheetDocument,SheetColumn,SheetRow} from "@interactive-os/json-document-sheet-document";
+import { createSheetRow, createSheetColumn, sheetStructureActions, sheetStructureViolation, type SheetStructureIntent, type SheetStructurePolicy, type SheetStructureActions } from "./sheet-structure.js";
 import {
   buildPointer,
   isJSONValue,
@@ -24,21 +29,7 @@ import {
   type SelectionRange,
 } from "@interactive-os/json-document-selection";
 import { jsonCellText } from "./cell-text.js";
-
-export interface SheetColumn extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly label: string;
-}
-
-export interface SheetRow extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly cells: Readonly<Record<string, JSONValue>>;
-}
-
-export interface SheetDocument extends Record<string, JSONValue> {
-  readonly columns: ReadonlyArray<SheetColumn>;
-  readonly rows: ReadonlyArray<SheetRow>;
-}
+import { sheetNavigationTarget, type SheetTraversalDirection } from "./sheet-navigation.js";
 
 export interface SheetPoint extends Record<string, JSONValue> {
   readonly rowId: string;
@@ -52,7 +43,7 @@ export interface SheetRange extends Record<string, JSONValue> {
 
 export interface SheetSelection extends Record<string, JSONValue> {
   readonly kind: "range";
-  /** Primary range aliases retained for single-range consumers. */
+  /** Anchor of the primary range; focus is the active cell and may move inside that range. */
   readonly anchor: SheetPoint | null;
   readonly focus: SheetPoint | null;
   readonly ranges: ReadonlyArray<SheetRange>;
@@ -83,6 +74,15 @@ export const sheetClipboardFormat = {
 };
 
 export type SheetIntent =
+  | SheetStructureIntent
+  | { readonly type: "sheet.rename"; readonly name: string }
+  | { readonly type: "column.resize"; readonly columnId: string; readonly width: number }
+  | { readonly type: "row.resize"; readonly rowId: string; readonly height: number }
+  | { readonly type: "selection.range"; readonly range: SheetRange }
+  | { readonly type: "selection.row"; readonly rowId: string }
+  | { readonly type: "selection.column"; readonly columnId: string }
+  | { readonly type: "range.fill"; readonly source: SheetRange; readonly target: SheetRange; readonly topology?:SheetTopology }
+  | { readonly type: "selection.navigate"; readonly direction: SheetTraversalDirection; readonly topology?: SheetTopology }
   | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
@@ -100,6 +100,7 @@ export type SheetIntent =
       readonly rowId: string;
       readonly columnId: string;
       readonly value: JSONValue;
+      readonly preserveSelection?: boolean;
     }
   | {
       readonly type: "clipboard.paste";
@@ -107,7 +108,14 @@ export type SheetIntent =
       readonly topology?: SheetTopology;
     };
 
+export type SheetAvailability = "ready" | "missing" | "invalid" | "readonly";
+
 export interface SheetEditor {
+  readonly availability: SheetAvailability;
+  readonly grid: SheetGrid;
+  createView(options?:SheetViewOptions):SheetEditor;
+  readonly capabilities: {readonly resize: boolean};
+  readonly structure: SheetStructureActions;
   readonly snapshot: EditingSnapshot<SheetSelection>;
   readonly selectedCells: ReadonlyArray<SheetCell>;
   selectedCellsIn(topology: SheetTopology): ReadonlyArray<SheetCell>;
@@ -119,15 +127,20 @@ export interface SheetEditor {
   subscribe(listener: (snapshot: EditingSnapshot<SheetSelection>) => void): () => void;
 }
 
-export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, options: EditingHistoryOptions = {}): SheetEditor {
+export interface SheetEditorOptions extends EditingHistoryOptions, SheetViewOptions {
+  /** False for formats such as GFM that cannot persist row heights or column widths. */
+  readonly resize?: boolean;
+  readonly structure?: SheetStructurePolicy;
+  /** Restore selection when projecting a new source snapshot; missing cells are reconciled. */
+  readonly selection?: SheetSelection;
+}
+
+export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, options: SheetEditorOptions = {}): SheetEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as SheetDocument;
   assertSheetDocument(initial);
-  const firstRow = initial.rows[0];
-  const firstColumn = initial.columns[0];
-  const initialSelection = firstRow && firstColumn
-    ? collapsed(firstRow.id, firstColumn.id)
-    : emptySelection();
+  const grid=projectSheetGrid(initial,options);
+  const initialSelection = reconcileSheetSelection({...initial,rows:grid.rows,columns:grid.columns}, options.selection);
   const session = createEditingSession({
     ...options,
     document,
@@ -136,8 +149,25 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
       const sheet = value as SheetDocument;
       return sheet.rows.some((row) => row.id === point.rowId)
         && sheet.columns.some((column) => column.id === point.columnId) ? point : null;
-    })),
+    }), selection.focus && (value as SheetDocument).rows.some(row => row.id === selection.focus?.rowId)
+      && (value as SheetDocument).columns.some(column => column.id === selection.focus?.columnId) ? selection.focus : null),
   });
+  const editor=bindSheetEditing(session, options);
+  editor.dispatch=intent=>dispatchSheetIntent(session,intent,options);
+  return editor;
+}
+
+/** Shared selection reconciliation for standalone and parent-owned documents. */
+export function reconcileSheetSelection(initial:SheetDocument, selection?:SheetSelection):SheetSelection {
+  const firstRow=initial.rows[0],firstColumn=initial.columns[0];
+  if(!selection)return firstRow && firstColumn ? collapsed(firstRow.id,firstColumn.id):emptySelection();
+  const exists=(point:SheetPoint)=>initial.rows.some(row=>row.id === point.rowId) && initial.columns.some(column=>column.id === point.columnId);
+  return withPrimaryAliases(reconcileRangeSelection(selection,point=>exists(point)?point:null),selection.focus && exists(selection.focus)?selection.focus:null);
+}
+
+/** Internal binding: one command implementation, independent of document/history storage. */
+export function bindSheetEditing(session:EditingSession<SheetSelection>,options:SheetEditorOptions={}):SheetEditor {
+  const initial=session.snapshot.value as SheetDocument;
   let indexedDocument: SheetDocument | undefined = initial;
   let indexedSheet: SheetIndex | undefined = createSheetIndex(initial);
 
@@ -147,6 +177,10 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
       indexedSheet = createSheetIndex(document);
     }
     return indexedSheet as SheetIndex;
+  }
+
+  function resolveTopology(document:SheetDocument,topology?:SheetTopology,sheetIndex=index(document)):SheetTopology {
+    return resolveExplicitTopology(document,topology ?? projectSheetGrid(document,options),sheetIndex);
   }
 
   function value(): SheetDocument {
@@ -197,6 +231,84 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
   }
 
   function dispatch(intent: SheetIntent): EditingResult<SheetSelection> {
+    if (options.readOnly?.() && (!intent.type.startsWith("selection.") || intent.type === "selection.fill")) return failure("table.readonly");
+    if (intent.type === "sheet.rename") return session.apply({operations:[{op:"add",path:"/name",value:intent.name}],selectionAfter:session.snapshot.selection,origin:intent.type,historyGroup:"sheet.name"});
+    if (intent.type === "selection.row" || intent.type === "selection.column") {
+      const current=projectSheetGrid(value(),options), firstRow=current.rows[0],lastRow=current.rows.at(-1),firstColumn=current.columns[0],lastColumn=current.columns.at(-1);
+      if(!firstRow || !lastRow || !firstColumn || !lastColumn) return failure("selection.empty");
+      return dispatch({type:"selection.range",range:intent.type === "selection.row"
+        ? {anchor:{rowId:intent.rowId,columnId:firstColumn.id},focus:{rowId:intent.rowId,columnId:lastColumn.id}}
+        : {anchor:{rowId:firstRow.id,columnId:intent.columnId},focus:{rowId:lastRow.id,columnId:intent.columnId}}});
+    }
+    if (intent.type === "range.fill") {
+      const current = value();
+      const topology = resolveTopology(current, intent.topology, index());
+      const source = gridRangeBounds(topology,intent.source), target = gridRangeBounds(topology,intent.target);
+      if (!source || !target || target.rowStart > source.rowStart || target.rowEnd < source.rowEnd
+        || target.columnStart > source.columnStart || target.columnEnd < source.columnEnd) return failure("sheet.invalid-fill");
+      const operations: JSONPatchOperation[] = [];
+      const modulo = (value:number,count:number) => (value % count + count) % count;
+      for (let r=target.rowStart;r<=target.rowEnd;r++) for(let c=target.columnStart;c<=target.columnEnd;c++) {
+        if (r>=source.rowStart && r<=source.rowEnd && c>=source.columnStart && c<=source.columnEnd) continue;
+        const row=source.rowStart+modulo(r-source.rowStart,source.rowEnd-source.rowStart+1);
+        const column=source.columnStart+modulo(c-source.columnStart,source.columnEnd-source.columnStart+1);
+        const destination=resolvePointWithIndices(current,topology.rowIds[r]!,topology.columnIds[c]!,index())!;
+        const sourceRow=index().rowById.get(topology.rowIds[row]!)!;
+        operations.push({op:"replace",path:buildPointer(["rows",destination.rowIndex,"cells",topology.columnIds[c]!]),value:sourceRow.cells[topology.columnIds[column]!]!});
+      }
+      return session.apply({operations,selectionAfter:withPrimaryAliases(replaceRangeSelection(session.snapshot.selection,intent.target,sameSheetPoint)),origin:"range.fill"});
+    }
+    if (intent.type === "selection.range") {
+      if (!resolvePoint(value(), intent.range.anchor.rowId, intent.range.anchor.columnId, index())
+        || !resolvePoint(value(), intent.range.focus.rowId, intent.range.focus.columnId, index())) return failure("selection.cell-not-found");
+      return success(session.select(withPrimaryAliases(replaceRangeSelection(session.snapshot.selection, intent.range, sameSheetPoint))));
+    }
+    if (intent.type === "column.resize" || intent.type === "row.resize") {
+      if (options.resize === false) return failure("sheet.resize-unavailable");
+      const column = intent.type === "column.resize";
+      const size = column ? intent.width : intent.height;
+      const position = column ? value().columns.findIndex(c => c.id === intent.columnId) : value().rows.findIndex(r => r.id === intent.rowId);
+      if (position < 0 || !Number.isFinite(size) || size <= 0) return failure("sheet.invalid-size");
+      return session.apply({operations: [{op:"add",path:buildPointer([column ? "columns" : "rows", position, column ? "width" : "height"]),value:size}],
+        selectionAfter:session.snapshot.selection,origin:intent.type});
+    }
+    if (intent.type === "selection.navigate") {
+      const next = sheetNavigationTarget(resolveTopology(value(), intent.topology, index()), session.snapshot.selection, intent.direction);
+      if (!next) return failure("selection.boundary");
+      return success(session.select(next.preserveRange ? withPrimaryAliases(session.snapshot.selection, {...next.point}) : collapsed(next.point.rowId, next.point.columnId)));
+    }
+    if (intent.type === "row.insert" || intent.type === "row.delete" || intent.type === "column.insert" || intent.type === "column.delete") {
+      const current = value();
+      const violation = sheetStructureViolation(current, intent, options.structure ?? {});
+      if (violation) return failure(violation);
+      let rows = [...current.rows], columns = [...current.columns];
+      if (intent.type === "row.insert") {
+        const inserted = intent.row ?? createSheetRow(current);
+        if (!Number.isInteger(intent.index) || intent.index < 0 || intent.index > rows.length || rows.some(row => row.id === inserted.id) || !inserted.id) return failure("row.invalid-insert");
+        if (columns.some(column => !Object.hasOwn(inserted.cells, column.id))) return failure("row.missing-cell");
+        rows.splice(intent.index, 0, inserted);
+      } else if (intent.type === "column.insert") {
+        const inserted = intent.column ?? createSheetColumn(current);
+        if (!Number.isInteger(intent.index) || intent.index < 0 || intent.index > columns.length || columns.some(column => column.id === inserted.id) || !inserted.id) return failure("column.invalid-insert");
+        columns.splice(intent.index, 0, inserted);
+        rows = rows.map(row => ({...row, cells: {...row.cells, [inserted.id]: ""}}));
+      } else if (intent.type === "row.delete") {
+        if (!rows.some(row => row.id === intent.rowId)) return failure("row.not-found");
+        rows = rows.filter(row => row.id !== intent.rowId);
+      } else {
+        if (!columns.some(column => column.id === intent.columnId)) return failure("column.not-found");
+        columns = columns.filter(column => column.id !== intent.columnId);
+        rows = rows.map(row => { const cells = {...row.cells}; delete cells[intent.columnId]; return {...row, cells}; });
+      }
+      try {assertSheetDocument({...current,rows,columns});} catch {return failure("sheet.invalid-document");}
+      const focus = session.snapshot.selection.focus;
+      const oldRow = current.rows.findIndex(row => row.id === focus?.rowId);
+      const oldColumn = current.columns.findIndex(column => column.id === focus?.columnId);
+      const row = rows.find(row => row.id === focus?.rowId) ?? rows[Math.min(Math.max(oldRow, 0), rows.length - 1)];
+      const column = columns.find(column => column.id === focus?.columnId) ?? columns[Math.min(Math.max(oldColumn, 0), columns.length - 1)];
+      return session.apply({operations: [{op: "replace", path: "/rows", value: rows}, {op: "replace", path: "/columns", value: columns}],
+        selectionAfter: row && column ? collapsed(row.id, column.id) : emptySelection(), origin: intent.type});
+    }
     if (intent.type === "selection.select-all") {
       const { rowIds, columnIds } = resolveTopology(value(), intent.topology, index());
       const firstRow = rowIds[0];
@@ -234,13 +346,13 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
           path: buildPointer(["rows", resolved.rowIndex, "cells", intent.columnId]),
           value: intent.value,
         }],
-        selectionAfter: collapsed(intent.rowId, intent.columnId),
+        selectionAfter: intent.preserveSelection ? session.snapshot.selection : collapsed(intent.rowId, intent.columnId),
         origin: intent.type,
         historyGroup: `cell:${intent.rowId}:${intent.columnId}`,
       });
     }
 
-    return paste(session, value(), intent.clipboard, intent.topology, index());
+    return paste(session, value(), intent.clipboard, resolveTopology(value(),intent.topology), index());
   }
 
   function copy(topology?: SheetTopology): SheetClipboard | null {
@@ -264,6 +376,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
 
   function cut(topology?: SheetTopology): { readonly clipboard: SheetClipboard; readonly result: EditingResult<SheetSelection> } | null {
     return cutEditingClipboard(() => copy(topology), () => {
+      if (options.readOnly?.()) return failure("table.readonly");
       const document = value();
       const axes = resolveTopology(document, topology, index(document));
       const range = primaryRange(session.snapshot.selection);
@@ -285,14 +398,25 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, 
   }
 
   return {
-    get snapshot() { return session.snapshot; },
+    get availability() {return options.readOnly?.() ? "readonly" as const:"ready" as const;},
+    get grid(){return projectSheetGrid(value(),options);},
+    createView(viewOptions={}) {
+      const parent=this;
+      return bindSheetView(parent,plan=>{
+        if(parent.availability !== "ready")return failure(`table.${parent.availability}`);
+        return session.apply({...plan,selectionAfter:session.snapshot.selection});
+      },{...options,...viewOptions,readOnly:()=>parent.availability !== "ready" || !!viewOptions.readOnly?.()});
+    },
+    get capabilities() {return {resize: options.resize !== false};},
+    get structure() { return sheetStructureActions(value(), session.snapshot.selection, options.structure ?? {}); },
+    get snapshot() {const snapshot=session.snapshot;return options.readOnly?.() ? {...snapshot,canUndo:false,canRedo:false}:snapshot;},
     get selectedCells() { return selectedCells(); },
     selectedCellsIn: (topology) => selectedCells(topology),
     dispatch,
     copy,
     cut,
-    undo: () => session.undo(),
-    redo: () => session.redo(),
+    undo: () => options.readOnly?.() ? failure("table.readonly"):session.undo(),
+    redo: () => options.readOnly?.() ? failure("table.readonly"):session.redo(),
     subscribe: (listener) => session.subscribe(listener),
   };
 }
@@ -314,7 +438,7 @@ function paste(
   if (clipboard.cells.some((row) => row.length !== width)) {
     return failure("clipboard.not-rectangular");
   }
-  const axes = resolveTopology(document, topology, index);
+  const axes = resolveExplicitTopology(document, topology, index);
   const start = resolvePointInTopology(axes, focus.rowId, focus.columnId);
   if (start === null) return failure("selection.cell-not-found");
   if (start.rowIndex + clipboard.cells.length > axes.rowIds.length || start.columnIndex + width > axes.columnIds.length) {
@@ -380,7 +504,7 @@ function createSheetIndex(document: SheetDocument): SheetIndex {
   };
 }
 
-function resolveTopology(document: SheetDocument, topology?: SheetTopology, index = createSheetIndex(document)): SheetTopology {
+function resolveExplicitTopology(document: SheetDocument, topology?: SheetTopology, index = createSheetIndex(document)): SheetTopology {
   const resolved = topology ?? index.defaultTopology;
   if (index.validatedTopologies.has(resolved)) return resolved;
   assertTopologyAxis(resolved.rowIds, index.rowById, "row");
@@ -437,12 +561,13 @@ function emptySelection(): SheetSelection {
 
 function withPrimaryAliases(
   selection: RangeSelection<SheetPoint>,
+  active?: SheetPoint | null,
 ): SheetSelection {
   const primary = primaryRange(selection);
   return {
     kind: "range",
     anchor: primary?.anchor ?? null,
-    focus: primary?.focus ?? null,
+    focus: active ?? primary?.focus ?? null,
     ranges: selection.ranges.map((range) => ({
       anchor: { ...range.anchor },
       focus: { ...range.focus },

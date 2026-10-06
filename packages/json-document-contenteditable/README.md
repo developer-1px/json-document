@@ -29,3 +29,15 @@ This Draft revision requires the Web peer's `isWebEditingHostTarget` capability.
 
 For selection-restoring history and literal source clipboard, pass the optional
 `TextEditor` to `createContentEditableBinding`. See [editing integration](docs/editing.md).
+
+For source intervals displayed as one visual unit, use `createTextProjectionDOMAdapter`.
+Its [projection contract](docs/editing.md#원문-구간의-시각적-투영) preserves source editing while aligning caret edges to the displayed element.
+
+Source-preserving DOM adapters may mark a noneditable UI island with `data-text-decoration`.
+The text index excludes that subtree from source and source selections. Keep the original
+source in a separate text projection; UI labels must never be serialized as document text.
+
+`bindTextSelectionOverlay(root, dom)` draws selection and caret from the live DOM
+without taking over browser editing. Import `text-selection.css`, or pass
+`selectionRendering: "virtual"` to a binding with that stylesheet loaded.
+See [virtual selection](docs/editing.md#가상-선택-표시) and [Usage](/demo/markdown-caret).

@@ -28,48 +28,25 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     await expect.poll(() => image.evaluate((element) => (element as HTMLImageElement).naturalWidth > 0)).toBe(true);
   }
   expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("y mandatory");
-  await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
+  await expect(navigation.getByRole("link", { name: "소개" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
-  await navigation.getByRole("button", { name: "Introduction" }).click();
-  await expect(navigation.getByRole("group", { name: "Introduction" }).getByRole("link")).toHaveText([
-    "Why",
-    "Concept Map",
-    "How We Build",
+  await navigation.getByRole("button", { name: "시작하기" }).click();
+  await expect(navigation.getByRole("group", { name: "시작하기" }).getByRole("link")).toHaveText(["소개", "빠른 시작", "Architecture"]);
+  await navigation.getByRole("button", { name: "모듈" }).click();
+  await expect(navigation.getByRole("group", { name: "모듈" }).getByRole("link")).toHaveText([
+    "전체 모듈", "JSON Document", "Document Types", "Editing", "Collaboration", "Adapter", "Connector", "Affordance", "UI Primitives",
   ]);
-  await navigation.getByRole("button", { name: "Foundation" }).click();
-  await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
-  await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: "Overview", exact: true }).first()).toBeVisible();
-  await navigation.getByRole("button", { name: "Building Blocks" }).click();
-  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
-  await navigation.getByRole("button", { name: "Hands" }).click();
-  await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([
-    "Overview",
-    "Official Hands · TBD",
-    "Order",
-    "Object",
-    "Tree",
-    "Database",
-    "Composer",
-    "Mention",
-  ]);
-  await navigation.getByRole("button", { name: "Artifact" }).click();
-  await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText([
-    "Content Prototype · TBD",
-  ]);
+  await navigation.getByRole("button", { name: "편집 조합 · Hands" }).click();
+  for (const label of ["지원 범위", "Order", "Object", "Tree", "Database", "Composer", "Mention", "API · Calendar"]) {
+    await expect(navigation.getByRole("group", { name: "편집 조합 · Hands" }).getByRole("link", {name: label, exact:true})).toBeVisible();
+  }
+  await expect(navigation.getByRole("group", { name: "편집 조합 · Hands" }).getByRole("link", {name: "Official Hands 목표"})).toHaveCount(0);
+  await navigation.getByRole("button", { name: "설계와 진행 상태" }).click();
+  await expect(navigation.getByRole("group", { name: "설계와 진행 상태" }).getByRole("link", {name: "Artifact · Prototype"})).toBeVisible();
   await navigation.getByRole("button", { name: "Applications" }).click();
-  await expect(navigation.getByRole("group", { name: "Applications" }).getByRole("link")).toHaveText([
-    "Overview",
-    "Calendar",
-    "AI Agent",
-  ]);
-  await expect(navigation.getByRole("link", { name: "JSON Document Protocol", exact: true })).toHaveAttribute("href", "/docs/api");
+  await expect(navigation.getByRole("group", { name: "Applications" }).getByRole("link")).toHaveText(["Overview", "Bear", "Calendar", "AI Agent"]);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
-    "Introduction",
-    "Foundation",
-    "Building Blocks",
-    "Hands",
-    "Artifact",
-    "Applications",
+    "시작하기", "모듈", "편집 조합 · Hands", "Applications", "설계와 진행 상태",
   ]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -83,19 +60,19 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(page.locator("[data-home-scene]")).toHaveCount(5);
 
   const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(siteNavigation.getByRole("group", { name: "Introduction" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Foundation" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "시작하기" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "모듈" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(siteNavigation.getByRole("group", { name: "Hands" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Artifact" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Building Blocks" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "편집 조합 · Hands" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "설계와 진행 상태" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "모듈" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Applications" })).toBeVisible();
 
-  await page.goto("/docs/concepts");
+  await page.goto("/docs/architecture");
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Documentation sections" })).toBeVisible();
-  await expect(siteNavigation.getByRole("link", { name: "Concept Map" })).toHaveAttribute("aria-current", "page");
+  await expect(siteNavigation.getByRole("link", { name: "Architecture" })).toHaveAttribute("aria-current", "page");
 });
 
 test("short desktop view keeps the home story in natural document flow", async ({ page }) => {
@@ -127,8 +104,8 @@ test("Document Types publishes a TBD responsibility boundary", async ({ page }) 
   await expect(page.getByRole("heading", { level: 1, name: "Document Types · TBD" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "책임", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "현재 소유자와 후보" })).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "Foundation" })).toHaveAttribute("href", "/docs/foundation");
-  await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByText("Overview · TBD")).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "모듈" })).toHaveAttribute("href", "/docs/modules");
+  await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByText("Document Types")).toBeVisible();
 });
 
 test("Calendar Document Type exposes its RC owner while unrelated candidates remain TBD", async ({ page }) => {
@@ -166,15 +143,14 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("heading", { level: 3, name: "값을 다루는 하나의 계약" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Introduction" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
-  await siteNavigation.getByRole("button", { name: "Building Blocks" }).click();
-  await siteNavigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Overview", exact: true }).nth(2).click();
+  await expect(siteNavigation.getByRole("group", { name: "시작하기" }).getByRole("link", { name: "소개" })).toHaveAttribute("aria-current", "page");
+  await siteNavigation.getByRole("button", { name: "모듈" }).click();
+  await siteNavigation.getByRole("group", { name: "모듈" }).getByRole("link", { name: "Connector", exact: true }).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(0);
 
-  await siteNavigation.getByRole("button", { name: "Foundation" }).click();
-  await siteNavigation.getByRole("link", { name: "JSON Document Protocol", exact: true }).click();
+  await siteNavigation.getByRole("link", { name: "JSON Document", exact: true }).click();
   await expect(page).toHaveTitle("JSON Document Protocol - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "JSON Document Protocol" })).toBeVisible();
 });
@@ -222,14 +198,14 @@ test("Connector pages declare the connection before the live demo", async ({ pag
 test("Adapter and Connector menus expose contract docs while demos stay embedded", async ({ page }) => {
   await page.goto("/docs/adapter-keyboard");
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Keyboard" })).toBeVisible();
-  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
+  await expect(navigation.getByRole("group", { name: "모듈" }).getByRole("link", { name: "Keyboard" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Keyboard Adapter" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(1);
 
   await page.goto("/docs/connector-zod-validate");
-  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Zod" })).toBeVisible();
-  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Validate" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "API · Markdown React", exact: true })).toBeVisible();
+  await expect(navigation.getByRole("group", { name: "모듈" }).getByRole("link", { name: "Zod", exact: true })).toBeVisible();
+  await expect(navigation.getByRole("group", { name: "모듈" }).getByRole("link", { name: "Validate" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Zod Validate" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(1);
 });
@@ -258,7 +234,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
   const illustrations = new Set<string>();
   const routes = [
     "/docs",
-    "/docs/concepts",
+    "/docs/architecture",
     "/docs/connectors",
     "/docs/adapters",
     "/docs/api",
@@ -408,7 +384,7 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
   expect(await navigation.getByRole("link", { name: "json-document" }).evaluate((element) => (
     getComputedStyle(element).borderBottomWidth
   ))).toBe("0px");
-  expect(await navigation.getByRole("button", { name: "Foundation" }).evaluate((element) => (
+  expect(await navigation.getByRole("button", { name: "모듈" }).evaluate((element) => (
     getComputedStyle(element).borderLeftColor
   ))).toContain("222, 109, 85");
   const currentCat = navigation.getByRole("link", { name: "Selection", exact: true }).locator("svg");
@@ -520,7 +496,7 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   expect((await titleInput.evaluate(controlSnapshot)).boxShadow).toContain("rgba(222, 109, 85, 0.25)");
 
   const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
-  const currentLink = siteNavigation.getByRole("group", { name: "Building Blocks" })
+  const currentLink = siteNavigation.getByRole("group", { name: "모듈" })
     .getByRole("link", { name: "React Reference", exact: true });
   expect(await currentLink.locator("svg").evaluate((element) => getComputedStyle(element).color)).toContain("222, 109, 85");
 
@@ -555,11 +531,27 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
     boxShadow: getComputedStyle(element).boxShadow,
   }))).toEqual({
     backgroundColor: "rgb(255, 255, 255)",
-    borderColor: "rgb(229, 231, 235) rgb(229, 231, 235) rgb(216, 209, 197)",
+    borderLeftWidth: "0px",
+    borderRightWidth: "0px",
+    boxShadow: "rgba(119, 115, 107, 0.3) 0px 0px 0px 1px inset, rgba(69, 67, 62, 0.024) 0px 0px 0px 999px inset",
   });
   await selectedCell.focus();
-  await expect.poll(() => selectedCell.evaluate((element) => getComputedStyle(element).boxShadow))
-    .toBe("rgb(222, 109, 85) 0px 0px 0px 2px inset");
+  await expect(selectedCell).toBeFocused();
+  // The canonical content interaction keeps selection and adds a focus outline.
+  await expect.poll(() => selectedCell.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      focusVisible: element.matches(":focus-visible"),
+      outline: style.outline,
+      outlineOffset: style.outlineOffset,
+      boxShadow: style.boxShadow,
+    };
+  })).toEqual({
+    focusVisible: true,
+    outline: "color(srgb 0.870588 0.427451 0.333333 / 0.58) solid 2px",
+    outlineOffset: "2px",
+    boxShadow: "rgba(119, 115, 107, 0.3) 0px 0px 0px 1px inset, rgba(69, 67, 62, 0.024) 0px 0px 0px 999px inset",
+  });
   expect(await page.getByRole("combobox").first().evaluate(controlSnapshot)).toMatchObject({
     backgroundColor: "rgba(0, 0, 0, 0)",
     boxShadow: "none",
