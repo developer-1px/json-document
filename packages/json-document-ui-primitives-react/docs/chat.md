@@ -41,3 +41,11 @@ import "@interactive-os/json-document-ui-primitives-react/chat-bubble.css";
 ```live-demo
 /demo/chat
 ```
+
+## 로컬 모델 응답 테스트
+
+Codex CLI에 로그인한 환경에서 사이트 개발 서버를 실행하고 `/demo/chat?agent=local`을 엽니다.
+기존 로컬 Codex app-server를 통해 `gpt-6-luna`, `low`, Fast(`priority`) 설정으로 응답을 스트리밍합니다.
+같은 화면의 후속 메시지는 같은 thread를 사용하며, 새로고침하면 새 대화를 시작합니다.
+사이트 내부 client는 `site/src/app/llm-agent-api.ts`, 서버 연결은 `site/config/codex-app-server.ts`가 소유합니다.
+이 연결은 개발 서버 전용이며 기본 Usage와 정적 배포에서는 실제 모델을 호출하지 않습니다.

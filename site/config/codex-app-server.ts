@@ -50,15 +50,19 @@ export function codexAppServer(): Plugin {
             res.statusCode = 400;
             return res.end("사용자 메시지가 비어 있습니다.");
           }
-          streamCodex(prompt, input.threadId || undefined, input.runId, res);
+          streamCodex(prompt, input.threadId || undefined, input.runId, res, input.forwardedProps?.mode === "chat");
         });
       });
     },
   };
 }
 
-function streamCodex(prompt: string, sessionId: string | undefined, requestedRunId: string, res: import("node:http").ServerResponse) {
+function streamCodex(prompt: string, sessionId: string | undefined, requestedRunId: string, res: import("node:http").ServerResponse, chat = false) {
   const child = spawn("codex", ["app-server", "--stdio"], { cwd: process.cwd(), stdio: ["pipe", "pipe", "pipe"] });
+  const model = chat ? "gpt-6-luna" : CODEX_MODEL;
+  const developerInstructions = chat
+    ? "Answer the user briefly in their language. This is a plain chat. Do not use tools or inspect files."
+    : A2UI_DEVELOPER_INSTRUCTIONS;
   const lines = createInterface({ input: child.stdout });
   const send = (message: object) => child.stdin.write(`${JSON.stringify(message)}\n`);
 
@@ -82,13 +86,13 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
     if (message.id === 1) {
       send({ method: "initialized" });
       send(sessionId
-        ? { method: "thread/resume", id: 2, params: { threadId: sessionId, cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", excludeTurns: true, developerInstructions: A2UI_DEVELOPER_INSTRUCTIONS, ...(CODEX_MODEL ? { model: CODEX_MODEL } : {}) } }
-        : { method: "thread/start", id: 2, params: { cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", ephemeral: false, developerInstructions: A2UI_DEVELOPER_INSTRUCTIONS, ...(CODEX_MODEL ? { model: CODEX_MODEL } : {}) } });
+        ? { method: "thread/resume", id: 2, params: { threadId: sessionId, cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", excludeTurns: true, developerInstructions, ...(model ? { model } : {}) } }
+        : { method: "thread/start", id: 2, params: { cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", ephemeral: false, developerInstructions, ...(model ? { model } : {}) } });
     } else if (message.id === 2 && message.result?.thread) {
       const threadId = message.result.thread.id;
       mappingState = { threadId, runId: requestedRunId };
-      send({ method: "turn/start", id: 3, params: { threadId, input: [{ type: "text", text: prompt, text_elements: [] }] } });
-    } else if (message.id === 2 && message.error) {
+      send({ method: "turn/start", id: 3, params: { threadId, ...(chat ? { effort: "low", serviceTier: "priority" } : {}), input: [{ type: "text", text: prompt, text_elements: [] }] } });
+    } else if (message.error) {
       emit({ type: EventType.RUN_ERROR, message: message.error.message ?? "Codex thread를 열 수 없습니다." });
       res.end();
       child.kill();

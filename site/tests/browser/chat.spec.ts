@@ -97,3 +97,27 @@ for (const route of ["/demo/chat", "/demo/composer"]) {
     await client.detach();
   });
 }
+
+test("local chat streams a reply, keeps the session, and preserves failed drafts", async ({ page }) => {
+  const requests: Array<{ threadId: string; forwardedProps: { mode: string } }> = [];
+  await page.route("**/api/llm-agent/turn", async route => {
+    requests.push(route.request().postDataJSON());
+    const events = requests.length === 1
+      ? [{ type: "RUN_STARTED", threadId: "local-session", runId: "run" }, { type: "TEXT_MESSAGE_CONTENT", messageId: "reply", delta: "안녕하세요" }, { type: "RUN_FINISHED", threadId: "local-session", runId: "run" }]
+      : [{ type: "RUN_ERROR", message: "테스트 연결 실패" }];
+    await route.fulfill({ contentType: "text/event-stream", body: events.map(event => `data: ${JSON.stringify(event)}\n\n`).join("") });
+  });
+  await page.goto("/demo/chat?agent=local");
+  const input = page.getByRole("textbox", { name: "메시지", exact: true });
+  await input.click();
+  await page.keyboard.insertText("안녕");
+  await input.press("Enter");
+  await expect(page.getByRole("group", { name: "AI", exact: true })).toHaveText("안녕하세요");
+  await expect(input).toHaveText("");
+  await page.keyboard.insertText("계속 대화");
+  await input.press("Enter");
+  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(input).toHaveText("계속 대화");
+  expect(requests.map(request => request.threadId)).toEqual(["", "local-session"]);
+  expect(requests.every(request => request.forwardedProps.mode === "chat")).toBe(true);
+});

@@ -219,6 +219,7 @@ const packageReferencePaths = new Map([
 const sourceModules = import.meta.glob<string>(
   [
     "/src/routes/**/*.{ts,tsx}",
+    "/src/app/llm-agent-api.ts",
     "/src/shared/**/*.{ts,tsx}",
     "!/src/shared/ui/**",
     "!/src/shared/widget-binding/**",

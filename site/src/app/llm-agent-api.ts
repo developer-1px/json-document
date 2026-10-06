@@ -17,6 +17,7 @@ export async function readLlmAgentSession(sessionId: string): Promise<ReadonlyAr
 
 export async function streamLlmAgentTurn(options: {
   readonly prompt: string;
+  readonly mode?: "chat";
   readonly sessionId: string | null;
   readonly onSession: (sessionId: string) => void;
   readonly write: (delta: string) => void;
@@ -32,7 +33,7 @@ export async function streamLlmAgentTurn(options: {
       messages: [{ id: crypto.randomUUID(), role: "user", content: options.prompt }],
       tools: [],
       context: [],
-      forwardedProps: {},
+      forwardedProps: options.mode ? { mode: options.mode } : {},
     } satisfies RunAgentInput),
     signal: options.signal,
   });
