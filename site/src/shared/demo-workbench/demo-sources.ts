@@ -1,3 +1,8 @@
+import richTextPlaceholderCSSSource from "../../../../packages/json-document-rich-text-react/src/placeholder.css?raw";
+import chatBubbleSource from "../../../../packages/json-document-ui-primitives-react/src/chat-bubble.tsx?raw";
+import chatBubbleCSSSource from "../../../../packages/json-document-ui-primitives-react/src/chat-bubble.css?raw";
+import chatComposerSource from "../../../../packages/json-document-composer-react/src/chat-composer.tsx?raw";
+import chatComposerCSSSource from "../../../../packages/json-document-composer-react/src/chat-composer.css?raw";
 import textChangeSource from "../../../../packages/json-document-editing/src/text-change.ts?raw";
 import markdownSyntaxSource from "../../../../packages/json-document-markdown/src/syntax.ts?raw";
 import markdownParserSource from "../../../../packages/json-document-markdown/src/parser.ts?raw";
@@ -354,6 +359,11 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/product-shell.tsx", uiProductShellSource],
   ["packages/json-document-ui-primitives-react/src/toolbar.tsx", uiToolbarSource],
   ["packages/json-document-ui-primitives-react/src/listbox.ts", uiListboxSource],
+  ["packages/json-document-ui-primitives-react/src/chat-bubble.tsx", chatBubbleSource],
+  ["packages/json-document-ui-primitives-react/src/chat-bubble.css", chatBubbleCSSSource],
+  ["packages/json-document-composer-react/src/chat-composer.tsx", chatComposerSource],
+  ["packages/json-document-composer-react/src/chat-composer.css", chatComposerCSSSource],
+  ["packages/json-document-rich-text-react/src/placeholder.css", richTextPlaceholderCSSSource],
   ["packages/json-document-composer/src/model.ts", composerModelSource],
   ["packages/json-document-composer/src/schema.ts", composerSchemaSource],
   ["packages/json-document-composer/src/trigger.ts", composerTriggerSource],
@@ -403,6 +413,11 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-rich-text-react",
+    symbol: "RichTextEditorSurface",
+    sourcePath: "packages/json-document-rich-text-react/src/placeholder.css",
+  },
   ...["createWebClipboardSurface", "routeWebClipboardEvent"].flatMap(symbol => [
     { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/clipboard-event.ts" },
     { packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/input.ts" },
@@ -416,6 +431,31 @@ const registeredPublicUsages = [
   { packageName: "@interactive-os/json-document-editing", symbol: "createObjectPasteSession", sourcePath: "packages/json-document-editing/src/preparation-queue.ts" },
   { packageName: "@interactive-os/json-document-web", symbol: "readWebRasterFiles", sourcePath: "packages/json-document-web/src/raster-files.ts" },
   ...["assertRasterImageSource", "assertRasterImageContent", "RasterImageContent"].map((symbol) => ({ packageName: "@interactive-os/json-document-file-intake", symbol, sourcePath: "packages/json-document-file-intake/src/raster-content.ts" })),
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "ChatBubble",
+    sourcePath: "packages/json-document-ui-primitives-react/src/chat-bubble.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "ChatBubble",
+    sourcePath: "packages/json-document-ui-primitives-react/src/chat-bubble.css",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer-react",
+    symbol: "ChatComposer",
+    sourcePath: "packages/json-document-composer-react/src/chat-composer.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer-react",
+    symbol: "ChatComposer",
+    sourcePath: "packages/json-document-composer-react/src/chat-composer.css",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer",
+    symbol: "clearComposerDraft",
+    sourcePath: "packages/json-document-composer/src/commands.ts",
+  },
   { packageName: "@interactive-os/json-document-composer-react", symbol: "useComposer", sourcePath: "packages/json-document-composer-react/src/attachments.ts" },
   ...(["CanvasHand", "useCanvasHand", "createCanvasClipboardBinding"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-canvas", symbol, sourcePath: "packages/json-document-canvas/src/canvas-clipboard.ts" })),
   { packageName: "@interactive-os/json-document-editing", symbol: "createCanvasClipboard", sourcePath: "packages/json-document-editing/src/canvas-clipboard.ts" },

@@ -83,6 +83,7 @@ export const docPages = {
   collaborationLease: docPage("/docs/collaboration/text/lease"),
   collaborationLifecycle: docPage("/docs/collaboration/lifecycle"),
   hands: docPage("/editors"),
+  chat: docPage("/docs/chat"),
   composer: docPage("/docs/composer"),
   mention: docPage("/docs/mention"),
   order: docPage("/docs/order"),

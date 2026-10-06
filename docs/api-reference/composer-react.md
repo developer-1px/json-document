@@ -6,6 +6,23 @@ Composer React interaction과 reference projection의 public entrypoint입니다
 
 > 이 문서는 `packages/json-document-composer-react/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `ChatComposer`
+
+```ts
+ChatComposer<Model extends string, Suggestion extends ComposerHostSuggestion & RichTextSuggestionCandidate>({ composer, label, submitLabel, submitErrorLabel, placeholder, className, }: ChatComposerProps<Model, Suggestion>): ReactNode
+```
+## `ChatComposerProps`
+
+```ts
+interface ChatComposerProps<Model extends string, Suggestion extends ComposerHostSuggestion & RichTextSuggestionCandidate> {
+  readonly composer: ComposerBinding<Model, Suggestion>;
+  readonly label: string;
+  readonly submitLabel: string;
+  readonly submitErrorLabel: string;
+  readonly placeholder?: string;
+  readonly className?: string;
+}
+```
 ## `ComposerBinding`
 
 ```ts
@@ -21,6 +38,8 @@ interface ComposerBinding<Model extends string, Suggestion extends ComposerHostS
   readonly isPreparingAttachments: boolean;
   readonly attachmentError: EditingPreparationFailure | null;
   readonly canSubmit: boolean;
+  readonly isSubmitting: boolean;
+  readonly submitError: Error | null;
   cancelAttachments(): void;
   readonly commandKind: "mention" | "skill" | null;
   readonly commandMenu: RichTextSuggestionBinding<Suggestion>;
@@ -65,6 +84,8 @@ interface UseComposerOptions<Model extends string, Suggestion extends ComposerHo
   readonly id: string;
   readonly config: ComposerHostConfig<Model> & { readonly suggestions: ReadonlyArray<Suggestion> };
   readonly ports: ComposerHostPorts<Model>;
+  /** Clear an accepted, unchanged draft as one undoable edit. Defaults to false. */
+  readonly shouldClearAfterSubmit?: boolean;
   readonly maxImagePixels?: number;
   readonly readRaster?: typeof readWebRasterFile;
   readonly labels: {

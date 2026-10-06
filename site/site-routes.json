@@ -248,7 +248,10 @@
     "description": "@interactive-os/json-document-composer의 전체 public API입니다.",
     "language": "ko",
     "navigationGroup": "Hands",
-    "documentSource": "docs/api-reference/composer.md"
+    "documentSource": "docs/api-reference/composer.md",
+    "documentIncludes": [
+      "packages/json-document-composer/docs/chat-submit.md"
+    ]
   },
   {
     "path": "/docs/api/composer-react",
@@ -257,7 +260,10 @@
     "description": "@interactive-os/json-document-composer-react의 전체 public API입니다.",
     "language": "ko",
     "navigationGroup": "Hands",
-    "documentSource": "docs/api-reference/composer-react.md"
+    "documentSource": "docs/api-reference/composer-react.md",
+    "documentIncludes": [
+      "packages/json-document-composer-react/docs/chat-composer.md"
+    ]
   },
   {
     "path": "/docs/api/web",
@@ -363,7 +369,10 @@
     "description": "@interactive-os/json-document-rich-text-react의 전체 public API입니다.",
     "language": "ko",
     "navigationGroup": "Connector",
-    "documentSource": "docs/api-reference/rich-text-react.md"
+    "documentSource": "docs/api-reference/rich-text-react.md",
+    "documentIncludes": [
+      "packages/json-document-rich-text-react/docs/placeholder.md"
+    ]
   },
   {
     "path": "/docs/api/affordance",
@@ -904,6 +913,25 @@
     "title": "Database Demo - json-document",
     "description": "A complete Database editor with typed properties, persistent views, selection, native text editing, and history.",
     "parentPath": "/docs/database",
+    "sidebar": false
+  },
+  {
+    "path": "/docs/chat",
+    "label": "Chat",
+    "title": "Chat - json-document",
+    "heading": "Chat",
+    "description": "재사용 가능한 발신·수신 챗버블과 Composer 기반 입력창입니다.",
+    "language": "ko",
+    "navigationGroup": "UI Primitives",
+    "relatedDemoPath": "/demo/chat",
+    "documentSource": "packages/json-document-ui-primitives-react/docs/chat.md"
+  },
+  {
+    "path": "/demo/chat",
+    "label": "Chat Usage",
+    "title": "Chat Usage - json-document",
+    "description": "챗버블과 입력창을 조합해 메시지를 입력하고 전송합니다.",
+    "parentPath": "/docs/chat",
     "sidebar": false
   },
   {

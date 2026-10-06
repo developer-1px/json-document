@@ -29,3 +29,8 @@ test("validates package-owned documentation includes", () => {
   assert.deepEqual(errors([root, route("/docs/one", { documentIncludes: ["packages/json-document-canvas/docs/api.md"] })]), []);
   assert.deepEqual(errors([root, route("/docs/one", { documentIncludes: ["../private.md"] })]), ["site route /docs/one has invalid owner documentation includes."]);
 });
+
+test("accepts package-owned documentation as the route source", () => {
+  assert.deepEqual(errors([root, route("/docs/chat", { documentSource: "packages/json-document-ui-primitives-react/docs/chat.md" })]), []);
+  assert.deepEqual(errors([root, route("/docs/chat", { documentSource: "packages/ui/src/chat.tsx" })]), ["site route /docs/chat has an invalid documentation source."]);
+});

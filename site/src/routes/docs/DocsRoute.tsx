@@ -63,6 +63,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   collaborationLease: "connector",
   collaborationLifecycle: "peek",
   hands: "braces",
+  chat: "cursor",
   composer: "terminal",
   mention: "cursor",
   order: "cursor",

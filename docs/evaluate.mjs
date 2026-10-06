@@ -156,7 +156,7 @@ for (const route of documentRoutes) {
 }
 const registeredSources = documentRoutes.map((route) => route.documentSource);
 for (const source of registeredSources) {
-  if (!/^docs\/(?:public|api-reference)\/[^/]+\.md$/.test(source) || !existsSync(join(root, source))) {
+  if (!/^(?:docs\/(?:public|api-reference)|packages\/[^/]+\/docs)\/[^/]+\.md$/.test(source) || !existsSync(join(root, source))) {
     fail(`Invalid documentation source registration: ${source}`);
   }
 }

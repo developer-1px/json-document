@@ -1,3 +1,4 @@
+export { ChatBubble, type ChatBubbleProps } from "./chat-bubble.js";
 export { Menu, type MenuItem } from "./menu.js";
 export { ContextualControls } from "./contextual-controls.js";
 export { ProductCanvas, ProductInspector, ProductShell } from "./product-shell.js";

@@ -58,3 +58,9 @@ the same generated-content attribute plus `aria-placeholder` and
 `data-rich-text-empty`. Hosts style the generated content with
 `[data-rich-text-placeholder]::before`; no placeholder text node enters the
 editable DOM or canonical document.
+
+## Placeholder presentation
+
+Import `@interactive-os/json-document-rich-text-react/placeholder.css` when using
+`RichTextEditorSurface` with `placeholder`. See the owning [Placeholder API](docs/placeholder.md)
+and [Chat Usage](/demo/chat). `ChatComposer`'s CSS already imports this stylesheet.

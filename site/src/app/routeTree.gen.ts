@@ -37,6 +37,7 @@ import { Route as PageDemoAnimationRouteImport } from "./routes/_page/demo/anima
 import { Route as PageDemoAnnotationRouteImport } from "./routes/_page/demo/annotation";
 import { Route as PageDemoCalendarRouteImport } from "./routes/_page/demo/calendar";
 import { Route as PageDemoCanvasRouteImport } from "./routes/_page/demo/canvas";
+import { Route as PageDemoChatRouteImport } from "./routes/_page/demo/chat";
 import { Route as PageDemoClipboardRouteImport } from "./routes/_page/demo/clipboard";
 import { Route as PageDemoComposerRouteImport } from "./routes/_page/demo/composer";
 import { Route as PageDemoDatabaseRouteImport } from "./routes/_page/demo/database";
@@ -63,6 +64,7 @@ import { Route as PageDocsAdapterVirtualSelectionRouteImport } from "./routes/_p
 import { Route as PageDocsAdaptersRouteImport } from "./routes/_page/docs/adapters";
 import { Route as PageDocsAnimationRouteImport } from "./routes/_page/docs/animation";
 import { Route as PageDocsBuildingBlocksRouteImport } from "./routes/_page/docs/building-blocks";
+import { Route as PageDocsChatRouteImport } from "./routes/_page/docs/chat";
 import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipboard";
 import { Route as PageDocsComposerRouteImport } from "./routes/_page/docs/composer";
 import { Route as PageDocsConceptsRouteImport } from "./routes/_page/docs/concepts";
@@ -318,6 +320,11 @@ const PageDemoCanvasRoute = PageDemoCanvasRouteImport.update({
   path: "/demo/canvas",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDemoChatRoute = PageDemoChatRouteImport.update({
+  id: "/demo/chat",
+  path: "/demo/chat",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDemoClipboardRoute = PageDemoClipboardRouteImport.update({
   id: "/demo/clipboard",
   path: "/demo/clipboard",
@@ -450,6 +457,11 @@ const PageDocsAnimationRoute = PageDocsAnimationRouteImport.update({
 const PageDocsBuildingBlocksRoute = PageDocsBuildingBlocksRouteImport.update({
   id: "/docs/building-blocks",
   path: "/docs/building-blocks",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsChatRoute = PageDocsChatRouteImport.update({
+  id: "/docs/chat",
+  path: "/docs/chat",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsClipboardRoute = PageDocsClipboardRouteImport.update({
@@ -1065,6 +1077,7 @@ export interface FileRoutesByFullPath {
   "/demo/annotation": typeof PageDemoAnnotationRoute;
   "/demo/calendar": typeof PageDemoCalendarRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
+  "/demo/chat": typeof PageDemoChatRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/composer": typeof PageDemoComposerRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
@@ -1090,6 +1103,7 @@ export interface FileRoutesByFullPath {
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/animation": typeof PageDocsAnimationRoute;
   "/docs/building-blocks": typeof PageDocsBuildingBlocksRoute;
+  "/docs/chat": typeof PageDocsChatRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
@@ -1229,6 +1243,7 @@ export interface FileRoutesByTo {
   "/demo/annotation": typeof PageDemoAnnotationRoute;
   "/demo/calendar": typeof PageDemoCalendarRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
+  "/demo/chat": typeof PageDemoChatRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/composer": typeof PageDemoComposerRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
@@ -1254,6 +1269,7 @@ export interface FileRoutesByTo {
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/animation": typeof PageDocsAnimationRoute;
   "/docs/building-blocks": typeof PageDocsBuildingBlocksRoute;
+  "/docs/chat": typeof PageDocsChatRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
@@ -1395,6 +1411,7 @@ export interface FileRoutesById {
   "/_page/demo/annotation": typeof PageDemoAnnotationRoute;
   "/_page/demo/calendar": typeof PageDemoCalendarRoute;
   "/_page/demo/canvas": typeof PageDemoCanvasRoute;
+  "/_page/demo/chat": typeof PageDemoChatRoute;
   "/_page/demo/clipboard": typeof PageDemoClipboardRoute;
   "/_page/demo/composer": typeof PageDemoComposerRoute;
   "/_page/demo/database": typeof PageDemoDatabaseRoute;
@@ -1420,6 +1437,7 @@ export interface FileRoutesById {
   "/_page/docs/adapters": typeof PageDocsAdaptersRoute;
   "/_page/docs/animation": typeof PageDocsAnimationRoute;
   "/_page/docs/building-blocks": typeof PageDocsBuildingBlocksRoute;
+  "/_page/docs/chat": typeof PageDocsChatRoute;
   "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
   "/_page/docs/composer": typeof PageDocsComposerRoute;
   "/_page/docs/concepts": typeof PageDocsConceptsRoute;
@@ -1561,6 +1579,7 @@ export interface FileRouteTypes {
     | "/demo/annotation"
     | "/demo/calendar"
     | "/demo/canvas"
+    | "/demo/chat"
     | "/demo/clipboard"
     | "/demo/composer"
     | "/demo/database"
@@ -1586,6 +1605,7 @@ export interface FileRouteTypes {
     | "/docs/adapters"
     | "/docs/animation"
     | "/docs/building-blocks"
+    | "/docs/chat"
     | "/docs/clipboard"
     | "/docs/composer"
     | "/docs/concepts"
@@ -1725,6 +1745,7 @@ export interface FileRouteTypes {
     | "/demo/annotation"
     | "/demo/calendar"
     | "/demo/canvas"
+    | "/demo/chat"
     | "/demo/clipboard"
     | "/demo/composer"
     | "/demo/database"
@@ -1750,6 +1771,7 @@ export interface FileRouteTypes {
     | "/docs/adapters"
     | "/docs/animation"
     | "/docs/building-blocks"
+    | "/docs/chat"
     | "/docs/clipboard"
     | "/docs/composer"
     | "/docs/concepts"
@@ -1890,6 +1912,7 @@ export interface FileRouteTypes {
     | "/_page/demo/annotation"
     | "/_page/demo/calendar"
     | "/_page/demo/canvas"
+    | "/_page/demo/chat"
     | "/_page/demo/clipboard"
     | "/_page/demo/composer"
     | "/_page/demo/database"
@@ -1915,6 +1938,7 @@ export interface FileRouteTypes {
     | "/_page/docs/adapters"
     | "/_page/docs/animation"
     | "/_page/docs/building-blocks"
+    | "/_page/docs/chat"
     | "/_page/docs/clipboard"
     | "/_page/docs/composer"
     | "/_page/docs/concepts"
@@ -2234,6 +2258,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDemoCanvasRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/demo/chat": {
+      id: "/_page/demo/chat";
+      path: "/demo/chat";
+      fullPath: "/demo/chat";
+      preLoaderRoute: typeof PageDemoChatRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/demo/clipboard": {
       id: "/_page/demo/clipboard";
       path: "/demo/clipboard";
@@ -2414,6 +2445,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/building-blocks";
       fullPath: "/docs/building-blocks";
       preLoaderRoute: typeof PageDocsBuildingBlocksRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/chat": {
+      id: "/_page/docs/chat";
+      path: "/docs/chat";
+      fullPath: "/docs/chat";
+      preLoaderRoute: typeof PageDocsChatRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/clipboard": {
@@ -3205,6 +3243,7 @@ interface PageRouteChildren {
   PageDemoAnnotationRoute: typeof PageDemoAnnotationRoute;
   PageDemoCalendarRoute: typeof PageDemoCalendarRoute;
   PageDemoCanvasRoute: typeof PageDemoCanvasRoute;
+  PageDemoChatRoute: typeof PageDemoChatRoute;
   PageDemoClipboardRoute: typeof PageDemoClipboardRoute;
   PageDemoComposerRoute: typeof PageDemoComposerRoute;
   PageDemoDatabaseRoute: typeof PageDemoDatabaseRoute;
@@ -3230,6 +3269,7 @@ interface PageRouteChildren {
   PageDocsAdaptersRoute: typeof PageDocsAdaptersRoute;
   PageDocsAnimationRoute: typeof PageDocsAnimationRoute;
   PageDocsBuildingBlocksRoute: typeof PageDocsBuildingBlocksRoute;
+  PageDocsChatRoute: typeof PageDocsChatRoute;
   PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
   PageDocsComposerRoute: typeof PageDocsComposerRoute;
   PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
@@ -3369,6 +3409,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoAnnotationRoute: PageDemoAnnotationRoute,
   PageDemoCalendarRoute: PageDemoCalendarRoute,
   PageDemoCanvasRoute: PageDemoCanvasRoute,
+  PageDemoChatRoute: PageDemoChatRoute,
   PageDemoClipboardRoute: PageDemoClipboardRoute,
   PageDemoComposerRoute: PageDemoComposerRoute,
   PageDemoDatabaseRoute: PageDemoDatabaseRoute,
@@ -3394,6 +3435,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAdaptersRoute: PageDocsAdaptersRoute,
   PageDocsAnimationRoute: PageDocsAnimationRoute,
   PageDocsBuildingBlocksRoute: PageDocsBuildingBlocksRoute,
+  PageDocsChatRoute: PageDocsChatRoute,
   PageDocsClipboardRoute: PageDocsClipboardRoute,
   PageDocsComposerRoute: PageDocsComposerRoute,
   PageDocsConceptsRoute: PageDocsConceptsRoute,

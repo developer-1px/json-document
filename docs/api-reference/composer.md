@@ -11,6 +11,11 @@ Composer draft와 reference/trigger command 계약의 public entrypoint입니다
 ```ts
 addComposerAttachments(editor: RichTextEditor, draft: ComposerDraft, attachments: ReadonlyArray<ComposerAttachment>): ComposerDraftCommandResult
 ```
+## `clearComposerDraft`
+
+```ts
+clearComposerDraft(editor: RichTextEditor, draft: ComposerDraft, options: { readonly createId: () => string; }): ComposerCommandResult
+```
 ## `COMPOSER_HOST_PROFILE_V1`
 
 ```ts
