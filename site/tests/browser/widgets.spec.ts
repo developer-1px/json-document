@@ -5,7 +5,7 @@ test("Widgets catalog redirects to affordance usage", async ({ page }) => {
   await expect(page).toHaveURL(/\/docs\/affordance$/);
   await expect(page.getByRole("heading", { level: 1, name: "Affordance" })).toBeVisible();
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(navigation.getByRole("group", { name: "Building Blocks" })).toBeVisible();
+  await expect(navigation.getByRole("group", { name: "모듈" })).toBeVisible();
   const content = page.getByRole("main");
   await expect(content.getByRole("link", { name: "Select" }).first()).toHaveAttribute("href", "/docs/affordance/select");
   await expect(content.getByRole("link", { name: "Expand/Collapse" }).first()).toHaveAttribute("href", "/docs/affordance/fold");
@@ -312,6 +312,9 @@ test("Board modifier click toggles cards and drag moves a card", async ({ page }
 
 test("Canvas proof cancels drawing without adding an object", async ({ page }) => {
   await page.goto("/widgets/canvas");
+  const objects = page.locator("[data-canvas-object]");
+  await expect(objects).toHaveCount(4);
+  const originalObjects = await objects.evaluateAll(elements => elements.map(element => element.getAttribute("data-canvas-object")));
   await page.getByRole("button", { name: "그리기" }).click();
   const canvas = page.locator("[data-canvas-slide]");
   const box = await canvas.boundingBox();
@@ -321,7 +324,8 @@ test("Canvas proof cancels drawing without adding an object", async ({ page }) =
   await page.mouse.move(box.x + 80, box.y + 60);
   await page.keyboard.press("Escape");
   await page.mouse.up();
-  await expect(page.locator("[data-canvas-object]")).toHaveCount(3);
+  await expect(objects).toHaveCount(originalObjects.length);
+  expect(await objects.evaluateAll(elements => elements.map(element => element.getAttribute("data-canvas-object")))).toEqual(originalObjects);
 });
 
 async function json(page: Page, testId: string): Promise<unknown> {
