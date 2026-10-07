@@ -7,7 +7,7 @@ import { createTextEditor } from "@interactive-os/json-document-editing";
 import { MarkdownEditingSurface } from "@interactive-os/json-document-markdown-react";
 
 import { createWebStoredDocument } from "@interactive-os/json-document-web";
-import { ui } from "../../shared/ui/styles";
+import { floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
 import { FileText } from "lucide-react";
 import { Popover, Toolbar, Command } from "@interactive-os/json-document-ui-primitives-react";
 
@@ -68,8 +68,8 @@ export function BearApplication() {
   return (
     <main className="min-h-dvh bg-background-canvas text-foreground-default">
       <header className="fixed left-1/2 top-4 z-30 max-w-[calc(100vw-2rem)] -translate-x-1/2">
-        <Toolbar label="문서 도구" className={`${ui.surface.floatingControl} ${ui.surface.glass} flex-nowrap p-1.5`}>
-          <Popover label="문서 메뉴" open={menuOpen} onOpenChange={setMenuOpen} triggerPresentation="icon" trigger={<FileText size={18} aria-hidden="true" />} panelClassName={`${ui.surface.floatingPanel} ${ui.surface.glass} w-64 max-w-[calc(100vw-3rem)] p-4`}>
+        <Toolbar label="문서 도구" className={`${floatingSurface.control} flex-nowrap p-1.5`}>
+          <Popover label="문서 메뉴" open={menuOpen} onOpenChange={setMenuOpen} triggerPresentation="icon" trigger={<FileText size={18} aria-hidden="true" />} panelClassName={`${floatingSurface.panel} w-64 max-w-[calc(100vw-3rem)] p-4`}>
             <nav aria-label="문서" className="flex flex-col gap-3 text-sm">
               <a href="?" aria-current={!example ? "page" : undefined}>내 글</a>
               <a href="?document=ai-native-writing" aria-current={example ? "page" : undefined}>작성 예제</a>

@@ -172,6 +172,11 @@ Field(props: FieldProps): ReactNode
 ```ts
 FileDropRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "onDrop"> & { readonly onFiles: (files: ReadonlyArray<File>) => void; readonly overlay?: ReactNode; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
+## `floatingSurface`
+
+```ts
+const floatingSurface: { readonly control: "json-document-floating-control"; readonly panel: "json-document-floating-panel"; }
+```
 ## `GridCell`
 
 ```ts

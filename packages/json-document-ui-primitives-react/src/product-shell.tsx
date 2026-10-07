@@ -1,4 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
+import { floatingSurface } from "./floating-surface.js";
 import { Toolbar } from "./toolbar.js";
 
 export function ProductShell(props: HTMLAttributes<HTMLDivElement> & {
@@ -24,6 +25,7 @@ export function ProductShell(props: HTMLAttributes<HTMLDivElement> & {
       {toolbar == null ? null : (
         <Toolbar
           label={toolbarLabel ?? "Product actions"}
+          className={toolbarPresentation === "floating" ? floatingSurface.control : undefined}
           data-ui-toolbar="product"
           data-ui-presentation={toolbarPresentation}
         >

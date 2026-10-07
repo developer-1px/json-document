@@ -4,7 +4,11 @@
   "description": "Official minimalist React UI primitives for json-document Hands.",
   "type": "module",
   "license": "MIT",
-  "sideEffects": ["./dist/content-interaction.css", "./dist/chat-bubble.css"],
+  "sideEffects": [
+    "./dist/content-interaction.css",
+    "./dist/chat-bubble.css",
+    "./dist/floating-surface.css"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {
@@ -12,22 +16,38 @@
     "url": "git+https://github.com/developer-1px/json-document.git",
     "directory": "packages/json-document-ui-primitives-react"
   },
-  "publishConfig": { "access": "public", "provenance": true, "tag": "next" },
-  "files": ["dist", "!dist/.tsbuildinfo", "docs", "README.md", "LICENSE"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "next"
+  },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./content-interaction.css": "./dist/content-interaction.css",
-    "./chat-bubble.css": "./dist/chat-bubble.css"
+    "./chat-bubble.css": "./dist/chat-bubble.css",
+    "./floating-surface.css": "./dist/floating-surface.css"
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc -b tsconfig.json && cp src/content-interaction.css dist/content-interaction.css && cp src/chat-bubble.css dist/chat-bubble.css",
+    "build": "npm run clean && tsc -b tsconfig.json && cp src/content-interaction.css dist/content-interaction.css && cp src/chat-bubble.css dist/chat-bubble.css && cp src/floating-surface.css dist/floating-surface.css",
     "test": "vitest run --config vitest.config.ts",
     "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run typecheck && npm test && npm run build"
   },
-  "peerDependencies": { "react": "^18.0.0 || ^19.0.0" },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
   "dependencies": {
     "@interactive-os/json-document-affordance": "0.1.0-rc.0",
     "@interactive-os/json-document-web": "0.1.0-rc.0",

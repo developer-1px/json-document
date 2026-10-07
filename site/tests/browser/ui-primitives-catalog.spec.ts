@@ -12,7 +12,7 @@ test("design system catalog shows tokens and canonical primitives", async ({ pag
 
   await page.getByRole("link", { name: "Controls", exact: true }).click();
   const catalogNavigation = page.getByRole("navigation", { name: "Design system sections" });
-  const controlsHeading = page.getByRole("heading", { level: 2, name: "Controls" });
+  const controlsHeading = page.getByRole("heading", { level: 2, name: "Controls", exact: true });
   const [navigationBox, headingBox] = await Promise.all([catalogNavigation.boundingBox(), controlsHeading.boundingBox()]);
   expect(navigationBox).not.toBeNull();
   expect(headingBox).not.toBeNull();

@@ -1,7 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { TextEditor } from "@interactive-os/json-document-editing";
 import { FolderOpen, Save, RefreshCw } from "lucide-react";
-import { ui } from "../../shared/ui/styles";
+import { floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
 import { Choice, Command, Field, Popover } from "@interactive-os/json-document-ui-primitives-react";
 import { listLocalMarkdownFiles, readLocalMarkdownFile, saveLocalMarkdownFile, type LocalMarkdownFile, type LocalMarkdownDirectory } from "../../app/local-markdown-api";
 
@@ -38,7 +38,7 @@ export function BearFiles({ editor, disabled, onOpen }: { editor: TextEditor; di
     await refresh();
   });
   return <>
-    <Popover label="로컬 파일" open={expanded} onOpenChange={setExpanded} triggerPresentation="icon" trigger={<FolderOpen size={18} aria-hidden="true" />} panelClassName={`${ui.surface.floatingPanel} ${ui.surface.glass} !-left-12 flex w-64 max-w-[calc(100vw-3rem)] flex-col gap-3 p-4`}>
+    <Popover label="로컬 파일" open={expanded} onOpenChange={setExpanded} triggerPresentation="icon" trigger={<FolderOpen size={18} aria-hidden="true" />} panelClassName={`${floatingSurface.panel} !-left-12 flex w-64 max-w-[calc(100vw-3rem)] flex-col gap-3 p-4`}>
       <div className="flex items-center gap-2">
         <Choice id="bear-file" label="파일 불러오기" presentation="popup" value={opened?.name ?? ""} options={[{ id: "", label: "파일 불러오기" }, ...directory.files.map(name => ({ id: name, label: name }))]} onValueChange={open} disabled={disabled || busy} />
         <Command label="파일 목록 새로고침" disabled={busy || disabled} onClick={() => { void run(async () => { await refresh(); }); }}><RefreshCw size={16} aria-hidden="true" /></Command>
@@ -47,6 +47,6 @@ export function BearFiles({ editor, disabled, onOpen }: { editor: TextEditor; di
     </Popover>
     <Command label="파일 저장" disabled={busy || disabled || !name.trim()} onClick={save}><Save size={18} aria-hidden="true" /></Command>
     <span role="status" className="max-w-36 truncate px-2 text-xs text-foreground-secondary">{busy ? "저장 중…" : opened ? (opened.source === source ? "파일에 저장됨" : "파일에 저장할 변경 있음") : "새 문서"}</span>
-    {error && <p role="alert" className={`${ui.surface.floatingPanel} ${ui.surface.glass} absolute left-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] p-3 text-sm`}>{error}</p>}
+    {error && <p role="alert" className={`${floatingSurface.panel} absolute left-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] p-3 text-sm`}>{error}</p>}
   </>;
 }

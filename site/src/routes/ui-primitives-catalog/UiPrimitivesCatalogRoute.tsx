@@ -1,3 +1,4 @@
+import { floatingSurface, Toolbar } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState, type ReactNode } from "react";
 import {
   AuroraMass,
@@ -94,6 +95,7 @@ export function UiPrimitivesCatalogRoute() {
   const [fieldValue, setFieldValue] = useState("");
   const [query, setQuery] = useState("");
   const [zoom, setZoom] = useState(50);
+  const [floatingOpen, setFloatingOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState("inbox");
@@ -140,6 +142,7 @@ export function UiPrimitivesCatalogRoute() {
             "Showroom",
             "Tokens",
             "Controls",
+            "Floating controls",
             "Shell and toolbar",
             "Overlays",
             "Date and time",
@@ -365,6 +368,10 @@ export function UiPrimitivesCatalogRoute() {
           </div>
           </div>
           </div>
+        </CatalogSection>
+
+        <CatalogSection title="Floating controls" description="Canonical glass surfaces compose existing control Atoms; Hosts only place them.">
+          <Toolbar label="Floating controls" className={`${floatingSurface.control} w-fit p-2`}><Popover label="Floating panel" open={floatingOpen} onOpenChange={setFloatingOpen} trigger="Options" panelClassName={`${floatingSurface.panel} p-4`}>Shared floating surface</Popover></Toolbar>
         </CatalogSection>
 
         <CatalogSection title="Shell and toolbar" description="ProductShell owns toolbar, canvas, and inspector. ToolbarLayout keeps start, center, and end on independent axes.">

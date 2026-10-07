@@ -1,3 +1,4 @@
+@import "@interactive-os/json-document-ui-primitives-react/floating-surface.css";
 @import "../../../packages/json-document-ui-primitives-react/src/content-interaction.css";
 @import "@interactive-os/json-document-markdown-web/markdown-editor.css";
 
@@ -120,16 +121,12 @@
     @apply flex min-w-0 flex-wrap items-center gap-1.5;
   }
 
-  [data-ui-toolbar="product"] {
+  [data-ui-toolbar="product"]:not([data-ui-presentation="floating"]) {
     @apply block shrink-0 border-b border-line-subtle/40 bg-background-subtle/50 px-3 py-2;
   }
 
   [data-ui-toolbar="product"][data-ui-presentation="floating"] {
-    @apply rounded-full border border-line-subtle/50 bg-background-canvas px-1 py-1 shadow-surface transition-[border-color,box-shadow] duration-interaction;
-  }
-
-  [data-ui-toolbar="product"][data-ui-presentation="floating"]:is(:hover, :focus-within) {
-    @apply border-line-subtle/70;
+    @apply px-1 py-1;
   }
 
   [data-ui-toolbar="product"][data-ui-presentation="floating"] [data-ui-segment="true"] {

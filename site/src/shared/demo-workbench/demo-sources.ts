@@ -1,3 +1,4 @@
+import floatingSurfaceSource from "../../../../packages/json-document-ui-primitives-react/src/floating-surface.ts?raw";
 import textEditSource from "../../../../packages/json-document-editing/src/text-edit.ts?raw";
 import textToolsSource from "../../../../packages/json-document-editing/src/text-tools.ts?raw";
 import sheetViewSource from "../../../../packages/json-document-editing/src/sheet-view.ts?raw";
@@ -419,6 +420,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/contextual-controls.tsx", uiContextualControlsSource],
   ["packages/json-document-ui-primitives-react/src/product-shell.tsx", uiProductShellSource],
   ["packages/json-document-ui-primitives-react/src/toolbar.tsx", uiToolbarSource],
+  ["packages/json-document-ui-primitives-react/src/floating-surface.ts", floatingSurfaceSource],
   ["packages/json-document-ui-primitives-react/src/listbox.ts", uiListboxSource],
   ["packages/json-document-ui-primitives-react/src/chat-bubble.tsx", chatBubbleSource],
   ["packages/json-document-ui-primitives-react/src/chat-bubble.css", chatBubbleCSSSource],
@@ -1511,6 +1513,7 @@ const registeredPublicUsages = [
     symbol,
     sourcePath: "packages/json-document-ui-primitives-react/src/product-shell.tsx",
   })),
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "floatingSurface", sourcePath: "packages/json-document-ui-primitives-react/src/floating-surface.ts" },
   ...(["Toolbar", "ToolbarGroup", "ToolbarLayout", "ToolbarRegion", "ToolbarSeparator", "ToolbarSpacer"] as const).map((symbol) => ({
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol,

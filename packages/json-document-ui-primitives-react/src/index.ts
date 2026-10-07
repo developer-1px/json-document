@@ -1,3 +1,4 @@
+export { floatingSurface } from "./floating-surface.js";
 export { ChatBubble, type ChatBubbleProps } from "./chat-bubble.js";
 export { Menu, type MenuItem } from "./menu.js";
 export { ContextualControls } from "./contextual-controls.js";

@@ -1,0 +1,20 @@
+/* Shared by Toolbar, Popover, and floating composer Hosts. */
+.json-document-floating-control,
+.json-document-floating-panel {
+  background: rgb(var(--color-background-canvas, 255 255 255) / 0.8);
+  color: rgb(var(--color-foreground-default, 69 67 62));
+  border: 1px solid rgb(var(--color-border-subtle, 220 218 212) / 0.5);
+  box-shadow: var(--shadow-overlay, 0 4px 24px rgb(0 0 0 / 0.1));
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+.json-document-floating-control { border-radius: 9999px; }
+.json-document-floating-panel { border-radius: var(--radius-surface, 1rem); }
+@media (prefers-reduced-transparency: reduce) {
+  .json-document-floating-control,
+  .json-document-floating-panel { background: rgb(var(--color-background-canvas, 255 255 255)); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (forced-colors: active) {
+  .json-document-floating-control,
+  .json-document-floating-panel { background: Canvas; color: CanvasText; border-color: CanvasText; box-shadow: none; }
+}
