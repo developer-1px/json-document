@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import {
   createSheetEditor,
-  gridTopology,
   type SheetDocument,
 } from "@interactive-os/json-document-editing";
 import { useGridEditing } from "@interactive-os/json-document-react";
@@ -55,11 +54,7 @@ export function GridWidgetRoute() {
       },
       focusPoint: () => editor.snapshot.selection.focus ?? undefined,
       neighbor: (point, command) => {
-        const sheet = editor.snapshot.value as SheetDocument;
-        const visible = gridTopology(
-          sheet.rows.map((row) => row.id),
-          sheet.columns.map((column) => column.id),
-        );
+        const visible = editor.grid;
         const next = command.type === "move"
           ? moveGridPoint(visible, point, command.direction)
           : gridBoundary(visible, point, command.edge);
@@ -76,16 +71,13 @@ export function GridWidgetRoute() {
       },
     },
   });
-  const document = editing.snapshot.value as SheetDocument;
-  const topology = gridTopology(
-    document.rows.map((row) => row.id),
-    document.columns.map((column) => column.id),
-  );
+  const document = editor.grid;
+  const topology = editor.grid;
 
   return (
     <WidgetDemoFrame
       title="Grid"
-      description="Select uses applyAffordance. Topology stays on the host."
+      description="Select uses applyAffordance. Topology comes from SheetEditor.grid."
       illustration="braces"
       widgetLabel="Grid"
       widget={(

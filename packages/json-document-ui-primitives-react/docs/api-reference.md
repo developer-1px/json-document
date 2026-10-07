@@ -105,7 +105,7 @@ type ContentInteractionInput =
 ## `ContextualControls`
 
 ```ts
-ContextualControls<Id extends string>(props: Omit<HTMLAttributes<HTMLDivElement>, "children"> & { readonly capabilities: ReadonlyArray<ContextualAffordanceCapability<Id>>; readonly selected?: boolean; readonly editing?: boolean; readonly children: (snapshot: ContextualAffordanceSnapshot<Id>) => ReactNode; }): ReactNode
+ContextualControls<Id extends string>(props: Omit<HTMLAttributes<HTMLDivElement>, "children"> & { readonly capabilities: ReadonlyArray<ContextualAffordanceCapability<Id>>; readonly rootRef?: Ref<HTMLDivElement>; readonly revealWithoutHover?: boolean; readonly selected?: boolean; readonly editing?: boolean; readonly children: (snapshot: ContextualAffordanceSnapshot<Id>) => ReactNode; }): ReactNode
 ```
 ## `ControlAffordance`
 

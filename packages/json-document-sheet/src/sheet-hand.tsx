@@ -4,7 +4,7 @@ import { sheetColumnLabel, jsonCellText, gridRangeBounds, gridCellsInRange, grid
 import { editingItemProps, useEditingSnapshot, useGridEditing, useRenameSession } from "@interactive-os/json-document-react";
 import { cellEditingAffordance, gridEditingProfiles, resolveGridEditActivation, editingCommandFromWebKeyboardStroke, type GridEditingProfile } from "@interactive-os/json-document-affordance";
 import { webKeyboardPlatform, isWebComposingKey, createWebClipboardSurface, findWebGridCell, gridBoundary, moveGridPoint, rovingFocusItemProps, sheetClipboardCodec, sheetClipboardRepresentations, webGridCellAddressProps } from "@interactive-os/json-document-web";
-import { Command, Toolbar, GridCell, Field, floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Toolbar, GridCell, Field, floatingSurface, ContextualControls } from "@interactive-os/json-document-ui-primitives-react";
 import {SheetAxisResize} from "./sheet-axis-resize.js";
 import {useSheetRangeSelection} from "./sheet-range-selection.js";
 import {SheetFillHandle} from "./sheet-fill-handle.js";
@@ -111,9 +111,10 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, coor
     } else if (!current) editing.getKeyDownHandler()(event);
   };
   const structure = editor.structure;
-  return <div data-sheet-hand="" ref={surface} onKeyDown={keyDown} onBeforeInput={event => event.stopPropagation()} onInput={event => event.stopPropagation()}
+  return <ContextualControls data-sheet-hand="" rootRef={surface} revealWithoutHover capabilities={[{id:"toolbar",phases:["approach","selected","editing"]}]} editing={draft !== null} onKeyDown={keyDown} onBeforeInput={event => event.stopPropagation()} onInput={event => event.stopPropagation()}
     onPointerDown={event => {event.stopPropagation();if (!draft) pointer.onPointerDown(event);}} onLostPointerCapture={pointer.onLostPointerCapture}>
-    <Toolbar label="표 작업" className={floatingSurface.control} data-sheet-toolbar="">
+    {context => <>
+    <Toolbar label="표 작업" className={floatingSurface.control} data-sheet-toolbar="" data-visible={context.visible.includes("toolbar")} aria-hidden={!context.visible.includes("toolbar")} inert={!context.visible.includes("toolbar")}>
       <Command disabled={!editable} label="행 추가" onClick={() => report(editor.dispatch(structure.insertRow))}><AxisActionIcon axis="row" action="add" /></Command>
       <Command disabled={!editable} label="열 추가" onClick={() => report(editor.dispatch(structure.insertColumn))}><AxisActionIcon axis="column" action="add" /></Command>
       <Command label="행 삭제" disabled={!editable || !structure.deleteRow} onClick={() => structure.deleteRow && report(editor.dispatch(structure.deleteRow))}><AxisActionIcon axis="row" action="remove" /></Command>
@@ -156,7 +157,8 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, coor
     </div>
     {available !== "ready" && <output role="status">{available === "readonly" ? "읽기 전용 표" : available === "missing" ? "표가 삭제되었습니다" : "표 데이터를 읽을 수 없습니다"}</output>}
     {message && <output role="status">{message}</output>}
-  </div>;
+  </>}
+  </ContextualControls>;
 }
 
 function AxisActionIcon({axis, action}: {readonly axis: "row" | "column"; readonly action: "add" | "remove"}) {

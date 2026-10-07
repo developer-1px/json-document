@@ -1,5 +1,5 @@
 import {sheetDocumentSchema} from "@interactive-os/json-document-sheet-document";
-import { MarkdownCellEditor, MarkdownRenderer } from "@interactive-os/json-document-markdown-react";
+import { markdownSheetPresentation } from "@interactive-os/json-document-markdown-react";
 import { useState } from "react";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createMarkdownTableEditor } from "@interactive-os/json-document-editing";
@@ -40,7 +40,7 @@ export function SheetDemo() {
     <ProductShell inspector={<Inspector placement="inline" items={[
       {label: mode === "sheet" ? "Canonical JSON" : "Markdown 원문", value: mode === "sheet" ? snapshot.value : source.value, testId: "sheet-canonical-json", size: "tall"},
       {label: "Selection", meta: `열 좌표 A–${sheetColumnLabel((snapshot.value as SheetDocument).columns.length ? (snapshot.value as SheetDocument).columns.length - 1 : 0)}`, value: snapshot.selection, testId: "sheet-selection-json", size: "compact"},
-    ]} />}><SheetHand key={mode} editor={editor} label="Project sheet" headerRow={mode === "markdown"} profile={mode === "markdown" ? "document-table" : "spreadsheet-grid"} {...(mode === "markdown" ? {renderCell:(value:string) => <MarkdownRenderer content={value} components={{p:({children}) => <span>{children}</span>}} />,renderEditor:(props:import("@interactive-os/json-document-sheet").SheetCellEditorProps) => <MarkdownCellEditor {...props} />} : {})} /></ProductShell>
+    ]} />}><SheetHand key={mode} editor={editor} label="Project sheet" headerRow={mode === "markdown"} profile={mode === "markdown" ? "document-table" : "spreadsheet-grid"} {...(mode === "markdown" ? markdownSheetPresentation : {})} /></ProductShell>
     </section>
   </DemoPage>;
 }

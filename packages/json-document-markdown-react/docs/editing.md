@@ -46,3 +46,20 @@ Markdown Web과 공용 contenteditable 투영을 사용합니다.
 [Sheet Usage](/demo/sheet)의 Markdown 탭과 [Bear](/applications/bear)가 같은 연결을 사용합니다. Markdown cell editor를 사용할 때 기존 `markdown-editor.css`도 함께 로드해야 합니다.
 
 Bear의 rich Markdown 리스트는 같은 Markdown Web binding을 사용합니다. Tab은 앞 형제 아래로, Shift+Tab은 부모 다음 형제로 항목과 자식을 함께 이동합니다. Enter는 항목을 분할·이어 쓰며 빈 중첩 항목에서는 한 단계 밖으로, 최상위에서는 리스트 밖으로 나갑니다. 내어쓴 항목 뒤의 형제들은 원래 부모 아래에 남습니다. Tree의 펼침·선택 어포던스는 이 텍스트 편집 계약에 포함하지 않습니다.
+
+## Markdown 셀 표현 계약
+
+`markdownSheetPresentation`은 `SheetHand`의 `renderCell`과 `renderEditor`를 함께
+제공합니다. 읽기 상태는 inline Markdown으로, 입력 상태는 MarkdownCellEditor의
+초안으로 표현하므로 소비자가 문단 wrapper나 편집기 조합을 다시 정의하지 않습니다.
+문서·선택·History는 전달한 SheetEditor가 계속 소유합니다.
+
+```tsx
+import { markdownSheetPresentation } from "@interactive-os/json-document-markdown-react";
+import { SheetHand } from "@interactive-os/json-document-sheet";
+
+<SheetHand editor={table} profile="document-table" headerRow {...markdownSheetPresentation} />
+```
+
+`MarkdownEditingSurface`와 [Sheet Usage](/demo/sheet)의 Markdown 탭이 같은 공개
+계약을 소비합니다. Sheet의 문자열 입력과 Canvas 표에는 이 포맷을 강제하지 않습니다.

@@ -50,6 +50,11 @@ type MarkdownRendererProps = Readonly<{
   streaming?: boolean;
 }>;
 ```
+## `markdownSheetPresentation`
+
+```ts
+const markdownSheetPresentation: { renderCell: (value: string) => JSX.Element; renderEditor: (props: SheetCellEditorProps) => JSX.Element; }
+```
 ## `projectStreamingMarkdown`
 
 ```ts

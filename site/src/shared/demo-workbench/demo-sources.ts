@@ -1,3 +1,4 @@
+import markdownSheetPresentationSource from "../../../../packages/json-document-markdown-react/src/markdown-sheet-presentation.tsx?raw";
 import sheetHandCssSource from "../../../../packages/json-document-sheet/src/sheet-hand.css?raw";
 import floatingSurfaceSource from "../../../../packages/json-document-ui-primitives-react/src/floating-surface.ts?raw";
 import textEditSource from "../../../../packages/json-document-editing/src/text-edit.ts?raw";
@@ -277,6 +278,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/axis-resize.ts", axisResizeSource],
   ["packages/json-document-affordance/src/grid-fill.ts", gridFillSource],
   ["packages/json-document-markdown-react/src/MarkdownCellEditor.tsx", markdownCellEditorSource],
+  ["packages/json-document-markdown-react/src/markdown-sheet-presentation.tsx", markdownSheetPresentationSource],
   ["packages/json-document-editing/src/sheet-structure.ts", sheetStructureSource],
   ["packages/json-document-affordance/src/cell-editing.ts", cellEditingSource],
   ["packages/json-document-react/src/use-rename-session.ts", renameSessionBindingSource],
@@ -488,7 +490,8 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-editing/src/sheet-navigation.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
   ["packages/json-document-web/src/keyboard.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
   ["packages/json-document-editing/src/sheet.ts", ["packages/json-document-editing/src/sheet-view.ts", "packages/json-document-editing/src/sheet-plan.ts", "packages/json-document-sheet-document/src/schema.ts", "packages/json-document-sheet-document/src/create.ts", "packages/json-document-editing/src/sheet-structure.ts", "packages/json-document-editing/src/sheet-navigation.ts"]],
-  ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", ["packages/json-document-editing/src/markdown-table.ts", "packages/json-document-markdown-react/src/MarkdownCellEditor.tsx"]],
+  ["packages/json-document-markdown-react/src/markdown-sheet-presentation.tsx", ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", "packages/json-document-markdown-react/src/MarkdownCellEditor.tsx"]],
+  ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", ["packages/json-document-markdown-react/src/markdown-sheet-presentation.tsx","packages/json-document-editing/src/markdown-table.ts", "packages/json-document-markdown-react/src/MarkdownCellEditor.tsx"]],
   ["packages/json-document-markdown/src/list-editing.ts", ["packages/json-document-markdown/src/source-edit.ts"]],
   ["packages/json-document-markdown/src/paragraph.ts", ["packages/json-document-markdown/src/list-editing.ts", "packages/json-document-markdown/src/source-edit.ts"]],
   ["routes/markdown-caret/MarkdownCaretRoute.tsx", ["app/interaction-recording/InteractionRecordingControls.tsx"]],
@@ -611,6 +614,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-affordance",
     symbol: "resizeValueForKey",
     sourcePath: "packages/json-document-affordance/src/axis-resize.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-react",
+    symbol: "markdownSheetPresentation",
+    sourcePath: "packages/json-document-markdown-react/src/markdown-sheet-presentation.tsx",
   },
   {
     packageName: "@interactive-os/json-document-markdown-react",

@@ -35,3 +35,6 @@ remains part of document flow.
 
 `ChatBubble` owns incoming/outgoing message presentation. Import `chat-bubble.css` once.
 See the owning [Chat API](docs/chat.md) and [Usage](/demo/chat).
+
+`ContextualControls` owns pointer, focus, editing, and optional no-hover discovery.
+See the [Contextual controls API](docs/contextual-controls.md).

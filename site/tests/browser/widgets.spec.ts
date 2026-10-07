@@ -139,7 +139,7 @@ test("Listbox keeps selection and active state separate", async ({ page }) => {
 
 test("Grid reads topology and selected cells from Sheet", async ({ page }) => {
   await page.goto("/widgets/grid");
-  expect(await json(page, "widget-grid-topology")).toEqual({
+  expect(await json(page, "widget-grid-topology")).toMatchObject({
     rowIds: ["alpha", "beta", "gamma"],
     columnIds: ["task", "owner"],
   });

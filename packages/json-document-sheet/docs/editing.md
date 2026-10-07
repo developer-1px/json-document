@@ -20,7 +20,7 @@ const editor = createSheetEditor({columns: [{id: 'a', label: 'A'}], rows: [{id: 
 
 현재 Markdown 연결은 최상위 GFM 표에 적용됩니다. 셀의 inline Markdown을 원문으로 편집하며, 줄바꿈은 공백으로, 구분자 pipe는 escape하여 표 구조를 유지합니다. 수식 계산이나 파일 가져오기는 이 Hand의 기능이 아닙니다.
 
-조작은 공통 `floatingSurface.control`을 소비하는 contextual 툴바로 제공합니다. 표에 포인터나 키보드 focus가 있을 때 표시하며, touch에서는 항상 접근할 수 있습니다. 숨김/표시는 공간을 유지해 편집 중 표가 이동하지 않습니다. `sheet-hand.css`와 UI primitives의 `floating-surface.css`를 한 번 import합니다. Host가 툴바 표면이나 셀 경계를 재구현하지 않습니다. 입력창은 셀의 기존 글꼴·여백을 사용하며, 편집 진입·입력·취소는 표의 열 너비나 행 높이를 바꾸지 않습니다. 확정된 새 내용에 따른 표 크기 조정은 문서 변경으로 반영됩니다.
+조작은 공통 `floatingSurface.control`을 소비하는 contextual 툴바로 제공합니다. 노출 판단은 `ContextualControls`의 capability 결과를 소비합니다. 표에 포인터나 키보드 focus가 있을 때 표시하며, hover가 없는 환경에서는 `revealWithoutHover`로 접근성을 유지합니다. 숨김/표시는 공간을 유지해 편집 중 표가 이동하지 않습니다. `sheet-hand.css`와 UI primitives의 `floating-surface.css`를 한 번 import합니다. Host가 툴바 표면이나 셀 경계를 재구현하지 않습니다. 입력창은 셀의 기존 글꼴·여백을 사용하며, 편집 진입·입력·취소는 표의 열 너비나 행 높이를 바꾸지 않습니다. 확정된 새 내용에 따른 표 크기 조정은 문서 변경으로 반영됩니다.
 
 편집 초안은 Affordance의 `createRenameSession`, React 관찰은 `useRenameSession`, 키의 의미는 `cellEditingAffordance`, 입력 UI는 `Field`를 사용합니다. 확정 거절 시 초안과 위치를 유지합니다.
 

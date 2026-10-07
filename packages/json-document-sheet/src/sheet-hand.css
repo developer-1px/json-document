@@ -15,8 +15,7 @@
   opacity: 0;
   pointer-events: none;
 }
-[data-sheet-hand]:hover > [data-sheet-toolbar],
-[data-sheet-hand]:focus-within > [data-sheet-toolbar] { opacity: 1; pointer-events: auto; }
+[data-sheet-toolbar][data-visible="true"] { opacity: 1; pointer-events: auto; }
 [data-sheet-hand] [role="gridcell"] { border: 1px solid rgb(var(--color-border-subtle, 232 227 219)); }
 [data-sheet-hand] [role="grid"] th { font-weight: 400; font-size: 12px; color: rgb(var(--color-foreground-muted, 119 115 107)); }
 [data-sheet-hand] .sheet-axis-command {
@@ -26,7 +25,4 @@
   font: inherit;
   padding: 2px 6px;
   min-height: 28px;
-}
-@media (hover: none) {
-  [data-sheet-hand] > [data-sheet-toolbar] { opacity: 1; pointer-events: auto; }
 }
