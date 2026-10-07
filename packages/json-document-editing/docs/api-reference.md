@@ -669,7 +669,7 @@ createTextEditor(document: JSONDocument, pointer?: Pointer): TextEditor
 ## `createTextEditorTools`
 
 ```ts
-createTextEditorTools(editor: TextEditor): ({ name: string; description: string; parameters: { type: string; properties: { before?: undefined; after?: undefined; }; required: any[]; additionalProperties: boolean; }; execute: (_args: unknown) => unknown; } | { ...; })[]
+createTextEditorTools(editor: TextEditor): ({ name: string; description: string; parameters: { type: string; properties: { before?: undefined; after?: undefined; text?: undefined; anchor?: undefined; placement?: undefined; }; required: any[]; additionalProperties: boolean; }; execute: (_args: unknown) => unknown; } | { ...; } | { ...; })[]
 ```
 ## `createTreeEditor`
 
@@ -1294,6 +1294,11 @@ interface LineTopology {
   readonly ids: ReadonlyArray<string>;
 }
 ```
+## `moveText`
+
+```ts
+moveText(editor: TextEditor, move: TextMove): import("<repository>/packages/json-document-editing/src/session").EditingResult<import("<repository>/packages/json-document-editing/src/text").TextSelection>
+```
 ## `nextDatabasePropertySort`
 
 ```ts
@@ -1818,6 +1823,16 @@ interface TextEditor {
   undo(): EditingResult<TextSelection>;
   redo(): EditingResult<TextSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<TextSelection>) => void): () => void;
+}
+```
+## `TextMove`
+
+```ts
+interface TextMove {
+  readonly source: string;
+  readonly text: string;
+  readonly anchor: string;
+  readonly placement: "before" | "after";
 }
 ```
 ## `TextSelection`

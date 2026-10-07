@@ -492,6 +492,7 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  { packageName: "@interactive-os/json-document-editing", symbol: "moveText", sourcePath: "packages/json-document-editing/src/text-edit.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "applyTextEdit", sourcePath: "packages/json-document-editing/src/text-edit.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createTextEditorTools", sourcePath: "packages/json-document-editing/src/text-tools.ts" },
   {packageName: "@interactive-os/json-document-web", symbol: "webKeyboardPlatform", sourcePath: "packages/json-document-web/src/keyboard.ts"},

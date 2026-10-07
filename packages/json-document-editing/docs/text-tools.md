@@ -19,3 +19,14 @@ const result = tools[1].execute({ before: "", after: "\n\n새 문단" });
 
 Usage: [Bear](/applications/bear). 개발 서버에서 채팅이 표시되며 기존 Codex 로그인으로
 도구를 호출합니다. 정적 배포에서는 로컬 에이전트 채팅이 표시되지 않습니다.
+
+## 순서 변경
+
+`moveText(editor, { source, text, anchor, placement })`는 원문의 `text`를 그대로
+이동합니다. `placement`는 `before` 또는 `after`이며, 빈 `anchor`는 각각 문서
+맨 앞과 맨 뒤입니다. 원문과 이동 구절 및 기준 구절이 정확히 일치해야 하며,
+중복되거나 서로 겹치는 구절은 거부합니다. 문단/목록 구분 줄바꿈도 이동할
+`text`와 기준 `anchor`에 포함하세요. 내용 재생성 없이 한 번의 Undo로 복원됩니다.
+
+`createTextEditorTools`의 `move_document` 도구도 같은 계약을 사용합니다.
+예: “마지막 문단을 첫 문단 앞으로 옮겨줘.”
