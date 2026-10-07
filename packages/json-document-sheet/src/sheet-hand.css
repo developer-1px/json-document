@@ -1,0 +1,32 @@
+/* Sheet owns grid geometry and contextual controls; floatingSurface owns elevation. */
+[data-sheet-hand] { position: relative; font-size: 14px; line-height: 1.5; }
+[data-sheet-hand] > [data-sheet-toolbar] {
+  position: sticky;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px;
+  margin: 0 0 8px;
+  opacity: 0;
+  pointer-events: none;
+}
+[data-sheet-hand]:hover > [data-sheet-toolbar],
+[data-sheet-hand]:focus-within > [data-sheet-toolbar] { opacity: 1; pointer-events: auto; }
+[data-sheet-hand] [role="gridcell"] { border: 1px solid rgb(var(--color-border-subtle, 232 227 219)); }
+[data-sheet-hand] [role="grid"] th { font-weight: 400; font-size: 12px; color: rgb(var(--color-foreground-muted, 119 115 107)); }
+[data-sheet-hand] .sheet-axis-command {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 2px 6px;
+  min-height: 28px;
+}
+@media (hover: none) {
+  [data-sheet-hand] > [data-sheet-toolbar] { opacity: 1; pointer-events: auto; }
+}

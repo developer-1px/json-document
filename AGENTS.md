@@ -1,5 +1,11 @@
 # Repository agent instructions
 
+## Design contract
+
+Before creating, modifying, or reviewing UI, read and follow
+[docs/Design.md](docs/Design.md). Use canonical UI Atoms and shared tokens;
+extend the owning module instead of inventing consumer-local variants.
+
 ## Local verification and remote workflows
 
 This is a solo-maintained project. Agents own change-scoped local verification

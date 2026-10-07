@@ -4,7 +4,9 @@
   "description": "Canonical React Sheet Hand for cell and table editing.",
   "type": "module",
   "license": "MIT",
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/sheet-hand.css"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {
@@ -28,11 +30,12 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./sheet-hand.css": "./dist/sheet-hand.css"
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc -b tsconfig.json",
+    "build": "npm run clean && tsc -b tsconfig.json && cp src/sheet-hand.css dist/sheet-hand.css",
     "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "test": "vitest run --config vitest.config.ts",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",

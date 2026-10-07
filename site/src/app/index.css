@@ -1,3 +1,4 @@
+@import "@interactive-os/json-document-sheet/sheet-hand.css";
 @import "@interactive-os/json-document-ui-primitives-react/floating-surface.css";
 @import "../../../packages/json-document-ui-primitives-react/src/content-interaction.css";
 @import "@interactive-os/json-document-markdown-web/markdown-editor.css";
@@ -13,6 +14,8 @@
     --ref-color-ink-strong: 41 40 36;
     --ref-color-pencil: 119 115 107;
     --ref-color-pencil-light: 216 209 197;
+    --ref-color-line: 166 161 152;
+    --ref-color-line-soft: 232 227 219;
     --ref-color-sage: 96 120 111;
     --ref-color-impact: 222 109 85;
     --ref-color-impact-ink: 159 73 55;
@@ -37,28 +40,28 @@
     --color-foreground-canvas-object: var(--ref-color-canvas-object-label);
     --color-foreground-accent: var(--ref-color-impact-ink);
     --color-foreground-success: var(--ref-color-sage);
-    --color-border-subtle: var(--ref-color-pencil-light);
-    --color-border-default: var(--ref-color-pencil);
+    --color-border-subtle: var(--ref-color-line-soft);
+    --color-border-default: var(--ref-color-line);
     --color-border-accent: var(--ref-color-impact);
-    --color-border-action-primary: var(--ref-color-pencil);
+    --color-border-action-primary: var(--ref-color-line);
 
     --radius-tight: var(--ref-radius-2);
-    --radius-control: var(--ref-radius-6);
+    --radius-control: var(--ref-radius-10);
     --radius-surface: var(--ref-radius-10);
 
-    --shadow-surface: 0 1px 2px rgb(var(--ref-color-ink) / 0.04), 0 16px 40px rgb(var(--ref-color-ink) / 0.08);
-    --shadow-overlay: 0 2px 4px rgb(var(--ref-color-ink) / 0.06), 0 20px 48px rgb(var(--ref-color-ink) / 0.10);
+    --shadow-surface: 0 2px 6px rgb(var(--ref-color-ink) / 0.03), 0 20px 56px rgb(var(--ref-color-ink) / 0.08);
+    --shadow-overlay: 0 4px 10px rgb(var(--ref-color-ink) / 0.04), 0 28px 72px rgb(var(--ref-color-ink) / 0.10);
     --shadow-inset: inset 0 1px 2px rgb(var(--ref-color-ink) / 0.04);
 
     --space-layout-page-inline: 1rem;
     --space-layout-page-inline-wide: 2rem;
-    --font-size-page-title: 1.875rem;
-    --line-height-page-title: 2.25rem;
-    --font-size-overline: 0.625rem;
-    --font-size-code: 0.8125rem;
+    --font-size-page-title: 1rem;
+    --line-height-page-title: 1.5rem;
+    --font-size-overline: 0.75rem;
+    --font-size-code: 0.875rem;
     --line-height-code: 1.55;
-    --letter-spacing-overline: 0.16em;
-    --letter-spacing-page-title: -0.025em;
+    --letter-spacing-overline: normal;
+    --letter-spacing-page-title: normal;
     --duration-interaction: 150ms;
     --scale-control-pressed: 0.97;
     --scale-content-active: 0.995;
@@ -195,7 +198,7 @@
   [data-ui-control="toggle"][data-ui-presentation="chip"],
   [data-ui-segment="true"],
   [data-ui-tab="true"] {
-    @apply inline-flex min-h-8 cursor-pointer items-center justify-center rounded-control border px-3 py-1.5 text-xs font-medium leading-5 outline-none transition-[background-color,border-color,color,transform] duration-interaction active:translate-y-px focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-transparent disabled:bg-background-subtle/40 disabled:text-foreground-disabled;
+    @apply inline-flex min-h-8 cursor-pointer items-center justify-center rounded-control border px-3 py-1.5 text-sm font-normal leading-5 outline-none transition-[background-color,border-color,color,transform] duration-interaction active:translate-y-px focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-transparent disabled:bg-background-subtle/40 disabled:text-foreground-disabled;
   }
 
   [data-ui-control="command"]:active,
@@ -244,7 +247,7 @@
   }
 
   [data-ui-control="date-field"] {
-    @apply grid w-full min-w-0 gap-1 text-xs font-medium text-foreground-default;
+    @apply grid w-full min-w-0 gap-1 text-xs font-normal text-foreground-default;
   }
 
   [data-ui-control="date-field"] input {
@@ -325,7 +328,7 @@
   }
 
   [data-ui-calendar-period="true"] {
-    @apply m-0 text-sm font-medium text-foreground-strong;
+    @apply m-0 text-sm font-normal text-foreground-strong;
   }
 
   [data-ui-control="calendar"] [role="grid"],
@@ -475,7 +478,7 @@
   }
 
   [data-ui-control="disclosure"] {
-    @apply flex w-full cursor-pointer items-center justify-between gap-3 rounded-control border border-transparent bg-transparent px-3 py-2 text-left text-sm font-medium text-foreground-strong outline-none transition-colors hover:border-line-subtle hover:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:text-foreground-muted;
+    @apply flex w-full cursor-pointer items-center justify-between gap-3 rounded-control border border-transparent bg-transparent px-3 py-2 text-left text-sm font-normal text-foreground-strong outline-none transition-colors hover:border-line-subtle hover:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:text-foreground-muted;
   }
 
   [data-ui-control="disclosure"][aria-expanded="true"] > [aria-hidden="true"] {
@@ -495,7 +498,7 @@
   }
 
   [data-ui-tooltip="true"] {
-    @apply pointer-events-none absolute left-1/2 top-full z-50 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded-control bg-foreground-strong px-2 py-1 text-overline font-medium text-background-canvas shadow-overlay;
+    @apply pointer-events-none absolute left-1/2 top-full z-50 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded-control bg-foreground-strong px-2 py-1 text-overline font-normal text-background-canvas shadow-overlay;
   }
 
   :is([data-ui-component="command-presentation"], [data-ui-component="toggle-presentation"]):hover [data-ui-tooltip="true"],

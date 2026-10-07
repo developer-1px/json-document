@@ -20,7 +20,7 @@ const editor = createSheetEditor({columns: [{id: 'a', label: 'A'}], rows: [{id: 
 
 현재 Markdown 연결은 최상위 GFM 표에 적용됩니다. 셀의 inline Markdown을 원문으로 편집하며, 줄바꿈은 공백으로, 구분자 pipe는 escape하여 표 구조를 유지합니다. 수식 계산이나 파일 가져오기는 이 Hand의 기능이 아닙니다.
 
-편집 여부에 관계없이 액션은 같은 위치의 아이콘으로 표시합니다. 입력창은 셀의 기존 글꼴·여백을 사용하며, 편집 진입·입력·취소는 표의 열 너비나 행 높이를 바꾸지 않습니다. 확정된 새 내용에 따른 표 크기 조정은 문서 변경으로 반영됩니다.
+조작은 공통 `floatingSurface.control`을 소비하는 contextual 툴바로 제공합니다. 표에 포인터나 키보드 focus가 있을 때 표시하며, touch에서는 항상 접근할 수 있습니다. 숨김/표시는 공간을 유지해 편집 중 표가 이동하지 않습니다. `sheet-hand.css`와 UI primitives의 `floating-surface.css`를 한 번 import합니다. Host가 툴바 표면이나 셀 경계를 재구현하지 않습니다. 입력창은 셀의 기존 글꼴·여백을 사용하며, 편집 진입·입력·취소는 표의 열 너비나 행 높이를 바꾸지 않습니다. 확정된 새 내용에 따른 표 크기 조정은 문서 변경으로 반영됩니다.
 
 편집 초안은 Affordance의 `createRenameSession`, React 관찰은 `useRenameSession`, 키의 의미는 `cellEditingAffordance`, 입력 UI는 `Field`를 사용합니다. 확정 거절 시 초안과 위치를 유지합니다.
 
@@ -80,3 +80,19 @@ Hand는 `editor.grid`의 행·열 순서를 렌더하고 모든 명령은 같은
 되는 것은 아닙니다. Markdown의 행·열 ID는 현재 위치에서 투영되므로 영속 ID 참조
 프로파일을 제공한다는 의미가 아닙니다. Markdown 구조 변경을 가로질러 같은 논리 셀을
 추적하는 영속 ID 계약은 제공하지 않습니다. 전체 Official Hands SDK의 Stable 선언도 아닙니다.
+
+## 정본 소유권
+
+| 책임 | 소유 모듈 | 소비 방식 |
+| --- | --- | --- |
+| 셀·범위 선택, 편집 초안, 조작 UI | SheetHand와 기존 Affordance/React/Web API | 독립 Sheet·Markdown React·Canvas가 같은 Hand 사용 |
+| 셀·행열 명령과 History | Editing의 SheetEditor / projected Sheet | Host에서 복제하지 않음 |
+| GFM 표 파싱·직렬화 | Markdown | Markdown adapter가 원문 표 부분만 변환 |
+| 원문과 문서 Undo | TextEditor | Markdown 표도 부모 문서 History 사용 |
+| Floating 표면 | UI primitives floatingSurface | Hand는 배치와 노출만 소유 |
+| 셀 경계와 축 컨트롤 | Sheet의 sheet-hand.css | Host의 toolbar/table 표현 우회 제거 |
+| 문서 이름·보관 상태·화면 배치 | SheetApplication | 정본 Atom 조합과 제품 정책 |
+
+감사 범위는 SheetHand와 직접 소비하는 SheetApplication, SheetDemo,
+SheetViewsDemo(2개 View), MarkdownEditingSurface, CanvasSheetObject입니다.
+수식 계산·병합 셀·Markdown의 영속 셀 ID는 이 변경 범위에 포함하지 않습니다.

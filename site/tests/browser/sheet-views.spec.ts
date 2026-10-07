@@ -10,13 +10,13 @@ test("two Views share edits and history while their ID selection and order remai
  await cell(right,'gamma','owner').dblclick();await right.getByRole('textbox').fill('공유 편집');await right.getByRole('textbox').press('Enter');
  await expect(cell(left,'gamma','owner')).toHaveText('공유 편집');await expect(cell(left,'beta','status')).toHaveAttribute('aria-selected','true');
  const leftSection=page.getByRole('region',{name:'기본 순서 View'}),rightSection=page.getByRole('region',{name:'다른 순서 View'});
- await leftSection.getByRole('button',{name:'실행 취소',exact:true}).click();await expect(cell(right,'gamma','owner')).toHaveText('수진');
- await rightSection.getByRole('button',{name:'다시 실행',exact:true}).click();await expect(cell(left,'gamma','owner')).toHaveText('공유 편집');
+ await left.hover();await leftSection.getByRole('button',{name:'실행 취소',exact:true}).click();await expect(cell(right,'gamma','owner')).toHaveText('수진');
+ await right.hover();await rightSection.getByRole('button',{name:'다시 실행',exact:true}).click();await expect(cell(left,'gamma','owner')).toHaveText('공유 편집');
  await cell(right,'gamma','owner').click();await cell(right,'gamma','owner').press('ArrowRight');await expect(cell(right,'gamma','status')).toBeFocused();
- await leftSection.getByRole('button',{name:'행 추가',exact:true}).click();await expect(left.getByRole('row')).toHaveCount(5);await expect(right.getByRole('row')).toHaveCount(5);
- await leftSection.getByRole('button',{name:'열 추가',exact:true}).click();await expect(left.getByRole('gridcell')).toHaveCount(16);await expect(right.getByRole('gridcell')).toHaveCount(16);
- await rightSection.getByRole('button',{name:'실행 취소',exact:true}).click();await expect(left.getByRole('gridcell')).toHaveCount(12);
- await rightSection.getByRole('button',{name:'실행 취소',exact:true}).click();await expect(right.getByRole('gridcell')).toHaveCount(9);
+ await left.hover();await leftSection.getByRole('button',{name:'행 추가',exact:true}).click();await expect(left.getByRole('row')).toHaveCount(5);await expect(right.getByRole('row')).toHaveCount(5);
+ await left.hover();await leftSection.getByRole('button',{name:'열 추가',exact:true}).click();await expect(left.getByRole('gridcell')).toHaveCount(16);await expect(right.getByRole('gridcell')).toHaveCount(16);
+ await right.hover();await rightSection.getByRole('button',{name:'실행 취소',exact:true}).click();await expect(left.getByRole('gridcell')).toHaveCount(12);
+ await right.hover();await rightSection.getByRole('button',{name:'실행 취소',exact:true}).click();await expect(right.getByRole('gridcell')).toHaveCount(9);
  expect(errors).toEqual([]);
 });
 

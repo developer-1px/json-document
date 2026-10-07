@@ -1,3 +1,4 @@
+import sheetHandCssSource from "../../../../packages/json-document-sheet/src/sheet-hand.css?raw";
 import floatingSurfaceSource from "../../../../packages/json-document-ui-primitives-react/src/floating-surface.ts?raw";
 import textEditSource from "../../../../packages/json-document-editing/src/text-edit.ts?raw";
 import textToolsSource from "../../../../packages/json-document-editing/src/text-tools.ts?raw";
@@ -280,6 +281,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/cell-editing.ts", cellEditingSource],
   ["packages/json-document-react/src/use-rename-session.ts", renameSessionBindingSource],
   ["packages/json-document-sheet/src/sheet-hand.tsx", sheetHandSource],
+  ["packages/json-document-sheet/src/sheet-hand.css", sheetHandCssSource],
   ["packages/json-document-editing/src/markdown-table.ts", markdownTableEditorSource],
   ["packages/json-document-markdown/src/table-editing.ts", markdownTableSource],
   ["packages/json-document-web/src/interaction-recording.ts", interactionRecordingSource],
@@ -482,7 +484,7 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-editing/src/object-sheet.ts",["packages/json-document-editing/src/projected-sheet.ts", "packages/json-document-object-document/src/embedded-document.ts"]],
   ["packages/json-document-canvas/src/canvas-hand.tsx",["packages/json-document-canvas/src/canvas-sheet-object.tsx"]],
 
-  ["packages/json-document-sheet/src/sheet-hand.tsx", ["packages/json-document-sheet/src/sheet-axis-resize.tsx", "packages/json-document-sheet/src/sheet-range-selection.tsx", "packages/json-document-sheet/src/sheet-fill-handle.tsx"]],
+  ["packages/json-document-sheet/src/sheet-hand.tsx", ["packages/json-document-sheet/src/sheet-hand.css","packages/json-document-sheet/src/sheet-axis-resize.tsx", "packages/json-document-sheet/src/sheet-range-selection.tsx", "packages/json-document-sheet/src/sheet-fill-handle.tsx"]],
   ["packages/json-document-editing/src/sheet-navigation.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
   ["packages/json-document-web/src/keyboard.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
   ["packages/json-document-editing/src/sheet.ts", ["packages/json-document-editing/src/sheet-view.ts", "packages/json-document-editing/src/sheet-plan.ts", "packages/json-document-sheet-document/src/schema.ts", "packages/json-document-sheet-document/src/create.ts", "packages/json-document-editing/src/sheet-structure.ts", "packages/json-document-editing/src/sheet-navigation.ts"]],

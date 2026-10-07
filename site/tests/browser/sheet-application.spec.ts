@@ -4,6 +4,7 @@ test("Sheet application edits, keeps geometry, persists title/data/size, and nav
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/applications/sheet');const grid=page.getByRole('grid',{name:'Sheet'}),cells=grid.getByRole('gridcell');
  await expect(cells).toHaveCount(480);
+ await page.getByRole('button',{name:'시트 설정',exact:true}).click();
  const title=page.getByRole('textbox',{name:'시트 이름'});await title.fill('주간 계획');
  const cell=cells.nth(0);await cell.scrollIntoViewIfNeeded();const before=await cell.boundingBox();
  await cell.dblclick();const input=grid.getByRole('textbox');await input.fill('작업');expect(await cell.boundingBox()).toEqual(before);await input.press('Enter');
@@ -11,6 +12,7 @@ test("Sheet application edits, keeps geometry, persists title/data/size, and nav
  await cell.click();await cells.nth(13).click({modifiers:['Shift']});await cells.nth(13).press('Tab');await expect(cell).toBeFocused();await expect(grid.locator('[data-selected="true"]')).toHaveCount(4);
  const resize=grid.getByRole('button',{name:'A 열 너비 조절'});await resize.focus();await resize.press('ArrowRight');
  await expect(page.getByRole('main').getByRole('status')).toHaveText('이 브라우저에 저장됨');await page.reload();
+ await page.getByRole('button',{name:'시트 설정',exact:true}).click();
  await expect(page.getByRole('textbox',{name:'시트 이름'})).toHaveValue('주간 계획');await expect(cells.nth(0)).toHaveText('작업');
  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('json-document.sheet.v1')!));expect(saved.columns[0].width).toBeGreaterThan(120);
  await cells.nth(0).click();await page.getByRole('button',{name:'행 추가',exact:true}).click();await expect(cells).toHaveCount(492);

@@ -4,7 +4,7 @@ import { sheetColumnLabel, jsonCellText, gridRangeBounds, gridCellsInRange, grid
 import { editingItemProps, useEditingSnapshot, useGridEditing, useRenameSession } from "@interactive-os/json-document-react";
 import { cellEditingAffordance, gridEditingProfiles, resolveGridEditActivation, editingCommandFromWebKeyboardStroke, type GridEditingProfile } from "@interactive-os/json-document-affordance";
 import { webKeyboardPlatform, isWebComposingKey, createWebClipboardSurface, findWebGridCell, gridBoundary, moveGridPoint, rovingFocusItemProps, sheetClipboardCodec, sheetClipboardRepresentations, webGridCellAddressProps } from "@interactive-os/json-document-web";
-import { Command, Toolbar, GridCell, Field } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Toolbar, GridCell, Field, floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
 import {SheetAxisResize} from "./sheet-axis-resize.js";
 import {useSheetRangeSelection} from "./sheet-range-selection.js";
 import {SheetFillHandle} from "./sheet-fill-handle.js";
@@ -113,7 +113,7 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, coor
   const structure = editor.structure;
   return <div data-sheet-hand="" ref={surface} onKeyDown={keyDown} onBeforeInput={event => event.stopPropagation()} onInput={event => event.stopPropagation()}
     onPointerDown={event => {event.stopPropagation();if (!draft) pointer.onPointerDown(event);}} onLostPointerCapture={pointer.onLostPointerCapture}>
-    <Toolbar label="표 작업" style={{display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8, fontSize: 13}}>
+    <Toolbar label="표 작업" className={floatingSurface.control} data-sheet-toolbar="">
       <Command disabled={!editable} label="행 추가" onClick={() => report(editor.dispatch(structure.insertRow))}><AxisActionIcon axis="row" action="add" /></Command>
       <Command disabled={!editable} label="열 추가" onClick={() => report(editor.dispatch(structure.insertColumn))}><AxisActionIcon axis="column" action="add" /></Command>
       <Command label="행 삭제" disabled={!editable || !structure.deleteRow} onClick={() => structure.deleteRow && report(editor.dispatch(structure.deleteRow))}><AxisActionIcon axis="row" action="remove" /></Command>
@@ -125,11 +125,11 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, coor
       <table role="grid" aria-label={label} aria-multiselectable="true" aria-readonly={!editable} style={{borderCollapse: "collapse", width: "100%"}}>
         <colgroup><col />{sheet.columns.map(column => <col key={column.id} style={{width:columnPreview?.id === column.id ? columnPreview.size : typeof column.width === "number" ? column.width : undefined}} />)}</colgroup>
         <thead><tr><th aria-label="행 번호" />{sheet.columns.map((column,columnIndex) => <th key={column.id} scope="col" style={{position:"relative"}}>
-          <button type="button" aria-label={`${coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label} 열 선택`} onClick={() => {editor.dispatch({type:"selection.column",columnId:column.id});const point=editor.snapshot.selection.focus;if(point) focusCell(point);}} style={{border:0,background:"transparent",font:"inherit",color:"inherit",padding:0}}>{coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label}</button>
+          <Command aria-label={`${coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label} 열 선택`} onClick={() => {editor.dispatch({type:"selection.column",columnId:column.id});const point=editor.snapshot.selection.focus;if(point) focusCell(point);}} className="sheet-axis-command">{coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label}</Command>
           {editable && editor.capabilities.resize && <SheetAxisResize axis="x" label={`${coordinateHeaders ? sheetColumnLabel(columnIndex) : column.label} 열 너비 조절`} onPreview={size => setColumnPreview(size === null ? null : {id:column.id,size})} onCommit={width => report(editor.dispatch({type:"column.resize",columnId:column.id,width}))} />}
         </th>)}</tr></thead>
         <tbody>{sheet.rows.map((row, index) => <tr key={row.id} style={{height:rowPreview?.id === row.id ? rowPreview.size : typeof row.height === "number" ? row.height : undefined}}><th scope="row" style={{position:"relative"}}>
-          <button type="button" aria-label={`${index + 1}행 선택`} onClick={() => {editor.dispatch({type:"selection.row",rowId:row.id});const point=editor.snapshot.selection.focus;if(point) focusCell(point);}} style={{border:0,background:"transparent",font:"inherit",color:"inherit",padding:0}}>{headerRow && index === 0 ? "제목" : index + (headerRow ? 0 : 1)}</button>
+          <Command aria-label={`${index + 1}행 선택`} onClick={() => {editor.dispatch({type:"selection.row",rowId:row.id});const point=editor.snapshot.selection.focus;if(point) focusCell(point);}} className="sheet-axis-command">{headerRow && index === 0 ? "제목" : index + (headerRow ? 0 : 1)}</Command>
           {editable && editor.capabilities.resize && <SheetAxisResize axis="y" label={`${index + 1}행 높이 조절`} onPreview={size => setRowPreview(size === null ? null : {id:row.id,size})} onCommit={height => report(editor.dispatch({type:"row.resize",rowId:row.id,height}))} />}
         </th>{sheet.columns.map(column => {
           const point = {rowId: row.id, columnId: column.id}; const item = editing.getCell(point);
@@ -140,7 +140,7 @@ export function SheetHand({editor, label = "표 편집", headerRow = false, coor
           return <GridCell key={column.id} {...webGridCellAddressProps(point)} {...rovingFocusItemProps(item.getIsFocus())} {...editingItemProps(item)}
             data-fill-preview={fillCells.has(gridPointKey(point)) || undefined}
             onClick={event => {if (!pointer.consumeClick()) item.getPressHandler()(event);}}
-            style={{minWidth: 90, padding: "7px 10px", border: "1px solid var(--border, #ddd)", position: "relative", outline:fillCells.has(gridPointKey(point)) ? "1px dashed var(--accent, #9f4937)" : undefined, fontWeight: headerRow && index === 0 ? 600 : undefined}}
+            style={{minWidth: 90, padding: "7px 10px", position: "relative", outline:fillCells.has(gridPointKey(point)) ? "1px dashed rgb(var(--color-border-accent, 159 73 55))" : undefined, fontWeight: headerRow && index === 0 ? 600 : undefined}}
             onDoubleClick={() => beginEdit(point)}>
             <div aria-hidden={active || undefined} style={{visibility: active ? "hidden" : "visible"}}>
               {(renderCell ? renderCell(jsonCellText(row.cells[column.id])) : jsonCellText(row.cells[column.id])) || <span aria-hidden="true">&nbsp;</span>}

@@ -45,6 +45,13 @@ test("Bear table shares Sheet controls and document history without serializing 
  await expect(page.getByRole("textbox",{name:"Markdown 문서",exact:true})).toBeFocused();
  await page.keyboard.type("after table");
  await expect(cells).toHaveCount(6);
+ const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("json-document.bear.v1")!).source as string);
+ expect(saved).toContain("| 새 제목 | #, ##, ### |");
+ expect(saved).toContain("after table");
+ expect(saved).not.toContain("data-sheet");
+ await page.reload();
+ await expect(page.getByRole("gridcell").nth(2)).toHaveText("새 제목");
+ await expect(page.getByRole("textbox", {name:"Markdown 문서",exact:true})).toContainText("after table");
  expect(problems).toEqual([]);
 });
 
@@ -79,6 +86,9 @@ test("table actions stay icon-only and editing preserves cell geometry", async (
   await page.goto(path);
   const grid=page.getByRole("grid"); const cell=grid.getByRole("gridcell").nth(2);
   const toolbar=page.getByRole("toolbar",{name:"표 작업"});
+  await cell.click();
+  await expect(toolbar).toHaveCSS("opacity", "1");
+  await expect(toolbar).toHaveClass(/json-document-floating-control/);
   await expect(toolbar.getByRole("button")).toHaveCount(6);
   for (const button of await toolbar.getByRole("button").all()) {
    await expect(button.locator("svg").first()).toBeVisible();
@@ -96,6 +106,7 @@ test("table actions stay icon-only and editing preserves cell geometry", async (
 });
 
 test("Sheet preserves its selected rectangle during Tab/Enter entry and Ctrl+Enter fill", async ({page}) => {
+ await page.addInitScript(() => Object.defineProperty(navigator,"platform",{get:()=>"Win32"}));
  await page.goto('/demo/sheet');const grid=page.getByRole('grid'),cells=grid.getByRole('gridcell');
  await cells.nth(0).click();await cells.nth(4).click({modifiers:['Shift']});
  await cells.nth(4).press('Tab');await expect(cells.nth(0)).toBeFocused();

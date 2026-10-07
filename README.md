@@ -56,6 +56,7 @@ unsubscribe();
 
 | 목적 | 위치 |
 | --- | --- |
+| UI 디자인 원칙 | [Design.md](docs/Design.md) |
 | 빠른 시작 | [설치·변경·구독](docs/public/quick-start.md) |
 | 모듈 찾기 | [책임별 API·Usage](docs/public/modules.md) |
 | 설계와 진행 상태 | [목표·프로토타입·소유권 감사](docs/public/design.md) |
