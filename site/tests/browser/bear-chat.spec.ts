@@ -39,17 +39,20 @@ test("Bear applies tool edits, retains other text, and supports undo", async ({ 
   await page.getByRole("button", { name: "대화 접기" }).click();
   await expect(page.getByRole("log", { name: "Bear 대화" })).not.toBeVisible();
   await expect(input).toBeVisible();
+  await page.getByRole("button", { name: "문서 메뉴", exact: true }).click();
   await expect(page.getByRole("status").filter({ hasText: "이 브라우저에 저장됨" })).toBeVisible();
   await page.reload();
   await expect(document).toContainText("추가된 문장");
   await expect(document).toContainText("생각이 머무는 곳.");
-  const download = page.getByRole("link", { name: "Markdown 저장" });
+  await page.getByRole("button", { name: "문서 메뉴", exact: true }).click();
+  const download = page.getByRole("link", { name: "Markdown 다운로드" });
   expect(decodeURIComponent((await download.getAttribute("href"))!)).toContain("추가된 문장");
 });
 
 test("Bear keeps unreadable local data and shows recovery state", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("json-document.bear.v1", "invalid json"));
   await page.goto("/applications/bear");
+  await page.getByRole("button", { name: "문서 메뉴", exact: true }).click();
   await expect(page.getByRole("status").filter({ hasText: "저장된 글을 읽지 못했습니다" })).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem("json-document.bear.v1"))).toBe("invalid json");
   await page.getByRole("button", { name: "저장 다시 시도" }).click();
@@ -62,6 +65,7 @@ test("agent-written example persists independently from the existing document", 
   const editor = page.getByRole("textbox", { name: "Markdown 문서", exact: true });
   await editor.press("ControlOrMeta+End");
   await page.keyboard.insertText(" 나만의 원고");
+  await page.getByRole("button", { name: "문서 메뉴", exact: true }).click();
   await page.getByRole("link", { name: "작성 예제", exact: true }).click();
   await expect(editor).toContainText("AI native로 글을 쓰는 법");
   await expect(editor).not.toContainText("나만의 원고");
@@ -69,6 +73,7 @@ test("agent-written example persists independently from the existing document", 
   await page.keyboard.insertText(" 예제 수정");
   await page.reload();
   await expect(editor).toContainText("예제 수정");
+  await page.getByRole("button", { name: "문서 메뉴", exact: true }).click();
   await page.getByRole("link", { name: "내 글", exact: true }).click();
   await expect(editor).toContainText("나만의 원고");
   await expect(editor).not.toContainText("예제 수정");

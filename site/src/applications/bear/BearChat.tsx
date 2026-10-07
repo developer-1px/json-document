@@ -3,7 +3,8 @@ import { COMPOSER_HOST_PROFILE_V1, composerText, type ComposerHostConfig } from 
 import { ChatComposer, useComposer } from "@interactive-os/json-document-composer-react";
 import { createTextEditorTools, type TextEditor } from "@interactive-os/json-document-editing";
 import { createRichTextNodeId } from "@interactive-os/json-document-rich-text";
-import { ChatBubble } from "@interactive-os/json-document-ui-primitives-react";
+import { ui } from "../../shared/ui/styles";
+import { ChatBubble, Command } from "@interactive-os/json-document-ui-primitives-react";
 import "@interactive-os/json-document-ui-primitives-react/chat-bubble.css";
 import "@interactive-os/json-document-composer-react/chat-composer.css";
 import { streamLlmAgentTurn } from "../../app/llm-agent-api";
@@ -45,8 +46,8 @@ export function BearChat({ editor, onBusyChange }: { editor: TextEditor; onBusyC
     } },
     labels: { mentionSuggestions: "멘션", skillSuggestions: "스킬" }, shouldClearAfterSubmit: true,
   });
-  return <aside aria-label="글쓰기 도우미" className="fixed bottom-4 right-4 z-20 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-3 rounded-xl bg-background-canvas p-3 shadow-lg">
-    {messages.length > 0 && <button type="button" onClick={() => setExpanded(value => !value)} aria-expanded={expanded} className="self-end text-sm text-foreground-secondary focus-visible:outline">{expanded ? "대화 접기" : "대화 펼치기"}</button>}
+  return <aside aria-label="글쓰기 도우미" className={`${ui.surface.floatingPanel} ${ui.surface.glass} fixed bottom-4 right-4 z-20 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-3 p-3`}>
+    {messages.length > 0 && <Command onClick={() => setExpanded(value => !value)} aria-expanded={expanded} className="self-end text-sm text-foreground-secondary focus-visible:outline">{expanded ? "대화 접기" : "대화 펼치기"}</Command>}
     {expanded && <div role="log" aria-label="Bear 대화" className="flex max-h-[50dvh] flex-col gap-3 overflow-y-auto">
       {messages.map((turn, index) => <Fragment key={index}>
         <ChatBubble direction="outgoing" label="나">{turn.prompt}</ChatBubble>

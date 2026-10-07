@@ -7,6 +7,7 @@ test("Bear creates, opens and updates a local Markdown file", async ({ page, req
   const { directory } = await (await request.get("/api/local-markdown/")).json();
   try {
     await page.goto("/applications/bear");
+    await page.getByRole("button", { name: "로컬 파일", exact: true }).click();
     await page.getByRole("textbox", { name: "파일 이름", exact: true }).fill(name);
     await page.getByRole("button", { name: "파일 저장", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: /^파일에 저장됨$/ })).toBeVisible();
@@ -22,6 +23,7 @@ test("Bear creates, opens and updates a local Markdown file", async ({ page, req
     expect(saved.source).toContain("파일로 저장할 문장");
     await editor.press("ControlOrMeta+End");
     await page.keyboard.insertText(" 아직 저장 안 함");
+    await page.getByRole("button", { name: "로컬 파일", exact: true }).click();
     await page.getByRole("button", { name: "파일 불러오기", exact: true }).click();
     await page.getByRole("option", { name, exact: true }).click();
     await expect(editor).toContainText("파일로 저장할 문장");
