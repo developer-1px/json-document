@@ -30,3 +30,16 @@ Usage: [Bear](/applications/bear). 개발 서버에서 채팅이 표시되며 �
 
 `createTextEditorTools`의 `move_document` 도구도 같은 계약을 사용합니다.
 예: “마지막 문단을 첫 문단 앞으로 옮겨줘.”
+
+## 검토와 되돌리기
+
+- `find_in_document({ query })`: 현재 원문에서 정확히 일치하는 구절의 UTF-16 위치와
+  주변 문맥을 반환합니다. 최대 100개이며 더 있으면 `truncated`가 참입니다.
+- `read_selection({})`: 현재 선택 범위와 선택된 글을 읽습니다. 선택이 없으면 빈 문자열입니다.
+- `undo_document({})`, `redo_document({})`: 수동/에이전트 편집을 포함한 이력 한 단계를
+  되돌리거나 다시 적용합니다. 먼저 `read_document`를 호출해야 하며 이후 본문이 바뀌면
+  거부합니다. 저장된 문서를 새로 열 때 Undo 이력은 복원하지 않습니다.
+
+읽기·검색·선택 읽기는 원문을 수정하지 않습니다. `read_document`의 `canUndo`,
+`canRedo`로 현재 이력 사용 가능 여부를 알 수 있습니다. 검색 결과만으로 원문 읽기를
+대체할 수는 없으며, 편집 전에 전체 원문을 읽어야 합니다.

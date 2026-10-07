@@ -198,3 +198,12 @@ npm run test:collaboration:soak
 gh workflow run ci.yml --ref main
 gh workflow run collaboration-soak.yml --ref main
 ```
+
+### Bear 로컬 Markdown 보관
+
+개발 서버의 `/applications/bear`에서 `.md` 파일을 만들고, 목록에서 불러오고,
+수정한 본문을 저장할 수 있습니다. 기본 보관함은 **현재 작업 폴더**의 `.local/bear/`이며
+Git에는 포함하지 않습니다. `BEAR_DOCUMENTS_DIR=/원하는/폴더 npm run dev`로 다른
+보관함을 지정할 수 있습니다. 같은 이름으로 저장할 때 외부 변경이 발견되면 거부합니다.
+브라우저 자동 저장은 작업 복구용이며 실제 파일 저장 버튼과 별개입니다.
+워크트리를 정리하기 전에는 이 폴더의 문서도 별도로 보관하세요.

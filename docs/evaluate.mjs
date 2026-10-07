@@ -45,6 +45,7 @@ function filesUnder(path) {
       }
 
       const child = path === "" ? entry.name : `${path}/${entry.name}`;
+      if (child === ".local/bear") return []; // User Markdown files, not repository documentation.
       return entry.isDirectory() ? filesUnder(child) : [child];
     });
 }
@@ -255,6 +256,7 @@ const misplacedMarkdown = filesUnder("").filter((path) => {
   return path.endsWith(".md")
     && !path.startsWith("docs/")
     && !path.startsWith("standards/")
+    && !path.startsWith("site/src/applications/bear/examples/") // Imported product fixtures.
     && !rootPackage.workspaces.some((workspace) => workspace.startsWith("packages/") && path.startsWith(`${workspace}/docs/`))
     && name !== "README.md"
     && name !== "AGENTS.md";

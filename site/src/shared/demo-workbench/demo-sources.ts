@@ -235,6 +235,7 @@ const sourceModules = import.meta.glob<string>(
     "/src/routes/**/*.{ts,tsx}",
     "/src/applications/**/*.{ts,tsx}",
     "/src/app/llm-agent-api.ts",
+    "/src/app/local-markdown-api.ts",
     "/src/shared/**/*.{ts,tsx}",
     "!/src/shared/ui/**",
     "!/src/shared/widget-binding/**",

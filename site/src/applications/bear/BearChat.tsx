@@ -15,7 +15,7 @@ const config: ComposerHostConfig = {
   interaction: { submit: "enter", newline: "shift-enter" },
 };
 
-export function BearChat({ editor }: { editor: TextEditor }) {
+export function BearChat({ editor, onBusyChange }: { editor: TextEditor; onBusyChange?: (busy: boolean) => void }) {
   const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Array<{ prompt: string; reply: string }>>([]);
   const session = useRef<string | null>(null);
@@ -29,6 +29,7 @@ export function BearChat({ editor }: { editor: TextEditor }) {
       setExpanded(true);
       setMessages(current => [...current, turn]);
       request.current = new AbortController();
+      onBusyChange?.(true);
       try {
         await streamLlmAgentTurn({
           prompt: turn.prompt, mode: "chat", tools, sessionId: session.current, signal: request.current.signal,
@@ -40,7 +41,7 @@ export function BearChat({ editor }: { editor: TextEditor }) {
         turn.reply += "\n응답을 완료하지 못했습니다. 본문에 반영된 내용은 유지됩니다.";
         setMessages(current => [...current]);
         throw error;
-      }
+      } finally { onBusyChange?.(false); }
     } },
     labels: { mentionSuggestions: "멘션", skillSuggestions: "스킬" }, shouldClearAfterSubmit: true,
   });

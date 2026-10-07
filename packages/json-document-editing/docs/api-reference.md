@@ -669,7 +669,7 @@ createTextEditor(document: JSONDocument, pointer?: Pointer): TextEditor
 ## `createTextEditorTools`
 
 ```ts
-createTextEditorTools(editor: TextEditor): ({ name: string; description: string; parameters: { type: string; properties: { before?: undefined; after?: undefined; text?: undefined; anchor?: undefined; placement?: undefined; }; required: any[]; additionalProperties: boolean; }; execute: (_args: unknown) => unknown; } | { ...; } | { ...; })[]
+createTextEditorTools(editor: TextEditor): ({ name: string; description: string; parameters: { type: string; properties: {}; required: any[]; additionalProperties: boolean; }; execute: (_args: unknown) => unknown; } | { ...; } | { ...; } | { ...; })[]
 ```
 ## `createTreeEditor`
 

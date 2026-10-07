@@ -1,3 +1,4 @@
+import { localMarkdownFiles } from "./config/local-markdown-files.ts";
 import { interactionRecordingServer } from "./config/interaction-recording-server.ts";
 import react from "@vitejs/plugin-react";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
@@ -117,6 +118,7 @@ export default defineConfig({
     }),
     react(),
     process.env.VITE_LLM_BACKEND !== "mock" ? codexAppServer() : undefined,
+    localMarkdownFiles(),
     interactionRecordingServer(),
     rootLlmsTxt(),
     productionSiteAssets(),

@@ -77,3 +77,30 @@ test("a move updates the read source for a subsequent edit", () => {
   expect(edit!.execute({ before: "A", after: "C" })).toMatchObject({ ok: true });
   expect(editor.text).toBe("B\nC\n");
 });
+
+test("writing tools find passages and read directional selection without changing it", () => {
+  const editor = createTextEditor(createJSONDocument("AI와 글. AI와 검토."));
+  editor.select({ anchor: 5, focus: 0 });
+  const tools = createTextEditorTools(editor);
+  const execute = (name: string, args: unknown) => tools.find(tool => tool.name === name)!.execute(args);
+  expect(execute("read_selection", {})).toEqual({ ok: true, text: "AI와 글", selection: { anchor: 5, focus: 0 } });
+  expect(execute("find_in_document", { query: "AI" })).toMatchObject({ ok: true, matches: [{ from: 0, to: 2 }, { from: 7, to: 9 }], truncated: false });
+  expect(execute("find_in_document", { query: "" })).toMatchObject({ code: "text.invalid-query" });
+  expect(execute("find_in_document", { query: "없음" })).toMatchObject({ matches: [] });
+  expect(editor.snapshot.selection).toEqual({ anchor: 5, focus: 0 });
+  expect(editor.snapshot.canUndo).toBe(false);
+});
+
+test("history tools report availability and reject edits made since the last read", () => {
+  const editor = createTextEditor(createJSONDocument("초안"));
+  const tools = createTextEditorTools(editor);
+  const execute = (name: string, args: unknown = {}) => tools.find(tool => tool.name === name)!.execute(args);
+  expect(execute("undo_document")).toMatchObject({ code: "text.read-required" });
+  execute("read_document");
+  expect(execute("undo_document")).toMatchObject({ code: "text.history-unavailable" });
+  execute("edit_document", { before: "초안", after: "수정" });
+  expect(execute("undo_document")).toMatchObject({ source: "초안", canRedo: true });
+  expect(execute("redo_document")).toMatchObject({ source: "수정", canRedo: false });
+  editor.insert("직접 입력");
+  expect(execute("undo_document")).toMatchObject({ code: "text.stale-source" });
+});
