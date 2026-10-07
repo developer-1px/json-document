@@ -39,6 +39,8 @@ export function GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & {
 
 export type InteractionHandleBindingOptions<ElementType extends Element = HTMLElement> = {
   readonly descriptor: InteractionHandleDescriptor;
+  /** Delegated surfaces capture on the hit item so native click/double-click retain their target. */
+  readonly captureTarget?: (event: PointerEvent<ElementType>) => ElementType;
   readonly onHandle: (event: InteractionHandleEvent, input: PointerEvent<ElementType>) => void;
 };
 
@@ -132,8 +134,9 @@ export function useInteractionHandle<ElementType extends Element = HTMLElement>(
           const superseded = interaction.cancel("superseded");
           if (superseded !== null) options.onHandle(superseded, event);
         }
-        pointer.begin(event.currentTarget, event.pointerId, { active: true });
-        continueOnWindow(event.currentTarget);
+        const target = options.captureTarget?.(event) ?? event.currentTarget;
+        pointer.begin(target, event.pointerId, { active: true });
+        continueOnWindow(target);
         setActive(true);
         options.onHandle(interaction.start(options.descriptor, point(event)), event);
       },

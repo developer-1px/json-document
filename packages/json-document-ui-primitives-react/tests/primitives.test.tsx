@@ -16,6 +16,7 @@ import {
   GridCell,
   Menu,
   ProductShell,
+  floatingSurface,
   Popover,
   ResizeHandle,
   SelectableItem,
@@ -183,6 +184,7 @@ describe("UI Primitives", () => {
   test("ProductShell exposes a canonical floating toolbar presentation", () => {
     render(<ProductShell toolbar="Actions" toolbarPresentation="floating">Canvas</ProductShell>);
     expect(screen.getByRole("toolbar").getAttribute("data-ui-presentation")).toBe("floating");
+    expect(screen.getByRole("toolbar").classList.contains(floatingSurface.control)).toBe(true);
   });
 
   test("Toolbar can own a standalone action collection", () => {

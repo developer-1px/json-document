@@ -7,6 +7,16 @@ export interface SourceAlias {
 
 export function jsonDocumentSourceAliases(): SourceAlias[] {
   return [
+    { find: "@interactive-os/json-document-sheet/sheet-hand.css", replacement: sourceFile("packages/json-document-sheet/src/sheet-hand.css") },
+    { find: "@interactive-os/json-document-sheet", replacement: sourceFile("packages/json-document-sheet/src/index.ts") },
+    { find: "@interactive-os/json-document-web/interaction-recording", replacement: sourceFile("packages/json-document-web/src/interaction-recording-index.ts") },
+    { find: "@interactive-os/json-document-contenteditable/text-projection.css", replacement: sourceFile("packages/json-document-contenteditable/src/dom/text-projection.css") },
+    { find: "@interactive-os/json-document-contenteditable/text-selection.css", replacement: sourceFile("packages/json-document-contenteditable/src/dom/text-selection.css") },
+    { find: "@interactive-os/json-document-markdown-web/markdown-editor.css", replacement: sourceFile("packages/json-document-markdown-web/src/markdown-editor.css") },
+    { find: "@interactive-os/json-document-rich-text-react/placeholder.css", replacement: sourceFile("packages/json-document-rich-text-react/src/placeholder.css") },
+    { find: "@interactive-os/json-document-ui-primitives-react/floating-surface.css", replacement: sourceFile("packages/json-document-ui-primitives-react/src/floating-surface.css") },
+    { find: "@interactive-os/json-document-ui-primitives-react/chat-bubble.css", replacement: sourceFile("packages/json-document-ui-primitives-react/src/chat-bubble.css") },
+    { find: "@interactive-os/json-document-composer-react/chat-composer.css", replacement: sourceFile("packages/json-document-composer-react/src/chat-composer.css") },
     { find: "@interactive-os/json-document-markdown", replacement: sourceFile("packages/json-document-markdown/src/index.ts") },
     { find: "@interactive-os/json-document-markdown-web", replacement: sourceFile("packages/json-document-markdown-web/src/index.ts") },
     { find: "@interactive-os/json-document-object-document", replacement: sourceFile("packages/json-document-object-document/src/index.ts") },

@@ -7,7 +7,7 @@ interface DOMPosition { readonly node: Node; readonly offset: number }
 export interface TextDOMIndex {
   readonly value: string;
   offset(node: Node, offset: number): number | null;
-  position(offset: number): DOMPosition;
+  position(offset: number, affinity?: "backward" | "forward"): DOMPosition;
 }
 interface CachedIndex { readonly observer: MutationObserver; dirty: boolean; index: TextDOMIndex | null }
 const indexes = new WeakMap<HTMLElement, CachedIndex>();
@@ -18,7 +18,7 @@ export function textDOMIndex(root: HTMLElement): TextDOMIndex {
   if (!cached) {
     const observer = new MutationObserver(records => { if (records.length) cached!.dirty = true; });
     cached = { observer, dirty: true, index: null };
-    observer.observe(root, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ["data-contenteditable-caret"] });
+    observer.observe(root, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ["data-contenteditable-caret", "data-text-decoration"] });
     indexes.set(root, cached);
   }
   if (cached.dirty || cached.observer.takeRecords().length) {
@@ -33,7 +33,8 @@ function buildIndex(root: HTMLElement): TextDOMIndex {
   const projections = new Map<Node, NodeText>();
   const project = (node: Node): NodeText => {
     let result: NodeText;
-    if (node.nodeType === 3) result = { value: (node as Text).data, children: [], offsets: [] };
+    if (node.nodeType === 1 && (node as Element).hasAttribute("data-text-decoration")) result = { value: "", children: [], offsets: [] };
+    else if (node.nodeType === 3) result = { value: (node as Text).data, children: [], offsets: [] };
     else if (isElement(node, "br")) result = { value: (node as Element).hasAttribute("data-contenteditable-caret") ? "" : "\n", children: [], offsets: [0] };
     else {
       const parts: string[] = [];
@@ -79,13 +80,14 @@ function buildIndex(root: HTMLElement): TextDOMIndex {
       const projection = projections.get(node)!;
       return from + (node.nodeType === 3 ? bounded(offset, projection.value.length) : projection.offsets[bounded(offset, projection.offsets.length - 1)] ?? 0);
     },
-    position(offset) {
+    position(offset, affinity = "backward") {
       let low = 0, high = texts.length;
       while (low < high) {
         const middle = (low + high) >>> 1;
         if (texts[middle]!.to < offset) low = middle + 1;
         else high = middle;
       }
+      while (affinity === "forward" && texts[low]?.to === offset && texts[low + 1]?.from === offset) low++;
       const text = texts[low];
       return text && offset >= text.from ? { node: text.node, offset: offset - text.from }
         : boundaries.get(offset) ?? { node: root, offset: root.childNodes.length };

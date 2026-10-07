@@ -4,7 +4,9 @@
   "description": "React contenteditable root bound to a local json-document string pointer.",
   "type": "module",
   "license": "MIT",
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {
@@ -22,13 +24,17 @@
     "!dist/.tsbuildinfo",
     "README.md",
     "LICENSE",
-    "docs"
+    "docs",
+    "src/dom/text-projection.css",
+    "src/dom/text-selection.css"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./text-projection.css": "./src/dom/text-projection.css",
+    "./text-selection.css": "./src/dom/text-selection.css"
   },
   "scripts": {
     "clean": "rm -rf dist",
@@ -42,7 +48,8 @@
     "@interactive-os/json-document": "^3.0.0",
     "@interactive-os/json-document-web": "^0.1.0-rc.0",
     "react": "^18.0.0 || ^19.0.0",
-    "@interactive-os/json-document-editing": "^0.1.0-rc.0"
+    "@interactive-os/json-document-editing": "^0.1.0-rc.0",
+    "@interactive-os/json-document-affordance": "^0.1.0-rc.0"
   },
   "devDependencies": {
     "@interactive-os/json-document": "*",
@@ -57,6 +64,7 @@
     "react-dom": "^19.2.5",
     "typescript": "^5.0.0",
     "vitest": "^4.1.7",
-    "@interactive-os/json-document-editing": "*"
+    "@interactive-os/json-document-editing": "*",
+    "@interactive-os/json-document-affordance": "*"
   }
 }

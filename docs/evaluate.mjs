@@ -1,3 +1,4 @@
+import { siteRoutes } from "../site/route-registry.mjs";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,7 +9,8 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 
 for (const args of [
   ["scripts/generate-api-reference.mjs", "--check"],
-  ["--test", "docs/api-reference/packages.test.mjs", "site/scripts/route-checks.test.mjs"],
+  ["scripts/check-architecture-drift.mjs"],
+  ["--test", "docs/api-reference/packages.test.mjs", "site/scripts/route-checks.test.mjs", "scripts/architecture-drift.test.mjs"],
 ]) {
   const result = spawnSync(process.execPath, args, { cwd: root, encoding: "utf8" });
   if (result.status !== 0) {
@@ -43,6 +45,7 @@ function filesUnder(path) {
       }
 
       const child = path === "" ? entry.name : `${path}/${entry.name}`;
+      if (child === ".local/bear") return []; // User Markdown files, not repository documentation.
       return entry.isDirectory() ? filesUnder(child) : [child];
     });
 }
@@ -55,7 +58,7 @@ function fail(message) {
 const publicDocs = {
   overview: read("docs/public/overview.md"),
   applications: read("docs/public/applications.md"),
-  concepts: read("docs/public/concepts.md"),
+  concepts: read("docs/public/architecture.md"),
   foundation: read("docs/public/foundation.md"),
   buildingBlocks: read("docs/public/building-blocks.md"),
   editing: read("docs/public/editing.md"),
@@ -148,7 +151,7 @@ const implementationShape = read("standards/repository-implementation-shape.md")
 const domEditingLifecycle = read("standards/dom-editing-lifecycle.md");
 const editingSession = read("standards/editing-session.md");
 
-const documentRoutes = readJson("site/site-routes.json").filter((route) => route.documentSource !== undefined);
+const documentRoutes = siteRoutes.filter((route) => route.documentSource !== undefined);
 for (const route of documentRoutes) {
   for (const source of route.documentIncludes ?? []) {
     if (!/^packages\/[^/]+\/docs\/[^/]+\.md$/.test(source) || !existsSync(join(root, source))) fail(`Invalid owner documentation inclusion: ${source}`);
@@ -156,7 +159,7 @@ for (const route of documentRoutes) {
 }
 const registeredSources = documentRoutes.map((route) => route.documentSource);
 for (const source of registeredSources) {
-  if (!/^docs\/(?:public|api-reference)\/[^/]+\.md$/.test(source) || !existsSync(join(root, source))) {
+  if (!/^(?:docs\/public\/[^/]+|packages\/[^/]+\/docs\/[^/]+)\.md$/.test(source) || !existsSync(join(root, source))) {
     fail(`Invalid documentation source registration: ${source}`);
   }
 }
@@ -253,6 +256,7 @@ const misplacedMarkdown = filesUnder("").filter((path) => {
   return path.endsWith(".md")
     && !path.startsWith("docs/")
     && !path.startsWith("standards/")
+    && !path.startsWith("site/src/applications/bear/examples/") // Imported product fixtures.
     && !rootPackage.workspaces.some((workspace) => workspace.startsWith("packages/") && path.startsWith(`${workspace}/docs/`))
     && name !== "README.md"
     && name !== "AGENTS.md";

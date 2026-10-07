@@ -1,0 +1,70 @@
+import { afterEach, expect, test, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createSheetEditor, type SheetDocument } from "@interactive-os/json-document-editing";
+import { SheetHand } from "../src/index.js";
+afterEach(()=>{cleanup();vi.restoreAllMocks();});
+test("edit commits once, Escape cancels, structural commands undo", () => {
+ const editor = createSheetEditor({columns:[{id:"a",label:"A"}],rows:[{id:"1",cells:{a:"one"}},{id:"2",cells:{a:"two"}}]});
+ render(<SheetHand editor={editor}/>);
+ fireEvent.doubleClick(screen.getByText("one"));
+ fireEvent.change(screen.getByRole("textbox"), {target:{value:"changed"}});
+ expect((editor.snapshot.value as SheetDocument).rows[0]!.cells.a).toBe("one");
+ fireEvent.keyDown(screen.getByRole("textbox"), {key:"Escape"});
+ expect(screen.queryByRole("textbox")).toBeNull();
+ fireEvent.doubleClick(screen.getByText("one"));
+ fireEvent.change(screen.getByRole("textbox"), {target:{value:"changed"}});
+ fireEvent.keyDown(screen.getByRole("textbox"), {key:"Enter", isComposing:true, keyCode:229});
+ expect(screen.queryByRole("textbox")).not.toBeNull();
+ fireEvent.keyDown(screen.getByRole("textbox"), {key:"Enter"});
+ expect((editor.snapshot.value as SheetDocument).rows[0]!.cells.a).toBe("changed");
+ fireEvent.click(screen.getByRole("button", {name:"실행 취소"}));
+ expect((editor.snapshot.value as SheetDocument).rows[0]!.cells.a).toBe("one");
+ fireEvent.click(screen.getByRole("button", {name:"열 추가"}));
+ expect((editor.snapshot.value as SheetDocument).columns).toHaveLength(2);
+ fireEvent.click(screen.getByRole("button", {name:"실행 취소"}));
+ expect((editor.snapshot.value as SheetDocument).columns).toHaveLength(1);
+});
+
+test("a rejected commit retains the draft and does not navigate or close editing", () => {
+ const editor=createSheetEditor({columns:[{id:"a",label:"A"}],rows:[{id:"1",cells:{a:"one"}},{id:"2",cells:{a:"two"}}]});
+ let reject=true;
+ const source={...editor,dispatch: ((intent) => intent.type === "cell.commit" && reject ? {ok:false,code:"cell.rejected"} : editor.dispatch(intent)) as typeof editor.dispatch};
+ render(<SheetHand editor={source}/>);
+ fireEvent.doubleClick(screen.getByText("one"));
+ fireEvent.change(screen.getByRole("textbox"),{target:{value:"retained"}});
+ fireEvent.keyDown(screen.getByRole("textbox"),{key:"Tab"});
+ expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("retained");
+ expect(editor.snapshot.selection.focus?.rowId).toBe("1");
+ expect(screen.getByRole("status").textContent).toBe("cell.rejected");
+ reject=false; fireEvent.keyDown(screen.getByRole("textbox"),{key:"Enter"});
+ expect(screen.queryByRole("textbox")).toBeNull();
+ expect((editor.snapshot.value as SheetDocument).rows[0]!.cells.a).toBe("retained");
+});
+
+test("readonly View exposes current values and blocks toolbar and keyboard history",()=>{
+ const owner=createSheetEditor({columns:[{id:"a",label:"A"}],rows:[{id:"r",cells:{a:"one"}}]});
+ owner.dispatch({type:"cell.commit",rowId:"r",columnId:"a",value:"saved"});
+ const view=owner.createView({readOnly:()=>true}),before=owner.snapshot.value;
+ render(<SheetHand editor={view}/>);
+ fireEvent.pointerEnter(document.querySelector("[data-sheet-hand]")!);
+ expect((screen.getByRole("button",{name:"실행 취소"}) as HTMLButtonElement).disabled).toBe(true);
+ expect((screen.getByRole("button",{name:"행 추가",hidden:true}) as HTMLButtonElement).disabled).toBe(true);
+ fireEvent.doubleClick(screen.getByText("saved"));expect(screen.queryByRole("textbox")).toBeNull();
+ fireEvent.keyDown(screen.getByRole("gridcell"),{key:"z",ctrlKey:true});
+ expect(owner.snapshot.value).toBe(before);
+});
+
+ test.each(["MacIntel", "Win32"])("spreadsheet Enter follows %s keyboard policy", platform=>{
+ vi.spyOn(window.navigator,"platform","get").mockReturnValue(platform);
+ const editor=createSheetEditor({columns:[{id:"a",label:"A"}],rows:[{id:"1",cells:{a:"one"}},{id:"2",cells:{a:"two"}}]});
+ render(<SheetHand editor={editor}/>);
+ fireEvent.keyDown(screen.getAllByRole("gridcell")[0]!,{key:"Enter"});
+ if(platform === "MacIntel") {
+   expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("one");
+   fireEvent.change(screen.getByRole("textbox"),{target:{value:"edited"}});
+   fireEvent.keyDown(screen.getByRole("textbox"),{key:"Enter"});
+   expect((editor.snapshot.value as SheetDocument).rows[0]!.cells.a).toBe("edited");
+ }
+ expect(screen.queryByRole("textbox")).toBeNull();
+ expect(editor.snapshot.selection.focus?.rowId).toBe("2");
+ });

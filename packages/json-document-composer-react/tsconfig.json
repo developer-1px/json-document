@@ -14,7 +14,8 @@
     { "path": "../json-document-rich-text-suggestion" },
     { "path": "../json-document-rich-text-suggestion-react" },
     { "path": "../json-document-web" },
-    { "path": "../json-document-ui-primitives-react" }
+    { "path": "../json-document-ui-primitives-react" },
+    { "path": "../json-document-rich-text-react" }
   ],
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

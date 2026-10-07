@@ -1,3 +1,5 @@
+import { localMarkdownFiles } from "./config/local-markdown-files.ts";
+import { interactionRecordingServer } from "./config/interaction-recording-server.ts";
 import react from "@vitejs/plugin-react";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { defineConfig, type Plugin } from "vite";
@@ -6,7 +8,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { jsonDocumentSourceAliases } from "./config/json-document-source-aliases.ts";
 import { codexAppServer } from "./config/codex-app-server.ts";
-import siteRoutes from "./site-routes.json";
+import { siteRoutes } from "./route-registry.mjs";
 
 function rootLlmsTxt(): Plugin {
   const path = fileURLToPath(new URL("../docs/public/llms.txt", import.meta.url));
@@ -116,6 +118,8 @@ export default defineConfig({
     }),
     react(),
     process.env.VITE_LLM_BACKEND !== "mock" ? codexAppServer() : undefined,
+    localMarkdownFiles(),
+    interactionRecordingServer(),
     rootLlmsTxt(),
     productionSiteAssets(),
   ],

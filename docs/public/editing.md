@@ -39,7 +39,7 @@ interface로 통합하거나 새로운 wire protocol을 정의하지 않습니�
 다음 작업이 실행돼도 반환 결과는 자신의 전이에 속합니다. `revision`은 문서
 commit 횟수가 아니라 편집 상태의 전이입니다.
 
-구체 시그니처는 [Editing API](../api-reference/editing.md), 사용법은
+구체 시그니처는 [Editing API](../../packages/json-document-editing/docs/api-reference.md), 사용법은
 [Intent guide](intent-guide.md)와 [Intent](intent.md)에서 봅니다.
 
 ## 값을 바꾸지 않는 경로

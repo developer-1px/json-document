@@ -1,3 +1,4 @@
+import { floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
 import { tv } from "tailwind-variants";
 import { ui } from "../../shared/ui/styles";
 
@@ -48,8 +49,8 @@ export const calendarDemoRecipe = tv({
     todayMark: "font-semibold text-foreground-strong",
     weekToday: "rounded-full bg-background-accent text-foreground-inverse",
     dayNumber: "inline-flex size-7 items-center justify-center font-medium text-foreground-strong",
-    sidebar: `absolute right-0 top-[calc(100%+0.75rem)] flex max-h-[calc(100vh-8rem)] w-44 shrink-0 flex-col gap-3 overflow-auto p-3 ${ui.surface.floatingPanel}`,
-    inspector: `group/details z-50 flex w-80 min-w-0 flex-col gap-3 overflow-auto p-3.5 ${ui.surface.floatingPanel}`,
+    sidebar: `absolute right-0 top-[calc(100%+0.75rem)] flex max-h-[calc(100vh-8rem)] w-44 shrink-0 flex-col gap-3 overflow-auto p-3 ${floatingSurface.panel}`,
+    inspector: `group/details z-50 flex w-80 min-w-0 flex-col gap-3 overflow-auto p-3.5 ${floatingSurface.panel}`,
     field: "grid gap-1",
     inspectorHeader: "flex min-w-0 items-center gap-2",
     inspectorTitle: "m-0 min-w-0 flex-1 truncate px-0 text-base font-semibold tracking-tight text-foreground-strong",
@@ -61,7 +62,7 @@ export const calendarDemoRecipe = tv({
     eventTime: "truncate text-xs font-normal leading-3 text-foreground-muted",
     creationTimeHint: "pointer-events-none absolute left-2 z-20 translate-y-1 whitespace-nowrap tabular-nums text-foreground-muted/55",
     hourLabel: "absolute right-2 -translate-y-1/2 whitespace-nowrap text-right tabular-nums text-foreground-muted/70",
-    composerDock: `${ui.surface.floatingControl} bottom-4 left-1/2 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 border-line-subtle/35 p-1.5 pl-3 shadow-none`,
+    composerDock: `${floatingSurface.control} bottom-4 left-1/2 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 border-line-subtle/35 p-1.5 pl-3 shadow-none`,
     composerDockFixed: "fixed",
     composerDockEmbedded: "absolute",
     composerSpark: "shrink-0 text-foreground-accent",

@@ -318,3 +318,5 @@ are owned by Key Selection; document reconciliation retains surviving IDs in
 that order. Undo/Redo restores both the document and the associated selection.
 `transformAnnotationSelector`, `annotationSelectorBounds`, and
 `annotationResizeHandle` are the canonical geometry APIs for preview and commit.
+
+문서 에이전트의 읽기·부분 수정 계약은 [Text editing tools](docs/text-tools.md)를 참고하세요.

@@ -19,6 +19,8 @@
   },
   "files": ["dist", "!dist/.tsbuildinfo", "README.md", "docs", "LICENSE"],
   "exports": {
+    "./grid-fill": {"types":"./dist/grid-fill.d.ts", "import":"./dist/grid-fill.js"},
+    "./axis-resize": {"types": "./dist/axis-resize.d.ts", "import": "./dist/axis-resize.js"},
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"

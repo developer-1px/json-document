@@ -74,26 +74,15 @@ Object와 단일 슬라이드 Canvas 프로파일의 정본 소유자는
 소비하며 `@interactive-os/json-document-canvas` Hand가 두 Canvas Host의 입력·UI를
 닫습니다. [Object 소유권 감사](/docs/document-types/object)와 [Canvas Usage/Source](/docs/api/canvas)를 참고하세요.
 
-현재 사이트에서 다음 항목을 추적합니다.
+위의 후보별 상태는 저장소의 소유권 감사 등록을 읽습니다.
 
 Markdown은 원문 문자열을 JSONDocument에 저장하는 별도의 실험입니다.
 `@interactive-os/json-document-markdown`이 문법의 source 위치 projection을 소유하고,
 Editing이 문자열 선택·이력을, Markdown Web과 contenteditable이 DOM·native 입력을
 소유합니다. Rich Text 모델로 변환하지 않습니다. [Markdown API](/docs/api/markdown)와
-[caret Usage](/demo/markdown-caret)에서 strong 한 문단의 동작과 범위를 확인합니다.
+[caret Usage](/demo/markdown-caret)에서 제목·강조·목록·인용·체크 항목의 원문 편집과 커서·선택 범위를 확인합니다.
 
-```text
-Document Types · TBD
-├── Rich Text
-├── Order
-├── Object · RC 공개 소유자 확정
-├── Tree
-├── Database
-├── Calendar · RC 공개 소유자 확정
-├── Sheet
-├── Kanban
-└── Annotation
-```
+
 
 Calendar·Object 이외의 목록은 분류 후보이지 완료 선언이 아닙니다. 각 후보는 모델, invariant,
 operation과 projection의 실제 owner를 감사한 뒤에만 이 위치로 이동할 수

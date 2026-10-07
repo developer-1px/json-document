@@ -1,0 +1,15 @@
+/* Keep placeholder copy outside text flow so the caret stays at the empty paragraph start. */
+[data-rich-text-placeholder] { position: relative; }
+[data-rich-text-placeholder]:not([data-rich-text-placeholder=""])::before {
+  content: attr(data-rich-text-placeholder);
+  position: absolute;
+  inset-inline-start: 0;
+  color: var(--rich-text-placeholder-color, GrayText);
+  white-space: pre;
+  pointer-events: none;
+  user-select: none;
+}
+
+[data-rich-text-composing] [data-rich-text-placeholder]::before {
+  content: none;
+}

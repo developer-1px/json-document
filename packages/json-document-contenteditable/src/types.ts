@@ -1,5 +1,6 @@
 import type { JSONDocument, Pointer } from "@interactive-os/json-document";
-import type { TextEditor, TextSelection } from "@interactive-os/json-document-editing";
+import type { EditingResult, TextEditor, TextSelection } from "@interactive-os/json-document-editing";
+import type { TextProjection } from "./dom/text-projection.js";
 export type { TextSelection } from "@interactive-os/json-document-editing";
 
 export interface DOMObservation {
@@ -7,10 +8,25 @@ export interface DOMObservation {
   readonly selection: TextSelection | null;
 }
 
+export interface TextDOMSelectionOptions {
+  /** Undefined preserves an equivalent live DOM endpoint; explicit affinity chooses a side. */
+  readonly affinity?: (offset: number) => "backward" | "forward" | undefined;
+}
+
 export interface TextDOMAdapter {
+  /** Source intervals with an atomic visual representation, shared with selection painting. */
+  getTextProjections?(root: HTMLElement): ReadonlyArray<TextProjection>;
   observe(root: HTMLElement): DOMObservation;
   render(root: HTMLElement, value: string, selection?: TextSelection | null): void;
-  restoreSelection(root: HTMLElement, selection: TextSelection): boolean;
+  restoreSelection(root: HTMLElement, selection: TextSelection, options?: TextDOMSelectionOptions): boolean;
+  /** Resolve one visual line while retaining the horizontal goal; null keeps native navigation. */
+  resolveVerticalSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward", extend: boolean): TextSelection | null;
+  /** Reset the horizontal goal after another input, pointer placement, or blur. */
+  resetNavigation?(root: HTMLElement): void;
+  /** Resolve a source deletion range where native DOM deletion cannot preserve the projection. */
+  resolveDeletionSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward"): TextSelection | null;
+  /** Resolve a source-coordinate step across projected DOM boundaries; null keeps native navigation. */
+  resolveHorizontalSelection?(root: HTMLElement, selection: TextSelection, direction: "backward" | "forward", extend: boolean): TextSelection | null;
 }
 
 export interface ContentEditableBindingOptions {
@@ -18,8 +34,14 @@ export interface ContentEditableBindingOptions {
   readonly pointer: Pointer;
   readonly root: HTMLElement;
   readonly dom?: TextDOMAdapter;
+  /** Opt in to virtual selection/caret painting; native input and selection remain authoritative. */
+  readonly selectionRendering?: "native" | "virtual";
   /** Optional canonical source editor; replaces direct commits with selection-restoring Editing transactions. */
   readonly editor?: TextEditor;
+  /** Syntax-owned Enter command; paste and native composition text keep their original content. */
+  readonly insertBreak?: (editor: TextEditor) => EditingResult<TextSelection>;
+  /** Syntax-owned Tab action; null leaves native focus navigation available. */
+  readonly indent?: (editor: TextEditor, direction: "indent" | "outdent") => EditingResult<TextSelection> | null;
 }
 
 export type ContentEditableBindingResult =

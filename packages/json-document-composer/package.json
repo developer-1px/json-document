@@ -9,7 +9,7 @@
   "types": "./dist/index.d.ts",
   "repository": { "type": "git", "url": "git+https://github.com/developer-1px/json-document.git", "directory": "packages/json-document-composer" },
   "publishConfig": { "access": "public", "provenance": true, "tag": "next" },
-  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "LICENSE"],
+  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "docs", "LICENSE"],
   "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
   "scripts": {
     "clean": "rm -rf dist",

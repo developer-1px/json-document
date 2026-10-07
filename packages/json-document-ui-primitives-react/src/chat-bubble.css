@@ -1,0 +1,26 @@
+/* Import once. Existing semantic tokens can be supplied by any Host. */
+[data-ui-chat-bubble] {
+  box-sizing: border-box;
+  width: fit-content;
+  min-width: 0;
+  max-width: 85%;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius-surface, 1rem);
+  background: rgb(var(--color-background-subtle, 251 248 242));
+  color: rgb(var(--color-foreground-default, 69 67 62));
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+[data-ui-chat-bubble="incoming"] {
+  margin-inline-end: auto;
+  border-end-start-radius: var(--radius-tight, 0.25rem);
+}
+[data-ui-chat-bubble="outgoing"] {
+  margin-inline-start: auto;
+  border-end-end-radius: var(--radius-tight, 0.25rem);
+  background: rgb(var(--color-background-action-primary, 41 40 36));
+  color: rgb(var(--color-foreground-inverse, 255 255 255));
+}
+[data-ui-chat-bubble] p { margin: 0; }
+[data-ui-chat-bubble] a { color: inherit; text-decoration: underline; }

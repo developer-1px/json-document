@@ -1,4 +1,6 @@
 export { selectionResult } from "./core/family.js";
+export { traverseGrid } from "./interaction/grid-traversal.js";
+export type { GridTraversalIndex, GridTraversalOptions } from "./interaction/grid-traversal.js";
 export {
   createKeySelectionFamily,
   emptyKeySelection,

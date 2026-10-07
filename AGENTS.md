@@ -1,5 +1,11 @@
 # Repository agent instructions
 
+## Design contract
+
+Before creating, modifying, or reviewing UI, read and follow
+[docs/Design.md](docs/Design.md). Use canonical UI Atoms and shared tokens;
+extend the owning module instead of inventing consumer-local variants.
+
 ## Local verification and remote workflows
 
 This is a solo-maintained project. Agents own change-scoped local verification
@@ -137,3 +143,13 @@ Remove the element when its absence does not lose meaning. In particular:
 After implementing UI, audit it by subtraction: remove every treatment whose
 absence preserves information, behavior, state, hierarchy, and accessibility.
 When uncertain, present the simpler version first.
+
+### Floating controls
+
+Build floating control surfaces from the UI primitives package's
+`floatingSurface.control` / `floatingSurface.panel` and its
+`floating-surface.css`, composing existing `Toolbar`, `Popover`, `Command`,
+`Choice`, and `Field` APIs. Hosts own placement, spacing, and product policy.
+Do not duplicate glass, border, radius, blur, or elevation recipes in Hosts or
+site-shared styles. Extend the canonical owner when a valid case is missing,
+and update its documentation, Usage, and source registration together.

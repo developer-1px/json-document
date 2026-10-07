@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { EventType, type AGUIEvent } from "@ag-ui/core";
 import { ArrowUp, Plus, Square } from "lucide-react";
 import { Command, Field } from "@interactive-os/json-document-ui-primitives-react";
-import { listLlmAgentSessions, readLlmAgentSession, streamLlmAgentTurn, type LlmAgentMessage, type LlmAgentSession } from "./llm-agent-api";
+import { listLlmAgentSessions, readLlmAgentSession, streamLlmAgentTurn, type LlmAgentMessage, type LlmAgentSession } from "../../app/llm-agent-api";
 import { createA2uiStreamingDocumentEngine, type A2uiStreamingDocument } from "@interactive-os/json-document-a2ui";
 import { A2UI_PROJECTION_ERROR_TEXT, A2uiSurface, a2uiCatalogPolicy, createAgUiA2uiAdapter, type AgUiA2uiAdapter } from "../../app/a2ui-streaming-document";
 import { MarkdownContent } from "../../shared/ui/markdown-content";

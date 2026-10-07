@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ConnectorCatalogRoute } from "../../../../routes/connectors/ConnectorCatalogRoute";
+import { DocsRoute } from "../../../../routes/docs/DocsRoute";
 
 export const Route = createFileRoute("/_page/connectors/")({
-  component: ConnectorCatalogRoute,
+  component: () => <DocsRoute pageId="connectors" />,
 });

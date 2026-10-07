@@ -1,4 +1,4 @@
-import { applyPatch, buildPointer, jsonEqual, type JSONPatchOperation } from "@interactive-os/json-document";
+import { applyPatch, buildPointer, jsonEqual, type JSONValue, type JSONPatchOperation } from "@interactive-os/json-document";
 import type { DocumentObject, ObjectDocument } from "./object-model.js";
 import { projectObjectText, transformObject, type ObjectTransform } from "./object-projection.js";
 import { assertObjectDocument } from "./object-validation.js";
@@ -10,6 +10,7 @@ export type ObjectOperation =
   | { readonly type: "fill"; readonly objectIds: ReadonlyArray<string>; readonly color: string }
   | { readonly type: "style"; readonly objectIds: ReadonlyArray<string>; readonly style: Partial<ObjectStyle> }
   | { readonly type: "remove"; readonly objectIds: ReadonlyArray<string> }
+  | { readonly type: "embedded-document"; readonly objectId: string; readonly document: JSONValue }
   | { readonly type: "text"; readonly objectId: string; readonly text: string }
   | { readonly type: "replace"; readonly document: ObjectDocument };
 
@@ -30,7 +31,7 @@ export function planObjectOperation(document: ObjectDocument, operation: ObjectO
     } else if (operation.type === "insert") {
       operation.objects.forEach((object, index) => operations.push({ op: "add", path: `/objects/${objects.length + index}`, value: object }));
     } else {
-      const ids = operation.type === "text" ? [operation.objectId] : operation.objectIds;
+      const ids = (operation.type === "text" || operation.type === "embedded-document") ? [operation.objectId] : operation.objectIds;
       const targets = new Set(ids);
       if (ids.some((id) => !objects.some((object) => object.id === id))) return { ok: false, code: "selection.object-not-found" };
       for (let index = objects.length - 1; index >= 0; index--) {
@@ -51,6 +52,9 @@ export function planObjectOperation(document: ObjectDocument, operation: ObjectO
             const effective = current[key as keyof ObjectStyle];
             if (effective !== undefined && effective !== value) operations.push({ op: "add", path: buildPointer(["objects", index, key]), value });
           }
+        } else if (operation.type === "embedded-document") {
+          if (object.kind !== "embedded-document") return {ok:false,code:"object.not-embedded-document"};
+          if (!jsonEqual(object.document!,operation.document)) operations.push({op:"replace",path:buildPointer(["objects",index,"document"]),value:operation.document});
         } else if (operation.type === "text") {
           if (!projectObjectText(object)) return { ok: false, code: "object.not-text" };
           if (operation.text !== object.label) operations.push({ op: "replace", path: buildPointer(["objects", index, "label"]), value: operation.text });

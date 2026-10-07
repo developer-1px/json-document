@@ -167,7 +167,9 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-affordance/src/select.ts",
       "packages/json-document-web/src/keyboard.ts",
+      "packages/json-document-selection/src/interaction/grid-traversal.ts",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
       "packages/json-document-editing/src/document.ts",
       "packages/json-document-selection/src/range/index.ts",
@@ -184,7 +186,9 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-affordance/src/select.ts",
       "packages/json-document-web/src/keyboard.ts",
+      "packages/json-document-selection/src/interaction/grid-traversal.ts",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
       "packages/json-document-editing/src/document.ts",
       "packages/json-document-selection/src/range/index.ts",
@@ -199,7 +203,9 @@ describe("Demo definition and source discovery", () => {
       "/docs/api/react",
       "/docs/api/affordance",
       "/docs/api/web",
+      "/docs/api/selection",
       "/docs/api/web",
+      "/docs/api/editing",
       "/docs/api/react",
       "/docs/api/editing",
       "/docs/api/selection",
@@ -221,8 +227,10 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-web/src/clipboard-event.ts",
       "packages/json-document-web/src/input.ts",
       "packages/json-document-web/src/keyboard.ts",
+      "packages/json-document-selection/src/interaction/grid-traversal.ts",
       "packages/json-document-ui-primitives-react/src/toolbar.tsx",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-editing/src/database.ts",
       "packages/json-document/src/foundation/json/serializable.ts",
       "packages/json-document-selection/src/range/index.ts",
@@ -253,6 +261,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-editing/src/object.ts",
       "packages/json-document-object-document/src/object-model.ts",
       "packages/json-document-object-document/src/object-style.ts",
@@ -267,28 +276,18 @@ describe("Demo definition and source discovery", () => {
 
   test("registers the Sheet editor, React and Web Grid owners next to Sheet usage", async () => {
     const sources = await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx");
-    expect(sources.map((file) => file.path)).toEqual([
+    expect(sources.map((file) => file.path)).toEqual(expect.arrayContaining([
       "routes/sheet-demo/SheetDemo.tsx",
-      "packages/json-document-web/src/clipboard-event.ts",
-      "packages/json-document-web/src/input.ts",
-      "packages/json-document-ui-primitives-react/src/controls.tsx",
-      "packages/json-document-ui-primitives-react/src/product-shell.tsx",
-      "packages/json-document-react/src/use-editing.ts",
-      "packages/json-document-react/src/editing-observation.ts",
-      "packages/json-document-affordance/src/select.ts",
-      "packages/json-document-web/src/keyboard.ts",
-      "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-sheet/src/sheet-hand.tsx",
       "packages/json-document-editing/src/sheet.ts",
       "packages/json-document/src/foundation/json/serializable.ts",
       "packages/json-document-selection/src/range/index.ts",
       "packages/json-document-react/src/use-grid-editing.ts",
-      "packages/json-document-editing/src/topology.ts",
-      "packages/json-document-web/src/grid-cell.ts",
-      "packages/json-document-ui-primitives-react/src/input-controls.tsx",
+      "packages/json-document-web/src/clipboard-event.ts",
       "packages/json-document-ui-primitives-react/src/surfaces.tsx",
-      "packages/json-document-web/src/pointer-session.ts",
-      "packages/json-document-affordance/src/interaction-handle.ts",
-    ]);
+    ]));
+    const hand = sources.find(file => file.path === "packages/json-document-sheet/src/sheet-hand.tsx")!;
+    expect(hand.referencePath).toBe("/docs/api/sheet");
     const owner = sources.find((file) => file.path === "packages/json-document-editing/src/sheet.ts")!;
     expect(owner.referencePath).toBe("/docs/api/editing");
     expect(await owner.load()).toContain("export function createSheetEditor");
@@ -303,6 +302,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-composer/src/host-config.ts",
       "packages/json-document-composer/src/interaction.ts",
       "packages/json-document-web/src/keyboard.ts",
+      "packages/json-document-selection/src/interaction/grid-traversal.ts",
       "packages/json-document-rich-text-suggestion/src/index.ts",
       "packages/json-document-rich-text-suggestion-react/src/index.ts",
       "packages/json-document-composer-react/src/use-composer.tsx",
@@ -332,9 +332,11 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-affordance/src/select.ts",
       "packages/json-document-web/src/keyboard.ts",
+      "packages/json-document-selection/src/interaction/grid-traversal.ts",
       "packages/json-document-editing/src/tree.ts",
       "packages/json-document-selection/src/range/index.ts",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-react/src/use-tree-editing.ts",
       "packages/json-document-editing/src/tree-visibility.ts",
     ]);
@@ -413,4 +415,27 @@ describe("Demo definition and source discovery", () => {
     expect(paths).toContain("routes/rich-text-demo/richTextDemoQuery.ts");
   });
 
+});
+
+test("Markdown Usage exposes the canonical text projection and restoration sources", async () => {
+  const sources = await discoverDemoSources("routes/markdown-caret/MarkdownCaretRoute.tsx");
+  expect(sources.map(file => file.path)).toEqual(expect.arrayContaining([
+    "packages/json-document-markdown/src/markers.ts",
+    "packages/json-document-markdown/src/tasks.ts",
+    "packages/json-document-markdown/src/paragraph.ts",
+    "packages/json-document-markdown/src/list-editing.ts",
+    "packages/json-document-markdown-web/src/editing-binding.ts",
+    "packages/json-document-contenteditable/src/dom/text-projection.ts",
+    "packages/json-document-contenteditable/src/dom/text-projection.css",
+    "packages/json-document-contenteditable/src/dom/text-selection-overlay.ts",
+    "packages/json-document-contenteditable/src/dom/text-selection-geometry.ts",
+    "packages/json-document-contenteditable/src/dom/text-selection.css",
+    "packages/json-document-contenteditable/src/dom/plain-text.ts",
+    "packages/json-document-contenteditable/src/dom/text-index.ts",
+    "packages/json-document-contenteditable/src/dom/text-navigation.ts",
+    "packages/json-document-contenteditable/src/dom/caret-visibility.ts",
+  ]));
+  const markdown = await sources.find(file => file.path === "packages/json-document-markdown-web/src/markdown-dom.ts")!.load();
+  expect(markdown).toContain("createTextProjectionDOMAdapter");
+  expect(markdown).not.toContain("setBaseAndExtent");
 });

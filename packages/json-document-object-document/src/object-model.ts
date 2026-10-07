@@ -26,7 +26,7 @@ export interface ObjectDocument extends Record<string, JSONValue> {
   readonly objects: ReadonlyArray<DocumentObject>;
 }
 
-export type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "sticky-note" | "path" | "image";
+export type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "sticky-note" | "path" | "image" | "embedded-document";
 
 export interface CanvasTextFormat {
   readonly fontSize?: number;
@@ -39,6 +39,7 @@ export type CanvasObjectDraft = ObjectDraft & (
   | (CanvasTextFormat & { readonly kind: "rectangle" | "ellipse" | "sticky-note"; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
   | { readonly kind: "path"; readonly points: ReadonlyArray<ObjectPoint>; readonly strokeWidth: number }
   | { readonly kind: "image"; readonly source: string }
+  | { readonly kind: "embedded-document"; readonly documentType: string; readonly document: JSONValue }
 );
 
 export type CanvasObject = CanvasObjectDraft & { readonly id: string };

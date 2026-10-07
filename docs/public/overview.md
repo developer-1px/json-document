@@ -1,5 +1,8 @@
 # 왜 이 기반을 만드는가
 
+처음 사용한다면 [빠른 시작](quick-start.md), 필요한 계약은 [모듈](modules.md),
+목표와 미완료 상태는 [설계와 진행 상태](design.md)에서 찾을 수 있습니다.
+
 에이전트는 이제 답변만 생성하지 않습니다. 문서와 표, 발표 자료 같은
 artifact를 만들고, 사람은 그 결과를 곧바로 고쳐서 일을 이어 갑니다.
 생성될 artifact마다 예전 방식의 제품 FE를 따로 설계하고 구현할 수는 없지만,
@@ -133,5 +136,5 @@ Connector, Affordance와 UI Primitive는 필요한 환경과 입력 문법에 �
 Hands는 그 조합이 장르별 최소 편집 loop를 완성했는지 판정합니다.
 
 여러 artifact가 같은 주소와 실행 취소와 협업을 쓰게 하려는 자리가 이
-Core입니다. 각 책임의 경계와 선택적인 의존 관계는 [Concept Map](concepts.md)에서
+Core입니다. 각 책임의 경계와 선택적인 의존 관계는 [Architecture](architecture.md)에서
 이어집니다.

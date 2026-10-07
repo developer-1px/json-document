@@ -1,0 +1,663 @@
+# @interactive-os/json-document-calendar API
+
+**탐색 분류:** Hands
+
+Calendar 입력·선택·시간 표시·제어 UI 조합의 public entrypoint입니다. API의 owner는 이 package이며 탐색 분류는 저장소의 아키텍처 등록에서 읽는 위치입니다. 별도 subpath 표시가 없는 항목은 package root에서 import합니다. internal 경로는 계약이 아닙니다.
+
+> 이 문서는 `packages/json-document-calendar/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
+
+## `addCalendarDays`
+
+```ts
+addCalendarDays(date: string, days: number): string
+```
+## `addCalendarMonths`
+
+```ts
+addCalendarMonths(date: string, months: number): string
+```
+## `addCalendarYears`
+
+```ts
+addCalendarYears(date: string, years: number): string
+```
+## `CalendarCell`
+
+```ts
+type CalendarCell = {
+  readonly date: string;
+  readonly day: number;
+  readonly inVisiblePeriod: boolean;
+  readonly weekday: number;
+};
+```
+## `calendarCellInterval`
+
+```ts
+calendarCellInterval(cells: ReadonlyArray<CalendarCell>): CalendarCellInterval | null
+```
+## `CalendarCellInterval`
+
+```ts
+type CalendarCellInterval = { readonly start: string; readonly end: string };
+```
+## `calendarCells`
+
+```ts
+calendarCells(period: CalendarPeriod, visibleDate: string): ReadonlyArray<CalendarCell>
+```
+## `CalendarEventInspector`
+
+```ts
+CalendarEventInspector(props: CalendarEventInspectorProps): ReactNode
+```
+## `CalendarEventInspectorAffordances`
+
+```ts
+interface CalendarEventInspectorAffordances {
+  readonly inspector: ControlAffordance;
+  readonly edit: ControlAffordance;
+  readonly remove: ControlAffordance;
+  readonly titleField: ControlAffordance;
+  readonly allDayToggle: ControlAffordance;
+  readonly startField: ControlAffordance;
+  readonly endField: ControlAffordance;
+  readonly calendarChoice: ControlAffordance;
+  readonly recurrenceChoice: ControlAffordance;
+  readonly recurrenceInterval: ControlAffordance;
+}
+```
+## `CalendarEventInspectorClassNames`
+
+```ts
+interface CalendarEventInspectorClassNames {
+  readonly root?: string;
+  readonly header?: string;
+  readonly title?: string;
+  readonly titleInput?: string;
+  readonly actions?: string;
+  readonly summary?: string;
+  readonly details?: string;
+  readonly field?: string;
+  readonly fieldLabel?: string;
+  readonly toggle?: string;
+  readonly numberInput?: string;
+}
+```
+## `CalendarEventInspectorIcons`
+
+```ts
+interface CalendarEventInspectorIcons {
+  readonly edit?: ReactNode;
+  readonly remove?: ReactNode;
+  readonly time?: ReactNode;
+  readonly calendar?: ReactNode;
+  readonly repeat?: ReactNode;
+}
+```
+## `CalendarEventInspectorLabels`
+
+```ts
+interface CalendarEventInspectorLabels {
+  readonly inspector: string;
+  readonly title: string;
+  readonly edit: string;
+  readonly remove: string;
+  readonly allDay: string;
+  readonly allDaySummary: string;
+  readonly start: string;
+  readonly end: string;
+  readonly calendar: string;
+  readonly repeat: string;
+  readonly repeats: string;
+  readonly none: string;
+  readonly daily: string;
+  readonly weekly: string;
+  readonly monthly: string;
+  readonly yearly: string;
+  readonly every: string;
+  readonly repeatEvery: string;
+  readonly repeatUntil: string;
+  readonly editOccurrence: string;
+  readonly thisOccurrence: string;
+  readonly followingOccurrences: string;
+  readonly allOccurrences: string;
+}
+```
+## `CalendarEventInspectorProps`
+
+```ts
+interface CalendarEventInspectorProps {
+  readonly hand: CalendarHand;
+  readonly calendars: ReadonlyArray<CalendarCalendar>;
+  readonly affordances: CalendarEventInspectorAffordances;
+  readonly classNames: CalendarEventInspectorClassNames;
+  readonly labels: CalendarEventInspectorLabels;
+  readonly icons?: CalendarEventInspectorIcons;
+  readonly realizationKey?: string | null;
+  readonly rootRef?: Ref<HTMLElement>;
+  readonly style?: CSSProperties;
+  readonly placement?: string;
+  readonly fits?: boolean;
+}
+```
+## `calendarEventLabel`
+
+```ts
+calendarEventLabel(event: CalendarEventLabelValue): string
+```
+## `CalendarEventLabelValue`
+
+```ts
+type CalendarEventLabelValue = {
+  readonly title: string;
+  readonly start: string;
+  readonly allDay: boolean;
+};
+```
+## `CalendarGrain`
+
+```ts
+type CalendarGrain = "week" | "month" | "year";
+```
+## `CalendarGrid`
+
+```ts
+CalendarGrid(props: { readonly label: string; readonly value: string | null; readonly grain: CalendarGrain; readonly visibleDate: string; readonly onValueChange: (value: string) => void; readonly onGrainChange: (grain: CalendarGrain) => void; readonly onVisibleDateChange: (date: string) => void; readonly commitOnArrow?: boolean; }): ReactNode
+```
+## `CalendarHand`
+
+```ts
+interface CalendarHand {
+  readonly snapshot: CalendarEditor["snapshot"];
+  readonly document: CalendarDocument;
+  readonly selectedEvent: CalendarEvent | null;
+  readonly selectedOccurrences: ReadonlyArray<CalendarOccurrenceSelection>;
+  readonly inspectedInterval: { readonly start: string; readonly end: string } | null;
+  readonly occurrence: CalendarOccurrenceRange;
+  readonly scope: OccurrenceScope;
+  readonly renaming: boolean;
+  readonly titleDraft: string;
+  readonly paintedEvents: ReadonlyArray<CalendarEvent>;
+  readonly timePreview: CalendarTimeGridPointerRelease | null;
+  readonly allDayPreview: CalendarAllDayPointerRelease | null;
+  readonly monthPreview: CalendarMonthPointerRelease | null;
+  readonly selectionDragPreview: CalendarSelectionDragPreview | null;
+  setScope(scope: OccurrenceScope): void;
+  setOccurrence(occurrence: CalendarOccurrenceRange): void;
+  setTitleDraft(title: string): void;
+  beginTitleRename(eventId?: string): void;
+  commitTitleRename(): void;
+  cancelTitleRename(): void;
+  handleTitleRenameKey(key: string): boolean;
+  setTimePreview(preview: CalendarTimeGridPointerRelease | null): void;
+  setAllDayPreview(preview: CalendarAllDayPointerRelease | null): void;
+  setMonthPreview(preview: CalendarMonthPointerRelease | null): void;
+  prepareSelectionDrag(eventId: string, occurrenceStart: string): CalendarSelectionDragSource | null;
+  previewSelectionDrag(preview: CalendarSelectionDragPreview | null): void;
+  commitSelectionDrag(preview: CalendarSelectionDragPreview): boolean;
+  dispatch(intent: CalendarIntent | null): boolean;
+  commitIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): boolean;
+  rememberIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): void;
+  applySelectedPatch(patch: CalendarEventPatch): boolean;
+  createInterval(start: string, end: string, options?: { readonly allDay?: boolean; readonly title?: string }): boolean;
+  isOccurrenceSelected(eventId: string, occurrenceStart: string): boolean;
+  isPrimaryOccurrence(eventId: string, occurrenceStart: string): boolean;
+  selectOccurrence(
+    eventId: string,
+    start: string,
+    end: string,
+    mode?: "replace" | "extend" | "toggle",
+    topology?: CalendarOccurrenceTopologySnapshot,
+  ): boolean;
+  removeSelected(): boolean;
+  setCalendarHidden(calendarId: string, hidden: boolean): boolean;
+  rememberSelection(): void;
+  undo(): void;
+  redo(): void;
+  copy(): CalendarClipboard | null;
+  cut(clipboard?: CalendarClipboard): EditingResult<CalendarSelection> | null;
+  paste(clipboard: CalendarClipboard): EditingResult<CalendarSelection>;
+}
+```
+## `CalendarHandOptions`
+
+```ts
+type CalendarHandOptions = {
+  readonly initialOccurrence?: CalendarOccurrenceRange;
+  readonly defaultTitle?: string;
+  readonly onResult?: (result: EditingResult<CalendarSelection>) => void;
+};
+```
+## `CalendarKeyboardOptions`
+
+```ts
+interface CalendarKeyboardOptions {
+  readonly active: boolean;
+  readonly target?: CalendarKeyboardTarget;
+  readonly onView: (view: CalendarView) => void;
+  readonly onShift: (direction: 1 | -1) => void;
+  readonly onToday: () => void;
+  readonly onCreate: () => void;
+  readonly onRename: () => void;
+  readonly onRemove: () => void;
+  readonly onUndo?: () => void;
+  readonly onRedo?: () => void;
+  readonly onDismiss?: () => boolean;
+}
+```
+## `CalendarKeyboardTarget`
+
+```ts
+interface CalendarKeyboardTarget {
+  addEventListener(type: "keydown", listener: (event: KeyboardEvent) => void): void;
+  removeEventListener(type: "keydown", listener: (event: KeyboardEvent) => void): void;
+}
+```
+## `CalendarMonthGrid`
+
+```ts
+CalendarMonthGrid(props: CalendarMonthGridProps & React.RefAttributes<CalendarMonthGridHandle>): ReactNode
+```
+## `CalendarMonthGridAffordances`
+
+```ts
+interface CalendarMonthGridAffordances {
+  readonly dateCell: ControlAffordance;
+  readonly event: ControlAffordance;
+  readonly eventResizeEnd: ControlAffordance;
+  readonly moreDisclosure: ControlAffordance;
+  readonly overflowDate: ControlAffordance;
+  readonly overflowEvent: ControlAffordance;
+}
+```
+## `CalendarMonthGridClassNames`
+
+```ts
+interface CalendarMonthGridClassNames {
+  readonly root?: string;
+  readonly headerRow?: string;
+  readonly header?: string;
+  readonly week?: string;
+  readonly day?: string;
+  readonly dayInPeriod?: string;
+  readonly dayOutsidePeriod?: string;
+  readonly dayOverflow?: string;
+  readonly dayNumber?: string;
+  readonly today?: string;
+  readonly laneSpacer?: string;
+  readonly moreDisclosure?: string;
+  readonly overflow?: string;
+  readonly overflowDate?: string;
+  readonly overflowEventContainer?: string;
+  readonly eventContainer?: string;
+  readonly allDayEvent?: string;
+  readonly timedEvent?: string;
+  readonly eventTitle?: string;
+  readonly eventTime?: string;
+  readonly resizeEnd?: string;
+}
+```
+## `CalendarMonthGridHandle`
+
+```ts
+interface CalendarMonthGridHandle {
+  dismissOverflow(): boolean;
+}
+```
+## `CalendarMonthGridLabels`
+
+```ts
+interface CalendarMonthGridLabels {
+  readonly grid: string;
+  overflow(date: string): string;
+  more(count: number): string;
+  resizeEnd(event: CalendarEvent): string;
+}
+```
+## `CalendarMonthGridProps`
+
+```ts
+interface CalendarMonthGridProps {
+  readonly visibleDate: string;
+  readonly today: string;
+  readonly events: ReadonlyArray<CalendarEvent>;
+  readonly weekdays: ReadonlyArray<string>;
+  readonly rowLimit: number;
+  readonly hand: CalendarHand;
+  readonly interactions: CalendarPointerInteractions;
+  readonly selectionTopology: CalendarOccurrenceTopologySnapshot;
+  readonly affordances: CalendarMonthGridAffordances;
+  readonly classNames: CalendarMonthGridClassNames;
+  readonly labels: CalendarMonthGridLabels;
+  readonly primaryEventRef?: Ref<HTMLDivElement>;
+  readonly getEventColor: (event: CalendarEvent) => string;
+  readonly onNavigateDate: (date: string) => void;
+}
+```
+## `calendarMonthWeeks`
+
+```ts
+calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyArray<CalendarCell>>
+```
+## `CalendarPeriod`
+
+```ts
+type CalendarPeriod = "day" | CalendarGrain;
+```
+## `CalendarPointerInteractions`
+
+```ts
+interface CalendarPointerInteractions {
+  /** Bind to one Calendar surface; canonical grids attach it automatically. */
+  readonly rootRef: RefObject<HTMLDivElement | null>;
+  readonly hoveredTime: { readonly day: string; readonly instant: string; readonly minutes: number } | null;
+  instantAt(day: string, clientY: number, grid: Element): string | null;
+  timePointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: CalendarTimeGridHandle | null): void;
+  timePointerMove(event: PointerEvent<HTMLElement>): void;
+  timePointerUp(event: PointerEvent<HTMLElement>): void;
+  clearTimeHover(): void;
+  consumeEventClick(): boolean;
+  consumeEventDoubleClick(): boolean;
+  allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
+  allDayPointerMove(event: PointerEvent<HTMLElement>): void;
+  allDayPointerUp(event: PointerEvent<HTMLElement>): void;
+  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, rowDays: ReadonlyArray<string>, id: string | null, start: string | null, end: string | null): void;
+  monthPointerMove(event: PointerEvent<HTMLElement>): void;
+  monthPointerUp(event: PointerEvent<HTMLElement>): void;
+  cancelTimePointer(pointerId: number, reason?: "cancel" | "lost-capture"): void;
+  cancelAllDayPointer(pointerId: number, reason?: "cancel" | "lost-capture"): void;
+  cancelMonthPointer(pointerId: number, reason?: "cancel" | "lost-capture"): void;
+  resizeTimed(id: string, edge: "start" | "end", occurrenceStart: string, origin: string, delta: number, phase: Phase): void;
+  resizeAllDay(id: string, edge: "start" | "end", originDay: string, occurrenceStart: string, delta: number, phase: Phase): void;
+}
+```
+## `CalendarPointerPolicy`
+
+```ts
+type CalendarPointerPolicy = {
+  readonly hourStart: number;
+  readonly hourEnd: number;
+  readonly stepMinutes: number;
+  readonly pixelsPerHour: number;
+  readonly onMonthPointerBegin?: () => void;
+};
+```
+## `CalendarRenameInputBinding`
+
+```ts
+interface CalendarRenameInputBinding {
+  readonly ref: RefObject<HTMLInputElement | null>;
+  readonly value: string;
+  onFocus(): void;
+  onChange(event: ChangeEvent<HTMLInputElement>): void;
+  onBlur(event: FocusEvent<HTMLInputElement>): void;
+  onKeyDown(event: KeyboardEvent<HTMLInputElement>): void;
+}
+```
+## `CalendarRenameInputOptions`
+
+```ts
+interface CalendarRenameInputOptions {
+  /** Commit when focus leaves the title. Disable inside a larger contextual editor. */
+  readonly commitOnBlur?: boolean;
+  /** Retries focus realization when an enclosing positioned editor becomes interactive. */
+  readonly realizationKey?: string | number | boolean | null;
+}
+```
+## `CalendarSelectionDragPreview`
+
+```ts
+interface CalendarSelectionDragPreview {
+  readonly source: CalendarSelectionDragSource;
+  readonly target: CalendarSelectionMoveTarget;
+}
+```
+## `CalendarTimeGrid`
+
+```ts
+CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode
+```
+## `CalendarTimeGridAffordances`
+
+```ts
+interface CalendarTimeGridAffordances {
+  readonly allDayCell: ControlAffordance;
+  readonly allDayEvent: ControlAffordance;
+  readonly eventResizeEnd: ControlAffordance;
+  readonly timeCell: ControlAffordance;
+  readonly selectedSlot: ControlAffordance;
+  readonly timedEvent: ControlAffordance;
+}
+```
+## `CalendarTimeGridClassNames`
+
+```ts
+interface CalendarTimeGridClassNames {
+  readonly root?: string;
+  readonly rootFill?: string;
+  readonly stickyHeader?: string;
+  readonly columnHeader?: string;
+  readonly weekday?: string;
+  readonly dayNumber?: string;
+  readonly today?: string;
+  readonly allDayLabel?: string;
+  readonly allDayCell?: string;
+  readonly allDayEventContainer?: string;
+  readonly allDayEvent?: string;
+  readonly resizeAllDayEnd?: string;
+  readonly timeViewport?: string;
+  readonly timeViewportFill?: string;
+  readonly hourGutter?: string;
+  readonly viewportAnchor?: string;
+  readonly hourLabel?: string;
+  readonly timeCell?: string;
+  readonly selectedSlot?: string;
+  readonly hourRule?: string;
+  readonly nowLine?: string;
+  readonly creationTimeHint?: string;
+  readonly timedEventContainer?: string;
+  readonly timedEvent?: string;
+  readonly eventTitle?: string;
+  readonly eventTime?: string;
+  readonly resizeTimedEnd?: string;
+}
+```
+## `CalendarTimeGridLabels`
+
+```ts
+interface CalendarTimeGridLabels {
+  readonly grid: string;
+  readonly allDay: string;
+  readonly now: string;
+  resizeEnd(event: CalendarEvent): string;
+  hour(hour: number): string;
+}
+```
+## `CalendarTimeGridProps`
+
+```ts
+interface CalendarTimeGridProps {
+  readonly cells: ReadonlyArray<CalendarCell>;
+  readonly weekdays: ReadonlyArray<string>;
+  readonly events: ReadonlyArray<CalendarEvent>;
+  readonly today: string;
+  readonly nowInstant: string;
+  readonly hourStart: number;
+  readonly hourEnd: number;
+  readonly workHourStart: number;
+  readonly stepMinutes: number;
+  readonly defaultTimedDurationMinutes: number;
+  readonly pixelsPerHour: number;
+  readonly fillViewport: boolean;
+  readonly hand: CalendarHand;
+  readonly interactions: CalendarPointerInteractions;
+  readonly selectionTopology: CalendarOccurrenceTopologySnapshot;
+  readonly affordances: CalendarTimeGridAffordances;
+  readonly classNames: CalendarTimeGridClassNames;
+  readonly labels: CalendarTimeGridLabels;
+  readonly timeViewportRef?: Ref<HTMLDivElement>;
+  readonly primaryEventRef?: Ref<HTMLDivElement>;
+  readonly getEventColor: (event: CalendarEvent) => string;
+}
+```
+## `calendarTimeLabel`
+
+```ts
+calendarTimeLabel(value: string): string
+```
+## `CalendarViewportPositionOptions`
+
+```ts
+interface CalendarViewportPositionOptions {
+  readonly viewportRef: RefObject<HTMLElement | null>;
+  readonly active: boolean;
+  readonly resetKey: string;
+  readonly targetHour: number;
+  readonly viewportOffset?: number;
+}
+```
+## `calendarYearMonths`
+
+```ts
+calendarYearMonths(visibleDate: string): ReadonlyArray<string>
+```
+## `DateGrid`
+
+```ts
+DateGrid(props: DateGridProps): ReactNode
+```
+## `DateGridCellRenderProps`
+
+```ts
+interface DateGridCellRenderProps {
+  readonly cell: CalendarCell;
+  readonly selected: boolean;
+  readonly focused: boolean;
+  readonly today: boolean;
+}
+```
+## `DateGridColumnHeader`
+
+```ts
+interface DateGridColumnHeader {
+  readonly label: string;
+  readonly content: ReactNode;
+}
+```
+## `DateGridProps`
+
+```ts
+interface DateGridProps {
+  readonly label: string;
+  readonly cells: ReadonlyArray<CalendarCell>;
+  readonly grain: CalendarGrain;
+  readonly focusDate: string;
+  readonly today?: string;
+  readonly className?: string;
+  readonly rowClassName?: string;
+  readonly columnHeaders?: ReadonlyArray<DateGridColumnHeader>;
+  readonly columnHeaderClassName?: string;
+  readonly cellAffordance?: ControlAffordance;
+  readonly isDateSelected: (date: string) => boolean;
+  readonly onDateSelect: (date: string) => void;
+  readonly onFocusDateChange?: (date: string) => void;
+  readonly onDateMove?: (date: string) => void;
+  readonly getCellClassName?: (props: DateGridCellRenderProps) => string | undefined;
+  readonly renderCellDecoration?: (props: DateGridCellRenderProps) => ReactNode;
+}
+```
+## `DatePicker`
+
+```ts
+DatePicker(props: { readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; }): ReactNode
+```
+## `DateRangePicker`
+
+```ts
+DateRangePicker(props: { readonly label: string; readonly value: DateRangeValue; readonly onValueChange: (value: DateRangeValue) => void; }): ReactNode
+```
+## `DateRangeValue`
+
+```ts
+type DateRangeValue = { readonly start: string; readonly end: string };
+```
+## `HtmlDateField`
+
+```ts
+HtmlDateField(props: { readonly type: HtmlDateType; readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; readonly affordance?: ControlAffordance; }): ReactNode
+```
+## `HtmlDateType`
+
+```ts
+type HtmlDateType = "date" | "time" | "datetime-local" | "month" | "week";
+```
+## `parseHtmlDateValue`
+
+```ts
+parseHtmlDateValue(type: HtmlDateType, value: string): string | null
+```
+## `RangeCalendar`
+
+```ts
+RangeCalendar(props: { readonly label: string; readonly value: DateRangeValue | null; readonly grain: CalendarGrain; readonly visibleDate: string; readonly onValueChange: (value: DateRangeValue) => void; readonly onGrainChange: (grain: CalendarGrain) => void; readonly onVisibleDateChange: (date: string) => void; readonly commitOnArrow?: boolean; }): ReactNode
+```
+## `shiftVisibleDate`
+
+```ts
+shiftVisibleDate(visibleDate: string, period: CalendarPeriod, direction: 1 | -1): string
+```
+## `startOfCalendarWeek`
+
+```ts
+startOfCalendarWeek(date: string): string
+```
+## `startOfIsoWeek`
+
+```ts
+startOfIsoWeek(date: string): string
+```
+## `startOfYear`
+
+```ts
+startOfYear(date: string): string
+```
+## `useCalendarHand`
+
+```ts
+useCalendarHand(editor: CalendarEditor, options?: CalendarHandOptions): CalendarHand
+```
+## `useCalendarKeyboard`
+
+```ts
+useCalendarKeyboard(options: CalendarKeyboardOptions): void
+```
+## `useCalendarPointerInteractions`
+
+```ts
+useCalendarPointerInteractions(hand: CalendarHand, policy: CalendarPointerPolicy): CalendarPointerInteractions
+```
+## `useCalendarRenameInput`
+
+```ts
+useCalendarRenameInput(hand: CalendarHand, options?: CalendarRenameInputOptions): CalendarRenameInputBinding
+```
+## `useCalendarViewportPosition`
+
+```ts
+useCalendarViewportPosition(options: CalendarViewportPositionOptions): void
+```
+## `visiblePeriodLabel`
+
+```ts
+visiblePeriodLabel(period: CalendarPeriod, visibleDate: string, options?: VisiblePeriodLabelOptions): string
+```
+## `VisiblePeriodLabelOptions`
+
+```ts
+type VisiblePeriodLabelOptions = {
+  readonly monthNames?: ReadonlyArray<string>;
+  readonly weekSeparator?: string;
+  readonly dateStyle?: "iso" | "named";
+};
+```

@@ -1,22 +1,39 @@
 import { useEffect, useRef, type HTMLAttributes } from "react";
+import { markdownTableBoundary, readMarkdownTable } from "@interactive-os/json-document-markdown";
+import { markdownSheetPresentation } from "./markdown-sheet-presentation.js";
+import { createRoot } from "react-dom/client";
+import { SheetHand } from "@interactive-os/json-document-sheet";
+import { createMarkdownTableEditor } from "@interactive-os/json-document-editing";
 import type { TextEditor } from "@interactive-os/json-document-editing";
-import { createContentEditableBinding } from "@interactive-os/json-document-contenteditable";
-import { createMarkdownDOMAdapter } from "@interactive-os/json-document-markdown-web";
+import { createMarkdownEditingBinding, type MarkdownEditingBindingOptions } from "@interactive-os/json-document-markdown-web";
 
 export interface MarkdownEditingSurfaceProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "contentEditable"> {
   readonly editor: TextEditor;
+  readonly selectionRendering?: MarkdownEditingBindingOptions["selectionRendering"];
 }
 
 /** Markdown source editing, independent of the Rich Text document and renderer. */
-export function MarkdownEditingSurface({ editor, style, ...props }: MarkdownEditingSurfaceProps) {
+export function MarkdownEditingSurface({ editor, style, selectionRendering = "native", ...props }: MarkdownEditingSurfaceProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const binding = createContentEditableBinding({
-      document: editor.document, pointer: editor.pointer, editor, root, dom: createMarkdownDOMAdapter(),
-    });
-    return binding.bind();
-  }, [editor]);
+    const disposals = new Set<() => void>();
+    const binding = createMarkdownEditingBinding({editor, root, selectionRendering, mountTable(element, position) {
+      const reactRoot = createRoot(element);
+      const table = createMarkdownTableEditor(editor, position);
+      reactRoot.render(<SheetHand editor={table} profile="document-table" headerRow onExit={edge => {
+        const current = readMarkdownTable(editor.text, position());
+        if (!current) return;
+        const offset = markdownTableBoundary(editor.text, current, edge);
+        root.focus(); editor.select({anchor: offset, focus: offset});
+      }} {...markdownSheetPresentation} />);
+      const dispose = () => {disposals.delete(dispose); queueMicrotask(() => reactRoot.unmount());};
+      disposals.add(dispose);
+      return dispose;
+    }});
+    const unbind = binding.bind();
+    return () => {unbind(); disposals.forEach(dispose => dispose());};
+  }, [editor, selectionRendering]);
   return <div {...props} ref={rootRef} role="textbox" aria-multiline="true" contentEditable suppressContentEditableWarning style={{ ...style, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }} />;
 }

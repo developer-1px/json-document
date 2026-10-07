@@ -1,0 +1,29 @@
+import { createContentEditableBinding, type ContentEditableBinding, type ContentEditableBindingOptions } from "@interactive-os/json-document-contenteditable";
+import type { TextEditor } from "@interactive-os/json-document-editing";
+import { indentMarkdownList, insertMarkdownParagraph } from "@interactive-os/json-document-markdown";
+import { createMarkdownDOMAdapter, type MarkdownDOMOptions } from "./markdown-dom.js";
+
+export interface MarkdownEditingBindingOptions {
+  readonly editor: TextEditor;
+  readonly root: HTMLElement;
+  readonly mountTable?: MarkdownDOMOptions["mountTable"];
+  readonly revealSyntax?: boolean;
+  readonly selectionRendering?: ContentEditableBindingOptions["selectionRendering"];
+}
+
+/** Connect Markdown DOM, syntax-owned Enter, and the editor's existing history. */
+export function createMarkdownEditingBinding({editor, root, mountTable, revealSyntax, selectionRendering = "native"}: MarkdownEditingBindingOptions): ContentEditableBinding {
+  return createContentEditableBinding({
+    document: editor.document, pointer: editor.pointer, editor, root,
+    selectionRendering,
+    dom: createMarkdownDOMAdapter({editor, ...(mountTable ? {mountTable} : {}), ...(revealSyntax === undefined ? {} : {revealSyntax})}),
+    indent(editor, direction) {
+      const next = indentMarkdownList(editor.text, editor.snapshot.selection, direction);
+      return next ? editor.replace(next.value, next.selection) : null;
+    },
+    insertBreak(editor) {
+      const next = insertMarkdownParagraph(editor.text, editor.snapshot.selection);
+      return editor.replace(next.value, next.selection);
+    },
+  });
+}
