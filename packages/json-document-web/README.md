@@ -296,3 +296,9 @@ and DOM evidence across one document. Canonical bindings contribute correlated
 command/model evidence through `traceWebInteraction` and `registerWebInteractionSource`.
 `createWebRecordingArchive` preserves recordings through a host-provided local endpoint
 with browser storage fallback. See [입력 진단 기록 API](docs/interaction-recording.md).
+
+`measureWebText` measures plain text using native browser wrapping in unscaled CSS
+pixels. It accepts text, width, auto/fixed widthMode, fontSize and fontWeight and
+returns positive width/height, including explicit and trailing newlines. Canvas
+injects it as the ObjectEditor's `measureText` port; it does not own document or
+history state. Usage and Source are available through the Canvas API page.

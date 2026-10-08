@@ -249,3 +249,4 @@ export {projectSheetGrid} from "./sheet-view.js";
 export type {SheetGrid,SheetViewOptions} from "./sheet-view.js";
 export { applyTextEdit, moveText, type TextEdit, type TextMove } from "./text-edit.js";
 export { createTextEditorTools } from "./text-tools.js";
+export { createCanvasEditorTools } from "./canvas-tools.js";

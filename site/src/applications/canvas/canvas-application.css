@@ -1,0 +1,4 @@
+.canvas-application > aside { bottom: 6rem; }
+@media (max-width: 767px) {
+  .canvas-application > aside { bottom: 10rem; max-height: calc(100dvh - 15rem); overflow-y: auto; }
+}

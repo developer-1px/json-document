@@ -56,7 +56,7 @@ describe("DemoWorkbench", () => {
 
 describe("Demo definition and source discovery", () => {
   test("Canvas Usage imports the reusable Plane Select profile and exposes its canonical closure", async () => {
-    const sources = await discoverDemoSources("routes/canvas-demo/CanvasDemoRoute.tsx");
+    const sources = await discoverDemoSources("applications/canvas/CanvasApplication.tsx");
     expect(await sources[0]!.load()).toContain("createPlaneSelectProfile()");
     for (const [path, reference] of [
       ["packages/json-document-affordance/src/plane-select.ts", "/docs/api/affordance"],
@@ -66,6 +66,10 @@ describe("Demo definition and source discovery", () => {
       ["packages/json-document-selection/src/key/index.ts", "/docs/api/selection"],
       ["packages/json-document-editing/src/object.ts", "/docs/api/editing"],
       ["packages/json-document-web/src/clipboard.ts", "/docs/api/web"],
+      ["packages/json-document-web/src/keyboard.ts", "/docs/api/web"],
+      ["packages/json-document-ui-primitives-react/src/toolbar.tsx", "/docs/api/ui-primitives-react"],
+      ["packages/json-document-ui-primitives-react/src/controls.tsx", "/docs/api/ui-primitives-react"],
+      ["packages/json-document-ui-primitives-react/src/product-shell.tsx", "/docs/api/ui-primitives-react"],
       ["packages/json-document-canvas/src/use-canvas-hand.ts", "/docs/api/canvas"],
       ["packages/json-document-canvas/src/canvas-clipboard.ts", "/docs/api/canvas"],
       ["packages/json-document-editing/src/canvas-clipboard.ts", "/docs/api/editing"],
@@ -370,7 +374,7 @@ describe("Demo definition and source discovery", () => {
   });
 
   test("registers the canonical Canvas Hand, Object document, Editing and gesture closure for both Hosts", async () => {
-    for (const entry of ["routes/canvas-demo/CanvasDemoRoute.tsx", "routes/widgets/CanvasWidgetRoute.tsx"]) {
+    for (const entry of ["applications/canvas/CanvasApplication.tsx", "routes/widgets/CanvasWidgetRoute.tsx"]) {
       const paths = (await discoverDemoSources(entry)).map((file) => file.path);
       expect(paths).toEqual(expect.arrayContaining([
         "packages/json-document-canvas/src/canvas-hand.tsx",

@@ -29,6 +29,8 @@ export interface UseComposerOptions<Model extends string, Suggestion extends Com
   readonly ports: ComposerHostPorts<Model>;
   /** Clear an accepted, unchanged draft as one undoable edit. Defaults to false. */
   readonly shouldClearAfterSubmit?: boolean;
+  /** Clear immediately for chat; success remains the default for existing Hosts. */
+  readonly submitClearTiming?: "start" | "success";
   readonly maxImagePixels?: number;
   readonly readRaster?: typeof readWebRasterFile;
   readonly labels: {
@@ -106,9 +108,13 @@ export function useComposer<Model extends string, Suggestion extends ComposerHos
     setSubmitError(null);
     void (async () => {
       try {
+        if (options.shouldClearAfterSubmit && options.submitClearTiming === "start") {
+          const cleared = clearComposerDraft(editor, current, { createId: ports.createId });
+          if (!cleared.ok) throw new Error(`Composer draft could not be cleared: ${cleared.code}`);
+        }
         await ports.submit(current);
         // Never discard text or attachments changed while the port was pending.
-        if (options.shouldClearAfterSubmit && document.value === current && !intake.hasPending()) {
+        if (options.shouldClearAfterSubmit && options.submitClearTiming !== "start" && document.value === current && !intake.hasPending()) {
           const cleared = clearComposerDraft(editor, current, { createId: ports.createId });
           if (!cleared.ok) throw new Error(`Accepted Composer draft could not be cleared: ${cleared.code}`);
         }

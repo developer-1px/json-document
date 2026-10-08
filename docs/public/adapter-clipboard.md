@@ -60,7 +60,7 @@ interface WebClipboardSurface<Payload, EditingResult> {
 외부 URL은 요청하지 않으며 읽을 수 없는 source는 전체 실패입니다.
 
 API 계약은 소유 패키지의 [Web API](/docs/api/web)에 있으며
-[Canvas](/demo/canvas)와 [Composer](/demo/composer)가 같은 준비 경로를 사용합니다.
+[Canvas](/applications/canvas)와 [Composer](/demo/composer)가 같은 준비 경로를 사용합니다.
 HTML의 남은 source·혼합 입력과 외부 앱 왕복은 [Paste × Image TBD](clipboard.md#paste--image-기본기--tbd)에
 구현 범위와 구분해 공개합니다.
 

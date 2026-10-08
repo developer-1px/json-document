@@ -14,3 +14,11 @@ export function ChatBubble({ direction, label, children, ...props }: ChatBubbleP
     </div>
   );
 }
+
+/** Transient work status, never a conversational message. Import chat-bubble.css. */
+export function ChatActivity({ label }: { readonly label: string }): ReactNode {
+  return <div role="status" data-ui-chat-activity="">
+    <span data-ui-chat-dots="" aria-hidden="true"><span /><span /><span /></span>
+    <span>{label}</span>
+  </div>;
+}

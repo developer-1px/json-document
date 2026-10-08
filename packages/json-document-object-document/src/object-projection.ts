@@ -16,6 +16,7 @@ export function transformObject<Object extends DocumentObject>(object: Object, t
   const resized = transform.dw !== undefined || transform.dh !== undefined;
   return {
     ...object,
+    ...(object.kind === "text" && dw !== 0 ? { widthMode: "fixed" } : {}),
     x: object.x + dx,
     y: object.y + dy,
     width: resized ? Math.max(1, object.width + dw) : object.width,
@@ -30,6 +31,7 @@ export function projectObject(object: DocumentObject): CanvasObject {
 
 /** Read-only body layout, shared by display, native editing, and text capability checks. */
 export interface ObjectTextProjection extends ObjectBounds, Pick<ObjectStyle, "fontSize" | "fontWeight" | "textAlign" | "color"> {
+  readonly widthMode: "auto" | "fixed";
   readonly text: string;
   readonly verticalAlign: "top" | "center";
 }
@@ -43,6 +45,7 @@ export function projectObjectText(object: DocumentObject): ObjectTextProjection 
   const insetY = object.kind === "ellipse" ? object.height * (1 - Math.SQRT1_2) / 2 : Math.min(padding, object.height / 4);
   return {
     x: object.x + insetX, y: object.y + insetY, width: object.width - 2 * insetX, height: object.height - 2 * insetY,
+    widthMode: object.kind === "text" && object.widthMode === "auto" ? "auto" : "fixed",
     text: object.label, color: style.textColor ?? style.color!, fontSize: style.fontSize,
     fontWeight: style.fontWeight!, textAlign: style.textAlign!, verticalAlign: shape ? "center" : "top",
   };

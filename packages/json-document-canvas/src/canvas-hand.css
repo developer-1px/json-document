@@ -1,0 +1,16 @@
+[data-canvas-workspace="true"] { position: relative; overflow: hidden; }
+[data-canvas-workspace="true"] > [data-ui-toolbar="product"] { position: absolute; z-index: 10; bottom: 1rem; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 2rem); }
+[data-canvas-workspace="true"] > .canvas-workspace-surface { position: relative; overflow: hidden; }
+[data-canvas-workspace="true"] .canvas-workspace-json { position: absolute; z-index: 11; top: 5rem; left: 1rem; right: 1rem; max-height: calc(100% - 6rem); overflow: auto; background: rgb(var(--color-background-canvas)); padding: 1rem; }
+[data-canvas-workspace="true"] [role="alert"], [data-canvas-workspace="true"] [aria-busy="true"] + [role="status"] { position: absolute; top: 5rem; left: 1rem; }
+
+[data-canvas-workspace="true"] > [data-ui-toolbar="product"] [data-ui-presentation="popover"] > [role="dialog"] { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 0.5rem; left: auto; right: 0; }
+
+[data-canvas-content-toolbar] > [role="toolbar"] { display: flex; align-items: center; flex-wrap: wrap; gap: 0.125rem; padding: 0.25rem; width: max-content; max-width: min(44rem, calc(100vw - 2rem)); }
+[data-canvas-content-toolbar] .canvas-style-number { width: 4.5rem; }
+[data-canvas-content-toolbar] .canvas-style-panel { width: 14rem; }
+
+[data-canvas-content-toolbar] :is([data-ui-control="command"], [data-ui-control="toggle"]):not([role="dialog"] *) { width: 1.75rem; height: 1.75rem; min-height: 1.75rem; }
+[data-canvas-content-toolbar] [data-ui-control="field"]:not([role="dialog"] *) { height: 1.75rem; min-height: 1.75rem; padding: 0.125rem 0.375rem; font-size: 0.75rem; line-height: 1.25rem; }
+[data-canvas-content-toolbar] [data-ui-component="toolbar-group"] { gap: 0.125rem; }
+[data-canvas-content-toolbar] svg:not([role="dialog"] *) { width: 0.875rem; height: 0.875rem; }

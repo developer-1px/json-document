@@ -9,7 +9,7 @@ Select는 대상을 집는 손입니다. 클릭은 그 대상으로 바꾸고, S
 Escape, primary 편집까지 연결합니다. Canvas는 이 public profile을 그대로 소비합니다.
 입력·출력·취소·범위의 정본은 [Affordance API · 평면 Select](/docs/api/affordance)에 있습니다.
 
-[실제 Canvas Usage와 Source](/demo/canvas)에서 프로파일을 실행할 수 있습니다.
+[실제 Canvas Usage와 Source](/applications/canvas)에서 프로파일을 실행할 수 있습니다.
 
 ```ts
 import {

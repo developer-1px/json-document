@@ -291,10 +291,10 @@ test.each(["Escape", "pointercancel", "lostpointercapture"])("%s cancels marquee
 test("only primary resizes and edits text while retaining the selected set", () => {
   const { container, svg, editor, value, commits } = setup(populated);
   act(() => { editor.dispatch({ type: "selection.set", objectIds: ["a", "b"], primaryKey: "a" }); });
-  expect(container.querySelectorAll("[data-resize-edge]")).toHaveLength(8);
-  const handle = container.querySelector('[data-resize-edge="se"]')!;
+  expect(container.querySelectorAll("[data-resize-edge]")).toHaveLength(2);
+  const handle = container.querySelector('[data-resize-edge="e"]')!;
   fireEvent.pointerDown(handle, event(100, 100)); fireEvent.pointerMove(window, event(120, 115)); fireEvent.pointerUp(window, event(120, 115));
-  expect(value().objects[0]!.width).toBeCloseTo(140); expect(value().objects[0]!.height).toBeCloseTo(130);
+  expect(value().objects[0]!.width).toBeCloseTo(140); expect(value().objects[0]!.height).toBeCloseTo(100);
   expect(value().objects[1]).toEqual(populated.objects[1]);
   expect(editor.snapshot.selection).toMatchObject({ keys: ["a", "b"], primaryKey: "a" });
   expect(commits).toHaveBeenCalledTimes(1);
@@ -338,7 +338,7 @@ test("every toolbar control shares icon, accessible name and canonical tooltip w
     expect(button.textContent).toBe("");
     expect(button.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
     expect(button.getAttribute("data-ui-presentation")).toBe("icon");
-    expect(button.getAttribute("aria-describedby")).toBe(toolbar.getByRole("tooltip", { name: label }).id);
+    expect(document.getElementById(button.getAttribute("aria-describedby")!)?.textContent).toBe(label + (button.getAttribute("aria-keyshortcuts") ? ` (${button.getAttribute("aria-keyshortcuts")})` : ""));
     expect(button.hasAttribute("title")).toBe(false);
   }
   expect(toolbar.getByRole("button", { name: "선택" }).getAttribute("aria-pressed")).toBe("true");
@@ -518,7 +518,7 @@ test.each(["rectangle", "ellipse", "sticky-note", "text", "path", "image"] as co
   fireEvent.pointerDown(handle, event(50, 70)); fireEvent.pointerMove(window, event(250, 200));
   expect(container.querySelector("[data-canvas-object]")?.getAttribute("x")).toBe("299");
   fireEvent.pointerUp(window, event(250, 200));
-  expect(value().objects[0]).toEqual({ ...object, x: 299, width: 1 });
+  expect(value().objects[0]).toEqual({ ...object, x: 299, width: 1, ...(object.kind === "text" ? { widthMode: "fixed" } : {}) });
 });
 
 test.each(["Escape", "pointercancel", "lostpointercapture", "document", "selection", "unmount"])("resize cancellation (%s) discards preview and ignores stale release", (reason) => {
@@ -538,11 +538,11 @@ test.each(["Escape", "pointercancel", "lostpointercapture", "document", "selecti
 
 test("resize ignores foreign pointers and a return to the original bounds adds no History", () => {
   const { container, editor, value, commits } = setup(populated);
-  const handle = container.querySelector('[data-resize-edge="n"]')!;
+  const handle = container.querySelector('[data-resize-edge="e"]')!;
   fireEvent.pointerDown(handle, event(75, 50));
   fireEvent.pointerMove(window, event(100, 100, 9)); fireEvent.pointerUp(window, event(100, 100, 9));
   expect(container.querySelector('[data-canvas-object="a"]')?.getAttribute("height")).toBe("100");
-  fireEvent.pointerMove(window, event(75, 30)); fireEvent.pointerUp(window, event(75, 50));
+  fireEvent.pointerMove(window, event(95, 50)); fireEvent.pointerUp(window, event(75, 50));
   expect(value()).toEqual(populated); expect(commits).not.toHaveBeenCalled(); expect(editor.snapshot.canUndo).toBe(false);
 });
 
@@ -611,11 +611,10 @@ test("external replacement cancels an in-flight transform and unmount releases p
   expect(observer).toHaveBeenCalled(); expect(commits).not.toHaveBeenCalled();
 });
 
-test("selection style uses an icon tooltip and only exposes supported properties", () => {
+test("selection exposes formatting directly and only exposes supported properties", () => {
   const { editor } = setup(populated);
-  const trigger = screen.getByRole("button", { name: "스타일" });
-  expect(document.getElementById(trigger.getAttribute("aria-describedby")!)?.textContent).toBe("스타일");
-  fireEvent.click(trigger);
+  expect(screen.queryByRole("button", { name: "스타일" })).toBeNull();
+  expect(screen.getByRole("toolbar", { name: "콘텐츠 서식" })).toBeTruthy();
   expect(screen.getByRole("textbox", { name: "글자 크기" })).toBeTruthy();
   expect(screen.queryByRole("textbox", { name: "테두리 색" })).toBeNull();
   act(() => { editor.dispatch({ type: "selection.set", objectIds: [] }); });
@@ -628,13 +627,15 @@ test("mixed color applies to the whole set once, preserves primary and leaves im
   const { editor, value, commits } = setup(initial);
   act(() => { editor.dispatch({ type: "selection.set", objectIds: ["a", "b", "image"], primaryKey: "image" }); });
   const selection = editor.snapshot.selection;
-  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  fireEvent.click(screen.getByRole("button", { name: "색상" }));
   expect((screen.getByRole("textbox", { name: "색상" }) as HTMLInputElement).placeholder).toBe("혼합");
   fireEvent.click(screen.getByRole("button", { name: "색상: 빨강" }));
   expect(value().objects.slice(0, 2).map((object) => object.color)).toEqual(["#ef4444", "#ef4444"]);
   expect(value().objects[3]).toEqual(initial.objects[3]); expect(editor.snapshot.selection).toEqual(selection);
   expect(commits).toHaveBeenCalledOnce();
   fireEvent.click(screen.getByRole("button", { name: "색상: 빨강" })); expect(commits).toHaveBeenCalledOnce();
+  fireEvent.keyDown(screen.getByRole("textbox", { name: "색상" }), { key: "Escape" });
+  expect(screen.queryByRole("dialog", { name: "색상" })).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "실행 취소" })); expect(value()).toEqual(initial);
   expect(editor.snapshot.selection).toEqual(selection);
   act(() => { editor.dispatch({ type: "selection.set", objectIds: ["image"] }); });
@@ -643,7 +644,6 @@ test("mixed color applies to the whole set once, preserves primary and leaves im
 
 test("text font size, bold and alignment render identically in display and native editing", () => {
   const { container, value, commits } = setup(populated);
-  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
   const font = screen.getByRole("textbox", { name: "글자 크기" });
   fireEvent.change(font, { target: { value: "48" } });
   expect(value().objects[0]!.fontSize).toBe(24); expect(commits).not.toHaveBeenCalled();
@@ -654,14 +654,12 @@ test("text font size, bold and alignment render identically in display and nativ
   expect(commits).toHaveBeenCalledTimes(3);
   const display = container.querySelector("foreignObject > div") as HTMLElement;
   expect(display.style.fontSize).toBe("48px"); expect(display.style.fontWeight).toBe("700"); expect(display.style.textAlign).toBe("center");
-  fireEvent.keyDown(screen.getByRole("dialog", { name: "스타일" }), { key: "Escape" });
   fireEvent.doubleClick(container.querySelector('[data-canvas-object="a"]')!);
   const input = screen.getByRole("textbox", { name: "Canvas text" }) as HTMLTextAreaElement;
   expect(input.style.fontSize).toBe(display.style.fontSize); expect(input.style.fontWeight).toBe("700"); expect(input.style.textAlign).toBe("center");
   fireEvent.change(input, { target: { value: "Updated" } });
-  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
-  expect(value().objects[0]!.label).toBe("Updated"); expect(commits).toHaveBeenCalledTimes(4);
   fireEvent.click(screen.getByRole("button", { name: "굵게" }));
+  expect(value().objects[0]!.label).toBe("Updated"); expect(commits).toHaveBeenCalledTimes(5);
   expect(value().objects[0]).toMatchObject({ label: "Updated", fontWeight: 400 });
 });
 
@@ -669,12 +667,11 @@ test("shape outlines and path widths render without replacing geometry or primar
   const path = { id: "p", kind: "path", label: "Line", color: "black", strokeWidth: 3, points: [{ x: 0, y: 0 }, { x: 1, y: 1 }], x: 100, y: 400, width: 100, height: 80 } as const;
   const { container, editor, value } = setup({ ...populated, objects: [...populated.objects, path] });
   pick(container, "b");
-  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  fireEvent.click(screen.getByRole("button", { name: "테두리 색" }));
   fireEvent.click(screen.getByRole("button", { name: "테두리 색: 빨강" }));
   expect(value().objects[1]).toMatchObject({ strokeColor: "#ef4444", strokeWidth: 2 });
   expect(container.querySelector('rect[stroke="#ef4444"]')?.getAttribute("stroke-width")).toBe("2");
   act(() => { editor.dispatch({ type: "selection.set", objectIds: ["b", "p"], primaryKey: "b" }); });
-  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
   const width = screen.getByRole("textbox", { name: "선 굵기" });
   expect((width as HTMLInputElement).placeholder).toBe("혼합");
   fireEvent.change(width, { target: { value: "8" } }); fireEvent.submit(width.closest("form")!);
@@ -685,7 +682,6 @@ test("shape outlines and path widths render without replacing geometry or primar
 
 test("invalid style and cancelled field drafts do not create partial state or history", () => {
   const { value, editor, commits } = setup(populated);
-  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
   const field = screen.getByRole("textbox", { name: "글자 크기" });
   fireEvent.change(field, { target: { value: "-1" } }); fireEvent.submit(field.closest("form")!);
   expect(screen.getByRole("alert")).toBeTruthy(); expect(value()).toEqual(populated); expect(commits).not.toHaveBeenCalled();
@@ -694,11 +690,11 @@ test("invalid style and cancelled field drafts do not create partial state or hi
   expect(editor.snapshot.canUndo).toBe(false); expect(value()).toEqual(populated);
 });
 
-test("opening style cancels a resize preview and stale pointer release cannot overwrite a style", () => {
+test("applying style cancels a resize preview and stale pointer release cannot overwrite a style", () => {
   const { container, value, commits } = setup(populated);
-  const handle = container.querySelector('[data-resize-edge="se"]')!;
+  const handle = container.querySelector('[data-resize-edge="e"]')!;
   fireEvent.pointerDown(handle, event(100, 100)); fireEvent.pointerMove(window, event(140, 140));
-  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  fireEvent.click(screen.getByRole("button", { name: "색상" }));
   fireEvent.click(screen.getByRole("button", { name: "색상: 빨강" }));
   fireEvent.pointerUp(window, event(150, 150));
   expect(value().objects[0]).toEqual({ ...populated.objects[0], color: "#ef4444" }); expect(commits).toHaveBeenCalledOnce();
@@ -751,12 +747,11 @@ test("new sticky notes accept immediate text, use host fill policy and copy thro
 test("filled objects expose independent body color without repainting their backgrounds", () => {
   const { container, editor, value } = setup({ ...populated, objects: [...populated.objects, { ...populated.objects[1]!, id: "note", kind: "sticky-note", textColor: "red" }] });
   act(() => { editor.dispatch({ type: "selection.set", objectIds: ["b", "note"], primaryKey: "note" }); });
-  fireEvent.click(screen.getByRole("button", { name: "스타일" }));
+  fireEvent.click(screen.getByRole("button", { name: "글자색" }));
   expect((screen.getByRole("textbox", { name: "글자색" }) as HTMLInputElement).placeholder).toBe("혼합");
   fireEvent.click(screen.getByRole("button", { name: "글자색: 빨강" }));
   expect(value().objects[1]).toMatchObject({ textColor: "#ef4444", color: "blue" });
   expect(value().objects[3]).toMatchObject({ textColor: "#ef4444", color: "blue" });
-  fireEvent.keyDown(screen.getByRole("dialog", { name: "스타일" }), { key: "Escape" });
   fireEvent.doubleClick(container.querySelector('[data-canvas-object="note"]')!);
   expect((screen.getByRole("textbox", { name: "Canvas text" }) as HTMLTextAreaElement).style.color).toBe("rgb(239, 68, 68)");
 });
@@ -785,4 +780,47 @@ test.each([[120,50],[40,110]])("table creation accepts an axis-aligned drag thro
  expect(value().objects[0]!.height).toBeGreaterThan(0);
  expect(commits).toHaveBeenCalledTimes(1);
  act(()=>{editor.undo();});expect(value().objects).toHaveLength(0);
+});
+
+test("FigJam tool keys switch tools without creating history and ignore modifiers and IME", () => {
+  const { svg, editor } = setup();
+  for (const [key, shiftKey, tool] of [["r", false, "rectangle"], ["o", false, "ellipse"], ["s", false, "sticky-note"], ["m", false, "path"], ["T", true, "table"], ["t", false, "text"], ["v", false, "select"]] as const) {
+    fireEvent.keyDown(svg, { key, shiftKey });
+    expect(svg.getAttribute("data-tool")).toBe(tool);
+  }
+  for (const modifiers of [{ ctrlKey: true }, { metaKey: true }, { altKey: true }, { isComposing: true }, { keyCode: 229 }]) {
+    fireEvent.keyDown(svg, { key: "r", ...modifiers });
+    expect(svg.getAttribute("data-tool")).toBe("select");
+  }
+  expect(editor.snapshot.canUndo).toBe(false);
+});
+
+test("FigJam tool keys do not intercept text editing", () => {
+  const { svg, container } = setup(populated);
+  pick(container, "a");
+  fireEvent.keyDown(svg, { key: "Enter" });
+  const input = screen.getByRole("textbox", { name: "Canvas text" });
+  fireEvent.keyDown(input, { key: "r" });
+  expect(svg.getAttribute("data-tool")).toBe("select");
+  expect(input).toBe(document.activeElement);
+});
+
+
+test("Korean physical tool keys update both toolbar selection and canvas cursor", () => {
+  const { svg } = setup();
+  for (const [key, code, tool, label, cursor] of [
+    ["ㄱ", "KeyR", "rectangle", "사각형", "crosshair"],
+    ["ㅅ", "KeyT", "text", "글자", "text"],
+    ["ㅡ", "KeyM", "path", "그리기", "crosshair"],
+    ["ㅍ", "KeyV", "select", "선택", "default"],
+  ] as const) {
+    fireEvent.keyDown(svg, { key, code });
+    expect(svg.getAttribute("data-canvas-mode")).toBe(tool);
+    expect(screen.getByRole("button", { name: label }).getAttribute("aria-pressed")).toBe("true");
+    expect(svg.style.cursor).toBe(cursor);
+  }
+  fireEvent.keyDown(svg, { key: "Process", code: "KeyR", keyCode: 229 });
+  expect(svg.getAttribute("data-tool")).toBe("rectangle");
+  fireEvent.keyDown(svg, { key: "ㅅ", code: "KeyT", isComposing: true });
+  expect(svg.getAttribute("data-tool")).toBe("rectangle");
 });

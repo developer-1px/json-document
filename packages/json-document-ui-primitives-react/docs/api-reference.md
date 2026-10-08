@@ -6,6 +6,11 @@
 
 > 이 문서는 `packages/json-document-ui-primitives-react/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `ChatActivity`
+
+```ts
+ChatActivity({ label }: { readonly label: string; }): ReactNode
+```
 ## `ChatBubble`
 
 ```ts

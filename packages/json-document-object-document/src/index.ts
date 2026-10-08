@@ -4,3 +4,5 @@ export { createCanvasObject, createCanvasPath, createCanvasImage, projectObject,
 export { planObjectOperation, type ObjectOperation, type ObjectOperationPlan } from "./object-operation.js";
 export { getObjectStyle, readObjectStyle, assertObjectStyle, type ObjectStyle, type ObjectStyleSelection } from "./object-style.js";
 export {createCanvasEmbeddedDocument} from "./embedded-document.js";
+export { layoutObjectText, type ObjectTextMeasurer } from "./object-text-layout.js";
+export { defaultObjectContainerPolicy, layoutObjectDocument, objectSubtreeIds, type ObjectContainerPolicy, type ObjectContainerLayout, type ObjectLayoutOptions } from "./object-container-layout.js";

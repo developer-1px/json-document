@@ -527,7 +527,7 @@ EditingResult나 domain 검증 규칙을 직접 소유하지 않는다. 비동�
 
 Host 연결도 구별한다. [Order Demo](../site/src/routes/order-demo/OrderDemoRoute.tsx)는
 정본 rename session을 `item.rename`에 연결하므로 거절 후 draft 처리를 Host에
-다시 구현하지 않는다. [Canvas Demo](../site/src/routes/canvas-demo/CanvasDemoRoute.tsx)의
+다시 구현하지 않는다. [Canvas Demo](../site/src/applications/canvas/CanvasApplication.tsx)의
 전체 선택은 `selectAllAffordance` 결과를 Object의 한 `selection.set`에 연결한다.
 기본 정책의 소유자는 Affordance·Profile이며 Canvas의 조건문으로 바꾸지 않는다.
 

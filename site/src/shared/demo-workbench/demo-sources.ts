@@ -1,3 +1,7 @@
+import objectContainerLayoutSource from "../../../../packages/json-document-object-document/src/object-container-layout.ts?raw";
+import objectTextLayoutSource from "../../../../packages/json-document-object-document/src/object-text-layout.ts?raw";
+import webTextMeasurementSource from "../../../../packages/json-document-web/src/text-measurement.ts?raw";
+import canvasToolsSource from "../../../../packages/json-document-editing/src/canvas-tools.ts?raw";
 import markdownSheetPresentationSource from "../../../../packages/json-document-markdown-react/src/markdown-sheet-presentation.tsx?raw";
 import sheetHandCssSource from "../../../../packages/json-document-sheet/src/sheet-hand.css?raw";
 import floatingSurfaceSource from "../../../../packages/json-document-ui-primitives-react/src/floating-surface.ts?raw";
@@ -64,6 +68,9 @@ import objectStyleSource from "../../../../packages/json-document-object-documen
 import objectValidationSource from "../../../../packages/json-document-object-document/src/object-validation.ts?raw";
 import objectOperationSource from "../../../../packages/json-document-object-document/src/object-operation.ts?raw";
 import objectProjectionSource from "../../../../packages/json-document-object-document/src/object-projection.ts?raw";
+import canvasViewportSource from "../../../../packages/json-document-canvas/src/use-canvas-viewport.ts?raw";
+import canvasHandStyleSource from "../../../../packages/json-document-canvas/src/canvas-hand.css?raw";
+import canvasContentToolbarSource from "../../../../packages/json-document-canvas/src/canvas-content-toolbar.tsx?raw";
 import canvasHandSource from "../../../../packages/json-document-canvas/src/canvas-hand.tsx?raw";
 import canvasInteractionSource from "../../../../packages/json-document-canvas/src/use-canvas-hand.ts?raw";
 import canvasObjectViewSource from "../../../../packages/json-document-canvas/src/canvas-object-view.tsx?raw";
@@ -253,6 +260,7 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-editing/src/canvas-tools.ts", canvasToolsSource],
   ["packages/json-document-editing/src/text-edit.ts", textEditSource],
   ["packages/json-document-editing/src/text-tools.ts", textToolsSource],
   ["packages/json-document-affordance/src/grid-editing-profile.ts", gridEditingProfileSource],
@@ -301,7 +309,13 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-object-document/src/object-validation.ts", objectValidationSource],
   ["packages/json-document-object-document/src/object-operation.ts", objectOperationSource],
   ["packages/json-document-object-document/src/object-projection.ts", objectProjectionSource],
+  ["packages/json-document-object-document/src/object-container-layout.ts", objectContainerLayoutSource],
+  ["packages/json-document-object-document/src/object-text-layout.ts", objectTextLayoutSource],
+  ["packages/json-document-web/src/text-measurement.ts", webTextMeasurementSource],
   ["packages/json-document-canvas/src/canvas-hand.tsx", canvasHandSource],
+  ["packages/json-document-canvas/src/canvas-content-toolbar.tsx", canvasContentToolbarSource],
+  ["packages/json-document-canvas/src/use-canvas-viewport.ts", canvasViewportSource],
+  ["packages/json-document-canvas/src/canvas-hand.css", canvasHandStyleSource],
   ["packages/json-document-canvas/src/use-canvas-hand.ts", canvasInteractionSource],
   ["packages/json-document-canvas/src/canvas-object-view.tsx", canvasObjectViewSource],
   ["packages/json-document-canvas/src/canvas-style-controls.tsx", canvasStyleControlsSource],
@@ -484,7 +498,7 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts", ["packages/json-document-contenteditable/src/dom/text-selection-geometry.ts", "packages/json-document-contenteditable/src/dom/text-selection.css"]],
   ["packages/json-document-editing/src/markdown-table.ts",["packages/json-document-editing/src/projected-sheet.ts"]],
   ["packages/json-document-editing/src/object-sheet.ts",["packages/json-document-editing/src/projected-sheet.ts", "packages/json-document-object-document/src/embedded-document.ts"]],
-  ["packages/json-document-canvas/src/canvas-hand.tsx",["packages/json-document-canvas/src/canvas-sheet-object.tsx"]],
+  ["packages/json-document-canvas/src/canvas-hand.tsx",["packages/json-document-canvas/src/canvas-content-toolbar.tsx","packages/json-document-canvas/src/canvas-sheet-object.tsx", "packages/json-document-canvas/src/use-canvas-viewport.ts", "packages/json-document-canvas/src/canvas-hand.css", "packages/json-document-object-document/src/object-text-layout.ts", "packages/json-document-web/src/text-measurement.ts", "packages/json-document-object-document/src/object-container-layout.ts"]],
 
   ["packages/json-document-sheet/src/sheet-hand.tsx", ["packages/json-document-sheet/src/sheet-hand.css","packages/json-document-sheet/src/sheet-axis-resize.tsx", "packages/json-document-sheet/src/sheet-range-selection.tsx", "packages/json-document-sheet/src/sheet-fill-handle.tsx"]],
   ["packages/json-document-editing/src/sheet-navigation.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
@@ -502,6 +516,7 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
 const registeredPublicUsages = [
   { packageName: "@interactive-os/json-document-editing", symbol: "moveText", sourcePath: "packages/json-document-editing/src/text-edit.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "applyTextEdit", sourcePath: "packages/json-document-editing/src/text-edit.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createCanvasEditorTools", sourcePath: "packages/json-document-editing/src/canvas-tools.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createTextEditorTools", sourcePath: "packages/json-document-editing/src/text-tools.ts" },
   {packageName: "@interactive-os/json-document-web", symbol: "webKeyboardPlatform", sourcePath: "packages/json-document-web/src/keyboard.ts"},
   {
@@ -688,6 +703,11 @@ const registeredPublicUsages = [
   { packageName: "@interactive-os/json-document-editing", symbol: "createObjectPasteSession", sourcePath: "packages/json-document-editing/src/preparation-queue.ts" },
   { packageName: "@interactive-os/json-document-web", symbol: "readWebRasterFiles", sourcePath: "packages/json-document-web/src/raster-files.ts" },
   ...["assertRasterImageSource", "assertRasterImageContent", "RasterImageContent"].map((symbol) => ({ packageName: "@interactive-os/json-document-file-intake", symbol, sourcePath: "packages/json-document-file-intake/src/raster-content.ts" })),
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "ChatActivity",
+    sourcePath: "packages/json-document-ui-primitives-react/src/chat-bubble.tsx",
+  },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "ChatBubble",

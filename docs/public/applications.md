@@ -20,6 +20,17 @@ Undo 이력과 채팅 이력은 현재 페이지 안에서만 유지됩니다.
 [작성 예제](/applications/bear?document=ai-native-writing)는 로컬 Codex가 실제 편집 도구로
 작성한 「AI native로 글을 쓰는 법」입니다. 내 글과 별도 저장되며 자유롭게 수정할 수 있습니다.
 
+## Canvas
+
+[Canvas Application](/applications/canvas)은 텍스트·도형·이미지·표를 배치하고
+AI와 함께 편집하는 전체 화면 작업 공간입니다. 문서와 대화를 브라우저에 보관하며,
+사이트 메뉴로 다른 Application과 문서에 이동할 수 있습니다.
+
+Application은 저장 정책, 에이전트 연결과 화면 조합을 소유합니다.
+[Canvas API](/docs/api/canvas)는 재사용하는 `CanvasHand`와 viewport를,
+[Editing API](/docs/api/editing)는 객체 편집 명령과 에이전트 도구를 소유합니다.
+앱과 API 문서는 서로 다른 계층이며, API의 Usage/Source에서 앱의 공개 API 사용을 확인할 수 있습니다.
+
 ## Calendar
 
 [Calendar Application](/applications/calendar)은 Calendar Document Type, Editing,

@@ -1,7 +1,7 @@
 import {createCanvasSheet} from "@interactive-os/json-document-editing";
 import { useEffect, useMemo, useReducer, useRef, useState, type ClipboardEvent, type KeyboardEvent, type PointerEvent } from "react";
 import { commitAffordance, createGestureSession, createPlaneSelectProfile, resizeAffordance, type InteractionHandleEvent, type PlaneSelectProfile, type PlaneSelectSelection, type ResizeEdge } from "@interactive-os/json-document-affordance";
-import { assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, projectObjectText, readObjectStyle, transformObject, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint, type ObjectStyle } from "@interactive-os/json-document-object-document";
+import { objectSubtreeIds, assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, projectObjectText, readObjectStyle, transformObject, type ObjectContainerLayout, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint, type ObjectStyle } from "@interactive-os/json-document-object-document";
 import type { EditingResult, ObjectEditor, ObjectIntent, ObjectSelection } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { routeWebClipboardEvent, createWebKeyboardAdapter, createWebPointerSession, isWebEditableTarget, projectWebClientPointToSVG, webSVGViewportFromElement } from "@interactive-os/json-document-web";
@@ -25,7 +25,7 @@ type Gesture = { readonly base: CanvasDocument } & (
 );
 type TextDraft = { readonly id: string; readonly text: string; readonly base: CanvasDocument };
 
-const keyboard = createWebKeyboardAdapter();
+const keyboard = createWebKeyboardAdapter({ keySource: "code" });
 const commands = createWebKeyboardAdapter<"cancel">({ defaults: false, keymap: { Escape: "cancel" } });
 
 /** Owns Canvas interaction composition, never document or history state. */
@@ -151,12 +151,13 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     if (click && !committing) return null;
     if (!click && start.x === point.x && start.y === point.y) return null;
     if (gesture.tool === "table") return createCanvasSheet({x:click ? start.x:Math.min(start.x,point.x),y:click ? start.y:Math.min(start.y,point.y),width:click ? 480:Math.abs(point.x-start.x),height:click ? 280:Math.abs(point.y-start.y)});
-    return createCanvasObject(gesture.tool, {
+    const object = createCanvasObject(gesture.tool, {
       x: click ? start.x : Math.min(start.x, point.x), y: click ? start.y : Math.min(start.y, point.y),
       width: click ? (gesture.tool === "text" ? 280 : gesture.tool === "sticky-note" ? 200 : 160) : Math.abs(point.x - start.x),
       height: click ? (gesture.tool === "text" ? 64 : gesture.tool === "sticky-note" ? 200 : 100) : Math.abs(point.y - start.y),
     }, { color: gesture.tool === "text" ? style.textColor : gesture.tool === "sticky-note" ? style.stickyNoteColor ?? style.color : style.color,
       label: gesture.tool === "text" ? "Text" : "", fontSize: style.fontSize, textColor: style.textColor });
+    return object.kind === "text" ? { ...object, widthMode: click ? "auto" as const : "fixed" as const } : object;
   }
 
   function transform(gesture: Extract<Gesture, { type: "resize" }>) {
@@ -279,23 +280,31 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
       setTool("select"); return;
     }
     if (commands.resolve(event) === "cancel") { event.preventDefault(); setTool("select"); return; }
-    const action = keyboard.resolve(event);
+    const action = keyboard.resolve(event.nativeEvent);
     if (action?.type === "undo" || action?.type === "redo") { event.preventDefault(); history(action.type); }
   }
 
   const gesture = gestures.getActive();
   const selectionPreview = profile.getPreview();
   const translation = selectionPreview?.translation;
-  const translating = new Set(translation?.keys);
+  const translating = new Set(translation ? objectSubtreeIds(document.objects, translation.keys) : []);
   const selection = selectionPreview?.selection ?? snapshot.selection;
-  const objects = document.objects.map((object) => {
+  const resizing = new Set(gesture?.type === "resize" ? objectSubtreeIds(document.objects, [gesture.object.id]) : []);
+  const laidOutObjects = document.objects.map((source) => {
+    const object = draft.current?.id === source.id ? { ...source, label: draft.current.text } : source;
     if (translation && translating.has(object.id)) return transformObject(object, translation);
+    if (gesture?.type === "resize" && resizing.has(object.id) && object.id !== gesture.object.id) { const delta = transform(gesture); return transformObject(object, { dx: delta.dx, dy: delta.dy }); }
     return gesture?.type === "resize" && gesture.object.id === object.id ? transformObject(object, transform(gesture)) : object;
   });
+  const objects = editor.layoutDocument({ ...document, objects: laidOutObjects }).objects as ReadonlyArray<CanvasObject>;
   const copyOriginals = translation?.operation === "copy" ? document.objects.filter((object) => translating.has(object.id)) : [];
-  const preview = gesture && (gesture.type === "create" || gesture.type === "draw") ? createPreview(gesture) : null;
+  const rawPreview = gesture && (gesture.type === "create" || gesture.type === "draw") ? createPreview(gesture) : null;
+
+  const preview = rawPreview ? editor.layoutObject(rawPreview) : null;
 
   return {
+    setContainerLayout(id: string, layout: ObjectContainerLayout) { commitText(); cancel(); return dispatch({ type: "object.update", objectId: id, changes: { containerLayout: layout } }); },
+    autoWidth(id: string) { commitText(); cancel(); dispatch({ type: "object.update", objectId: id, changes: { widthMode: "auto" } }); },
     document, snapshot, selection, marquee: selectionPreview?.marquee ?? null, objects, copyOriginals, preview, surface, tool, error, pastePending: clipboard.pending, draft: draft.current,
     choose, select, interaction, editText, commitText, cancel, remove, duplicate, history, setStyle,
     selectedStyle: readObjectStyle(editor.selectedObjects),

@@ -53,3 +53,7 @@ Codex CLI에 로그인한 환경에서 사이트 개발 서버를 실행하고 `
 로컬 채팅은 코딩 지침·스킬 카탈로그·플러그인·도구 문맥을 줄이고 같은 대화의 연결을 재사용합니다. 5분간 사용하지 않은 연결은 종료하며 다음 입력에서 thread를 복원합니다. 일반 Codex 설정 파일은 변경하지 않습니다.
 
 로컬 모드에서 입력창에 처음 포커스하면 메시지를 보내지 않고 thread를 준비합니다. 준비와 실제 전송의 모델·추론·서비스 등급은 동일하며, 준비 실패 시 일반 전송으로 이어집니다.
+
+`ChatActivity` renders transient work as three wave dots and a status label,
+without a message bubble. Import `chat-bubble.css`; reduced-motion users receive
+static dots. Only real assistant text belongs in `ChatBubble`.

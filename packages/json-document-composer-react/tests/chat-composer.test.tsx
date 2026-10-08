@@ -102,3 +102,17 @@ test("submission failures have visible accessible copy", async () => {
   expect(screen.getByRole("alert").textContent).toBe("Try again");
   expect(screen.getByRole("textbox").getAttribute("aria-describedby")).toBe(screen.getByRole("alert").id);
 });
+
+test("chat clears at submission start and preserves the next draft on completion", async () => {
+  let finish!: () => void;
+  let id = 0;
+  const { result } = renderHook(() => useComposer({ id: "immediate", config,
+    ports: { createId: () => `immediate-${++id}`, submit: () => new Promise<void>(resolve => { finish = resolve; }) },
+    labels: { mentionSuggestions: "Mentions", skillSuggestions: "Skills" }, shouldClearAfterSubmit: true, submitClearTiming: "start" }));
+  act(() => { result.current.insertText("sent"); result.current.submit(); });
+  expect(composerText(result.current.draft.instruction)).toBe("");
+  expect(result.current.isSubmitting).toBe(true);
+  act(() => { result.current.insertText("next"); });
+  await act(async () => { finish(); });
+  expect(composerText(result.current.draft.instruction)).toBe("next");
+});

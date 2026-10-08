@@ -354,12 +354,12 @@
           "changeReason": "제품 fixture와 화면 구성 변경",
           "stateLifecycle": "소유자 API의 session/component lifecycle",
           "inputsOutputs": "fixture·public API 입력 → 화면 조합",
-          "currentOwner": "Canvas Demo Host",
-          "canonicalEvidence": "site/src/routes/canvas-demo/CanvasDemoRoute.tsx와 공개 entrypoint·package API 문서·Canvas Usage/Source",
-          "sourcePath": "site/src/routes/canvas-demo/CanvasDemoRoute.tsx",
-          "symbol": "CanvasDemoRoute",
+          "currentOwner": "Canvas Application",
+          "canonicalEvidence": "site/src/applications/canvas/CanvasApplication.tsx와 공개 entrypoint·package API 문서·Canvas Usage/Source",
+          "sourcePath": "site/src/applications/canvas/CanvasApplication.tsx",
+          "symbol": "CanvasApplication",
           "disposition": "Host composition",
-          "intendedOwner": "Canvas Demo Host",
+          "intendedOwner": "Canvas Application",
           "nextCheck": "회귀 테스트와 실제 Canvas Usage/Source로 검증"
         },
         {

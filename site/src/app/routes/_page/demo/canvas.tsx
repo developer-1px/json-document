@@ -1,8 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { defineDemo } from "../../../../shared/demo-workbench/define-demo";
-import { CanvasDemoRoute } from "../../../../routes/canvas-demo/CanvasDemoRoute";
+import { Navigate, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_page/demo/canvas")({
-  component: CanvasDemoRoute,
-  ...defineDemo({ source: "routes/canvas-demo/CanvasDemoRoute.tsx" }),
+  component: () => <Navigate to="/applications/canvas" replace />,
 });

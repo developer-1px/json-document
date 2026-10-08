@@ -154,3 +154,4 @@ export {createWebStoredDocument, type WebStoredDocument, type WebStoredDocumentO
 export {projectWebClientDeltaToElement} from "./element-coordinate.js";
 
 export {webKeyboardPlatform} from "./keyboard.js";
+export { measureWebText, type WebTextMeasurement } from "./text-measurement.js";

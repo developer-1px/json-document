@@ -96,8 +96,8 @@ createWebJSONClipboardRepresentation<Payload extends WebClipboardPayload>(format
 
 ```ts
 createWebKeyboardAdapter(): WebKeyboardAdapter
-createWebKeyboardAdapter(options: { readonly keymap?: WebKeymap; readonly defaults?: true; }): WebKeyboardAdapter
-createWebKeyboardAdapter<Command>(options: { readonly keymap: WebKeymap<Command>; readonly defaults: false; }): WebKeyboardAdapter<Command>
+createWebKeyboardAdapter(options: { readonly keymap?: WebKeymap; readonly defaults?: true; readonly keySource?: "key" | "code"; }): WebKeyboardAdapter
+createWebKeyboardAdapter<Command>(options: { readonly keymap: WebKeymap<Command>; readonly defaults: false; readonly keySource?: "key" | "code"; }): WebKeyboardAdapter<Command>
 ```
 ## `createWebPointerSession`
 
@@ -198,6 +198,11 @@ kanbanCardDropTargetFromWebElement(element: WebKanbanTargetElement | null): Kanb
 
 ```ts
 lineBoundary(ids: ReadonlyArray<string>, edge: "start" | "end"): string | null
+```
+## `measureWebText`
+
+```ts
+measureWebText(text: WebTextMeasurement): { width: number; height: number; }
 ```
 ## `moveGridPoint`
 
@@ -777,6 +782,10 @@ webKeyboardPlatform(environment?: { readonly platform: string; readonly maxTouch
 ```ts
 interface WebKeyboardStroke {
   readonly key: string;
+  /** Physical key position, independent of the current input language. */
+  readonly code?: string;
+  readonly isComposing?: boolean;
+  readonly keyCode?: number;
   readonly shiftKey: boolean;
   readonly metaKey: boolean;
   readonly ctrlKey: boolean;
@@ -1004,6 +1013,17 @@ interface WebTextControlEvent {
 interface WebTextInput {
   readonly text: string;
   readonly offset: number;
+}
+```
+## `WebTextMeasurement`
+
+```ts
+interface WebTextMeasurement {
+  readonly text: string;
+  readonly width: number;
+  readonly widthMode?: "auto" | "fixed";
+  readonly fontSize: number;
+  readonly fontWeight: number;
 }
 ```
 ## `WebViewportPositionElement`

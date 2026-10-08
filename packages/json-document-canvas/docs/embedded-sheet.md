@@ -21,4 +21,4 @@ editor.dispatch({type:'object.create',object:table});
 
 표 내용은 Canvas JSON 안에 저장되며 JSON 재열기·객체 복제·복사/붙여넣기·삭제/Undo에서도 보존됩니다. 알 수 없는 embedded documentType은 임의 편집기를 만들지 않고 지원하지 않는 문서로 표시합니다. Object 소유자는 내장 payload를 보존하며 payload의 구체 모델 검증은 각 편집 어댑터가 소유합니다.
 
-현재 좌표 보정은 Canvas의 축 정렬 SVG viewport 및 CSS 확대/축소를 대상으로 합니다. 회전/기울이기와 수식, Excel 파일 호환성은 지원 범위가 아닙니다. 실제 Usage는 `/demo/canvas`와 `/widgets/canvas`입니다.
+현재 좌표 보정은 Canvas의 축 정렬 SVG viewport 및 CSS 확대/축소를 대상으로 합니다. 회전/기울이기와 수식, Excel 파일 호환성은 지원 범위가 아닙니다. 실제 Usage는 `/applications/canvas`와 `/widgets/canvas`입니다.

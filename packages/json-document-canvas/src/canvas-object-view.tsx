@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties, type PointerEvent, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type PointerEvent, type KeyboardEvent, type ReactNode } from "react";
 import { getObjectStyle, projectObjectText, type CanvasObject, type ObjectTextProjection } from "@interactive-os/json-document-object-document";
 import type { InteractionHandleEvent, ResizeEdge } from "@interactive-os/json-document-affordance";
 import { contentInteractionAttributes, Field, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
@@ -21,7 +21,7 @@ export function CanvasObjectView({ object, hideText = false, renderEmbedded }: {
 
 function textPresentation(value: ObjectTextProjection): CSSProperties {
   return { color: value.color, fontSize: value.fontSize, fontWeight: value.fontWeight, textAlign: value.textAlign,
-    fontFamily: "inherit", lineHeight: 1.2, whiteSpace: "pre-wrap", overflowWrap: "anywhere", letterSpacing: "normal" };
+    fontFamily: "inherit", lineHeight: 1.2, whiteSpace: value.widthMode === "auto" ? "pre" : "pre-wrap", overflowWrap: "anywhere", letterSpacing: "normal" };
 }
 
 /** The same body box and line wrapping serve display and the native textarea. */
@@ -48,7 +48,7 @@ export function CanvasObjectTarget(props: {
     <rect {...(props.enabled ? binding.handleProps : {})} x={object.x} y={object.y} width={object.width} height={object.height}
       fill="transparent" role="button" aria-label={object.label || object.kind} aria-pressed={props.selected}
       {...contentInteractionAttributes({ role: "content", selected: props.selected, dragging: binding.active })}
-      tabIndex={props.enabled ? 0 : -1} data-canvas-object={object.id} data-kind={object.kind}
+      tabIndex={props.enabled ? 0 : -1} data-canvas-object={object.id} data-kind={object.kind} data-container-id={typeof object.parentId === "string" ? object.parentId : undefined}
       pointerEvents={props.enabled ? "all" : "none"} style={{ cursor: props.copying ? "copy" : binding.cursor, transform: "none" }}
       onDoubleClick={props.onEdit}
       onKeyDown={(event) => {
@@ -64,6 +64,7 @@ export function CanvasObjectTarget(props: {
 export function CanvasResizeTarget(props: {
   readonly object: CanvasObject;
   readonly edge: ResizeEdge;
+  readonly onAutoWidth?: () => void;
   readonly onHandle: (interaction: InteractionHandleEvent, event: PointerEvent<SVGElement>) => void;
 }) {
   const binding = useInteractionHandle<SVGRectElement>({ descriptor: { kind: "resize", edge: props.edge }, onHandle: props.onHandle });
@@ -73,6 +74,8 @@ export function CanvasResizeTarget(props: {
   if (edge.length === 1) {
     const horizontal = edge === "n" || edge === "s";
     return <rect {...binding.handleProps} data-resize-edge={edge}
+      {...(edge === "e" && props.onAutoWidth ? { role: "button", tabIndex: 0, "aria-label": "텍스트 너비 자동 맞춤", onDoubleClick: props.onAutoWidth,
+        onKeyDown: (event: KeyboardEvent<SVGRectElement>) => { if (event.key === "Enter") { event.preventDefault(); event.stopPropagation(); props.onAutoWidth?.(); } } } : {})}
       x={horizontal ? object.x : x - 6} y={horizontal ? y - 6 : object.y}
       width={horizontal ? object.width : 12} height={horizontal ? 12 : object.height}
       fill="transparent" style={{ cursor: binding.cursor }} />;

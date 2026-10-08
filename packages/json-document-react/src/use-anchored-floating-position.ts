@@ -8,6 +8,8 @@ import { createWebAnchoredFloatingPositionPorts } from "@interactive-os/json-doc
 
 export interface UseAnchoredFloatingPositionOptions {
   readonly active: boolean;
+  /** Remeasure when a transformed anchor moves without resizing (such as SVG pan/zoom). */
+  readonly geometryKey?: unknown;
   readonly policy: FloatingPlacementPolicy;
   readonly offset?: number;
   readonly boundaryPadding?: number;
@@ -15,7 +17,7 @@ export interface UseAnchoredFloatingPositionOptions {
 }
 
 export interface AnchoredFloatingPositionBinding<
-  Anchor extends HTMLElement = HTMLElement,
+  Anchor extends Element = HTMLElement,
   Floating extends HTMLElement = HTMLElement,
 > {
   readonly anchorRef: RefCallback<Anchor>;
@@ -26,7 +28,7 @@ export interface AnchoredFloatingPositionBinding<
 
 /** Connects platform-independent anchored placement to Web measurement and React mount lifecycles. */
 export function useAnchoredFloatingPosition<
-  Anchor extends HTMLElement = HTMLElement,
+  Anchor extends Element = HTMLElement,
   Floating extends HTMLElement = HTMLElement,
 >(options: UseAnchoredFloatingPositionOptions): AnchoredFloatingPositionBinding<Anchor, Floating> {
   const [anchor, setAnchor] = useState<Anchor | null>(null);
@@ -70,6 +72,7 @@ export function useAnchoredFloatingPosition<
     anchor,
     floating,
     options.active,
+    options.geometryKey,
     options.boundaryPadding,
     options.boundaryRef,
     options.offset,

@@ -10,7 +10,7 @@
 
 ```ts
 interface AnchoredFloatingPositionBinding<
-  Anchor extends HTMLElement = HTMLElement,
+  Anchor extends Element = HTMLElement,
   Floating extends HTMLElement = HTMLElement,
 > {
   readonly anchorRef: RefCallback<Anchor>;
@@ -300,13 +300,15 @@ interface TreeEditingKeyboardOptions {
 ## `useAnchoredFloatingPosition`
 
 ```ts
-useAnchoredFloatingPosition<Anchor extends HTMLElement = HTMLElement, Floating extends HTMLElement = HTMLElement>(options: UseAnchoredFloatingPositionOptions): AnchoredFloatingPositionBinding<Anchor, Floating>
+useAnchoredFloatingPosition<Anchor extends Element = HTMLElement, Floating extends HTMLElement = HTMLElement>(options: UseAnchoredFloatingPositionOptions): AnchoredFloatingPositionBinding<Anchor, Floating>
 ```
 ## `UseAnchoredFloatingPositionOptions`
 
 ```ts
 interface UseAnchoredFloatingPositionOptions {
   readonly active: boolean;
+  /** Remeasure when a transformed anchor moves without resizing (such as SVG pan/zoom). */
+  readonly geometryKey?: unknown;
   readonly policy: FloatingPlacementPolicy;
   readonly offset?: number;
   readonly boundaryPadding?: number;

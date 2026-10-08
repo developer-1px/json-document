@@ -16,7 +16,7 @@ import { createEditingId, createEditingIdAllocator } from "./identity.js";
 import type { EditingHistoryOptions } from "./history.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
-  assertObjectDocument, planObjectOperation, transformObject,
+  assertObjectDocument, planObjectOperation, transformObject, layoutObjectText, layoutObjectDocument, objectSubtreeIds, type ObjectLayoutOptions,
   type DocumentObject, type ObjectDocument, type ObjectDraft, type ObjectOperation, type ObjectStyle,
 } from "@interactive-os/json-document-object-document";
 export type { DocumentObject, ObjectDocument } from "@interactive-os/json-document-object-document";
@@ -57,6 +57,8 @@ export interface ObjectPastePlacement {
 }
 
 export type ObjectIntent =
+  | { readonly type: "object.update"; readonly objectId: string; readonly changes: Partial<ObjectDraft> }
+  | { readonly type: "object.reorder"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "object.create"; readonly object: ObjectDraft }
   | { readonly type: "object.duplicate"; readonly objectIds: ReadonlyArray<string>; readonly placement?: ObjectPastePlacement }
   | { readonly type: "object.remove"; readonly objectIds: ReadonlyArray<string> }
@@ -91,6 +93,8 @@ export type ObjectIntent =
 export interface ObjectEditor {
   readonly snapshot: EditingSnapshot<ObjectSelection>;
   readonly selectedObjects: ReadonlyArray<DocumentObject>;
+  layoutDocument(document: ObjectDocument): ObjectDocument;
+  layoutObject<Object extends ObjectDraft>(object: Object): Object;
   dispatch(intent: ObjectIntent): EditingResult<ObjectSelection>;
   copy(): ObjectClipboard | null;
   cut(): { readonly clipboard: ObjectClipboard; readonly result: EditingResult<ObjectSelection> } | null;
@@ -101,11 +105,17 @@ export interface ObjectEditor {
 
 export function createObjectEditor(
   source: EditingDocumentSource<ObjectDocument>,
-  options: EditingHistoryOptions & { readonly createId?: () => string } = {},
+  options: EditingHistoryOptions & ObjectLayoutOptions & { readonly createId?: () => string } = {},
 ): ObjectEditor {
   const document = resolveDocumentSource(source);
+  assertObjectDocument(document.value);
+  if (options.measureText || options.containerPolicy) {
+    const current = document.value as ObjectDocument;
+    const next = layoutObjectDocument(current, options);
+    assertObjectDocument(next);
+    if (JSON.stringify(current) !== JSON.stringify(next)) document.commit([{ op: "replace", path: "", value: next }]);
+  }
   const initial = document.value as ObjectDocument;
-  assertObjectDocument(initial);
   const createId = options.createId ?? (() => createEditingId("object"));
   const selectionFamily = createKeySelectionFamily<string>();
   const first = initial.objects[0];
@@ -142,6 +152,8 @@ export function createObjectEditor(
   }
 
   function dispatch(intent: ObjectIntent): EditingResult<ObjectSelection> {
+    if (intent.type === "object.update") return apply({ type: "update", objectId: intent.objectId, changes: intent.changes }, session.snapshot.selection, intent.type);
+    if (intent.type === "object.reorder") return apply({ type: "reorder", objectIds: intent.objectIds }, session.snapshot.selection, intent.type);
     if (intent.type === "object.create") {
       const allocate = createEditingIdAllocator(value().objects.map((object) => object.id), createId, "object");
       let id: string;
@@ -194,7 +206,7 @@ export function createObjectEditor(
     if (intent.type === "object.remove") return removeSelected(intent.objectIds, intent.type);
 
     if (intent.type === "object.duplicate") {
-      const ids = new Set(intent.objectIds);
+      const ids = new Set(objectSubtreeIds(value().objects, intent.objectIds));
       const source = value().objects.filter((object) => ids.has(object.id));
       if (source.length !== ids.size) return failure("selection.object-not-found");
       if (source.length === 0) return failure("selection.empty");
@@ -250,12 +262,16 @@ export function createObjectEditor(
   }
 
   function apply(operation: ObjectOperation, selectionAfter: ObjectSelection, origin: string): EditingResult<ObjectSelection> {
-    const plan = planObjectOperation(value(), operation);
+    const plan = planObjectOperation(value(), operation, options);
     return plan.ok ? session.apply({ operations: plan.operations, selectionAfter, origin }) : plan;
   }
 
   function copy(): ObjectClipboard | null {
-    const objects = selectedObjects();
+    const ids = new Set(objectSubtreeIds(value().objects, session.snapshot.selection.keys));
+    const objects = value().objects.filter(object => ids.has(object.id)).map(object => {
+      if (typeof object.parentId === "string" && !ids.has(object.parentId)) { const { parentId: _, ...rest } = object; return rest as DocumentObject; }
+      return object;
+    });
     if (objects.length === 0) return null;
     return {
       type: "application/vnd.interactive-os.objects+json",
@@ -283,6 +299,8 @@ export function createObjectEditor(
   return {
     get snapshot() { return session.snapshot; },
     get selectedObjects() { return selectedObjects(); },
+    layoutDocument: document => layoutObjectDocument(document, options, value()),
+    layoutObject: object => layoutObjectText(object, options.measureText),
     dispatch,
     copy,
     cut: () => cutEditingClipboard(copy, (clipboard) => removeSelected(clipboard.objects.map((object) => object.id))),
@@ -298,7 +316,8 @@ function cloneObjectsWithUniqueIds(
   createId: () => string,
 ): DocumentObject[] {
   const allocateId = createEditingIdAllocator([...existing, ...source].map((object) => object.id), createId, "object");
-  return source.map((object) => ({ ...object, id: allocateId() }));
+  const ids = new Map(source.map(object => [object.id, allocateId()]));
+  return source.map(object => ({ ...object, id: ids.get(object.id)!, ...(typeof object.parentId === "string" && ids.has(object.parentId) ? { parentId: ids.get(object.parentId)! } : {}) }));
 }
 
 function selectionFor(

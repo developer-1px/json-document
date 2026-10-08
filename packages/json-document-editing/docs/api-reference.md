@@ -586,6 +586,11 @@ createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: 
 ```ts
 createCanvasClipboard(content: CanvasClipboardContent, options: CanvasClipboardOptions): ObjectClipboard
 ```
+## `createCanvasEditorTools`
+
+```ts
+createCanvasEditorTools(editor: ObjectEditor): { name: string; description: string; parameters: Record<string, unknown>; execute: (args: unknown) => unknown; }[]
+```
 ## `createCanvasSheet`
 
 ```ts
@@ -634,7 +639,7 @@ createMarkdownTableEditor(text: TextEditor, position: () => number): SheetEditor
 ## `createObjectEditor`
 
 ```ts
-createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): ObjectEditor
+createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: EditingHistoryOptions & ObjectLayoutOptions & { readonly createId?: () => string; }): ObjectEditor
 ```
 ## `createObjectPasteSession`
 
@@ -1333,6 +1338,8 @@ interface ObjectDocument extends Record<string, JSONValue> {
 interface ObjectEditor {
   readonly snapshot: EditingSnapshot<ObjectSelection>;
   readonly selectedObjects: ReadonlyArray<DocumentObject>;
+  layoutDocument(document: ObjectDocument): ObjectDocument;
+  layoutObject<Object extends ObjectDraft>(object: Object): Object;
   dispatch(intent: ObjectIntent): EditingResult<ObjectSelection>;
   copy(): ObjectClipboard | null;
   cut(): { readonly clipboard: ObjectClipboard; readonly result: EditingResult<ObjectSelection> } | null;
@@ -1345,6 +1352,8 @@ interface ObjectEditor {
 
 ```ts
 type ObjectIntent =
+  | { readonly type: "object.update"; readonly objectId: string; readonly changes: Partial<ObjectDraft> }
+  | { readonly type: "object.reorder"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "object.create"; readonly object: ObjectDraft }
   | { readonly type: "object.duplicate"; readonly objectIds: ReadonlyArray<string>; readonly placement?: ObjectPastePlacement }
   | { readonly type: "object.remove"; readonly objectIds: ReadonlyArray<string> }
