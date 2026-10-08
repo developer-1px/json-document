@@ -5,7 +5,7 @@ import { useState, useEffect, type CSSProperties } from "react";
 import { Hand, Maximize, Minus, Plus, Braces, Circle, CopyPlus, MousePointer2, Pencil, RectangleHorizontal, Redo2, StickyNote, Trash2, Type, Table2, Undo2, type LucideIcon } from "lucide-react";
 import type { ObjectEditor } from "@interactive-os/json-document-editing";
 import type { PlaneSelectProfile } from "@interactive-os/json-document-affordance";
-import { serializeCanvasDocument } from "@interactive-os/json-document-object-document";
+import { serializeCanvasDocument, type ObjectContainerLayout } from "@interactive-os/json-document-object-document";
 import { Command, Field, ProductShell, Toggle, ToolbarGroup } from "@interactive-os/json-document-ui-primitives-react";
 import { CanvasObjectTarget, CanvasObjectView, CanvasResizeTarget, CanvasTextInput } from "./canvas-object-view.js";
 import { useCanvasHand, type CanvasCreationStyle, type CanvasTool } from "./use-canvas-hand.js";
@@ -63,7 +63,7 @@ export function CanvasHand(props: CanvasHandProps) {
         <Command label="복제" disabled={!selected} onClick={() => hand.duplicate()}><CopyPlus aria-hidden="true" size={16} /></Command>
         <Command label="삭제" disabled={!selected} onClick={hand.remove}><Trash2 aria-hidden="true" size={16} /></Command>
       </ToolbarGroup>
-      {hand.tool === "select" && <CanvasStyleControls key={JSON.stringify(hand.snapshot.selection)} value={hand.selectedStyle} onStyle={hand.setStyle} onOpen={() => { hand.commitText(); hand.cancel(); }} />}
+      {hand.tool === "select" && <CanvasStyleControls key={JSON.stringify(hand.snapshot.selection)} value={hand.selectedStyle} {...(selected?.kind === "rectangle" && selected.containerLayout ? { containerLayout: selected.containerLayout, onContainerLayout: (layout: ObjectContainerLayout) => hand.setContainerLayout(selected.id, layout) } : {})} onStyle={hand.setStyle} onOpen={() => { hand.commitText(); hand.cancel(); }} />}
       <Command label="JSON" onClick={() => { hand.commitText(); hand.cancel(); setJSON(json === null ? serializeCanvasDocument(props.editor.snapshot.value as typeof hand.document) : null); }}><Braces aria-hidden="true" size={16} /></Command>
     </ToolbarGroup>}>
       <svg ref={hand.surface} {...hand.surfaceProps} {...viewport.events} onLostPointerCapture={event => { viewport.events.onLostPointerCapture?.(event); hand.surfaceProps.onLostPointerCapture(event); }} onPointerDownCapture={event => {viewport.events.onPointerDownCapture?.(event); if(editingObject && !(event.target as Element).closest("[data-canvas-sheet]")) setEditingObject(null);}} tabIndex={0} role="group" aria-label={props.label ?? "Canvas slide"}
@@ -76,12 +76,12 @@ export function CanvasHand(props: CanvasHandProps) {
             copying={hand.copyOriginals.length > 0 && selectedKeys.has(object.id)}
             onSelect={(shiftKey) => {setEditingObject(null);hand.select(object.id, shiftKey);}} onEdit={() => editObject(object)} onHandle={(interaction, event) => hand.interaction(interaction, event, object, "drag")} />
         </g>)}
-        {copyOriginals.size > 0 && <g data-canvas-copy-preview="" pointerEvents="none">{hand.objects.filter((object) => selectedKeys.has(object.id)).map((object) => <CanvasObjectView key={object.id} object={object} renderEmbedded={renderEmbedded} />)}</g>}
+        {copyOriginals.size > 0 && <g data-canvas-copy-preview="" pointerEvents="none">{hand.objects.filter((object) => copyOriginals.has(object.id)).map((object) => <CanvasObjectView key={object.id} object={object} renderEmbedded={renderEmbedded} />)}</g>}
         {hand.preview && <g data-canvas-preview="" pointerEvents="none" opacity={0.65}><CanvasObjectView object={{ ...hand.preview, id: "preview" }} renderEmbedded={renderEmbedded} /></g>}
         {hand.tool === "select" && hand.objects.filter((object) => selectedKeys.has(object.id)).map((object) =>
           <rect key={object.id} data-selection-outline={object.id} x={object.x} y={object.y} width={object.width} height={object.height} fill="none" stroke="rgb(var(--color-border-accent))" strokeWidth={object.id === selected?.id ? 2 : 1} pointerEvents="none" />)}
         {selected && hand.tool === "select" && <g>
-          {!hand.draft && !editingObject && (["n", "e", "s", "w", "nw", "ne", "se", "sw"] as const).map((edge) => <CanvasResizeTarget key={edge} object={selected} edge={edge} onHandle={(interaction, event) => hand.interaction(interaction, event, selected, "resize", edge)} />)}
+          {!hand.draft && !editingObject && (selected.kind === "text" ? ["e", "w"] as const : ["n", "e", "s", "w", "nw", "ne", "se", "sw"] as const).map((edge) => <CanvasResizeTarget key={edge} object={selected} edge={edge} {...(selected.kind === "text" ? { onAutoWidth: () => hand.autoWidth(selected.id) } : {})} onHandle={(interaction, event) => hand.interaction(interaction, event, selected, "resize", edge)} />)}
         </g>}
         {hand.marquee && <rect data-canvas-marquee="" {...hand.marquee} fill="rgb(var(--color-border-accent) / 0.08)" stroke="rgb(var(--color-border-accent))" pointerEvents="none" />}
         {selected && hand.draft?.id === selected.id && <CanvasTextInput object={selected} text={hand.draft.text} onChange={hand.changeText}

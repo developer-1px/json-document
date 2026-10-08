@@ -30,6 +30,7 @@ export function assertObjectDocument(value: unknown): void {
       if (!["text", "rectangle", "ellipse", "sticky-note", "path", "image", "embedded-document"].includes(object.kind as string)) throw new TypeError("Unknown Object kind.");
       if (!positive(object.width) || !positive(object.height)) throw new TypeError("Canvas object dimensions must be positive.");
       if (object.kind === "text" && !positive(object.fontSize)) throw new TypeError("Text fontSize must be positive and finite.");
+      if (object.widthMode !== undefined && (object.kind !== "text" || !["auto", "fixed"].includes(object.widthMode as string))) throw new TypeError("widthMode is auto or fixed for text only.");
       const styleKeys = Object.keys(getObjectStyle(object as unknown as DocumentObject)).filter((key) => key !== "color");
       assertObjectStyle(Object.fromEntries(styleKeys.filter((key) => Object.hasOwn(object, key)).map((key) => [key, object[key]])));
       if (object.kind === "embedded-document" && (typeof object.documentType !== "string" || !object.documentType || !("document" in object))) throw new TypeError("Embedded objects require a document type and value.");
@@ -41,7 +42,24 @@ export function assertObjectDocument(value: unknown): void {
         }
       }
     }
+    if (object.parentId !== undefined && typeof object.parentId !== "string") throw new TypeError("parentId must be a string.");
+    if (object.containerLayout !== undefined) {
+      const layout = object.containerLayout;
+      if (object.kind !== "rectangle" || !record(layout) || !["horizontal", "vertical", "free"].includes(layout.direction as string) || !finite(layout.gap) || layout.gap < 0 || !record(layout.padding)) throw new TypeError("Invalid container layout.");
+      const padding = layout.padding;
+      if (!["top", "right", "bottom", "left"].every(key => finite(padding[key]) && (padding[key] as number) >= 0)) throw new TypeError("Invalid container padding.");
+    }
     ids.add(object.id);
+  }
+  const objects = value.objects as unknown as DocumentObject[];
+  for (const object of objects) {
+    const seen = new Set([object.id]);
+    let parentId = object.parentId;
+    while (typeof parentId === "string") {
+      const parent = objects.find(item => item.id === parentId);
+      if (!parent || parent.kind !== "rectangle" || seen.has(parent.id)) throw new TypeError("Invalid container hierarchy.");
+      seen.add(parent.id); parentId = parent.parentId;
+    }
   }
   if (value.profile === "canvas/1") assertCanvasShape(value as unknown as ObjectDocument);
 }

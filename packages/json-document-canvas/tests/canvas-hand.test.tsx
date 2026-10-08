@@ -291,10 +291,10 @@ test.each(["Escape", "pointercancel", "lostpointercapture"])("%s cancels marquee
 test("only primary resizes and edits text while retaining the selected set", () => {
   const { container, svg, editor, value, commits } = setup(populated);
   act(() => { editor.dispatch({ type: "selection.set", objectIds: ["a", "b"], primaryKey: "a" }); });
-  expect(container.querySelectorAll("[data-resize-edge]")).toHaveLength(8);
-  const handle = container.querySelector('[data-resize-edge="se"]')!;
+  expect(container.querySelectorAll("[data-resize-edge]")).toHaveLength(2);
+  const handle = container.querySelector('[data-resize-edge="e"]')!;
   fireEvent.pointerDown(handle, event(100, 100)); fireEvent.pointerMove(window, event(120, 115)); fireEvent.pointerUp(window, event(120, 115));
-  expect(value().objects[0]!.width).toBeCloseTo(140); expect(value().objects[0]!.height).toBeCloseTo(130);
+  expect(value().objects[0]!.width).toBeCloseTo(140); expect(value().objects[0]!.height).toBeCloseTo(100);
   expect(value().objects[1]).toEqual(populated.objects[1]);
   expect(editor.snapshot.selection).toMatchObject({ keys: ["a", "b"], primaryKey: "a" });
   expect(commits).toHaveBeenCalledTimes(1);
@@ -518,7 +518,7 @@ test.each(["rectangle", "ellipse", "sticky-note", "text", "path", "image"] as co
   fireEvent.pointerDown(handle, event(50, 70)); fireEvent.pointerMove(window, event(250, 200));
   expect(container.querySelector("[data-canvas-object]")?.getAttribute("x")).toBe("299");
   fireEvent.pointerUp(window, event(250, 200));
-  expect(value().objects[0]).toEqual({ ...object, x: 299, width: 1 });
+  expect(value().objects[0]).toEqual({ ...object, x: 299, width: 1, ...(object.kind === "text" ? { widthMode: "fixed" } : {}) });
 });
 
 test.each(["Escape", "pointercancel", "lostpointercapture", "document", "selection", "unmount"])("resize cancellation (%s) discards preview and ignores stale release", (reason) => {
@@ -538,11 +538,11 @@ test.each(["Escape", "pointercancel", "lostpointercapture", "document", "selecti
 
 test("resize ignores foreign pointers and a return to the original bounds adds no History", () => {
   const { container, editor, value, commits } = setup(populated);
-  const handle = container.querySelector('[data-resize-edge="n"]')!;
+  const handle = container.querySelector('[data-resize-edge="e"]')!;
   fireEvent.pointerDown(handle, event(75, 50));
   fireEvent.pointerMove(window, event(100, 100, 9)); fireEvent.pointerUp(window, event(100, 100, 9));
   expect(container.querySelector('[data-canvas-object="a"]')?.getAttribute("height")).toBe("100");
-  fireEvent.pointerMove(window, event(75, 30)); fireEvent.pointerUp(window, event(75, 50));
+  fireEvent.pointerMove(window, event(95, 50)); fireEvent.pointerUp(window, event(75, 50));
   expect(value()).toEqual(populated); expect(commits).not.toHaveBeenCalled(); expect(editor.snapshot.canUndo).toBe(false);
 });
 
@@ -696,7 +696,7 @@ test("invalid style and cancelled field drafts do not create partial state or hi
 
 test("opening style cancels a resize preview and stale pointer release cannot overwrite a style", () => {
   const { container, value, commits } = setup(populated);
-  const handle = container.querySelector('[data-resize-edge="se"]')!;
+  const handle = container.querySelector('[data-resize-edge="e"]')!;
   fireEvent.pointerDown(handle, event(100, 100)); fireEvent.pointerMove(window, event(140, 140));
   fireEvent.click(screen.getByRole("button", { name: "스타일" }));
   fireEvent.click(screen.getByRole("button", { name: "색상: 빨강" }));

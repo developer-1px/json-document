@@ -34,7 +34,7 @@ test("body bounds are inset, finite at minimum sizes and ellipse corners remain 
 
 test("text keeps its color and uninset bounds; metadata-only labels do not acquire text capability", () => {
   const text = { ...createCanvasObject("text", bounds, { color: "red", label: "Title", fontSize: 32 }), id: "text" };
-  expect(projectObjectText(text)).toEqual({ ...bounds, text: "Title", color: "red", fontSize: 32, fontWeight: 400, textAlign: "left", verticalAlign: "top" });
+  expect(projectObjectText(text)).toEqual({ ...bounds, widthMode: "fixed", text: "Title", color: "red", fontSize: 32, fontWeight: 400, textAlign: "left", verticalAlign: "top" });
   for (const object of [
     { ...bounds, id: "legacy", color: "blue", label: "Legacy" },
     { ...bounds, id: "image", color: "transparent", label: "Image", kind: "image", source: "data:image/png;base64,AQID" },

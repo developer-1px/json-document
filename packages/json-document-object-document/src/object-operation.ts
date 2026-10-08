@@ -1,3 +1,4 @@
+import { layoutObjectDocument, objectSubtreeIds, type ObjectLayoutOptions } from "./object-container-layout.js";
 import { applyPatch, buildPointer, jsonEqual, type JSONValue, type JSONPatchOperation } from "@interactive-os/json-document";
 import type { DocumentObject, ObjectDocument, ObjectDraft } from "./object-model.js";
 import { projectObjectText, transformObject, type ObjectTransform } from "./object-projection.js";
@@ -21,7 +22,7 @@ export type ObjectOperationPlan =
   | { readonly ok: false; readonly code: string; readonly reason?: string };
 
 /** Pure, atomic semantic planner. No selection, identity allocation, history or input lifecycle. */
-export function planObjectOperation(document: ObjectDocument, operation: ObjectOperation): ObjectOperationPlan {
+export function planObjectOperation(document: ObjectDocument, operation: ObjectOperation, options: ObjectLayoutOptions = {}): ObjectOperationPlan {
   try {
     assertObjectDocument(document);
     if (operation.type === "style") assertObjectStyle(operation.style);
@@ -37,7 +38,13 @@ export function planObjectOperation(document: ObjectDocument, operation: ObjectO
         changes[key] = value;
       }
       const next = { ...objects[index]!, ...changes };
+      if (next.kind === "text" && Object.hasOwn(changes, "width") && changes.width !== objects[index]!.width && !Object.hasOwn(changes, "widthMode")) next.widthMode = "fixed";
       if (!jsonEqual(objects[index]!, next)) operations.push({ op: "replace", path: buildPointer(["objects", index]), value: next });
+      const dx = next.x - objects[index]!.x, dy = next.y - objects[index]!.y;
+      if (dx || dy) for (const id of objectSubtreeIds(objects, [next.id]).filter(id => id !== next.id)) {
+        const childIndex = objects.findIndex(item => item.id === id), child = objects[childIndex]!;
+        operations.push({ op: "replace", path: buildPointer(["objects", childIndex]), value: { ...child, x: child.x + dx, y: child.y + dy } });
+      }
     } else if (operation.type === "reorder") {
       if (operation.objectIds.length !== objects.length || new Set(operation.objectIds).size !== objects.length || operation.objectIds.some(id => !objects.some(object => object.id === id))) return { ok: false, code: "object.invalid-order" };
       const next = operation.objectIds.map(id => objects.find(object => object.id === id)!);
@@ -49,7 +56,7 @@ export function planObjectOperation(document: ObjectDocument, operation: ObjectO
       operation.objects.forEach((object, index) => operations.push({ op: "add", path: `/objects/${objects.length + index}`, value: object }));
     } else {
       const ids = (operation.type === "text" || operation.type === "embedded-document") ? [operation.objectId] : operation.objectIds;
-      const targets = new Set(ids);
+      const targets = new Set(operation.type === "transform" ? objectSubtreeIds(objects, ids) : ids);
       if (ids.some((id) => !objects.some((object) => object.id === id))) return { ok: false, code: "selection.object-not-found" };
       for (let index = objects.length - 1; index >= 0; index--) {
         const object = objects[index]!;
@@ -57,9 +64,9 @@ export function planObjectOperation(document: ObjectDocument, operation: ObjectO
         if (operation.type === "remove") {
           operations.push({ op: "remove", path: buildPointer(["objects", index]) });
         } else if (operation.type === "transform") {
-          const next = transformObject(object, operation.transform);
-          for (const key of ["x", "y", "width", "height"] as const) {
-            if (next[key] !== object[key]) operations.push({ op: "replace", path: buildPointer(["objects", index, key]), value: next[key] });
+          const next = transformObject(object, ids.includes(object.id) ? operation.transform : { dx: operation.transform.dx, dy: operation.transform.dy });
+          for (const key of ["x", "y", "width", "height", "widthMode"] as const) {
+            if (next[key] !== object[key]) operations.push({ op: "add", path: buildPointer(["objects", index, key]), value: next[key]! });
           }
         } else if (operation.type === "fill") {
           if (operation.color !== object.color) operations.push({ op: "replace", path: buildPointer(["objects", index, "color"]), value: operation.color });
@@ -80,7 +87,13 @@ export function planObjectOperation(document: ObjectDocument, operation: ObjectO
     }
     const result = applyPatch(document, operations);
     if (!result.ok) return result;
-    assertObjectDocument(result.value);
+    if (operation.type !== "remove") assertObjectDocument(result.value);
+    const next = layoutObjectDocument(result.value as ObjectDocument, options, document);
+    assertObjectDocument(next);
+    if (!jsonEqual(result.value, next) || options.measureText || options.containerPolicy || document.objects.some(object => object.parentId || object.containerLayout)) {
+      if (jsonEqual(document, next)) return { ok: true, operations: [] };
+      return { ok: true, operations: [{ op: "replace", path: "", value: next }] };
+    }
     return { ok: true, operations };
   } catch (error) {
     return { ok: false, code: "object.invalid", reason: error instanceof Error ? error.message : String(error) };

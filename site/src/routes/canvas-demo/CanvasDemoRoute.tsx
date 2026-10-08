@@ -1,3 +1,5 @@
+import { defaultObjectContainerPolicy } from "@interactive-os/json-document-object-document";
+import { measureWebText } from "@interactive-os/json-document-web";
 import "@interactive-os/json-document-canvas/canvas-hand.css";
 import { createWebStoredDocument } from "@interactive-os/json-document-web";
 import { assertCanvasDocument } from "@interactive-os/json-document-object-document";
@@ -10,7 +12,7 @@ import { canvasCreationStyle, emptyCanvasDocument } from "../../shared/demo-work
 
 export function CanvasDemoRoute() {
   const [stored] = useState(() => createWebStoredDocument({ key: "json-document.canvas.v1", storage: () => window.localStorage,
-    create: () => createObjectEditor(emptyCanvasDocument), restore: value => { assertCanvasDocument(value); return createObjectEditor(value); } }));
+    create: () => createObjectEditor(emptyCanvasDocument, { measureText: measureWebText, containerPolicy: defaultObjectContainerPolicy }), restore: value => { assertCanvasDocument(value); return createObjectEditor(value, { measureText: measureWebText, containerPolicy: defaultObjectContainerPolicy }); } }));
   const editor = stored.source;
   const saveState = useSyncExternalStore(stored.subscribe, () => stored.state);
   useEffect(() => stored.connect(), [stored]);

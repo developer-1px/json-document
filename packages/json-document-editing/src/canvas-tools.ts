@@ -3,6 +3,11 @@ import type { ObjectEditor, ObjectIntent } from "./object.js";
 
 const kinds = ["text", "rectangle", "ellipse", "sticky-note", "image"];
 const fields = {
+  containerLayout: { type: "object", description: "Rectangle container flow; children are inferred from overlap. Use free to keep positions.", additionalProperties: false, required: ["direction", "gap", "padding"], properties: {
+    direction: { type: "string", enum: ["horizontal", "vertical", "free"] }, gap: { type: "number", minimum: 0 },
+    padding: { type: "object", additionalProperties: false, required: ["top", "right", "bottom", "left"], properties: Object.fromEntries(["top", "right", "bottom", "left"].map(key => [key, { type: "number", minimum: 0 }])) },
+  } },
+  widthMode: { type: "string", enum: ["auto", "fixed"], description: "Text only: auto fits explicit text lines; fixed wraps to width. Text height always follows content." },
   source: { type: "string", description: "For image objects only: an existing validated PNG/JPEG/WebP data URL. Reuse user-provided image data; do not invent image bytes or fetch remote URLs." },
   x: { type: "number" }, y: { type: "number" }, width: { type: "number", exclusiveMinimum: 0 }, height: { type: "number", exclusiveMinimum: 0 },
   label: { type: "string", description: "Visible text rendered INSIDE this object, not metadata. Use an empty string for a background shape with separate text objects." }, color: { type: "string" }, fontSize: { type: "number", exclusiveMinimum: 0 },
@@ -64,7 +69,8 @@ export function createCanvasEditorTools(editor: ObjectEditor) {
       if (!target) return failure("selection.object-not-found");
       if (!kinds.includes(target.kind)) return failure("canvas.unsupported-object");
       if (target.kind !== "image" && Object.hasOwn(args.changes, "source")) return failure("canvas.invalid-arguments");
-      try { assertCanvasDocument({ ...(editor.snapshot.value as CanvasDocument), objects: [{ ...target, ...args.changes }] }); }
+      const changes = args.changes;
+      try { assertCanvasDocument({ ...(editor.snapshot.value as CanvasDocument), objects: (editor.snapshot.value as CanvasDocument).objects.map(object => object.id === target.id ? { ...target, ...changes } : object) }); }
       catch { return failure("canvas.invalid-object"); }
       const duplicate = overlappingText(editor.snapshot.value as CanvasDocument, { ...target, ...args.changes } as CanvasObjectDraft, target.id);
       if (duplicate) return { ok: false, code: "canvas.duplicate-visible-text", objectId: duplicate.id };

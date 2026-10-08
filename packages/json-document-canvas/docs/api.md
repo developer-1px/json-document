@@ -181,3 +181,19 @@ snap·레이어·PPTX·collaboration은 이번 Hand의 지원 범위가 아닙�
 - 이미지(PNG/JPEG/WebP)는 기존 붙여넣기로 추가합니다. 이미지·제목·본문은 같은 객체 선택·이동·크기 조절 계약을 사용합니다.
 
 전체 화면 Usage는 `/demo/canvas`, 구현 Source는 Canvas API 페이지에 등록됩니다.
+
+### 텍스트 크기와 자동 컨테이너
+
+Canvas Host는 `createObjectEditor(value, { measureText: measureWebText,
+containerPolicy: defaultObjectContainerPolicy })`로 Web 측정과 컨테이너 정책을 주입합니다.
+`measureWebText`는 Web 공개 API, 나머지 레이아웃 규칙은 Object Document 정본입니다.
+
+- 텍스트의 `widthMode: "auto" | "fixed"`는 JSON에 보관되며 생략한 기존 문서는 fixed입니다.
+- 클릭 생성은 auto, 드래그 생성은 fixed입니다. 오른쪽 edge 더블클릭(또는 해당 edge에서 Enter)은 auto, 너비 변경은 fixed입니다.
+- 세로 크기는 항상 실제 텍스트 줄에 맞습니다. 입력 preview, 글꼴 변경, AI 수정, 저장·Undo는 같은 측정 계약을 사용합니다.
+- 콘텐츠 면적의 30% 이상 겹치는 사각형을 부모로 추정합니다. 겹침 비율, 작은 박스, 기존 부모 순으로 우선합니다. `defaultObjectContainerPolicy.overlapThreshold`가 기본값의 정본이며 Host가 다른 정책을 주입할 수 있습니다.
+- `parentId`가 계층을 보관합니다. 박스 이동/복제에는 자손이 한 번씩 포함됩니다. 박스 삭제는 콘텐츠를 남기고 부모 관계를 해제합니다.
+- 정렬된 두 개 이상 자식은 가로/세로 흐름과 간격·padding을 추정합니다. 불규칙한 배치는 free입니다. 기존 스타일 팝오버에서 배치 방향과 간격을 바꿀 수 있습니다.
+- 텍스트 높이 변경은 다음 자식과 박스 크기를 갱신합니다. 컨테이너는 자식보다 뒤에 그려집니다. 자식을 밖으로 이동하면 겹침 기준으로 부모를 다시 판단합니다.
+
+휴리스틱은 초기 실험값입니다. 콘텐츠를 여러 박스에 중복 소속시키지 않으며, 중첩 관계의 순환과 유효하지 않은 레이아웃 값은 거부합니다.

@@ -1,3 +1,4 @@
+import type { ObjectContainerLayout } from "./object-container-layout.js";
 import type { JSONValue } from "@interactive-os/json-document";
 
 export interface ObjectBounds {
@@ -34,9 +35,10 @@ export interface CanvasTextFormat {
   readonly textAlign?: "left" | "center" | "right";
 }
 
-export type CanvasObjectDraft = ObjectDraft & (
-  | (CanvasTextFormat & { readonly kind: "text"; readonly fontSize: number })
-  | (CanvasTextFormat & { readonly kind: "rectangle" | "ellipse" | "sticky-note"; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
+export type CanvasObjectDraft = ObjectDraft & { readonly parentId?: string } & (
+  | (CanvasTextFormat & { readonly kind: "text"; readonly fontSize: number; readonly widthMode?: "auto" | "fixed" })
+  | (CanvasTextFormat & { readonly kind: "rectangle"; readonly containerLayout?: ObjectContainerLayout; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
+  | (CanvasTextFormat & { readonly kind: "ellipse" | "sticky-note"; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
   | { readonly kind: "path"; readonly points: ReadonlyArray<ObjectPoint>; readonly strokeWidth: number }
   | { readonly kind: "image"; readonly source: string }
   | { readonly kind: "embedded-document"; readonly documentType: string; readonly document: JSONValue }

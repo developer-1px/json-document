@@ -199,6 +199,11 @@ kanbanCardDropTargetFromWebElement(element: WebKanbanTargetElement | null): Kanb
 ```ts
 lineBoundary(ids: ReadonlyArray<string>, edge: "start" | "end"): string | null
 ```
+## `measureWebText`
+
+```ts
+measureWebText(text: WebTextMeasurement): { width: number; height: number; }
+```
 ## `moveGridPoint`
 
 ```ts
@@ -1004,6 +1009,17 @@ interface WebTextControlEvent {
 interface WebTextInput {
   readonly text: string;
   readonly offset: number;
+}
+```
+## `WebTextMeasurement`
+
+```ts
+interface WebTextMeasurement {
+  readonly text: string;
+  readonly width: number;
+  readonly widthMode?: "auto" | "fixed";
+  readonly fontSize: number;
+  readonly fontWeight: number;
 }
 ```
 ## `WebViewportPositionElement`

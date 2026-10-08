@@ -639,7 +639,7 @@ createMarkdownTableEditor(text: TextEditor, position: () => number): SheetEditor
 ## `createObjectEditor`
 
 ```ts
-createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): ObjectEditor
+createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: EditingHistoryOptions & ObjectLayoutOptions & { readonly createId?: () => string; }): ObjectEditor
 ```
 ## `createObjectPasteSession`
 
@@ -1338,6 +1338,8 @@ interface ObjectDocument extends Record<string, JSONValue> {
 interface ObjectEditor {
   readonly snapshot: EditingSnapshot<ObjectSelection>;
   readonly selectedObjects: ReadonlyArray<DocumentObject>;
+  layoutDocument(document: ObjectDocument): ObjectDocument;
+  layoutObject<Object extends ObjectDraft>(object: Object): Object;
   dispatch(intent: ObjectIntent): EditingResult<ObjectSelection>;
   copy(): ObjectClipboard | null;
   cut(): { readonly clipboard: ObjectClipboard; readonly result: EditingResult<ObjectSelection> } | null;

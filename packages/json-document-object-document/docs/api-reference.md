@@ -44,9 +44,10 @@ type CanvasObject = CanvasObjectDraft & { readonly id: string };
 ## `CanvasObjectDraft`
 
 ```ts
-type CanvasObjectDraft = ObjectDraft & (
-  | (CanvasTextFormat & { readonly kind: "text"; readonly fontSize: number })
-  | (CanvasTextFormat & { readonly kind: "rectangle" | "ellipse" | "sticky-note"; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
+type CanvasObjectDraft = ObjectDraft & { readonly parentId?: string } & (
+  | (CanvasTextFormat & { readonly kind: "text"; readonly fontSize: number; readonly widthMode?: "auto" | "fixed" })
+  | (CanvasTextFormat & { readonly kind: "rectangle"; readonly containerLayout?: ObjectContainerLayout; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
+  | (CanvasTextFormat & { readonly kind: "ellipse" | "sticky-note"; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
   | { readonly kind: "path"; readonly points: ReadonlyArray<ObjectPoint>; readonly strokeWidth: number }
   | { readonly kind: "image"; readonly source: string }
   | { readonly kind: "embedded-document"; readonly documentType: string; readonly document: JSONValue }
@@ -86,6 +87,11 @@ createCanvasObject(kind: Exclude<CanvasObjectKind, "path" | "image" | "embedded-
 ```ts
 createCanvasPath(points: ReadonlyArray<ObjectPoint>, style: { readonly color: string; readonly label: string; readonly strokeWidth: number; }): Extract<CanvasObjectDraft, { readonly kind: "path"; }>
 ```
+## `defaultObjectContainerPolicy`
+
+```ts
+const defaultObjectContainerPolicy: ObjectContainerPolicy
+```
 ## `DocumentObject`
 
 ```ts
@@ -98,6 +104,16 @@ interface DocumentObject extends ObjectDraft {
 ```ts
 getObjectStyle(object: DocumentObject): Partial<ObjectStyle>
 ```
+## `layoutObjectDocument`
+
+```ts
+layoutObjectDocument(document: ObjectDocument, options: ObjectLayoutOptions, previous?: ObjectDocument): ObjectDocument
+```
+## `layoutObjectText`
+
+```ts
+layoutObjectText<Object extends ObjectDraft>(object: Object, measure?: ObjectTextMeasurer): Object
+```
 ## `ObjectBounds`
 
 ```ts
@@ -107,6 +123,20 @@ interface ObjectBounds {
   readonly width: number;
   readonly height: number;
 }
+```
+## `ObjectContainerLayout`
+
+```ts
+type ObjectContainerLayout = {
+  readonly direction: "horizontal" | "vertical" | "free";
+  readonly gap: number;
+  readonly padding: { readonly top: number; readonly right: number; readonly bottom: number; readonly left: number };
+}
+```
+## `ObjectContainerPolicy`
+
+```ts
+interface ObjectContainerPolicy { readonly overlapThreshold: number }
 ```
 ## `ObjectDocument`
 
@@ -121,6 +151,14 @@ interface ObjectDocument extends Record<string, JSONValue> {
 interface ObjectDraft extends ObjectBounds, Record<string, JSONValue> {
   readonly label: string;
   readonly color: string;
+}
+```
+## `ObjectLayoutOptions`
+
+```ts
+interface ObjectLayoutOptions {
+  readonly measureText?: ObjectTextMeasurer;
+  readonly containerPolicy?: ObjectContainerPolicy;
 }
 ```
 ## `ObjectOperation`
@@ -172,10 +210,21 @@ interface ObjectStyle {
 ```ts
 type ObjectStyleSelection = { readonly [Key in keyof ObjectStyle]?: ObjectStyle[Key] | null };
 ```
+## `objectSubtreeIds`
+
+```ts
+objectSubtreeIds(objects: ReadonlyArray<DocumentObject>, ids: ReadonlyArray<string>): string[]
+```
+## `ObjectTextMeasurer`
+
+```ts
+type ObjectTextMeasurer = (text: ObjectTextProjection) => { readonly width: number; readonly height: number };
+```
 ## `ObjectTextProjection`
 
 ```ts
 interface ObjectTextProjection extends ObjectBounds, Pick<ObjectStyle, "fontSize" | "fontWeight" | "textAlign" | "color"> {
+  readonly widthMode: "auto" | "fixed";
   readonly text: string;
   readonly verticalAlign: "top" | "center";
 }
@@ -198,7 +247,7 @@ parseCanvasDocument(json: string): CanvasDocument
 ## `planObjectOperation`
 
 ```ts
-planObjectOperation(document: ObjectDocument, operation: ObjectOperation): ObjectOperationPlan
+planObjectOperation(document: ObjectDocument, operation: ObjectOperation, options?: ObjectLayoutOptions): ObjectOperationPlan
 ```
 ## `projectObject`
 

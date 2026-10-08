@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AlignCenter, AlignLeft, AlignRight, Bold, Check, Palette, Square, SquareDashed, type LucideIcon } from "lucide-react";
-import type { ObjectStyle, ObjectStyleSelection } from "@interactive-os/json-document-object-document";
+import type { ObjectContainerLayout, ObjectStyle, ObjectStyleSelection } from "@interactive-os/json-document-object-document";
 import { Command, Field, Popover, Toggle, ToolbarGroup } from "@interactive-os/json-document-ui-primitives-react";
 
 const colors = [
@@ -16,6 +16,8 @@ export function CanvasStyleControls(props: {
   readonly value: ObjectStyleSelection;
   readonly onStyle: (style: Partial<ObjectStyle>) => { readonly ok: boolean };
   readonly onOpen: () => void;
+  readonly containerLayout?: ObjectContainerLayout;
+  readonly onContainerLayout?: (layout: ObjectContainerLayout) => { readonly ok: boolean };
 }) {
   const [open, setOpen] = useState(false);
   const value = props.value;
@@ -23,6 +25,12 @@ export function CanvasStyleControls(props: {
   const apply = (style: Partial<ObjectStyle>) => props.onStyle(style).ok;
   return <Popover label="스타일" trigger={<Palette aria-hidden="true" size={16} />} triggerPresentation="icon"
     open={open} onOpenChange={(next) => { if (next) props.onOpen(); setOpen(next); }} panelClassName="canvas-style-panel">
+    {props.containerLayout && <>
+      <ToolbarGroup label="컨테이너 배치">
+        {([ ["free", "자유 배치"], ["horizontal", "가로 배치"], ["vertical", "세로 배치"] ] as const).map(([direction, label]) => <Toggle key={direction} label={label} pressed={props.containerLayout!.direction === direction} onClick={() => props.onContainerLayout?.({ ...props.containerLayout!, direction })}>{label}</Toggle>)}
+      </ToolbarGroup>
+      <StyleValue key={`gap:${props.containerLayout.gap}`} label="콘텐츠 간격" value={props.containerLayout.gap} onApply={gap => props.onContainerLayout?.({ ...props.containerLayout!, gap: Number(gap) }).ok ?? false} />
+    </>}
     {value.color !== undefined && <StyleValue key={`color:${value.color}`} label="색상" value={value.color} color onApply={(color) => apply({ color })} />}
     {value.textColor !== undefined && <StyleValue key={`text:${value.textColor}`} label="글자색" value={value.textColor} color onApply={(textColor) => apply({ textColor })} />}
     {value.strokeColor !== undefined && <StyleValue key={`stroke:${value.strokeColor}`} label="테두리 색" value={value.strokeColor} color

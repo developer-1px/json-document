@@ -22,3 +22,12 @@ serializeCanvasDocument(parseCanvasDocument(JSON.stringify(document.value)));
 호환 경로입니다. RC이며 안정된 wire 표준이나 PPTX 지원을 선언하지 않습니다.
 
 [API와 프로파일 계약](docs/api.md) · [Usage 및 Source](https://developer-1px.github.io/json-document/docs/api/canvas)
+
+Canvas text supports persisted `widthMode` (auto/fixed; omitted means fixed).
+`layoutObjectText` consumes an injected measurer for auto width and content height.
+`layoutObjectDocument` owns container parent inference and nested flow layout;
+`defaultObjectContainerPolicy` starts at 30% of the child's area. `parentId` and
+rectangle `containerLayout` persist ownership, direction, gap and padding.
+`objectSubtreeIds` expands a selection without moving descendants twice.
+`planObjectOperation` accepts ObjectLayoutOptions so related text and container
+geometry commit atomically. The Canvas Usage and Source demonstrate these APIs.

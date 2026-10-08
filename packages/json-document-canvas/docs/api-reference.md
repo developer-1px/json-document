@@ -66,7 +66,7 @@ createCanvasClipboardBinding(editor: ObjectEditor, policy: CanvasClipboardPolicy
 ## `useCanvasHand`
 
 ```ts
-useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile, activateEmbedded?: (objectId: string) => void): { document: CanvasDocument; ... 24 more ...; surfaceProps: { ...; }; }
+useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile, activateEmbedded?: (objectId: string) => void): { setContainerLayout(id: string, layout: ObjectContainerLayout): EditingResult<...>; ... 26 more ...; surfaceProps: { ...; }; }
 ```
 ## `useCanvasViewport`
 

@@ -60,3 +60,11 @@ restore as interrupted. History stacks remain session-local. Storage is scoped
 to the browser/origin; Codex keeps its own local thread record separately.
 
 Image create/update accepts existing PNG/JPEG/WebP data URLs through the canonical image validator. Remote image URLs and invalid data are rejected without a document edit. Image geometry uses the same tools and history as text.
+
+Text `widthMode` accepts auto/fixed. The editor's injected `measureText` port computes
+text height and auto width in the same transaction as text or style changes.
+Explicit width edits default back to fixed wrapping. Tools operate on complete
+container hierarchies; moving a parent carries descendants once. Rectangle
+`containerLayout` controls horizontal/vertical/free flow, gap and edge padding.
+Reading exposes parentId and persisted layout fields. The Canvas Host injects
+the canonical 30% overlap policy and native Web text measurement.
