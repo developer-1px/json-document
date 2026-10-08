@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type RefObject, type PointerEvent, type KeyboardEvent } from "react";
-import { createWebPointerSession, isWebEditableTarget } from "@interactive-os/json-document-web";
+import { createWebPointerSession, isWebEditableTarget, isWebComposingKey } from "@interactive-os/json-document-web";
 import type { CanvasDocument } from "@interactive-os/json-document-object-document";
 
 type View = { x: number; y: number; scale: number };
@@ -9,17 +9,25 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
   const [view, setView] = useState<View>({ x: 0, y: 0, scale: 1 });
   const [hand, setHand] = useState(false);
   const [space, setSpace] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const state = useRef({ size, view, document });
   state.current = { size, view, document };
   const [pointer] = useState(() => createWebPointerSession<{ x: number; y: number; view: View }>());
-  const fit = () => {
-    const { size, document } = state.current;
-    const left = Math.min(0, ...document.objects.map(o => o.x));
-    const top = Math.min(0, ...document.objects.map(o => o.y));
-    const right = Math.max(document.width, ...document.objects.map(o => o.x + o.width));
-    const bottom = Math.max(document.height, ...document.objects.map(o => o.y + o.height));
-    const scale = Math.max(0.05, Math.min(8, (size.width - 64) / (right - left), (size.height - 160) / (bottom - top)));
+  const fitBounds = (left: number, top: number, right: number, bottom: number) => {
+    const { size } = state.current;
+    const scale = Math.max(0.05, Math.min(8, (size.width - 64) / Math.max(1, right - left), (size.height - 160) / Math.max(1, bottom - top)));
     setView({ x: (left + right - size.width / scale) / 2, y: (top + bottom - size.height / scale) / 2, scale });
+  };
+  const fit = () => {
+    const { document } = state.current;
+    fitBounds(Math.min(0, ...document.objects.map(o => o.x)), Math.min(0, ...document.objects.map(o => o.y)),
+      Math.max(document.width, ...document.objects.map(o => o.x + o.width)), Math.max(document.height, ...document.objects.map(o => o.y + o.height)));
+  };
+  const fitSelection = (ids: readonly string[]) => {
+    const objects = state.current.document.objects.filter(object => ids.includes(object.id));
+    if (!objects.length) return;
+    fitBounds(Math.min(...objects.map(o => o.x)), Math.min(...objects.map(o => o.y)),
+      Math.max(...objects.map(o => o.x + o.width)), Math.max(...objects.map(o => o.y + o.height)));
   };
   const zoom = (factor: number, at = { x: state.current.size.width / 2, y: state.current.size.height / 2 }) => {
     setView(current => {
@@ -50,7 +58,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
         zoom(Math.exp(-event.deltaY * unit * 0.01), { x: event.clientX - rect.left, y: event.clientY - rect.top });
       } else setView(current => ({ ...current, x: current.x + event.deltaX * unit / current.scale, y: current.y + event.deltaY * unit / current.scale }));
     };
-    const release = () => { setSpace(false); const active = pointer.getSnapshot(); if (active) pointer.cancel(active.pointerId); };
+    const release = () => { setSpace(false); setDragging(false); const active = pointer.getSnapshot(); if (active) pointer.cancel(active.pointerId); };
     svg.addEventListener("wheel", wheel, { passive: false });
     window.addEventListener("blur", release);
     return () => { observer.disconnect(); svg.removeEventListener("wheel", wheel); window.removeEventListener("blur", release); release(); };
@@ -58,17 +66,20 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
   const end = (event: PointerEvent<SVGSVGElement>, cancel = false) => {
     if (!pointer.getSnapshot()) return;
     event.stopPropagation();
+    setDragging(false);
     if (cancel) pointer.cancel(event.pointerId); else pointer.commit(event.pointerId);
   };
   return {
-    hand, setHand, fit, zoom, scale: view.scale,
+    hand, setHand, fit, fitSelection, zoom, scale: view.scale,
     viewBox: `${view.x} ${view.y} ${size.width / view.scale} ${size.height / view.scale}`,
-    cursor: hand || space ? "grab" : undefined,
+    panning: hand || space || dragging,
+    cursor: dragging ? "grabbing" : hand || space ? "grab" : undefined,
     events: enabled ? {
       onPointerDownCapture(event: PointerEvent<SVGSVGElement>) {
         if (isWebEditableTarget(event.target) || !(event.button === 1 || event.button === 0 && (hand || space))) return;
         event.preventDefault(); event.stopPropagation(); event.currentTarget.focus();
         pointer.begin(event.currentTarget, event.pointerId, { x: event.clientX, y: event.clientY, view: state.current.view });
+        setDragging(true);
       },
       onPointerMoveCapture(event: PointerEvent<SVGSVGElement>) {
         const active = pointer.getSnapshot();
@@ -81,8 +92,8 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
       onPointerCancelCapture: (event: PointerEvent<SVGSVGElement>) => end(event, true),
       onLostPointerCapture: (event: PointerEvent<SVGSVGElement>) => end(event, true),
       onKeyDownCapture(event: KeyboardEvent<SVGSVGElement>) {
-        if (isWebEditableTarget(event.target)) return;
-        if (event.code === "Space") { event.preventDefault(); event.stopPropagation(); setSpace(true); }
+        if (isWebComposingKey(event.nativeEvent) || isWebEditableTarget(event.target)) return;
+        if (event.code === "Space" && !event.metaKey && !event.ctrlKey && !event.altKey) { event.preventDefault(); event.stopPropagation(); setSpace(true); }
       },
       onKeyUpCapture(event: KeyboardEvent<SVGSVGElement>) {
         if (event.code === "Space") { event.preventDefault(); event.stopPropagation(); setSpace(false); }

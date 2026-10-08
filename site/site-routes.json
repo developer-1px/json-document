@@ -95,6 +95,24 @@
     "applicationSource": "site/src/app/routes/applications/bear.tsx"
   },
   {
+    "path": "/applications/canvas",
+    "label": "Canvas",
+    "title": "Canvas - json-document",
+    "description": "텍스트·도형·이미지·표를 배치하고 AI와 함께 편집하는 전체 화면 Canvas 애플리케이션입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications",
+    "chrome": "none",
+    "modulePaths": [
+      "/docs/api/object-document",
+      "/docs/api/editing",
+      "/docs/api/canvas",
+      "/docs/api/affordance",
+      "/docs/api/web",
+      "/docs/api/ui-primitives-react"
+    ],
+    "applicationSource": "site/src/app/routes/applications/canvas.tsx"
+  },
+  {
     "path": "/applications/sheet",
     "label": "Sheet",
     "title": "Sheet",
@@ -298,7 +316,7 @@
         "/demo/clipboard",
         "/demo/markdown-caret",
         "/applications/sheet",
-        "/demo/canvas",
+        "/applications/canvas",
         "/demo/sheet-views"
       ]
     },
@@ -414,7 +432,7 @@
         "/adapters/clipboard",
         "/demo/viewport",
         "/applications/sheet",
-        "/demo/canvas"
+        "/applications/canvas"
       ]
     },
     "parentPath": "/docs/adapters"
@@ -583,7 +601,7 @@
       "usagePaths": [
         "/affordances/handles",
         "/demo/viewport",
-        "/demo/canvas"
+        "/applications/canvas"
       ]
     },
     "parentPath": "/docs/affordance"
@@ -739,7 +757,7 @@
     "module": {
       "packageName": "@interactive-os/json-document-object-document",
       "usagePaths": [
-        "/demo/canvas"
+        "/applications/canvas"
       ]
     },
     "parentPath": "/docs/document-types"
@@ -757,7 +775,7 @@
     "module": {
       "packageName": "@interactive-os/json-document-canvas",
       "usagePaths": [
-        "/demo/canvas"
+        "/applications/canvas"
       ]
     }
   },
@@ -1128,9 +1146,8 @@
     "path": "/demo/canvas",
     "chrome": "none",
     "label": "Canvas",
-    "title": "Canvas - json-document",
-    "description": "한 장에 글자·도형·그리기를 만들고 편집하는 Canvas 수직 슬라이스입니다.",
-    "parentPath": "/docs/api/canvas",
+    "title": "Canvas 이동 - json-document",
+    "description": "Canvas Application의 이전 주소입니다.",
     "sidebar": false
   },
   {
@@ -1698,7 +1715,7 @@
     "description": "클릭·Enter·Space로 대상의 기본 동작을 실행하는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoPath": "/applications/canvas",
     "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance",
     "documentSource": "docs/public/affordance-activate.md"
@@ -1711,7 +1728,7 @@
     "description": "Escape와 pointercancel로 진행 중인 손을 버리는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoPath": "/applications/canvas",
     "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance",
     "documentSource": "docs/public/affordance-cancel.md"
@@ -1750,7 +1767,7 @@
     "description": "Delete와 Backspace로 고른 대상을 지우는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoPath": "/applications/canvas",
     "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance",
     "documentSource": "docs/public/affordance-delete.md"
@@ -1901,7 +1918,7 @@
     "description": "모서리·칸·분할선을 끌어 크기를 바꾸고, 화살표로 미세 조절하는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
-    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoPath": "/applications/canvas",
     "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance",
     "documentSource": "docs/public/affordance-resize.md"
@@ -2050,7 +2067,7 @@
       "usagePaths": [
         "/demo/sheet",
         "/applications/sheet",
-        "/demo/canvas",
+        "/applications/canvas",
         "/demo/sheet-views"
       ]
     },

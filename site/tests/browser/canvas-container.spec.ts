@@ -36,8 +36,7 @@ test("overlapping box owns content, moves it once, and reflows growing text", as
   await expect(title).toHaveAttribute("aria-label", "제목");
   await expect(body).toHaveAttribute("y", String(oldBodyY));
   const current = (await box.boundingBox())!;
-  await page.mouse.click(current.x + 10, current.y + 10);
-  await page.getByRole("button", { name: "스타일", exact: true }).click();
+  await page.mouse.click(current.x + current.width - 12, current.y + current.height - 12);
   await expect(page.getByRole("button", { name: "세로 배치", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "가로 배치", exact: true }).click();
   expect(Number(await body.getAttribute("y"))).toBe(Number(await title.getAttribute("y")));

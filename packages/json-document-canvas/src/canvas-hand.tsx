@@ -1,15 +1,16 @@
+import { createWebKeyboardAdapter, isWebEditableTarget } from "@interactive-os/json-document-web";
 import { useCanvasViewport } from "./use-canvas-viewport.js";
 import {CanvasSheetObject} from "./canvas-sheet-object.js";
 import {sheetEmbeddedDocumentType} from "@interactive-os/json-document-editing";
-import { useState, useEffect, type CSSProperties } from "react";
+import { useState, useEffect, type KeyboardEvent, type CSSProperties } from "react";
 import { Hand, Maximize, Minus, Plus, Braces, Circle, CopyPlus, MousePointer2, Pencil, RectangleHorizontal, Redo2, StickyNote, Trash2, Type, Table2, Undo2, type LucideIcon } from "lucide-react";
 import type { ObjectEditor } from "@interactive-os/json-document-editing";
 import type { PlaneSelectProfile } from "@interactive-os/json-document-affordance";
-import { serializeCanvasDocument, type ObjectContainerLayout } from "@interactive-os/json-document-object-document";
+import { serializeCanvasDocument } from "@interactive-os/json-document-object-document";
 import { Command, Field, ProductShell, Toggle, ToolbarGroup } from "@interactive-os/json-document-ui-primitives-react";
 import { CanvasObjectTarget, CanvasObjectView, CanvasResizeTarget, CanvasTextInput } from "./canvas-object-view.js";
 import { useCanvasHand, type CanvasCreationStyle, type CanvasTool } from "./use-canvas-hand.js";
-import { CanvasStyleControls } from "./canvas-style-controls.js";
+import { CanvasContentToolbar } from "./canvas-content-toolbar.js";
 
 export interface CanvasHandProps {
   /** Fill the host and navigate independently of document coordinates. */
@@ -23,12 +24,20 @@ export interface CanvasHandProps {
   readonly selectProfile?: PlaneSelectProfile;
 }
 
-const tools: ReadonlyArray<{ readonly id: CanvasTool; readonly label: string; readonly icon: LucideIcon }> = [
-  { id: "select", label: "선택", icon: MousePointer2 }, { id: "text", label: "글자", icon: Type },
-  { id: "sticky-note", label: "스티커 노트", icon: StickyNote },
-  { id:"table",label:"표",icon:Table2 },
-  { id: "rectangle", label: "사각형", icon: RectangleHorizontal }, { id: "ellipse", label: "타원", icon: Circle }, { id: "path", label: "그리기", icon: Pencil },
+const tools: ReadonlyArray<{ readonly id: CanvasTool; readonly label: string; readonly icon: LucideIcon; readonly shortcut: string }> = [
+  { id: "select", label: "선택", icon: MousePointer2, shortcut: "V" }, { id: "text", label: "글자", icon: Type, shortcut: "T" },
+  { id: "sticky-note", label: "스티커 노트", icon: StickyNote, shortcut: "S" },
+  { id:"table",label:"표",icon: Table2, shortcut: "Shift-T" },
+  { id: "rectangle", label: "사각형", icon: RectangleHorizontal, shortcut: "R" }, { id: "ellipse", label: "타원", icon: Circle, shortcut: "O" }, { id: "path", label: "그리기", icon: Pencil, shortcut: "M" },
 ];
+
+const toolKeyboard = createWebKeyboardAdapter<CanvasTool>({ defaults: false, keySource: "code",
+  keymap: Object.fromEntries(tools.map(tool => [tool.shortcut.replace(/[A-Z]$/, key => key.toLowerCase()), tool.id])),
+});
+const viewKeyboard = createWebKeyboardAdapter({ defaults: false, keySource: "code", keymap: {
+  h: "hand", Escape: "select", "Shift-1": "fit", "Shift-!": "fit",
+  "Shift-2": "selection", "Shift-@": "selection",
+} as const });
 
 export function CanvasHand(props: CanvasHandProps) {
   const [editingObject, setEditingObject] = useState<string | null>(null);
@@ -45,17 +54,37 @@ export function CanvasHand(props: CanvasHandProps) {
   const renderEmbedded = (object: Extract<typeof hand.objects[number],{kind:"embedded-document"}>) => object.documentType === sheetEmbeddedDocumentType
     ? <CanvasSheetObject object={object} editor={props.editor} active={editingObject === object.id} onDeactivate={exitTable} />
     : <foreignObject x={object.x} y={object.y} width={object.width} height={object.height}><div role="status">지원하지 않는 문서: {object.documentType}</div></foreignObject>;
+  useEffect(() => { if (props.workspace) hand.surface.current?.focus({ preventScroll: true }); }, [props.workspace, hand.surface]);
+  const chooseTool = (tool: CanvasTool) => { viewport.setHand(false); hand.choose(tool); };
+  const chooseHand = () => { hand.commitText(); hand.cancel(); viewport.setHand(true); hand.surface.current?.focus(); };
+  const keyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (isWebEditableTarget(event.target)
+      || (event.target instanceof Element && event.target.closest('[role="dialog"]'))) return;
+    // Escape is already consumed by the selection profile; it must also leave the hand tool.
+    const action = viewKeyboard.resolve(event.nativeEvent);
+    if (action === "select") viewport.setHand(false);
+    if (event.defaultPrevented) return;
+    const tool = toolKeyboard.resolve(event.nativeEvent);
+    if (tool) { event.preventDefault(); chooseTool(tool); return; }
+    if (!props.workspace) return;
+    if (!action) return;
+    event.preventDefault();
+    if (action === "hand") chooseHand();
+    else if (action === "select") chooseTool("select");
+    else if (action === "fit") viewport.fit();
+    else viewport.fitSelection(hand.selection.keys);
+  };
   const selectedKeys = new Set(hand.selection.keys);
   const copyOriginals = new Map(hand.copyOriginals.map((object) => [object.id, object]));
   return (
-    <ProductShell className={props.className} fill={props.workspace ?? false} data-canvas-workspace={props.workspace || undefined} toolbarPresentation={props.workspace ? "floating" : "attached"} {...(props.workspace ? { canvasClassName: "canvas-workspace-surface" } : {})} toolbarLabel="Canvas tools" toolbar={<ToolbarGroup style={{ flexWrap: "wrap" }}>
-      <ToolbarGroup>{tools.map((tool) => <Toggle key={tool.id} label={tool.label} pressed={!viewport.hand && hand.tool === tool.id} onClick={() => { viewport.setHand(false); hand.choose(tool.id); }}><tool.icon aria-hidden="true" size={16} /></Toggle>)}</ToolbarGroup>
+    <ProductShell onKeyDown={keyDown} className={props.className} fill={props.workspace ?? false} data-canvas-workspace={props.workspace || undefined} toolbarPresentation={props.workspace ? "floating" : "attached"} {...(props.workspace ? { canvasClassName: "canvas-workspace-surface" } : {})} toolbarLabel="Canvas tools" toolbar={<ToolbarGroup style={{ flexWrap: "wrap" }}>
+      <ToolbarGroup>{tools.map((tool) => <Toggle key={tool.id} label={tool.label} tooltip={`${tool.label} (${tool.shortcut.replace("-", "+")})`} aria-keyshortcuts={tool.shortcut.replace("-", "+")} pressed={!viewport.panning && hand.tool === tool.id} onClick={() => chooseTool(tool.id)}><tool.icon aria-hidden="true" size={16} /></Toggle>)}</ToolbarGroup>
       {props.workspace && <ToolbarGroup>
-        <Toggle label="화면 이동" pressed={viewport.hand} onClick={() => { hand.commitText(); hand.cancel(); viewport.setHand(!viewport.hand); }}><Hand aria-hidden="true" size={16} /></Toggle>
+        <Toggle label="화면 이동" tooltip="화면 이동 (H · Space 누르기)" aria-keyshortcuts="H" pressed={viewport.panning} onClick={() => { if (viewport.hand) chooseTool("select"); else chooseHand(); }}><Hand aria-hidden="true" size={16} /></Toggle>
         <Command label="축소" onClick={() => viewport.zoom(1 / 1.2)}><Minus aria-hidden="true" size={16} /></Command>
         <Command label="배율 100%" onClick={() => viewport.zoom(1 / viewport.scale)}>{Math.round(viewport.scale * 100)}%</Command>
         <Command label="확대" onClick={() => viewport.zoom(1.2)}><Plus aria-hidden="true" size={16} /></Command>
-        <Command label="전체 보기" onClick={viewport.fit}><Maximize aria-hidden="true" size={16} /></Command>
+        <Command label="전체 보기" aria-keyshortcuts="Shift+1" onClick={viewport.fit}><Maximize aria-hidden="true" size={16} /></Command>
       </ToolbarGroup>}
       <ToolbarGroup>
         <Command label="실행 취소" disabled={!hand.snapshot.canUndo} onClick={() => hand.history("undo")}><Undo2 aria-hidden="true" size={16} /></Command>
@@ -63,16 +92,15 @@ export function CanvasHand(props: CanvasHandProps) {
         <Command label="복제" disabled={!selected} onClick={() => hand.duplicate()}><CopyPlus aria-hidden="true" size={16} /></Command>
         <Command label="삭제" disabled={!selected} onClick={hand.remove}><Trash2 aria-hidden="true" size={16} /></Command>
       </ToolbarGroup>
-      {hand.tool === "select" && <CanvasStyleControls key={JSON.stringify(hand.snapshot.selection)} value={hand.selectedStyle} {...(selected?.kind === "rectangle" && selected.containerLayout ? { containerLayout: selected.containerLayout, onContainerLayout: (layout: ObjectContainerLayout) => hand.setContainerLayout(selected.id, layout) } : {})} onStyle={hand.setStyle} onOpen={() => { hand.commitText(); hand.cancel(); }} />}
       <Command label="JSON" onClick={() => { hand.commitText(); hand.cancel(); setJSON(json === null ? serializeCanvasDocument(props.editor.snapshot.value as typeof hand.document) : null); }}><Braces aria-hidden="true" size={16} /></Command>
     </ToolbarGroup>}>
       <svg ref={hand.surface} {...hand.surfaceProps} {...viewport.events} onLostPointerCapture={event => { viewport.events.onLostPointerCapture?.(event); hand.surfaceProps.onLostPointerCapture(event); }} onPointerDownCapture={event => {viewport.events.onPointerDownCapture?.(event); if(editingObject && !(event.target as Element).closest("[data-canvas-sheet]")) setEditingObject(null);}} tabIndex={0} role="group" aria-label={props.label ?? "Canvas slide"}
         aria-busy={hand.pastePending}
-        data-canvas-slide="true" data-tool={hand.tool} viewBox={props.workspace ? viewport.viewBox : `0 0 ${hand.document.width} ${hand.document.height}`} preserveAspectRatio="none"
-        style={{ display: "block", width: "100%", aspectRatio: `${hand.document.width} / ${hand.document.height}`, touchAction: "none", userSelect: "none", overflow: "hidden", ...props.slideStyle, ...(props.workspace ? { height: "100%", aspectRatio: "auto", cursor: viewport.cursor } : {}) }}>
+        data-canvas-slide="true" data-tool={hand.tool} data-canvas-mode={viewport.panning ? "hand" : hand.tool} viewBox={props.workspace ? viewport.viewBox : `0 0 ${hand.document.width} ${hand.document.height}`} preserveAspectRatio="none"
+        style={{ display: "block", width: "100%", aspectRatio: `${hand.document.width} / ${hand.document.height}`, touchAction: "none", userSelect: "none", overflow: "hidden", cursor: viewport.cursor ?? (hand.tool === "select" ? "default" : hand.tool === "text" ? "text" : "crosshair"), ...props.slideStyle, ...(props.workspace ? { height: "100%", aspectRatio: "auto" } : {}) }}>
         {hand.objects.map((object) => <g key={object.id} data-canvas-copy-original={copyOriginals.has(object.id) ? object.id : undefined}>
           <CanvasObjectView object={copyOriginals.get(object.id) ?? object} hideText={hand.draft?.id === object.id} renderEmbedded={renderEmbedded} />
-          <CanvasObjectTarget object={object} selected={selectedKeys.has(object.id)} enabled={hand.tool === "select" && hand.draft?.id !== object.id && editingObject !== object.id}
+          <CanvasObjectTarget object={object} selected={selectedKeys.has(object.id)} enabled={!viewport.panning && hand.tool === "select" && hand.draft?.id !== object.id && editingObject !== object.id}
             copying={hand.copyOriginals.length > 0 && selectedKeys.has(object.id)}
             onSelect={(shiftKey) => {setEditingObject(null);hand.select(object.id, shiftKey);}} onEdit={() => editObject(object)} onHandle={(interaction, event) => hand.interaction(interaction, event, object, "drag")} />
         </g>)}
@@ -80,13 +108,14 @@ export function CanvasHand(props: CanvasHandProps) {
         {hand.preview && <g data-canvas-preview="" pointerEvents="none" opacity={0.65}><CanvasObjectView object={{ ...hand.preview, id: "preview" }} renderEmbedded={renderEmbedded} /></g>}
         {hand.tool === "select" && hand.objects.filter((object) => selectedKeys.has(object.id)).map((object) =>
           <rect key={object.id} data-selection-outline={object.id} x={object.x} y={object.y} width={object.width} height={object.height} fill="none" stroke="rgb(var(--color-border-accent))" strokeWidth={object.id === selected?.id ? 2 : 1} pointerEvents="none" />)}
-        {selected && hand.tool === "select" && <g>
+        {selected && !viewport.panning && hand.tool === "select" && <g>
           {!hand.draft && !editingObject && (selected.kind === "text" ? ["e", "w"] as const : ["n", "e", "s", "w", "nw", "ne", "se", "sw"] as const).map((edge) => <CanvasResizeTarget key={edge} object={selected} edge={edge} {...(selected.kind === "text" ? { onAutoWidth: () => hand.autoWidth(selected.id) } : {})} onHandle={(interaction, event) => hand.interaction(interaction, event, selected, "resize", edge)} />)}
         </g>}
         {hand.marquee && <rect data-canvas-marquee="" {...hand.marquee} fill="rgb(var(--color-border-accent) / 0.08)" stroke="rgb(var(--color-border-accent))" pointerEvents="none" />}
         {selected && hand.draft?.id === selected.id && <CanvasTextInput object={selected} text={hand.draft.text} onChange={hand.changeText}
           onCommit={() => { hand.commitText(); hand.surface.current?.focus(); }} onCancel={() => { hand.cancel(); hand.surface.current?.focus(); }} />}
       </svg>
+      {hand.tool === "select" && !viewport.panning && <CanvasContentToolbar hand={hand} targetId={hand.selection.primaryKey} geometryKey={viewport.viewBox} />}
       {hand.pastePending && <p role="status">붙여넣는 중… Escape로 취소</p>}
       {hand.error && <p role="alert">{hand.error}</p>}
       {json !== null && <section aria-label="Canvas JSON" className={props.workspace ? "canvas-workspace-json" : undefined}>

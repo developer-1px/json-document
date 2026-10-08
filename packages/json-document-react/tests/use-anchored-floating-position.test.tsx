@@ -1,8 +1,17 @@
-import { act, render, screen } from "@testing-library/react";
-import { describe, expect, test } from "vitest";
+import { act, cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, test } from "vitest";
 import { useAnchoredFloatingPosition } from "../src/index.js";
 
+afterEach(cleanup);
+
 describe("useAnchoredFloatingPosition", () => {
+  test("remeasures SVG transforms when geometry changes without a resize", () => {
+    const view = render(<Fixture anchor={{ x: 300, y: 200, width: 80, height: 30 }} />);
+    view.rerender(<Fixture anchor={{ x: 400, y: 250, width: 80, height: 30 }} />);
+    expect(screen.getByTestId("floating").style.left).toBe("488px");
+    expect(screen.getByTestId("floating").style.top).toBe("175px");
+  });
+
   test("positions mounted floating content beside its anchor", () => {
     render(<Fixture anchor={{ x: 300, y: 200, width: 80, height: 30 }} />);
     const floating = screen.getByTestId("floating");
@@ -22,17 +31,18 @@ describe("useAnchoredFloatingPosition", () => {
 });
 
 function Fixture(props: { readonly anchor: { x: number; y: number; width: number; height: number }; readonly active?: boolean }) {
-  const binding = useAnchoredFloatingPosition<HTMLButtonElement, HTMLDivElement>({
+  const binding = useAnchoredFloatingPosition<SVGRectElement, HTMLDivElement>({
     active: props.active ?? true,
+    geometryKey: JSON.stringify(props.anchor),
     policy: { type: "preferred", placement: "right", fallbacks: ["left"] },
     offset: 8,
   });
   return (
     <>
-      <button ref={(element) => {
+      <svg><rect ref={(element) => {
         if (element !== null) element.getBoundingClientRect = () => domRect(props.anchor);
         binding.anchorRef(element);
-      }}>Anchor</button>
+      }} /></svg>
       <div
         ref={(element) => {
           if (element !== null) element.getBoundingClientRect = () => domRect({ x: 0, y: 0, width: 200, height: 180 });

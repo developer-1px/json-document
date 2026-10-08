@@ -148,8 +148,9 @@ JSON 버튼은 현재 문서 문자열을 노출합니다. 이 문자열을 저�
 
 ### 범위와 Usage
 
-단일 슬라이드를 컨테이너에 맞춰 표시합니다. 확대/축소·페이지·팬·다중 resize·그룹·회전·
-snap·레이어·PPTX·collaboration은 이번 Hand의 지원 범위가 아닙니다.
+기본 embedded 모드는 슬라이드를 컨테이너에 맞춰 표시하고, workspace 모드는 팬·확대축소와
+컨테이너 배치를 제공합니다. 페이지 관리·다중 resize·명시적인 그룹 관리·회전·snap·
+레이어 패널·PPTX·collaboration은 현재 지원 범위가 아닙니다.
 `creationStyle`은 새 객체에만 적용하는 제품 기본값이며 저장 객체의 스타일을 덮어쓰지 않습니다.
 `stickyNoteColor`로 새 노트의 채우기를 지정하며 생략하면 `color`를 사용합니다.
 노트·도형의 본문은 `textColor`와 `fontSize` 생성 기본값을 받습니다.
@@ -160,7 +161,7 @@ snap·레이어·PPTX·collaboration은 이번 Hand의 지원 범위가 아닙�
 현재 표시할 preview이며, `snapshot.selection`은 Editing에 확정된 선택입니다.
 
 ```live-demo
-/demo/canvas
+/applications/canvas
 ```
 
 샘플이 있는 두 번째 Host도 같은 Hand를 사용합니다.
@@ -180,7 +181,7 @@ snap·레이어·PPTX·collaboration은 이번 Hand의 지원 범위가 아닙�
 - 화면 크기가 바뀌어도 x/y의 단위 비율을 유지합니다. 보기 변경은 문서 좌표·선택·저장·Undo에 포함되지 않습니다.
 - 이미지(PNG/JPEG/WebP)는 기존 붙여넣기로 추가합니다. 이미지·제목·본문은 같은 객체 선택·이동·크기 조절 계약을 사용합니다.
 
-전체 화면 Usage는 `/demo/canvas`, 구현 Source는 Canvas API 페이지에 등록됩니다.
+전체 화면 Usage는 `/applications/canvas`, 구현 Source는 Canvas API 페이지에 등록됩니다.
 
 ### 텍스트 크기와 자동 컨테이너
 
@@ -197,3 +198,67 @@ containerPolicy: defaultObjectContainerPolicy })`로 Web 측정과 컨테이너 
 - 텍스트 높이 변경은 다음 자식과 박스 크기를 갱신합니다. 컨테이너는 자식보다 뒤에 그려집니다. 자식을 밖으로 이동하면 겹침 기준으로 부모를 다시 판단합니다.
 
 휴리스틱은 초기 실험값입니다. 콘텐츠를 여러 박스에 중복 소속시키지 않으며, 중첩 관계의 순환과 유효하지 않은 레이아웃 값은 거부합니다.
+
+### FigJam 키맵과 하단 툴바
+
+`workspace` 툴바는 하단 중앙에 떠 있으며 스타일 팝오버는 위로 열립니다.
+Application은 채팅과 메뉴의 배치를 소유하고, 도구 선택과 키보드 처리는 `CanvasHand`가 소유합니다.
+
+| 기능 | 키 |
+| --- | --- |
+| 선택 | V |
+| 텍스트 / 스티키 | T / S |
+| 사각형 / 타원 | R / O |
+| 그리기 | M |
+| 표 | Shift+T |
+| 화면 이동 | H / Space를 누른 채 드래그 |
+| 전체 보기 / 선택 영역 보기 | Shift+1 / Shift+2 |
+| 도구·진행 중 조작 취소 | Escape |
+
+기존 선택·복사·붙여넣기·복제·Undo/Redo 키는 유지합니다. 텍스트, 표 셀, 채팅,
+팝오버 입력 및 IME 조합 중에는 도구 단축키를 처리하지 않습니다.
+`useCanvasViewport`의 `fitSelection(ids)`는 선택한 객체의 경계로 화면을 맞추며,
+빈 선택은 무시합니다. 문서·선택·Undo에는 기록되지 않습니다.
+
+2026-10-08에 확인한 공식 [FigJam 가이드](https://help.figma.com/hc/en-us/articles/1500004362321-Guide-to-FigJam),
+[선택](https://help.figma.com/hc/en-us/articles/1500004292221-Select-move-and-order-objects-in-FigJam),
+[도형](https://help.figma.com/hc/en-us/articles/1500004414382-Visualize-information-using-shapes-with-text),
+[표](https://help.figma.com/hc/en-us/articles/12583849250199-Tables-in-FigJam),
+[이동·확대축소](https://help.figma.com/hc/en-us/articles/1500004414582-Pan-and-zoom-in-FigJam)를 기준으로
+현재 지원하는 도구에 대응시킵니다. FigJam의 연결선·섹션·스탬프·협업 전용 기능까지 구현한다는 계약은 아닙니다.
+
+
+도구 단축키는 Web keyboard adapter의 `keySource: "code"`로 해석하므로 한글
+입력 모드에서도 같은 물리 키로 동작합니다. 실제 글자 입력과 IME 조합은 우선합니다.
+키보드와 툴바 클릭은 같은 모드를 변경합니다. 선택은 기본 커서, 텍스트는 I-beam,
+도형·표·스티키·그리기는 crosshair, 이동은 grab이며 실제 팬 중에는 grabbing입니다.
+Space를 누르는 동안 이동 버튼이 선택되고, 떼면 기존 도구의 선택과 커서로 돌아갑니다.
+
+
+### 키 입력·툴바 소유권
+
+| 책임 | 정본 소유자 | 소비 경로 |
+| --- | --- | --- |
+| 물리 키·수정 키·IME 사실 해석 | Web `createWebKeyboardAdapter` | CanvasHand의 도구/뷰 키맵, useCanvasHand의 history |
+| 선택·이동·복제 의미 | Affordance `createPlaneSelectProfile` | useCanvasHand → ObjectEditor |
+| 도구 전환·툴바 선택·커서 | Canvas `CanvasHand` / `useCanvasHand` | 클릭과 단축키가 같은 choose 경로 사용 |
+| 팬·확대·임시 Space 상태 | Canvas `useCanvasViewport` | CanvasHand가 툴바·커서에 투영 |
+| 툴바·버튼·팝오버 표현 | UI Primitives `ProductShell`, `ToolbarGroup`, `Toggle`, `Command`, `Popover` | CanvasHand / CanvasStyleControls |
+
+검증 범위는 site registry의 Canvas Application, Canvas Widget 두 직접 소비자와
+Canvas API의 Usage/Source 진입 경로입니다. 두 Host는 정본 `CanvasHand`를
+조합하며 별도 키맵·툴바·모드 상태를 구현하지 않습니다. 전체 사이트의 모든
+키보드 프로파일을 동일한 FigJam 정책으로 바꾸는 계약은 아닙니다.
+
+
+### 콘텐츠 서식 툴바
+
+색상·글자 크기·굵기·정렬·테두리 및 컨테이너 배치는 하단 도구 툴바 대신
+콘텐츠 선택 툴바에서 엽니다. 선택된 콘텐츠는 키보드·터치에서도 접근할 수
+있도록 툴바를 유지합니다. hover만으로는 표시하지 않습니다. 다중 선택은 기존 집합
+서식을 유지합니다. `ContextualControls`가 선택·편집 상태의 노출 판단을 소유하고,
+`useAnchoredFloatingPosition`이 SVG anchor 위치와 화면 경계·팬·줌에 따른 배치를
+소유합니다. UI는 기존 `CanvasStyleControls`, `Toolbar`, `Popover`, `Field`를
+재사용하며 변경은 같은 ObjectEditor의 선택 서식 명령과 Undo를 거칩니다.
+
+선택 툴바는 별도 “스타일” 진입 버튼 없이 크기·굵기·정렬을 직접 노출합니다. 색상은 각 속성의 현재 색상 버튼으로 팔레트를 열며, 지원하지 않는 속성은 표시하지 않습니다.

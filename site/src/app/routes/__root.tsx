@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import { PanelLeft, PanelLeftClose } from "lucide-react";
-import { DisclosureButton, Command } from "@interactive-os/json-document-ui-primitives-react";
+import { DisclosureButton, Command, Popover, floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
 import { ActionLink } from "../../shared/ui/interactive";
 import { CatMenuMark, JsonDocumentWordmark } from "../../shared/ui/brand";
 import { classes, ui } from "../../shared/ui/styles";
@@ -29,6 +29,8 @@ function AppShell() {
   const appChrome = isAppChrome(route);
   const [navCollapsed, setNavCollapsed] = useState(false);
   const collapsed = appChrome && navCollapsed;
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => setMenuOpen(false), [pathname]);
 
   useRouteMetadata(route);
   const activeSection = routeSection(route, siteRoutes);
@@ -41,39 +43,10 @@ function AppShell() {
     setOpenSections((current) => current.has(activeSection.id) ? current : new Set([...current, activeSection.id]));
   }, [activeSection]);
 
-  if (route.chrome === "none") return <Outlet />;
-
-  return (
-    <div className={classes("flex min-h-screen flex-col md:flex-row", appChrome && "h-screen overflow-hidden", ui.frame.app)}>
-      <a
-        href="#main-content"
-        className={classes("sr-only z-50", ui.state.skipLink)}
-      >
-        Skip to content
-      </a>
-      {collapsed ? (
-        <nav aria-label="Site navigation" className={classes(ui.frame.navigationRail, ui.frame.navigation)}>
-          <Command label="Open navigation" onClick={() => setNavCollapsed(false)}>
-            <PanelLeft aria-hidden="true" size={16} />
-          </Command>
-          <div className={ui.nav.railMenu}>
-            {siteSections.map((section) => (
-              <ActionLink
-                key={section.id}
-                to={section.path}
-                activePath={route.path}
-                className={classes(ui.nav.railItem, ui.nav.current)}
-              >
-                <span className="sr-only">{section.label}</span>
-                <NavigationLayerIcon section={section.id} />
-              </ActionLink>
-            ))}
-          </div>
-        </nav>
-      ) : (
+  const navigation = (
       <nav
         aria-label="Site navigation"
-        className={classes("shrink-0 md:sticky md:top-0 md:h-screen md:w-52 md:self-start md:overflow-y-auto", ui.frame.navigation)}
+        className={classes(route.chrome === "none" ? "w-64 max-w-[calc(100vw-2rem)]" : "shrink-0 md:sticky md:top-0 md:h-screen md:w-52 md:self-start md:overflow-y-auto", route.chrome !== "none" && ui.frame.navigation)}
       >
         <div className="flex items-start justify-between gap-1">
           <ActionLink to="/" className={classes("flex min-w-0 flex-1 px-4 py-3", ui.frame.brand)}>
@@ -160,6 +133,47 @@ function AppShell() {
           })}
         </div>
       </nav>
+  );
+
+  if (route.chrome === "none") return <>
+    <Outlet />
+    <Popover label="사이트 메뉴" trigger={<PanelLeft aria-hidden="true" size={16} />}
+      triggerPresentation="icon" open={menuOpen} onOpenChange={setMenuOpen}
+      className={classes(floatingSurface.control, "fixed left-4 top-4 z-40 p-1")}
+      panelClassName={classes(floatingSurface.panel, "absolute left-0 top-full mt-2 max-h-[calc(100dvh-5rem)] overflow-y-auto")}>
+      {navigation}
+    </Popover>
+  </>;
+
+  return (
+    <div className={classes("flex min-h-screen flex-col md:flex-row", appChrome && "h-screen overflow-hidden", ui.frame.app)}>
+      <a
+        href="#main-content"
+        className={classes("sr-only z-50", ui.state.skipLink)}
+      >
+        Skip to content
+      </a>
+      {collapsed ? (
+        <nav aria-label="Site navigation" className={classes(ui.frame.navigationRail, ui.frame.navigation)}>
+          <Command label="Open navigation" onClick={() => setNavCollapsed(false)}>
+            <PanelLeft aria-hidden="true" size={16} />
+          </Command>
+          <div className={ui.nav.railMenu}>
+            {siteSections.map((section) => (
+              <ActionLink
+                key={section.id}
+                to={section.path}
+                activePath={route.path}
+                className={classes(ui.nav.railItem, ui.nav.current)}
+              >
+                <span className="sr-only">{section.label}</span>
+                <NavigationLayerIcon section={section.id} />
+              </ActionLink>
+            ))}
+          </div>
+        </nav>
+      ) : (
+      navigation
       )}
       <div id="main-content" className={classes("min-w-0 flex-1", appChrome && "flex min-h-0 flex-col overflow-hidden")}>
         <Outlet />

@@ -5,7 +5,7 @@ Shift+화살표는 큰 단위입니다. 항목 이웃으로 초점을 옮기는
 [Select](affordance-select.md)와 다릅니다.
 
 평면 편집기는 [`createPlaneSelectProfile`](/docs/api/affordance)의 `keyDown`이
-이 Affordance를 조합한 집합 `translate` 결과를 소비합니다. [Canvas Usage](/demo/canvas)는
+이 Affordance를 조합한 집합 `translate` 결과를 소비합니다. [Canvas Usage](/applications/canvas)는
 native editable/IME 및 Ctrl/Meta/Alt 조합을 제외하고 Object Editing에 연결합니다.
 이 최소 프로파일은 선택이 없을 때 nudge를 처리하지 않으며 pan으로 전환하지 않습니다.
 

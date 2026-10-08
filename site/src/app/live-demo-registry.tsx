@@ -1,6 +1,8 @@
+import { pageDescriptors } from "./page-descriptors";
+import { ActionLink } from "../shared/ui/interactive";
 import { lazy, Suspense, useEffect, useRef, useState, type ComponentType } from "react";
 import { DemoEmbedProvider } from "../shared/demo-workbench/DemoPage";
-import { DemoProvider } from "../shared/demo-workbench/DemoSurface";
+import { DemoProvider, DemoSurface } from "../shared/demo-workbench/DemoSurface";
 import { classes, ui } from "../shared/ui/styles";
 
 type DemoModule = Record<string, ComponentType>;
@@ -19,7 +21,7 @@ const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
   "/demo/history": demo(() => import("../routes/editing-demos/HistoryDemoRoute"), "HistoryDemoRoute", "routes/editing-demos/HistoryDemoRoute.tsx"),
   "/demo/order": demo(() => import("../routes/order-demo/OrderDemoRoute"), "OrderDemoRoute", "routes/order-demo/OrderDemoRoute.tsx"),
   "/demo/object": demo(() => import("../routes/object-demo/ObjectDemoRoute"), "ObjectDemoRoute", "routes/object-demo/ObjectDemoRoute.tsx"),
-  "/demo/canvas": demo(() => import("../routes/canvas-demo/CanvasDemoRoute"), "CanvasDemoRoute", "routes/canvas-demo/CanvasDemoRoute.tsx"),
+  "/applications/canvas": demo(() => import("../applications/canvas/CanvasApplication"), "CanvasApplication", "applications/canvas/CanvasApplication.tsx"),
   "/demo/sheet-views": demo(() => import("../routes/sheet-demo/SheetViewsDemoRoute"), "SheetViewsDemoRoute", "routes/sheet-demo/SheetViewsDemoRoute.tsx"),
   "/demo/sheet": demo(() => import("../routes/sheet-demo/SheetDemoRoute"), "SheetDemoRoute", "routes/sheet-demo/SheetDemoRoute.tsx"),
   "/demo/tree": demo(() => import("../routes/tree-demo/TreeDemoRoute"), "TreeDemoRoute", "routes/tree-demo/TreeDemoRoute.tsx"),
@@ -62,6 +64,7 @@ export function LiveDemo({ path }: { readonly path: string }) {
   const definition = liveDemos[path];
   if (!definition) return <p className={ui.state.error}>Unknown live demo: {path}</p>;
   const Demo = definition.Component;
+  const application = pageDescriptors.find(route => route.path === path && route.applicationSource);
   const rootRef = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -82,7 +85,8 @@ export function LiveDemo({ path }: { readonly path: string }) {
       {visible ? (
         <Suspense fallback={<p className={classes("m-0 p-4", ui.text.meta)}>Live demo 불러오는 중…</p>}>
           <DemoProvider demo={{ source: definition.source }}>
-            <DemoEmbedProvider><Demo /></DemoEmbedProvider>
+            {application ? <DemoSurface><ActionLink to={path}>{application.label} 앱 열기</ActionLink></DemoSurface>
+              : <DemoEmbedProvider><Demo /></DemoEmbedProvider>}
           </DemoProvider>
         </Suspense>
       ) : <p className={classes("m-0 p-4", ui.text.meta)}>Live demo</p>}

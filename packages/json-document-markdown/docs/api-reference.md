@@ -145,7 +145,7 @@ readMarkdownTable(source: string, at: number): MarkdownTable | null
 ## `replaceMarkdownTable`
 
 ```ts
-replaceMarkdownTable(source: string, table: MarkdownTable, rows: ReadonlyArray<ReadonlyArray<string>>, align?: readonly ("left" | "right" | "center")[]): string
+replaceMarkdownTable(source: string, table: MarkdownTable, rows: ReadonlyArray<ReadonlyArray<string>>, align?: readonly ("right" | "left" | "center")[]): string
 ```
 ## `setMarkdownTaskChecked`
 

@@ -649,6 +649,26 @@ describe("Web keyboard Adapter", () => {
     expect(adapter.resolve({ key: "c", shiftKey: false, metaKey: true, ctrlKey: false })).toBeNull();
   });
 
+  test("physical letter and digit shortcuts work independently of input language", () => {
+    const physical = createWebKeyboardAdapter({ defaults: false, keySource: "code", keymap: {
+      r: "rectangle", "Shift-t": "table", "Shift-1": "fit", "Mod-z": "undo",
+    } });
+    const stroke = { key: "ㄱ", code: "KeyR", shiftKey: false, ctrlKey: false, metaKey: false };
+    expect(physical.resolve(stroke)).toBe("rectangle");
+    // Native KeyboardEvent fields are prototype getters, not enumerable own properties.
+    expect(physical.resolve(Object.create({ ...stroke, key: "ㅆ", code: "KeyT", shiftKey: true }))).toBe("table");
+    expect(physical.resolve(Object.create({ ...stroke, key: "ㅋ", code: "KeyZ", metaKey: true }))).toBe("undo");
+    expect(physical.resolve({ ...stroke, key: "Process", keyCode: 229 })).toBe("rectangle");
+    expect(physical.resolve({ ...stroke, key: "Process", keyCode: 229, isComposing: true })).toBeNull();
+    expect(physical.resolve({ ...stroke, code: "", keyCode: 229 })).toBeNull();
+    expect(adapter.resolve({ ...stroke, key: "z", metaKey: true, isComposing: true })).toBeNull();
+    expect(physical.resolve({ ...stroke, key: "ㅆ", code: "KeyT", shiftKey: true })).toBe("table");
+    expect(physical.resolve({ ...stroke, key: "!", code: "Digit1", shiftKey: true })).toBe("fit");
+    expect(physical.resolve({ ...stroke, key: "ㅋ", code: "KeyZ", metaKey: true })).toBe("undo");
+    expect(physical.resolve({ ...stroke, altKey: true })).toBeNull();
+    expect(createWebKeyboardAdapter({ defaults: false, keymap: { r: "rectangle" } }).resolve(stroke)).toBeNull();
+  });
+
   test("preserves modifiers while allowing explicit product chord assignments", () => {
     const product = createWebKeyboardAdapter({
       defaults: false,

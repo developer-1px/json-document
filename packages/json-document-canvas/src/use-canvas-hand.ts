@@ -25,7 +25,7 @@ type Gesture = { readonly base: CanvasDocument } & (
 );
 type TextDraft = { readonly id: string; readonly text: string; readonly base: CanvasDocument };
 
-const keyboard = createWebKeyboardAdapter();
+const keyboard = createWebKeyboardAdapter({ keySource: "code" });
 const commands = createWebKeyboardAdapter<"cancel">({ defaults: false, keymap: { Escape: "cancel" } });
 
 /** Owns Canvas interaction composition, never document or history state. */
@@ -280,7 +280,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
       setTool("select"); return;
     }
     if (commands.resolve(event) === "cancel") { event.preventDefault(); setTool("select"); return; }
-    const action = keyboard.resolve(event);
+    const action = keyboard.resolve(event.nativeEvent);
     if (action?.type === "undo" || action?.type === "redo") { event.preventDefault(); history(action.type); }
   }
 

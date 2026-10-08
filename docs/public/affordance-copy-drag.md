@@ -33,4 +33,4 @@ Mod+D와 공통 아이콘 툴바의 복제는 같은 `object.duplicate`를 사�
 x/y 각각 24단위이고 반복 복제는 방금 생성한 선택을 대상으로 합니다. Clipboard는 건드리지
 않습니다. 값의 복사·잘라내기·붙여넣기는 별도로 Web Clipboard와 Object Editing이 연결합니다.
 
-실제 [Canvas Usage와 Source](/demo/canvas)에서 이 정본 경로를 확인할 수 있습니다.
+실제 [Canvas Usage와 Source](/applications/canvas)에서 이 정본 경로를 확인할 수 있습니다.

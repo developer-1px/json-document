@@ -96,8 +96,8 @@ createWebJSONClipboardRepresentation<Payload extends WebClipboardPayload>(format
 
 ```ts
 createWebKeyboardAdapter(): WebKeyboardAdapter
-createWebKeyboardAdapter(options: { readonly keymap?: WebKeymap; readonly defaults?: true; }): WebKeyboardAdapter
-createWebKeyboardAdapter<Command>(options: { readonly keymap: WebKeymap<Command>; readonly defaults: false; }): WebKeyboardAdapter<Command>
+createWebKeyboardAdapter(options: { readonly keymap?: WebKeymap; readonly defaults?: true; readonly keySource?: "key" | "code"; }): WebKeyboardAdapter
+createWebKeyboardAdapter<Command>(options: { readonly keymap: WebKeymap<Command>; readonly defaults: false; readonly keySource?: "key" | "code"; }): WebKeyboardAdapter<Command>
 ```
 ## `createWebPointerSession`
 
@@ -782,6 +782,10 @@ webKeyboardPlatform(environment?: { readonly platform: string; readonly maxTouch
 ```ts
 interface WebKeyboardStroke {
   readonly key: string;
+  /** Physical key position, independent of the current input language. */
+  readonly code?: string;
+  readonly isComposing?: boolean;
+  readonly keyCode?: number;
   readonly shiftKey: boolean;
   readonly metaKey: boolean;
   readonly ctrlKey: boolean;

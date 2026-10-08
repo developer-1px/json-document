@@ -71,5 +71,5 @@ useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: 
 ## `useCanvasViewport`
 
 ```ts
-useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean): { hand: boolean; setHand: React.Dispatch<React.SetStateAction<boolean>>; ... 5 more ...; events: { ...; } | { ...; }; }
+useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean): { hand: boolean; setHand: React.Dispatch<React.SetStateAction<boolean>>; ... 7 more ...; events: { ...; } | { ...; }; }
 ```

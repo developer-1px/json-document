@@ -3,6 +3,10 @@ import { traverseGrid, type NavigationCommand } from "@interactive-os/json-docum
 
 export interface WebKeyboardStroke {
   readonly key: string;
+  /** Physical key position, independent of the current input language. */
+  readonly code?: string;
+  readonly isComposing?: boolean;
+  readonly keyCode?: number;
   readonly shiftKey: boolean;
   readonly metaKey: boolean;
   readonly ctrlKey: boolean;
@@ -61,15 +65,16 @@ export const defaultWebKeymap: WebKeymap = Object.freeze({
 
 export function createWebKeyboardAdapter(): WebKeyboardAdapter;
 export function createWebKeyboardAdapter(
-  options: { readonly keymap?: WebKeymap; readonly defaults?: true },
+  options: { readonly keymap?: WebKeymap; readonly defaults?: true; readonly keySource?: "key" | "code" },
 ): WebKeyboardAdapter;
 export function createWebKeyboardAdapter<Command>(
-  options: { readonly keymap: WebKeymap<Command>; readonly defaults: false },
+  options: { readonly keymap: WebKeymap<Command>; readonly defaults: false; readonly keySource?: "key" | "code" },
 ): WebKeyboardAdapter<Command>;
 export function createWebKeyboardAdapter<Command>(
   options: {
     readonly keymap?: WebKeymap<Command>;
     readonly defaults?: boolean;
+    readonly keySource?: "key" | "code";
   } = {},
 ): WebKeyboardAdapter<Command | WebKeyboardCommand> {
   const keymap: WebKeymap<Command | WebKeyboardCommand> = options.defaults === false
@@ -77,7 +82,13 @@ export function createWebKeyboardAdapter<Command>(
     : { ...defaultWebKeymap, ...options.keymap };
   return {
     resolve(stroke) {
-      return keymap[chordFromStroke(stroke)] ?? null;
+      const code = options.keySource === "code" ? stroke.code : undefined;
+      const physical = code && /^(Key[A-Z]|Digit[0-9])$/.test(code);
+      // Process/229 can identify a non-text shortcut when a physical key is available.
+      // Active composition always keeps the native text lease.
+      if (isWebComposingKey(stroke) && (stroke.isComposing || !physical)) return null;
+      const key = physical ? code.slice(code.startsWith("Key") ? 3 : 5) : stroke.key;
+      return keymap[chordFromStroke({ key, shiftKey: stroke.shiftKey, metaKey: stroke.metaKey, ctrlKey: stroke.ctrlKey, altKey: stroke.altKey ?? false })] ?? null;
     },
   };
 }
