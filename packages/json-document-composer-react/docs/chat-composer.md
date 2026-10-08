@@ -41,3 +41,9 @@ Rich Text의 `placeholder.css`를 함께 불러오므로 안내 문구가 커서
 
 [Chat Usage](/demo/chat)는 로컬 draft를 화면에 표시하는 Host port를 사용합니다.
 Source 탭은 ChatComposer와 useComposer의 canonical 구현까지 연결합니다.
+
+For chat, combine `shouldClearAfterSubmit: true` with
+`submitClearTiming: "start"`. The submitted draft is captured and cleared before
+the asynchronous port runs; new input is preserved while the request is pending.
+The Host must retain the submitted message and show failures separately. The
+existing default `"success"` still preserves a failed draft for form-like Hosts.

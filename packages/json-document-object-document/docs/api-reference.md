@@ -127,6 +127,8 @@ interface ObjectDraft extends ObjectBounds, Record<string, JSONValue> {
 
 ```ts
 type ObjectOperation =
+  | { readonly type: "update"; readonly objectId: string; readonly changes: Partial<ObjectDraft> }
+  | { readonly type: "reorder"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "insert"; readonly objects: ReadonlyArray<DocumentObject> }
   | { readonly type: "transform"; readonly objectIds: ReadonlyArray<string>; readonly transform: ObjectTransform }
   | { readonly type: "fill"; readonly objectIds: ReadonlyArray<string>; readonly color: string }

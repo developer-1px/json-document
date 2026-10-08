@@ -1,0 +1,5 @@
+[data-canvas-workspace="true"] { position: relative; overflow: hidden; }
+[data-canvas-workspace="true"] > [data-ui-toolbar="product"] { position: absolute; z-index: 10; top: 1rem; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 2rem); }
+[data-canvas-workspace="true"] > .canvas-workspace-surface { position: relative; overflow: hidden; }
+[data-canvas-workspace="true"] .canvas-workspace-json { position: absolute; z-index: 11; top: 5rem; left: 1rem; right: 1rem; max-height: calc(100% - 6rem); overflow: auto; background: rgb(var(--color-background-canvas)); padding: 1rem; }
+[data-canvas-workspace="true"] [role="alert"], [data-canvas-workspace="true"] [aria-busy="true"] + [role="status"] { position: absolute; top: 5rem; left: 1rem; }

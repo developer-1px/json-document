@@ -1126,6 +1126,7 @@
   },
   {
     "path": "/demo/canvas",
+    "chrome": "none",
     "label": "Canvas",
     "title": "Canvas - json-document",
     "description": "한 장에 글자·도형·그리기를 만들고 편집하는 Canvas 수직 슬라이스입니다.",

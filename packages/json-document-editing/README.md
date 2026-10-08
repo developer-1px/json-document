@@ -320,3 +320,6 @@ that order. Undo/Redo restores both the document and the associated selection.
 `annotationResizeHandle` are the canonical geometry APIs for preview and commit.
 
 문서 에이전트의 읽기·부분 수정 계약은 [Text editing tools](docs/text-tools.md)를 참고하세요.
+
+[Canvas agent tools](docs/canvas-tools.md) expose validated reads and edits over
+an existing ObjectEditor, sharing manual editing history.

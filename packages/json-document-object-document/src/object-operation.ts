@@ -1,10 +1,12 @@
 import { applyPatch, buildPointer, jsonEqual, type JSONValue, type JSONPatchOperation } from "@interactive-os/json-document";
-import type { DocumentObject, ObjectDocument } from "./object-model.js";
+import type { DocumentObject, ObjectDocument, ObjectDraft } from "./object-model.js";
 import { projectObjectText, transformObject, type ObjectTransform } from "./object-projection.js";
 import { assertObjectDocument } from "./object-validation.js";
 import { assertObjectStyle, getObjectStyle, type ObjectStyle } from "./object-style.js";
 
 export type ObjectOperation =
+  | { readonly type: "update"; readonly objectId: string; readonly changes: Partial<ObjectDraft> }
+  | { readonly type: "reorder"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "insert"; readonly objects: ReadonlyArray<DocumentObject> }
   | { readonly type: "transform"; readonly objectIds: ReadonlyArray<string>; readonly transform: ObjectTransform }
   | { readonly type: "fill"; readonly objectIds: ReadonlyArray<string>; readonly color: string }
@@ -25,7 +27,22 @@ export function planObjectOperation(document: ObjectDocument, operation: ObjectO
     if (operation.type === "style") assertObjectStyle(operation.style);
     const objects = document.objects;
     const operations: JSONPatchOperation[] = [];
-    if (operation.type === "replace") {
+    if (operation.type === "update") {
+      const index = objects.findIndex(object => object.id === operation.objectId);
+      if (index < 0) return { ok: false, code: "selection.object-not-found" };
+      if (Object.hasOwn(operation.changes, "id") || Object.hasOwn(operation.changes, "kind")) return { ok: false, code: "object.identity-change" };
+      const changes: Record<string, JSONValue> = {};
+      for (const [key, value] of Object.entries(operation.changes)) {
+        if (value === undefined) return { ok: false, code: "object.invalid" };
+        changes[key] = value;
+      }
+      const next = { ...objects[index]!, ...changes };
+      if (!jsonEqual(objects[index]!, next)) operations.push({ op: "replace", path: buildPointer(["objects", index]), value: next });
+    } else if (operation.type === "reorder") {
+      if (operation.objectIds.length !== objects.length || new Set(operation.objectIds).size !== objects.length || operation.objectIds.some(id => !objects.some(object => object.id === id))) return { ok: false, code: "object.invalid-order" };
+      const next = operation.objectIds.map(id => objects.find(object => object.id === id)!);
+      if (!jsonEqual(objects, next)) operations.push({ op: "replace", path: "/objects", value: next });
+    } else if (operation.type === "replace") {
       assertObjectDocument(operation.document);
       if (!jsonEqual(document, operation.document)) operations.push({ op: "replace", path: "", value: operation.document });
     } else if (operation.type === "insert") {

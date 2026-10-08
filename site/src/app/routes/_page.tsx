@@ -18,6 +18,7 @@ function InteriorPage() {
     ),
   });
   const content = <Outlet />;
+  if (route.chrome === "none") return content;
   if (isAppChrome(route)) {
     return <main className="flex min-h-0 flex-1 flex-col">{content}</main>;
   }

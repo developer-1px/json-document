@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, expect, test } from "vitest";
-import { ChatBubble } from "../src/index.js";
+import { ChatActivity, ChatBubble } from "../src/index.js";
 
 afterEach(cleanup);
 
@@ -17,4 +17,13 @@ test("messages keep sender semantics, rich children, and Host attributes", () =>
   expect(outgoing.dir).toBe("rtl");
   expect(outgoing.className).toBe("product-message");
   expect(outgoing.textContent).toBe("first\nsecond");
+});
+
+
+test("work is an accessible status with decorative dots, not a message", () => {
+  const { container } = render(<ChatActivity label="작업 중" />);
+  expect(screen.getByRole("status").textContent).toBe("작업 중");
+  expect(screen.queryByRole("group")).toBeNull();
+  expect(container.querySelector("[data-ui-chat-dots]")?.getAttribute("aria-hidden")).toBe("true");
+  expect(container.querySelectorAll("[data-ui-chat-dots] > span")).toHaveLength(3);
 });

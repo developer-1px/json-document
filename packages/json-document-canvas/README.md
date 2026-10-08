@@ -23,3 +23,5 @@ function Slide() {
 CSS와 레이아웃은 Host가 결정하고 controls는 기존 UI Primitives를 소비합니다.
 슬라이드 크기와 색은 문서/제품 값입니다. [API 계약](docs/api.md)과
 [실제 Usage/Source](https://developer-1px.github.io/json-document/docs/api/canvas)를 참고하세요.
+
+전체 화면 작업 공간은 `CanvasHand workspace`로 사용합니다. `@interactive-os/json-document-canvas/canvas-hand.css`를 import하고 Host에 높이를 지정하세요. 팬·줌·전체 보기는 문서 history와 독립적으로 동작합니다.

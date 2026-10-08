@@ -168,3 +168,16 @@ snap·레이어·PPTX·collaboration은 이번 Hand의 지원 범위가 아닙�
 ```live-demo
 /widgets/canvas
 ```
+
+### 전체 화면 작업 공간
+
+`CanvasHand workspace`와 `@interactive-os/json-document-canvas/canvas-hand.css`를 사용하고 Host에 높이를 지정합니다. 기본 embedded 모드는 유지됩니다. 툴바는 floating으로 표시됩니다.
+
+- 휠/트랙패드 스크롤: 화면 이동. Ctrl/Command+휠 또는 pinch: 포인터를 중심으로 확대/축소.
+- 화면 이동 도구, Space+드래그, 가운데 버튼 드래그: 팬. 입력 중 Space는 그대로 텍스트 입력입니다.
+- 확대·축소·100%·전체 보기: 문서 및 객체 전체 영역을 확인합니다.
+- `useCanvasViewport(surface, document, enabled)`는 viewBox, capture 이벤트, fit/zoom/hand 제어를 제공합니다. 포인터 캡처는 Web 정본을 사용합니다.
+- 화면 크기가 바뀌어도 x/y의 단위 비율을 유지합니다. 보기 변경은 문서 좌표·선택·저장·Undo에 포함되지 않습니다.
+- 이미지(PNG/JPEG/WebP)는 기존 붙여넣기로 추가합니다. 이미지·제목·본문은 같은 객체 선택·이동·크기 조절 계약을 사용합니다.
+
+전체 화면 Usage는 `/demo/canvas`, 구현 Source는 Canvas API 페이지에 등록됩니다.

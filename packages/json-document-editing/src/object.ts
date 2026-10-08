@@ -57,6 +57,8 @@ export interface ObjectPastePlacement {
 }
 
 export type ObjectIntent =
+  | { readonly type: "object.update"; readonly objectId: string; readonly changes: Partial<ObjectDraft> }
+  | { readonly type: "object.reorder"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "object.create"; readonly object: ObjectDraft }
   | { readonly type: "object.duplicate"; readonly objectIds: ReadonlyArray<string>; readonly placement?: ObjectPastePlacement }
   | { readonly type: "object.remove"; readonly objectIds: ReadonlyArray<string> }
@@ -142,6 +144,8 @@ export function createObjectEditor(
   }
 
   function dispatch(intent: ObjectIntent): EditingResult<ObjectSelection> {
+    if (intent.type === "object.update") return apply({ type: "update", objectId: intent.objectId, changes: intent.changes }, session.snapshot.selection, intent.type);
+    if (intent.type === "object.reorder") return apply({ type: "reorder", objectIds: intent.objectIds }, session.snapshot.selection, intent.type);
     if (intent.type === "object.create") {
       const allocate = createEditingIdAllocator(value().objects.map((object) => object.id), createId, "object");
       let id: string;

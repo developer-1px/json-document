@@ -37,6 +37,8 @@ CanvasHand(props: CanvasHandProps): import("<repository>/node_modules/@types/rea
 
 ```ts
 interface CanvasHandProps {
+  /** Fill the host and navigate independently of document coordinates. */
+  readonly workspace?: boolean;
   readonly editor: ObjectEditor;
   readonly creationStyle: CanvasCreationStyle;
   readonly className?: string;
@@ -65,4 +67,9 @@ createCanvasClipboardBinding(editor: ObjectEditor, policy: CanvasClipboardPolicy
 
 ```ts
 useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile, activateEmbedded?: (objectId: string) => void): { document: CanvasDocument; ... 24 more ...; surfaceProps: { ...; }; }
+```
+## `useCanvasViewport`
+
+```ts
+useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean): { hand: boolean; setHand: React.Dispatch<React.SetStateAction<boolean>>; ... 5 more ...; events: { ...; } | { ...; }; }
 ```

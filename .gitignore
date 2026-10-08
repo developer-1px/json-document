@@ -16,3 +16,6 @@ playwright-report/
 .artifacts/interaction-recordings/
 
 .local/bear/
+
+# Local Canvas recovery files and session backups
+.local/canvas/

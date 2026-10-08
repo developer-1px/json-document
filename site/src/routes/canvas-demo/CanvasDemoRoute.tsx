@@ -1,18 +1,26 @@
-import { useState } from "react";
-import { createObjectEditor } from "@interactive-os/json-document-editing";
+import "@interactive-os/json-document-canvas/canvas-hand.css";
+import { createWebStoredDocument } from "@interactive-os/json-document-web";
+import { assertCanvasDocument } from "@interactive-os/json-document-object-document";
+import { EditorAgentChat } from "../../app/EditorAgentChat";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createCanvasEditorTools, createObjectEditor } from "@interactive-os/json-document-editing";
 import { CanvasHand } from "@interactive-os/json-document-canvas";
 import { createPlaneSelectProfile } from "@interactive-os/json-document-affordance";
-import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { canvasCreationStyle, emptyCanvasDocument } from "../../shared/demo-workbench/canvas-demo-document";
-import { PageHeader } from "../../shared/ui/primitives";
-import { ui } from "../../shared/ui/styles";
 
 export function CanvasDemoRoute() {
-  const [editor] = useState(() => createObjectEditor(emptyCanvasDocument));
+  const [stored] = useState(() => createWebStoredDocument({ key: "json-document.canvas.v1", storage: () => window.localStorage,
+    create: () => createObjectEditor(emptyCanvasDocument), restore: value => { assertCanvasDocument(value); return createObjectEditor(value); } }));
+  const editor = stored.source;
+  const saveState = useSyncExternalStore(stored.subscribe, () => stored.state);
+  useEffect(() => stored.connect(), [stored]);
+  const [tools] = useState(() => createCanvasEditorTools(editor));
   const [selectProfile] = useState(() => createPlaneSelectProfile());
   return (
-    <DemoPage documentation={<PageHeader illustration="peek" title="Canvas">한 장에 글자·도형·스티커 노트·표·그리기. 표는 더블클릭으로 셀 편집에 들어가고 Escape로 객체 선택에 돌아옵니다. 도형 안에도 더블클릭으로 글을 적습니다. Shift+클릭으로 다중 선택하고 Alt+드래그로 복제합니다. 스타일 아이콘에서 색·글자 서식·테두리를 바꾸고, 복사한 텍스트·이미지를 붙여넣습니다.</PageHeader>}>
-      <CanvasHand className={ui.product.embedded} editor={editor} selectProfile={selectProfile} creationStyle={canvasCreationStyle} slideStyle={{ background: "rgb(var(--color-background-canvas))" }} />
-    </DemoPage>
+    <main aria-label="Canvas 작업 공간" className="h-dvh w-full overflow-hidden">
+      <CanvasHand workspace editor={editor} selectProfile={selectProfile} creationStyle={canvasCreationStyle} slideStyle={{ background: "rgb(var(--color-background-canvas))" }} />
+      {(saveState === "save-error" || saveState === "load-error") && <p role="alert">Canvas 저장 데이터를 확인해 주세요. 기존 데이터는 유지됩니다.</p>}
+      <EditorAgentChat tools={tools} id="canvas-chat" label="Canvas 도우미" logLabel="Canvas 대화" inputLabel="Canvas 편집 요청" placeholder="만들거나 바꿀 내용을 말해보세요" />
+    </main>
   );
 }

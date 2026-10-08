@@ -86,6 +86,8 @@ interface UseComposerOptions<Model extends string, Suggestion extends ComposerHo
   readonly ports: ComposerHostPorts<Model>;
   /** Clear an accepted, unchanged draft as one undoable edit. Defaults to false. */
   readonly shouldClearAfterSubmit?: boolean;
+  /** Clear immediately for chat; success remains the default for existing Hosts. */
+  readonly submitClearTiming?: "start" | "success";
   readonly maxImagePixels?: number;
   readonly readRaster?: typeof readWebRasterFile;
   readonly labels: {

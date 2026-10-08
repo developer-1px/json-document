@@ -586,6 +586,11 @@ createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: 
 ```ts
 createCanvasClipboard(content: CanvasClipboardContent, options: CanvasClipboardOptions): ObjectClipboard
 ```
+## `createCanvasEditorTools`
+
+```ts
+createCanvasEditorTools(editor: ObjectEditor): { name: string; description: string; parameters: Record<string, unknown>; execute: (args: unknown) => unknown; }[]
+```
 ## `createCanvasSheet`
 
 ```ts
@@ -1345,6 +1350,8 @@ interface ObjectEditor {
 
 ```ts
 type ObjectIntent =
+  | { readonly type: "object.update"; readonly objectId: string; readonly changes: Partial<ObjectDraft> }
+  | { readonly type: "object.reorder"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "object.create"; readonly object: ObjectDraft }
   | { readonly type: "object.duplicate"; readonly objectIds: ReadonlyArray<string>; readonly placement?: ObjectPastePlacement }
   | { readonly type: "object.remove"; readonly objectIds: ReadonlyArray<string> }
