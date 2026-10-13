@@ -323,3 +323,7 @@ that order. Undo/Redo restores both the document and the associated selection.
 
 [Canvas agent tools](docs/canvas-tools.md) expose validated reads and edits over
 an existing ObjectEditor, sharing manual editing history.
+
+## UI Builder
+
+[컴포넌트 기반 자유 배치 API](docs/ui-builder.md)와 [Usage · Source](/applications/ui-builder)를 제공합니다.

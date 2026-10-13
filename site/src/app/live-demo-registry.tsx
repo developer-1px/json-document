@@ -14,6 +14,7 @@ function demo(importer: () => Promise<unknown>, exportName: string, source: stri
 }
 
 const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
+  "/applications/ui-builder": demo(() => import("../applications/ui-builder/UIBuilderApplication"), "UIBuilderApplication", "applications/ui-builder/UIBuilderApplication.tsx"),
   "/demo": demo(() => import("../routes/document-demo/DocumentDemoRoute"), "DocumentDemoRoute", "routes/document-demo/DocumentDemoRoute.tsx"),
   "/demo/topology": demo(() => import("../routes/editing-demos/TopologyDemoRoute"), "TopologyDemoRoute", "routes/editing-demos/TopologyDemoRoute.tsx"),
   "/demo/selection": demo(() => import("../routes/editing-demos/SelectionDemoRoute"), "SelectionDemoRoute", "routes/editing-demos/SelectionDemoRoute.tsx"),

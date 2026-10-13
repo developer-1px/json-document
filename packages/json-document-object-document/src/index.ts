@@ -6,3 +6,4 @@ export { getObjectStyle, readObjectStyle, assertObjectStyle, type ObjectStyle, t
 export {createCanvasEmbeddedDocument} from "./embedded-document.js";
 export { layoutObjectText, type ObjectTextMeasurer } from "./object-text-layout.js";
 export { defaultObjectContainerPolicy, layoutObjectDocument, objectSubtreeIds, type ObjectContainerPolicy, type ObjectContainerLayout, type ObjectLayoutOptions } from "./object-container-layout.js";
+export { uiComponentCatalog, uiComponentDocumentType, createUIComponentObject, assertUIComponentContent, assertUIBuilderDocument, type UIComponentKind, type UIComponentContent, type UIComponentObject } from "./ui-component.js";

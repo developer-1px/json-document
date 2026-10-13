@@ -681,6 +681,16 @@ createTextEditorTools(editor: TextEditor): ({ name: string; description: string;
 ```ts
 createTreeEditor(source: EditingDocumentSource<TreeDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): TreeEditor
 ```
+## `createUIBuilderEditor`
+
+```ts
+createUIBuilderEditor(value: CanvasDocument): ObjectEditor
+```
+## `createUIBuilderTools`
+
+```ts
+createUIBuilderTools(editor: ObjectEditor): { name: string; description: string; parameters: { type: string; properties: Record<string, unknown>; required: string[]; additionalProperties: boolean; }; execute(args: unknown): { ...; } | ... 3 more ... | { ...; }; }[]
+```
 ## `cutEditingClipboard`
 
 ```ts

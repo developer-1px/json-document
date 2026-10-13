@@ -39,6 +39,15 @@ CanvasHand(props: CanvasHandProps): import("<repository>/node_modules/@types/rea
 interface CanvasHandProps {
   /** Fill the host and navigate independently of document coordinates. */
   readonly workspace?: boolean;
+  /** Pixel-sized workspace with scrolling, without zoom or fit controls. */
+  readonly navigation?: "free" | "fixed";
+  readonly onViewportChange?: (bounds: import("@interactive-os/json-document-object-document").ObjectBounds) => void;
+  readonly creationTools?: readonly CanvasTool[];
+  readonly toolbarContent?: ReactNode;
+  readonly documentControls?: boolean;
+  readonly contentToolbar?: boolean;
+  readonly renderEmbedded?: (object: Extract<import("@interactive-os/json-document-object-document").CanvasObject, {kind: "embedded-document"}>) => ReactNode;
+  readonly onEditEmbedded?: (objectId: string) => void;
   readonly editor: ObjectEditor;
   readonly creationStyle: CanvasCreationStyle;
   readonly className?: string;
@@ -63,6 +72,16 @@ type CanvasTool = "select" | "table" | Exclude<CanvasObjectKind, "image" | "embe
 ```ts
 createCanvasClipboardBinding(editor: ObjectEditor, policy: CanvasClipboardPolicy, options?: { readonly readRaster?: typeof readWebRasterFile; readonly onResult?: (result: { readonly ok: boolean; readonly code?: string; readonly reason?: string; }) => void; readonly onPendingChange?: (pending: boolean) => void; }): { ...; }
 ```
+## `UIBuilderHand`
+
+```ts
+UIBuilderHand({ editor }: { readonly editor: ObjectEditor; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `UIComponentView`
+
+```ts
+UIComponentView({ object }: { readonly object: Extract<CanvasObject, { kind: "embedded-document"; }>; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
 ## `useCanvasHand`
 
 ```ts
@@ -71,5 +90,5 @@ useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: 
 ## `useCanvasViewport`
 
 ```ts
-useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean): { hand: boolean; setHand: React.Dispatch<React.SetStateAction<boolean>>; ... 7 more ...; events: { ...; } | { ...; }; }
+useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean, navigation?: "free" | "fixed"): { hand: boolean; setHand: React.Dispatch<React.SetStateAction<boolean>>; ... 8 more ...; events: { ...; } | { ...; }; }
 ```

@@ -26,6 +26,16 @@ assertObjectDocument(value: unknown): void
 ```ts
 assertObjectStyle(value: unknown): asserts value is Partial<ObjectStyle>
 ```
+## `assertUIBuilderDocument`
+
+```ts
+assertUIBuilderDocument(value: unknown): asserts value is CanvasDocument
+```
+## `assertUIComponentContent`
+
+```ts
+assertUIComponentContent(value: unknown): asserts value is UIComponentContent
+```
 ## `CanvasDocument`
 
 ```ts
@@ -86,6 +96,11 @@ createCanvasObject(kind: Exclude<CanvasObjectKind, "path" | "image" | "embedded-
 
 ```ts
 createCanvasPath(points: ReadonlyArray<ObjectPoint>, style: { readonly color: string; readonly label: string; readonly strokeWidth: number; }): Extract<CanvasObjectDraft, { readonly kind: "path"; }>
+```
+## `createUIComponentObject`
+
+```ts
+createUIComponentObject(component: UIComponentKind, position: Pick<ObjectBounds, "x" | "y">, content?: Partial<Pick<UIComponentContent, "detail" | "items" | "tone">> & { readonly text?: string; }): CanvasObjectDraft
 ```
 ## `defaultObjectContainerPolicy`
 
@@ -273,4 +288,34 @@ serializeCanvasDocument(document: CanvasDocument): string
 
 ```ts
 transformObject<Object extends DocumentObject>(object: Object, transform: ObjectTransform): Object
+```
+## `uiComponentCatalog`
+
+```ts
+const uiComponentCatalog: readonly [{ readonly id: "heading"; readonly label: "제목"; readonly width: 440; readonly height: 64; readonly text: "새로운 아이디어"; readonly detail: ""; readonly items: readonly []; readonly description: "Page or section heading"; }, ... 10 more ..., { ...; }]
+```
+## `UIComponentContent`
+
+```ts
+interface UIComponentContent extends Record<string, JSONValue> {
+  readonly component: UIComponentKind;
+  readonly detail: string;
+  readonly items: readonly string[];
+  readonly tone: "default" | "accent" | "quiet";
+}
+```
+## `uiComponentDocumentType`
+
+```ts
+const uiComponentDocumentType: "ui-component/1"
+```
+## `UIComponentKind`
+
+```ts
+type UIComponentKind = typeof uiComponentCatalog[number]["id"];
+```
+## `UIComponentObject`
+
+```ts
+type UIComponentObject = Extract<CanvasObject, { kind: "embedded-document" }> & { readonly document: UIComponentContent };
 ```

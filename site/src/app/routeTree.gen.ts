@@ -17,6 +17,7 @@ import { Route as PageViewerRouteImport } from "./routes/_page/viewer";
 import { Route as ApplicationsBearRouteImport } from "./routes/applications/bear";
 import { Route as ApplicationsCanvasRouteImport } from "./routes/applications/canvas";
 import { Route as ApplicationsSheetRouteImport } from "./routes/applications/sheet";
+import { Route as ApplicationsUiBuilderRouteImport } from "./routes/applications/ui-builder";
 import { Route as PageAdaptersIndexRouteImport } from "./routes/_page/adapters/index";
 import { Route as PageAdaptersClipboardRouteImport } from "./routes/_page/adapters/clipboard";
 import { Route as PageAdaptersContenteditableRouteImport } from "./routes/_page/adapters/contenteditable";
@@ -223,6 +224,11 @@ const ApplicationsCanvasRoute = ApplicationsCanvasRouteImport.update({
 const ApplicationsSheetRoute = ApplicationsSheetRouteImport.update({
   id: "/applications/sheet",
   path: "/applications/sheet",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const ApplicationsUiBuilderRoute = ApplicationsUiBuilderRouteImport.update({
+  id: "/applications/ui-builder",
+  path: "/applications/ui-builder",
   getParentRoute: () => rootRouteImport,
 } as any);
 const PageAdaptersIndexRoute = PageAdaptersIndexRouteImport.update({
@@ -1128,6 +1134,7 @@ export interface FileRoutesByFullPath {
   "/applications/bear": typeof ApplicationsBearRoute;
   "/applications/canvas": typeof ApplicationsCanvasRoute;
   "/applications/sheet": typeof ApplicationsSheetRoute;
+  "/applications/ui-builder": typeof ApplicationsUiBuilderRoute;
   "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
@@ -1305,6 +1312,7 @@ export interface FileRoutesByTo {
   "/applications/bear": typeof ApplicationsBearRoute;
   "/applications/canvas": typeof ApplicationsCanvasRoute;
   "/applications/sheet": typeof ApplicationsSheetRoute;
+  "/applications/ui-builder": typeof ApplicationsUiBuilderRoute;
   "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
@@ -1484,6 +1492,7 @@ export interface FileRoutesById {
   "/applications/bear": typeof ApplicationsBearRoute;
   "/applications/canvas": typeof ApplicationsCanvasRoute;
   "/applications/sheet": typeof ApplicationsSheetRoute;
+  "/applications/ui-builder": typeof ApplicationsUiBuilderRoute;
   "/_page/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/_page/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/_page/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
@@ -1663,6 +1672,7 @@ export interface FileRouteTypes {
     | "/applications/bear"
     | "/applications/canvas"
     | "/applications/sheet"
+    | "/applications/ui-builder"
     | "/adapters/clipboard"
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
@@ -1840,6 +1850,7 @@ export interface FileRouteTypes {
     | "/applications/bear"
     | "/applications/canvas"
     | "/applications/sheet"
+    | "/applications/ui-builder"
     | "/adapters/clipboard"
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
@@ -2018,6 +2029,7 @@ export interface FileRouteTypes {
     | "/applications/bear"
     | "/applications/canvas"
     | "/applications/sheet"
+    | "/applications/ui-builder"
     | "/_page/adapters/clipboard"
     | "/_page/adapters/contenteditable"
     | "/_page/adapters/keyboard"
@@ -2194,6 +2206,7 @@ export interface RootRouteChildren {
   ApplicationsBearRoute: typeof ApplicationsBearRoute;
   ApplicationsCanvasRoute: typeof ApplicationsCanvasRoute;
   ApplicationsSheetRoute: typeof ApplicationsSheetRoute;
+  ApplicationsUiBuilderRoute: typeof ApplicationsUiBuilderRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -2252,6 +2265,13 @@ declare module "@tanstack/react-router" {
       path: "/applications/sheet";
       fullPath: "/applications/sheet";
       preLoaderRoute: typeof ApplicationsSheetRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/applications/ui-builder": {
+      id: "/applications/ui-builder";
+      path: "/applications/ui-builder";
+      fullPath: "/applications/ui-builder";
+      preLoaderRoute: typeof ApplicationsUiBuilderRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/_page/adapters/": {
@@ -3791,6 +3811,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApplicationsBearRoute: ApplicationsBearRoute,
   ApplicationsCanvasRoute: ApplicationsCanvasRoute,
   ApplicationsSheetRoute: ApplicationsSheetRoute,
+  ApplicationsUiBuilderRoute: ApplicationsUiBuilderRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

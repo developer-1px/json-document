@@ -1,3 +1,8 @@
+import uiBuilderStyleSource from "../../../../packages/json-document-canvas/src/ui-builder.css?raw";
+import uiComponentViewSource from "../../../../packages/json-document-canvas/src/ui-component-view.tsx?raw";
+import uiBuilderHandSource from "../../../../packages/json-document-canvas/src/ui-builder-hand.tsx?raw";
+import uiBuilderEditingSource from "../../../../packages/json-document-editing/src/ui-builder.ts?raw";
+import uiComponentModelSource from "../../../../packages/json-document-object-document/src/ui-component.ts?raw";
 import objectContainerLayoutSource from "../../../../packages/json-document-object-document/src/object-container-layout.ts?raw";
 import objectTextLayoutSource from "../../../../packages/json-document-object-document/src/object-text-layout.ts?raw";
 import webTextMeasurementSource from "../../../../packages/json-document-web/src/text-measurement.ts?raw";
@@ -260,6 +265,11 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-canvas/src/ui-builder.css", uiBuilderStyleSource],
+  ["packages/json-document-canvas/src/ui-component-view.tsx", uiComponentViewSource],
+  ["packages/json-document-canvas/src/ui-builder-hand.tsx", uiBuilderHandSource],
+  ["packages/json-document-editing/src/ui-builder.ts", uiBuilderEditingSource],
+  ["packages/json-document-object-document/src/ui-component.ts", uiComponentModelSource],
   ["packages/json-document-editing/src/canvas-tools.ts", canvasToolsSource],
   ["packages/json-document-editing/src/text-edit.ts", textEditSource],
   ["packages/json-document-editing/src/text-tools.ts", textToolsSource],
@@ -494,6 +504,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["packages/json-document-canvas/src/ui-builder-hand.tsx", ["packages/json-document-canvas/src/ui-builder.css", "packages/json-document-canvas/src/ui-component-view.tsx"]],
   ["packages/json-document-contenteditable/src/lease.ts", ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts"]],
   ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts", ["packages/json-document-contenteditable/src/dom/text-selection-geometry.ts", "packages/json-document-contenteditable/src/dom/text-selection.css"]],
   ["packages/json-document-editing/src/markdown-table.ts",["packages/json-document-editing/src/projected-sheet.ts"]],
@@ -514,6 +525,13 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  { packageName: "@interactive-os/json-document-canvas", symbol: "UIComponentView", sourcePath: "packages/json-document-canvas/src/ui-component-view.tsx" },
+  { packageName: "@interactive-os/json-document-canvas", symbol: "UIBuilderHand", sourcePath: "packages/json-document-canvas/src/ui-builder-hand.tsx" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderTools", sourcePath: "packages/json-document-editing/src/ui-builder.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderEditor", sourcePath: "packages/json-document-editing/src/ui-builder.ts" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "uiComponentCatalog", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "assertUIBuilderDocument", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "createUIComponentObject", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "moveText", sourcePath: "packages/json-document-editing/src/text-edit.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "applyTextEdit", sourcePath: "packages/json-document-editing/src/text-edit.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createCanvasEditorTools", sourcePath: "packages/json-document-editing/src/canvas-tools.ts" },
