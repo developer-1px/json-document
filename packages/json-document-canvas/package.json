@@ -6,8 +6,8 @@
   "main": "./dist/index.js", "types": "./dist/index.d.ts",
   "repository": { "type": "git", "url": "git+https://github.com/developer-1px/json-document.git", "directory": "packages/json-document-canvas" },
   "publishConfig": { "access": "public", "provenance": true, "tag": "next" },
-  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "docs", "LICENSE", "src/canvas-hand.css"],
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }, "./canvas-hand.css": "./src/canvas-hand.css" },
+  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "docs", "LICENSE", "src/canvas-hand.css", "src/ui-builder.css"],
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }, "./canvas-hand.css": "./src/canvas-hand.css", "./ui-builder.css": "./src/ui-builder.css" },
   "scripts": {
     "build": "tsc -b tsconfig.json", "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "typecheck": "tsc -p tsconfig.test.json --noEmit", "test": "vitest run --config vitest.config.ts",

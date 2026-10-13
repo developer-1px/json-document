@@ -419,5 +419,17 @@
     "entrypoint": "packages/json-document-sheet-document/src/index.ts",
     "subpaths": [],
     "referencePath": "packages/json-document-sheet-document/docs/api-reference.md"
+  },
+  {
+    "packageName": "@interactive-os/json-document-ui-builder",
+    "sourceDirectory": "packages/json-document-ui-builder",
+    "positions": [
+      "Hands",
+      "Connector"
+    ],
+    "responsibility": "UI 빌더 화면·데이터·액션 관리 Hand와 스키마 기반 Faker 예시 생성 연결",
+    "entrypoint": "packages/json-document-ui-builder/src/index.ts",
+    "subpaths": [],
+    "referencePath": "packages/json-document-ui-builder/docs/api-reference.md"
   }
 ]

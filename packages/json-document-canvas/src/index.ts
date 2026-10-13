@@ -3,3 +3,5 @@ export { createCanvasClipboardBinding, type CanvasClipboardPolicy } from "./canv
 export { useCanvasHand, type CanvasTool, type CanvasCreationStyle } from "./use-canvas-hand.js";
 export {CanvasSheetObject} from "./canvas-sheet-object.js";
 export { useCanvasViewport } from "./use-canvas-viewport.js";
+export { UIBuilderHand } from "./ui-builder-hand.js";
+export { UIComponentView, UIComponentSurface, type UIComponentSurfaceProps, type UIComponentInteraction } from "./ui-component-view.js";

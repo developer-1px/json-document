@@ -250,3 +250,20 @@ export type {SheetGrid,SheetViewOptions} from "./sheet-view.js";
 export { applyTextEdit, moveText, type TextEdit, type TextMove } from "./text-edit.js";
 export { createTextEditorTools } from "./text-tools.js";
 export { createCanvasEditorTools } from "./canvas-tools.js";
+export { createUIBuilderEditor, createUIBuilderTools } from "./ui-builder.js";
+
+export { uiBuilderSampleKinds, readUIBuilderProject, assertUIBuilderProject, applyUIBuilderMaterials } from "./ui-builder-materials.js";
+export type { UIBuilderProject, UIBuilderTable, UIBuilderField, UIBuilderAction, UIBuilderSampleKind, UIBuilderSampleGenerator, UIBuilderMaterialCommand } from "./ui-builder-materials.js";
+export { createUIBuilderMaterialTools } from "./ui-builder-material-tools.js";
+
+export { createDatabaseView } from "./database-view.js";
+
+export { resolveUIBuilderComponent } from "./ui-builder-bindings.js";
+export type { UIBuilderProjection } from "./ui-builder-bindings.js";
+export { applyUIBuilderConfiguration } from "./ui-builder-configuration.js";
+export type { UIBuilderConnection, UIBuilderConfiguration } from "./ui-builder-configuration.js";
+export { createUIBuilderCatalogTools } from "./ui-builder-catalog-tools.js";
+
+export { assertUIBuilderActionExecution, setUIBuilderInput, executeUIBuilderAction, type UIBuilderActionExecution, type UIBuilderSkillRequest, type UIBuilderSkill, type UIBuilderSkillDefinition, type UIBuilderRecordSelection } from "./ui-builder-runtime.js";
+export { createUIBuilderActionTools } from "./ui-builder-action-tools.js";
+export { createUIBuilderLayoutTools } from "./ui-builder-layout-tools.js";

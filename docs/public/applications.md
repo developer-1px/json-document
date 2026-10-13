@@ -63,3 +63,7 @@ AI Agent Application
 Application은 showcase가 아니라 책임을 발견하고 canonical API가 실제 제품에서
 다시 소비되는지 검증하는 production composition root입니다. 개발 순환은
 [How We Build](/docs/how-we-build)에서 설명합니다.
+
+## UI Builder
+
+[UI Builder](/applications/ui-builder)는 등록 컴포넌트를 자유롭게 배치하고 우측 하단 채팅으로 생성·정리를 요청하는 애플리케이션입니다. 컴포넌트를 추가하고 드래그·크기 조절하거나 더블 클릭으로 내용을 수정합니다. 줌과 레이아웃 구조 설정은 없습니다. 변경은 브라우저에 저장되며 AI batch도 실행 취소할 수 있습니다. 실제 AI 편집은 `npm run dev`의 로컬 agent 연결이 필요합니다. 배포된 정적 사이트에서는 직접 편집은 가능하지만 로컬 agent API는 제공되지 않습니다.

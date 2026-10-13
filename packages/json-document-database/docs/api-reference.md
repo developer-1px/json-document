@@ -14,7 +14,7 @@ createDatabaseResource<Row extends DatabaseRow, Create = Partial<Row>>(resource:
 ## `createDatabaseView`
 
 ```ts
-createDatabaseView(id: string, name: string, propertyIds: ReadonlyArray<string>, ownership?: DatabaseTableView["ownership"]): DatabaseTableView
+createDatabaseView(id: string, name: string, propertyIds: ReadonlyArray<string>, ownership?: DatabaseTableView["ownership"], options?: { readonly hiddenPropertyIds?: readonly string[]; }): DatabaseTableView
 ```
 ## `Database`
 
@@ -216,6 +216,8 @@ interface DatabaseHandLegacySource<Row extends Record<string, unknown>> {
 
 ```ts
 interface DatabaseHandPresentation {
+  readonly showRecordIds?: boolean;
+  readonly showPropertyTypes?: boolean;
   readonly propertyOrder?: ReadonlyArray<string>;
   readonly propertyVisibility?: Readonly<Record<string, boolean>>;
   readonly propertyWidths?: Readonly<Record<string, number>>;

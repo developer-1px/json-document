@@ -1,0 +1,48 @@
+.ui-builder-hand > [data-ui-toolbar="product"] { top: 1rem; bottom: auto; left: 4.5rem; transform: none; }
+.ui-builder-hand > [data-ui-toolbar="product"] [data-ui-presentation="popover"] > [role="dialog"] { top: 100%; bottom: auto; left: 0; right: auto; margin-top: 0.75rem; margin-bottom: 0; }
+.ui-builder-hand [data-ui-presentation="popover"] > button { display: inline-flex; align-items: center; gap: 0.5rem; }
+.ui-builder-palette { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; padding: 0.75rem; width: min(20rem, calc(100vw - 3rem)); }
+.ui-builder-palette > button { min-height: 2.75rem; text-align: left; }
+.ui-builder-properties { width: min(18rem, calc(100vw - 3rem)); padding: 0.75rem; }
+.ui-builder-property-fields { display: flex; flex-direction: column; gap: 0.75rem; }
+.ui-builder-property-fields > :is(input, textarea) { width: 100%; }
+.ui-builder-empty { position: absolute; top: 32%; left: 10%; pointer-events: none; color: rgb(var(--color-foreground-secondary)); }
+.ui-builder-empty h1 { font-size: 1rem; font-weight: 600; color: rgb(var(--color-foreground-default)); margin-bottom: 0.75rem; }
+.ui-builder-empty p { font-size: 0.875rem; line-height: 1.8; }
+/* Document content is distinct from the builder's editing controls. */
+.ui-component { width: 100%; height: 100%; overflow: hidden; color: rgb(var(--color-foreground-default)); font-size: 1rem; }
+.ui-component :is(h1, h2, p) { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ui-component h1 { font-size: 2.5rem; line-height: 1.2; font-weight: 600; letter-spacing: -0.03em; }
+.ui-component h2 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+.ui-component p { line-height: 1.7; }
+.ui-component > button { width: 100%; height: 100%; font-size: 1rem; }
+.ui-component > label { display: flex; flex-direction: column; gap: 0.5rem; height: 100%; }
+.ui-component > label > :is(input, textarea) { width: 100%; flex: 1; min-height: 0; }
+.ui-component > label.ui-component-check { flex-direction: row; align-items: center; }
+.ui-component > label.ui-component-check > input { flex: none; width: 1.125rem; height: 1.125rem; }
+.ui-component > article { height: 100%; padding: 1.5rem; border: 1px solid rgb(var(--color-border-subtle)); border-radius: var(--radius-surface); background: rgb(var(--color-background-canvas)); }
+.ui-component > article > p { margin-top: 0.75rem; color: rgb(var(--color-foreground-secondary)); }
+.ui-component > section { padding: 0.5rem 0; }
+.ui-component strong { display: block; font-size: 2.5rem; font-weight: 600; line-height: 1.3; margin-top: 0.5rem; }
+.ui-component ul { margin: 0.75rem 0 0; padding-left: 1.5rem; line-height: 2; }
+.ui-component hr { border: 0; border-top: 1px solid rgb(var(--color-border-default)); margin: 0.75rem 0; }
+.ui-component[data-tone="quiet"] { color: rgb(var(--color-foreground-secondary)); }
+.ui-component[data-tone="accent"] { color: rgb(var(--color-foreground-accent)); }
+@media (max-width: 600px) { .ui-builder-empty { left: 1.5rem; top: 24%; } }
+.ui-component { position: relative; }
+.ui-component-binding-error { position: absolute; inset: auto 0 0; padding: 0.5rem; background: rgb(var(--color-background-canvas)); color: rgb(var(--color-foreground-danger, 170 40 40)); font-size: 0.75rem; line-height: 1.4; }
+.ui-component[data-design="soft"] > article { background: rgb(var(--color-background-subtle, 247 246 244)); border-color: transparent; }
+.ui-component[data-design="soft"] :is(h1, h2) { letter-spacing: -0.025em; }
+.ui-component[data-design="soft"] > section { padding: 1rem; background: rgb(var(--color-background-subtle, 247 246 244)); border-radius: var(--radius-surface); }
+.ui-component[data-design="bold"] :is(h1, h2, strong) { color: rgb(var(--color-foreground-accent)); }
+.ui-component[data-design="bold"] > article { border-color: rgb(var(--color-foreground-accent)); }
+.ui-component[data-design="bold"] h1 { font-size: 3rem; }
+
+/* Published content hugs its contents; only the editor wrapper uses absolute dimensions. */
+.ui-component[data-layout="flow"] { height: auto; min-width: 0; overflow: visible; }
+.ui-component[data-layout="flow"] > :is(article, label, button) { height: auto; }
+.ui-component[data-layout="flow"] > button { min-height: 2.75rem; padding-inline: 1.25rem; white-space: normal; }
+.ui-component[data-layout="flow"] > label { width: 100%; }
+.ui-component[data-layout="flow"] > label > :is(input, textarea) { flex: none; }
+.ui-component[data-layout="flow"] textarea { min-height: 7rem; field-sizing: content; }
+.ui-component[data-layout="flow"] .ui-component-binding-error { position: static; }

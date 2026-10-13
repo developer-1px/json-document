@@ -4,7 +4,7 @@ import type { CanvasDocument } from "@interactive-os/json-document-object-docume
 
 type View = { x: number; y: number; scale: number };
 /** View-only navigation; never writes document geometry, selection, or history. */
-export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean) {
+export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean, navigation: "free" | "fixed" = "free") {
   const [size, setSize] = useState({ width: document.width, height: document.height });
   const [view, setView] = useState<View>({ x: 0, y: 0, scale: 1 });
   const [hand, setHand] = useState(false);
@@ -14,6 +14,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
   state.current = { size, view, document };
   const [pointer] = useState(() => createWebPointerSession<{ x: number; y: number; view: View }>());
   const fitBounds = (left: number, top: number, right: number, bottom: number) => {
+    if (navigation === "fixed") return;
     const { size } = state.current;
     const scale = Math.max(0.05, Math.min(8, (size.width - 64) / Math.max(1, right - left), (size.height - 160) / Math.max(1, bottom - top)));
     setView({ x: (left + right - size.width / scale) / 2, y: (top + bottom - size.height / scale) / 2, scale });
@@ -30,6 +31,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
       Math.max(...objects.map(o => o.x + o.width)), Math.max(...objects.map(o => o.y + o.height)));
   };
   const zoom = (factor: number, at = { x: state.current.size.width / 2, y: state.current.size.height / 2 }) => {
+    if (navigation === "fixed") return;
     setView(current => {
       const scale = Math.max(0.05, Math.min(8, current.scale * factor));
       return { x: current.x + at.x / current.scale - at.x / scale, y: current.y + at.y / current.scale - at.y / scale, scale };
@@ -44,7 +46,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
       if (!width || !height) return;
       state.current.size = { width, height };
       setSize({ width, height });
-      if (initial) { fit(); initial = false; }
+      if (initial) { if (navigation !== "fixed") fit(); initial = false; }
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -62,7 +64,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
     svg.addEventListener("wheel", wheel, { passive: false });
     window.addEventListener("blur", release);
     return () => { observer.disconnect(); svg.removeEventListener("wheel", wheel); window.removeEventListener("blur", release); release(); };
-  }, [enabled, surface, pointer]);
+  }, [enabled, surface, pointer, navigation]);
   const end = (event: PointerEvent<SVGSVGElement>, cancel = false) => {
     if (!pointer.getSnapshot()) return;
     event.stopPropagation();
@@ -71,6 +73,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
   };
   return {
     hand, setHand, fit, fitSelection, zoom, scale: view.scale,
+    bounds: { x: view.x, y: view.y, width: size.width / view.scale, height: size.height / view.scale },
     viewBox: `${view.x} ${view.y} ${size.width / view.scale} ${size.height / view.scale}`,
     panning: hand || space || dragging,
     cursor: dragging ? "grabbing" : hand || space ? "grab" : undefined,

@@ -113,6 +113,25 @@
     "applicationSource": "site/src/app/routes/applications/canvas.tsx"
   },
   {
+    "path": "/applications/ui-builder",
+    "label": "UI Builder",
+    "title": "UI Builder - json-document",
+    "description": "컴포넌트를 자유롭게 놓고 AI와 함께 화면을 만드는 UI 빌더입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications",
+    "chrome": "none",
+    "modulePaths": [
+      "/docs/api/object-document",
+      "/docs/api/editing",
+      "/docs/api/canvas",
+      "/docs/api/affordance",
+      "/docs/api/web",
+      "/docs/api/ui-primitives-react",
+      "/docs/api/composer-react"
+    ],
+    "applicationSource": "site/src/app/routes/applications/ui-builder.tsx"
+  },
+  {
     "path": "/applications/sheet",
     "label": "Sheet",
     "title": "Sheet",
@@ -307,7 +326,8 @@
       "packages/json-document-editing/docs/text.md",
       "packages/json-document-editing/docs/sheet.md",
       "packages/json-document-editing/docs/sheet-contract.md",
-      "packages/json-document-editing/docs/text-tools.md"
+      "packages/json-document-editing/docs/text-tools.md",
+      "packages/json-document-editing/docs/ui-builder.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-editing",
@@ -317,7 +337,8 @@
         "/demo/markdown-caret",
         "/applications/sheet",
         "/applications/canvas",
-        "/demo/sheet-views"
+        "/demo/sheet-views",
+        "/applications/ui-builder"
       ]
     },
     "parentPath": "/docs/editing"
@@ -728,7 +749,8 @@
     "module": {
       "packageName": "@interactive-os/json-document-database",
       "usagePaths": [
-        "/demo/database"
+        "/demo/database",
+        "/applications/ui-builder"
       ]
     }
   },
@@ -752,12 +774,14 @@
     "description": "Object와 Canvas의 문서 계약과 public API입니다.",
     "language": "ko",
     "documentIncludes": [
-      "packages/json-document-object-document/docs/api.md"
+      "packages/json-document-object-document/docs/api.md",
+      "packages/json-document-object-document/docs/ui-component.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-object-document",
       "usagePaths": [
-        "/applications/canvas"
+        "/applications/canvas",
+        "/applications/ui-builder"
       ]
     },
     "parentPath": "/docs/document-types"
@@ -770,12 +794,14 @@
     "language": "ko",
     "documentIncludes": [
       "packages/json-document-canvas/docs/api.md",
-      "packages/json-document-canvas/docs/embedded-sheet.md"
+      "packages/json-document-canvas/docs/embedded-sheet.md",
+      "packages/json-document-canvas/docs/ui-builder.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-canvas",
       "usagePaths": [
-        "/applications/canvas"
+        "/applications/canvas",
+        "/applications/ui-builder"
       ]
     }
   },
@@ -2092,5 +2118,21 @@
       ]
     },
     "parentPath": "/docs/document-types"
+  },
+  {
+    "path": "/docs/api/ui-builder",
+    "label": "API · UI Builder",
+    "title": "UI Builder API - json-document",
+    "description": "UI 빌더 프로젝트 Hand와 예시 생성 연결 API입니다.",
+    "language": "ko",
+    "documentIncludes": [
+      "packages/json-document-ui-builder/docs/workspace.md"
+    ],
+    "module": {
+      "packageName": "@interactive-os/json-document-ui-builder",
+      "usagePaths": [
+        "/applications/ui-builder"
+      ]
+    }
   }
 ]

@@ -87,6 +87,11 @@ createWebClipboardTextWriter(options?: { readonly clipboard?: WebClipboardTextPo
 ```ts
 createWebDragDropSession<Item, Target>(options?: WebDragDropSessionOptions<Item, Target>): WebDragDropSession<Item, Target>
 ```
+## `createWebIndexedDBStorage`
+
+```ts
+createWebIndexedDBStorage(databaseName: string): WebAsyncDocumentStorage
+```
 ## `createWebJSONClipboardRepresentation`
 
 ```ts
@@ -128,6 +133,11 @@ const defaultWebKeymap: Readonly<Record<string, WebKeyboardCommand>>
 
 ```ts
 const documentClipboardCodec: WebClipboardCodec<DocumentClipboard>
+```
+## `downloadWebDocumentFile`
+
+```ts
+downloadWebDocumentFile(value: JSONValue, filename: string): void
 ```
 ## `fileCandidateFromWebFile`
 
@@ -219,6 +229,11 @@ moveLinePoint(ids: ReadonlyArray<string>, currentId: string, direction: Extract<
 ```ts
 const objectClipboardCodec: WebClipboardCodec<ObjectClipboard>
 ```
+## `openWebStoredDocument`
+
+```ts
+openWebStoredDocument<Source extends WebStoredDocumentSource>(options: WebAsyncStoredDocumentOptions<Source>): Promise<WebStoredDocument<Source>>
+```
 ## `orderClipboardCodec`
 
 ```ts
@@ -253,6 +268,11 @@ projectWebClientPointToSVG(point: WebClientPoint, viewport: WebSVGViewport): Web
 
 ```ts
 projectWebWidgetState(state: WebWidgetState): WebWidgetARIA
+```
+## `readWebDocumentFile`
+
+```ts
+readWebDocumentFile(file: { readonly size: number; text(): Promise<string>; }, maxBytes?: number): Promise<unknown>
 ```
 ## `readWebHTMLClipboard`
 
@@ -401,6 +421,23 @@ interface WebAnnotationRasterStyle {
   readonly fill: string;
   readonly lineWidth: number;
   readonly labelFont: string;
+}
+```
+## `WebAsyncDocumentStorage`
+
+```ts
+interface WebAsyncDocumentStorage {
+  getItem(key: string): Promise<string | null>;
+  setItem(key: string, value: string): Promise<void>;
+}
+```
+## `WebAsyncStoredDocumentOptions`
+
+```ts
+interface WebAsyncStoredDocumentOptions<Source extends WebStoredDocumentSource> extends Omit<WebStoredDocumentOptions<Source>, "storage"> {
+  readonly storage: WebAsyncDocumentStorage;
+  /** Migration fallback; only read when the primary store has no document. Never removes legacy data. */
+  readonly legacyStorage?: () => {getItem(key: string): string | null};
 }
 ```
 ## `WebCalendarCommand`
@@ -574,7 +611,7 @@ type WebComposerFileList = WebFileCandidateList;
 ## `WebDocumentSaveState`
 
 ```ts
-type WebDocumentSaveState = "saved" | "unsaved" | "load-error" | "save-error";
+type WebDocumentSaveState = "saved" | "saving" | "unsaved" | "load-error" | "save-error";
 ```
 ## `WebDragDropCancelReason`
 
@@ -946,7 +983,7 @@ interface WebStoredDocument<Source extends WebStoredDocumentSource> {
   subscribe(listener: () => void): () => void;
   /** Observe value changes only. Returns cleanup; selection movement never writes storage. */
   connect(): () => void;
-  save(): void;
+  save(): void | Promise<void>;
 }
 ```
 ## `WebStoredDocumentOptions`

@@ -28,6 +28,7 @@ export const docPages = {
   ownership: docPage("/docs/ownership"),
   markdownApi: docPage("/docs/api/markdown"),
   markdownWebApi: docPage("/docs/api/markdown-web"),
+  uiBuilderApi: docPage("/docs/api/ui-builder"),
   canvasApi: docPage("/docs/api/canvas"),
   objectDocumentApi: docPage("/docs/api/object-document"),
   calendarDocumentApi: docPage("/docs/api/calendar-document"),

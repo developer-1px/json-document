@@ -51,8 +51,8 @@ for (const symbol of ["AnnotationHand", "useAnnotationOutput"]) {
 for (const localResponsibility of ["createGestureSession", "projectWebClientPointToSVG", "function AnnotationShape", "function CommentComposer", "presentStructuredSnapshot", "JSON.stringify", "JSON.parse", "renderWebAnnotationRaster"]) {
   if (annotationDemo.includes(localResponsibility)) throw new Error(`Annotation Demo owns displaced behavior: ${localResponsibility}`);
 }
-const entries = [...registrySource.matchAll(/^\s*"\/[^"]+"[^\n]+"(routes\/[^"]+)"\),?$/gm)].map((match) => match[1]);
-const usages = [...sourceRegistry.matchAll(/packageName:\s*["']([^"']+)["'],\s*\n\s*symbol:\s*["']([^"']+)["'],\s*\n\s*sourcePath:\s*["']([^"']+)["']/g)].map((match) => ({
+const entries = [...registrySource.matchAll(/^\s*"\/[^"]+"[^\n]+"((?:routes|applications)\/[^"]+)"\),?$/gm)].map((match) => match[1]);
+const usages = [...sourceRegistry.matchAll(/packageName:\s*["']([^"']+)["'],\s*symbol:\s*["']([^"']+)["'],\s*sourcePath:\s*["']([^"']+)["']/g)].map((match) => ({
   packageName: match[1],
   symbol: match[2],
   sourcePath: match[3],

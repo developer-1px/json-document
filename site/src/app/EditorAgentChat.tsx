@@ -1,4 +1,4 @@
-import { createAgentChatSession, type AgentChatSession } from "./agent-chat-session";
+import { createAgentChatSession, prepareAgentChatTurn, type AgentChatSession } from "./agent-chat-session";
 import { Fragment, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { COMPOSER_HOST_PROFILE_V1, composerText, type ComposerHostConfig } from "@interactive-os/json-document-composer";
 import { ChatComposer, useComposer } from "@interactive-os/json-document-composer-react";
@@ -33,15 +33,17 @@ export function EditorAgentChat({ tools, id, label, logLabel, inputLabel, placeh
     id, config,
     ports: { createId: createRichTextNodeId, submit: async draft => {
       const turn = { prompt: composerText(draft.instruction), reply: "", state: "running" as const };
-      const index = (stored.source.snapshot.value as AgentChatSession).messages.length;
+      const currentChat = stored.source.snapshot.value as AgentChatSession;
+      const prepared = prepareAgentChatTurn(currentChat, tools, turn.prompt);
+      const index = currentChat.messages.length;
       const update = (changes: Partial<AgentChatSession["messages"][number]>) => stored.source.update(current => ({ ...current, messages: current.messages.map((message, i) => i === index ? { ...message, ...changes } : message) }));
       setExpanded(true);
-      stored.source.update(current => ({ ...current, messages: [...current.messages, turn] }));
+      stored.source.update(current => ({ ...current, sessionId: prepared.sessionId, toolSignature: prepared.toolSignature, messages: [...current.messages, turn] }));
       request.current = new AbortController();
       onBusyChange?.(true);
       try {
         await streamLlmAgentTurn({
-          prompt: turn.prompt, mode: "chat", tools, sessionId: (stored.source.snapshot.value as AgentChatSession).sessionId, signal: request.current.signal,
+          prompt: prepared.prompt, mode: "chat", tools, sessionId: prepared.sessionId, signal: request.current.signal,
           onSession: sessionId => { stored.source.update(current => ({ ...current, sessionId })); },
           write: delta => { turn.reply += delta; update({ reply: turn.reply }); },
         });
