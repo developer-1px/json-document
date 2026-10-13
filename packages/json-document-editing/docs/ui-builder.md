@@ -11,3 +11,23 @@ Usage와 Source: [UI Builder](/applications/ui-builder).
 ```live-demo
 /applications/ui-builder
 ```
+
+## 프로젝트 재료
+
+`readUIBuilderProject`는 기존 Canvas 전용 문서에 빈 tables/actions를 부여한다.
+`createUIBuilderEditor`는 복원과 모든 변경 경계에서 `assertUIBuilderProject`를 적용한다.
+프로젝트의 테이블은 Database 스키마·레코드·보기를 그대로 사용한다.
+`UIBuilderField.sample`은 생성 의미이며, `UIBuilderSampleGenerator`는 외부에서 주입한다.
+
+`applyUIBuilderMaterials(editor, commands, generator)`는 테이블 저장·삭제·데이터 교체·예시 생성,
+액션 저장·삭제를 원자적 배치로 처리한다. 오류가 있으면 전체 배치를 거부한다.
+화면과 카탈로그는 하나의 undo/redo 기록을 공유한다. 예시 생성은 append/replace를 명시해야 한다.
+
+`createUIBuilderMaterialTools`는 읽기·카탈로그 저장·예시 생성 도구를 제공한다.
+읽은 뒤 사용자가 문서를 바꾸면 수정 도구는 stale 오류를 반환한다.
+AI는 목적을 확인하고 기존 테이블·액션을 재사용하며 필요한 스키마와 예시를 만든 뒤 화면을 구성한다.
+이 단계에서는 화면의 동적 바인딩이나 액션 실행을 제공하지 않으므로 완료했다고 표현하면 안 된다.
+
+`createDatabaseView(id, name, propertyIds, ownership?, options?)`가 Database 보기 생성의 정본이다.
+`options.hiddenPropertyIds`로 숨길 필드를 지정한다. 기존 Database 공개 API도 이 함수를 재노출한다.
+UI 빌더와 Zod 번역은 빈 숨김 목록을 전달해 모든 스키마 필드를 표시한다.

@@ -108,10 +108,20 @@ interface AnnotationSource extends Record<string, JSONValue> { readonly id: stri
 ```ts
 applyTextEdit(editor: TextEditor, edit: TextEdit): import("<repository>/packages/json-document-editing/src/session").EditingResult<import("<repository>/packages/json-document-editing/src/text").TextSelection>
 ```
+## `applyUIBuilderMaterials`
+
+```ts
+applyUIBuilderMaterials(editor: ObjectEditor, commands: readonly UIBuilderMaterialCommand[], generate?: UIBuilderSampleGenerator): { readonly ok: false; readonly code: string; readonly reason?: string; } | { ...; } | { ...; }
+```
 ## `assertAnnotationDocument`
 
 ```ts
 assertAnnotationDocument(document: AnnotationDocument): void
+```
+## `assertUIBuilderProject`
+
+```ts
+assertUIBuilderProject(value: unknown): asserts value is UIBuilderProject
 ```
 ## `bindCalendarAllDayIntent`
 
@@ -601,6 +611,11 @@ createCanvasSheet(bounds: ObjectBounds, options?: { rows?: number; columns?: num
 ```ts
 createDatabaseEditor(source: EditingDocumentSource<DatabaseDocument>, options?: EditingHistoryOptions): DatabaseEditor
 ```
+## `createDatabaseView`
+
+```ts
+createDatabaseView(id: string, name: string, propertyIds: ReadonlyArray<string>, ownership?: DatabaseTableView["ownership"], options?: { readonly hiddenPropertyIds?: readonly string[]; }): DatabaseTableView
+```
 ## `createDocumentEditor`
 
 ```ts
@@ -685,6 +700,11 @@ createTreeEditor(source: EditingDocumentSource<TreeDocument>, options?: EditingH
 
 ```ts
 createUIBuilderEditor(value: CanvasDocument): ObjectEditor
+```
+## `createUIBuilderMaterialTools`
+
+```ts
+createUIBuilderMaterialTools(editor: ObjectEditor, generate: UIBuilderSampleGenerator): { name: string; description: string; parameters: { type: string; properties: Record<string, unknown>; required: string[]; additionalProperties: boolean; }; execute(args: unknown): { ...; } | ... 2 more ... | { ...; }; }[]
 ```
 ## `createUIBuilderTools`
 
@@ -1590,6 +1610,11 @@ projectSheetGrid(document: SheetDocument, order?: SheetViewOptions): SheetGrid
 ```ts
 projectTreeVisibility(nodes: ReadonlyArray<TreeNode>, expandedIds: ReadonlySet<string>): TreeVisibility
 ```
+## `readUIBuilderProject`
+
+```ts
+readUIBuilderProject(value: unknown): UIBuilderProject
+```
 ## `SheetAvailability`
 
 ```ts
@@ -1988,5 +2013,65 @@ interface TreeVisibilityRow extends TreeNode {
   readonly setSize: number;
   readonly hasChildren: boolean;
   readonly expanded: boolean;
+}
+```
+## `UIBuilderAction`
+
+```ts
+interface UIBuilderAction extends Record<string, JSONValue> {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly inputs: readonly DatabaseProperty[];
+  readonly outputs: readonly DatabaseProperty[];
+}
+```
+## `UIBuilderField`
+
+```ts
+interface UIBuilderField extends DatabaseProperty { readonly sample: UIBuilderSampleKind; }
+```
+## `UIBuilderMaterialCommand`
+
+```ts
+type UIBuilderMaterialCommand =
+  | { readonly type: "table.save"; readonly id: string; readonly name: string; readonly fields: readonly UIBuilderField[] }
+  | { readonly type: "table.remove"; readonly id: string }
+  | { readonly type: "table.data"; readonly id: string; readonly data: DatabaseDocument }
+  | { readonly type: "table.generate"; readonly id: string; readonly count: number; readonly mode: "append" | "replace" }
+  | { readonly type: "action.save"; readonly action: UIBuilderAction }
+  | { readonly type: "action.remove"; readonly id: string };
+```
+## `UIBuilderProject`
+
+```ts
+interface UIBuilderProject extends CanvasDocument {
+  readonly tables: readonly UIBuilderTable[];
+  readonly actions: readonly UIBuilderAction[];
+}
+```
+## `UIBuilderSampleGenerator`
+
+```ts
+type UIBuilderSampleGenerator = (field: UIBuilderField) => JSONValue;
+```
+## `UIBuilderSampleKind`
+
+```ts
+type UIBuilderSampleKind = typeof uiBuilderSampleKinds[number];
+```
+## `uiBuilderSampleKinds`
+
+```ts
+const uiBuilderSampleKinds: readonly ["auto", "name", "email", "company", "product", "sentence", "date", "url"]
+```
+## `UIBuilderTable`
+
+```ts
+interface UIBuilderTable extends Record<string, JSONValue> {
+  readonly id: string;
+  readonly name: string;
+  readonly fields: readonly UIBuilderField[];
+  readonly data: DatabaseDocument;
 }
 ```

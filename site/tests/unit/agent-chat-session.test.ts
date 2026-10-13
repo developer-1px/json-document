@@ -19,3 +19,15 @@ test("does not overwrite unreadable persisted conversations on mount", () => {
   const stored = createAgentChatSession("canvas", () => ({ getItem: () => raw, setItem: (_key, value) => { raw = value; } }));
   expect(stored.state).toBe("load-error"); stored.connect(); expect(raw).toBe("broken");
 });
+
+test("renews the tool session while retaining recent context when the tool catalog changes", async () => {
+  const {prepareAgentChatTurn} = await import("../../src/app/agent-chat-session");
+  const session: AgentChatSession = {sessionId: "old", messages: [{prompt: "고객 화면", reply: "완료", state: "complete"}]};
+  const tools = [{name: "materials", description: "read", parameters: {type: "object"}}];
+  const first = prepareAgentChatTurn(session, tools, "상품도 추가");
+  expect(first.sessionId).toBeNull(); expect(first.prompt).toContain("고객 화면");
+  expect(session.sessionId).toBe("old"); expect(session.messages).toHaveLength(1);
+  const next = prepareAgentChatTurn({...session, toolSignature: first.toolSignature}, tools, "다시");
+  expect(next.sessionId).toBe("old"); expect(next.prompt).toBe("다시");
+  expect(prepareAgentChatTurn({...session, toolSignature: first.toolSignature}, [{...tools[0]!, parameters: {type: "string"}}], "변경").sessionId).toBeNull();
+});

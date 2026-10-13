@@ -66,3 +66,9 @@ Saved view는 Editing의 `DatabaseTableView.projection`으로 저장합니다. �
 새 `layout/ownership/projection` 형태로 전환해야 하며 자동 마이그레이션하지 않습니다.
 `projection`은 `search`, `filter` group, `sorts`, `groups`, `columns`를 소유합니다.
 문서의 schema·records와 legacy Zod records 입력은 계속 지원합니다.
+
+`DatabaseHand`의 `presentation.showRecordIds`와 `presentation.showPropertyTypes`를
+`false`로 설정하면 내부 행 ID 열과 타입 표기를 숨길 수 있다. 기본값은 기존 표현을 유지한다.
+UI 빌더 Usage(`/applications/ui-builder`)는 이 옵션으로 사용자 데이터에 집중한다.
+부모 문서의 투영으로 사용하는 경우 `onHistory(direction)`으로 표의 undo/redo 단축키를
+부모 문서에 위임한다. `features.history: false`는 로컬 표 history를 사용하지 않는다.

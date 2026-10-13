@@ -38,7 +38,8 @@
     "packages/contenteditable-collaboration",
     "site",
     "packages/json-document-sheet",
-    "packages/json-document-sheet-document"
+    "packages/json-document-sheet-document",
+    "packages/json-document-ui-builder"
   ],
   "scripts": {
     "dev": "npm run dev -w @interactive-os/json-document-site",

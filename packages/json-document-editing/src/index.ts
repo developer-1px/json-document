@@ -251,3 +251,9 @@ export { applyTextEdit, moveText, type TextEdit, type TextMove } from "./text-ed
 export { createTextEditorTools } from "./text-tools.js";
 export { createCanvasEditorTools } from "./canvas-tools.js";
 export { createUIBuilderEditor, createUIBuilderTools } from "./ui-builder.js";
+
+export { uiBuilderSampleKinds, readUIBuilderProject, assertUIBuilderProject, applyUIBuilderMaterials } from "./ui-builder-materials.js";
+export type { UIBuilderProject, UIBuilderTable, UIBuilderField, UIBuilderAction, UIBuilderSampleKind, UIBuilderSampleGenerator, UIBuilderMaterialCommand } from "./ui-builder-materials.js";
+export { createUIBuilderMaterialTools } from "./ui-builder-material-tools.js";
+
+export { createDatabaseView } from "./database-view.js";

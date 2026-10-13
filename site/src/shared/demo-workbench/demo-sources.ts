@@ -1,3 +1,11 @@
+import databaseViewSource from "../../../../packages/json-document-editing/src/database-view.ts?raw";
+import builderWorkspaceSource from "../../../../packages/json-document-ui-builder/src/ui-builder-workspace.tsx?raw";
+import builderMaterialsHandSource from "../../../../packages/json-document-ui-builder/src/materials-hand.tsx?raw";
+import builderSchemaFieldsSource from "../../../../packages/json-document-ui-builder/src/schema-fields.tsx?raw";
+import builderFakerSamplesSource from "../../../../packages/json-document-ui-builder/src/faker-samples.ts?raw";
+import builderWorkspaceStyleSource from "../../../../packages/json-document-ui-builder/src/ui-builder-workspace.css?raw";
+import builderMaterialsSource from "../../../../packages/json-document-editing/src/ui-builder-materials.ts?raw";
+import builderMaterialToolsSource from "../../../../packages/json-document-editing/src/ui-builder-material-tools.ts?raw";
 import uiBuilderStyleSource from "../../../../packages/json-document-canvas/src/ui-builder.css?raw";
 import uiComponentViewSource from "../../../../packages/json-document-canvas/src/ui-component-view.tsx?raw";
 import uiBuilderHandSource from "../../../../packages/json-document-canvas/src/ui-builder-hand.tsx?raw";
@@ -266,6 +274,15 @@ const excludedSources = new Set([
 ]);
 const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-canvas/src/ui-builder.css", uiBuilderStyleSource],
+  ["packages/json-document-ui-builder/src/ui-builder-workspace.tsx", builderWorkspaceSource],
+  ["packages/json-document-ui-builder/src/materials-hand.tsx", builderMaterialsHandSource],
+  ["packages/json-document-ui-builder/src/schema-fields.tsx", builderSchemaFieldsSource],
+  ["packages/json-document-ui-builder/src/faker-samples.ts", builderFakerSamplesSource],
+  ["packages/json-document-ui-builder/src/ui-builder-workspace.css", builderWorkspaceStyleSource],
+  ["packages/json-document-editing/src/ui-builder-materials.ts", builderMaterialsSource],
+  ["packages/json-document-editing/src/database-view.ts", databaseViewSource],
+  ["packages/json-document-editing/src/ui-builder-material-tools.ts", builderMaterialToolsSource],
+
   ["packages/json-document-canvas/src/ui-component-view.tsx", uiComponentViewSource],
   ["packages/json-document-canvas/src/ui-builder-hand.tsx", uiBuilderHandSource],
   ["packages/json-document-editing/src/ui-builder.ts", uiBuilderEditingSource],
@@ -504,6 +521,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["packages/json-document-ui-builder/src/ui-builder-workspace.tsx", ["packages/json-document-ui-builder/src/materials-hand.tsx", "packages/json-document-ui-builder/src/schema-fields.tsx", "packages/json-document-ui-builder/src/ui-builder-workspace.css", "packages/json-document-editing/src/ui-builder-materials.ts", "packages/json-document-editing/src/database-view.ts"]],
+  ["packages/json-document-editing/src/ui-builder-material-tools.ts", ["packages/json-document-editing/src/ui-builder-materials.ts", "packages/json-document-editing/src/database-view.ts"]],
   ["packages/json-document-canvas/src/ui-builder-hand.tsx", ["packages/json-document-canvas/src/ui-builder.css", "packages/json-document-canvas/src/ui-component-view.tsx"]],
   ["packages/json-document-contenteditable/src/lease.ts", ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts"]],
   ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts", ["packages/json-document-contenteditable/src/dom/text-selection-geometry.ts", "packages/json-document-contenteditable/src/dom/text-selection.css"]],
@@ -526,6 +545,10 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
 ]);
 const registeredPublicUsages = [
   { packageName: "@interactive-os/json-document-canvas", symbol: "UIComponentView", sourcePath: "packages/json-document-canvas/src/ui-component-view.tsx" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createDatabaseView", sourcePath: "packages/json-document-editing/src/database-view.ts" },
+  { packageName: "@interactive-os/json-document-ui-builder", symbol: "UIBuilderWorkspace", sourcePath: "packages/json-document-ui-builder/src/ui-builder-workspace.tsx" },
+  { packageName: "@interactive-os/json-document-ui-builder", symbol: "createFakerSampleGenerator", sourcePath: "packages/json-document-ui-builder/src/faker-samples.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderMaterialTools", sourcePath: "packages/json-document-editing/src/ui-builder-material-tools.ts" },
   { packageName: "@interactive-os/json-document-canvas", symbol: "UIBuilderHand", sourcePath: "packages/json-document-canvas/src/ui-builder-hand.tsx" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderTools", sourcePath: "packages/json-document-editing/src/ui-builder.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderEditor", sourcePath: "packages/json-document-editing/src/ui-builder.ts" },

@@ -749,7 +749,8 @@
     "module": {
       "packageName": "@interactive-os/json-document-database",
       "usagePaths": [
-        "/demo/database"
+        "/demo/database",
+        "/applications/ui-builder"
       ]
     }
   },
@@ -2117,5 +2118,21 @@
       ]
     },
     "parentPath": "/docs/document-types"
+  },
+  {
+    "path": "/docs/api/ui-builder",
+    "label": "API · UI Builder",
+    "title": "UI Builder API - json-document",
+    "description": "UI 빌더 프로젝트 Hand와 예시 생성 연결 API입니다.",
+    "language": "ko",
+    "documentIncludes": [
+      "packages/json-document-ui-builder/docs/workspace.md"
+    ],
+    "module": {
+      "packageName": "@interactive-os/json-document-ui-builder",
+      "usagePaths": [
+        "/applications/ui-builder"
+      ]
+    }
   }
 ]

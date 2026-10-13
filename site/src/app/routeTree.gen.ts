@@ -175,6 +175,7 @@ import { Route as PageDocsApiSelectionRouteImport } from "./routes/_page/docs/ap
 import { Route as PageDocsApiSheetRouteImport } from "./routes/_page/docs/api/sheet";
 import { Route as PageDocsApiSheetDocumentRouteImport } from "./routes/_page/docs/api/sheet-document";
 import { Route as PageDocsApiTanstackTableRouteImport } from "./routes/_page/docs/api/tanstack-table";
+import { Route as PageDocsApiUiBuilderRouteImport } from "./routes/_page/docs/api/ui-builder";
 import { Route as PageDocsApiUiPrimitivesReactRouteImport } from "./routes/_page/docs/api/ui-primitives-react";
 import { Route as PageDocsApiWebRouteImport } from "./routes/_page/docs/api/web";
 import { Route as PageDocsApiZodRouteImport } from "./routes/_page/docs/api/zod";
@@ -1061,6 +1062,11 @@ const PageDocsApiTanstackTableRoute =
     path: "/docs/api/tanstack-table",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsApiUiBuilderRoute = PageDocsApiUiBuilderRouteImport.update({
+  id: "/docs/api/ui-builder",
+  path: "/docs/api/ui-builder",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsApiUiPrimitivesReactRoute =
   PageDocsApiUiPrimitivesReactRouteImport.update({
     id: "/docs/api/ui-primitives-react",
@@ -1289,6 +1295,7 @@ export interface FileRoutesByFullPath {
   "/docs/api/sheet": typeof PageDocsApiSheetRoute;
   "/docs/api/sheet-document": typeof PageDocsApiSheetDocumentRoute;
   "/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
+  "/docs/api/ui-builder": typeof PageDocsApiUiBuilderRoute;
   "/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
   "/docs/api/web": typeof PageDocsApiWebRoute;
   "/docs/api/zod": typeof PageDocsApiZodRoute;
@@ -1467,6 +1474,7 @@ export interface FileRoutesByTo {
   "/docs/api/sheet": typeof PageDocsApiSheetRoute;
   "/docs/api/sheet-document": typeof PageDocsApiSheetDocumentRoute;
   "/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
+  "/docs/api/ui-builder": typeof PageDocsApiUiBuilderRoute;
   "/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
   "/docs/api/web": typeof PageDocsApiWebRoute;
   "/docs/api/zod": typeof PageDocsApiZodRoute;
@@ -1647,6 +1655,7 @@ export interface FileRoutesById {
   "/_page/docs/api/sheet": typeof PageDocsApiSheetRoute;
   "/_page/docs/api/sheet-document": typeof PageDocsApiSheetDocumentRoute;
   "/_page/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
+  "/_page/docs/api/ui-builder": typeof PageDocsApiUiBuilderRoute;
   "/_page/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
   "/_page/docs/api/web": typeof PageDocsApiWebRoute;
   "/_page/docs/api/zod": typeof PageDocsApiZodRoute;
@@ -1827,6 +1836,7 @@ export interface FileRouteTypes {
     | "/docs/api/sheet"
     | "/docs/api/sheet-document"
     | "/docs/api/tanstack-table"
+    | "/docs/api/ui-builder"
     | "/docs/api/ui-primitives-react"
     | "/docs/api/web"
     | "/docs/api/zod"
@@ -2005,6 +2015,7 @@ export interface FileRouteTypes {
     | "/docs/api/sheet"
     | "/docs/api/sheet-document"
     | "/docs/api/tanstack-table"
+    | "/docs/api/ui-builder"
     | "/docs/api/ui-primitives-react"
     | "/docs/api/web"
     | "/docs/api/zod"
@@ -2184,6 +2195,7 @@ export interface FileRouteTypes {
     | "/_page/docs/api/sheet"
     | "/_page/docs/api/sheet-document"
     | "/_page/docs/api/tanstack-table"
+    | "/_page/docs/api/ui-builder"
     | "/_page/docs/api/ui-primitives-react"
     | "/_page/docs/api/web"
     | "/_page/docs/api/zod"
@@ -3373,6 +3385,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiTanstackTableRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/api/ui-builder": {
+      id: "/_page/docs/api/ui-builder";
+      path: "/docs/api/ui-builder";
+      fullPath: "/docs/api/ui-builder";
+      preLoaderRoute: typeof PageDocsApiUiBuilderRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/api/ui-primitives-react": {
       id: "/_page/docs/api/ui-primitives-react";
       path: "/docs/api/ui-primitives-react";
@@ -3611,6 +3630,7 @@ interface PageRouteChildren {
   PageDocsApiSheetRoute: typeof PageDocsApiSheetRoute;
   PageDocsApiSheetDocumentRoute: typeof PageDocsApiSheetDocumentRoute;
   PageDocsApiTanstackTableRoute: typeof PageDocsApiTanstackTableRoute;
+  PageDocsApiUiBuilderRoute: typeof PageDocsApiUiBuilderRoute;
   PageDocsApiUiPrimitivesReactRoute: typeof PageDocsApiUiPrimitivesReactRoute;
   PageDocsApiWebRoute: typeof PageDocsApiWebRoute;
   PageDocsApiZodRoute: typeof PageDocsApiZodRoute;
@@ -3787,6 +3807,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsApiSheetRoute: PageDocsApiSheetRoute,
   PageDocsApiSheetDocumentRoute: PageDocsApiSheetDocumentRoute,
   PageDocsApiTanstackTableRoute: PageDocsApiTanstackTableRoute,
+  PageDocsApiUiBuilderRoute: PageDocsApiUiBuilderRoute,
   PageDocsApiUiPrimitivesReactRoute: PageDocsApiUiPrimitivesReactRoute,
   PageDocsApiWebRoute: PageDocsApiWebRoute,
   PageDocsApiZodRoute: PageDocsApiZodRoute,

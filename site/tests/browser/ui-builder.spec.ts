@@ -55,7 +55,7 @@ test("agent protocol applies a catalog batch, shares undo, and reports real fail
   const results: Array<{ ok: boolean }> = [];
   await page.route("**/api/llm-agent/tool-results/*", async route => { results.push(route.request().postDataJSON()); await route.fulfill({ body: "" }); });
   await page.route("**/api/llm-agent/turn", async route => {
-    expect(route.request().postDataJSON().tools.map((t: {name: string}) => t.name)).toEqual(["read_ui_builder", "apply_ui_builder_changes"]);
+    expect(route.request().postDataJSON().tools.map((t: {name: string}) => t.name)).toEqual(["read_ui_builder", "apply_ui_builder_changes", "read_ui_builder_materials", "save_ui_builder_materials", "generate_ui_builder_samples"]);
     const events = [
       { type: "RUN_STARTED", threadId: "builder-test", runId: "1" },
       { type: "CUSTOM", name: "client-tool", value: { token: "read", tool: "read_ui_builder", arguments: {} } },
@@ -80,4 +80,59 @@ test("agent protocol applies a catalog batch, shares undo, and reports real fail
   await page.getByRole("textbox", { name: "UI 편집 요청", exact: true }).click(); await page.keyboard.insertText("간격 정리해줘"); await page.getByRole("button", { name: "보내기", exact: true }).click();
   await expect(page.getByText("요청을 완료하지 못했습니다. 반영된 편집은 유지됩니다.")).toBeVisible();
   await expect(page.locator("[data-canvas-object]")).toHaveCount(2);
+});
+
+test("schema samples, hand edits, regeneration undo and action contracts persist", async ({page}) => {
+  await page.goto("/applications/ui-builder");
+  await page.getByRole("tab", {name: "데이터", exact: true}).click();
+  await page.getByRole("button", {name: "새 테이블", exact: true}).click();
+  await page.getByRole("textbox", {name: "테이블 이름", exact: true}).fill("고객");
+  await page.getByRole("textbox", {name: "필드 1 이름", exact: true}).fill("이름");
+  await page.getByRole("button", {name: "+ 필드 추가", exact: true}).click();
+  await page.getByRole("textbox", {name: "필드 2 이름", exact: true}).fill("이메일");
+  await page.getByRole("button", {name: "테이블 저장", exact: true}).click();
+  await page.getByRole("textbox", {name: "생성할 행 수", exact: true}).fill("3");
+  await page.getByRole("button", {name: "예시 추가", exact: true}).click();
+  const grid = page.getByRole("grid", {name: "고객 예시 데이터"});
+  await expect(grid.getByRole("row")).toHaveCount(4);
+  await grid.getByRole("textbox", {name: /^이름 record-/}).first().fill("직접 수정한 고객");
+  await page.getByRole("textbox", {name: "생성할 행 수", exact: true}).fill("1");
+  await page.getByRole("button", {name: "예시 추가", exact: true}).click();
+  await expect(grid.getByRole("row")).toHaveCount(5);
+  await expect(grid.getByRole("textbox", {name: /^이름 record-/}).first()).toHaveValue("직접 수정한 고객");
+  await page.getByRole("button", {name: "예시 전체 재생성", exact: true}).click();
+  await page.getByRole("button", {name: "재생성", exact: true}).click();
+  await expect(grid.getByRole("row")).toHaveCount(2);
+  await page.getByRole("button", {name: "실행 취소", exact: true}).click();
+  await expect(grid.getByRole("row")).toHaveCount(5);
+  await expect(grid.getByRole("textbox", {name: /^이름 record-/}).first()).toHaveValue("직접 수정한 고객");
+  await page.getByRole("tab", {name: "액션·스킬", exact: true}).click();
+  await page.getByRole("button", {name: "+ 액션", exact: true}).click();
+  await page.getByRole("textbox", {name: "액션 이름", exact: true}).fill("고객 초대");
+  await page.getByRole("textbox", {name: "무엇을 하는 기능인가요?", exact: true}).fill("고객에게 초대 이메일 발송");
+  await page.getByRole("button", {name: "+ 입력 추가", exact: true}).click();
+  await page.getByRole("textbox", {name: "입력 1 이름", exact: true}).fill("이메일");
+  await page.getByRole("button", {name: "+ 출력 추가", exact: true}).click();
+  await page.getByRole("textbox", {name: "출력 1 이름", exact: true}).fill("결과");
+  await page.getByRole("button", {name: "액션 저장", exact: true}).click();
+  await page.reload();
+  await page.getByRole("tab", {name: "액션·스킬", exact: true}).click();
+  await page.getByRole("button", {name: "고객 초대", exact: true}).click();
+  await expect(page.getByRole("textbox", {name: "입력 1 이름", exact: true})).toHaveValue("이메일");
+  await expect(page.getByRole("textbox", {name: "출력 1 이름", exact: true})).toHaveValue("결과");
+  await page.getByRole("tab", {name: "데이터", exact: true}).click();
+  await expect(grid.getByRole("row")).toHaveCount(5);
+  await expect(grid.getByRole("textbox", {name: /^이름 record-/}).first()).toHaveValue("직접 수정한 고객");
+  await expect(grid.getByRole("columnheader", {name: "Row", exact: true})).toHaveCount(0);
+  await page.setViewportSize({width: 390, height: 844});
+  await page.getByRole("button", {name: "스키마 편집", exact: true}).click();
+  const schemaDialog = page.getByRole("dialog", {name: "스키마 편집", exact: true});
+  await expect(schemaDialog.getByRole("textbox", {name: "테이블 이름", exact: true})).toBeVisible();
+  const bounds = (await schemaDialog.boundingBox())!;
+  expect(bounds.x).toBeGreaterThanOrEqual(0); expect(bounds.x + bounds.width).toBeLessThanOrEqual(390);
+  await page.keyboard.press("Escape");
+  await page.getByRole("tab", {name: "액션·스킬", exact: true}).click();
+  await page.getByRole("button", {name: "고객 초대", exact: true}).click();
+  await expect(page.getByRole("textbox", {name: "입력 1 이름", exact: true})).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });

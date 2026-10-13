@@ -156,3 +156,15 @@ describe("DatabaseHand", () => {
     );
   });
 });
+
+it("delegates keyboard history to the parent and can omit internal identity/type metadata", () => {
+  const translated = databaseDocumentFromZod(schema, records);
+  if (!translated.ok) throw new Error(translated.code);
+  const editor = createDatabaseEditor(translated.value);
+  const onHistory = vi.fn();
+  const {container} = render(<DatabaseHand editor={editor} viewId={translated.value.views[0]!.id} features={{history: false}} onHistory={onHistory} presentation={{showRecordIds: false, showPropertyTypes: false}} />);
+  expect(screen.queryByRole("columnheader", {name: "Row"})).toBeNull();
+  expect(screen.getByRole("button", {name: "Title", exact: true})).toBeTruthy();
+  fireEvent.keyDown(container.querySelector(".jd-database__viewport")!, {key: "z", ctrlKey: true});
+  expect(onHistory).toHaveBeenCalledWith("undo");
+});

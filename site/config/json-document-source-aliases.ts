@@ -7,6 +7,8 @@ export interface SourceAlias {
 
 export function jsonDocumentSourceAliases(): SourceAlias[] {
   return [
+    { find: "@interactive-os/json-document-ui-builder/ui-builder-workspace.css", replacement: sourceFile("packages/json-document-ui-builder/src/ui-builder-workspace.css") },
+    { find: "@interactive-os/json-document-ui-builder", replacement: sourceFile("packages/json-document-ui-builder/src/index.ts") },
     { find: "@interactive-os/json-document-canvas/ui-builder.css", replacement: sourceFile("packages/json-document-canvas/src/ui-builder.css") },
     { find: "@interactive-os/json-document-canvas/canvas-hand.css", replacement: sourceFile("packages/json-document-canvas/src/canvas-hand.css") },
     { find: "@interactive-os/json-document-sheet/sheet-hand.css", replacement: sourceFile("packages/json-document-sheet/src/sheet-hand.css") },

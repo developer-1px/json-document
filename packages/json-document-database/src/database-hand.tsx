@@ -83,6 +83,8 @@ export interface DatabaseHandCellRenderProps<Row> {
 }
 
 export interface DatabaseHandPresentation {
+  readonly showRecordIds?: boolean;
+  readonly showPropertyTypes?: boolean;
   readonly propertyOrder?: ReadonlyArray<string>;
   readonly propertyVisibility?: Readonly<Record<string, boolean>>;
   readonly propertyWidths?: Readonly<Record<string, number>>;
@@ -102,6 +104,8 @@ export interface DatabaseHandContext {
 }
 
 interface DatabaseHandCommonProps<Row extends Record<string, unknown>> {
+  /** Delegate shortcuts to a parent document history when this Hand edits a projection. */
+  readonly onHistory?: (direction: "undo" | "redo") => void;
   readonly onSelectionChange?: (recordIds: ReadonlyArray<string>) => void;
   readonly onRecordOpen?: (record: Row) => void;
   readonly createRecord?: () => Row;
@@ -382,6 +386,8 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
   }
 
   function history(kind: "undo" | "redo") {
+    if (props.onHistory) { props.onHistory(kind); return; }
+    if (!props.features.history) return;
     const result = observe(editor[kind]());
     if (result.ok) emit({ origin: kind }, kind === "undo" ? "Undone" : "Redone");
   }
@@ -547,7 +553,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                 >
                   <Command type="button" onClick={() => configure({ sort: nextDatabasePropertySort(sort, property.id) })}>
                     <span>{property.name}</span>
-                    <small>{property.type}{sortMark(sort, property.id)}</small>
+                    <small>{props.presentation?.showPropertyTypes !== false && property.type}{sortMark(sort, property.id)}</small>
                   </Command>
                   <DatabaseColumnResizeHandle
                     label={`${property.name} column width`}
@@ -560,7 +566,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
               {hiddenProperties.map((property) => (
                 <th key={property.id} scope="col" aria-label={`Show ${property.name}`} onClick={() => configure({ propertyVisibility: { ...propertyVisibility, [property.id]: true } })}>·</th>
               ))}
-              <th scope="col">Row</th>
+              {props.presentation?.showRecordIds !== false && <th scope="col">Row</th>}
             </tr>
           </thead>
           <tbody>
@@ -622,7 +628,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                   );
                 })}
                 {hiddenProperties.map((property) => <td key={property.id} />)}
-                <td>{record.id}</td>
+                {props.presentation?.showRecordIds !== false && <td>{record.id}</td>}
               </tr>
             ))}
           </tbody>
