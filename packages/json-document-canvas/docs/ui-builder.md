@@ -22,3 +22,9 @@ Usage와 Source: [UI Builder](/applications/ui-builder).
 ```live-demo
 /applications/ui-builder
 ```
+
+## 동일한 컴포넌트의 편집·실행
+
+`UIComponentView`는 선택적인 `designId`, `issues`, `interaction: UIComponentInteraction`을 받는다. interaction이 없으면 inert인 편집 콘텐츠이고, 있으면 canonical Field/Choice/Command에 실행 콜백을 연결한다. 입력·행 선택·버튼 이벤트만 전달하며 데이터 저장이나 스킬 실행을 소유하지 않는다. 빈 바인딩 결과에는 작업 안내를, 깨진 참조에는 오류를 표시한다.
+
+`UIBuilderHand.toolbarContent`에 Host가 데이터 연결 컨트롤을 조합할 수 있다. 데이터에 연결된 문구 편집은 비활성화하고 데이터 탭을 안내한다.

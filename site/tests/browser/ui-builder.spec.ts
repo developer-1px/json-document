@@ -55,7 +55,7 @@ test("agent protocol applies a catalog batch, shares undo, and reports real fail
   const results: Array<{ ok: boolean }> = [];
   await page.route("**/api/llm-agent/tool-results/*", async route => { results.push(route.request().postDataJSON()); await route.fulfill({ body: "" }); });
   await page.route("**/api/llm-agent/turn", async route => {
-    expect(route.request().postDataJSON().tools.map((t: {name: string}) => t.name)).toEqual(["read_ui_builder", "apply_ui_builder_changes", "read_ui_builder_materials", "save_ui_builder_materials", "generate_ui_builder_samples"]);
+    expect(route.request().postDataJSON().tools.map((t: {name: string}) => t.name)).toEqual(["read_ui_builder", "apply_ui_builder_changes", "read_ui_builder_materials", "save_ui_builder_materials", "generate_ui_builder_samples", "read_ui_builder_catalogs", "configure_ui_builder", "read_ui_builder_skills", "configure_ui_builder_action"]);
     const events = [
       { type: "RUN_STARTED", threadId: "builder-test", runId: "1" },
       { type: "CUSTOM", name: "client-tool", value: { token: "read", tool: "read_ui_builder", arguments: {} } },

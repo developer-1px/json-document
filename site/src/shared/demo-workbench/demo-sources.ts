@@ -1,3 +1,20 @@
+import builderCanonical0 from "../../../../packages/json-document-object-document/src/ui-binding.ts?raw";
+import builderCanonical1 from "../../../../packages/json-document-object-document/src/ui-design.ts?raw";
+import builderCanonical2 from "../../../../packages/json-document-object-document/src/ui-layout.ts?raw";
+import builderCanonical3 from "../../../../packages/json-document-editing/src/ui-builder-bindings.ts?raw";
+import builderCanonical4 from "../../../../packages/json-document-editing/src/ui-builder-configuration.ts?raw";
+import builderCanonical5 from "../../../../packages/json-document-editing/src/ui-builder-catalog-tools.ts?raw";
+import builderCanonical6 from "../../../../packages/json-document-editing/src/ui-builder-action-tools.ts?raw";
+import builderCanonical7 from "../../../../packages/json-document-editing/src/ui-builder-layout-tools.ts?raw";
+import builderCanonical8 from "../../../../packages/json-document-editing/src/ui-builder-runtime.ts?raw";
+import builderCanonical9 from "../../../../packages/json-document-ui-builder/src/action-execution-fields.tsx?raw";
+import builderCanonical10 from "../../../../packages/json-document-ui-builder/src/arrange-control.tsx?raw";
+import builderCanonical11 from "../../../../packages/json-document-ui-builder/src/binding-inspector.tsx?raw";
+import builderCanonical12 from "../../../../packages/json-document-ui-builder/src/catalog-controls.tsx?raw";
+import builderCanonical13 from "../../../../packages/json-document-ui-builder/src/runtime-hand.tsx?raw";
+import builderCanonical14 from "../../../../packages/json-document-ui-builder/src/storage-controls.tsx?raw";
+import builderCanonical15 from "../../../../packages/json-document-web/src/indexeddb-document-storage.ts?raw";
+import builderCanonical16 from "../../../../packages/json-document-web/src/document-file.ts?raw";
 import databaseViewSource from "../../../../packages/json-document-editing/src/database-view.ts?raw";
 import builderWorkspaceSource from "../../../../packages/json-document-ui-builder/src/ui-builder-workspace.tsx?raw";
 import builderMaterialsHandSource from "../../../../packages/json-document-ui-builder/src/materials-hand.tsx?raw";
@@ -273,6 +290,23 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-object-document/src/ui-binding.ts", builderCanonical0],
+  ["packages/json-document-object-document/src/ui-design.ts", builderCanonical1],
+  ["packages/json-document-object-document/src/ui-layout.ts", builderCanonical2],
+  ["packages/json-document-editing/src/ui-builder-bindings.ts", builderCanonical3],
+  ["packages/json-document-editing/src/ui-builder-configuration.ts", builderCanonical4],
+  ["packages/json-document-editing/src/ui-builder-catalog-tools.ts", builderCanonical5],
+  ["packages/json-document-editing/src/ui-builder-action-tools.ts", builderCanonical6],
+  ["packages/json-document-editing/src/ui-builder-layout-tools.ts", builderCanonical7],
+  ["packages/json-document-editing/src/ui-builder-runtime.ts", builderCanonical8],
+  ["packages/json-document-ui-builder/src/action-execution-fields.tsx", builderCanonical9],
+  ["packages/json-document-ui-builder/src/arrange-control.tsx", builderCanonical10],
+  ["packages/json-document-ui-builder/src/binding-inspector.tsx", builderCanonical11],
+  ["packages/json-document-ui-builder/src/catalog-controls.tsx", builderCanonical12],
+  ["packages/json-document-ui-builder/src/runtime-hand.tsx", builderCanonical13],
+  ["packages/json-document-ui-builder/src/storage-controls.tsx", builderCanonical14],
+  ["packages/json-document-web/src/indexeddb-document-storage.ts", builderCanonical15],
+  ["packages/json-document-web/src/document-file.ts", builderCanonical16],
   ["packages/json-document-canvas/src/ui-builder.css", uiBuilderStyleSource],
   ["packages/json-document-ui-builder/src/ui-builder-workspace.tsx", builderWorkspaceSource],
   ["packages/json-document-ui-builder/src/materials-hand.tsx", builderMaterialsHandSource],
@@ -521,6 +555,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["applications/ui-builder/UIBuilderApplication.tsx", ["packages/json-document-object-document/src/ui-binding.ts", "packages/json-document-object-document/src/ui-design.ts", "packages/json-document-object-document/src/ui-layout.ts", "packages/json-document-editing/src/ui-builder-bindings.ts", "packages/json-document-editing/src/ui-builder-configuration.ts", "packages/json-document-editing/src/ui-builder-catalog-tools.ts", "packages/json-document-editing/src/ui-builder-action-tools.ts", "packages/json-document-editing/src/ui-builder-layout-tools.ts", "packages/json-document-editing/src/ui-builder-runtime.ts", "packages/json-document-ui-builder/src/action-execution-fields.tsx", "packages/json-document-ui-builder/src/arrange-control.tsx", "packages/json-document-ui-builder/src/binding-inspector.tsx", "packages/json-document-ui-builder/src/catalog-controls.tsx", "packages/json-document-ui-builder/src/runtime-hand.tsx", "packages/json-document-ui-builder/src/storage-controls.tsx", "packages/json-document-web/src/indexeddb-document-storage.ts", "packages/json-document-web/src/document-file.ts"]],
   ["packages/json-document-ui-builder/src/ui-builder-workspace.tsx", ["packages/json-document-ui-builder/src/materials-hand.tsx", "packages/json-document-ui-builder/src/schema-fields.tsx", "packages/json-document-ui-builder/src/ui-builder-workspace.css", "packages/json-document-editing/src/ui-builder-materials.ts", "packages/json-document-editing/src/database-view.ts"]],
   ["packages/json-document-editing/src/ui-builder-material-tools.ts", ["packages/json-document-editing/src/ui-builder-materials.ts", "packages/json-document-editing/src/database-view.ts"]],
   ["packages/json-document-canvas/src/ui-builder-hand.tsx", ["packages/json-document-canvas/src/ui-builder.css", "packages/json-document-canvas/src/ui-component-view.tsx"]],
@@ -544,6 +579,16 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderCatalogTools", sourcePath: "packages/json-document-editing/src/ui-builder-catalog-tools.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderActionTools", sourcePath: "packages/json-document-editing/src/ui-builder-action-tools.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderLayoutTools", sourcePath: "packages/json-document-editing/src/ui-builder-layout-tools.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "applyUIBuilderMaterials", sourcePath: "packages/json-document-editing/src/ui-builder-materials.ts" },
+  { packageName: "@interactive-os/json-document-ui-builder", symbol: "UIBuilderStorageControls", sourcePath: "packages/json-document-ui-builder/src/storage-controls.tsx" },
+  { packageName: "@interactive-os/json-document-ui-builder", symbol: "UIBuilderRuntimeHand", sourcePath: "packages/json-document-ui-builder/src/runtime-hand.tsx" },
+  { packageName: "@interactive-os/json-document-web", symbol: "createWebIndexedDBStorage", sourcePath: "packages/json-document-web/src/indexeddb-document-storage.ts" },
+  { packageName: "@interactive-os/json-document-web", symbol: "openWebStoredDocument", sourcePath: "packages/json-document-web/src/stored-document.ts" },
+  { packageName: "@interactive-os/json-document-web", symbol: "downloadWebDocumentFile", sourcePath: "packages/json-document-web/src/document-file.ts" },
+  { packageName: "@interactive-os/json-document-web", symbol: "readWebDocumentFile", sourcePath: "packages/json-document-web/src/document-file.ts" },
   { packageName: "@interactive-os/json-document-canvas", symbol: "UIComponentView", sourcePath: "packages/json-document-canvas/src/ui-component-view.tsx" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createDatabaseView", sourcePath: "packages/json-document-editing/src/database-view.ts" },
   { packageName: "@interactive-os/json-document-ui-builder", symbol: "UIBuilderWorkspace", sourcePath: "packages/json-document-ui-builder/src/ui-builder-workspace.tsx" },

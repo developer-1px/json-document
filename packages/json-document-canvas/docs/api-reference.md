@@ -75,12 +75,23 @@ createCanvasClipboardBinding(editor: ObjectEditor, policy: CanvasClipboardPolicy
 ## `UIBuilderHand`
 
 ```ts
-UIBuilderHand({ editor }: { readonly editor: ObjectEditor; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+UIBuilderHand({ editor, toolbarContent, recordSelection }: { readonly editor: ObjectEditor; readonly toolbarContent?: ReactNode; readonly recordSelection?: UIBuilderRecordSelection; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `UIComponentInteraction`
+
+```ts
+interface UIComponentInteraction {
+  readonly busy: boolean;
+  readonly selectedItem: number;
+  readonly onAction: () => void;
+  readonly onValueChange: (value: string | boolean) => void;
+  readonly onSelectItem: (index: number) => void;
+}
 ```
 ## `UIComponentView`
 
 ```ts
-UIComponentView({ object }: { readonly object: Extract<CanvasObject, { kind: "embedded-document"; }>; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+UIComponentView({ object, designId, issues, interaction }: { readonly object: Extract<CanvasObject, { kind: "embedded-document"; }>; readonly designId?: UIDesignId; readonly issues?: readonly string[]; readonly interaction?: UIComponentInteraction; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
 ## `useCanvasHand`
 

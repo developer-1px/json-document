@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { DatabaseHand } from "@interactive-os/json-document-database";
 import { Choice, Command, Field, Popover, floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
-import type { UIBuilderAction, UIBuilderField, UIBuilderMaterialCommand, UIBuilderProject, UIBuilderTable } from "@interactive-os/json-document-editing";
+import type { UIBuilderSkillDefinition, UIBuilderAction, UIBuilderField, UIBuilderMaterialCommand, UIBuilderProject, UIBuilderTable } from "@interactive-os/json-document-editing";
+import { ActionExecutionFields } from "./action-execution-fields.js";
 import { SchemaFields, newBuilderField } from "./schema-fields.js";
 
 type Commit = (command: UIBuilderMaterialCommand) => boolean;
@@ -47,29 +48,31 @@ function TableForm({table, commit}: {table?: UIBuilderTable; commit: Commit}) {
     {table && <Command kind="danger" onClick={() => commit({type: "table.remove", id: table.id})}>테이블 삭제</Command>}
   </div>;
 }
-export function ActionMaterialsHand({project, commit}: {project: UIBuilderProject; commit: Commit}) {
+export function ActionMaterialsHand({project, commit, skills}: {project: UIBuilderProject; commit: Commit; skills: readonly UIBuilderSkillDefinition[]}) {
   const [selected, setSelected] = useState<string | null>(null);
   const action = project.actions.find(a => a.id === selected);
   return <div className="builder-materials">
     <div className="builder-material-toolbar"><h2>액션·스킬</h2><Command onClick={() => setSelected("")}>+ 액션</Command></div>
-    <p className="builder-material-note">화면에서 사용할 기능과 입력·출력을 정해두세요. 실행 연결은 아직 준비 중이에요.</p>
+    <p className="builder-material-note">기능과 입력·출력을 정하고 실행 스킬을 연결하세요. 실행 탭의 버튼으로 사용할 수 있어요.</p>
     <div className="builder-actions">
       <nav aria-label="등록된 액션" className="builder-action-list">{project.actions.map(a => <Command key={a.id} aria-pressed={selected === a.id} onClick={() => setSelected(a.id)}>{a.name}</Command>)}</nav>
-      {selected !== null ? <ActionForm key={`${selected}:${JSON.stringify(action)}`} action={action} commit={command => {const ok = commit(command); if (ok) setSelected(null); return ok;}} /> : <p>{project.actions.length ? "액션을 선택하면 내용을 수정할 수 있어요." : "등록한 액션은 AI가 화면을 구성할 때 참고해요."}</p>}
+      {selected !== null ? <ActionForm key={`${selected}:${JSON.stringify(action)}`} action={action} project={project} skills={skills} commit={command => {const ok = commit(command); if (ok) setSelected(null); return ok;}} /> : <p>{project.actions.length ? "액션을 선택하면 내용을 수정할 수 있어요." : "등록한 액션은 AI가 화면을 구성할 때 참고해요."}</p>}
     </div>
   </div>;
 }
-function ActionForm({action, commit}: {action?: UIBuilderAction | undefined; commit: Commit}) {
+function ActionForm({action, commit, project, skills}: {action?: UIBuilderAction | undefined; commit: Commit; project: UIBuilderProject; skills: readonly UIBuilderSkillDefinition[]}) {
   const [name, setName] = useState(action?.name ?? "");
   const [description, setDescription] = useState(action?.description ?? "");
   const [inputs, setInputs] = useState(action?.inputs ?? []);
   const [outputs, setOutputs] = useState(action?.outputs ?? []);
+  const [execution, setExecution] = useState(action?.execution);
   return <div className="builder-material-form">
     <label>액션 이름<Field label="액션 이름" value={name} onValueChange={setName} placeholder="예: 고객 초대" /></label>
     <label>무엇을 하는 기능인가요?<Field label="무엇을 하는 기능인가요?" multiline rows={2} value={description} onValueChange={setDescription} /></label>
     <SchemaFields label="입력" value={inputs} onChange={setInputs} />
     <SchemaFields label="출력" value={outputs} onChange={setOutputs} />
-    <Command kind="primary" disabled={!name.trim()} onClick={() => commit({type: "action.save", action: {id: action?.id ?? "", name, description, inputs, outputs}})}>액션 저장</Command>
+    <ActionExecutionFields value={execution} onChange={setExecution} project={project} skills={skills} />
+    <Command kind="primary" disabled={!name.trim()} onClick={() => commit({type: "action.save", action: {id: action?.id ?? "", name, description, inputs, outputs, ...(execution ? {execution} : {})}})}>액션 저장</Command>
     {action && <Command kind="danger" onClick={() => commit({type: "action.remove", id: action.id})}>액션 삭제</Command>}
   </div>;
 }

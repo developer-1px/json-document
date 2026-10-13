@@ -29,3 +29,11 @@
 .ui-component[data-tone="quiet"] { color: rgb(var(--color-foreground-secondary)); }
 .ui-component[data-tone="accent"] { color: rgb(var(--color-foreground-accent)); }
 @media (max-width: 600px) { .ui-builder-empty { left: 1.5rem; top: 24%; } }
+.ui-component { position: relative; }
+.ui-component-binding-error { position: absolute; inset: auto 0 0; padding: 0.5rem; background: rgb(var(--color-background-canvas)); color: rgb(var(--color-foreground-danger, 170 40 40)); font-size: 0.75rem; line-height: 1.4; }
+.ui-component[data-design="soft"] > article { background: rgb(var(--color-background-subtle, 247 246 244)); border-color: transparent; }
+.ui-component[data-design="soft"] :is(h1, h2) { letter-spacing: -0.025em; }
+.ui-component[data-design="soft"] > section { padding: 1rem; background: rgb(var(--color-background-subtle, 247 246 244)); border-radius: var(--radius-surface); }
+.ui-component[data-design="bold"] :is(h1, h2, strong) { color: rgb(var(--color-foreground-accent)); }
+.ui-component[data-design="bold"] > article { border-color: rgb(var(--color-foreground-accent)); }
+.ui-component[data-design="bold"] h1 { font-size: 3rem; }

@@ -11,8 +11,18 @@ UI 빌더 화면·데이터·액션 관리 Hand와 스키마 기반 Faker 예시
 ```ts
 createFakerSampleGenerator(seed?: number): UIBuilderSampleGenerator
 ```
+## `UIBuilderRuntimeHand`
+
+```ts
+UIBuilderRuntimeHand({ editor, skills, selection: controlledSelection, onSelectionChange }: { readonly editor: ObjectEditor; readonly skills: readonly UIBuilderSkillDefinition[]; readonly selection?: UIBuilderRecordSelection; readonly onSelectionChange?: (selection: UIBuilderRecordSelection) => void; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `UIBuilderStorageControls`
+
+```ts
+UIBuilderStorageControls({ editor, state, retry }: { readonly editor: ObjectEditor; readonly state: WebDocumentSaveState; readonly retry: () => void; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
 ## `UIBuilderWorkspace`
 
 ```ts
-UIBuilderWorkspace({ editor, generateSamples }: { readonly editor: ObjectEditor; readonly generateSamples: UIBuilderSampleGenerator; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+UIBuilderWorkspace({ editor, generateSamples, skills, navigation, arrange, initialTab }: { readonly editor: ObjectEditor; readonly generateSamples: UIBuilderSampleGenerator; readonly skills?: readonly UIBuilderSkillDefinition[]; readonly navigation?: ReactNode; readonly arrange?: (signal: AbortSignal) => Promise<void>; readonly initialTab?: "screen" | "run"; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```

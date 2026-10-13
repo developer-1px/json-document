@@ -26,8 +26,22 @@ Usage와 Source: [UI Builder](/applications/ui-builder).
 `createUIBuilderMaterialTools`는 읽기·카탈로그 저장·예시 생성 도구를 제공한다.
 읽은 뒤 사용자가 문서를 바꾸면 수정 도구는 stale 오류를 반환한다.
 AI는 목적을 확인하고 기존 테이블·액션을 재사용하며 필요한 스키마와 예시를 만든 뒤 화면을 구성한다.
-이 단계에서는 화면의 동적 바인딩이나 액션 실행을 제공하지 않으므로 완료했다고 표현하면 안 된다.
+동적 값은 바인딩 도구로 연결하고, 버튼 실행은 등록된 스킬을 선언적으로 연결한다. MOCK 스킬의 결과를 외부 실행 완료로 표현해서는 안 된다.
 
 `createDatabaseView(id, name, propertyIds, ownership?, options?)`가 Database 보기 생성의 정본이다.
 `options.hiddenPropertyIds`로 숨길 필드를 지정한다. 기존 Database 공개 API도 이 함수를 재노출한다.
 UI 빌더와 Zod 번역은 빈 숨김 목록을 전달해 모든 스키마 필드를 표시한다.
+
+## 바인딩·디자인·배치
+
+`resolveUIBuilderComponent(project, object, selection?)`은 현재 데이터에서 text/detail/items/value 슬롯을 투영한다. 원본 컴포넌트와 기하는 바꾸지 않는다. 값·목록·개수·숫자 합계를 지원하며, 없는 테이블/필드/행은 빈 값과 issues로 표시한다. 선택 필드는 옵션 이름으로 표시한다. 목록은 최대 50행, 문자열은 표시 한도 내에서 투영한다.
+
+`applyUIBuilderConfiguration`은 connections, designId, layout을 한 undo로 적용한다. connections에 없는 객체는 그대로 두며 명시한 객체의 연결은 교체한다. recordId가 빈 연결은 실행 화면의 선택 행, 선택이 없으면 첫 행을 따른다. 지정한 ID는 그 행에 고정한다. 디자인 변경은 위치를 바꾸지 않는다. layout은 명시적 한 번 배치다.
+
+`createUIBuilderCatalogTools`로 같은 카탈로그와 설정 명령을 AI에 제공한다. `createUIBuilderLayoutTools`는 전용 읽기와 `arrange_ui_builder`만 제공한다. 현재 요소 전체의 기하 정보만 바꿀 수 있고, 겹침·범위 초과·중복/누락 ID·stale 요청을 거부한다. 한 세션의 성공한 정리는 한 번이며 undo 한 번으로 돌아간다.
+
+## 실행
+
+`UIBuilderAction.execution`은 skill, tableId, prompt, inputFieldIds, outputFieldIds, requiredFieldIds를 저장한다. 실행 구현은 문서에 넣지 않는다. Host가 `UIBuilderSkillDefinition[]`으로 실제 또는 MOCK port를 주입한다. `createUIBuilderActionTools`는 가능한 스킬을 읽고 기존 액션에 연결한다. AI 설정 도구 자체는 업무 스킬을 실행하지 않는다.
+
+`executeUIBuilderAction(editor, actionId, skills, selection?, signal?)`은 선택 행의 명시한 필드만 복사해 스킬에 전달한다. 필수값, 취소, 실행 중 문서 변경, 출력 필드/타입을 검사한 다음 결과를 같은 행에 원자적으로 저장한다. 실패·취소 결과는 문서를 바꾸지 않는다. `setUIBuilderInput`은 컴포넌트의 value 바인딩으로 같은 데이터 행을 편집한다. 스킬의 외부 부수효과는 undo 대상이 아니므로 Host는 실행 권한과 실제 연결의 동작을 책임져야 한다. 예제 스킬은 외부 부수효과가 없다.

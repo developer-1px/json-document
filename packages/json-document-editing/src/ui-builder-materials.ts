@@ -1,11 +1,12 @@
 import { isJSONValue, type JSONValue } from "@interactive-os/json-document";
-import { assertUIBuilderDocument, type CanvasDocument } from "@interactive-os/json-document-object-document";
+import { assertUIBuilderDocument, uiDesignCatalog, type UIDesignId, type CanvasDocument } from "@interactive-os/json-document-object-document";
 import type { DatabaseDocument, DatabaseProperty, DatabaseRecord } from "./database.js";
 import { createDatabaseView } from "./database-view.js";
 import { assertDatabaseDocument } from "./database-validation.js";
 import { acceptsDatabaseValue, defaultDatabaseValue } from "./database-property-value.js";
 import { createEditingId } from "./identity.js";
 import type { ObjectEditor } from "./object.js";
+import { assertUIBuilderActionExecution, type UIBuilderActionExecution } from "./ui-builder-runtime.js";
 
 export const uiBuilderSampleKinds = ["auto", "name", "email", "company", "product", "sentence", "date", "url"] as const;
 export type UIBuilderSampleKind = typeof uiBuilderSampleKinds[number];
@@ -16,7 +17,8 @@ export interface UIBuilderTable extends Record<string, JSONValue> {
   readonly fields: readonly UIBuilderField[];
   readonly data: DatabaseDocument;
 }
-export interface UIBuilderAction extends Record<string, JSONValue> {
+export type UIBuilderAction = Record<string, JSONValue> & {
+  readonly execution?: UIBuilderActionExecution;
   readonly id: string;
   readonly name: string;
   readonly description: string;
@@ -24,6 +26,7 @@ export interface UIBuilderAction extends Record<string, JSONValue> {
   readonly outputs: readonly DatabaseProperty[];
 }
 export interface UIBuilderProject extends CanvasDocument {
+  readonly designId: UIDesignId;
   readonly tables: readonly UIBuilderTable[];
   readonly actions: readonly UIBuilderAction[];
 }
@@ -58,7 +61,7 @@ function fields(value: unknown, sample: boolean): asserts value is readonly UIBu
 /** Legacy canvas-only documents acquire empty catalogs without losing objects. */
 export function readUIBuilderProject(value: unknown): UIBuilderProject {
   assertUIBuilderDocument(value);
-  const project = { ...value, tables: value.tables === undefined ? [] : value.tables, actions: value.actions === undefined ? [] : value.actions } as UIBuilderProject;
+  const project = { ...value, designId: value.designId === undefined ? "clean" : value.designId, tables: value.tables === undefined ? [] : value.tables, actions: value.actions === undefined ? [] : value.actions } as UIBuilderProject;
   assertUIBuilderProject(project);
   return project;
 }
@@ -66,6 +69,7 @@ export function assertUIBuilderProject(value: unknown): asserts value is UIBuild
   assertUIBuilderDocument(value);
   if (!isJSONValue(value) || !Array.isArray(value.tables) || !Array.isArray(value.actions)) throw new Error("데이터·액션 목록을 확인해 주세요.");
   const project = value as UIBuilderProject;
+  if (!uiDesignCatalog.some(entry => entry.id === project.designId)) throw new Error("등록된 디자인을 선택해 주세요.");
   unique(project.tables); unique(project.actions);
   for (const table of project.tables) {
     named(table); fields(table.fields, true);
@@ -78,6 +82,7 @@ export function assertUIBuilderProject(value: unknown): asserts value is UIBuild
     named(action);
     if (typeof action.description !== "string") throw new Error("액션 설명을 확인해 주세요.");
     fields(action.inputs, false); fields(action.outputs, false);
+    if (action.execution !== undefined) assertUIBuilderActionExecution(action.execution);
   }
 }
 function tableData(id: string, properties: readonly UIBuilderField[], records: readonly DatabaseRecord[]): DatabaseDocument {

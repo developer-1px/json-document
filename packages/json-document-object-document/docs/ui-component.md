@@ -14,3 +14,9 @@ Usage와 Source: [UI Builder](/applications/ui-builder).
 ```live-demo
 /applications/ui-builder
 ```
+
+## 연결·디자인·레이아웃 카탈로그
+
+`uiComponentCatalog.bindingTargets`는 컴포넌트가 받을 수 있는 text/detail/items/value 슬롯이다. `UIComponentContent.bindings`는 `UIComponentBinding[]`, 버튼의 `actionId`는 액션 참조다. `assertUIComponentBindings`는 모드·슬롯·필드/행 참조 형식을 검증한다. 실제 테이블 참조 해석은 Editing의 프로젝트 projection 책임이다.
+
+`uiBindingCatalog`는 value/list/count/sum, `uiDesignCatalog`는 clean/soft/bold, `uiLayoutCatalog`는 stack/grid/dashboard를 제공한다. `arrangeUIComponents(objects, layoutId, width)`는 명시적인 한 번 배치를 계산한다. 문서 내용과 연결을 보존한다. 수동 편집이나 데이터 변경 때 자동 호출하지 않는다. 디자인은 Canvas의 등록 컴포넌트 renderer가 투영한다.

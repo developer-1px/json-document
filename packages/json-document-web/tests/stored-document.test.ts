@@ -22,3 +22,21 @@ test("preserves unreadable storage until an edit and exposes failed save/retry",
  denied=true;doc.source.edit("recover");expect(doc.state).toBe("save-error");
  denied=false;doc.save();expect(doc.state).toBe("saved");expect(JSON.parse(stored)).toEqual({text:"recover"});off();
 });
+
+test("async storage migrates legacy data and serializes rapid saves without writing on selection",async()=>{
+ const {openWebStoredDocument}=await import("../src/stored-document.js");
+ let disk:string|null=null; const writes:string[]=[];
+ const storage={getItem:async()=>disk,setItem:async(_key:string,value:string)=>{await Promise.resolve();writes.push(value);disk=value;}};
+ const options={key:"builder",storage,legacyStorage:()=>({getItem:()=>JSON.stringify({text:"기존 문서"})}),create:()=>source(""),restore:(v:unknown)=>source((v as {text:string}).text)};
+ const doc=await openWebStoredDocument(options);expect(doc.source.snapshot.value.text).toBe("기존 문서");
+ const off=doc.connect(); doc.source.edit("첫 변경");doc.source.select();doc.source.edit("마지막 변경");await doc.save();
+ expect(doc.state).toBe("saved");expect(writes.map(s=>JSON.parse(s).text)).toEqual(["기존 문서","첫 변경","마지막 변경","마지막 변경"]);
+ expect((await openWebStoredDocument(options)).source.snapshot.value.text).toBe("마지막 변경");off();
+});
+test("async load failure never overwrites the original and failed writes are observable",async()=>{
+ const {openWebStoredDocument}=await import("../src/stored-document.js");
+ let writes=0;
+ const doc=await openWebStoredDocument({key:"builder",storage:{getItem:async()=>"broken",setItem:async()=>{writes++;throw Error("quota");}},create:()=>source(""),restore:()=>{throw Error("invalid");}});
+ expect(doc.state).toBe("load-error");doc.connect();expect(writes).toBe(0);
+ await doc.save();expect(doc.state).toBe("save-error");
+});

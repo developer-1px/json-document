@@ -1,17 +1,18 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Plus, Pencil } from "lucide-react";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { type ObjectEditor } from "@interactive-os/json-document-editing";
-import { assertUIBuilderDocument, assertUIComponentContent, createUIComponentObject, uiComponentCatalog, type UIComponentKind, type CanvasObject, type ObjectBounds } from "@interactive-os/json-document-object-document";
+import { readUIBuilderProject, resolveUIBuilderComponent, type ObjectEditor, type UIBuilderRecordSelection } from "@interactive-os/json-document-editing";
+import { assertUIBuilderDocument, assertUIComponentContent, createUIComponentObject, uiComponentCatalog, type UIComponentObject, type UIComponentKind, type CanvasObject, type ObjectBounds } from "@interactive-os/json-document-object-document";
 import { Choice, Command, Field, Popover, floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
 import { CanvasHand } from "./canvas-hand.js";
 import { UIComponentView } from "./ui-component-view.js";
 
 /** A constrained Canvas Hand. Spatial interaction and history remain owned by Canvas/Object. */
-export function UIBuilderHand({ editor }: { readonly editor: ObjectEditor }) {
+export function UIBuilderHand({ editor, toolbarContent, recordSelection }: { readonly editor: ObjectEditor; readonly toolbarContent?: ReactNode; readonly recordSelection?: UIBuilderRecordSelection }) {
   const snapshot = useEditingSnapshot(editor);
   assertUIBuilderDocument(snapshot.value);
   const document = snapshot.value;
+  const project = readUIBuilderProject(document);
   const [palette, setPalette] = useState(false);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +28,7 @@ export function UIBuilderHand({ editor }: { readonly editor: ObjectEditor }) {
     <CanvasHand workspace navigation="fixed" onViewportChange={setView} editor={editor} className="ui-builder-hand" label="UI 작업면"
       creationStyle={{ color: "transparent", textColor: "#222222", fontSize: 16, strokeWidth: 1 }}
       creationTools={[]} documentControls={false} contentToolbar={false}
-      renderEmbedded={object => <UIComponentView object={object} />} onEditEmbedded={() => setEditing(true)}
+      renderEmbedded={object => { const projected = resolveUIBuilderComponent(project, object as UIComponentObject, recordSelection); return <UIComponentView object={projected.object} designId={project.designId} issues={projected.issues} />; }} onEditEmbedded={() => setEditing(true)}
       toolbarContent={<>
         <Popover label="컴포넌트 추가" open={palette} onOpenChange={setPalette} trigger={<><Plus size={16} aria-hidden="true" /> 컴포넌트</>} panelClassName={`${floatingSurface.panel} ui-builder-palette`}>
           {uiComponentCatalog.map(component => <Command key={component.id} onClick={() => add(component.id)}>{component.label}</Command>)}
@@ -35,6 +36,7 @@ export function UIBuilderHand({ editor }: { readonly editor: ObjectEditor }) {
         {selected?.kind === "embedded-document" && <Popover label="내용 편집" open={editing} onOpenChange={setEditing} trigger={<Pencil size={16} aria-hidden="true" />} triggerPresentation="icon" panelClassName={`${floatingSurface.panel} ui-builder-properties`}>
           <ComponentProperties key={`${selected.id}:${JSON.stringify(selected.document)}:${selected.label}`} object={selected} editor={editor} onClose={() => setEditing(false)} />
         </Popover>}
+        {toolbarContent}
       </>} />
     {document.objects.length === 0 && <div className="ui-builder-empty" aria-live="polite"><h1>어떤 화면을 만들까요?</h1><p>컴포넌트를 놓고 자유롭게 움직여보세요.<br />정리가 필요하면 AI에게 말해주세요.</p></div>}
     {error && <p role="alert">{error}</p>}
@@ -51,9 +53,10 @@ function ComponentProperties({ object, editor, onClose }: { object: Extract<Canv
   const hasDetail = ["input", "textarea", "card", "metric"].includes(content.component);
   const hasItems = ["select", "tabs", "list"].includes(content.component);
   return <div className="ui-builder-property-fields">
-    <Field label="내용" multiline rows={2} value={text} onValueChange={setText} />
-    {hasDetail && <Field label={content.component === "metric" ? "숫자" : "설명"} value={detail} onValueChange={setDetail} />}
-    {hasItems && <Field label="항목 (한 줄에 하나)" multiline rows={4} value={items} onValueChange={setItems} />}
+    {!!content.bindings?.length && <p>연결된 값은 데이터 탭에서 수정할 수 있어요.</p>}
+    <Field label="내용" disabled={!!content.bindings?.some(b => b.target === "text")} multiline rows={2} value={text} onValueChange={setText} />
+    {hasDetail && <Field label={content.component === "metric" ? "숫자" : "설명"} disabled={!!content.bindings?.some(b => b.target === "detail")} value={detail} onValueChange={setDetail} />}
+    {hasItems && <Field label="항목 (한 줄에 하나)" disabled={!!content.bindings?.some(b => b.target === "items")} multiline rows={4} value={items} onValueChange={setItems} />}
     <Choice presentation="inline" label="강조" value={tone} options={[{ id: "default", label: "기본" }, { id: "accent", label: "강조" }, { id: "quiet", label: "차분하게" }]} onValueChange={setTone} />
     <Command kind="primary" onClick={() => {
       const result = editor.dispatch({ type: "object.update", objectId: object.id, changes: { label: text, document: { ...content, detail, items: items ? items.split("\n") : [], tone } } });
