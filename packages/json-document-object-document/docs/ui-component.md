@@ -10,3 +10,7 @@ UI 빌더의 컴포넌트는 기존 Canvas `embedded-document`의 `documentType:
 `UIComponentKind`, `UIComponentContent`, `UIComponentObject`를 공개합니다. 화면 투영은 Canvas의 `UIComponentView`가, 편집은 Editing의 `createUIBuilderEditor`가 소유합니다.
 
 Usage와 Source: [UI Builder](/applications/ui-builder).
+
+```live-demo
+/applications/ui-builder
+```

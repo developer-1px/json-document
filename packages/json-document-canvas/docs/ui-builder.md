@@ -18,3 +18,7 @@ const tools = createUIBuilderTools(editor);
 `CanvasHand`의 `navigation="fixed"`는 1 Canvas 단위 = 1 CSS pixel을 유지합니다. wheel/trackpad와 Space drag로 작업면을 이동할 수 있지만 zoom/fit은 실행하지 않습니다. `creationTools`, `toolbarContent`, `documentControls`, `contentToolbar`로 노출할 조작을 구성합니다. `renderEmbedded`, `onEditEmbedded`로 등록 문서의 projection과 편집을 주입하고 `onViewportChange`로 보이는 좌표를 관찰합니다. 생략하면 기존 Canvas 동작이 유지됩니다.
 
 Usage와 Source: [UI Builder](/applications/ui-builder).
+
+```live-demo
+/applications/ui-builder
+```

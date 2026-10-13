@@ -7,3 +7,7 @@
 read 후 수동 편집이 발생하면 `ui-builder.stale-document`로 거절합니다. 다시 읽고 새 계획을 적용해야 합니다. 유효하지 않은 batch는 일부도 적용하지 않으며 성공한 한 batch는 실행 취소 한 번으로 복구합니다. 등록되지 않은 코드·HTML·컴포넌트는 지원하지 않습니다.
 
 Usage와 Source: [UI Builder](/applications/ui-builder).
+
+```live-demo
+/applications/ui-builder
+```
