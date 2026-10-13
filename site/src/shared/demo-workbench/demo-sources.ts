@@ -15,6 +15,7 @@ import builderCanonical13 from "../../../../packages/json-document-ui-builder/sr
 import builderCanonical14 from "../../../../packages/json-document-ui-builder/src/storage-controls.tsx?raw";
 import builderCanonical15 from "../../../../packages/json-document-web/src/indexeddb-document-storage.ts?raw";
 import builderCanonical16 from "../../../../packages/json-document-web/src/document-file.ts?raw";
+import builderCanonical17 from "../../../../packages/json-document-object-document/src/ui-flow.ts?raw";
 import databaseViewSource from "../../../../packages/json-document-editing/src/database-view.ts?raw";
 import builderWorkspaceSource from "../../../../packages/json-document-ui-builder/src/ui-builder-workspace.tsx?raw";
 import builderMaterialsHandSource from "../../../../packages/json-document-ui-builder/src/materials-hand.tsx?raw";
@@ -307,6 +308,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-builder/src/storage-controls.tsx", builderCanonical14],
   ["packages/json-document-web/src/indexeddb-document-storage.ts", builderCanonical15],
   ["packages/json-document-web/src/document-file.ts", builderCanonical16],
+  ["packages/json-document-object-document/src/ui-flow.ts", builderCanonical17],
   ["packages/json-document-canvas/src/ui-builder.css", uiBuilderStyleSource],
   ["packages/json-document-ui-builder/src/ui-builder-workspace.tsx", builderWorkspaceSource],
   ["packages/json-document-ui-builder/src/materials-hand.tsx", builderMaterialsHandSource],
@@ -555,7 +557,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
-  ["applications/ui-builder/UIBuilderApplication.tsx", ["packages/json-document-object-document/src/ui-binding.ts", "packages/json-document-object-document/src/ui-design.ts", "packages/json-document-object-document/src/ui-layout.ts", "packages/json-document-editing/src/ui-builder-bindings.ts", "packages/json-document-editing/src/ui-builder-configuration.ts", "packages/json-document-editing/src/ui-builder-catalog-tools.ts", "packages/json-document-editing/src/ui-builder-action-tools.ts", "packages/json-document-editing/src/ui-builder-layout-tools.ts", "packages/json-document-editing/src/ui-builder-runtime.ts", "packages/json-document-ui-builder/src/action-execution-fields.tsx", "packages/json-document-ui-builder/src/arrange-control.tsx", "packages/json-document-ui-builder/src/binding-inspector.tsx", "packages/json-document-ui-builder/src/catalog-controls.tsx", "packages/json-document-ui-builder/src/runtime-hand.tsx", "packages/json-document-ui-builder/src/storage-controls.tsx", "packages/json-document-web/src/indexeddb-document-storage.ts", "packages/json-document-web/src/document-file.ts"]],
+  ["applications/ui-builder/UIBuilderApplication.tsx", ["packages/json-document-object-document/src/ui-flow.ts", "packages/json-document-object-document/src/ui-binding.ts", "packages/json-document-object-document/src/ui-design.ts", "packages/json-document-object-document/src/ui-layout.ts", "packages/json-document-editing/src/ui-builder-bindings.ts", "packages/json-document-editing/src/ui-builder-configuration.ts", "packages/json-document-editing/src/ui-builder-catalog-tools.ts", "packages/json-document-editing/src/ui-builder-action-tools.ts", "packages/json-document-editing/src/ui-builder-layout-tools.ts", "packages/json-document-editing/src/ui-builder-runtime.ts", "packages/json-document-ui-builder/src/action-execution-fields.tsx", "packages/json-document-ui-builder/src/arrange-control.tsx", "packages/json-document-ui-builder/src/binding-inspector.tsx", "packages/json-document-ui-builder/src/catalog-controls.tsx", "packages/json-document-ui-builder/src/runtime-hand.tsx", "packages/json-document-ui-builder/src/storage-controls.tsx", "packages/json-document-web/src/indexeddb-document-storage.ts", "packages/json-document-web/src/document-file.ts"]],
   ["packages/json-document-ui-builder/src/ui-builder-workspace.tsx", ["packages/json-document-ui-builder/src/materials-hand.tsx", "packages/json-document-ui-builder/src/schema-fields.tsx", "packages/json-document-ui-builder/src/ui-builder-workspace.css", "packages/json-document-editing/src/ui-builder-materials.ts", "packages/json-document-editing/src/database-view.ts"]],
   ["packages/json-document-editing/src/ui-builder-material-tools.ts", ["packages/json-document-editing/src/ui-builder-materials.ts", "packages/json-document-editing/src/database-view.ts"]],
   ["packages/json-document-canvas/src/ui-builder-hand.tsx", ["packages/json-document-canvas/src/ui-builder.css", "packages/json-document-canvas/src/ui-component-view.tsx"]],
@@ -579,6 +581,9 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
+  { packageName: "@interactive-os/json-document-object-document", symbol: "assertUIFlowLayout", sourcePath: "packages/json-document-object-document/src/ui-flow.ts" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "resolveUIFlowLayout", sourcePath: "packages/json-document-object-document/src/ui-flow.ts" },
+  { packageName: "@interactive-os/json-document-canvas", symbol: "UIComponentSurface", sourcePath: "packages/json-document-canvas/src/ui-component-view.tsx" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderCatalogTools", sourcePath: "packages/json-document-editing/src/ui-builder-catalog-tools.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderActionTools", sourcePath: "packages/json-document-editing/src/ui-builder-action-tools.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderLayoutTools", sourcePath: "packages/json-document-editing/src/ui-builder-layout-tools.ts" },

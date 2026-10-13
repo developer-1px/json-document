@@ -14,3 +14,4 @@ export { uiDesignCatalog } from "./ui-design.js";
 export type { UIDesignId } from "./ui-design.js";
 export { uiLayoutCatalog, arrangeUIComponents } from "./ui-layout.js";
 export type { UILayoutId } from "./ui-layout.js";
+export { assertUIFlowLayout, resolveUIFlowLayout, type UIFlowLayout, type UIFlowRow, type UIFlowColumn, type UIFlowItem } from "./ui-flow.js";

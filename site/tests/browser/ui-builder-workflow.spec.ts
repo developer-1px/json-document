@@ -29,21 +29,26 @@ test('briefing tasks, mock execution, IndexedDB reload, file backup and restore'
  await page.locator('input[type="file"]').setInputFiles(path);await expect(page.getByRole('dialog',{name:'문서 보관'})).toHaveCount(0);
  await expect(page.getByRole('article').last()).toContainText('TEAM-102');
 });
-test('AI arrange only changes geometry and shares undo',async({page})=>{
+test('AI apply publishes real flow, preserves edit geometry, and shares undo',async({page})=>{
  let reads=0;
  await page.route('**/api/llm-agent/tool-results/*',async route=>{if(route.request().postDataJSON().objects)reads++;await route.fulfill({body:''});});
  await page.route('**/api/llm-agent/turn',async route=>{
   expect(route.request().postDataJSON().tools.map((t:{name:string})=>t.name)).toEqual(['read_ui_builder_layout','arrange_ui_builder']);
   const ids=await page.locator('[data-ui-component-object]').evaluateAll(elements=>elements.map(el=>el.getAttribute('data-ui-component-object')!));
-  const events=[{type:'RUN_STARTED',threadId:'layout',runId:'1'},{type:'CUSTOM',name:'client-tool',value:{token:'read',tool:'read_ui_builder_layout',arguments:{}}},{type:'CUSTOM',name:'client-tool',value:{token:'apply',tool:'arrange_ui_builder',arguments:{objects:ids.map((id,i)=>({id,x:40,y:100+i*400,width:1100,height:350}))}}},{type:'RUN_FINISHED',threadId:'layout',runId:'1'}];
+  const events=[{type:'RUN_STARTED',threadId:'layout',runId:'1'},{type:'CUSTOM',name:'client-tool',value:{token:'read',tool:'read_ui_builder_layout',arguments:{}}},{type:'CUSTOM',name:'client-tool',value:{token:'apply',tool:'arrange_ui_builder',arguments:{rows:[{columns:[{weight:1,items:ids.map(objectId=>({objectId,size:'fill'}))}]}]}}},{type:'RUN_FINISHED',threadId:'layout',runId:'1'}];
   await route.fulfill({contentType:'text/event-stream',body:events.map(e=>`data: ${JSON.stringify(e)}\n\n`).join('')});
  });
  await page.goto('/applications/ui-builder?example=briefing');await page.getByRole('tab',{name:'화면',exact:true}).click();
  const title=page.locator('[data-ui-component-object]').first();const before=await title.getAttribute('y');
- await page.getByRole('button',{name:'알아서 정리',exact:true}).click();await expect(title).toHaveAttribute('y','100');expect(reads).toBe(1);
+ await page.getByRole('button',{name:'알아서 정리',exact:true}).click();
+ await expect(page.getByRole('tab',{name:'실행',exact:true})).toHaveAttribute('aria-selected','true');
+ await expect(page.locator('[data-layout-mode="auto-flow"]')).toBeVisible();
+ await expect(page.locator('[data-flow-column]')).toHaveCount(1);expect(reads).toBe(1);
+ await page.getByRole('tab',{name:'화면',exact:true}).click();await expect(title).toHaveAttribute('y',before!);
  await page.getByRole('button',{name:'실행 취소',exact:true}).click();await expect(title).toHaveAttribute('y',before!);
  await page.getByRole('tab',{name:'실행',exact:true}).click();await page.getByRole('button',{name:'브리핑 화면을 더 쉽게 만들기',exact:true}).click();
  await expect(page.getByRole('heading',{name:'브리핑 화면을 더 쉽게 만들기',exact:true})).toBeVisible();
+ await expect(page.locator('[data-flow-column]')).toHaveCount(3);
 });
 
 test('IndexedDB refuses a stale tab save instead of overwriting newer data',async({page,context})=>{
@@ -62,4 +67,24 @@ test('IndexedDB refuses a stale tab save instead of overwriting newer data',asyn
  await expect(page.getByRole('heading',{name:'내보낸 CSV에서 한글이 깨져요',exact:true})).toBeVisible();
  await expect(page.getByText('방향 선택',{exact:true})).toBeVisible();
  await second.close();
+});
+
+test('content hugs its height, pushes subsequent elements, and columns flow on a narrow screen',async({page})=>{
+ await page.goto('/applications/ui-builder?example=briefing');
+ const cards=page.getByRole('article');
+ const before=await cards.first().evaluate(el=>el.getBoundingClientRect().height);
+ const relativeTop=()=>cards.last().evaluate(el=>el.getBoundingClientRect().top-document.querySelector('[data-layout-mode="auto-flow"]')!.getBoundingClientRect().top);
+ const beforeResult=await relativeTop();
+ await page.getByRole('button',{name:'1. AI 브리핑 받기',exact:true}).click();
+ await expect(page.getByText('방향 선택',{exact:true})).toBeVisible();
+ expect(await cards.first().evaluate(el=>el.getBoundingClientRect().height)).toBeGreaterThan(before+80);
+ expect(await relativeTop()).toBeGreaterThan(beforeResult+80);
+ await expect(page.locator('.builder-runtime svg')).toHaveCount(0);
+ await page.setViewportSize({width:390,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+ expect(await page.locator('.builder-runtime').evaluate(el=>el.scrollWidth)).toBeLessThanOrEqual(390);
+ const widths=await page.locator('[data-flow-column]').evaluateAll(els=>els.map(el=>el.getBoundingClientRect().width));
+ expect(widths.every(width=>width<=390)).toBe(true);
+ await page.getByRole('button',{name:'2. 어떻게 진행할까요?',exact:true}).click();
+ await expect(page.getByRole('option',{name:'답변 초안 작성',exact:true})).toBeVisible();
 });

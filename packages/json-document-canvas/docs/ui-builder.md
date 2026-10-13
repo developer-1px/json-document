@@ -25,6 +25,8 @@ Usage와 Source: [UI Builder](/applications/ui-builder).
 
 ## 동일한 컴포넌트의 편집·실행
 
-`UIComponentView`는 선택적인 `designId`, `issues`, `interaction: UIComponentInteraction`을 받는다. interaction이 없으면 inert인 편집 콘텐츠이고, 있으면 canonical Field/Choice/Command에 실행 콜백을 연결한다. 입력·행 선택·버튼 이벤트만 전달하며 데이터 저장이나 스킬 실행을 소유하지 않는다. 빈 바인딩 결과에는 작업 안내를, 깨진 참조에는 오류를 표시한다.
+`UIComponentSurface`는 HTML 콘텐츠의 정본이다. 선택적인 `designId`, `issues`, `interaction: UIComponentInteraction`을 받는다. 기본 `layout="flow"`에서는 높이가 콘텐츠를 따르며 긴 글·결과·입력으로 늘어난다. `UIComponentView`는 이 surface를 `layout="absolute"`로 감싸 편집 좌표와 크기의 SVG foreignObject에 배치한다. 두 모드가 같은 컴포넌트 표현을 사용한다.
+
+interaction이 없으면 inert인 편집 콘텐츠이고, 있으면 canonical Field/Choice/Command에 실행 콜백을 연결한다. 입력·행 선택·버튼 이벤트만 전달하며 데이터 저장이나 스킬 실행을 소유하지 않는다. 빈 바인딩 결과에는 작업 안내를, 깨진 참조에는 오류를 표시한다.
 
 `UIBuilderHand.toolbarContent`에 Host가 데이터 연결 컨트롤을 조합할 수 있다. 데이터에 연결된 문구 편집은 비활성화하고 데이터 탭을 안내한다.

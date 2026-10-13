@@ -14,7 +14,7 @@ Usage와 Source: [UI Builder](/applications/ui-builder).
 
 ## 프로젝트 재료
 
-`readUIBuilderProject`는 기존 Canvas 전용 문서에 빈 tables/actions를 부여한다.
+`readUIBuilderProject`는 기존 Canvas 전용 문서에 빈 tables/actions와 `flow: null`을 부여한다.
 `createUIBuilderEditor`는 복원과 모든 변경 경계에서 `assertUIBuilderProject`를 적용한다.
 프로젝트의 테이블은 Database 스키마·레코드·보기를 그대로 사용한다.
 `UIBuilderField.sample`은 생성 의미이며, `UIBuilderSampleGenerator`는 외부에서 주입한다.
@@ -36,9 +36,11 @@ UI 빌더와 Zod 번역은 빈 숨김 목록을 전달해 모든 스키마 필�
 
 `resolveUIBuilderComponent(project, object, selection?)`은 현재 데이터에서 text/detail/items/value 슬롯을 투영한다. 원본 컴포넌트와 기하는 바꾸지 않는다. 값·목록·개수·숫자 합계를 지원하며, 없는 테이블/필드/행은 빈 값과 issues로 표시한다. 선택 필드는 옵션 이름으로 표시한다. 목록은 최대 50행, 문자열은 표시 한도 내에서 투영한다.
 
-`applyUIBuilderConfiguration`은 connections, designId, layout을 한 undo로 적용한다. connections에 없는 객체는 그대로 두며 명시한 객체의 연결은 교체한다. recordId가 빈 연결은 실행 화면의 선택 행, 선택이 없으면 첫 행을 따른다. 지정한 ID는 그 행에 고정한다. 디자인 변경은 위치를 바꾸지 않는다. layout은 명시적 한 번 배치다.
+`applyUIBuilderConfiguration`은 connections, designId, layout, flow를 한 undo로 적용한다. connections에 없는 객체는 그대로 두며 명시한 객체의 연결은 교체한다. recordId가 빈 연결은 실행 화면의 선택 행, 선택이 없으면 첫 행을 따른다. 지정한 ID는 그 행에 고정한다. 디자인 변경은 위치를 바꾸지 않는다. layout은 편집 좌표를 정리하는 명시적 프리셋이며, flow는 실행 화면의 행·열·순서·너비 정책이다.
 
-`createUIBuilderCatalogTools`로 같은 카탈로그와 설정 명령을 AI에 제공한다. `createUIBuilderLayoutTools`는 전용 읽기와 `arrange_ui_builder`만 제공한다. 현재 요소 전체의 기하 정보만 바꿀 수 있고, 겹침·범위 초과·중복/누락 ID·stale 요청을 거부한다. 한 세션의 성공한 정리는 한 번이며 undo 한 번으로 돌아간다.
+`createUIBuilderCatalogTools`로 같은 카탈로그와 설정 명령을 AI에 제공한다. `createUIBuilderLayoutTools`는 전용 읽기와 `arrange_ui_builder`만 제공한다. AI가 자유 배치 좌표와 콘텐츠를 읽고 `UIFlowLayout`을 반영한다. 현재 요소를 모두 한 번씩 포함해야 하며 중복/누락 ID·잘못된 열 비율·stale 요청을 거부한다. 편집 좌표, 크기, 콘텐츠와 바인딩은 보존한다. 한 세션의 성공한 반영은 한 번이며 undo 한 번으로 돌아간다.
+
+실행 화면은 실제 Grid/Flex 흐름을 사용한다. `size: "hug"`는 내용 너비, `"fill"`은 열 너비를 따른다. 높이는 모두 내용에 맞춰 늘어나고 뒤쪽 요소를 밀어낸다. 수동으로 정한 편집 높이를 실행 화면의 고정 높이로 사용하지 않는다. flow는 프로젝트와 함께 저장된다.
 
 ## 실행
 

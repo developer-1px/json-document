@@ -1,5 +1,5 @@
 import { isJSONValue, type JSONValue } from "@interactive-os/json-document";
-import { assertUIBuilderDocument, uiDesignCatalog, type UIDesignId, type CanvasDocument } from "@interactive-os/json-document-object-document";
+import { assertUIBuilderDocument, assertUIFlowLayout, type UIFlowLayout, uiDesignCatalog, type UIDesignId, type CanvasDocument } from "@interactive-os/json-document-object-document";
 import type { DatabaseDocument, DatabaseProperty, DatabaseRecord } from "./database.js";
 import { createDatabaseView } from "./database-view.js";
 import { assertDatabaseDocument } from "./database-validation.js";
@@ -27,6 +27,7 @@ export type UIBuilderAction = Record<string, JSONValue> & {
 }
 export interface UIBuilderProject extends CanvasDocument {
   readonly designId: UIDesignId;
+  readonly flow: UIFlowLayout | null;
   readonly tables: readonly UIBuilderTable[];
   readonly actions: readonly UIBuilderAction[];
 }
@@ -61,7 +62,7 @@ function fields(value: unknown, sample: boolean): asserts value is readonly UIBu
 /** Legacy canvas-only documents acquire empty catalogs without losing objects. */
 export function readUIBuilderProject(value: unknown): UIBuilderProject {
   assertUIBuilderDocument(value);
-  const project = { ...value, designId: value.designId === undefined ? "clean" : value.designId, tables: value.tables === undefined ? [] : value.tables, actions: value.actions === undefined ? [] : value.actions } as UIBuilderProject;
+  const project = { ...value, flow: value.flow === undefined ? null : value.flow, designId: value.designId === undefined ? "clean" : value.designId, tables: value.tables === undefined ? [] : value.tables, actions: value.actions === undefined ? [] : value.actions } as UIBuilderProject;
   assertUIBuilderProject(project);
   return project;
 }
@@ -70,6 +71,7 @@ export function assertUIBuilderProject(value: unknown): asserts value is UIBuild
   if (!isJSONValue(value) || !Array.isArray(value.tables) || !Array.isArray(value.actions)) throw new Error("데이터·액션 목록을 확인해 주세요.");
   const project = value as UIBuilderProject;
   if (!uiDesignCatalog.some(entry => entry.id === project.designId)) throw new Error("등록된 디자인을 선택해 주세요.");
+  if (project.flow !== null) assertUIFlowLayout(project.flow);
   unique(project.tables); unique(project.actions);
   for (const table of project.tables) {
     named(table); fields(table.fields, true);

@@ -42,7 +42,7 @@ function UIBuilderProjectApplication({stored, example}: {stored: WebStoredDocume
       if (tool.name === "arrange_ui_builder" && result.ok) applied = true;
       return result;
     }}));
-    await streamLlmAgentTurn({prompt: "현재 화면을 알아서 정리해 주세요. 먼저 전용 도구로 전체 요소와 실제 바인딩 내용을 읽으세요. 사용자가 자유롭게 놓은 요소를 의미와 사용 순서에 맞게 정렬하고 간격, 크기, 줄바꿈 공간을 조절하세요. 목록 탐색과 상세 내용, 브리핑/선택/실행 흐름을 읽기 쉽게 배치하세요. 모든 요소를 보존하고 전용 배치 도구를 한 번 적용하세요.", mode: "chat", tools: layoutTools, sessionId: null, onSession: () => {}, write: () => {}, signal});
+    await streamLlmAgentTurn({prompt: "자유 배치한 편집 화면을 실제 자동 흐름으로 정리하고 반영해 주세요. 먼저 전용 도구로 요소와 데이터 연결을 읽으세요. 편집 좌표는 유지하고, 의미와 사용 순서에 맞는 행·열 묶음과 순서를 결정하세요. 제목·본문·카드의 높이는 내용에 맞게 hug하고 버튼은 너비도 hug하세요. 페이지 목적에 맞게 제목과 도입부, 탐색과 주요 콘텐츠, 액션과 결과의 관계를 구성하세요. 절대 좌표나 고정 높이를 만들지 말고 모든 요소를 포함한 자동 흐름을 한 번 적용하세요.", mode: "chat", tools: layoutTools, sessionId: null, onSession: () => {}, write: () => {}, signal});
     if (!applied && !signal.aborted) throw new Error("AI가 배치를 적용하지 못했습니다. 다시 눌러 주세요.");
   }
   return <main aria-label="UI 빌더" className="ui-builder-application relative h-dvh w-full overflow-hidden bg-background-canvas">

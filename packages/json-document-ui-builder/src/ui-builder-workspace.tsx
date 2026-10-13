@@ -23,7 +23,7 @@ export function UIBuilderWorkspace({editor, generateSamples, skills = [], naviga
   return <div className="ui-builder-workspace">
     <div className={`${floatingSurface.control} builder-navigation`}>
       <Tabs label="빌더 작업" value={tab} options={[{id: "run", label: "실행"}, {id: "screen", label: "화면"}, {id: "data", label: "데이터"}, {id: "actions", label: "액션·스킬"}]} onValueChange={setTab} tabId={id => `builder-tab-${id}`} panelId={id => `builder-panel-${id}`} />
-      {tab === "screen" && arrange && <BuilderArrangeControl arrange={arrange} onError={setError} />}
+      {tab === "screen" && arrange && <BuilderArrangeControl arrange={arrange} onError={setError} onApplied={() => setTab("run")} />}
       {tab === "screen" && <BuilderDesignControls editor={editor} project={project} />}
       {navigation}
       {tab !== "screen" && tab !== "run" && <><Command disabled={!snapshot.canUndo} onClick={() => editor.undo()}>실행 취소</Command><Command disabled={!snapshot.canRedo} onClick={() => editor.redo()}>다시 실행</Command></>}

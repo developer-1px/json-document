@@ -46,11 +46,17 @@
 }
 
 .builder-runtime { height: 100%; overflow: auto; padding-bottom: 8rem; }
-.builder-runtime svg { display: block; }
-.builder-runtime .ui-component { overflow: auto; }
 .builder-runtime .ui-component ul:has(button) { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
 .builder-runtime .ui-component li > button { width: 100%; text-align: left; white-space: normal; }
 .builder-runtime .ui-component li > button[aria-pressed="true"] { color: rgb(var(--color-foreground-accent)); background: rgb(var(--color-background-subtle)); font-weight: 600; }
 .builder-runtime-status { position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 40; max-width: min(38rem, calc(100vw - 3rem)); display: flex; align-items: center; gap: 1rem; }
 
 .builder-field-check { display: flex !important; align-items: center; gap: 0.5rem; }
+
+.builder-flow { width: 100%; padding: 2rem; display: flex; flex-direction: column; gap: 2rem; box-sizing: border-box; }
+.builder-flow-row { display: grid; gap: 2rem; align-items: start; }
+.builder-flow-column { min-width: 0; display: flex; flex-direction: column; gap: 1.5rem; align-items: stretch; }
+.builder-flow-item { min-width: 0; max-width: 100%; }
+.builder-flow-item[data-flow-size="hug"] { width: fit-content; align-self: start; }
+.builder-flow-item[data-flow-size="fill"] { width: 100%; }
+@media (max-width: 720px) { .builder-flow { padding: 1.5rem 1rem; } .builder-flow-row { grid-template-columns: minmax(0, 1fr) !important; } }

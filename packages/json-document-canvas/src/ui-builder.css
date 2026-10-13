@@ -37,3 +37,12 @@
 .ui-component[data-design="bold"] :is(h1, h2, strong) { color: rgb(var(--color-foreground-accent)); }
 .ui-component[data-design="bold"] > article { border-color: rgb(var(--color-foreground-accent)); }
 .ui-component[data-design="bold"] h1 { font-size: 3rem; }
+
+/* Published content hugs its contents; only the editor wrapper uses absolute dimensions. */
+.ui-component[data-layout="flow"] { height: auto; min-width: 0; overflow: visible; }
+.ui-component[data-layout="flow"] > :is(article, label, button) { height: auto; }
+.ui-component[data-layout="flow"] > button { min-height: 2.75rem; padding-inline: 1.25rem; white-space: normal; }
+.ui-component[data-layout="flow"] > label { width: 100%; }
+.ui-component[data-layout="flow"] > label > :is(input, textarea) { flex: none; }
+.ui-component[data-layout="flow"] textarea { min-height: 7rem; field-sizing: content; }
+.ui-component[data-layout="flow"] .ui-component-binding-error { position: static; }

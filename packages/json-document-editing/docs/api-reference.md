@@ -2085,6 +2085,7 @@ interface UIBuilderActionExecution extends Record<string, JSONValue> {
 interface UIBuilderConfiguration {
   readonly connections?: readonly UIBuilderConnection[];
   readonly designId?: UIDesignId;
+  readonly flow?: UIFlowLayout;
   /** Empty objectIds explicitly arranges the whole page. */
   readonly layout?: {readonly id: UILayoutId; readonly objectIds: readonly string[]};
 }
@@ -2120,6 +2121,7 @@ type UIBuilderMaterialCommand =
 ```ts
 interface UIBuilderProject extends CanvasDocument {
   readonly designId: UIDesignId;
+  readonly flow: UIFlowLayout | null;
   readonly tables: readonly UIBuilderTable[];
   readonly actions: readonly UIBuilderAction[];
 }

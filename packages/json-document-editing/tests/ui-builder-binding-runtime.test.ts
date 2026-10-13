@@ -62,17 +62,19 @@ describe("live builder bindings and runtime", () => {
   finish({result:"늦은 응답"});expect(await pending).toMatchObject({ok:false});
   expect(s.read().tables[0]!.data.records[0]!.values.result).toBe("");
  });
- it("AI arrangement changes geometry only, rejects overlaps/stale reads, and is one undo", () => {
+ it("AI apply creates flow without changing free-placement geometry, rejects missing IDs and is one undo", () => {
   const s=setup(); const tools=createUIBuilderLayoutTools(s.editor);tools[0]!.execute({});
   const before=s.editor.snapshot.value;
-  expect(tools[1]!.execute({objects:[{id:"metric",x:0,y:0,width:100,height:100},{id:"input",x:50,y:0,width:100,height:100}]})).toMatchObject({ok:false});
+  expect(tools[1]!.execute({rows:[{columns:[{weight:1,items:[{objectId:"metric",size:"hug"}]}]}]})).toMatchObject({ok:false});
   expect(s.editor.snapshot.value).toBe(before);
-  expect(tools[1]!.execute({objects:[{id:"metric",x:40,y:120,width:250,height:100},{id:"input",x:320,y:120,width:500,height:100}]})).toMatchObject({ok:true});
+  const flow={rows:[{columns:[{weight:1,items:[{objectId:"metric",size:"hug"},{objectId:"input",size:"fill"}]}]}]};
+  expect(tools[1]!.execute(flow)).toMatchObject({ok:true});
+  expect(s.read().flow).toEqual(flow);
   expect(s.read().tables).toEqual(readUIBuilderProject(before).tables);
-  expect((s.read().objects[0] as UIComponentObject).document).toEqual((readUIBuilderProject(before).objects[0] as UIComponentObject).document);
+  expect(s.read().objects).toEqual(readUIBuilderProject(before).objects);
   s.editor.undo();expect(s.editor.snapshot.value).toEqual(before);
   const stale=createUIBuilderLayoutTools(s.editor);stale[0]!.execute({});applyUIBuilderConfiguration(s.editor,{designId:"soft"});
-  expect(stale[1]!.execute({objects:[]})).toMatchObject({ok:false});
+  expect(stale[1]!.execute(flow)).toMatchObject({ok:false});
  });
 });
 

@@ -10,17 +10,29 @@ export interface UIComponentInteraction {
   readonly onSelectItem: (index: number) => void;
 }
 
-/** Registered component projection. User strings remain text, never HTML or CSS. */
-export function UIComponentView({ object, designId = "clean", issues = [], interaction }: { readonly object: Extract<CanvasObject, {kind: "embedded-document"}>; readonly designId?: UIDesignId; readonly issues?: readonly string[]; readonly interaction?: UIComponentInteraction }) {
+export interface UIComponentSurfaceProps {
+  readonly object: Extract<CanvasObject, {kind: "embedded-document"}>;
+  readonly designId?: UIDesignId;
+  readonly issues?: readonly string[];
+  readonly interaction?: UIComponentInteraction;
+  readonly layout?: "absolute" | "flow";
+}
+/** Absolute editing wrapper over the same content surface used by auto-flow runtime. */
+export function UIComponentView(props: UIComponentSurfaceProps) {
+  const {object} = props;
+  return <foreignObject x={object.x} y={object.y} width={object.width} height={object.height} data-ui-component-object={object.id}>
+    <UIComponentSurface {...props} layout="absolute" />
+  </foreignObject>;
+}
+/** Registered HTML content with intrinsic sizing. User strings remain text, never HTML or CSS. */
+export function UIComponentSurface({object, designId = "clean", issues = [], interaction, layout = "flow"}: UIComponentSurfaceProps) {
   if (object.documentType !== uiComponentDocumentType) return null;
   assertUIComponentContent(object.document);
   const content = object.document;
-  return <foreignObject x={object.x} y={object.y} width={object.width} height={object.height} data-ui-component-object={object.id}>
-    <div inert={!interaction} className="ui-component" data-component={content.component} data-tone={content.tone} data-design={designId}>
-      <ComponentContent text={object.label} content={content} interaction={interaction} />
-      {issues.length > 0 && <p className="ui-component-binding-error" role="status">{issues.join(" ")}</p>}
-    </div>
-  </foreignObject>;
+  return <div inert={!interaction} className="ui-component" data-component={content.component} data-tone={content.tone} data-design={designId} data-layout={layout}>
+    <ComponentContent text={object.label} content={content} interaction={interaction} />
+    {issues.length > 0 && <p className="ui-component-binding-error" role="status">{issues.join(" ")}</p>}
+  </div>;
 }
 function ComponentContent({ text, content, interaction }: { text: string; content: UIComponentContent; interaction: UIComponentInteraction | undefined }): ReactNode {
   const id = useId();

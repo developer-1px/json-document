@@ -1,4 +1,4 @@
-import { assertUIComponentContent, arrangeUIComponents, uiDesignCatalog, type UIComponentBinding, type UIComponentObject, type UIDesignId, type UILayoutId } from "@interactive-os/json-document-object-document";
+import { assertUIComponentContent, assertUIFlowLayout, type UIFlowLayout, arrangeUIComponents, uiDesignCatalog, type UIComponentBinding, type UIComponentObject, type UIDesignId, type UILayoutId } from "@interactive-os/json-document-object-document";
 import type { ObjectEditor } from "./object.js";
 import { readUIBuilderProject, assertUIBuilderProject } from "./ui-builder-materials.js";
 import { resolveUIBuilderComponent } from "./ui-builder-bindings.js";
@@ -12,6 +12,7 @@ export interface UIBuilderConnection {
 export interface UIBuilderConfiguration {
   readonly connections?: readonly UIBuilderConnection[];
   readonly designId?: UIDesignId;
+  readonly flow?: UIFlowLayout;
   /** Empty objectIds explicitly arranges the whole page. */
   readonly layout?: {readonly id: UILayoutId; readonly objectIds: readonly string[]};
 }
@@ -35,6 +36,12 @@ export function applyUIBuilderConfiguration(editor: ObjectEditor, change: UIBuil
     if (change.designId !== undefined) {
       if (!uiDesignCatalog.some(d => d.id === change.designId)) throw new Error("등록된 디자인을 선택해 주세요.");
       project = {...project, designId: change.designId};
+    }
+    if (change.flow !== undefined) {
+      assertUIFlowLayout(change.flow);
+      const ids = change.flow.rows.flatMap(row => row.columns.flatMap(column => column.items.map(item => item.objectId)));
+      if (ids.length !== project.objects.length || ids.some(id => !project.objects.some(o => o.id === id))) throw new Error("현재 요소 전체를 자동 흐름에 포함해 주세요.");
+      project = {...project, flow: JSON.parse(JSON.stringify(change.flow)) as UIFlowLayout};
     }
     if (change.layout) {
       const {id, objectIds} = change.layout;

@@ -88,10 +88,26 @@ interface UIComponentInteraction {
   readonly onSelectItem: (index: number) => void;
 }
 ```
+## `UIComponentSurface`
+
+```ts
+UIComponentSurface({ object, designId, issues, interaction, layout }: UIComponentSurfaceProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `UIComponentSurfaceProps`
+
+```ts
+interface UIComponentSurfaceProps {
+  readonly object: Extract<CanvasObject, {kind: "embedded-document"}>;
+  readonly designId?: UIDesignId;
+  readonly issues?: readonly string[];
+  readonly interaction?: UIComponentInteraction;
+  readonly layout?: "absolute" | "flow";
+}
+```
 ## `UIComponentView`
 
 ```ts
-UIComponentView({ object, designId, issues, interaction }: { readonly object: Extract<CanvasObject, { kind: "embedded-document"; }>; readonly designId?: UIDesignId; readonly issues?: readonly string[]; readonly interaction?: UIComponentInteraction; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+UIComponentView(props: UIComponentSurfaceProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
 ## `useCanvasHand`
 

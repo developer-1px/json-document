@@ -46,6 +46,11 @@ assertUIComponentBindings(value: unknown, targets: readonly UIBindingTarget[]): 
 ```ts
 assertUIComponentContent(value: unknown): asserts value is UIComponentContent
 ```
+## `assertUIFlowLayout`
+
+```ts
+assertUIFlowLayout(value: unknown): asserts value is UIFlowLayout
+```
 ## `CanvasDocument`
 
 ```ts
@@ -289,6 +294,11 @@ projectObjectText(object: DocumentObject): ObjectTextProjection | null
 ```ts
 readObjectStyle(objects: ReadonlyArray<DocumentObject>): ObjectStyleSelection
 ```
+## `resolveUIFlowLayout`
+
+```ts
+resolveUIFlowLayout(objects: readonly CanvasObject[], layout?: UIFlowLayout | null): UIFlowLayout
+```
 ## `serializeCanvasDocument`
 
 ```ts
@@ -367,6 +377,26 @@ const uiDesignCatalog: readonly [{ readonly id: "clean"; readonly label: "기본
 
 ```ts
 type UIDesignId = typeof uiDesignCatalog[number]["id"];
+```
+## `UIFlowColumn`
+
+```ts
+interface UIFlowColumn extends Record<string, JSONValue> { readonly weight: number; readonly items: readonly UIFlowItem[]; }
+```
+## `UIFlowItem`
+
+```ts
+interface UIFlowItem extends Record<string, JSONValue> { readonly objectId: string; readonly size: "hug" | "fill"; }
+```
+## `UIFlowLayout`
+
+```ts
+interface UIFlowLayout extends Record<string, JSONValue> { readonly rows: readonly UIFlowRow[]; }
+```
+## `UIFlowRow`
+
+```ts
+interface UIFlowRow extends Record<string, JSONValue> { readonly columns: readonly UIFlowColumn[]; }
 ```
 ## `uiLayoutCatalog`
 

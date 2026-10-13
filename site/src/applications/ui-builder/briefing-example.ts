@@ -1,4 +1,4 @@
-import { applyUIBuilderMaterials, createUIBuilderEditor, readUIBuilderProject, type UIBuilderField, type UIBuilderSkillDefinition } from "@interactive-os/json-document-editing";
+import { applyUIBuilderMaterials, applyUIBuilderConfiguration, createUIBuilderEditor, readUIBuilderProject, type UIBuilderField, type UIBuilderSkillDefinition } from "@interactive-os/json-document-editing";
 import { createUIComponentObject, type UIComponentBinding, type UIComponentKind } from "@interactive-os/json-document-object-document";
 
 const approaches = [{id: "plan", name: "진행 계획 작성"}, {id: "draft", name: "답변 초안 작성"}, {id: "questions", name: "확인 질문 정리"}];
@@ -27,10 +27,12 @@ export function createBriefingExample() {
   const table = readUIBuilderProject(editor.snapshot.value).tables[0]!;
   ensure(applyUIBuilderMaterials(editor, [{type: "table.data", id: table.id, data: {...table.data, records: tasks.map(({id, ...task}) => ({id, values: {...task, briefing: "", approach: "plan", result: "", state: "브리핑 전"}}))}}]));
   const binding = (target: UIComponentBinding["target"], fieldId: string, mode: UIComponentBinding["mode"] = "value"): UIComponentBinding => ({target, mode, tableId: "tasks", fieldId, recordId: ""});
+  const componentIds: Record<string, string> = {};
   const add = (id: string, kind: UIComponentKind, text: string, x: number, y: number, width: number, height: number, bindings: readonly UIComponentBinding[] = [], actionId = "", detail = "", items: readonly string[] = []) => {
     const object = createUIComponentObject(kind, {x, y}, {text, detail, items});
     if (object.kind !== "embedded-document") throw new Error("컴포넌트를 확인해 주세요.");
     ensure(editor.dispatch({type: "object.create", object: {...object, id, width, height, document: {...object.document as object, bindings, ...(actionId ? {actionId} : {})}}}));
+    componentIds[id] = readUIBuilderProject(editor.snapshot.value).objects.at(-1)!.id;
   };
   add("page-title", "heading", "오늘의 업무 브리핑", 40, 40, 950, 60);
   add("intro", "text", "업무를 고르면, 복잡한 정리는 AI에게. 방향을 선택하고 결과를 확인하세요.", 40, 112, 1080, 48);
@@ -45,6 +47,11 @@ export function createBriefingExample() {
   add("approach", "select", "2. 어떻게 진행할까요?", 360, 862, 480, 92, [binding("value", "approach")], "", "", approaches.map(a => a.name));
   add("execute-button", "button", "3. 선택한 방향으로 실행", 864, 894, 286, 48, [], "execute");
   add("result", "card", "실행 결과", 360, 984, 790, 350, [binding("detail", "result")]);
+  const item = (name: string, size: "fill" | "hug" = "fill") => ({objectId: componentIds[name]!, size});
+  ensure(applyUIBuilderConfiguration(editor, {flow: {rows: [
+    {columns: [{weight: 1, items: [item("page-title"), item("intro")]}]},
+    {columns: [{weight: 1, items: [item("task-list"), item("mock-note")]}, {weight: 3, items: [item("task-key", "hug"), item("task-state", "hug"), item("task-title"), item("task-description"), item("brief-button", "hug"), item("briefing"), item("approach"), item("execute-button", "hug"), item("result")]}]},
+  ]}}));
   return createUIBuilderEditor(readUIBuilderProject(editor.snapshot.value));
 }
 
