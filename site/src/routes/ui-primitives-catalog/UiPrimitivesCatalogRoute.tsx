@@ -23,6 +23,7 @@ import {
   contentInteractionAttributes,
   Toggle,
   ContextualControls,
+  EditingControls,
   ControlHandle,
   Dialog,
   DisclosureButton,
@@ -395,6 +396,8 @@ export function UiPrimitivesCatalogRoute() {
                   />
                 </ToolbarRegion>
                 <ToolbarRegion placement="end" label="Actions">
+                  <EditingControls label="간단한 편집" choices={[{ id: "view", label: "보기", value: shellView, options: [{ id: "canvas", label: "Canvas" }, { id: "json", label: "JSON" }], onValueChange: value => setShellView(value as "canvas" | "json") }]}
+                    onRequestEdit={() => setShellView("json")} requestLabel="선택 대상 자세히 보기" />
                   <ContextualControls
                     aria-label="Catalog contextual actions"
                     tabIndex={0}

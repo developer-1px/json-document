@@ -31,3 +31,21 @@ rectangle `containerLayout` persist ownership, direction, gap and padding.
 `objectSubtreeIds` expands a selection without moving descendants twice.
 `planObjectOperation` accepts ObjectLayoutOptions so related text and container
 geometry commit atomically. The Canvas Usage and Source demonstrate these APIs.
+
+### Section placement
+
+`kind: "section"` is a named free-layout container. Its label appears above its
+bounds. Sections use the existing `parentId` hierarchy and subtree operations.
+Children fully inside a section can be adopted by the container policy; their
+coordinates remain unchanged. Explicit ownership on inserted children is retained.
+
+```ts
+import { findVacantObjectBounds } from "@interactive-os/json-document-object-document";
+const bounds = findVacantObjectBounds(document.objects,
+  { x: 0, y: 0, width: 1280, height: 720 }, 64);
+```
+
+The function finds the first horizontal slot at the requested row, including
+section title space and the requested gap. It does not mutate or reserve data.
+The Editing `section.create` intent allocates identity and commits the region.
+Live Usage: `/applications/canvas`; Source: `src/object-placement.ts`.

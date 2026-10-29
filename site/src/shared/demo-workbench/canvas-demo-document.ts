@@ -15,3 +15,6 @@ export const canvasProofDocument: CanvasDocument = {
     { id: "note", kind: "sticky-note", x: 880, y: 264, width: 240, height: 240, label: "작은 아이디어를\n한 장에", color: "#fff2a8", fontSize: 28 },
   ],
 };
+
+// Authored HTML/CSS artwork fixture, independent of the editor UI theme.
+export const canvasHTMLProofSource = '<style>body{font-family:system-ui;background:linear-gradient(120deg,#163857,#2563eb);color:white;padding:20px;box-sizing:border-box}h1{font-size:22px;margin:0}p{font-size:14px}</style><h1 data-node-id="title">HTML + CSS</h1><p data-node-id="hint">더블클릭으로 소스 편집</p>';

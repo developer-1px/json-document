@@ -153,10 +153,10 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     if (gesture.tool === "table") return createCanvasSheet({x:click ? start.x:Math.min(start.x,point.x),y:click ? start.y:Math.min(start.y,point.y),width:click ? 480:Math.abs(point.x-start.x),height:click ? 280:Math.abs(point.y-start.y)});
     const object = createCanvasObject(gesture.tool, {
       x: click ? start.x : Math.min(start.x, point.x), y: click ? start.y : Math.min(start.y, point.y),
-      width: click ? (gesture.tool === "text" ? 280 : gesture.tool === "sticky-note" ? 200 : 160) : Math.abs(point.x - start.x),
-      height: click ? (gesture.tool === "text" ? 64 : gesture.tool === "sticky-note" ? 200 : 100) : Math.abs(point.y - start.y),
-    }, { color: gesture.tool === "text" ? style.textColor : gesture.tool === "sticky-note" ? style.stickyNoteColor ?? style.color : style.color,
-      label: gesture.tool === "text" ? "Text" : "", fontSize: style.fontSize, textColor: style.textColor });
+      width: click ? (gesture.tool === "text" ? 280 : gesture.tool === "section" ? 640 : gesture.tool === "sticky-note" ? 200 : 160) : Math.abs(point.x - start.x),
+      height: click ? (gesture.tool === "text" ? 64 : gesture.tool === "section" ? 400 : gesture.tool === "sticky-note" ? 200 : 100) : Math.abs(point.y - start.y),
+    }, { color: gesture.tool === "section" ? "#f4f3f0" : gesture.tool === "text" ? style.textColor : gesture.tool === "sticky-note" ? style.stickyNoteColor ?? style.color : style.color,
+      label: gesture.tool === "section" ? "섹션" : gesture.tool === "text" ? "Text" : "", fontSize: style.fontSize, textColor: style.textColor });
     return object.kind === "text" ? { ...object, widthMode: click ? "auto" as const : "fixed" as const } : object;
   }
 
@@ -290,13 +290,18 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   const translating = new Set(translation ? objectSubtreeIds(document.objects, translation.keys) : []);
   const selection = selectionPreview?.selection ?? snapshot.selection;
   const resizing = new Set(gesture?.type === "resize" ? objectSubtreeIds(document.objects, [gesture.object.id]) : []);
-  const laidOutObjects = document.objects.map((source) => {
-    const object = draft.current?.id === source.id ? { ...source, label: draft.current.text } : source;
-    if (translation && translating.has(object.id)) return transformObject(object, translation);
-    if (gesture?.type === "resize" && resizing.has(object.id) && object.id !== gesture.object.id) { const delta = transform(gesture); return transformObject(object, { dx: delta.dx, dy: delta.dy }); }
-    return gesture?.type === "resize" && gesture.object.id === object.id ? transformObject(object, transform(gesture)) : object;
-  });
-  const objects = editor.layoutDocument({ ...document, objects: laidOutObjects }).objects as ReadonlyArray<CanvasObject>;
+  const objects = useMemo(() => {
+    const laidOutObjects = document.objects.map((source) => {
+      const object = draft.current?.id === source.id ? { ...source, label: draft.current.text } : source;
+      if (translation && translating.has(object.id)) return transformObject(object, translation);
+      if (gesture?.type === "resize" && resizing.has(object.id) && object.id !== gesture.object.id) { const delta = transform(gesture); return transformObject(object, { dx: delta.dx, dy: delta.dy }); }
+      return gesture?.type === "resize" && gesture.object.id === object.id ? transformObject(object, transform(gesture)) : object;
+    });
+    // Translation previews preserve membership and layout until the drop commits.
+    // Only resizing and text drafts need a fresh layout while interacting.
+    if (gesture?.type !== "resize" && !draft.current) return laidOutObjects;
+    return editor.layoutDocument({ ...document, objects: laidOutObjects }).objects as ReadonlyArray<CanvasObject>;
+  }, [editor, document, translation, gesture, draft.current]);
   const copyOriginals = translation?.operation === "copy" ? document.objects.filter((object) => translating.has(object.id)) : [];
   const rawPreview = gesture && (gesture.type === "create" || gesture.type === "draw") ? createPreview(gesture) : null;
 
@@ -307,7 +312,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     autoWidth(id: string) { commitText(); cancel(); dispatch({ type: "object.update", objectId: id, changes: { widthMode: "auto" } }); },
     document, snapshot, selection, marquee: selectionPreview?.marquee ?? null, objects, copyOriginals, preview, surface, tool, error, pastePending: clipboard.pending, draft: draft.current,
     choose, select, interaction, editText, commitText, cancel, remove, duplicate, history, setStyle,
-    selectedStyle: readObjectStyle(editor.selectedObjects),
+    selectedStyle: readObjectStyle(objects.filter(object => selection.keys.includes(object.id))),
     changeText(text: string) { if (draft.current) { draft.current = { ...draft.current, text }; redraw(); } },
     openJSON(json: string) {
       try {

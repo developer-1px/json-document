@@ -38,3 +38,5 @@ See the owning [Chat API](docs/chat.md) and [Usage](/demo/chat).
 
 `ContextualControls` owns pointer, focus, editing, and optional no-hover discovery.
 See the [Contextual controls API](docs/contextual-controls.md).
+
+- [Bounded editing and agent handoff — EditingControls](docs/editing-controls.md)

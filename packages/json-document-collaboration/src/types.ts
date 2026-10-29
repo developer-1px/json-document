@@ -217,6 +217,8 @@ export type CollaborationIngestResult =
 export interface CollaborationReplica {
   readonly epoch: CollaborationEpoch;
   status(): ReplicaStatus;
+  /** Current JSON Pointer of a stable member, or null when it is not visible. */
+  locate(memberId: MemberId): string | null;
   exportBundle(): CollaborationBundle;
   exportCheckpoint(): CollaborationCheckpoint;
   ingest(bundle: unknown): CollaborationIngestResult;

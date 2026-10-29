@@ -155,3 +155,8 @@ export {projectWebClientDeltaToElement} from "./element-coordinate.js";
 
 export {webKeyboardPlatform} from "./keyboard.js";
 export { measureWebText, type WebTextMeasurement } from "./text-measurement.js";
+export { webCanvasHTMLAdapter, createWebHTMLArtifactSource } from "./html-artifact.js";
+export { editWebHTMLArtifactNode, type WebHTMLNodeChange } from "./html-artifact.js";
+export { bindWebHTMLArtifactEditing, type WebHTMLNodeSelection } from "./html-artifact-editing.js";
+export { createWebSpeechInput, webSpeechRecognitionConstructor, type WebSpeechRecognition, type WebSpeechRecognitionConstructor } from "./speech-input.js";
+export { measureWebHTMLReview, type WebHTMLReviewRegion, type WebHTMLReviewRequest } from "./html-artifact-review.js";

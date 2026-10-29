@@ -14,3 +14,30 @@ import "@interactive-os/json-document-ui-primitives-react/floating-surface.css";
 Popover의 `panelClassName`에는 `floatingSurface.panel`을 전달합니다. ProductShell의 `toolbarPresentation="floating"`도 같은 표면을 소비합니다. CSS를 한 번 import하고 Host의 semantic color/radius/shadow tokens로 조정합니다. 투명도 감소 및 강제 색상 모드를 지원합니다. 위치 지정과 팝오버 dismiss/focus는 이 스타일 API가 소유하지 않습니다.
 
 [Site UI primitives catalog](/demo/ui-primitives#design-system-floating-controls)의 Floating controls Usage와 Source 등록에서 구현을 확인할 수 있습니다. Bear와 Calendar도 동일 API를 소비합니다.
+
+## WindowDock
+
+`WindowDock` composes independent non-modal panels with the canonical floating
+surfaces, `DisclosureButton` and `Command`. Import it from the package root and
+import `floating-surface.css` once. Hosts place the dock and supply items
+(`id`, `title`, optional `status`, `content`), `activeId`, `onActivate`, an optional
+`action`, and an optional `notice`.
+
+Activating an item opens it without closing other requested panels. Clicking its
+title again or the panel's collapse control hides it. Contents stay mounted so
+in-flight work, editor selection and drafts survive hiding. Activity updates do
+not open panels or move focus. Width determines the number of visible panels;
+when space is limited, the most recently opened panels remain visible. Expanding
+the viewport restores requested panels. The title row scrolls when necessary.
+These are independent disclosures, not mutually exclusive ARIA tabs.
+
+The Host may set `--window-dock-max-height`; the default is `65dvh`. Colors,
+radii and elevation stay with `floatingSurface`. See the Canvas Application's
+Usage/Source for `WindowDock` and the package's generated API reference for types.
+
+`WindowDock.onClose(id)`를 제공하면 창 머리글에 닫기 버튼이 나타납니다.
+접기는 콘텐츠를 유지하며, 닫기의 제거·작업 중단 정책은 소비자가 소유합니다.
+Canvas는 닫을 때 목록에서 제거하고 진행 중 요청을 중단합니다. 모든 창을 닫아도 새 대화로 다시 시작할 수 있습니다.
+
+`WindowDock.activationKey` can be changed to reopen `activeId` even if the user
+collapsed that same window. Mounted contents and their input drafts are retained.

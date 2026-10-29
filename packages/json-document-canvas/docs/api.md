@@ -1,5 +1,27 @@
 ## Canvas Hand 계약 · RC
 
+### HTML/CSS 원본 문서
+
+`CanvasHTMLObject`는 Editing의 `html/css/1` embedded document를 표시합니다.
+`CanvasHand`에서 자동으로 조합되며 별도 Host renderer가 필요하지 않습니다.
+Web의 `createWebHTMLArtifactSource`와 스크립트가 금지된 `sandbox` iframe을 사용해 CSS를 문서
+안에 격리합니다. 원본 CSS·안정적인 `data-node-id`·작성 viewport를 보존하고,
+Canvas 크기 조절은 작성 viewport의 확대·축소입니다.
+
+더블클릭/F2/Enter로 내부 편집 모드에 들어갑니다. `data-node-id` 요소를 클릭해
+선택하고 자식 요소가 없는 텍스트를 더블클릭해 직접 입력합니다. Mod+Enter 또는
+blur로 확정하고 Escape는 초안을 취소합니다. 기존 `CanvasStyleControls`로
+텍스트 색·크기, 컨테이너 배경색을 수정하며 원본 HTML에 반영합니다.
+소스 편집은 별도 `HTML 소스` 명령으로 유지합니다.
+
+입력 도중 원본이 달라지면 화면의 초안을 유지하고 확정은 거부합니다. 내용을
+복사한 뒤 Escape로 최신 원본을 확인할 수 있습니다. UI 상태·선택 윤곽과
+contenteditable 속성은 저장하지 않습니다. 편집·저장·undo는 기존 ObjectEditor가
+소유합니다. 내부 요소 이동·Flex/Grid 재정렬과 rich-text 편집은 아직 지원하지 않습니다.
+
+`/widgets/canvas`에 공개 API를 사용하는 예제가 있으며 Source에서 Editing,
+Web, Canvas 구현을 함께 확인할 수 있습니다.
+
 `CanvasHand`는 `ObjectEditor`와 `CanvasCreationStyle`을 받아 글자·사각형·타원·스티커 노트·자유
 그리기, 이미지·텍스트 붙여넣기, 다중 선택, 선택 스타일, 집합 이동·복제·삭제, native Clipboard, primary resize, Undo/Redo, JSON 재열기를 연결합니다.
 `useCanvasHand`는 같은 입력 조합을 custom UI에서 사용할 수 있게 공개합니다.
@@ -262,3 +284,66 @@ Canvas API의 Usage/Source 진입 경로입니다. 두 Host는 정본 `CanvasHan
 재사용하며 변경은 같은 ObjectEditor의 선택 서식 명령과 Undo를 거칩니다.
 
 선택 툴바는 별도 “스타일” 진입 버튼 없이 크기·굵기·정렬을 직접 노출합니다. 색상은 각 속성의 현재 색상 버튼으로 팔레트를 열며, 지원하지 않는 속성은 표시하지 않습니다.
+
+### 카메라와 편집 계산의 실행 경계
+
+`useCanvasViewport`는 휠·팬 입력의 최신 카메라를 보관하고 `requestAnimationFrame`당
+한 번 SVG `viewBox`에 반영합니다. 탐색 중에는 문서 커밋이나 React 전체 렌더링을
+요구하지 않습니다. 100ms 동안 입력이 없으면 배율 표시와 contextual toolbar를
+동기화합니다. 탐색 중 toolbar는 숨기고 멈춘 뒤 다시 위치를 계산합니다.
+`useCanvasHand`의 문서 레이아웃은 문서 또는 편집 preview가 바뀔 때만 계산합니다.
+카메라 변경은 문서 좌표·선택·이력을 바꾸지 않습니다.
+
+### 섹션
+
+툴바의 **섹션** 또는 `Shift+S`로 이름이 붙은 자유 배치 영역을 만듭니다.
+제목/영역을 더블 클릭하면 이름을 편집하고, 섹션을 이동하면 `parentId`로 연결된
+내부 객체가 함께 이동합니다. 섹션을 복제하거나 삭제할 때도 내부 객체를 포함하며
+undo/redo는 한 번에 처리합니다. 일반 사각형의 자동 흐름 정렬은 적용하지 않습니다.
+
+`CanvasSection`은 `CanvasObject`의 `kind: "section"`을 표시하는 공개 컴포넌트입니다.
+`object`와 선택적인 `hideTitle`을 받으며 편집 동작은 `CanvasHand`가 담당합니다.
+
+```tsx
+import { CanvasSection } from "@interactive-os/json-document-canvas";
+// SVG 내부에서 사용. 실제 생성·이동·이름 편집 Usage: /applications/canvas
+<CanvasSection object={{ id: "section", kind: "section", x: 0, y: 0,
+  width: 1280, height: 720, label: "새 페이지", color: "#f4f3f0" }} />
+```
+
+
+### Agent-connected minimal editing
+
+`CanvasHand.onRequestEdit?: (target: CanvasEditTarget) => void` opts the native
+selection controls into bounded presets and a request action. Existing full-editor
+consumers without a callback retain their native style controls. HTML uses bounded
+presets and hides its source command when a request handler is supplied.
+
+`CanvasEditTarget` contains `objectIds`, optional HTML `nodeId`, and a human-readable
+`label`. Selection is captured on invocation; it is not a live reference to later
+selection. The consumer opens a composer with removable target context, preserves
+its existing draft, and reads current document content before applying agent edits.
+The Canvas application demonstrates this through `CanvasAgentChats` and `EditorAgentChat`.
+No request is automatically submitted. Arbitrary style changes remain available
+through chat. Undo, direct text edits, movement, duplication and deletion continue
+to use their existing commands.
+
+HTML contextual controls are portaled to the owning document body and anchored
+to the selected node through `useAnchoredFloatingPosition`. The Canvas viewport
+geometry key triggers remeasurement after pan/zoom, without scaling the controls
+or clipping their options to the HTML artifact. `CanvasHTMLObject.geometryKey`
+allows embedded consumers to supply the same invalidation signal.
+
+## CanvasPages
+
+`CanvasPages`는 HTML 객체를 문서 순서의 스크롤 페이지로 표시한다.
+`editor`, `selectedId`, `onSelect`, `onRequestEdit`를 받는다. 객체 명령과
+실행 취소는 기존 `ObjectEditor`, HTML 내부 편집은 `CanvasHTMLObject`를 사용한다.
+Host가 선택 상태와 채팅 정책을 소유한다. 비 HTML 객체는 표시하지 않는다.
+
+Usage: [Slides](/applications/slides). 이 앱은 공개 `CanvasPages`를 가져와
+페이지 추가, 페이지별 채팅, 로컬 저장을 조합한다. 현재 PPTX 입출력은 제공하지 않는다.
+
+페이지 선택과 내부 편집 세션은 별개다. 페이지 내용에서 시작한 편집을 종료해도
+`selectedId`는 유지되어 Host의 페이지 대화가 사라지지 않는다. 페이지 헤더는
+hover, 키보드 포커스 또는 선택 상태에서 표시한다.

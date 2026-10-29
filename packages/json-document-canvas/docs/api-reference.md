@@ -28,6 +28,15 @@ interface CanvasCreationStyle {
   readonly stickyNoteColor?: string;
 }
 ```
+## `CanvasEditTarget`
+
+```ts
+interface CanvasEditTarget {
+  readonly objectIds: readonly string[];
+  readonly nodeId?: string;
+  readonly label: string;
+}
+```
 ## `CanvasHand`
 
 ```ts
@@ -37,6 +46,7 @@ CanvasHand(props: CanvasHandProps): import("<repository>/node_modules/@types/rea
 
 ```ts
 interface CanvasHandProps {
+  readonly onRequestEdit?: (target: CanvasEditTarget) => void;
   /** Fill the host and navigate independently of document coordinates. */
   readonly workspace?: boolean;
   readonly editor: ObjectEditor;
@@ -47,6 +57,21 @@ interface CanvasHandProps {
   /** Optional policy instance; one profile per mounted Hand. */
   readonly selectProfile?: PlaneSelectProfile;
 }
+```
+## `CanvasHTMLObject`
+
+```ts
+CanvasHTMLObject({ object, editor, active, onDeactivate, onRequestEdit, geometryKey }: { readonly object: Extract<CanvasObject, { kind: "embedded-document"; }>; readonly editor: ObjectEditor; readonly geometryKey?: string; readonly active: boolean; readonly onDeactivate: () => void; readonly onRequestEdit?: (target: CanvasEditTarget) => void; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `CanvasPages`
+
+```ts
+CanvasPages({ editor, selectedId, onSelect, onRequestEdit }: { readonly editor: ObjectEditor; readonly selectedId: string | null; readonly onSelect: (id: string) => void; readonly onRequestEdit: (target: CanvasEditTarget) => void; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `CanvasSection`
+
+```ts
+CanvasSection({ object, hideTitle }: { readonly object: Extract<CanvasObject, { kind: "section"; }>; readonly hideTitle?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
 ## `CanvasSheetObject`
 
@@ -73,3 +98,9 @@ useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: 
 ```ts
 useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean): { hand: boolean; setHand: React.Dispatch<React.SetStateAction<boolean>>; ... 7 more ...; events: { ...; } | { ...; }; }
 ```
+
+`CanvasHTMLObject` accepts optional `review: { requests, onRegions }`. It measures
+review targets after iframe load and whenever requests change using Web's
+`measureWebHTMLReview`. It does not infer targets from pointer coordinates or modify
+HTML to insert review decorations. Coordinates are in the HTML viewport; consumers
+must use a matching review viewport or transform them.

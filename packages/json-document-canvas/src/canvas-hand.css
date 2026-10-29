@@ -14,3 +14,21 @@
 [data-canvas-content-toolbar] [data-ui-control="field"]:not([role="dialog"] *) { height: 1.75rem; min-height: 1.75rem; padding: 0.125rem 0.375rem; font-size: 0.75rem; line-height: 1.25rem; }
 [data-canvas-content-toolbar] [data-ui-component="toolbar-group"] { gap: 0.125rem; }
 [data-canvas-content-toolbar] svg:not([role="dialog"] *) { width: 0.875rem; height: 0.875rem; }
+
+/* Contextual controls re-anchor after the camera settles, without per-frame layout reads. */
+[data-canvas-workspace]:has([data-canvas-navigating]) [data-canvas-content-toolbar] { visibility: hidden; }
+
+/* Page presentation shares HTML editing without exposing the spatial canvas tools. */
+[data-canvas-pages] { display: flex; flex-direction: column; gap: 32px; }
+[data-canvas-page-heading] { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 12px; color: rgb(var(--color-foreground-secondary)); }
+[data-canvas-page-heading] > button { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; min-width: 0; }
+[data-canvas-page-heading] [role="toolbar"] { display: flex; flex-shrink: 0; gap: 2px; }
+[data-canvas-page-sheet] { background: rgb(var(--color-background-canvas)); outline: 1px solid rgb(var(--color-border-subtle)); }
+[data-canvas-page][data-selected="true"] [data-canvas-page-sheet] { outline: 2px solid rgb(var(--color-border-accent)); }
+
+[data-canvas-page-heading] { opacity: 0; }
+[data-canvas-page]:focus-within [data-canvas-page-heading],
+[data-canvas-page][data-selected="true"] [data-canvas-page-heading] { opacity: 1; }
+@media (hover: hover) {
+  [data-canvas-page]:hover [data-canvas-page-heading] { opacity: 1; }
+}

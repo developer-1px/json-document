@@ -9,7 +9,7 @@ Composer 편집 관찰과 참조 atom을 React에 연결의 public entrypoint입
 ## `ChatComposer`
 
 ```ts
-ChatComposer<Model extends string, Suggestion extends ComposerHostSuggestion & RichTextSuggestionCandidate>({ composer, label, submitLabel, submitErrorLabel, placeholder, className, }: ChatComposerProps<Model, Suggestion>): ReactNode
+ChatComposer<Model extends string, Suggestion extends ComposerHostSuggestion & RichTextSuggestionCandidate>({ composer, label, submitLabel, submitErrorLabel, placeholder, className, speechInput, }: ChatComposerProps<Model, Suggestion>): ReactNode
 ```
 ## `ChatComposerProps`
 
@@ -21,6 +21,7 @@ interface ChatComposerProps<Model extends string, Suggestion extends ComposerHos
   readonly submitErrorLabel: string;
   readonly placeholder?: string;
   readonly className?: string;
+  readonly speechInput?: { readonly lang: string };
 }
 ```
 ## `ComposerBinding`

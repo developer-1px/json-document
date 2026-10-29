@@ -27,7 +27,7 @@ export function assertObjectDocument(value: unknown): void {
     if ((object.width as number) < 0 || (object.height as number) < 0) throw new TypeError(`Object dimensions must not be negative: ${JSON.stringify(object.id)}.`);
     if (object.kind !== undefined) {
       if (typeof object.color !== "string") throw new TypeError("Canvas objects require a color string.");
-      if (!["text", "rectangle", "ellipse", "sticky-note", "path", "image", "embedded-document"].includes(object.kind as string)) throw new TypeError("Unknown Object kind.");
+      if (!["text", "section", "rectangle", "ellipse", "sticky-note", "path", "image", "embedded-document"].includes(object.kind as string)) throw new TypeError("Unknown Object kind.");
       if (!positive(object.width) || !positive(object.height)) throw new TypeError("Canvas object dimensions must be positive.");
       if (object.kind === "text" && !positive(object.fontSize)) throw new TypeError("Text fontSize must be positive and finite.");
       if (object.widthMode !== undefined && (object.kind !== "text" || !["auto", "fixed"].includes(object.widthMode as string))) throw new TypeError("widthMode is auto or fixed for text only.");
@@ -57,7 +57,7 @@ export function assertObjectDocument(value: unknown): void {
     let parentId = object.parentId;
     while (typeof parentId === "string") {
       const parent = objects.find(item => item.id === parentId);
-      if (!parent || parent.kind !== "rectangle" || seen.has(parent.id)) throw new TypeError("Invalid container hierarchy.");
+      if (!parent || (parent.kind !== "rectangle" && parent.kind !== "section") || seen.has(parent.id)) throw new TypeError("Invalid container hierarchy.");
       seen.add(parent.id); parentId = parent.parentId;
     }
   }

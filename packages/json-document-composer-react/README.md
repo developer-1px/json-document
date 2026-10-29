@@ -72,3 +72,12 @@ and command-menu handling retain the configured Composer policy.
 
 `ChatComposer` composes the canonical text editor and submit lifecycle for compact chat input.
 See the owning [Chat Composer API](docs/chat-composer.md) and [Usage](/demo/chat).
+
+### ChatComposer dictation
+
+Pass `speechInput={{lang: "ko-KR"}}` to `ChatComposer` to enable an optional microphone
+button on supported browsers. Final speech segments use `composer.insertText`;
+interim recognition is shown separately. Nothing is automatically submitted.
+The microphone stops on hidden/unmounted controls, hidden tabs and submission.
+Users can move the pointer outside the composer while speaking.
+Usage: [Slides](/applications/slides) and the shared `EditorAgentChat`.

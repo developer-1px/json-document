@@ -14,7 +14,8 @@ import {
   unauthorizedChange,
 } from "./change.js";
 import { patchBetweenTrees } from "./document-patch.js";
-import { jsonEqual } from "@interactive-os/json-document";
+import { visibleMemberEntries } from "./tree.js";
+import { buildPointer, jsonEqual } from "@interactive-os/json-document";
 import { materializeChanges } from "./materialize.js";
 import { assignCausalState, type RuntimeState } from "./runtime-state.js";
 import type {
@@ -25,9 +26,26 @@ import type {
 } from "./types.js";
 
 export function createReplicaRuntime(state: RuntimeState): CollaborationReplica {
+  let locationRevision = -1;
+  const locations = new Map<string, string>();
   return Object.freeze({
     epoch: state.epoch,
     status: () => state.replicaStatus(),
+    locate(memberId: string) {
+      if (locationRevision !== state.graphRevision) {
+        locations.clear();
+        const tree = state.materialized.tree;
+        const stack: Array<readonly [string, string[]]> = [[tree.root, []]];
+        while (stack.length) {
+          const [id, path] = stack.pop()!;
+          if (locations.has(id)) continue;
+          locations.set(id, buildPointer(path));
+          for (const [key, child] of visibleMemberEntries(tree, id)) stack.push([child, [...path, key]]);
+        }
+        locationRevision = state.graphRevision;
+      }
+      return locations.get(memberId) ?? null;
+    },
     exportBundle(): CollaborationBundle {
       return Object.freeze({
         epoch: state.epoch,
@@ -95,6 +113,16 @@ export function createReplicaRuntime(state: RuntimeState): CollaborationReplica 
         additions += 1;
       }
 
+      // No causal state changed; the existing graph already passed these checks.
+      if (additions === 0) {
+        return {
+          ok: true,
+          integrated: Object.freeze([]),
+          pending: Object.freeze(state.graph.pending.map((row) => row.changeId)),
+          duplicates: Object.freeze(duplicates.sort(compareChangeIds)),
+        };
+      }
+
       const cycle = graphCycle(nextKnown);
       if (cycle !== null) {
         return {
@@ -113,14 +141,7 @@ export function createReplicaRuntime(state: RuntimeState): CollaborationReplica 
           changeId: freezeChangeId(dependencyFork),
         };
       }
-      if (additions === 0) {
-        return {
-          ok: true,
-          integrated: Object.freeze([]),
-          pending: Object.freeze(state.graph.pending.map((row) => row.changeId)),
-          duplicates: Object.freeze(duplicates.sort(compareChangeIds)),
-        };
-      }
+
 
       const nextGraph = prepareGraph(nextKnown);
       const actorFork = findActorFork(nextGraph.ordered);

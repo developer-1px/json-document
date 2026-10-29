@@ -1,3 +1,4 @@
+import { ComposerSpeechInput } from "./speech-input.js";
 import { useId, type ReactNode } from "react";
 import { ArrowUp } from "lucide-react";
 import type { ComposerHostSuggestion } from "@interactive-os/json-document-composer";
@@ -14,10 +15,11 @@ export interface ChatComposerProps<Model extends string, Suggestion extends Comp
   readonly submitErrorLabel: string;
   readonly placeholder?: string;
   readonly className?: string;
+  readonly speechInput?: { readonly lang: string };
 }
 
 export function ChatComposer<Model extends string, Suggestion extends ComposerHostSuggestion & RichTextSuggestionCandidate>({
-  composer, label, submitLabel, submitErrorLabel, placeholder, className,
+  composer, label, submitLabel, submitErrorLabel, placeholder, className, speechInput,
 }: ChatComposerProps<Model, Suggestion>): ReactNode {
   const errorId = useId();
   return (
@@ -38,6 +40,7 @@ export function ChatComposer<Model extends string, Suggestion extends ComposerHo
           renderExtension={(node) => composer.renderReference(node)}
           data-ui-chat-composer-input=""
         />
+        {speechInput && <ComposerSpeechInput lang={speechInput.lang} onText={composer.insertText} disabled={composer.isSubmitting} />}
         <Command type="submit" preserveFocus aria-label={submitLabel} disabled={!composer.canSubmit}
           aria-busy={composer.isSubmitting} data-ui-chat-composer-send="">
           <ArrowUp aria-hidden="true" size={18} />

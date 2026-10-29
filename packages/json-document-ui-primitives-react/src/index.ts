@@ -38,3 +38,6 @@ export {
   type TabOption,
   type SelectableItemProps,
 } from "./controls.js";
+export { WindowDock, type WindowDockItem, type WindowDockProps } from "./window-dock.js";
+
+export { EditingControls, type EditingControlsProps } from "./editing-controls.js";

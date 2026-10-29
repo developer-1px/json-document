@@ -249,4 +249,13 @@ export {projectSheetGrid} from "./sheet-view.js";
 export type {SheetGrid,SheetViewOptions} from "./sheet-view.js";
 export { applyTextEdit, moveText, type TextEdit, type TextMove } from "./text-edit.js";
 export { createTextEditorTools } from "./text-tools.js";
-export { createCanvasEditorTools } from "./canvas-tools.js";
+export { createCanvasEditorTools, type CanvasEditorToolsLifecycle } from "./canvas-tools.js";
+export { htmlEmbeddedDocumentType, createCanvasHTML, readCanvasHTML, projectCanvasHTML, updateCanvasHTML, type CanvasHTMLDocument, type CanvasHTMLAdapter } from "./object-html.js";
+export { createAnnotationReviewQueue, type AnnotationReviewQueue, type AnnotationReviewCancellation, type AnnotationReviewTask, type AnnotationReviewState } from "./annotation-review.js";
+export { createAnnotationReviewSession } from "./annotation-review-session.js";
+export type { AnnotationReviewDocument, AnnotationReviewSession, AnnotationReviewSessionOptions } from "./annotation-review-session.js";
+
+export { createAnnotationFollowing, type AnnotationFollowing } from "./annotation-following.js";
+
+export { createAnnotationReviewPlanTool } from "./annotation-review-plan.js";
+export type { AnnotationReviewQueueOptions, AnnotationReviewWorker } from "./annotation-review.js";

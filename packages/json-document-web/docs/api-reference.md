@@ -16,6 +16,11 @@ activeDescendantContainerProps(activeId: string | null): Readonly<{ tabIndex: 0;
 ```ts
 activeDescendantItemProps(id: string): Readonly<{ id: string; }>
 ```
+## `bindWebHTMLArtifactEditing`
+
+```ts
+bindWebHTMLArtifactEditing(frame: { readonly contentDocument: unknown; readonly contentWindow: unknown; }, options: { readonly selectedId?: string; readonly onSelect: (selection: WebHTMLNodeSelection | null) => void; readonly onCommitText: (id: string, text: string) => boolean; readonly onEditingChange: (editing: boolean) => void; readonly onHistory: (action: "undo" | "redo") => void; readonly onExit: () => void; }): () => void
+```
 ## `calendarCommandFromWebKeyboardEvent`
 
 ```ts
@@ -87,6 +92,11 @@ createWebClipboardTextWriter(options?: { readonly clipboard?: WebClipboardTextPo
 ```ts
 createWebDragDropSession<Item, Target>(options?: WebDragDropSessionOptions<Item, Target>): WebDragDropSession<Item, Target>
 ```
+## `createWebHTMLArtifactSource`
+
+```ts
+createWebHTMLArtifactSource(html: string): string
+```
 ## `createWebJSONClipboardRepresentation`
 
 ```ts
@@ -103,6 +113,11 @@ createWebKeyboardAdapter<Command>(options: { readonly keymap: WebKeymap<Command>
 
 ```ts
 createWebPointerSession<State>(options?: WebPointerSessionOptions<State>): WebPointerSession<State>
+```
+## `createWebSpeechInput`
+
+```ts
+createWebSpeechInput(options: { lang: string; onText: (text: string) => void; onInterim: (text: string) => void; onError: (code: string) => void; onEnd: () => void; Recognition?: WebSpeechRecognitionConstructor; }): { ...; }
 ```
 ## `createWebStoredDocument`
 
@@ -128,6 +143,11 @@ const defaultWebKeymap: Readonly<Record<string, WebKeyboardCommand>>
 
 ```ts
 const documentClipboardCodec: WebClipboardCodec<DocumentClipboard>
+```
+## `editWebHTMLArtifactNode`
+
+```ts
+editWebHTMLArtifactNode(html: string, nodeId: string, change: WebHTMLNodeChange): string
 ```
 ## `fileCandidateFromWebFile`
 
@@ -426,6 +446,11 @@ interface WebCalendarKeyboardEvent {
   readonly ctrlKey?: boolean;
   readonly altKey?: boolean;
 }
+```
+## `webCanvasHTMLAdapter`
+
+```ts
+const webCanvasHTMLAdapter: CanvasHTMLAdapter
 ```
 ## `WebClientPoint`
 
@@ -729,6 +754,32 @@ interface WebHTMLNode {
   readonly childNodes: ArrayLike<WebHTMLNode>;
 }
 ```
+## `WebHTMLNodeChange`
+
+```ts
+interface WebHTMLNodeChange {
+  readonly text?: string;
+  readonly color?: string;
+  readonly backgroundColor?: string;
+  readonly fontSize?: number;
+}
+```
+## `WebHTMLNodeSelection`
+
+```ts
+interface WebHTMLNodeSelection {
+  readonly id: string;
+  readonly text: string;
+  readonly editableText: boolean;
+  readonly color: string;
+  readonly backgroundColor: string;
+  readonly fontSize: number;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+```
 ## `WebJSONClipboardFormat`
 
 ```ts
@@ -936,6 +987,31 @@ interface WebRasterReadSignal {
 type WebRasterSourceResult =
   | { readonly ok: true; readonly dataURL: string; readonly width: number; readonly height: number }
   | { readonly ok: false; readonly code: "raster.read-failed" | "raster.decode-failed" | "raster.cancelled"; readonly reason?: string };
+```
+## `WebSpeechRecognition`
+
+```ts
+interface WebSpeechRecognition {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((event: { results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null;
+  onerror: ((event: { error: string }) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+```
+## `webSpeechRecognitionConstructor`
+
+```ts
+webSpeechRecognitionConstructor(): WebSpeechRecognitionConstructor | undefined
+```
+## `WebSpeechRecognitionConstructor`
+
+```ts
+type WebSpeechRecognitionConstructor = new () => WebSpeechRecognition;
 ```
 ## `WebStoredDocument`
 
@@ -1236,3 +1312,17 @@ type WebRecordingSaveResult =
   | { readonly ok: true; readonly id: string; readonly path: string }
   | { readonly ok: false; readonly id: string; readonly local: boolean; readonly error: string };
 ```
+
+### `measureWebHTMLReview(document, requests)`
+
+Resolves `WebHTMLReviewRequest[]` against a rendered, same-origin HTML document.
+Each request supplies `id`, coordinator-selected `nodeIds`, and optionally an exact
+`before`/`after` source pair. Returns regions keyed by request ID in iframe viewport
+coordinates. `kind` distinguishes `target`, `added`, `changed`, `removed`, and `page`.
+Changes come from source comparison, not the coordinator's claim. Deleted nodes,
+stylesheet edits, and superseded results use a page-level comparison marker rather
+than a guessed element location. This is authored-node comparison, not pixel diff.
+
+`CanvasHTMLObject.review` consumes this API and reports regions to
+`AnnotationReview.renderContent`'s optional review projection. See Slides' public
+API composition in `SlideProof` and the AnnotationReview Usage on the site.

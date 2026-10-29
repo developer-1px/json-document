@@ -1,4 +1,4 @@
-import { createAgentChatSession, type AgentChatSession } from "./agent-chat-session";
+import { createAgentChatSession, type AgentChatSession, type AgentChatMessage } from "./agent-chat-session";
 import { Fragment, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { COMPOSER_HOST_PROFILE_V1, composerText, type ComposerHostConfig } from "@interactive-os/json-document-composer";
 import { ChatComposer, useComposer } from "@interactive-os/json-document-composer-react";
@@ -17,14 +17,21 @@ const config: ComposerHostConfig = {
   interaction: { submit: "enter", newline: "shift-enter" },
 };
 
-export function EditorAgentChat({ tools, id, label, logLabel, inputLabel, placeholder, onBusyChange }: {
+export interface AgentChatContext { readonly id: string; readonly label: string; readonly prompt: string }
+
+export function EditorAgentChat({ context, onClearContext, tools, id, label, logLabel, inputLabel, placeholder, onBusyChange, onStateChange, presentation = "floating" }: {
+  context?: AgentChatContext; onClearContext?: (id: string) => void;
   tools: ReadonlyArray<LlmAgentTool>; id: string; label: string; logLabel: string; inputLabel: string; placeholder: string;
   onBusyChange?: (busy: boolean) => void;
+  onStateChange?: (state: AgentChatMessage["state"] | null) => void;
+  presentation?: "floating" | "embedded";
 }) {
   const [stored] = useState(() => createAgentChatSession(id));
   const chat = useSyncExternalStore(stored.source.subscribe, () => stored.source.snapshot.value) as AgentChatSession;
   const saveState = useSyncExternalStore(stored.subscribe, () => stored.state);
   const { messages } = chat;
+  const state = messages.at(-1)?.state ?? null;
+  useEffect(() => { onStateChange?.(state); }, [state, onStateChange]);
   const [expanded, setExpanded] = useState(messages.length > 0);
   useEffect(() => stored.connect(), [stored]);
   const request = useRef<AbortController | null>(null);
@@ -32,16 +39,19 @@ export function EditorAgentChat({ tools, id, label, logLabel, inputLabel, placeh
   const composer = useComposer({
     id, config,
     ports: { createId: createRichTextNodeId, submit: async draft => {
-      const turn = { prompt: composerText(draft.instruction), reply: "", state: "running" as const };
+      const instruction = composerText(draft.instruction);
+      const prompt = context ? `${instruction}\n\n[수정 대상]\n${context.prompt}\n최신 내용을 도구로 읽은 뒤 이 대상을 수정하세요. 대상이 없으면 다른 항목을 대신 수정하지 말고 알려주세요.` : instruction;
+      const turn = { prompt: instruction, reply: "", state: "running" as const };
       const index = (stored.source.snapshot.value as AgentChatSession).messages.length;
       const update = (changes: Partial<AgentChatSession["messages"][number]>) => stored.source.update(current => ({ ...current, messages: current.messages.map((message, i) => i === index ? { ...message, ...changes } : message) }));
       setExpanded(true);
+      if (context) onClearContext?.(context.id);
       stored.source.update(current => ({ ...current, messages: [...current.messages, turn] }));
       request.current = new AbortController();
       onBusyChange?.(true);
       try {
         await streamLlmAgentTurn({
-          prompt: turn.prompt, mode: "chat", tools, sessionId: (stored.source.snapshot.value as AgentChatSession).sessionId, signal: request.current.signal,
+          prompt, mode: "chat", tools, sessionId: (stored.source.snapshot.value as AgentChatSession).sessionId, signal: request.current.signal,
           onSession: sessionId => { stored.source.update(current => ({ ...current, sessionId })); },
           write: delta => { turn.reply += delta; update({ reply: turn.reply }); },
         });
@@ -53,9 +63,17 @@ export function EditorAgentChat({ tools, id, label, logLabel, inputLabel, placeh
     } },
     labels: { mentionSuggestions: "멘션", skillSuggestions: "스킬" }, shouldClearAfterSubmit: true, submitClearTiming: "start",
   });
-  return <aside aria-label={label} className={`${floatingSurface.panel} fixed bottom-4 right-4 z-20 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-3 p-3`}>
-    {messages.length > 0 && <Command onClick={() => setExpanded(value => !value)} aria-expanded={expanded} className="self-end text-sm text-foreground-secondary focus-visible:outline">{expanded ? "대화 접기" : "대화 펼치기"}</Command>}
-    {expanded && <div role="log" aria-label={logLabel} className="flex max-h-[50dvh] flex-col gap-3 overflow-y-auto">
+  useEffect(() => {
+    if (!context) return;
+    const frame = requestAnimationFrame(() => composer.editorElementRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [context?.id]);
+  const Container = presentation === "embedded" ? "div" : "aside";
+  return <Container aria-label={label} className={presentation === "embedded"
+    ? "flex min-h-0 flex-col gap-3 text-sm"
+    : `${floatingSurface.panel} fixed bottom-4 right-4 z-20 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-3 p-3 text-sm`}>
+    {presentation === "floating" && messages.length > 0 && <Command onClick={() => setExpanded(value => !value)} aria-expanded={expanded} className="self-end text-xs text-foreground-secondary focus-visible:outline">{expanded ? "대화 접기" : "대화 펼치기"}</Command>}
+    {(presentation === "embedded" || expanded) && <div role="log" aria-label={logLabel} className="flex min-h-0 max-h-[50dvh] flex-col gap-3 overflow-y-auto">
       {messages.map((turn, index) => <Fragment key={index}>
         <ChatBubble direction="outgoing" label="나">{turn.prompt}</ChatBubble>
         {turn.reply && <ChatBubble direction="incoming" label="AI">{turn.reply}</ChatBubble>}
@@ -64,6 +82,10 @@ export function EditorAgentChat({ tools, id, label, logLabel, inputLabel, placeh
     </div>}
     {(saveState === "load-error" || saveState === "save-error") && <p role="alert" className="text-xs text-foreground-secondary">대화를 보관하지 못했습니다. 기존 저장 데이터는 유지됩니다.</p>}
     {composer.isSubmitting && <ChatActivity label="작업 중" />}
-    <ChatComposer composer={composer} label={inputLabel} placeholder={placeholder} submitLabel="보내기" submitErrorLabel="요청을 완료하지 못했습니다. 대화의 요청을 확인해 다시 입력해 주세요." />
-  </aside>;
+    {context && <div role="group" aria-label="수정 대상" className="flex items-center gap-2 text-xs">
+      <span className="min-w-0 truncate">{context.label}</span>
+      {onClearContext && <Command onClick={() => onClearContext(context.id)}>대상 해제</Command>}
+    </div>}
+    <ChatComposer speechInput={{ lang: "ko-KR" }} composer={composer} label={inputLabel} placeholder={placeholder} submitLabel="보내기" submitErrorLabel="요청을 완료하지 못했습니다. 대화의 요청을 확인해 다시 입력해 주세요." />
+  </Container>;
 }

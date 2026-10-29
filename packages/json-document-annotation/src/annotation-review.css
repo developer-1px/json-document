@@ -1,0 +1,67 @@
+.annotation-review > header { display: flex; align-items: center; gap: 12px; min-height: 36px; font-size: 12px; color: rgb(var(--color-foreground-secondary)); }
+.annotation-review-frame, .annotation-review-stage { position: relative; width: 100%; }
+.annotation-review-canvas, .annotation-review-result { display: block; width: 100%; outline: 1px solid rgb(var(--color-border-subtle)); touch-action: none; }
+.annotation-review-tools { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; padding: 4px; opacity: 0; }
+.annotation-review-frame:hover .annotation-review-tools, .annotation-review-frame:focus-within .annotation-review-tools { opacity: 1; }
+.annotation-review-instruction { position: fixed; right: 24px; bottom: 24px; z-index: 50; width: min(360px, calc(100vw - 32px)); padding: 12px; }
+.annotation-review-instruction > button { display: block; margin-left: auto; margin-bottom: 8px; font-size: 12px; }
+.annotation-review-tasks { padding: 0; list-style: none; font-size: 12px; }
+.annotation-review-tasks li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px 0; }
+.annotation-review-tasks li > span:first-child { flex: 1; min-width: 120px; }
+.annotation-review-tasks [role="status"] { color: rgb(var(--color-foreground-secondary)); }
+.annotation-review-tooltip { position: absolute; pointer-events: none; font-size: 12px; background: rgb(var(--color-background-canvas)); padding: 8px; max-width: 240px; }
+@media (hover: none) { .annotation-review-tools { opacity: 1; } }
+
+.annotation-following-dock { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; align-items: center; gap: 12px; padding: 8px 16px; max-width: calc(100vw - 32px); font-size: 12px; }
+.annotation-following-caption:empty { display: none; }
+.annotation-following-caption { width: 240px; max-width: 45vw; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.annotation-following-dock [role="status"] { white-space: nowrap; color: rgb(var(--color-foreground-secondary)); }
+.annotation-following-dock details { position: relative; }
+.annotation-following-dock details p { max-width: 240px; }
+.annotation-following nav[hidden] { display: none; }
+.annotation-following .annotation-review-canvas { cursor: crosshair; }
+
+.annotation-following .annotation-review-canvas path { stroke-width: 3px; }
+
+.annotation-following-threads { list-style: none; margin: 12px 0 0; padding: 0; font-size: 12px; }
+.annotation-following-threads > li { scroll-margin: 24px; padding: 8px 0; }
+.annotation-following-request { display: flex; align-items: baseline; gap: 12px; width: 100%; text-align: left; font-size: 12px; }
+.annotation-following-request > span:nth-child(2) { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.annotation-following-request > span:first-child, .annotation-following-request [role="status"] { color: rgb(var(--color-foreground-secondary)); white-space: nowrap; }
+.annotation-following-reply { margin: 8px 0 0 24px; color: rgb(var(--color-foreground-secondary)); }
+.annotation-following-reply p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 8px 0; }
+.annotation-following-actions, .annotation-following-comparison { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 12px; }
+.annotation-following-comparison { margin-bottom: 8px; }
+.annotation-following-dock > button:last-child { white-space: nowrap; font-size: 12px; }
+@media (max-width: 600px) {
+  .annotation-following-dock { gap: 8px; padding: 8px; }
+  .annotation-following-caption { width: 120px; max-width: 26vw; }
+}
+
+.annotation-following-group { margin-top: 16px; }
+.annotation-following-group summary { cursor: pointer; font-size: 12px; color: rgb(var(--color-foreground-secondary)); }
+.annotation-following-group summary:focus-visible { outline: 2px solid rgb(var(--color-foreground-accent)); outline-offset: 4px; }
+.annotation-following-history { margin-top: 16px; font-size: 12px; color: rgb(var(--color-foreground-secondary)); }
+.annotation-following-history summary { cursor: pointer; }
+.annotation-following-history summary:focus-visible { outline: 2px solid rgb(var(--color-foreground-accent)); outline-offset: 4px; }
+
+.annotation-following-document { position: relative; }
+.annotation-following-locations { position: absolute; inset: 0; pointer-events: none; }
+.annotation-following-location { position: absolute; outline: 2px dashed rgb(var(--color-foreground-accent)); outline-offset: 2px; }
+.annotation-following-location[data-review-location="review"] { outline-style: solid; background: rgb(var(--color-foreground-accent) / .06); }
+.annotation-following-location-label { position: absolute; right: 0; top: 100%; pointer-events: auto; font-size: 12px; color: rgb(var(--color-foreground-accent)); }
+.annotation-following-location[data-change-kind="request"] { outline: none; }
+.annotation-following-location-label > [data-ui-component="command-presentation"] { display: inline-flex; }
+.annotation-following-note [data-ui-chat-bubble] { font-size: 12px; }
+.annotation-following-note > [data-ui-chat-bubble] { margin-bottom: 8px; }
+.annotation-following-note-heading > [data-ui-component="command-presentation"] { margin-left: auto; }
+.annotation-following-request { border: 0; background: transparent; box-shadow: none; }
+.annotation-following-actions button { border: 0; background: transparent; box-shadow: none; padding: 4px 0; font-size: 12px; }
+.annotation-following-actions button:hover { text-decoration: underline; }
+
+.annotation-following-note { position: fixed; z-index: 40; width: 280px; padding: 12px; font-size: 12px; overflow: auto; }
+.annotation-following-note-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: rgb(var(--color-foreground-secondary)); }
+.annotation-following-note p { margin: 8px 0; overflow-wrap: anywhere; }
+.annotation-following-note .annotation-following-reply { margin: 0; }
+
+

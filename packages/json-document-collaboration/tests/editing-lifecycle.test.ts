@@ -201,3 +201,19 @@ describe.each([true, false])("external history (observed: %s)", (observed) => {
     expect(session[direction === "undo" ? "redo" : "undo"]()).toMatchObject({ ok: true, snapshot: { selection: 1 - restoredSelection } });
   });
 });
+
+test("editing history reuses availability until causal revision changes", () => {
+  let validations = 0;
+  const local = createHistoryRuntime(initial, { actorId: "local", epochId: "cached-history", ruleset: { id: "test", digest: "1" },
+    validate: () => { validations++; return { ok: true }; } });
+  local.document.commit([{ op: "replace", path: "/n", value: 1 }]);
+  const history = createCollaborationEditingHistory(local);
+  const first = history.status();
+  const before = validations;
+  for (let i = 0; i < 100; i++) expect(history.status()).toEqual(first);
+  expect(validations).toBe(before);
+  local.document.commit([{ op: "replace", path: "/other", value: 2 }]);
+  expect(history.status().revision).not.toBe(first.revision);
+  expect(history.undo().ok).toBe(true);
+  expect(local.document.value).toEqual({ n: 1, other: 0 });
+});
