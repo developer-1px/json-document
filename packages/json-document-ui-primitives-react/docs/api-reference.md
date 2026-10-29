@@ -445,13 +445,3 @@ interface WindowDockProps {
   readonly className?: string;
 }
 ```
-
-`Popover.autoFocus` defaults to `true`. Set `false` for voice-initiated disclosure
-so streamed speech does not steal focus from the active surface. `panelStyle` and
-`panelRef` compose the canonical `useAnchoredFloatingPosition` binding; Popover
-continues to own outside dismissal, Escape, and trigger focus restoration.
-The AnnotationReview Usage demonstrates this composition for live voice notes.
-
-`dismissOnOutsideInteraction` defaults to `true`. Continuous document annotations set it
-to `false` so pointing to the document does not dismiss a just-created voice note.
-Escape and explicit close remain available.

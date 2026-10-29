@@ -29,7 +29,7 @@ export function BearApplication({ document: { editor, status, retry }, downloadN
               {retry && <Command aria-label="저장 다시 시도" onClick={retry}>다시 저장</Command>}
             </nav>
           </Popover>
-          <span role="status" className="px-2 text-xs">{status}</span>
+          {retry && <span role="status" className="px-2 text-xs">자동 저장 확인 필요</span>}
           {tools}
         </Toolbar>
       </header>
@@ -38,7 +38,7 @@ export function BearApplication({ document: { editor, status, retry }, downloadN
         editor={editor}
         aria-label="Markdown 문서"
         spellCheck={false}
-        className={`mx-auto min-h-dvh w-full max-w-3xl px-6 pb-40 focus-visible:outline-none sm:px-12 ${embedded ? "pt-6 text-[length:var(--alias-body3-size,14px)] leading-[var(--alias-body3-line-height,1.6)]" : "pt-28 text-lg leading-loose sm:pt-32"}`}
+        className={`mx-auto min-h-dvh w-full max-w-3xl px-6 pb-40 focus-visible:outline-none sm:px-12 ${embedded ? "pt-6 text-sm leading-relaxed" : "pt-28 text-lg leading-loose sm:pt-32"}`}
       />
       {chat}
     </main>

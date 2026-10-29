@@ -725,13 +725,13 @@ interface CollaborationCanvasReviewOptions {
   readonly queue: AnnotationReviewQueue;
   readonly htmlAdapter: CanvasHTMLAdapter;
   readonly createActorId: () => string;
-  readonly execute: (request: { readonly task: AnnotationReviewTask; readonly signal: AbortSignal; readonly tools: ReturnType<typeof createCollaborationCanvasTools> }) => Promise<void>;
+  readonly execute: (request: { readonly task: AnnotationReviewTask; readonly signal: AbortSignal; readonly report: (response: string) => void; readonly tools: ReturnType<typeof createCollaborationCanvasTools> }) => Promise<void>;
 }
 ```
 ### `createCollaborationCanvasReview`
 
 ```ts
-createCollaborationCanvasReview({ workspace, queue, htmlAdapter, createActorId, execute }: CollaborationCanvasReviewOptions): (task: AnnotationReviewTask, cancellation: AnnotationReviewCancellation) => Promise<string>
+createCollaborationCanvasReview({ workspace, queue, htmlAdapter, createActorId, execute }: CollaborationCanvasReviewOptions): (task: AnnotationReviewTask, cancellation: AnnotationReviewCancellation, report?: (response: string) => void) => Promise<string>
 ```
 ### `createCollaborationCanvasTools`
 
@@ -743,5 +743,3 @@ createCollaborationCanvasTools(participant: CollaborationParticipant, options?: 
 ```ts
 createCollaborationEditingHistory(runtime: HistoryRuntime): EditingHistory
 ```
-
-Canvas review execution receives `report(response)` alongside `task`, `signal`, and `tools`. Pass cumulative user-visible agent output through this callback; the queue owns persistence and cancellation guards.

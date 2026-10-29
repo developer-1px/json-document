@@ -219,6 +219,11 @@ kanbanCardDropTargetFromWebElement(element: WebKanbanTargetElement | null): Kanb
 ```ts
 lineBoundary(ids: ReadonlyArray<string>, edge: "start" | "end"): string | null
 ```
+## `measureWebHTMLReview`
+
+```ts
+measureWebHTMLReview(documentValue: unknown, requests: readonly WebHTMLReviewRequest[]): Record<string, WebHTMLReviewRegion[]>
+```
 ## `measureWebText`
 
 ```ts
@@ -780,6 +785,28 @@ interface WebHTMLNodeSelection {
   readonly height: number;
 }
 ```
+## `WebHTMLReviewRegion`
+
+```ts
+interface WebHTMLReviewRegion {
+  readonly nodeId: string;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly kind: "target" | "added" | "changed" | "removed" | "page";
+}
+```
+## `WebHTMLReviewRequest`
+
+```ts
+interface WebHTMLReviewRequest {
+  readonly id: string;
+  readonly nodeIds: readonly string[];
+  readonly before?: string;
+  readonly after?: string;
+}
+```
 ## `WebJSONClipboardFormat`
 
 ```ts
@@ -1312,17 +1339,3 @@ type WebRecordingSaveResult =
   | { readonly ok: true; readonly id: string; readonly path: string }
   | { readonly ok: false; readonly id: string; readonly local: boolean; readonly error: string };
 ```
-
-### `measureWebHTMLReview(document, requests)`
-
-Resolves `WebHTMLReviewRequest[]` against a rendered, same-origin HTML document.
-Each request supplies `id`, coordinator-selected `nodeIds`, and optionally an exact
-`before`/`after` source pair. Returns regions keyed by request ID in iframe viewport
-coordinates. `kind` distinguishes `target`, `added`, `changed`, `removed`, and `page`.
-Changes come from source comparison, not the coordinator's claim. Deleted nodes,
-stylesheet edits, and superseded results use a page-level comparison marker rather
-than a guessed element location. This is authored-node comparison, not pixel diff.
-
-`CanvasHTMLObject.review` consumes this API and reports regions to
-`AnnotationReview.renderContent`'s optional review projection. See Slides' public
-API composition in `SlideProof` and the AnnotationReview Usage on the site.

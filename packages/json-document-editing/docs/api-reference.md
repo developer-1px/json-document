@@ -41,6 +41,11 @@ interface AnnotationDocument extends Record<string, JSONValue> { readonly profil
 ```ts
 interface AnnotationEditor { readonly snapshot: EditingSnapshot<AnnotationSelection>; dispatch(intent: AnnotationIntent): EditingResult<AnnotationSelection>; undo(): EditingResult<AnnotationSelection>; redo(): EditingResult<AnnotationSelection>; subscribe(listener: () => void): () => void }
 ```
+## `AnnotationFollowing`
+
+```ts
+type AnnotationFollowing = ReturnType<typeof createAnnotationFollowing>;
+```
 ## `AnnotationIntent`
 
 ```ts
@@ -92,6 +97,16 @@ interface AnnotationReviewDocument extends AnnotationDocument {
 ```ts
 type AnnotationReviewQueue = ReturnType<typeof createAnnotationReviewQueue>;
 ```
+## `AnnotationReviewQueueOptions`
+
+```ts
+interface AnnotationReviewQueueOptions {
+  /** One coordinator prepares tasks serially before execution. */
+  readonly prepare?: AnnotationReviewWorker;
+  /** Independent sources may execute in parallel; each source remains ordered. */
+  readonly concurrency?: number;
+}
+```
 ## `AnnotationReviewSession`
 
 ```ts
@@ -121,10 +136,20 @@ interface AnnotationReviewTask extends Record<string, JSONValue> {
   readonly id: string;
   readonly annotation: Annotation;
   readonly source: string;
-  readonly state: "queued" | "running" | "review" | "accepted" | "error";
+  readonly request: string;
+  readonly response: string;
+  readonly plan: string;
+  readonly annotationIds: readonly string[];
+  readonly targetNodeIds: readonly string[];
+  readonly state: "queued" | "planning" | "running" | "review" | "accepted" | "reverted" | "error";
   readonly result: string;
   readonly error: string;
 }
+```
+## `AnnotationReviewWorker`
+
+```ts
+type AnnotationReviewWorker = (task: AnnotationReviewTask, signal: AnnotationReviewCancellation, report: (response: string, targetNodeIds?: readonly string[]) => void) => Promise<string>;
 ```
 ## `AnnotationSelection`
 
@@ -655,6 +680,16 @@ clampTextSelection(value: string, selection: TextSelection): TextSelection
 
 ```ts
 createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>, options?: EditingHistoryOptions): AnnotationEditor
+```
+## `createAnnotationFollowing`
+
+```ts
+createAnnotationFollowing(queue: AnnotationReviewQueue, createId: () => string): { readonly draft: { readonly annotation: Annotation; readonly text: string; }; ... 6 more ...; reset(): void; }
+```
+## `createAnnotationReviewPlanTool`
+
+```ts
+createAnnotationReviewPlanTool(availableNodeIds?: readonly string[]): { tool: { name: string; description: string; parameters: { type: string; properties: { targetNodeIds: { type: string; items: { type: string; }; description: string; }; instruction: { ...; }; reply: { ...; }; }; required: string[]; additionalProperties: boolean; }; execute(args: unknown): { ...; } | ... 1 more ... | { ...; }; }; read(): { ...; }; }
 ```
 ## `createAnnotationReviewQueue`
 
@@ -2097,38 +2132,3 @@ interface TreeVisibilityRow extends TreeNode {
 ```ts
 updateCanvasHTML(editor: ObjectEditor, objectId: string, before: string, html: string, adapter: CanvasHTMLAdapter): import("<repository>/packages/json-document-editing/src/session").EditingResult<import("<repository>/packages/json-document-editing/src/object").ObjectSelection>
 ```
-
-## Continuous annotation following
-
-`createAnnotationFollowing(queue, createId)` combines `point(annotation, source, explicit?)`, `interim(text)` and `hear(text)` into continuous review execution. Speech onset retains its pointer target; speech before pointing waits for a target. Later speech on the same page revises queued/running work via `queue.revise(id, annotation)`, cancelling obsolete executions. Completed work receives a new follow-up with prior conversation context. Explicit marks also correct an active utterance target. `endSpeech()` releases an unfinished speech target when recognition stops. `reset()` clears conversational context, not existing tasks. The transport must honor cancellation before publication. Recognition chunks are transport boundaries, never user submit actions.
-
-Review tasks persist a user-facing `request` separately from the agent instruction, plus the streamed `response`. `enqueue` accepts an optional request and `revise(id, annotation, request?)` updates it. A queue worker receives `report(response)` as its third argument; report the cumulative response text. Cancelled executions cannot overwrite response text. Restored legacy tasks receive readable request text and an empty response.
-
-`AnnotationFollowing.pendingRequest` and `subscribe(listener)` expose speech waiting for a target. The request clears when pointing binds it to a task or `reset()` clears the session.
-
-## Coordinator and parallel execution
-
-`queue.connect(execute, { prepare, concurrency })` runs one `prepare` coordinator at a time, then up to `concurrency` executors on independent source IDs. The same source remains FIFO. A successful prepare returns a nonempty plan and stores it in `task.plan`; planning errors block that task. `planning` is a persisted task state; restored in-flight planning requires explicit retry. Revising work cancels its old plan/execution, and a cancelled coordinator must settle before the next coordinator begins. Without options, the queue retains sequential execution.
-
-`createAnnotationReviewPlanTool()` provides `tool` (`queue_review`) and `read()`. The coordinator calls it with `{ instruction, reply }`; both must be nonempty strings. `read()` rejects missing delegation. It grants no document mutation capability. See Annotation Review Usage for the fixture coordinator and parallel queue configuration.
-
-Review workers may call `report(response, targetNodeIds)` to persist the actual
-planned document targets on a task. `createAnnotationReviewPlanTool(availableNodeIds)`
-requires non-empty, valid `targetNodeIds` in `queue_review`; unknown IDs cannot be
-accepted as a plan. Revised/retried requests clear the old targets. Restored legacy
-tasks receive an empty target list. This metadata identifies intent, not proof of
-which elements changed.
-
-`annotationIds` records all marks consumed by a continuous request, including
-amendments. UI can retain the ink while executing and remove all related marks
-when the result is published. `queue.revert(id)` records a successful host-checked
-reversal as `reverted`; unlike accepted results, reverted outputs never advance
-`sourceFor` for subsequent tasks. Call this only after the host rollback succeeds.
-
-`createAnnotationFollowing().draft` is a stable observable snapshot of
-`{ annotation, text } | null`. `interim()` replaces the transcript without
-queuing work. Once a location exists the draft is anchored immediately; passive
-pointer movement cannot move an utterance's captured target. An explicit mark
-may retarget it. `hear()` consumes final speech into the existing queue and clears
-the draft. `endSpeech()` discards unfinished interim text. Subscribe through the
-existing `subscribe` method; unchanged pointer events do not emit draft updates.
