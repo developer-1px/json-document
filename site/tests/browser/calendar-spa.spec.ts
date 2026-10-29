@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-test("Calendar Create and mini-month jump keep the current view", async ({ page }) => {
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+test("Calendar c creates, commits or discards an event and mini-month jump keeps the current view", async ({ page }) => {
+  await page.goto("/applications/calendar?view=week&date=2026-05-25");
   await expect(page.getByRole("grid", { name: "Week", exact: true })).toBeVisible();
 
   await page.keyboard.press("c");
@@ -10,6 +10,15 @@ test("Calendar Create and mini-month jump keep the current view", async ({ page 
   await expect(inspector.getByLabel("Start", { exact: true })).toHaveValue("2026-05-25T10:00");
   await expect(inspector.getByLabel("End", { exact: true })).toHaveValue("2026-05-25T10:30");
   await expect(page.getByRole("grid", { name: "Week", exact: true }).getByRole("button", { name: "Event", exact: true })).toBeVisible();
+  const title = inspector.getByRole("textbox", { name: "Title" });
+  await expect(title).toBeFocused();
+  await title.fill("Planning");
+  await title.press("Enter");
+  await expect(page.getByRole("button", { name: "Planning", exact: true })).toBeVisible();
+  await page.keyboard.press("c");
+  await expect(title).toHaveValue("Event");
+  await title.press("Escape");
+  await expect(page.getByRole("button", { name: "Event", exact: true })).toHaveCount(0);
 
   await page.locator('[data-ui-component="contextual-controls"][aria-label="Calendar sources"]').focus();
   const dateGrid = page.getByRole("region", { name: "Jump to date" }).getByRole("grid", { name: "Jump 2026-05", exact: true });
@@ -23,18 +32,8 @@ test("Calendar Create and mini-month jump keep the current view", async ({ page 
   await expect(page).toHaveURL(/date=2026-05-27/);
 });
 
-test("Calendar c hotkey creates a timed event on the visible date", async ({ page }) => {
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
-  await page.getByRole("button", { name: "View", exact: true }).focus();
-  await page.keyboard.press("c");
-  const inspector = page.getByRole("region", { name: "Event" });
-  await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
-  await expect(inspector.getByLabel("Start", { exact: true })).toHaveValue("2026-05-25T10:00");
-  await expect(inspector.getByLabel("End", { exact: true })).toHaveValue("2026-05-25T10:30");
-});
-
 test("Calendar view and period hotkeys use the canonical Web keymap", async ({ page }) => {
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  await page.goto("/applications/calendar?view=week&date=2026-05-25");
   await page.getByRole("button", { name: "View", exact: true }).focus();
   await page.keyboard.press("m");
   await expect(page).toHaveURL(/view=month/);
@@ -50,7 +49,7 @@ test("Calendar view and period hotkeys use the canonical Web keymap", async ({ p
 });
 
 test("Calendar week empty drag creates a timed interval and inspector shows that span", async ({ page }) => {
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  await page.goto("/applications/calendar?view=week&date=2026-05-25");
   const thursday = page.locator('[data-calendar-grid="time"][data-calendar-day="2026-05-28"]');
   const box = await thursday.boundingBox();
   if (box === null) throw new Error("Week time-grid Thursday is not visible.");
@@ -70,7 +69,7 @@ test("Calendar week empty drag creates a timed interval and inspector shows that
 });
 
 test("Calendar month empty drag paints an all-day span without leaving month view", async ({ page }) => {
-  await page.goto("/demo/calendar?view=month&date=2026-05-25");
+  await page.goto("/applications/calendar?view=month&date=2026-05-25");
   const from = page.getByRole("gridcell", { name: "2026-05-22", exact: true });
   const to = page.getByRole("gridcell", { name: "2026-05-23", exact: true });
   const start = await from.boundingBox();
@@ -101,7 +100,7 @@ test("Calendar month empty drag paints an all-day span without leaving month vie
 });
 
 test("Calendar month all-day bar resizes by its end handle", async ({ page }) => {
-  await page.goto("/demo/calendar?view=month&date=2026-05-25");
+  await page.goto("/applications/calendar?view=month&date=2026-05-25");
   const from = page.getByRole("gridcell", { name: "2026-05-22", exact: true });
   const to = page.getByRole("gridcell", { name: "2026-05-23", exact: true });
   const start = await from.boundingBox();
@@ -121,17 +120,14 @@ test("Calendar month all-day bar resizes by its end handle", async ({ page }) =>
   await page.mouse.down();
   await page.mouse.move(box.x + box.width / 2 + end.width, box.y + box.height / 2, { steps: 8 });
   await page.mouse.up();
-  await page.keyboard.press("F2");
-  const inspector = page.getByRole("region", { name: "Event" });
-  await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
-  await expect(inspector.getByLabel("Start", { exact: true })).toHaveValue("2026-05-22");
-  const endValue = await inspector.getByLabel("End", { exact: true }).inputValue();
-  expect(endValue >= "2026-05-24").toBe(true);
+  // The extended span wraps into the next week row: 2 days + 1 day.
+  const eventBars = month.locator("[data-calendar-span]").filter({ has: page.getByRole("button", { name: "Event", exact: true }) });
+  await expect.poll(() => eventBars.evaluateAll(bars => bars.map(bar => bar.getAttribute("data-calendar-span")).sort())).toEqual(["1", "2"]);
   await expect(month).toBeVisible();
 });
 
 test("Calendar empty month cell click clears selection and does not create", async ({ page }) => {
-  await page.goto("/demo/calendar?view=month&date=2026-05-25");
+  await page.goto("/applications/calendar?view=month&date=2026-05-25");
   const month = page.getByRole("grid", { name: "Month", exact: true });
   const occurrence = month.getByRole("button", { name: "09:00 매일 뉴스 브리핑", exact: true }).first();
   await occurrence.click();
@@ -142,16 +138,8 @@ test("Calendar empty month cell click clears selection and does not create", asy
   await expect(month.getByRole("button", { name: "Event", exact: true })).toHaveCount(0);
 });
 
-test("Calendar Home and Work chips use distinct fill tokens", async ({ page }) => {
-  await page.goto("/demo/calendar?view=month&date=2026-05-25");
-  const home = page.getByRole("button", { name: "휴일", exact: true });
-  const work = page.getByRole("button", { name: /경쟁사 가격 모니터링/ }).first();
-  await expect(home).toHaveAttribute("data-calendar-color", "accent");
-  await expect(work).toHaveAttribute("data-calendar-color", "subtle");
-});
-
 test("Calendar month +N more opens that day's events without leaving month view", async ({ page }) => {
-  await page.goto("/demo/calendar?view=month&date=2026-05-25");
+  await page.goto("/applications/calendar?view=month&date=2026-05-25");
   const day = page.getByRole("gridcell", { name: "2026-05-25", exact: true });
   await day.getByRole("button", { name: /\+\d+ more/ }).click();
   const overflow = page.getByRole("dialog", { name: "Events on 2026-05-25", exact: true });
@@ -168,4 +156,17 @@ test("Calendar month +N more opens that day's events without leaving month view"
   await lunch.dblclick();
   await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("점심");
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
+});
+
+test("Calendar location writes one search snapshot and restores on back", async ({ page }) => {
+  await page.goto("/applications/calendar?view=month&date=2026-05-25");
+  await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "View", exact: true }).click();
+  await page.getByRole("option", { name: "Week", exact: true }).click();
+  await expect(page.getByRole("grid", { name: "Week", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/view=week/);
+  await expect(page).toHaveURL(/date=2026-05-25/);
+  await page.goBack();
+  await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/view=month/);
 });

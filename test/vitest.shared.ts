@@ -16,6 +16,8 @@ function defineProject(
       environment,
       include,
       isolate: true,
+      // Node 25+ exposes an unconfigured global localStorage that shadows jsdom's Storage.
+      execArgv: ["--no-experimental-webstorage"],
     },
   }, config));
 }

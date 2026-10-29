@@ -51,5 +51,5 @@ pointer capture·장치별 이벤트 수명은 Web binding에 남깁니다. 선�
 resize하며, 그룹 resize·회전·flip·snap·crop은 이 계약에 포함하지 않습니다.
 
 ```live-demo
-/demo/canvas
+/applications/canvas
 ```

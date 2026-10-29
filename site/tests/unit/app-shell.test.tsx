@@ -52,7 +52,7 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "시작하기")).toEqual(["소개", "빠른 시작", "Architecture"]);
     await user.click(nav.getByRole("button", { name: "모듈" }));
     expect(groupLinks(nav, "모듈")).toEqual([
-      "전체 모듈", "JSON Document", "Document Types", "Editing", "Collaboration", "Adapter", "Connector", "Affordance", "UI Primitives",
+      "전체 모듈", "JSON Document", "Document Types", "Editing", "Collaboration", "Adapter", "Connector", "Affordance", "Chat", "UI Primitives",
     ]);
     await user.click(nav.getByRole("button", { name: "편집 조합 · Hands" }));
     expect(groupLinks(nav, "편집 조합 · Hands")).toEqual(expect.arrayContaining([
@@ -64,7 +64,7 @@ describe("official site shell", () => {
       "설계 현황", "Official Hands 목표", "소유권 감사", "Artifact · Prototype", "개발 원칙",
     ]));
     await user.click(nav.getByRole("button", { name: "Applications" }));
-    expect(groupLinks(nav, "Applications")).toEqual(["Overview", "Bear", "Sheet", "Calendar", "AI Agent"]);
+    expect(groupLinks(nav, "Applications")).toEqual(["Overview", "Bear", "Canvas", "Slides", "Agent Review", "Sheet", "Calendar", "AI Agent"]);
     expect(nav.getByRole("link", { name: "JSON Document", exact: true }).getAttribute("href")).toBe("/docs/api");
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "시작하기", "모듈", "편집 조합 · Hands", "Applications", "설계와 진행 상태",

@@ -62,7 +62,7 @@ test("Composer가 브라우저 편집과 canonical draft를 함께 유지한다"
   await expect(page.getByTestId("composer-draft-json")).toContainText('"os.interactive/mention"');
 
   await editor.press("Enter");
-  await expect(page.getByRole("status")).toHaveText("canonical Composer turn을 제출했습니다.");
+  await expect(page.getByRole("status").filter({ hasText: "canonical Composer" })).toHaveText("canonical Composer turn을 제출했습니다.");
   expect(pageErrors).toEqual([]);
 });
 

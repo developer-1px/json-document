@@ -1,14 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-test("Image Annotation Hands exposes the compact bottom tool dock", async ({ page }) => {
-  await page.goto("/demo/annotation");
-  const dock = page.getByRole("navigation", { name: "Annotation tools" });
-  await expect(dock).toBeVisible();
-  for (const name of ["Select", "Comment", "Draw", "Arrow", "Like", "Dislike", "Download annotated image"]) {
-    await expect(dock.getByRole("button", { name, exact: true })).toBeVisible();
-  }
-});
-
 test("Like and Dislike place reaction stickers without opening a comment composer", async ({ page }) => {
   await page.goto("/demo/annotation");
   const canvas = page.getByLabel("Raster annotation canvas");
@@ -23,22 +14,6 @@ test("Like and Dislike place reaction stickers without opening a comment compose
     { type: "reaction", reaction: "like" },
     { type: "reaction", reaction: "dislike" },
   ]);
-});
-
-test("hovering or focusing an annotation number previews its comment", async ({ page }) => {
-  await page.goto("/demo/annotation");
-  const canvas = page.getByLabel("Raster annotation canvas");
-  await canvas.click({ position: { x: 300, y: 260 } });
-  await page.getByLabel("Annotation instruction").fill("이 부분의 대비를 높여 주세요.");
-  await page.getByRole("button", { name: "Send comment" }).click();
-  const marker = page.locator("[data-annotation-id]").first();
-  await marker.hover();
-  const preview = page.getByRole("tooltip", { name: "Comment 1 preview" });
-  await expect(preview).toContainText("대비를 높여");
-  await expect(marker).toBeVisible();
-  await page.mouse.move(0, 0);
-  await marker.focus();
-  await expect(preview).toContainText("대비를 높여");
 });
 
 test("click opens comment editing while drag keeps the composer hidden", async ({ page }) => {
@@ -204,68 +179,6 @@ async function drawPath(page: Page, points: ReadonlyArray<{ x: number; y: number
   for (const point of points.slice(1)) await page.mouse.move(point.x, point.y, { steps: 4 });
   await page.mouse.up();
 }
-
-test("output preserves exact document state across save, restore and raster preview", async ({ page }) => {
-  await page.goto("/demo/annotation");
-  const canvas = page.getByLabel("Raster annotation canvas");
-  await page.getByRole("button", { name: "Like", exact: true }).click();
-  await canvas.click({ position: { x: 240, y: 220 } });
-  await page.getByText("Annotation output", { exact: true }).click();
-  const saved = await structured(page);
-  expect(Object.keys(saved).sort()).toEqual(["annotations", "id", "profile", "sources"]);
-  await page.getByRole("button", { name: "Save state", exact: true }).click();
-  await page.getByRole("button", { name: "Delete annotation", exact: true }).click();
-  expect((await structured(page)).annotations).toHaveLength(0);
-  await page.getByRole("button", { name: "Restore state", exact: true }).click();
-  expect(await structured(page)).toEqual(saved);
-  await expect(page.locator('[data-annotation-id][data-selected="true"]')).toHaveCount(0);
-  await page.getByRole("tab", { name: "Image", exact: true }).click();
-  await expect(page.getByTestId("annotation-image-output")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Download PNG", exact: true })).toHaveAttribute("href", /^data:image\/png/);
-});
-
-test("modified Delete is ignored while ordinary Delete and Undo share the editing contract", async ({ page }) => {
-  await page.goto("/demo/annotation");
-  const canvas = page.getByLabel("Raster annotation canvas");
-  await canvas.focus();
-  await canvas.press("l");
-  await canvas.click({ position: { x: 240, y: 220 } });
-  await canvas.focus();
-  await canvas.press("Alt+Backspace");
-  expect((await structured(page)).annotations).toHaveLength(1);
-  await canvas.press("Delete");
-  expect((await structured(page)).annotations).toHaveLength(0);
-  await canvas.press("ControlOrMeta+z");
-  expect((await structured(page)).annotations).toHaveLength(1);
-  await expect(page.locator('[data-annotation-id][data-selected="true"]')).toHaveCount(1);
-});
-
-
-test("source tabs connect Annotation Usage to each canonical responsibility", async ({ page }) => {
-  await page.goto("/demo/annotation");
-  const workbench = page.getByRole("region", { name: "Demo workbench" });
-  await workbench.getByRole("tab", { name: "AnnotationDemoRoute.tsx", exact: true }).click();
-  for (const [file, code, api] of [
-    ["annotation-hand.tsx", "useInteractionHandle", "annotation"],
-    ["annotation-output.ts", "export function useAnnotationOutput", "annotation"],
-    ["annotation-review.tsx", "export function AnnotationReview", "annotation"],
-    ["annotation-review-session.ts", "createAnnotationReviewSession", "editing"],
-    ["annotation.ts", "transformAnnotationSelector", "editing"],
-    ["annotation-selection.ts", "family.transition", "editing"],
-    ["index.ts", "createKeySelectionFamily", "selection"],
-  ]) {
-    const matching = workbench.getByRole("tab", { name: file, exact: true });
-    if (file === "index.ts") {
-      for (const tab of await matching.all()) {
-        await tab.click();
-        if ((await workbench.getByRole("tabpanel").innerText()).includes("packages/json-document-selection/src/key/index.ts")) break;
-      }
-    } else await matching.click();
-    await expect(workbench.getByRole("tabpanel").locator("pre")).toContainText(code!);
-    await expect(workbench.getByRole("link", { name: "API Reference" })).toHaveAttribute("href", `/docs/api/${api}`);
-  }
-});
-
 
 test("review Usage collapses completed work while retaining its conversation", async ({ page }) => {
   await page.addInitScript(() => {

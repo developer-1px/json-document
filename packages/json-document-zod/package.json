@@ -41,7 +41,7 @@
     "@interactive-os/json-document": "*",
     "@interactive-os/json-document-editing": "*",
     "@types/node": "^25.9.0",
-    "typescript": "^5.0.0",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.7",
     "zod": "^4.0.0"
   }

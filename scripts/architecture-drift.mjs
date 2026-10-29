@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
-import ts from "typescript";
+import ts from "typescript-api";
 
 /** Static source reachability, including type imports and re-exports; not runtime calls. */
 export function sourceImportGraph(root, entrypoint, modules) {

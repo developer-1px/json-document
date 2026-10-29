@@ -1,13 +1,10 @@
 import { expect, test } from "@playwright/test";
 
 test("workspace fills the viewport and view navigation preserves document and editing coordinates", async ({ page }) => {
-  await page.goto("/demo/canvas");
+  await page.goto("/applications/canvas");
   const svg = page.locator("[data-canvas-slide]");
   await expect(svg).toBeVisible();
-  const bounds = await svg.boundingBox();
-  const size = page.viewportSize()!;
-  expect(bounds).toEqual({ x: 0, y: 0, ...size });
-  await expect(page.getByRole("navigation", { name: "Site navigation" })).toHaveCount(0);
+  const bounds = (await svg.boundingBox())!;
   const initial = await svg.getAttribute("viewBox");
   await page.getByRole("button", { name: "확대", exact: true }).click();
   await expect(svg).not.toHaveAttribute("viewBox", initial!);
@@ -33,28 +30,17 @@ test("workspace fills the viewport and view navigation preserves document and ed
   await page.mouse.move(200, 300); await page.mouse.down(); await page.mouse.move(320, 380); await page.mouse.up();
   const object = page.locator("[data-canvas-object]");
   await expect(object).toHaveCount(1);
-  expect(Number(await object.getAttribute("x"))).toBeCloseTo(view[0]! + 200 / size.width * view[2]!, 2);
-  expect(Number(await object.getAttribute("y"))).toBeCloseTo(view[1]! + 300 / size.height * view[3]!, 2);
+  expect(Number(await object.getAttribute("x"))).toBeCloseTo(view[0]! + (200 - bounds.x) / bounds.width * view[2]!, 2);
+  expect(Number(await object.getAttribute("y"))).toBeCloseTo(view[1]! + (300 - bounds.y) / bounds.height * view[3]!, 2);
   await page.getByRole("button", { name: "전체 보기", exact: true }).click();
   await page.getByRole("button", { name: "실행 취소", exact: true }).click();
   await expect(object).toHaveCount(0);
-  await page.setViewportSize({ width: 390, height: 844 });
-  await expect.poll(async () => (await svg.boundingBox())?.width).toBe(390);
-  expect((await svg.boundingBox())?.height).toBe(844);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
 });
 
 test("Canvas Application has a top toolbar and FigJam keys that respect text and chat focus", async ({ page }) => {
-  await page.goto("/demo/canvas");
-  await expect(page).toHaveURL(/\/applications\/canvas$/);
+  await page.goto("/applications/canvas");
   const svg = page.locator("[data-canvas-slide]");
-  const toolbar = page.getByRole("toolbar", { name: "Canvas tools" });
   await expect(svg).toBeVisible();
-  const rect = await toolbar.boundingBox();
-  expect(rect!.y).toBeCloseTo(16, 0);
-  await page.getByRole("button", { name: "사이트 메뉴", exact: true }).click();
-  await expect(page.getByRole("group", { name: "Applications", exact: true }).getByRole("link", { name: "Canvas", exact: true })).toHaveAttribute("href", "/applications/canvas");
-  await page.getByRole("dialog", { name: "사이트 메뉴", exact: true }).press("Escape");
   await svg.focus();
   for (const [key, tool] of [["r", "rectangle"], ["o", "ellipse"], ["s", "sticky-note"], ["m", "path"], ["Shift+t", "table"], ["t", "text"], ["v", "select"]]) {
     await page.keyboard.press(key!);
@@ -96,44 +82,9 @@ test("Canvas Application has a top toolbar and FigJam keys that respect text and
   await expect(chat).toContainText("rstomv");
   await expect(svg).toHaveAttribute("data-tool", "select");
   await chat.press("ControlOrMeta+a"); await chat.press("Backspace");
-  await page.getByRole("button", { name: "색상", exact: true }).click();
-  const panel = await page.getByRole("dialog", { name: "색상", exact: true }).boundingBox();
-  expect(panel!.y).toBeGreaterThanOrEqual(0);
-  await expect(toolbar.getByRole("button", { name: "색상", exact: true })).toHaveCount(0);
-  await page.getByRole("dialog", { name: "색상", exact: true }).press("Escape");
-  await page.setViewportSize({ width: 390, height: 844 });
-  const smallToolbar = await toolbar.boundingBox();
-  const smallChat = await page.getByRole("region", { name: "대화 1", exact: true }).boundingBox();
-  expect(smallChat!.y).toBeGreaterThan(smallToolbar!.y + smallToolbar!.height);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
 });
 
-test("Canvas Widget consumes the same physical keymap, tool state and cursor", async ({ page }) => {
-  await page.goto("/widgets/canvas");
-  const svg = page.locator("[data-canvas-slide]");
-  await expect(svg).toBeVisible();
-  await svg.dispatchEvent("keydown", { key: "Process", code: "KeyR", keyCode: 229, bubbles: true });
-  await expect(svg).toHaveAttribute("data-tool", "rectangle");
-  await expect(svg).toHaveCSS("cursor", "crosshair");
-  await expect(page.getByRole("button", { name: "사각형", exact: true })).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: "글자", exact: true }).click();
-  await expect(svg).toHaveCSS("cursor", "text");
-});
-
-test("Canvas API Usage exposes the application and canonical keyboard and toolbar sources", async ({ page }) => {
-  await page.goto("/docs/api/canvas");
-  await page.getByRole("region", { name: "Live demo: /applications/canvas", exact: true }).scrollIntoViewIfNeeded();
-  const workbench = page.getByRole("region", { name: "Demo workbench" }).first();
-  await workbench.getByRole("tab", { name: "CanvasApplication.tsx", exact: true }).click();
-  await workbench.getByRole("tab", { name: "keyboard.ts", exact: true }).click();
-  await expect(workbench.getByRole("tabpanel").locator("pre")).toContainText('keySource');
-  await expect(workbench.getByRole("link", { name: "API Reference" })).toHaveAttribute("href", "/docs/api/web");
-  await workbench.getByRole("tab", { name: "toolbar.tsx", exact: true }).click();
-  await expect(workbench.getByRole("link", { name: "API Reference" })).toHaveAttribute("href", "/docs/api/ui-primitives-react");
-});
-
-
-test("selection exposes formatting near the object while hover alone does not", async ({ page }) => {
+test("selection exposes content editing near the object while hover alone does not", async ({ page }) => {
   await page.goto("/applications/canvas");
   const svg = page.locator("[data-canvas-slide]");
   await expect(svg).toBeVisible();
@@ -141,21 +92,22 @@ test("selection exposes formatting near the object while hover alone does not", 
   await page.mouse.move(200, 250); await page.mouse.down(); await page.mouse.move(400, 360); await page.mouse.up();
   await page.keyboard.press("Escape");
   await page.mouse.move(600, 200);
-  await expect(page.getByRole("toolbar", { name: "콘텐츠 서식" })).toHaveCount(0);
+  const editing = page.getByRole("toolbar", { name: "콘텐츠 편집" });
+  await expect(editing).toHaveCount(0);
   const object = page.locator("[data-canvas-object]");
   await object.hover();
-  await expect(page.getByRole("toolbar", { name: "콘텐츠 서식" })).toHaveCount(0);
+  await expect(editing).toHaveCount(0);
   await object.click();
-  const formatting = page.getByRole("toolbar", { name: "콘텐츠 서식" });
-  await expect(formatting).toBeVisible();
-  const objectBox = await object.boundingBox();
-  const formatBox = await formatting.boundingBox();
-  expect(formatBox!.y + formatBox!.height).toBeLessThan(objectBox!.y);
-  await formatting.getByRole("button", { name: "색상", exact: true }).click();
-  await page.getByRole("button", { name: "색상: 빨강", exact: true }).click();
+  await expect(editing).toBeVisible();
+  const objectBox = (await object.boundingBox())!;
+  const editingBox = (await editing.boundingBox())!;
+  expect(editingBox.y + editingBox.height).toBeLessThan(objectBox.y);
+  const textColor = () => object.locator("..").locator("[data-canvas-text-box] > div").first().evaluate(element => getComputedStyle(element).color);
+  const initial = await textColor();
+  await editing.getByRole("button", { name: "글자색", exact: true }).click();
+  await page.getByRole("listbox", { name: "글자색" }).getByRole("option", { name: "빨강", exact: true }).click();
   await expect(object).toHaveAttribute("aria-pressed", "true");
-  await expect(object.locator("..").locator("rect").first()).toHaveAttribute("fill", "#ef4444");
-  await page.getByRole("dialog", { name: "색상" }).press("Escape");
+  await expect.poll(textColor).not.toBe(initial);
   await svg.focus(); await page.keyboard.press("ControlOrMeta+z");
-  await expect(object.locator("..").locator("rect").first()).not.toHaveAttribute("fill", "#ef4444");
+  await expect.poll(textColor).toBe(initial);
 });

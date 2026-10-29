@@ -2,7 +2,7 @@ import { siteRoutes } from "../site/route-registry.mjs";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import ts from "typescript";
+import ts from "typescript-api";
 import { apiReferenceCoverageErrors, apiReferencePackages } from "../docs/api-reference/packages.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));

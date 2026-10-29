@@ -20,5 +20,5 @@
   },
   "peerDependencies": { "@interactive-os/json-document": "^3.0.0" },
   "dependencies": { "@js-temporal/polyfill": "^0.5.1" },
-  "devDependencies": { "@interactive-os/json-document": "*", "@types/node": "^25.9.0", "typescript": "^5.0.0", "vitest": "^4.1.7" }
+  "devDependencies": { "@interactive-os/json-document": "*", "@types/node": "^25.9.0", "typescript": "^7.0.2", "vitest": "^4.1.7" }
 }

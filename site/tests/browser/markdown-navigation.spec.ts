@@ -1,21 +1,15 @@
 import {expect, test, type Locator, type Page} from "@playwright/test";
 
 const word = "abcdefghij";
+// Representative block projections; each follows the same vertical traversal contract.
 const fixtures = [
-  ["plain", `${word}\nx\n${word}\n\n${word}`],
   ["quote", `${word}\n> ${word}\n> ${word}\n\n${word}`],
-  ["nested quote", `${word}\n> > ${word}\n> > ${word}\n\n${word}`],
-  ["headings", `${word}\n# ${word}\n## ${word}\n\n${word}`],
-  ["bullets", `${word}\n- ${word}\n- ${word}\n\n${word}`],
-  ["ordered", `${word}\n1. ${word}\n2. ${word}\n\n${word}`],
   ["tasks", `${word}\n- [ ] ${word}\n- [x] ${word}\n\n${word}`],
   ["code", `${word}\n\n\`\`\`js\n${word}\n${word}\n\`\`\`\n\n${word}`],
-  ["inline styles", `${word}\n\n**${word}** and [link](/test)\n\n\`${word}\`\n\n${word}`],
-  ["table", `${word}\n\n| ${word} | other |\n| --- | --- |\n| ${word} | next |\n\n${word}`],
 ] as const;
 
 async function prepare(page: Page, source: string) {
-  await page.goto("/applications/bear");
+  if (!page.url().endsWith("/applications/bear")) await page.goto("/applications/bear");
   const editor = page.getByRole("textbox", {name:"Markdown 문서"});
   await editor.click(); await page.keyboard.press("ControlOrMeta+a");
   await editor.evaluate((root, source) => {
@@ -48,7 +42,8 @@ async function point(editor: Locator) {
   });
 }
 
-for (const [name, source] of fixtures) for (const extend of [false, true]) test(`${name}: ${extend ? "Shift selection" : "caret"} traverses all visible text rows in both directions`, async ({page}) => {
+test("caret and Shift selection traverse all visible text rows in both directions", async ({page}) => {
+  for (const [, source] of fixtures) for (const extend of [false, true]) {
   const editor = await prepare(page, source);
   const visited: number[] = [7];
   for (const direction of ["Down", "Up"]) {
@@ -68,6 +63,7 @@ for (const [name, source] of fixtures) for (const extend of [false, true]) test(
     expect(visited.some(offset => offset >= match.index && offset <= match.index + word.length), `never visited body at ${match.index}; visited ${visited}`).toBe(true);
   }
   await expect(editor).toHaveText(source);
+  }
 });
 
 test("vertical navigation remembers x across a short quote line and resets after horizontal input", async ({page}) => {

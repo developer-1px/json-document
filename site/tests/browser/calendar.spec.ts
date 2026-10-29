@@ -1,7 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
 test("Calendar Hands edits one interval across day, week, month, and year views", async ({ page }) => {
-  await page.goto("/demo/calendar");
+  await page.goto("/applications/calendar");
 
   await expect(page.getByRole("grid", { name: "Week" })).toBeVisible();
   const monday = timeGridDay(page, "2026-05-25");
@@ -63,7 +63,7 @@ test("Calendar Hands edits one interval across day, week, month, and year views"
 });
 
 test("Calendar selection uses the native clipboard and one history across copy, cut, paste, undo, and redo", async ({ page }) => {
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  await page.goto("/applications/calendar?view=week&date=2026-05-25");
   const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
 
   await event.click();
@@ -88,7 +88,7 @@ test("Calendar selection uses the native clipboard and one history across copy, 
 });
 
 test("Calendar drags the selected occurrence set with one temporal delta and one undo", async ({ page }) => {
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  await page.goto("/applications/calendar?view=week&date=2026-05-25");
   const first = page.getByRole("button", { name: "경쟁사 가격 모니터링", exact: true });
   const second = page.getByRole("button", { name: "고객사 싱크", exact: true });
   await first.click();
@@ -110,7 +110,7 @@ test("Calendar drags the selected occurrence set with one temporal delta and one
 });
 
 test("Calendar pastes into a selected empty time slot", async ({ page }) => {
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  await page.goto("/applications/calendar?view=week&date=2026-05-25");
   const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
   await event.click();
   await page.keyboard.press("ControlOrMeta+c");
@@ -127,7 +127,7 @@ test("Calendar pastes into a selected empty time slot", async ({ page }) => {
 });
 
 test("Calendar occurrence selection shares replace, toggle, extend, focus, and clipboard semantics", async ({ page }) => {
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  await page.goto("/applications/calendar?view=week&date=2026-05-25");
   const first = page.getByRole("button", { name: "고객사 싱크", exact: true });
   const second = page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true });
 
@@ -173,7 +173,7 @@ test("Calendar clipboard remains reachable from day, month, and recurring occurr
     { view: "day", title: "고객사 싱크" },
     { view: "month", title: "경쟁사 가격 모니터링" },
   ] as const) {
-    await page.goto(`/demo/calendar?view=${view}&date=2026-05-25`);
+    await page.goto(`/applications/calendar?view=${view}&date=2026-05-25`);
     const event = view === "month"
       ? page.getByRole("grid", { name: "Month", exact: true }).getByRole("button").filter({ hasText: title }).first()
       : page.getByRole("button", { name: title, exact: true }).first();
@@ -184,7 +184,7 @@ test("Calendar clipboard remains reachable from day, month, and recurring occurr
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain(title);
   }
 
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  await page.goto("/applications/calendar?view=week&date=2026-05-25");
   const occurrences = page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true });
   await occurrences.nth(0).click();
   await occurrences.nth(1).click({ modifiers: ["ControlOrMeta"] });
@@ -197,7 +197,7 @@ test("Calendar clipboard remains reachable from day, month, and recurring occurr
 });
 
 test("Calendar title editing preserves the input's native text clipboard", async ({ page }) => {
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  await page.goto("/applications/calendar?view=week&date=2026-05-25");
   const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
   await event.dblclick();
   const title = page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" });
@@ -206,29 +206,6 @@ test("Calendar title editing preserves the input's native text clipboard", async
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("고객사 싱크");
 });
 
-
-test("Calendar Usage exposes its canonical Editing and pointer sources", async ({ page }) => {
-  await page.goto("/editors");
-  const usage = page.locator('[data-live-demo="/demo/calendar"]');
-  await expect(usage).toHaveCount(1);
-  await usage.evaluate((element) => element.scrollIntoView({ block: "center" }));
-  const sourceTabs = usage.getByRole("tablist", { name: "Demo and source files" });
-  await expect(sourceTabs).toBeVisible();
-  await usage.getByRole("tab", { name: "CalendarDemoRoute.tsx", exact: true }).click();
-  await expect(usage.getByRole("tab", { name: "calendar-month-grid.tsx", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "calendar-time-grid.tsx", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "calendar-event-inspector.tsx", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "calendar.ts", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "calendar-input.ts", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "calendar-time-grid-pointer.ts", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "calendar-allday-pointer.ts", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "calendar-month-pointer.ts", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "point-target.ts", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "use-calendar-viewport-position.ts", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "use-calendar-keyboard.ts", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "use-anchored-floating-position.ts", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "anchored-floating-position.ts", exact: true })).toHaveCount(2);
-});
 
 function timeGridDay(page: Page, day: string): Locator {
   return page.locator(`[data-calendar-grid="time"][data-calendar-day="${day}"]`);

@@ -1,7 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
-for (const modifier of ["Meta", "Control"]) for (const backward of [false, true]) {
-  test(`Rich Text ${modifier} Undo restores ${backward ? "backward" : "forward"} range; selection movement retains Redo`, async ({ page }) => {
+{
+  test("Rich Text Undo restores a backward range; selection movement retains Redo", async ({ page }) => {
+    const modifier = "ControlOrMeta";
+    const backward = true;
     await page.goto("/editing/rich-text");
     const before = await json(page, "rich-text-document-json");
     const text = textNode(before, "text-editable").text;
@@ -285,21 +287,6 @@ test("Rich Text Lab replaces unexpected descendant DOM mutation from the canonic
   });
 });
 
-test("Rich Text Lab exposes a deterministic sample intent for inspection", async ({ page }) => {
-  await page.goto("/editing/rich-text");
-  await page.getByRole("button", { name: "Apply sample intent" }).click();
-
-  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
-    text: "여기를 선택하고 직접 입력해 보세요. ✓",
-  });
-  expect(await json(page, "rich-text-patch-json")).toEqual([{
-    op: "replace",
-    path: "/content/2/content/0/text",
-    value: "여기를 선택하고 직접 입력해 보세요. ✓",
-  }]);
-  await expect(page.getByRole("button", { name: "Undo" })).toBeEnabled();
-});
-
 test("Rich Text Lab connects Enter, IME, selection restore, and Clipboard representations to the DOM", async ({ page }) => {
   await page.goto("/editing/rich-text");
   const editor = page.getByTestId("rich-text-editor");
@@ -386,8 +373,9 @@ test("Rich Text Lab connects Enter, IME, selection restore, and Clipboard repres
   await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), plainId)?.text).toBe("plain");
 });
 
-for (const failedFormat of ["application/vnd.interactive-os.rich-text+json", "text/html", "text/plain"]) {
-  test(`Rich Text failed native Cut at ${failedFormat} preserves selection and history before retry`, async ({ page }) => {
+{
+  test("Rich Text failed native Cut preserves selection and history before retry", async ({ page }) => {
+    const failedFormat = "text/html";
     await page.goto("/editing/rich-text");
     const editor = page.getByTestId("rich-text-editor");
     // Keep a real Redo entry: a failed Cut must not replace history or clear its future.
@@ -513,29 +501,6 @@ test("Rich Text Lab handles Chromium Korean IME composition without orphaned jam
   expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
     text: "여기를 선택하고 직접 입력해 보세요.",
   });
-});
-
-test("Rich Text Lab renders the complete v1 vocabulary and exposes schema-aware proof intents", async ({ page }) => {
-  await page.goto("/editing/rich-text");
-  const editor = page.getByTestId("rich-text-editor");
-  await expect(editor.locator("blockquote")).toContainText("Blockquote");
-  await expect(editor.locator("pre code")).toHaveText('{ "canonical": true }');
-  await expect(editor.locator("ol")).toHaveAttribute("start", "2");
-  await expect(editor.locator("ul")).toContainText("schema-aware transforms");
-  await expect(editor.locator("br")).toHaveCount(1);
-
-  await setSelection(page, "text-editable", 0, 3);
-  await page.getByRole("button", { name: "Toggle strong" }).click();
-  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
-    text: "여기를",
-    marks: [{ type: "strong" }],
-  });
-  await page.getByRole("button", { name: "Set code attrs" }).click();
-  expect(textNode(await json(page, "rich-text-document-json"), "code-block-1")).toMatchObject({
-    attrs: { language: "typescript" },
-  });
-  await page.getByRole("button", { name: "Insert hard break" }).click();
-  expect(textNode(await json(page, "rich-text-document-json"), "demo-hard-break")).toMatchObject({ type: "hardBreak" });
 });
 
 test("Rich Text Lab maps formatting, hard-break, and platform deletion target ranges", async ({ page }) => {

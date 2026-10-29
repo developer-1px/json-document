@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-test("continuous microphone survives page changes, restarts normal endings and stops on permission errors", async ({ page }) => {
+// Slides speech interim display is under redesign: https://github.com/developer-1px/json-document/issues/806
+test.skip("continuous microphone survives page changes, restarts normal endings and stops on permission errors", async ({ page }) => {
   await page.addInitScript(() => {
     (window as any).speechStarts = 0;
     class SpeechMock {

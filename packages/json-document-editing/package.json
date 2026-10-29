@@ -53,7 +53,7 @@
     "@interactive-os/json-document": "*",
     "@interactive-os/json-document-selection": "*",
     "@types/node": "^25.9.0",
-    "typescript": "^5.0.0",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.7",
     "@interactive-os/json-document-markdown": "*",
     "@interactive-os/json-document-sheet-document": "*"

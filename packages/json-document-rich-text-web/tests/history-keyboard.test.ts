@@ -62,9 +62,12 @@ test.each(["metaKey", "ctrlKey"] as const)("%s Undo/Redo restores directed selec
   }
 });
 
-test.each(["metaKey", "ctrlKey"] as const)("%s preserves legacy Alt and composing modifier acceptance", (modifier) => {
+test.each(["metaKey", "ctrlKey"] as const)("%s preserves legacy Alt acceptance and leaves active composition to the native lease", (modifier) => {
   const { root, editor } = fixture();
-  expect(key(root, { [modifier]: true, altKey: true, isComposing: true }).defaultPrevented).toBe(true);
+  const before = editor.snapshot;
+  expect(key(root, { [modifier]: true, altKey: true, isComposing: true }).defaultPrevented).toBe(false);
+  expect(editor.snapshot).toEqual(before);
+  expect(key(root, { [modifier]: true, altKey: true }).defaultPrevented).toBe(true);
   expect(editor.snapshot).toMatchObject({ value: initial, selection: range(2, 4), canRedo: true });
   expect(key(root, { [modifier]: true, altKey: true, shiftKey: true }).defaultPrevented).toBe(true);
   expect(editor.snapshot.selection).toEqual(range(3));

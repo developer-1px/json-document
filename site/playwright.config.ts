@@ -6,10 +6,12 @@ const browserChannel = process.env.PLAYWRIGHT_CHANNEL === "bundled"
   ? undefined
   : process.env.PLAYWRIGHT_CHANNEL ?? "chrome";
 const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
-const richTextBrowserSpecs = /(?:rich-text-(?:corpus|demo)|text-selection-overlay)\.spec\.ts/;
+const richTextBrowserSpecs = /(?:rich-text-demo|text-selection-overlay)\.spec\.ts/;
 
 export default defineConfig({
   testDir: "./tests/browser",
+  // Local profiling scripts are never part of the suite.
+  testIgnore: /.*\.tmp\.spec\.ts/,
   fullyParallel: true,
   timeout: 30_000,
   expect: { timeout: 15_000 },
@@ -36,7 +38,7 @@ export default defineConfig({
     {
       name: "chrome",
       dependencies: ["setup"],
-      testIgnore: /.*\.setup\.ts/,
+      testIgnore: [/.*\.setup\.ts/, /.*\.tmp\.spec\.ts/],
       use: {
         ...devices["Desktop Chrome"],
         ...(browserChannel ? { channel: browserChannel } : {}),

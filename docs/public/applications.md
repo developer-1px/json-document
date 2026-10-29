@@ -83,6 +83,10 @@ Application은 showcase가 아니라 책임을 발견하고 canonical API가 실
 
 ## Slides
 
+```live-demo
+/applications/slides
+```
+
 [Slides](/applications/slides)는 원문 위에 교정을 남기면 에이전트가 순차 처리하는
 첨삭 애플리케이션이다. 점·영역·자유선·화살표와 텍스트 또는 Chrome 음성 입력으로
 지시를 남기고, `첨삭 맡기기`로 대기열에 저장한다.
@@ -166,6 +170,10 @@ Slides의 연속 첨삭은 관리 에이전트가 지정한 실제 HTML 요소�
 대화 중 상태 문구를 AI 발언으로 만들지 않으며, 페이지 아래 중복 목록은 접어 둔다.
 
 ## Agent Review 실험 페이지
+
+```live-demo
+/applications/agent-review
+```
 
 [함께 고치기](/applications/agent-review)는 대상 지정 → 음성 지시 → 에이전트 실행 → 변경 확인 흐름을 독립적으로 사용하는 실험 공간입니다. Applications 메뉴의 Agent Review에서 열 수 있습니다.
 

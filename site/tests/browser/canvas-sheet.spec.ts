@@ -1,8 +1,8 @@
 import {expect,test} from "@playwright/test";
 
-test("Canvas creates and edits a shared Sheet object with parent history and JSON persistence",async({page})=>{
+test("Canvas creates and edits a shared Sheet object with parent history and reload persistence",async({page})=>{
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
- await page.goto('/demo/canvas');await page.getByRole('button',{name:'표',exact:true}).click();
+ await page.goto('/applications/canvas');await page.getByRole('button',{name:'표',exact:true}).click();
  const surface=page.locator('[data-canvas-slide]');const box=await surface.boundingBox();
  await page.mouse.click(box!.x+box!.width*.12,box!.y+box!.height*.18);
  const object=page.locator('[data-canvas-object]');await expect(object).toHaveCount(1);await surface.focus();await surface.press("F2");
@@ -14,10 +14,10 @@ test("Canvas creates and edits a shared Sheet object with parent history and JSO
  await grid.getByRole('gridcell').first().press('Escape');await toolbar.getByRole('button',{name:'다시 실행',exact:true}).click();
  await object.dblclick();await expect(cells.first()).toHaveText('abc');
  await grid.getByRole('button',{name:'A 열 너비 조절'}).press('ArrowRight');
- await cells.first().press('Escape');await toolbar.getByRole('button',{name:'JSON',exact:true}).click();
- const json=page.getByRole('textbox',{name:'Canvas JSON document'}),saved=JSON.parse(await json.inputValue());
- expect(saved.objects[0].document.rows[0].cells[saved.objects[0].document.columns[0].id]).toBe('abc');expect(saved.objects[0].document.columns[0].width).toBeGreaterThan(120);
- await page.getByRole('button',{name:'JSON 열기',exact:true}).click();await object.dblclick();await expect(cells.first()).toHaveText('abc');
+ const widened=await grid.getByRole('columnheader').first().evaluate(element=>element.getBoundingClientRect().width);
+ await cells.first().press('Escape');
+ await page.reload();await expect(object).toHaveCount(1);await object.dblclick();await expect(cells.first()).toHaveText('abc');
+ expect(await grid.getByRole('columnheader').first().evaluate(element=>element.getBoundingClientRect().width)).toBeCloseTo(widened,0);
  expect(errors).toEqual([]);
 });
 
@@ -36,7 +36,7 @@ test("replacement typing, external paste, header focus and scaled resize share t
 test("table preview survives horizontal, vertical and tiny creation drags",async({page})=>{
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
  for(const [dx,dy] of [[90,0],[0,90],[1,1]]) {
-  await page.goto('/demo/canvas');await page.getByRole('button',{name:'표',exact:true}).click();
+  await page.goto('/applications/canvas');await page.getByRole('button',{name:'표',exact:true}).click();
   const surface=page.locator('[data-canvas-slide]'),box=await surface.boundingBox();
   const x=box!.x+box!.width*.15,y=box!.y+box!.height*.2;
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+dx!,y+dy!,{steps:4});

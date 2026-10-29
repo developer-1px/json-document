@@ -1,12 +1,14 @@
 import { expect, test } from "@playwright/test";
 
 test("text auto width, fixed wrapping, content height and local restoration", async ({ page }) => {
-  await page.goto("/demo/canvas");
-  await page.getByRole("button", { name: "JSON", exact: true }).click();
-  await page.getByRole("textbox", { name: "Canvas JSON document" }).fill(JSON.stringify({ profile: "canvas/1", width: 1280, height: 720, objects: [
-    { id: "text", kind: "text", label: "가로 길이를 바꾸면 줄바꿈하고 세로는 글을 따라갑니다", fontSize: 24, color: "black", x: 100, y: 180, width: 160, height: 1 },
-  ] }));
-  await page.getByRole("button", { name: "JSON 열기", exact: true }).click();
+  // Seed the stored document once; reload must then restore the edited copy.
+  await page.addInitScript(() => {
+    if (localStorage.getItem("json-document.canvas.v1")) return;
+    localStorage.setItem("json-document.canvas.v1", JSON.stringify({ profile: "canvas/1", width: 1280, height: 720, objects: [
+      { id: "text", kind: "text", label: "가로 길이를 바꾸면 줄바꿈하고 세로는 글을 따라갑니다", fontSize: 24, color: "black", x: 100, y: 180, width: 160, height: 1 },
+    ] }));
+  });
+  await page.goto("/applications/canvas");
   const object = page.locator('[data-canvas-object="text"]');
   await object.click();
   const fixedHeight = Number(await object.getAttribute("height"));
@@ -32,11 +34,9 @@ test("text auto width, fixed wrapping, content height and local restoration", as
   expect(Number(await object.getAttribute("height"))).toBeGreaterThan(beforeHeight);
   await input.press("ControlOrMeta+Enter");
   const finalHeight = await object.getAttribute("height");
-  await page.getByRole("button", { name: "JSON", exact: true }).click();
-  const saved = JSON.parse(await page.getByRole("textbox", { name: "Canvas JSON document" }).inputValue());
-  expect(saved.objects[0].widthMode).toBe("fixed");
-  expect(saved.objects[0].height).toBe(Number(finalHeight));
+  const finalWidth = await object.getAttribute("width");
   await page.reload();
   await expect(object).toHaveAttribute("height", finalHeight!);
+  await expect(object).toHaveAttribute("width", finalWidth!);
   await expect(object).toHaveAttribute("aria-label", "여러 줄 텍스트\n둘째 줄\n셋째 줄\n넷째 줄\n");
 });

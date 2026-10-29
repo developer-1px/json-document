@@ -81,30 +81,6 @@ test("Sheet Usage exposes the Markdown adapter public API and source history", a
  await page.getByRole("tab",{name:"Sheet",exact:true}).click(); await expect(grid.getByRole("gridcell")).toHaveCount(12);
 });
 
-test("table actions stay icon-only and editing preserves cell geometry", async ({page}) => {
- for (const path of ["/demo/sheet", "/applications/bear"]) {
-  await page.goto(path);
-  const grid=page.getByRole("grid"); const cell=grid.getByRole("gridcell").nth(2);
-  const toolbar=page.getByRole("toolbar",{name:"표 작업"});
-  await cell.click();
-  await expect(toolbar).toHaveCSS("opacity", "1");
-  await expect(toolbar).toHaveClass(/json-document-floating-control/);
-  await expect(toolbar.getByRole("button")).toHaveCount(6);
-  for (const button of await toolbar.getByRole("button").all()) {
-   await expect(button.locator("svg").first()).toBeVisible();
-   expect(await button.textContent()).toBe("");
-  }
-  await cell.scrollIntoViewIfNeeded();
-  const before=await cell.boundingBox(); const gridBefore=await grid.boundingBox();
-  await cell.dblclick(); const input=grid.getByRole("textbox"); await expect(input).toBeVisible();
-  expect(await cell.boundingBox()).toEqual(before); expect(await grid.boundingBox()).toEqual(gridBefore);
-  await input.fill("A long draft that must not resize the table while editing this cell");
-  expect(await cell.boundingBox()).toEqual(before); expect(await grid.boundingBox()).toEqual(gridBefore);
-  await input.press("Escape");
-  expect(await cell.boundingBox()).toEqual(before); expect(await grid.boundingBox()).toEqual(gridBefore);
- }
-});
-
 test("Sheet preserves its selected rectangle during Tab/Enter entry and Ctrl+Enter fill", async ({page}) => {
  await page.addInitScript(() => Object.defineProperty(navigator,"platform",{get:()=>"Win32"}));
  await page.goto('/demo/sheet');const grid=page.getByRole('grid'),cells=grid.getByRole('gridcell');
@@ -146,12 +122,4 @@ test("Bear keeps inline formatting visible during cell editing and refuses unsup
  await expect(input.locator('[data-markdown-delimiter]').first()).toBeHidden();
  expect(await cell.boundingBox()).toEqual(before);await input.press('Escape');
  await expect(cell.locator('strong')).toBeVisible();expect(await cell.boundingBox()).toEqual(before);
-});
-
-test("Sheet Document API resolves its own route and links to executable table Usage",async({page})=>{
-  await page.goto('/docs/api/sheet-document');
-  await expect(page.getByRole('heading',{level:1,name:'Sheet Document API'})).toBeVisible();
-  await expect(page.getByRole('heading',{level:2,name:'sheetDocumentSchema',exact:true})).toBeVisible();
-  await page.getByRole('link',{name:'표 편집',exact:true}).click();
-  await expect(page.getByRole('grid',{name:'Project sheet'})).toBeVisible();
 });

@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.9.0",
-    "typescript": "^5.0.0",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.7",
     "@interactive-os/json-document-markdown": "*",
     "@interactive-os/json-document-contenteditable": "*",
