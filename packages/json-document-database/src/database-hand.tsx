@@ -41,7 +41,7 @@ import {
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import { Check, Command, GridCell, Toolbar, ToolbarGroup, floatingSurface, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 import type { InteractionHandleEvent } from "@interactive-os/json-document-affordance";
-import { DatabasePropertyControl } from "./database-property-control.js";
+import { DatabasePropertyControl, databasePropertyDisplay } from "./database-property-control.js";
 import type { ZodType } from "zod/v4";
 import type { JSONValue } from "@interactive-os/json-document";
 import { ArrowDown, ArrowUp, Minus, Plus, Redo2, Undo2 } from "lucide-react";
@@ -727,8 +727,7 @@ function DefaultCell(props: {
     requestAnimationFrame(() => cell?.focus());
   }
   if (props.readOnly || (!props.editing && !props.directEditing)) {
-    const display = props.property.type === "select" ? props.property.options.find(option => option.id === value)?.name ?? String(value) : String(value);
-    return <span className="jd-database__readonly">{display}</span>;
+    return <span className="jd-database__readonly">{databasePropertyDisplay(props.property, value)}</span>;
   }
   return (
     <DatabasePropertyControl

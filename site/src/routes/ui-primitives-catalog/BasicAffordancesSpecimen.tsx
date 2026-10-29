@@ -1,5 +1,6 @@
 import {useState} from "react";
 import {MoreHorizontal} from "lucide-react";
+import {basicAffordancesLayout} from "./basic-affordances-styles";
 import {Check, Choice, Command, Field, FormField, IssueRow, Menu, NumberField, RecordFacts, SemanticIcon, StateIndicator, StatusBadge, Toolbar, contentPresentation} from "@interactive-os/json-document-ui-primitives-react";
 
 /** Product copy, fixtures and save policy only; field/selection/menu behavior belongs to the public primitives. */
@@ -22,7 +23,7 @@ export function InputFieldsSpecimen() {
     <section className={contentPresentation.group} aria-label="저장한 설정과 수량 입력">
       <h3 className={contentPresentation.itemTitle}>저장한 값</h3>
       <RecordFacts label="팀 설정 값" presentation="list" items={[{id:"name",label:"팀",value:saved.name},{id:"description",label:"소개",value:saved.description || "소개 없음"}]}/>
-      <div className="grid gap-related border-t border-line-subtle pt-group"><NumberField label="주간 알림 한도" value={limit} onValueChange={setLimit} min={0} precision={0} unit="회"/><p className={contentPresentation.caption}>0은 알림 없음, 빈 값은 한도 없음입니다. 소수는 입력값을 유지하고 오류를 표시합니다.</p></div>
+      <div className={basicAffordancesLayout.setting}><NumberField label="주간 알림 한도" value={limit} onValueChange={setLimit} min={0} precision={0} unit="회"/><p className={contentPresentation.caption}>0은 알림 없음, 빈 값은 한도 없음입니다. 소수는 입력값을 유지하고 오류를 표시합니다.</p></div>
     </section>
   </div>;
 }
@@ -43,7 +44,7 @@ export function RecordRowsSpecimen() {
     <section className={contentPresentation.group} aria-label="업무 목록 어포던스">
       <header className={contentPresentation.group}><h3 className={contentPresentation.itemTitle}>목록 탐색과 일괄 선택</h3><p className={contentPresentation.caption}>체크는 일괄 작업의 대상, 행 선택은 오른쪽에 열어 볼 대상입니다.</p></header>
       <Toolbar label="업무 일괄 선택"><label className="flex items-center gap-related"><Check label="업무 모두 선택" checked={checked.length === records.length} indeterminate={checked.length > 0 && checked.length < records.length} onCheckedChange={all=>setChecked(all ? records.map(record=>record.id) : [])}/><span className={contentPresentation.caption}>전체 선택</span></label><span role="status" className={contentPresentation.caption}>{checked.length}개 선택</span><Command disabled={!checked.length} onClick={()=>{setRecords(previous=>previous.map(record=>checked.includes(record.id) ? {...record,unread:false} : record));}}>읽음으로 표시</Command></Toolbar>
-      <ul aria-label="업무 목록" className="grid min-w-0 list-none divide-y divide-line-subtle border-y border-line-subtle p-0">
+      <ul aria-label="업무 목록" className={basicAffordancesLayout.list}>
         {records.map(record=><li key={record.id} className="min-w-0">
           <IssueRow title={record.title} summary={record.summary} identifier={record.id} assignee={record.owner}
             selected={opened === record.id} onSelect={()=>setOpened(record.id)}

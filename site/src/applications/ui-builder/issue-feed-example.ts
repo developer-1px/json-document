@@ -26,7 +26,7 @@ export function createIssueFeedExample() {
   const add = (id: string, kind: UIComponentKind, text: string, pageId: string, height: number, content: Partial<UIComponentContent> = {}) => {
     const created = createUIComponentObject(kind, {x: 0, y: 0}, {text});
     if (created.kind !== "embedded-document") throw new Error("등록 컴포넌트를 확인해 주세요.");
-    ensure(editor.dispatch({type: "object.create", object: {...created, id, width: kind === "button" || kind === "page-link" ? 200 : 1080, height, document: {...created.document, ...content, pageId}}}));
+    ensure(editor.dispatch({type: "object.create", object: {...created, id, width: kind === "button" || kind === "page-link" ? 200 : 1080, height, document: {...(created.document as UIComponentContent), ...content, pageId}}}));
     ids[id] = readUIBuilderProject(editor.snapshot.value).objects.at(-1)!.id;
   };
   const main = "page:main";

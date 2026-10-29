@@ -163,10 +163,15 @@ describe("Demo definition and source discovery", () => {
     const document = await discoverDemoSources("routes/document-demo/DocumentDemoRoute.tsx");
     expect(document.map((file) => file.path)).toEqual([
       "routes/document-demo/DocumentDemoRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/input-controls.tsx",
+      "packages/json-document-ui-primitives-react/src/design-system.css",
+      "packages/json-document-ui-primitives-react/src/design-tokens.css",
+      "packages/json-document-ui-primitives-react/src/content-presentation.ts",
       "packages/json-document-web/src/clipboard-event.ts",
       "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
+      "packages/json-document-ui-primitives-react/src/toolbar.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-affordance/src/select.ts",
@@ -182,10 +187,15 @@ describe("Demo definition and source discovery", () => {
     expect(source).toContain("export function DocumentDemoRoute()");
     expect(source).toContain('from "@interactive-os/json-document-react"');
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.path)).toEqual([
+      "packages/json-document-ui-primitives-react/src/input-controls.tsx",
+      "packages/json-document-ui-primitives-react/src/design-system.css",
+      "packages/json-document-ui-primitives-react/src/design-tokens.css",
+      "packages/json-document-ui-primitives-react/src/content-presentation.ts",
       "packages/json-document-web/src/clipboard-event.ts",
       "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
+      "packages/json-document-ui-primitives-react/src/toolbar.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-affordance/src/select.ts",
@@ -199,8 +209,13 @@ describe("Demo definition and source discovery", () => {
     ]);
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.referencePath)).toEqual([
+      "/docs/api/ui-primitives-react",
+      "/docs/api/ui-primitives-react",
+      "/docs/api/ui-primitives-react",
+      "/docs/api/ui-primitives-react",
       "/docs/api/web",
       "/docs/api/web",
+      "/docs/api/ui-primitives-react",
       "/docs/api/ui-primitives-react",
       "/docs/api/ui-primitives-react",
       "/docs/api/react",
@@ -219,20 +234,35 @@ describe("Demo definition and source discovery", () => {
   test("discovers demo-owned helpers and shared behavioral glue from one entry", async () => {
     expect((await discoverDemoSources("routes/database-demo/DatabaseDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/database-demo/DatabaseDemoRoute.tsx",
+      "routes/database-demo/ResourceDatabaseUsage.tsx",
+      "packages/json-document-ui-primitives-react/src/content-group.tsx",
+      "packages/json-document-ui-primitives-react/src/content-presentation.ts",
+      "packages/json-document-ui-primitives-react/src/design-system.css",
+      "packages/json-document-ui-primitives-react/src/design-tokens.css",
+      "packages/json-document-ui-primitives-react/src/record-presentation.tsx",
+      "packages/json-document-ui-primitives-react/src/input-controls.tsx",
+      "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-ui-primitives-react/src/record-affordances.tsx",
+      "packages/json-document-ui-primitives-react/src/chat-bubble.tsx",
+      "packages/json-document-ui-primitives-react/src/chat-bubble.css",
+      "packages/json-document-database/src/database-hands.tsx",
+      "packages/json-document-ui-primitives-react/src/product-shell.tsx",
+      "packages/json-document-ui-primitives-react/src/toolbar.tsx",
+      "packages/json-document-editing/src/database-property-value.ts",
       "routes/database-demo/DatabaseTableDemo.tsx",
       "routes/database-demo/initial-database.ts",
-      "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-database/src/database-hand.tsx",
       "packages/json-document-database/src/database-property-control.tsx",
-      "packages/json-document-editing/src/database-property-value.ts",
-      "packages/json-document-ui-primitives-react/src/input-controls.tsx",
       "packages/json-document-database/src/database-view-controls.tsx",
-      "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-ui-primitives-react/src/presentations.tsx",
+      "packages/json-document-ui-primitives-react/src/use-popup.ts",
+      "packages/json-document-ui-primitives-react/src/floating-surface.css",
+      "packages/json-document-database/styles.css",
       "packages/json-document-web/src/clipboard-event.ts",
       "packages/json-document-web/src/input.ts",
       "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-selection/src/interaction/grid-traversal.ts",
-      "packages/json-document-ui-primitives-react/src/toolbar.tsx",
+      "packages/json-document-ui-primitives-react/src/floating-surface.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-editing/src/database.ts",
@@ -246,6 +276,9 @@ describe("Demo definition and source discovery", () => {
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/content-presentation.ts",
+      "packages/json-document-ui-primitives-react/src/design-system.css",
+      "packages/json-document-ui-primitives-react/src/design-tokens.css",
       "packages/json-document-ui-primitives-react/src/listbox.ts",
       "packages/json-document-affordance/src/session.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
@@ -258,10 +291,14 @@ describe("Demo definition and source discovery", () => {
   test("registers the Object owner source next to Object demo usage", async () => {
     expect((await discoverDemoSources("routes/object-demo/ObjectDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/object-demo/ObjectDemoRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/content-presentation.ts",
+      "packages/json-document-ui-primitives-react/src/design-system.css",
+      "packages/json-document-ui-primitives-react/src/design-tokens.css",
       "packages/json-document-web/src/clipboard-event.ts",
       "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
+      "packages/json-document-ui-primitives-react/src/toolbar.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
@@ -329,10 +366,14 @@ describe("Demo definition and source discovery", () => {
   test("registers Tree visibility and React binding sources next to Tree usage", async () => {
     expect((await discoverDemoSources("routes/tree-demo/TreeDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/tree-demo/TreeDemoRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/content-presentation.ts",
+      "packages/json-document-ui-primitives-react/src/design-system.css",
+      "packages/json-document-ui-primitives-react/src/design-tokens.css",
       "packages/json-document-web/src/clipboard-event.ts",
       "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
+      "packages/json-document-ui-primitives-react/src/toolbar.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-affordance/src/select.ts",
@@ -350,6 +391,9 @@ describe("Demo definition and source discovery", () => {
   test("registers Board and platform drag session sources next to Kanban usage", async () => {
     expect((await discoverDemoSources("routes/kanban-demo/KanbanDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/kanban-demo/KanbanDemoRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/content-presentation.ts",
+      "packages/json-document-ui-primitives-react/src/design-system.css",
+      "packages/json-document-ui-primitives-react/src/design-tokens.css",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-editing/src/kanban.ts",
@@ -361,6 +405,9 @@ describe("Demo definition and source discovery", () => {
     ]);
     expect((await discoverDemoSources("routes/widgets/BoardWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/BoardWidgetRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/content-presentation.ts",
+      "packages/json-document-ui-primitives-react/src/design-system.css",
+      "packages/json-document-ui-primitives-react/src/design-tokens.css",
       "packages/json-document-ui-primitives-react/src/content-interaction.ts",
       "packages/json-document-affordance/src/content-interaction.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",

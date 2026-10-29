@@ -11,7 +11,7 @@ const initialTable:DatabaseDocument={schema:{properties:[{id:"name",name:"상품
 /** Fixtures only: table behavior, commands, validation and keyboard editing belong to DatabaseHand. */
 function TablePair() {
   const [document,setDocument]=useState(initialTable);
-  return <Comparison readApi="DatabaseHand (readOnly)" writeApi="DatabaseHand" read={<DatabaseHand document={document} viewId="comparison" readOnly presentation={{showRecordIds:false,showPropertyTypes:false}} features={{create:false,delete:false,history:false,filter:false,columns:false}} labels={{ariaLabel:"상품 비교 · 읽기"}}/>} write={<DatabaseHand document={document} viewId="comparison" onDocumentChange={setDocument} presentation={{showRecordIds:false,showPropertyTypes:false}} features={{create:false,delete:false,history:false,filter:false,columns:false}} labels={{ariaLabel:"상품 비교 · 편집"}}/>}/>;
+  return <Comparison readApi="DatabaseHand (readOnly)" writeApi="DatabaseHand" read={<DatabaseHand document={document} viewId="comparison" onDocumentChange={()=>{}} readOnly presentation={{showRecordIds:false,showPropertyTypes:false}} features={{create:false,delete:false,history:false,filter:false,columns:false}} labels={{ariaLabel:"상품 비교 · 읽기"}}/>} write={<DatabaseHand document={document} viewId="comparison" onDocumentChange={setDocument} presentation={{showRecordIds:false,showPropertyTypes:false}} features={{create:false,delete:false,history:false,filter:false,columns:false}} labels={{ariaLabel:"상품 비교 · 편집"}}/>}/>;
 }
 function Comparison({readApi,writeApi,read,write}: {readApi:string;writeApi?:string;read:ReactNode;write:ReactNode}) {
   return <section aria-label="읽기와 쓰기 비교" className="grid min-w-0 gap-group">

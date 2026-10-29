@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Temporal } from "@js-temporal/polyfill";
 import { Choice, Popover, fieldPresentation, type ControlAffordance } from "@interactive-os/json-document-ui-primitives-react";
 import {
   addCalendarDays,
@@ -175,7 +176,7 @@ export function DatePicker(props: {
 }): ReactNode {
   const [open, setOpen] = useState(false);
   const [grain, setGrain] = useState<CalendarGrain>("month");
-  const fallbackDate = props.defaultVisibleDate ?? new Date().toLocaleDateString("sv-SE");
+  const fallbackDate = props.defaultVisibleDate ?? Temporal.Now.plainDateISO().toString();
   const [visibleDate, setVisibleDate] = useState(props.value || fallbackDate);
   return <div data-ui-control="date-picker">
     <HtmlDateField type="date" label={props.label} value={props.value} onValueChange={props.onValueChange}/>

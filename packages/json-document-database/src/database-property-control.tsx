@@ -3,6 +3,10 @@ import type { KeyboardEventHandler } from "react";
 import { databaseValueFromText, type DatabaseProperty } from "@interactive-os/json-document-editing";
 type DatabaseControlValue = string | number | boolean;
 interface DatabasePropertyControlProps { readonly property: DatabaseProperty; readonly value: DatabaseControlValue; readonly label?: string; readonly mode: "cell" | "form"; readonly initialValue?: string; readonly autoFocus?: boolean; readonly onChange: (value: DatabaseControlValue) => void; readonly onBlur?: (value: DatabaseControlValue) => void; readonly onKeyDown?: KeyboardEventHandler<HTMLInputElement | HTMLSelectElement>; readonly onFocus?: () => void; readonly onCompositionStart?: () => void; readonly onCompositionEnd?: () => void; }
+/** Read-only text for a property value; select values show their option name. */
+export function databasePropertyDisplay(property: DatabaseProperty, value: DatabaseControlValue): string {
+  return property.type === "select" ? property.options.find(option => option.id === value)?.name ?? String(value) : String(value);
+}
 export function DatabasePropertyControl(props: DatabasePropertyControlProps) {
   const controlled = props.mode === "form";
   if (props.property.type === "checkbox") return <Check label={props.label ?? props.property.name} checked={Boolean(props.value)} onCheckedChange={props.onChange} />;

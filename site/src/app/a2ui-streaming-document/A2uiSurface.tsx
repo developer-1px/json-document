@@ -4,6 +4,7 @@ import { useId, useState, type ComponentType, type ReactNode } from "react";
 import { A2UI_BASIC_CATALOG_ID } from "./basic-catalog";
 import type { A2uiComponent, A2uiStreamingDocument, A2uiSurfaceDocument } from "@interactive-os/json-document-a2ui";
 import { classes } from "../../shared/ui/styles";
+import { basicSurfaceLayout } from "./a2ui-surface-styles";
 import { A2UI_PROJECTION_ERROR_TEXT } from "./protocol-error";
 
 type MarkdownSurface = ComponentType<{ readonly content?: string | null; readonly streaming?: boolean }>;
@@ -122,25 +123,3 @@ function ReasoningContent({value}: {readonly value: string}) {
   </section>;
 }
 
-const basicSurfaceLayout = {
-    root: "grid content-start items-start gap-related",
-    column: "grid gap-related",
-    row: "flex flex-wrap items-start gap-related",
-    child: "contents",
-    weightedChild: "block min-w-0 basis-0",
-    justify: {
-      start: "justify-start",
-      center: "justify-center",
-      end: "justify-end",
-      spaceBetween: "justify-between",
-      spaceAround: "justify-around",
-      spaceEvenly: "justify-evenly",
-      stretch: "justify-stretch",
-    },
-    align: { start: "items-start", center: "items-center", end: "items-end", stretch: "items-stretch" },
-    divider: {
-      horizontal: " w-full border-0 border-t border-line-subtle/70",
-      vertical: " min-h-6 w-0 self-stretch border-0 border-l border-line-subtle/70",
-    },
-    text: "m-0 tracking-tight",
-  } as const;

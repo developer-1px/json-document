@@ -1,6 +1,6 @@
 import {expect, test} from "vitest";
-import {createUIComponentObject, resolveObjectCollisions} from "../src/index.js";
-const box = (id: string, x: number, y: number) => ({...createUIComponentObject("text", {x, y}), id, width: 100, height: 40});
+import {createUIComponentObject, resolveObjectCollisions, type UIComponentObject} from "../src/index.js";
+const box = (id: string, x: number, y: number) => ({...createUIComponentObject("text", {x, y}), id, width: 100, height: 40}) as UIComponentObject;
 test("pushes a collision chain while retaining the gesture target and another column", () => {
   const objects = [box("a", 0, 30), box("b", 0, 50), box("c", 0, 100), box("other", 200, 50)];
   const result = resolveObjectCollisions(objects, [{objectIds: ["a", "b", "c"], gap: 10}], ["a"]);

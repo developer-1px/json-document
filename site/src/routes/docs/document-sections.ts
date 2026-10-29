@@ -9,7 +9,7 @@ export function documentSections() {
       for (const node of nodes) {
         if (node.type === "element" && node.tagName === level) {
           body = { type: "element", tagName: "div", properties: { className: ["grid", "gap-group"] }, children: [] };
-          const section: Element = { type: "element", tagName: "section", properties: { className: ["grid", "content-start", "gap-related"], ariaLabelledBy: node.properties.id }, children: [node, body] };
+          const section: Element = { type: "element", tagName: "section", properties: { className: ["grid", "content-start", "gap-related"], ariaLabelledBy: node.properties.id === undefined ? undefined : [node.properties.id] }, children: [node, body] };
           result.push(section);
         } else if (body) {
           body.children.push(node as Element["children"][number]);

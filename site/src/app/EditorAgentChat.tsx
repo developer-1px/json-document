@@ -10,6 +10,7 @@ import { ChatActivity, ChatBubble, Command } from "@interactive-os/json-document
 import "@interactive-os/json-document-ui-primitives-react/chat-bubble.css";
 import "@interactive-os/json-document-composer-react/chat-composer.css";
 import { streamLlmAgentTurn } from "./llm-agent-api";
+import { ui } from "../shared/ui/styles";
 
 const config: ComposerHostConfig = {
   profile: COMPOSER_HOST_PROFILE_V1,
@@ -95,13 +96,13 @@ export function EditorAgentChat({ context, onClearContext, tools, id, label, log
       {messages.map((turn, index) => <Fragment key={index}>
         <ChatBubble direction="outgoing" label="나">{turn.prompt}</ChatBubble>
         {turn.reply && <ChatBubble direction="incoming" label="AI">{turn.reply}</ChatBubble>}
-        {(turn.state === "error" || turn.state === "interrupted") && <p role="status" className="text-xs text-foreground-muted">{turn.state === "error" ? `요청을 완료하지 못했습니다.${turn.error ? ` ${turn.error}` : ""}` : "작업이 중단됐습니다."} 반영된 편집은 유지됩니다.</p>}
+        {(turn.state === "error" || turn.state === "interrupted") && <p role="status" className={ui.agentChat.note}>{turn.state === "error" ? `요청을 완료하지 못했습니다.${turn.error ? ` ${turn.error}` : ""}` : "작업이 중단됐습니다."} 반영된 편집은 유지됩니다.</p>}
       </Fragment>)}
     </div>}
-    {(saveState === "load-error" || saveState === "save-error") && <p role="alert" className="text-xs text-foreground-muted">대화를 보관하지 못했습니다. 기존 저장 데이터는 유지됩니다.</p>}
+    {(saveState === "load-error" || saveState === "save-error") && <p role="alert" className={ui.agentChat.note}>대화를 보관하지 못했습니다. 기존 저장 데이터는 유지됩니다.</p>}
     {running && !composer.isSubmitting && <ChatActivity label="배치 의도 확인·정리 중" />}
     {composer.isSubmitting && <div className="flex items-center justify-between gap-related"><ChatActivity label={activity} /><Command onClick={() => request.current?.abort()}>중단</Command></div>}
-    {context && <div role="group" aria-label="수정 대상" className="flex items-center gap-related text-xs">
+    {context && <div role="group" aria-label="수정 대상" className={ui.agentChat.target}>
       <span className="min-w-0 truncate">{context.label}</span>
       {onClearContext && <Command onClick={() => onClearContext(context.id)}>대상 해제</Command>}
     </div>}

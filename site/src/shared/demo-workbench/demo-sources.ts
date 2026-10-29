@@ -118,6 +118,7 @@ import canvasToolsSource from "../../../../packages/json-document-editing/src/ca
 import markdownSheetPresentationSource from "../../../../packages/json-document-markdown-react/src/markdown-sheet-presentation.tsx?raw";
 import sheetHandCssSource from "../../../../packages/json-document-sheet/src/sheet-hand.css?raw";
 import floatingSurfaceSource from "../../../../packages/json-document-ui-primitives-react/src/floating-surface.ts?raw";
+import floatingSurfaceCSSSource from "../../../../packages/json-document-ui-primitives-react/src/floating-surface.css?raw";
 import textEditSource from "../../../../packages/json-document-editing/src/text-edit.ts?raw";
 import textToolsSource from "../../../../packages/json-document-editing/src/text-tools.ts?raw";
 import sheetViewSource from "../../../../packages/json-document-editing/src/sheet-view.ts?raw";
@@ -280,6 +281,7 @@ import databaseEditingSource from "../../../../packages/json-document-editing/sr
 import databasePropertyValueSource from "../../../../packages/json-document-editing/src/database-property-value.ts?raw";
 import databaseStylesSource from "../../../../packages/json-document-database/styles.css?raw";
 import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
+import databaseHandsSource from "../../../../packages/json-document-database/src/database-hands.tsx?raw";
 import annotationSelectionSource from "../../../../packages/json-document-editing/src/annotation-selection.ts?raw";
 import annotationOutputSource from "../../../../packages/json-document-annotation/src/annotation-output.ts?raw";
 import annotationHandSource from "../../../../packages/json-document-annotation/src/annotation-hand.tsx?raw";
@@ -649,6 +651,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
   ["packages/json-document-editing/src/database-property-value.ts", databasePropertyValueSource],
   ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
+  ["packages/json-document-database/src/database-hands.tsx", databaseHandsSource],
   ["packages/json-document-database/styles.css", databaseStylesSource],
   ["packages/json-document-annotation/src/annotation-hand.tsx", annotationHandSource],
   ["packages/json-document-annotation/src/annotation-output.ts", annotationOutputSource],
@@ -684,6 +687,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/use-popup.ts", popupLifecycleSource],
   ["packages/json-document-ui-primitives-react/src/chat-bubble.tsx", chatBubbleSource],
   ["packages/json-document-ui-primitives-react/src/chat-bubble.css", chatBubbleCSSSource],
+  ["packages/json-document-ui-primitives-react/src/floating-surface.css", floatingSurfaceCSSSource],
   ["packages/json-document-composer-react/src/chat-composer.tsx", chatComposerSource],
   ["packages/json-document-composer-react/src/chat-composer.css", chatComposerCSSSource],
   ["packages/json-document-rich-text-react/src/placeholder.css", richTextPlaceholderCSSSource],

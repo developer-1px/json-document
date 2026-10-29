@@ -116,7 +116,7 @@ function AppShell() {
     <div className={classes("flex min-h-screen flex-col md:flex-row", appChrome && "h-screen overflow-hidden", ui.frame.app)}>
       <a
         href="#main-content"
-        className={classes(linkPresentation.action, "sr-only z-50 focus:not-sr-only focus:fixed focus:left-group focus:top-group")}
+        className={classes(linkPresentation.action, ui.frame.skipLink)}
       >
         Skip to content
       </a>

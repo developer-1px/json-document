@@ -1,5 +1,5 @@
 import { createUIBuilderEditor, applyUIBuilderMaterials, applyUIBuilderPages, applyUIBuilderComponentConfiguration, applyUIBuilderConfiguration, getUIBuilderPageObjects, getUIBuilderRootObjects, readUIBuilderProject, type UIBuilderField } from "@interactive-os/json-document-editing";
-import { createUIComponentObject, uiComponentAuthoringCatalog, type UIComponentKind, type UIComponentObject } from "@interactive-os/json-document-object-document";
+import { createUIComponentObject, uiComponentAuthoringCatalog, type UIComponentContent, type UIComponentKind, type UIComponentObject } from "@interactive-os/json-document-object-document";
 const labels:Readonly<Record<string,string>>={content:"콘텐츠·데이터",control:"입력·행동",composition:"작업 공간·오버레이",calendar:"날짜·일정",feedback:"대기·상태"};
 /** Registration Usage is composed from public APIs, with meaningful local data and separate category pages. */
 export function createFullCatalogExample() {
@@ -13,7 +13,7 @@ export function createFullCatalogExample() {
   ensure(applyUIBuilderPages(editor,[{type:"page.rename",id:"page:main",name:labels.content!},...categories.slice(1).map(category=>({type:"page.create" as const,id:`catalog:${category}`,name:labels[category]!}))]));
   let y=0;
   const people=[{id:"person-cx",name:"김민지",description:"고객 경험"},{id:"person-design",name:"김민지",description:"제품 디자인"}];
-  const add=(kind:UIComponentKind,text:string,items:readonly string[]=[])=>{const draft=createUIComponentObject(kind,{x:0,y},{text,items});if(draft.kind!=="embedded-document")throw new Error("컴포넌트 오류");y+=draft.height+24;ensure(editor.dispatch({type:"object.create",object:{...draft,document:{...draft.document,pageId:readUIBuilderProject(editor.snapshot.value).activePageId}}}));return readUIBuilderProject(editor.snapshot.value).objects.at(-1)!.id;};
+  const add=(kind:UIComponentKind,text:string,items:readonly string[]=[])=>{const draft=createUIComponentObject(kind,{x:0,y},{text,items});if(draft.kind!=="embedded-document")throw new Error("컴포넌트 오류");y+=draft.height+24;ensure(editor.dispatch({type:"object.create",object:{...draft,document:{...(draft.document as UIComponentContent),pageId:readUIBuilderProject(editor.snapshot.value).activePageId}}}));return readUIBuilderProject(editor.snapshot.value).objects.at(-1)!.id;};
   const calendar={calendars:[{id:"team",title:"팀 일정",hidden:false,color:"#466378"}],events:[{id:"review",title:"제품 검토",start:"2026-10-13T10:00",end:"2026-10-13T11:00",allDay:false,calendarId:"team",recurrence:null,excludeDates:[]}]};
   for(const category of categories){y=0;ensure(applyUIBuilderPages(editor,[{type:"page.select",id:category==="content"?"page:main":`catalog:${category}`} ]));add("title",labels[category]!);const nav=add("tabs","카탈로그 범주",Object.values(labels));ensure(applyUIBuilderComponentConfiguration(editor,[{objectId:nav,props:{pageIds:pages}}]));
     for(const entry of uiComponentAuthoringCatalog.filter(entry=>entry.category===category)){

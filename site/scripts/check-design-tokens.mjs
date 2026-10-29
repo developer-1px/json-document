@@ -11,6 +11,9 @@ const contentDataFiles = new Set([
   path.join(sourceRoot, "shared/demo-workbench/canvas-demo-document.ts"),
   path.join(sourceRoot, "shared/demo-workbench/slides-demo-document.ts"),
   path.join(sourceRoot, "shared/demo-workbench/agent-review-demo-document.ts"),
+  // Issue keys ("#214") and calendar colors are UI Builder example records, not presentation.
+  path.join(sourceRoot, "applications/ui-builder/issue-workbench-example.ts"),
+  path.join(sourceRoot, "applications/ui-builder/full-catalog-example.ts"),
 ]);
 const fixture = path.join(siteRoot, "scripts/fixtures/design-token-violation.tsx");
 

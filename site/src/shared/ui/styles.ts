@@ -8,6 +8,7 @@ export const ui = {
     navigation: "bg-background-subtle text-sm",
     navigationRail: "flex h-screen w-12 shrink-0 flex-col items-center gap-related border-r border-line-subtle/40 py-related",
     brand: "font-mono text-foreground-strong no-underline hover:text-foreground-default",
+    skipLink: "sr-only z-50 focus:not-sr-only focus:fixed focus:left-group focus:top-group",
   },
   demoWorkbench: {
     header: "sticky top-0 z-20 border-b border-line-subtle/40 bg-background-subtle px-related pt-related",
@@ -15,7 +16,12 @@ export const ui = {
     tab: "shrink-0 whitespace-nowrap",
     panel: "min-w-0 bg-background-canvas",
   },
+  agentChat: {
+    note: "text-xs text-foreground-muted",
+    target: "flex items-center gap-related text-xs",
+  },
   code: {
+    inline: "rounded-tight bg-background-subtle px-1 py-0.5 font-mono text-code text-foreground-strong",
     install: "min-w-0 self-start p-related",
     prompt: "text-foreground-accent",
   },

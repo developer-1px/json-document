@@ -19,7 +19,7 @@ import {dataPresentationCatalog, Command, Popover, floatingSurface } from "@inte
 import { builderDomainExamples, createBuilderDomainExample, type BuilderDomainExample } from "./domain-examples";
 import { createBriefingExample, briefingMockSkills } from "./briefing-example";
 import { streamLlmAgentTurn } from "../../app/llm-agent-api";
-import { createAgentChatSession, agentChatErrorReason } from "../../app/agent-chat-session";
+import { createAgentChatSession, agentChatErrorReason, type AgentChatSession } from "../../app/agent-chat-session";
 import { EditorAgentChat } from "../../app/EditorAgentChat";
 import "@interactive-os/json-document-canvas/canvas-hand.css";
 import "@interactive-os/json-document-canvas/ui-builder.css";
@@ -56,7 +56,7 @@ function UIBuilderProjectApplication({stored, example, location}: {stored: WebSt
   const chatId = location.projectId.startsWith("legacy:") ? example ? `ui-builder-${example}-chat` : "ui-builder-chat" : `ui-builder-project-${location.projectId}-chat`;
   const [chatSession] = useState(() => createAgentChatSession(chatId));
   async function arrange(signal: AbortSignal, context?: {pageId: string; selection: UIBuilderRecordSelection; runtimeValues?: UIBuilderRuntimeValues}) {
-    const currentChat = chatSession.source.snapshot.value;
+    const currentChat = chatSession.source.snapshot.value as AgentChatSession;
     if (currentChat.messages.some(message => message.state === "running")) throw new Error("진행 중인 대화가 끝난 뒤 배치를 적용해 주세요.");
     const index = currentChat.messages.length;
     let reply = "";

@@ -48,7 +48,7 @@ describe("DatabaseHand", () => {
     const onRecordsChange = vi.fn();
     render(<DatabaseHand schema={schema} records={records} onRecordsChange={onRecordsChange} />);
 
-    fireEvent.doubleClick(screen.getByRole("gridcell", { name: "backlog" }));
+    fireEvent.doubleClick(screen.getByRole("gridcell", { name: "Backlog" }));
     const status = screen.getByRole("combobox", { name: "Status a" });
     fireEvent.change(status, { target: { value: "done" } });
     fireEvent.blur(status);
