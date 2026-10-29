@@ -1,5 +1,7 @@
+import {A2uiSurface} from "../../../app/a2ui-streaming-document/A2uiSurface";
+import {MarkdownContent} from "../../../shared/ui/markdown-content";
 import { useEffect, useState } from "react";
-import { createA2uiStreamingDocumentEngine, type A2uiStreamingDocumentEngine } from "@interactive-os/json-document-a2ui";
+import { createA2uiStreamingDocumentEngine, type A2uiStreamingDocumentEngine, type A2uiStreamingDocument } from "@interactive-os/json-document-a2ui";
 import { useReactConnector } from "@interactive-os/json-document-react";
 import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { Inspector } from "../../../shared/ui/inspector";
@@ -7,7 +9,8 @@ import { ConnectorDemoPage } from "../ConnectorDemoPage";
 
 const fixture = [
   { version: "v0.9", createSurface: { surfaceId: "demo", catalogId: "example-catalog" } },
-  { version: "v0.9", updateComponents: { surfaceId: "demo", components: [{ id: "root", component: "Text", text: { path: "/answer" } }] } },
+  { version: "v0.9", updateComponents: { surfaceId: "demo", components: [{ id: "root", component: "Text", text: { path: "/answer" } }, {id:"sample-user",component:"Markdown",role:"user",value:{path:"/request"}}, {id:"sample-assistant",component:"Markdown",role:"assistant",value:{path:"/answer"}}] } },
+  { version: "v0.9", updateDataModel: { surfaceId: "demo", path: "/request", value: "CSV 오류의 처리 상태를 확인해 주세요." } },
   { version: "v0.9", updateDataModel: { surfaceId: "demo", path: "/answer", value: "Stream complete" } },
 ].map((message) => JSON.stringify(message)).join("\n");
 
@@ -47,6 +50,7 @@ function A2uiConnectorFixture({ engine }: { readonly engine: A2uiStreamingDocume
       setPhase((current) => current + 1);
     }}>{phase === 0 ? "첫 chunk 수신" : phase === 1 ? "나머지 수신·완료" : "수신 완료"}</Command>
     <p role="status">{phase === 0 ? "수신 대기" : phase === 1 ? "불완전한 JSONL은 아직 반영되지 않았습니다." : "Stream complete"}</p>
+    <div className="grid gap-group py-group"><A2uiSurface document={value as A2uiStreamingDocument} markdown={MarkdownContent} surfaceId="demo"/></div>
     <Inspector defaultOpen placement="inline" label="문서 확인" items={[{ label: "Canonical JSON", testId: "a2ui-document-json", value }]} />
   </section>;
 }

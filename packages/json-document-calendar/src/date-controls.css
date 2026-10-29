@@ -1,0 +1,20 @@
+@import "@interactive-os/json-document-ui-primitives-react/design-system.css";
+
+/* Date controls consume the same control height, type and inset as UI Primitives. */
+[data-ui-control="date-field"] { display: grid; width: fit-content; max-width: 100%; min-width: 0; align-self: start; align-content: start; gap: var(--space-related); font-size: var(--font-size-caption); line-height: var(--line-height-caption); color: rgb(var(--color-foreground-default)); }
+[data-ui-control="date-field"] input { width: auto; max-width: 100%; height: var(--control-height); padding-block: 0.375rem; }
+:is([data-ui-control="date-picker"], [data-ui-control="date-range-picker"]) { display: grid; width: fit-content; max-width: 100%; min-width: 0; align-self: start; align-content: start; gap: var(--space-related); }
+:is([data-ui-control="date-picker"], [data-ui-control="date-range-picker"]) > [data-ui-control="command"] { justify-self: start; }
+:is([data-ui-control="calendar"], [data-ui-control="range-calendar"]) { display: grid; width: calc(7 * var(--control-height) + 6 * var(--space-related)); max-width: 100%; align-self: start; align-content: start; gap: var(--space-group); }
+[data-ui-calendar-period="true"] { margin: 0; font-size: var(--font-size-body); line-height: var(--line-height-body); color: rgb(var(--color-foreground-strong)); }
+:is([data-ui-control="calendar"], [data-ui-control="range-calendar"]) [role="grid"] { display: grid; gap: var(--space-related); outline: none; }
+:is([data-ui-control="calendar"], [data-ui-control="range-calendar"]) [role="row"] { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-related); }
+:is([data-ui-control="calendar"], [data-ui-control="range-calendar"]) [data-ui-control="calendar-day"] { box-sizing: border-box; display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 1; min-height: 0; padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: rgb(var(--color-foreground-strong)); font-family: var(--font-family-ui); font-size: var(--font-size-body); line-height: var(--line-height-control); cursor: pointer; outline: none; }
+:is([data-ui-control="calendar"], [data-ui-control="range-calendar"]) [data-ui-control="calendar-day"]:hover { background: rgb(var(--color-background-subtle)); }
+:is([data-ui-control="calendar"], [data-ui-control="range-calendar"]) [data-outside="true"] { color: rgb(var(--color-foreground-muted)); }
+:is([data-ui-control="calendar"], [data-ui-control="range-calendar"]) [aria-selected="true"] { background: rgb(var(--color-background-action-primary)); color: rgb(var(--color-foreground-inverse)); }
+:is([data-ui-control="calendar"], [data-ui-control="range-calendar"]) [data-focused="true"] { outline: 2px solid rgb(var(--color-border-accent)); outline-offset: -2px; }
+
+[data-ui-control="date-picker"] { grid-template-columns: minmax(0, auto) auto; align-items: end; }
+
+:is([data-ui-control="date-picker"], [data-ui-control="date-range-picker"]) [data-ui-presentation="popover"] > [role="dialog"] { width: max-content; max-width: min(100vw - var(--space-region), 30rem); }

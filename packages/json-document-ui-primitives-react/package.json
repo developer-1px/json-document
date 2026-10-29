@@ -7,7 +7,9 @@
   "sideEffects": [
     "./dist/content-interaction.css",
     "./dist/chat-bubble.css",
-    "./dist/floating-surface.css"
+    "./dist/floating-surface.css",
+    "./dist/design-system.css",
+    "./dist/design-tokens.css"
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,18 +37,21 @@
     },
     "./content-interaction.css": "./dist/content-interaction.css",
     "./chat-bubble.css": "./dist/chat-bubble.css",
-    "./floating-surface.css": "./dist/floating-surface.css"
+    "./floating-surface.css": "./dist/floating-surface.css",
+    "./design-system.css": "./dist/design-system.css",
+    "./design-tokens.css": "./dist/design-tokens.css"
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc -b tsconfig.json && cp src/content-interaction.css dist/content-interaction.css && cp src/chat-bubble.css dist/chat-bubble.css && cp src/floating-surface.css dist/floating-surface.css",
+    "build": "npm run clean && tsc -b tsconfig.json && cp src/content-interaction.css dist/content-interaction.css && cp src/chat-bubble.css dist/chat-bubble.css && cp src/floating-surface.css dist/floating-surface.css && cp src/design-system.css dist/design-system.css && cp src/design-tokens.css dist/design-tokens.css",
     "test": "vitest run --config vitest.config.ts",
     "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
     "@interactive-os/json-document-affordance": "0.1.0-rc.0",

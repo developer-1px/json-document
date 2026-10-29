@@ -65,15 +65,7 @@ export function StreamingCaret(props: HTMLAttributes<HTMLSpanElement>): ReactNod
   return <span {...props} data-ui-animation="caret" aria-hidden={props["aria-hidden"] ?? true} />;
 }
 
-export function WaveDots(props: SpanProps & { readonly frame?: WaveFrame }): ReactNode {
-  const { announce, label, frame = "none", children, ...spanProps } = props;
-  return (
-    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="wave-dots" data-ui-frame={frame === "bubble" ? "bubble" : undefined}>
-      {Beats(3, "dot")}
-      {children}
-    </span>
-  );
-}
+export {WaveDots} from "@interactive-os/json-document-ui-primitives-react";
 
 const WAVE_ROWS: ReadonlyArray<number> = [3, 5, 7, 5, 3];
 
@@ -160,10 +152,12 @@ export function EqualizerBars(props: SpanProps): ReactNode {
   );
 }
 
-export function LoadingBar(props: DivProps): ReactNode {
+export function LoadingBar({value, ...props}: DivProps & {readonly value?: number}): ReactNode {
+  const progress = value != null && Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : undefined;
+  const accessible = progress !== undefined || props["aria-label"] != null || props["aria-labelledby"] != null;
   return (
-    <div {...props} data-ui-animation="loading-bar" aria-hidden={props["aria-hidden"] ?? true}>
-      <span data-ui-animation="loading-fill" />
+    <div {...props} data-ui-animation="loading-bar" data-ui-progress={progress === undefined ? "indeterminate" : "determinate"} role={accessible ? "progressbar" : props.role} aria-valuemin={accessible ? 0 : undefined} aria-valuemax={accessible ? 100 : undefined} aria-valuenow={progress} aria-hidden={props["aria-hidden"] ?? !accessible}>
+      <span data-ui-animation="loading-fill" style={progress === undefined ? undefined : {width: `${progress}%`}} />
     </div>
   );
 }

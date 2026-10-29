@@ -57,7 +57,7 @@ const operations: DatabaseOperations<Task> = {
 function DatabaseApp() {
   const [view, setView] = useState(allTasks);
   const [saved, setSaved] = useState(0);
-  return <main><h1>Delivery database</h1><p>Host schema and CRUD operations.</p>
+  return <main><header><h1>Delivery database</h1><p>Host schema and CRUD operations.</p></header>
     <Database.Workspace<Task>
       className="company-database"
       resource={resource} operations={operations} defaultView={allTasks} view={view} views={[allTasks, triageView]}

@@ -1,7 +1,8 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { ActionLink } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { MarkdownViewer } from "./MarkdownViewer";
 
 export function DocumentationPage(props: {
@@ -20,19 +21,19 @@ export function DocumentationPage(props: {
 
   return (
     <PageFrame>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_11rem]">
-        <div ref={contentRef} className="min-w-0" data-doc-content>
-          <div className="mx-auto max-w-3xl">
+      <div className="grid gap-region lg:grid-cols-[minmax(0,1fr)_11rem]">
+        <div ref={contentRef} className="grid min-w-0 justify-items-center" data-doc-content>
+          <div className="grid w-full max-w-3xl content-start gap-region">
             <PageHeader title={props.title} illustration={props.illustration}>
               {props.summary}
             </PageHeader>
-            <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
-              <div className="flex gap-1 whitespace-nowrap">
+            <nav aria-label="Documentation sections" className={classes("overflow-x-auto lg:hidden", contentPresentation.caption)}>
+              <div className="flex gap-related whitespace-nowrap">
                 {headings.map((heading) => (
                   <ActionLink
                     key={`${heading.id}-${heading.text}`}
                     href={`#${heading.id}`}
-                    className={classes("px-2 py-1 no-underline", ui.text.meta)}
+                    className="shrink-0 whitespace-nowrap px-related py-related no-underline"
                   >
                     {heading.text}
                   </ActionLink>
@@ -43,15 +44,15 @@ export function DocumentationPage(props: {
           </div>
         </div>
 
-        <aside className={classes("hidden min-w-0 self-start lg:sticky lg:top-4 lg:block", ui.text.meta)}>
-          <nav aria-label="On this page">
-            <div className={classes("mb-2", ui.text.heading)}>On this page</div>
+        <aside className={classes("hidden min-w-0 self-start lg:sticky lg:top-4 lg:block", contentPresentation.caption)}>
+          <nav aria-label="On this page" className="grid gap-related">
+            <div className={contentPresentation.itemTitle}>On this page</div>
             <div className="grid">
               {headings.map((heading) => (
                 <ActionLink
                   key={`${heading.id}-${heading.text}`}
                   href={`#${heading.id}`}
-                  className={classes("min-w-0 break-all px-3 py-1 no-underline", ui.surface.navigationRule, ui.text.meta)}
+                  className={classes("min-w-0 break-words px-related py-1 no-underline", contentPresentation.caption)}
                 >
                   {heading.text}
                 </ActionLink>

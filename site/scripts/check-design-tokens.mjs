@@ -4,13 +4,16 @@ import { fileURLToPath } from "node:url";
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourceRoot = path.join(siteRoot, "src");
-const tokenDefinition = path.join(sourceRoot, "app/index.css");
+const tokenDefinition = path.resolve(siteRoot, "../packages/json-document-ui-primitives-react/src/design-tokens.css");
 const contentDataFiles = new Set([
   path.join(sourceRoot, "shared/demo-workbench/object-demo-document.ts"),
   // These colors are serialized artwork data, not application presentation tokens.
   path.join(sourceRoot, "shared/demo-workbench/canvas-demo-document.ts"),
   path.join(sourceRoot, "shared/demo-workbench/slides-demo-document.ts"),
   path.join(sourceRoot, "shared/demo-workbench/agent-review-demo-document.ts"),
+  // Issue keys ("#214") and calendar colors are UI Builder example records, not presentation.
+  path.join(sourceRoot, "applications/ui-builder/issue-workbench-example.ts"),
+  path.join(sourceRoot, "applications/ui-builder/full-catalog-example.ts"),
 ]);
 const fixture = path.join(siteRoot, "scripts/fixtures/design-token-violation.tsx");
 
@@ -49,6 +52,26 @@ const violations = files.flatMap((file) => designTokenViolations(
   path.relative(siteRoot, file),
   { allowContentColors: contentDataFiles.has(file) },
 ));
+
+// Builder and shared presentations must consume the package's tokens, including outside site/src.
+const sharedPresentations = [
+  "json-document-canvas/src/ui-builder.css", "json-document-ui-builder/src/ui-builder-workspace.css",
+  "json-document-ui-primitives-react/src/design-system.css", "json-document-ui-primitives-react/src/chat-bubble.css",
+  "json-document-composer-react/src/chat-composer.css", "json-document-database/styles.css",
+];
+const tokenSource = fs.readFileSync(tokenDefinition, "utf8");
+function sharedPresentationViolations(source) {
+  return [
+    ...[...source.matchAll(/(?:font-(?:family|size|weight)|border-radius)\s*:\s*([^;{}]+)/g)].filter(match => !/^(?:var\(|inherit\b|normal\b|50%$|0$)/.test(match[1].trim())).map(match => `local presentation: ${match[0]}`),
+    ...[...source.matchAll(/var\((--color-[a-z0-9-]+)/g)].filter(match => !tokenSource.includes(`${match[1]}:`)).map(match => `unknown semantic token: ${match[1]}`),
+  ];
+}
+if (sharedPresentationViolations("font-size:16px;border-radius:12px;color:var(--color-foreground-secondary)").length !== 3) throw new Error("Shared presentation guard must reject local typography, radius and unknown tokens.");
+if (sharedPresentationViolations("font-size: var(--font-size-body);border-radius:var(--radius-control)").length !== 0) throw new Error("Shared presentation guard must accept semantic tokens.");
+for (const relative of sharedPresentations) {
+  const source = fs.readFileSync(path.resolve(siteRoot, "../packages", relative), "utf8");
+  violations.push(...sharedPresentationViolations(source).map(message => `${relative}: ${message}`));
+}
 
 const tailwindConfig = fs.readFileSync(path.join(siteRoot, "tailwind.config.cjs"), "utf8");
 for (const match of tailwindConfig.matchAll(/var\(--ref-[a-z0-9-]+\)/g)) {

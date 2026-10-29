@@ -1,3 +1,5 @@
+import { fieldPresentation } from "@interactive-os/json-document-ui-primitives-react";
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState } from "react";
 import { Plus, Redo2, Undo2 } from "lucide-react";
 import { createJSONDocument, isJSONValue, readPointer, trackPointer, type JSONValue } from "@interactive-os/json-document";
@@ -12,7 +14,7 @@ import {
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../../shared/ui/inspector";
 import { Command, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../../shared/ui/styles";
+import { classes } from "../../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialEditorDocument: BlockDocument = {
@@ -24,7 +26,7 @@ const initialEditorDocument: BlockDocument = {
 
 export function ReactConnectorLab() {
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-group lg:grid-cols-2">
       <JSONDocumentSubscriptionLab />
       <EditingSnapshotLab />
       <UseEditingLab />
@@ -47,12 +49,12 @@ function JSONValueLab() {
   const result = valid ? readPointer(input, sample.pointer) : null;
   return (
     <section aria-label="JSON value boundary" className="lg:col-span-2">
-      <h2 className={ui.text.heading}>Read a JSON snapshot</h2>
-      <p className={ui.text.meta}>Validate incoming values, then resolve an address without copying the snapshot.</p>
-      <div className="flex gap-2">
+      <h2 className={contentPresentation.itemTitle}>Read a JSON snapshot</h2>
+      <p className={contentPresentation.caption}>Validate incoming values, then resolve an address without copying the snapshot.</p>
+      <div className="flex gap-related">
         {samples.map((item, index) => <Command key={item.label} onClick={() => setIndex(index)}>{item.label}</Command>)}
       </div>
-      <p className={ui.text.meta}><output data-testid="json-value-valid">{valid ? "Valid JSON value" : "Not a JSON value"}</output></p>
+      <p className={contentPresentation.caption}><output data-testid="json-value-valid">{valid ? "Valid JSON value" : "Not a JSON value"}</output></p>
       <Inspector label="Inspect JSON value" items={[
         { label: "Pointer", testId: "json-value-pointer", value: sample.pointer },
         { label: "Read result", testId: "json-value-read", value: result },
@@ -70,13 +72,13 @@ function PointerTrackingLab() {
 
   return (
     <section aria-label="Context-aware pointer tracking" className="lg:col-span-2">
-      <h2 className={ui.text.heading}>Track a position through a patch</h2>
-      <p className={ui.text.meta}>The previous snapshot distinguishes array insertion from numeric object-key replacement.</p>
-      <div className="flex gap-2">
+      <h2 className={contentPresentation.itemTitle}>Track a position through a patch</h2>
+      <p className={contentPresentation.caption}>The previous snapshot distinguishes array insertion from numeric object-key replacement.</p>
+      <div className="flex gap-related">
         <Command onClick={() => setShape("array")}>Array insertion</Command>
         <Command onClick={() => setShape("object")}>Numeric object key</Command>
       </div>
-      <p className={ui.text.meta}>Tracked address: <output data-testid="tracked-pointer">{tracked ?? "removed"}</output></p>
+      <p className={contentPresentation.caption}>Tracked address: <output data-testid="tracked-pointer">{tracked ?? "removed"}</output></p>
       <Inspector label="Inspect pointer tracking" items={[
         { label: "Before", testId: "pointer-before-json", value: before },
         { label: "After", testId: "pointer-after-json", value: document.value },
@@ -97,14 +99,14 @@ function JSONDocumentSubscriptionLab() {
   }
 
   return (
-    <section aria-label="JSON Document subscription" className={classes("p-4", ui.surface.raised)}>
-      <div className="mb-4">
-        <p className={ui.text.label}>useReactConnector</p>
-        <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Document subscription</h2>
-        <p className={classes("m-0", ui.text.meta)}>A React view follows the six-member JSON Document through its public subscription.</p>
+    <section aria-label="JSON Document subscription" className={classes("p-group")}>
+      <div className="mb-group">
+        <p className={contentPresentation.caption}>useReactConnector</p>
+        <h2 className={classes("mb-related mt-related", contentPresentation.itemTitle)}>Document subscription</h2>
+        <p className={classes("m-0", contentPresentation.caption)}>A React view follows the six-member JSON Document through its public subscription.</p>
       </div>
 
-      <label className={classes("grid gap-1", ui.text.meta)}>
+      <label className={classes("grid gap-related", contentPresentation.caption)}>
         Document title
         <Field
           label="Document title"
@@ -114,7 +116,7 @@ function JSONDocumentSubscriptionLab() {
       </label>
       <Command label={`Count ${value.count}`}
         onClick={() => replace("/count", value.count + 1)}
-        className="mt-3"
+        className="mt-related"
       >
         <Plus aria-hidden="true" size={16} />
       </Command>
@@ -131,17 +133,17 @@ function EditingSnapshotLab() {
   const commands = historyAffordance(snapshot).hand;
 
   return (
-    <section aria-label="Editing snapshot subscription" className={classes("p-4", ui.surface.raised)}>
-      <div className="mb-4 flex items-start justify-between gap-3">
+    <section aria-label="Editing snapshot subscription" className={classes("p-group")}>
+      <div className="mb-group flex items-start justify-between gap-related">
         <div>
-          <p className={ui.text.label}>useDocumentEditor + useEditingSnapshot</p>
-          <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Editing snapshot</h2>
-          <p className={classes("m-0", ui.text.meta)}>The component owns one editor and rerenders from published editing snapshots.</p>
+          <p className={contentPresentation.caption}>useDocumentEditor + useEditingSnapshot</p>
+          <h2 className={classes("mb-related mt-related", contentPresentation.itemTitle)}>Editing snapshot</h2>
+          <p className={classes("m-0", contentPresentation.caption)}>The component owns one editor and rerenders from published editing snapshots.</p>
         </div>
-        <span className={classes("shrink-0", ui.text.meta)}>revision {snapshot.revision}</span>
+        <span className={classes("shrink-0", contentPresentation.caption)}>revision {snapshot.revision}</span>
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-related">
         {value.blocks.map((block, index) => (
           <textarea
             key={block.id}
@@ -155,11 +157,11 @@ function EditingSnapshotLab() {
               text: event.currentTarget.value,
               offset: event.currentTarget.selectionStart,
             })}
-            className={classes("resize-none", ui.field.control)}
+            className={classes("resize-none", fieldPresentation.standard)}
           />
         ))}
       </div>
-      <div className="mt-3 flex gap-2">
+      <div className="mt-related flex gap-related">
         <Command label="Undo"
           disabled={commands.undo.disabled}
           onClick={() => editor.undo()}
@@ -194,25 +196,25 @@ function UseEditingLab() {
   const value = editing.snapshot.value as BlockDocument;
 
   return (
-    <section aria-label="Editing selection queries" className={classes("p-4 lg:col-span-2", ui.surface.raised)}>
-      <div className="mb-4">
-        <p className={ui.text.label}>useEditing</p>
-        <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Selection and cursor</h2>
-        <p className={classes("m-0", ui.text.meta)}>
+    <section aria-label="Editing selection queries" className={classes("p-group lg:col-span-2")}>
+      <div className="mb-group">
+        <p className={contentPresentation.caption}>useEditing</p>
+        <h2 className={classes("mb-related mt-related", contentPresentation.itemTitle)}>Selection and cursor</h2>
+        <p className={classes("m-0", contentPresentation.caption)}>
           getIsSelected is the object range. getIsFocus is the cursor. getTextOffset is the caret on that focus.
         </p>
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-related">
         {value.blocks.map((block) => {
           const item = editing.getItem(block.id);
           return (
             <SelectableItem
               key={block.id}
-              className={classes("grid gap-2 p-3 text-left", ui.surface.workspace)}
+              className={classes("grid gap-related p-related text-left")}
               {...editingItemProps(item)}
             >
-              <span className={ui.text.label}>{block.id}</span>
+              <span className={contentPresentation.caption}>{block.id}</span>
               <DocumentTextControl
                 aria-label={`${block.id} cursor`}
                 text={block.text}
@@ -221,7 +223,7 @@ function UseEditingLab() {
                 rows={2}
                 onCaretRange={(_from, offset) => editor.dispatch({ type: "selection.set", blockId: block.id, offset })}
                 onTextInput={() => undefined}
-                className={classes("resize-none", ui.field.control)}
+                className={classes("resize-none", fieldPresentation.standard)}
               />
             </SelectableItem>
           );
@@ -232,7 +234,7 @@ function UseEditingLab() {
 }
 
 function JSONPanel({ testId, value }: { readonly testId: string; readonly value: JSONValue }) {
-  return <Inspector className="mt-4" label="Inspect canonical JSON" items={[
+  return <Inspector className="mt-group" label="Inspect canonical JSON" items={[
     { label: "Canonical JSON", testId, value },
   ]} />;
 }

@@ -47,3 +47,7 @@ For chat, combine `shouldClearAfterSubmit: true` with
 the asynchronous port runs; new input is preserved while the request is pending.
 The Host must retain the submitted message and show failures separately. The
 existing default `"success"` still preserves a failed draft for form-like Hosts.
+
+한 줄 입력은 아이콘 전송 버튼과 같은 32px 높이입니다. 입력의 24px 줄 높이와
+상하 4px 여백을 합하며, 여러 줄은 내용에 따라 늘어나고 기존 최대 높이에서 스크롤합니다.
+입력 행은 8px inset·8px gap을 사용합니다. Host의 바깥 배치 여백과 구분합니다.

@@ -1,3 +1,5 @@
+import { fieldPresentation } from "@interactive-os/json-document-ui-primitives-react";
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useState } from "react";
 import { createJSONDocument, type JSONDocument, type JSONValue } from "@interactive-os/json-document";
 import { useEditing, useReactConnector, type Editing } from "@interactive-os/json-document-react";
@@ -20,15 +22,15 @@ export function ContentEditableAdapterLab() {
   });
 
   return (
-    <section aria-label="Contenteditable document surface" className={classes("p-4", ui.surface.raised)}>
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
-        <div className="grid gap-4">
-          <header className="grid gap-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className={ui.text.heading}>Native editing surface</h2>
+    <section aria-label="Contenteditable document surface" className={classes("p-group")}>
+      <div className="grid gap-group lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
+        <div className="grid gap-group">
+          <header className="grid gap-related">
+            <div className="flex flex-wrap items-center gap-related">
+              <h2 className={contentPresentation.itemTitle}>Native editing surface</h2>
               <code className={ui.code.inline}>contenteditable=&quot;true&quot;</code>
             </div>
-            <p className={ui.text.meta}>
+            <p className={contentPresentation.caption}>
               Click either canvas and edit its text. Every native input commits only the JSON pointer shown above it.
             </p>
           </header>
@@ -68,16 +70,16 @@ function PointerCanvas(props: {
       as="label"
       selected={item.getIsSelected()}
       focus={item.getIsFocus()}
-      className="grid gap-1.5 p-2"
+      className="grid gap-related p-related"
       onFocus={item.getPressHandler()}
     >
-      <span className="flex items-center justify-between gap-3">
-        <span className={ui.text.label}>{props.label}</span>
+      <span className="flex items-center justify-between gap-related">
+        <span className={contentPresentation.caption}>{props.label}</span>
         <code className={ui.code.inline}>{props.pointer}</code>
       </span>
       <ContentEditable
         aria-label={props.ariaLabel}
-        className={ui.contenteditable.canvas}
+        className={classes("min-h-28 whitespace-pre-wrap", fieldPresentation.standard)}
         document={props.document}
         pointer={props.pointer}
       />

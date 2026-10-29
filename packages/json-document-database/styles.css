@@ -1,14 +1,15 @@
+@import "@interactive-os/json-document-ui-primitives-react/design-system.css";
 @import "@interactive-os/json-document-ui-primitives-react/content-interaction.css";
 
 .jd-database {
-  --jd-db-bg: #ffffff;
-  --jd-db-canvas: #ffffff;
-  --jd-db-text: #172033;
-  --jd-db-muted: #667085;
-  --jd-db-border: #dfe3eb;
-  --jd-db-accent: #5b5bd6;
-  --jd-db-accent-soft: #eeeeff;
-  --jd-db-danger: #c2415d;
+  --jd-db-bg: rgb(var(--color-background-canvas));
+  --jd-db-canvas: rgb(var(--color-background-canvas));
+  --jd-db-text: rgb(var(--color-foreground-default));
+  --jd-db-muted: rgb(var(--color-foreground-muted));
+  --jd-db-border: rgb(var(--color-border-subtle));
+  --jd-db-accent: rgb(var(--color-border-accent));
+  --jd-db-accent-soft: rgb(var(--color-background-subtle));
+  --jd-db-danger: rgb(var(--color-foreground-accent));
   --jd-db-radius: 0;
   --jd-content-interaction-accent: var(--jd-db-accent);
   --jd-content-interaction-fill: color-mix(in srgb, var(--jd-db-accent) 7%, transparent);
@@ -19,7 +20,7 @@
   border: 1px solid var(--jd-db-border);
   border-radius: var(--jd-db-radius);
   background: var(--jd-db-bg);
-  font: 14px/1.4 Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-family-ui); font-size: var(--font-size-body); line-height: var(--line-height-body);
 }
 
 .jd-database *, .jd-database *::before, .jd-database *::after { box-sizing: border-box; }
@@ -29,31 +30,15 @@
   position: relative;
   z-index: 2;
   display: flex;
-  min-height: 42px;
+  min-height: 0;
   align-items: center;
-  gap: 4px;
-  padding: 6px 8px;
+  gap: var(--space-related);
+  padding: 4px 8px;
   border-bottom: 1px solid var(--jd-db-border);
 }
 
-.jd-database__toolbar select,
-.jd-database__toolbar input {
-  min-height: 28px;
-  border: 1px solid var(--jd-db-border);
-  border-radius: 4px;
-  background: var(--jd-db-bg);
-  padding: 6px 10px;
-}
-
-.jd-database__toolbar button, .jd-database__toolbar summary { display: inline-grid; width: 30px; min-height: 28px; border: 0; border-radius: 4px; background: transparent; padding: 4px; place-items: center; cursor: pointer; font-weight: 600; }
-.jd-database__toolbar button:hover:not(:disabled), .jd-database__toolbar summary:hover { background: var(--jd-db-accent-soft); }
-.jd-database__toolbar button:disabled { cursor: not-allowed; opacity: .45; }
-.jd-database__toolbar button[data-kind="danger"] { color: var(--jd-db-danger); }
-
-.jd-database__filter { display: flex; gap: 6px; align-items: center; }
+.jd-database__filter { display: flex; gap: var(--space-related); align-items: center; }
 .jd-database__filter input { width: 130px; }
-.jd-database__columns summary { list-style: none; }
-.jd-database__columns summary::-webkit-details-marker { display: none; }
 .jd-database__column-menu {
   position: absolute;
   z-index: 2;
@@ -61,61 +46,64 @@
   right: 0;
   display: grid;
   min-width: 190px;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid var(--jd-db-border);
-  border-radius: 10px;
-  background: var(--jd-db-bg);
-  box-shadow: 0 16px 40px rgb(31 42 68 / 18%);
+  gap: var(--space-related);
+  padding: var(--space-group);
 }
-.jd-database__column-menu label { display: flex; align-items: center; gap: 9px; }
-.jd-database__column-menu input { min-height: auto; }
-.jd-database__announcement { margin-left: auto; color: var(--jd-db-muted); font-size: 12px; }
+.jd-database__column-menu label { display: flex; align-items: center; gap: var(--space-related); }
+.jd-database__announcement {  color: var(--jd-db-muted); font-size: var(--font-size-caption); }
 
 .jd-database__viewport { max-width: 100%; overflow: auto; background: var(--jd-db-canvas); }
 .jd-database table { width: 100%; min-width: 680px; border-collapse: separate; border-spacing: 0; background: var(--jd-db-bg); }
-.jd-database th { position: sticky; top: 0; z-index: 1; border-bottom: 1px solid var(--jd-db-border); background: #f9fafc; text-align: left; }
-.jd-database th button { display: flex; width: 100%; min-width: 150px; align-items: center; justify-content: space-between; gap: 12px; border: 0; background: transparent; padding: 10px 12px; cursor: pointer; font-weight: 700; }
-.jd-database th small { color: var(--jd-db-muted); font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.jd-database th { position: sticky; top: 0; z-index: 1; border-bottom: 1px solid var(--jd-db-border); background: rgb(var(--color-background-subtle)); text-align: left; }
+.jd-database th button { display: flex; width: 100%; min-width: 150px; align-items: center; justify-content: space-between; gap: var(--space-related); border: 0; background: transparent; padding: 8px 12px; cursor: pointer; font-weight: var(--font-weight-emphasis); }
+.jd-database th small { color: var(--jd-db-muted); font-size: var(--font-size-caption); font-weight: var(--font-weight-emphasis);  }
 .jd-database td { min-width: 150px; border-bottom: 1px solid var(--jd-db-border); background: var(--jd-db-bg); padding: 0; }
 .jd-database tbody tr:last-child td { border-bottom: 0; }
 .jd-database td:hover { background: var(--jd-db-accent-soft); }
-.jd-database td > input:not([type="checkbox"]), .jd-database td > select { width: 100%; min-height: 32px; border: 0; outline: 0; background: transparent; padding: 5px 8px; }
-.jd-database td > input[type="checkbox"] { display: block; width: 17px; height: 17px; margin: 12px auto; accent-color: var(--jd-db-accent); }
-.jd-database__readonly { display: block; min-height: 32px; overflow: hidden; padding: 6px 8px; text-overflow: ellipsis; white-space: nowrap; }
+.jd-database td > input:not([type="checkbox"]), .jd-database td > select { width: 100%; min-height: 40px; height: 40px; border: 0; outline: 0; background: transparent; padding: 8px 12px; line-height: var(--line-height-body); }
+.jd-database td > input[type="checkbox"] { display: inline-block; vertical-align: middle; width: 16px; height: 16px; margin: 0; accent-color: var(--jd-db-accent); }
+.jd-database__readonly { display: block; min-height: 40px; overflow: hidden; padding: 8px 12px; text-overflow: ellipsis; white-space: nowrap; }
 .jd-database__sheet { overflow: hidden; border: 1px solid var(--jd-db-border); }
 .jd-database__sheet > .jd-database { border: 0; }
 .jd-database__append-row { display: block; width: 100%; min-height: 32px; border: 0; border-top: 1px solid var(--jd-db-border); background: var(--jd-db-bg); color: var(--jd-db-muted); text-align: left; padding: 4px 12px; cursor: pointer; }
 .jd-database__append-row:hover, .jd-database__append-row:focus-visible { background: var(--jd-db-accent-soft); color: var(--jd-db-accent); outline: 0; }
-.jd-database__state { display: grid; min-height: 180px; place-items: center; padding: 32px; color: var(--jd-db-muted); text-align: center; }
-.jd-database[data-density="compact"] .jd-database__toolbar { min-height: 46px; padding-block: 6px; }
+.jd-database__state { display: grid; min-height: 180px; place-items: center; padding: var(--space-region); color: var(--jd-db-muted); text-align: center; }
+.jd-database[data-density="compact"] .jd-database__toolbar { min-height: 0; padding-block: 4px; }
 .jd-database[data-density="compact"] td > input:not([type="checkbox"]),
 .jd-database[data-density="compact"] td > select,
-.jd-database[data-density="compact"] .jd-database__readonly { min-height: 34px; padding-block: 6px; }
+.jd-database[data-density="compact"] .jd-database__readonly { min-height: 32px; height: 32px; padding-block: 4px; }
 .jd-database__sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 
 .jd-database [data-pinned="start"] { background: var(--jd-db-bg); box-shadow: 1px 0 var(--jd-db-border); }
 
-.jd-database-workspace { color: var(--jd-db-text, #172033); font: 14px/1.4 Inter, ui-sans-serif, system-ui, sans-serif; }
+.jd-database-workspace { color: var(--jd-db-text, rgb(var(--color-foreground-default))); font-family: var(--font-family-ui); font-size: var(--font-size-body); line-height: var(--line-height-body); }
 .jd-database__toolbar-group { display: contents; }
-.jd-database__toolbar details { position: relative; }
+
 .jd-database__toolbar-group > input[type="search"] { width: 140px; }
-.jd-database__control-row { display: flex; align-items: center; gap: 6px; }
-.jd-database__control-row label { display: flex; min-width: 100px; align-items: center; gap: 6px; }
+.jd-database__control-row { display: flex; align-items: center; gap: var(--space-related); }
+.jd-database__control-row label { display: flex; min-width: 100px; align-items: center; gap: var(--space-related); }
 .jd-database__control-row input[type="number"] { width: 72px; }
-.jd-database__status { margin-left: auto; color: var(--jd-db-muted); font-size: 12px; }
-.jd-database__status button { margin-left: 6px; }
-.jd-database__more { display: block; margin: 12px auto; }
-.jd-database__record { border: 1px solid var(--jd-db-border); border-top: 0; background: var(--jd-db-bg); }
-.jd-database__record > header { display: flex; align-items: flex-start; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--jd-db-border); }
-.jd-database__record h2 { margin: 2px 0 0; font-size: 16px; }
-.jd-database__record form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; padding: 12px; }
-.jd-database__record form > label { display: grid; gap: 4px; }
-.jd-database__record form input, .jd-database__record form select { min-height: 34px; border: 1px solid var(--jd-db-border); padding: 6px 8px; }
-.jd-database__record form footer { display: flex; grid-column: 1 / -1; justify-content: flex-end; gap: 6px; }
+.jd-database__status { display: flex; gap: var(--space-related); align-items: center;  color: var(--jd-db-muted); font-size: var(--font-size-caption); }
+
+.jd-database__more { display: block; justify-self: center; align-self: center; }
+.jd-database__record form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-group); padding: var(--space-group); }
+.jd-database__record form > label { display: grid; gap: var(--space-related); }
+.jd-database__record form footer { display: flex; grid-column: 1 / -1; justify-content: flex-end; gap: var(--space-related); }
 
 @media (max-width: 760px) {
   .jd-database__toolbar { align-items: stretch; flex-wrap: wrap; }
   .jd-database__filter { order: 2; width: 100%; }
-  .jd-database__announcement { width: 100%; margin-left: 0; }
+  .jd-database__announcement { width: 100%;  }
 }
+
+.jd-database[data-density="compact"] td > input[type="checkbox"] { margin: 0; }
+
+.jd-database__toolbar-actions { display: flex; flex-wrap: wrap; flex: 1; align-items: center; gap: var(--space-related); }
+.jd-database td:has(> input[type="checkbox"]) { text-align: center; }
+
+.jd-database__pagination { display: grid; justify-items: center; padding-block: var(--space-group); }
+
+/* View configuration composes canonical inputs and Popover, retaining only layout. */
+.jd-database__view-panel { display: grid; gap: var(--space-related); width: max-content; max-width: calc(100vw - var(--space-region)); max-height: 60vh; overflow: auto; }
+.jd-database__toolbar [data-ui-control="search"] { width: 10rem; }
+.jd-database__control-row > .json-document-field { flex: 1; }

@@ -182,15 +182,70 @@ type AnnotationSelectorTransform =
 ```ts
 interface AnnotationSource extends Record<string, JSONValue> { readonly id: string; readonly src: string; readonly width: number; readonly height: number }
 ```
+## `appendUIBuilderActivity`
+
+```ts
+appendUIBuilderActivity(editor: ObjectEditor, composerId: string, body: string): { readonly ok: false; readonly code: string; readonly reason?: string; } | { readonly ok: true; readonly snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<import("<repository>/packages/json-document-editing/src/object").ObjectSelection>; readonly change?: import("<repository>/packages/json-document/src/application/document/contract").JSONAppliedChange; } | { ...; }
+```
 ## `applyTextEdit`
 
 ```ts
 applyTextEdit(editor: TextEditor, edit: TextEdit): import("<repository>/packages/json-document-editing/src/session").EditingResult<import("<repository>/packages/json-document-editing/src/text").TextSelection>
 ```
+## `applyUIBuilderComponentConfiguration`
+
+```ts
+applyUIBuilderComponentConfiguration(editor: ObjectEditor, changes: readonly UIBuilderComponentConfiguration[]): { readonly ok: false; readonly code: string; readonly reason?: string; } | { readonly ok: true; readonly snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<...>; readonly change?: import("<repository>/packages/json-document/src/application/document/contract").JSONAppliedChange; } | { ...; }
+```
+## `applyUIBuilderConfiguration`
+
+```ts
+applyUIBuilderConfiguration(editor: ObjectEditor, change: UIBuilderConfiguration): { readonly ok: false; readonly code: string; readonly reason?: string; } | { readonly ok: true; readonly snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<import("<repository>/packages/json-document-editing/src/object").ObjectSelection>; readonly change?: import("<repository>/packages/json-document/src/application/document/contract").JSONAppliedChange; } | { ...; }
+```
+## `applyUIBuilderMaterials`
+
+```ts
+applyUIBuilderMaterials(editor: ObjectEditor, commands: readonly UIBuilderMaterialCommand[], generate?: UIBuilderSampleGenerator): { readonly ok: false; readonly code: string; readonly reason?: string; } | { ...; } | { ...; }
+```
+## `applyUIBuilderPages`
+
+```ts
+applyUIBuilderPages(editor: ObjectEditor, commands: readonly UIBuilderPageCommand[]): { readonly ok: false; readonly code: string; readonly reason?: string; } | { readonly ok: true; readonly snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<...>; readonly change?: import("<repository>/packages/json-document/src/application/document/contract").JSONAppliedChange; } | { ...; }
+```
+## `applyUIBuilderScreen`
+
+```ts
+applyUIBuilderScreen(editor: ObjectEditor, plan: UIBuilderScreenPlan): { readonly ok: false; readonly code: string; readonly reason?: string; } | { readonly ok: true; readonly snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<import("<repository>/packages/json-document-editing/src/object").ObjectSelection>; readonly change?: import("<repository>/packages/json-document/src/application/document/contract").JSONAppliedChange; } | { ...; }
+```
 ## `assertAnnotationDocument`
 
 ```ts
 assertAnnotationDocument(document: AnnotationDocument): void
+```
+## `assertUIBuilderActionExecution`
+
+```ts
+assertUIBuilderActionExecution(value: unknown): asserts value is UIBuilderActionExecution
+```
+## `assertUIBuilderComposition`
+
+```ts
+assertUIBuilderComposition(project: UIBuilderProject): void
+```
+## `assertUIBuilderPages`
+
+```ts
+assertUIBuilderPages(project: UIBuilderProject): void
+```
+## `assertUIBuilderProject`
+
+```ts
+assertUIBuilderProject(value: unknown): asserts value is UIBuilderProject
+```
+## `assertUIBuilderSkillContract`
+
+```ts
+assertUIBuilderSkillContract(execution: UIBuilderActionExecution, fields: readonly UIBuilderField[], skill: UIBuilderSkillDefinition): void
 ```
 ## `bindCalendarAllDayIntent`
 
@@ -676,6 +731,11 @@ interface CanvasHTMLDocument extends Record<string, JSONValue> {
 ```ts
 clampTextSelection(value: string, selection: TextSelection): TextSelection
 ```
+## `commitUIBuilderCollection`
+
+```ts
+commitUIBuilderCollection(editor: ObjectEditor, object: UIComponentObject, document: DatabaseDocument): { readonly ok: false; readonly code: string; readonly reason?: string; } | { readonly ok: true; readonly snapshot: import("<repository>/packages/json-document-editing/src/session").EditingSnapshot<...>; readonly change?: import("<repository>/packages/json-document/src/application/document/contract").JSONAppliedChange; } | { ...; }
+```
 ## `createAnnotationEditor`
 
 ```ts
@@ -730,6 +790,11 @@ createCanvasSheet(bounds: ObjectBounds, options?: { rows?: number; columns?: num
 
 ```ts
 createDatabaseEditor(source: EditingDocumentSource<DatabaseDocument>, options?: EditingHistoryOptions): DatabaseEditor
+```
+## `createDatabaseView`
+
+```ts
+createDatabaseView(id: string, name: string, propertyIds: ReadonlyArray<string>, ownership?: DatabaseTableView["ownership"], options?: { readonly hiddenPropertyIds?: readonly string[]; }): DatabaseTableView
 ```
 ## `createDocumentEditor`
 
@@ -810,6 +875,56 @@ createTextEditorTools(editor: TextEditor): ({ name: string; description: string;
 
 ```ts
 createTreeEditor(source: EditingDocumentSource<TreeDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): TreeEditor
+```
+## `createUIBuilderActionTools`
+
+```ts
+createUIBuilderActionTools(editor: ObjectEditor, skills: readonly UIBuilderSkillDefinition[]): { name: string; description: string; parameters: { type: string; properties: Record<string, unknown>; required: string[]; additionalProperties: boolean; }; execute(args: unknown): { ...; } | ... 2 more ... | { ...; }; }[]
+```
+## `createUIBuilderCatalogTools`
+
+```ts
+createUIBuilderCatalogTools(editor: ObjectEditor, options?: { readonly dataPresentations?: readonly JSONValue[]; }): { name: string; description: string; parameters: { type: string; properties: Record<string, unknown>; required: string[]; additionalProperties: boolean; }; execute(args: unknown): { ...; } | ... 2 more ... | { ...; }; }[]
+```
+## `createUIBuilderComponentConfigurationTools`
+
+```ts
+createUIBuilderComponentConfigurationTools(editor: ObjectEditor): ({ name: string; description: string; parameters: { type: string; properties: { changes?: undefined; }; required: any[]; additionalProperties: boolean; }; execute(args: unknown): { ...; } | { ...; }; } | { ...; })[]
+```
+## `createUIBuilderEditor`
+
+```ts
+createUIBuilderEditor(value: CanvasDocument): ObjectEditor
+```
+## `createUIBuilderLayoutTools`
+
+```ts
+createUIBuilderLayoutTools(editor: ObjectEditor, context?: { readonly pageId: string; readonly selection: UIBuilderRecordSelection; readonly runtimeValues?: UIBuilderRuntimeValues; }): ({ name: string; description: string; parameters: { ...; }; execute(): { ...; }; } | { ...; })[]
+```
+## `createUIBuilderMaterialTools`
+
+```ts
+createUIBuilderMaterialTools(editor: ObjectEditor, generate: UIBuilderSampleGenerator): { name: string; description: string; parameters: { type: string; properties: Record<string, unknown>; required: string[]; additionalProperties: boolean; }; execute(args: unknown): { ...; } | ... 2 more ... | { ...; }; }[]
+```
+## `createUIBuilderPageTools`
+
+```ts
+createUIBuilderPageTools(editor: ObjectEditor): { name: string; description: string; parameters: { type: string; properties: Record<string, unknown>; required: string[]; additionalProperties: boolean; }; execute(args: unknown): { ...; } | ... 4 more ... | { ...; }; }[]
+```
+## `createUIBuilderRecordSelection`
+
+```ts
+createUIBuilderRecordSelection(project: ReturnType<typeof readUIBuilderProject>): UIBuilderRecordSelection
+```
+## `createUIBuilderScreenTools`
+
+```ts
+createUIBuilderScreenTools(editor: ObjectEditor, options?: { readonly pageId?: string; readonly dataPresentations?: readonly JSONValue[]; }): { name: string; description: string; parameters: { type: string; properties: Record<...>; required: string[]; additionalProperties: boolean; }; execute(args: unknown): { ...; } | ... 2 more ... | { ...; }; }[]
+```
+## `createUIBuilderTools`
+
+```ts
+createUIBuilderTools(editor: ObjectEditor): { name: string; description: string; parameters: { type: string; properties: Record<string, unknown>; required: string[]; additionalProperties: boolean; }; execute(args: unknown): { ...; } | ... 3 more ... | { ...; }; }[]
 ```
 ## `cutEditingClipboard`
 
@@ -1018,6 +1133,11 @@ databaseValueFromText(property: DatabaseProperty, value: string): string | numbe
 ```ts
 defaultDatabaseValue(property: DatabaseProperty): JSONValue
 ```
+## `defaultUIBuilderPages`
+
+```ts
+defaultUIBuilderPages(): readonly UIBuilderPage[]
+```
 ## `diffText`
 
 ```ts
@@ -1108,6 +1228,11 @@ interface DocumentSelection extends Record<string, JSONValue> {
 
 ```ts
 documentSelectionFocus(selection: DocumentSelection): DocumentPoint | null
+```
+## `duplicateUIBuilderComposition`
+
+```ts
+duplicateUIBuilderComposition(project: UIBuilderProject, objectIds: readonly string[], placement?: ObjectPastePlacement): UIBuilderProject
 ```
 ## `EditingClipboardCut`
 
@@ -1257,10 +1382,25 @@ interface EditingSnapshot<Selection extends JSONValue> {
   readonly canRedo: boolean;
 }
 ```
+## `executeUIBuilderAction`
+
+```ts
+executeUIBuilderAction(editor: ObjectEditor, actionId: string, skills: readonly UIBuilderSkillDefinition[], selection?: UIBuilderRecordSelection, signal?: { readonly aborted: boolean; }): Promise<...>
+```
 ## `formatCalendarInstant`
 
 ```ts
 formatCalendarInstant(value: Temporal.PlainDateTime): string
+```
+## `getUIBuilderPageObjects`
+
+```ts
+getUIBuilderPageObjects(project: UIBuilderProject, pageId?: string): readonly CanvasObject[]
+```
+## `getUIBuilderRootObjects`
+
+```ts
+getUIBuilderRootObjects(objects: readonly UIComponentObject[]): readonly UIComponentObject[]
 ```
 ## `gridCellsInRange`
 
@@ -1688,6 +1828,11 @@ projectCalendarOccurrences(events: ReadonlyArray<CalendarEvent>, rangeStart: str
 ```ts
 projectCanvasHTML<T extends DocumentObject>(object: T, html: string, bounds: ObjectBounds): T & { document: { html: string; viewportWidth: number; viewportHeight: number; }; x: number; y: number; width: number; height: number; }
 ```
+## `projectDatabaseTable`
+
+```ts
+projectDatabaseTable(document: DatabaseDocument, viewId: string): DatabaseTopology
+```
 ## `ProjectedSheetOptions`
 
 ```ts
@@ -1726,6 +1871,46 @@ projectTreeVisibility(nodes: ReadonlyArray<TreeNode>, expandedIds: ReadonlySet<s
 
 ```ts
 readCanvasHTML(object: DocumentObject): CanvasHTMLDocument | null
+```
+## `readUIBuilderProject`
+
+```ts
+readUIBuilderProject(value: unknown): UIBuilderProject
+```
+## `resolveUIBuilderActionPrerequisites`
+
+```ts
+resolveUIBuilderActionPrerequisites(project: ReturnType<typeof readUIBuilderProject>, actionId: string, selection?: UIBuilderRecordSelection): { ok: false; reason: string; } | { ok: true; reason?: undefined; }
+```
+## `resolveUIBuilderCollection`
+
+```ts
+resolveUIBuilderCollection(project: UIBuilderProject, object: UIComponentObject, selection?: UIBuilderRecordSelection, values?: UIBuilderRuntimeValues): UIBuilderCollectionProjection | undefined
+```
+## `resolveUIBuilderComponent`
+
+```ts
+resolveUIBuilderComponent(project: UIBuilderProject, object: UIComponentObject, selection?: UIBuilderRecordSelection, values?: UIBuilderRuntimeValues): UIBuilderProjection
+```
+## `resolveUIBuilderPageId`
+
+```ts
+resolveUIBuilderPageId(project: UIBuilderProject, pageId?: string): string
+```
+## `resolveUIBuilderTableData`
+
+```ts
+resolveUIBuilderTableData(project: UIBuilderProject, tableId: string, values?: UIBuilderRuntimeValues): DatabaseDocument | undefined
+```
+## `setUIBuilderComponentValue`
+
+```ts
+setUIBuilderComponentValue(editor: ObjectEditor, object: UIComponentObject, value: string | number | boolean, selection?: UIBuilderRecordSelection): import("<repository>/packages/json-document-editing/src/session").EditingResult<import("<repository>/packages/json-document-editing/src/object").ObjectSelection> | { ...; }
+```
+## `setUIBuilderInput`
+
+```ts
+setUIBuilderInput(editor: ObjectEditor, object: UIComponentObject, value: string | boolean, selection?: UIBuilderRecordSelection): { readonly ok: false; readonly code: string; readonly reason?: string; } | { ...; } | { ...; }
 ```
 ## `SheetAvailability`
 
@@ -2125,6 +2310,198 @@ interface TreeVisibilityRow extends TreeNode {
   readonly setSize: number;
   readonly hasChildren: boolean;
   readonly expanded: boolean;
+}
+```
+## `UIBuilderAction`
+
+```ts
+type UIBuilderAction = Record<string, JSONValue> & {
+  readonly execution?: UIBuilderActionExecution;
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly inputs: readonly DatabaseProperty[];
+  readonly outputs: readonly DatabaseProperty[];
+}
+```
+## `UIBuilderActionExecution`
+
+```ts
+interface UIBuilderActionExecution extends Record<string, JSONValue> {
+  readonly skill: string;
+  readonly tableId: string;
+  readonly prompt: string;
+  readonly inputFieldIds: readonly string[];
+  readonly outputFieldIds: readonly string[];
+  readonly requiredFieldIds: readonly string[];
+}
+```
+## `UIBuilderCollectionProjection`
+
+```ts
+interface UIBuilderCollectionProjection { readonly tableId: string; readonly name: string; readonly document: DatabaseDocument; readonly fieldIds: readonly string[]; readonly selectedRecordId: string | null; readonly selectionOutsideQuery?: boolean; }
+```
+## `uiBuilderComponentChildIds`
+
+```ts
+uiBuilderComponentChildIds(object: UIComponentObject): readonly string[]
+```
+## `UIBuilderComponentConfiguration`
+
+```ts
+interface UIBuilderComponentConfiguration {
+  readonly objectId: string;
+  /** Complete approved props. Omission preserves previous configuration. */
+  readonly props?: Record<string, JSONValue>;
+  readonly childIds?: readonly string[];
+  /** null explicitly disconnects collection projection. */
+  readonly collection?: {readonly tableId: string; readonly fieldIds: readonly string[]} | null;
+}
+```
+## `UIBuilderConfiguration`
+
+```ts
+interface UIBuilderConfiguration {
+  /** Reorder existing children without adding, removing or reparenting them. */
+  readonly childOrders?: readonly {readonly objectId: string; readonly slot: "childIds" | "toolbarIds" | "inspectorIds"; readonly objectIds: readonly string[]}[] | undefined;
+  readonly connections?: readonly UIBuilderConnection[];
+  readonly designId?: UIDesignId;
+  readonly flow?: UIFlowLayout;
+  /** Scope flow publication to the displayed page without changing the start page. */
+  readonly pageId?: string;
+  /** Empty objectIds explicitly arranges the active page. */
+  readonly layout?: {readonly id: UILayoutId; readonly objectIds: readonly string[]};
+}
+```
+## `UIBuilderConnection`
+
+```ts
+interface UIBuilderConnection {
+  readonly objectId: string;
+  readonly bindings: readonly UIComponentBinding[];
+  /** Empty string disconnects the action. */
+  readonly actionId: string;
+}
+```
+## `uiBuilderContentStructure`
+
+```ts
+const uiBuilderContentStructure: { readonly decide: readonly ["Choose which facts the user needs on this screen for the requested task. Preserve relevant facts; defer secondary facts to the selected-record detail instead of displaying every field everywhere.", ... 6 more ..., "For the main selected subject or readable result, page-header.titleRole=...
+```
+## `UIBuilderField`
+
+```ts
+interface UIBuilderField extends DatabaseProperty { readonly sample: UIBuilderSampleKind; }
+```
+## `UIBuilderMaterialCommand`
+
+```ts
+type UIBuilderMaterialCommand =
+  | { readonly type: "table.save"; readonly id: string; readonly name: string; readonly fields: readonly UIBuilderField[] }
+  | { readonly type: "table.remove"; readonly id: string }
+  | { readonly type: "table.data"; readonly id: string; readonly data: DatabaseDocument }
+  | { readonly type: "table.generate"; readonly id: string; readonly count: number; readonly mode: "append" | "replace" }
+  | { readonly type: "action.save"; readonly action: UIBuilderAction }
+  | { readonly type: "action.remove"; readonly id: string };
+```
+## `UIBuilderPage`
+
+```ts
+interface UIBuilderPage extends Record<string, JSONValue> { readonly id: string; readonly name: string; }
+```
+## `UIBuilderPageCommand`
+
+```ts
+type UIBuilderPageCommand =
+  | {readonly type: "page.create"; readonly id: string; readonly name: string}
+  | {readonly type: "page.rename"; readonly id: string; readonly name: string}
+  | {readonly type: "page.select"; readonly id: string}
+  | {readonly type: "page.remove"; readonly id: string; readonly moveToPageId?: string}
+  | {readonly type: "component.move"; readonly id: string; readonly pageId: string}
+  | {readonly type: "page-link.target"; readonly id: string; readonly targetPageId: string};
+```
+## `UIBuilderProject`
+
+```ts
+interface UIBuilderProject extends CanvasDocument {
+  readonly pages: readonly UIBuilderPage[];
+  readonly activePageId: string;
+  readonly designId: UIDesignId;
+  readonly flow: UIFlowLayout | null;
+  readonly tables: readonly UIBuilderTable[];
+  readonly actions: readonly UIBuilderAction[];
+}
+```
+## `UIBuilderProjection`
+
+```ts
+interface UIBuilderProjection { readonly object: UIComponentObject; readonly issues: readonly string[]; readonly collection?: UIBuilderCollectionProjection | undefined; readonly recordIds?: readonly string[] | undefined; readonly selectionMissing: boolean; }
+```
+## `UIBuilderRecordSelection`
+
+```ts
+type UIBuilderRecordSelection = Readonly<Record<string, string>>;
+```
+## `UIBuilderRuntimeValues`
+
+```ts
+type UIBuilderRuntimeValues = Readonly<Record<string, string | number | boolean>>;
+```
+## `UIBuilderSampleGenerator`
+
+```ts
+type UIBuilderSampleGenerator = (field: UIBuilderField) => JSONValue;
+```
+## `UIBuilderSampleKind`
+
+```ts
+type UIBuilderSampleKind = typeof uiBuilderSampleKinds[number];
+```
+## `uiBuilderSampleKinds`
+
+```ts
+const uiBuilderSampleKinds: readonly ["auto", "name", "email", "company", "product", "sentence", "date", "url"]
+```
+## `UIBuilderScreenPlan`
+
+```ts
+interface UIBuilderScreenPlan {
+  readonly pageId: string;
+  readonly materials: readonly UIBuilderMaterialCommand[];
+  /** IDs are declared once and referenced directly by children, bindings and flow. */
+  readonly components: readonly ({readonly id: string; readonly text: string} & Omit<UIComponentContent, "pageId">)[];
+  readonly flow: UIFlowLayout;
+}
+```
+## `UIBuilderSkill`
+
+```ts
+type UIBuilderSkill = (request: UIBuilderSkillRequest) => Promise<Readonly<Record<string, JSONValue>>>;
+```
+## `UIBuilderSkillDefinition`
+
+```ts
+interface UIBuilderSkillDefinition { readonly id: string; readonly name: string; readonly description: string; readonly run: UIBuilderSkill; readonly contract?: {readonly requiredInputFieldIds: readonly string[]; readonly outputFields: readonly {readonly id: string; readonly types: readonly UIBuilderField["type"][]}[]}; }
+```
+## `UIBuilderSkillRequest`
+
+```ts
+interface UIBuilderSkillRequest {
+  readonly action: UIBuilderAction;
+  readonly recordId: string;
+  readonly input: Readonly<Record<string, JSONValue>>;
+  readonly outputs: readonly UIBuilderField[];
+  readonly signal: {readonly aborted: boolean};
+}
+```
+## `UIBuilderTable`
+
+```ts
+interface UIBuilderTable extends Record<string, JSONValue> {
+  readonly id: string;
+  readonly name: string;
+  readonly fields: readonly UIBuilderField[];
+  readonly data: DatabaseDocument;
 }
 ```
 ## `updateCanvasHTML`

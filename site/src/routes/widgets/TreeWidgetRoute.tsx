@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import {
@@ -11,7 +12,7 @@ import {
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
 import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import {
   editingCommandFromWebKeyboardStroke,
 } from "@interactive-os/json-document-affordance";
@@ -77,14 +78,14 @@ export function TreeWidgetRoute() {
           aria-label="Visible nodes"
           {...activeDescendantContainerProps(focusKey === null ? null : treeItemId(focusKey))}
           onKeyDown={editing.getKeyDownHandler()}
-          className={classes("m-0 grid list-none gap-1 p-0", ui.state.focus)}
+          className={classes("m-0 grid list-none gap-related p-0", contentPresentation.focus)}
         >
           {rows.map((row) => {
             return (
               <li role="none" key={row.id} style={{ paddingLeft: `${row.depth * 1.25}rem` }}>
-                  <SelectableItem
+                  <SelectableItem presentation="row"
                     as="div"
-                    className={classes("grid grid-cols-[2rem_minmax(0,1fr)] text-left", ui.surface.selectableBlock)}
+                    className={classes("grid grid-cols-[2rem_minmax(0,1fr)] text-left", contentPresentation.itemSummary)}
                     {...editingItemProps(editing.getItem(row.id))}
                     {...activeDescendantItemProps(treeItemId(row.id))}
                     {...projectWebWidgetState({

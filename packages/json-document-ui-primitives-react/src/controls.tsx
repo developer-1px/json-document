@@ -5,7 +5,9 @@ import {
   type ComponentPropsWithoutRef,
   type ElementType,
   type ReactNode,
+  type Ref,
 } from "react";
+import { ChevronDown } from "lucide-react";
 import type { ControlAffordanceProps } from "./control-affordance.js";
 import { contentInteractionAttributes } from "./content-interaction.js";
 
@@ -20,16 +22,18 @@ type FocusPreservingControl = {
 export function Command(
   props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title"> & FocusPreservingControl & ControlAffordanceProps & {
     readonly kind?: CommandKind;
-    readonly label?: string;
+    readonly label?: string | undefined;
     readonly rootClassName?: string;
+    readonly controlRef?: Ref<HTMLButtonElement>;
   },
 ): ReactNode {
-  const { "aria-label": ariaLabel, affordance, children, kind = "secondary", label, onMouseDown, preserveFocus = false, rootClassName, type = "button", ...buttonProps } = props;
+  const { "aria-label": ariaLabel, affordance, children, controlRef, kind = "secondary", label, onMouseDown, preserveFocus = false, rootClassName, type = "button", ...buttonProps } = props;
   const accessibleLabel = label ?? ariaLabel;
   const tooltipId = useId();
   const command = (
     <button
       {...buttonProps}
+      ref={controlRef}
       type={type}
       aria-describedby={label ? tooltipId : undefined}
       aria-label={accessibleLabel}
@@ -87,6 +91,7 @@ export function Toggle(
 export type InlineChoiceOption<Id extends string = string> = {
   readonly id: Id;
   readonly label: string;
+  readonly description?: string;
   readonly disabled?: boolean;
 };
 
@@ -148,13 +153,14 @@ export function InlineChoice<Id extends string>(props: {
   readonly className?: string;
 } & ControlAffordanceProps): ReactNode {
   const enabled = props.options.filter((option) => !option.disabled);
+  const focusId = enabled.some(option => option.id === props.value) ? props.value : enabled[0]?.id;
   const move = (from: Id, direction: 1 | -1) => {
     const index = enabled.findIndex((option) => option.id === from);
     const next = enabled[(index + direction + enabled.length) % enabled.length];
     if (next) props.onValueChange(next.id);
   };
   return (
-    <div role="radiogroup" aria-label={props.label} className={props.className} data-ui-control="choice" data-ui-presentation="inline" data-ui-affordance={props.affordance}>
+    <div role="radiogroup" aria-label={props.label} className={props.className} data-ui-control="choice" data-ui-presentation="inline" data-ui-described={props.options.some(option => option.description) || undefined} data-ui-affordance={props.affordance}>
       {props.options.map((option) => (
         <button
           key={option.id}
@@ -162,7 +168,7 @@ export function InlineChoice<Id extends string>(props: {
           role="radio"
           aria-checked={option.id === props.value}
           disabled={option.disabled}
-          tabIndex={option.id === props.value ? 0 : -1}
+          tabIndex={option.id === focusId ? 0 : -1}
           data-ui-segment="true"
           onClick={() => props.onValueChange(option.id)}
           onKeyDown={(event) => {
@@ -176,7 +182,7 @@ export function InlineChoice<Id extends string>(props: {
               ?.querySelectorAll<HTMLButtonElement>("[role=radio]")
               [props.options.indexOf(next!)]?.focus();
           }}
-        >{option.label}</button>
+        ><span>{option.label}</span>{option.description && <span data-choice-description>{option.description}</span>}</button>
       ))}
     </div>
   );
@@ -184,6 +190,7 @@ export function InlineChoice<Id extends string>(props: {
 
 export type SelectableItemProps<T extends ElementType = "button"> = {
   readonly as?: T;
+  readonly presentation?: "row";
   readonly selected: boolean;
   readonly primary?: boolean;
   readonly focus?: boolean;
@@ -194,13 +201,14 @@ export type SelectableItemProps<T extends ElementType = "button"> = {
 export function SelectableItem<T extends ElementType = "button">(
   props: SelectableItemProps<T>,
 ): ReactNode {
-  const { active = false, affordance, as, dragging = false, selected, primary = false, focus = false, ...itemProps } = props;
+  const { active = false, affordance, as, presentation, dragging = false, selected, primary = false, focus = false, ...itemProps } = props;
   const Component = as ?? "button";
   return createElement(Component, {
     ...itemProps,
     ...contentInteractionAttributes({ role: "content", selected, primary, active, dragging }),
     "data-focus": focus ? "true" : "false",
     "data-ui-control": "selectable",
+    ...(presentation ? {"data-ui-presentation": presentation} : {}),
     "data-ui-affordance": affordance,
   });
 }
@@ -211,7 +219,7 @@ export function DisclosureButton(
     readonly controls: string;
   },
 ): ReactNode {
-  const { affordance, expanded, controls, type = "button", ...buttonProps } = props;
+  const { affordance, children, expanded, controls, type = "button", ...buttonProps } = props;
   return (
     <button
       {...buttonProps}
@@ -220,7 +228,7 @@ export function DisclosureButton(
       aria-controls={controls}
       data-ui-control="disclosure"
       data-ui-affordance={affordance}
-    />
+    ><span data-ui-disclosure="content">{children}</span><ChevronDown data-ui-disclosure="chevron" aria-hidden="true" size={16} /></button>
   );
 }
 

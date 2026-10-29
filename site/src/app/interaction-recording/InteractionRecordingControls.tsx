@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { useEffect, useState } from "react";
@@ -29,17 +30,17 @@ export function InteractionRecordingControls() {
     return () => { current.dispose(); unsubscribe(); unbind(); };
   }, []);
   const start = () => { setLast(null); setSaved(null); recorder?.start(); };
-  return <aside data-interaction-recorder aria-label="입력 진단 기록" className={classes("fixed top-3 right-3 z-[100] flex max-w-[calc(100vw-1.5rem)] items-center gap-2 px-2 py-1", ui.frame.app)}>
-    <Command preserveFocus className="px-2 py-1"
+  return <aside data-interaction-recorder aria-label="입력 진단 기록" className={classes("fixed top-3 right-3 z-[100] flex max-w-[calc(100vw-1.5rem)] items-center gap-related px-related py-1", ui.frame.app)}>
+    <Command preserveFocus className="px-related py-1"
       aria-label={recording ? "기록 종료" : "REC 기록 시작"} disabled={!recorder}
       onClick={recording ? () => recorder?.stop() : start}>
       {recording ? "■ STOP" : "● REC"}
     </Command>
-    <span role="status" className={ui.text.meta}>
+    <span role="status" className={contentPresentation.caption}>
       {recording ? "입력 내용 기록 중" : saving ? "저장 중…" : saved?.ok ? `저장됨 · ${saved.id.slice(0, 8)}` : saved ? "서버 저장 실패 · JSON을 보관하세요" : ""}
       {last?.reason === "limit" ? " · 기록 한도 도달" : ""}
     </span>
-    {last && !recording ? <Command preserveFocus className="px-2 py-1"
+    {last && !recording ? <Command preserveFocus className="px-related py-1"
       onClick={() => downloadWebInteractionRecording(document, last)}>JSON</Command> : null}
   </aside>;
 }

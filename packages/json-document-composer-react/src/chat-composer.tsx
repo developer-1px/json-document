@@ -41,7 +41,7 @@ export function ChatComposer<Model extends string, Suggestion extends ComposerHo
           data-ui-chat-composer-input=""
         />
         {speechInput && <ComposerSpeechInput lang={speechInput.lang} onText={composer.insertText} disabled={composer.isSubmitting} />}
-        <Command type="submit" preserveFocus aria-label={submitLabel} disabled={!composer.canSubmit}
+        <Command type="submit" preserveFocus label={submitLabel} disabled={!composer.canSubmit}
           aria-busy={composer.isSubmitting} data-ui-chat-composer-send="">
           <ArrowUp aria-hidden="true" size={18} />
         </Command>

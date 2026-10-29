@@ -1,12 +1,14 @@
+import { linkPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import {
   type AnchorHTMLAttributes,
   type ReactNode,
 } from "react";
 import { ArrowRight } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { classes, ui } from "./styles";
+import { normalizePath } from "../../app/router";
+import { classes } from "./styles";
 
-type ActionLinkBaseProps = {
+type ActionLinkBaseProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "children" | "className"> & {
   readonly children: ReactNode;
   readonly kind?: "prominent" | "quiet";
   readonly className?: string;
@@ -28,42 +30,14 @@ type ActionLinkProps = ActionLinkBaseProps & (
 );
 
 export function ActionLink(props: ActionLinkProps) {
-  const { children, className, kind = "quiet" } = props;
-  const content = (
-    <>
-      {children}
-      {kind === "prominent" ? <ArrowRight aria-hidden="true" size={16} /> : null}
-    </>
-  );
-  const linkClassName = classes(ui.interactive.link[kind], className);
-
-  if (props.href !== undefined) {
-    const {
-      activePath: _activePath,
-      branch: _branch,
-      children: _children,
-      className: _className,
-      href,
-      kind: _kind,
-      to: _to,
-      ...anchorProps
-    } = props;
-    return <a {...anchorProps} href={href} className={linkClassName}>{content}</a>;
-  }
-
-  return (
-    <InternalActionLink
-      to={props.to}
-      activePath={props.activePath}
-      branch={props.branch}
-      className={linkClassName}
-    >
-      {content}
-    </InternalActionLink>
-  );
+  const { children, className, kind = "quiet", to, href, activePath, branch, ...attributes } = props;
+  const content = <>{children}{kind === "prominent" ? <ArrowRight aria-hidden="true" size={16} /> : null}</>;
+  const linkClassName = classes(kind === "prominent" ? linkPresentation.action : linkPresentation.inline, className);
+  if (to !== undefined) return <InternalActionLink {...attributes} to={to} activePath={activePath} branch={branch} className={linkClassName}>{content}</InternalActionLink>;
+  return <a {...attributes} href={href} className={linkClassName}>{content}</a>;
 }
 
-function InternalActionLink(props: {
+function InternalActionLink(props: Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "children" | "className"> & {
   readonly to: string;
   readonly children: ReactNode;
   readonly className: string;
@@ -74,9 +48,11 @@ function InternalActionLink(props: {
     select: (state) => normalizePath(state.location.pathname),
   });
   const active = normalizePath(props.activePath ?? pathname) === props.to;
+  const {to, children, className, activePath, branch, ...attributes} = props;
   return (
     <Link
-      to={props.to as never}
+      {...attributes}
+      to={to as never}
       className={props.className}
       aria-current={active ? "page" : undefined}
       data-branch={props.branch && !active ? "true" : undefined}
@@ -88,7 +64,3 @@ function InternalActionLink(props: {
   );
 }
 
-function normalizePath(path: string): string {
-  if (path === "/") return path;
-  return path.replace(/\/+$/g, "") || "/";
-}

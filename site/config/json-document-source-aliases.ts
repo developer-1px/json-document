@@ -7,6 +7,11 @@ export interface SourceAlias {
 
 export function jsonDocumentSourceAliases(): SourceAlias[] {
   return [
+    { find: "@interactive-os/json-document-calendar/date-controls.css", replacement: sourceFile("packages/json-document-calendar/src/date-controls.css") },
+    { find: "@interactive-os/json-document-calendar/calendar-presentation.css", replacement: sourceFile("packages/json-document-calendar/src/calendar-presentation.css") },
+    { find: "@interactive-os/json-document-ui-builder/ui-builder-workspace.css", replacement: sourceFile("packages/json-document-ui-builder/src/ui-builder-workspace.css") },
+    { find: "@interactive-os/json-document-ui-builder", replacement: sourceFile("packages/json-document-ui-builder/src/index.ts") },
+    { find: "@interactive-os/json-document-canvas/ui-builder.css", replacement: sourceFile("packages/json-document-canvas/src/ui-builder.css") },
     { find: "@interactive-os/json-document-annotation/annotation-review.css", replacement: sourceFile("packages/json-document-annotation/src/annotation-review.css") },
     { find: "@interactive-os/json-document-canvas/canvas-hand.css", replacement: sourceFile("packages/json-document-canvas/src/canvas-hand.css") },
     { find: "@interactive-os/json-document-sheet/sheet-hand.css", replacement: sourceFile("packages/json-document-sheet/src/sheet-hand.css") },
@@ -16,6 +21,8 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
     { find: "@interactive-os/json-document-contenteditable/text-selection.css", replacement: sourceFile("packages/json-document-contenteditable/src/dom/text-selection.css") },
     { find: "@interactive-os/json-document-markdown-web/markdown-editor.css", replacement: sourceFile("packages/json-document-markdown-web/src/markdown-editor.css") },
     { find: "@interactive-os/json-document-rich-text-react/placeholder.css", replacement: sourceFile("packages/json-document-rich-text-react/src/placeholder.css") },
+    { find: "@interactive-os/json-document-ui-primitives-react/design-system.css", replacement: sourceFile("packages/json-document-ui-primitives-react/src/design-system.css") },
+    { find: "@interactive-os/json-document-ui-primitives-react/design-tokens.css", replacement: sourceFile("packages/json-document-ui-primitives-react/src/design-tokens.css") },
     { find: "@interactive-os/json-document-ui-primitives-react/floating-surface.css", replacement: sourceFile("packages/json-document-ui-primitives-react/src/floating-surface.css") },
     { find: "@interactive-os/json-document-ui-primitives-react/chat-bubble.css", replacement: sourceFile("packages/json-document-ui-primitives-react/src/chat-bubble.css") },
     { find: "@interactive-os/json-document-composer-react/chat-composer.css", replacement: sourceFile("packages/json-document-composer-react/src/chat-composer.css") },

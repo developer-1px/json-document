@@ -157,3 +157,5 @@ icons, affordances, and classes through finite presentation slots:
   icons={icons}
 />
 ```
+
+날짜 선택 컨트롤의 공통 스타일과 정사각형 날짜 칸은 [date-controls API](docs/date-controls.md)를 사용합니다.

@@ -36,6 +36,52 @@ import {
 afterEach(cleanup);
 
 describe("UI Primitives", () => {
+  test("viewport Dialog escapes transformed ancestors and applies only its explicit offset", () => {
+    const view=render(<div data-testid="transformed" style={{transform:"translate(20px, 30px)"}}><Dialog label="Viewport" open onOpenChange={() => {}} viewportOffset={{x:0,y:0}}>Content</Dialog></div>);
+    const dialog=screen.getByRole("dialog",{name:"Viewport"});
+    expect(dialog.closest('[data-testid="transformed"]')).toBeNull();
+    expect(dialog.parentElement?.parentElement).toBe(document.body);
+    view.rerender(<div data-testid="transformed" style={{transform:"translate(20px, 30px)"}}><Dialog label="Viewport" open onOpenChange={() => {}} viewportOffset={{x:7,y:3}} inert>Content</Dialog></div>);
+    expect(dialog.style.transform).toBe("translate(7px, 3px)");
+    expect(dialog.closest("[inert]")).not.toBeNull();
+  });
+  test("scoped Dialog keeps host controls reachable while preserving surface dismissal", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [open, setOpen] = useState(false);
+      const [boundary] = useState(() => createRef<HTMLDivElement>());
+      return <><button>Host mode</button><div ref={boundary}><button onClick={() => setOpen(true)}>Open dialog</button><Dialog label="Scoped" open={open} onOpenChange={setOpen} dismissBoundary={boundary}><button>Dialog action</button></Dialog><button>Surface outside</button></div></>;
+    }
+    render(<Harness />);
+    await user.click(screen.getByRole("button", {name: "Open dialog"}));
+    await user.click(screen.getByRole("button", {name: "Host mode"}));
+    expect(screen.getByRole("dialog", {name: "Scoped"})).toBeTruthy();
+    await user.click(screen.getByRole("button", {name: "Surface outside"}));
+    expect(screen.queryByRole("dialog", {name: "Scoped"})).toBeNull();
+  });
+  test("inert scoped Dialog preserves its open state during Canvas pointer selection", async () => {
+    const user = userEvent.setup();
+    const boundary = createRef<HTMLDivElement>();
+    const onOpenChange = vi.fn();
+    render(<div ref={boundary}><button>Canvas selection</button><Dialog label="Editing" open inert dismissBoundary={boundary} viewportOffset={{x: 0, y: 0}} onOpenChange={onOpenChange}>Content</Dialog></div>);
+    await user.click(screen.getByRole("button", {name: "Canvas selection"}));
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog", {name: "Editing"}).closest("[inert]")).not.toBeNull();
+  });
+  test("scoped Popover preserves its state across host controls and dismisses inside its surface", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [open, setOpen] = useState(false);
+      const [boundary] = useState(() => createRef<HTMLDivElement>());
+      return <><button>Host mode</button><div ref={boundary}><Popover label="Options" trigger="Open" open={open} onOpenChange={setOpen} dismissBoundary={boundary}><button>Inside panel</button></Popover><button>Surface outside</button></div></>;
+    }
+    render(<Harness />);
+    await user.click(screen.getByRole("button", {name: "Options"}));
+    await user.click(screen.getByRole("button", {name: "Host mode"}));
+    expect(screen.getByRole("dialog", {name: "Options"})).toBeTruthy();
+    await user.click(screen.getByRole("button", {name: "Surface outside"}));
+    expect(screen.queryByRole("dialog", {name: "Options"})).toBeNull();
+  });
   test("projects product affordance without changing the semantic control role", () => {
     render(<>
       <Command affordance="persistent">Today</Command>

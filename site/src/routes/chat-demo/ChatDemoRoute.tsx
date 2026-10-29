@@ -57,8 +57,8 @@ export function ChatDemoRoute() {
   });
   return (
     <DemoPage documentation={<PageHeader label="UI Primitives" title="Chat">메시지를 입력해 보세요. Enter로 보내고 Shift+Enter로 줄을 바꿉니다. {localAgent ? "로컬 Codex · Luna · 추론 없음 · Fast로 응답합니다." : "이 예제는 현재 화면에서만 동작합니다."}</PageHeader>}>
-      <div onFocusCapture={prepare} className="mx-auto flex min-h-96 w-full max-w-2xl flex-col gap-8 py-6">
-        <div role="log" aria-label="대화" className="flex flex-col gap-3">
+      <div onFocusCapture={prepare} className="mx-auto flex min-h-96 w-full max-w-2xl flex-col gap-region py-group">
+        <div role="log" aria-label="대화" className="flex flex-col gap-related">
           {!localAgent && <>
           <ChatBubble direction="incoming" label="상대방">생각을 짧게 남겨도 좋아요.</ChatBubble>
           <ChatBubble direction="outgoing" label="나">여기서부터 시작해 볼게요.</ChatBubble>

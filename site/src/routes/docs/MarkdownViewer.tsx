@@ -1,10 +1,12 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
+import { documentSections } from "./document-sections";
 import rehypeSlug from "rehype-slug";
 import { pageDescriptors } from "../../app/page-descriptors";
 import { InlineCode } from "../../shared/ui/code-block";
 import { codeLanguage } from "../../shared/ui/code-tokens";
 import { ShikiSourceCodeBlock } from "../../shared/demo-workbench/ShikiSourceCodeBlock";
 import { ActionLink } from "../../shared/ui/interactive";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { LiveDemo } from "../../app/live-demo-registry";
 import { MarkdownContent } from "../../shared/ui/markdown-content";
 
@@ -14,21 +16,22 @@ export function MarkdownViewer({ source, sourcePath = "docs/public/overview.md",
   hideTitle?: boolean;
 }) {
   return (
-    <article className="min-w-0 max-w-full">
+    <article className="min-w-0 max-w-full [&_h2_code]:[font-size:inherit] [&_h3_code]:[font-size:inherit]">
       <MarkdownContent
         content={source}
-        rehypePlugins={[rehypeSlug]}
+        className="gap-region"
+        rehypePlugins={[rehypeSlug, documentSections]}
         components={{
           h1: ({ children, id }) => hideTitle
             ? null
-            : <h1 id={id} className={classes("mb-0 mt-0", ui.text.heading)}>{children}</h1>,
+            : <h1 id={id} className={contentPresentation.title}>{children}</h1>,
           h2: ({ children, id }) => (
-            <h2 id={id} data-doc-heading className={classes("mb-0", ui.text.section)}>
+            <h2 id={id} data-doc-heading className={classes("scroll-mt-8", contentPresentation.heading)}>
               {children}
             </h2>
           ),
           h3: ({ children, id }) => (
-            <h3 id={id} className={classes("mb-0 mt-2", ui.text.heading)}>
+            <h3 id={id} className={classes("scroll-mt-8", contentPresentation.itemTitle)}>
               {children}
             </h3>
           ),

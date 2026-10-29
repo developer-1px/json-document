@@ -1,5 +1,6 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Choice, type ControlAffordance } from "@interactive-os/json-document-ui-primitives-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Temporal } from "@js-temporal/polyfill";
+import { Choice, Popover, fieldPresentation, type ControlAffordance } from "@interactive-os/json-document-ui-primitives-react";
 import {
   addCalendarDays,
   addCalendarMonths,
@@ -44,16 +45,17 @@ export function HtmlDateField(props: {
       <span>{props.label}</span>
       <input
         type={props.type}
+        className={fieldPresentation.standard}
         aria-label={props.label}
         autoComplete="off"
         spellCheck={false}
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
-        onBlur={() => commit()}
+        onBlur={(event) => commit(event.currentTarget.value)}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
             event.preventDefault();
-            commit();
+            commit(event.currentTarget.value);
           }
         }}
       />
@@ -167,68 +169,21 @@ export function RangeCalendar(props: {
 
 export function DatePicker(props: {
   readonly label: string;
+  readonly chooseLabel?: string;
   readonly value: string;
+  readonly defaultVisibleDate?: string;
   readonly onValueChange: (value: string) => void;
 }): ReactNode {
   const [open, setOpen] = useState(false);
   const [grain, setGrain] = useState<CalendarGrain>("month");
-  const [visibleDate, setVisibleDate] = useState(props.value);
-  const dialogId = useId();
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  function close(): void {
-    setOpen(false);
-    queueMicrotask(() => triggerRef.current?.focus());
-  }
-
-  return (
-    <div data-ui-control="date-picker">
-      <HtmlDateField type="date" label={props.label} value={props.value} onValueChange={props.onValueChange} />
-      <button
-        ref={triggerRef}
-        type="button"
-        data-ui-control="command"
-        aria-expanded={open}
-        aria-controls={dialogId}
-        aria-label={`Choose ${props.label}`}
-        onClick={() => {
-          if (open) close();
-          else {
-            setVisibleDate(props.value);
-            setOpen(true);
-          }
-        }}
-      >
-        Choose date
-      </button>
-      {open ? (
-        <div
-          id={dialogId}
-          role="dialog"
-          aria-label={props.label}
-          onKeyDown={(event) => {
-            if (event.key !== "Escape") return;
-            event.preventDefault();
-            close();
-          }}
-        >
-          <CalendarGrid
-            label={`${props.label} calendar`}
-            value={props.value}
-            grain={grain}
-            visibleDate={visibleDate}
-            commitOnArrow={false}
-            onValueChange={(value) => {
-              props.onValueChange(value);
-              close();
-            }}
-            onGrainChange={setGrain}
-            onVisibleDateChange={setVisibleDate}
-          />
-        </div>
-      ) : null}
-    </div>
-  );
+  const fallbackDate = props.defaultVisibleDate ?? Temporal.Now.plainDateISO().toString();
+  const [visibleDate, setVisibleDate] = useState(props.value || fallbackDate);
+  return <div data-ui-control="date-picker">
+    <HtmlDateField type="date" label={props.label} value={props.value} onValueChange={props.onValueChange}/>
+    <Popover label={props.chooseLabel ? `${props.label} ${props.chooseLabel}` : `Choose ${props.label}`} trigger={props.chooseLabel ?? "Choose date"} open={open} onOpenChange={next => {if (next) setVisibleDate(props.value || fallbackDate); setOpen(next);}}>
+      <CalendarGrid label={`${props.label} calendar`} value={props.value || null} grain={grain} visibleDate={visibleDate} commitOnArrow={false} onValueChange={value => {props.onValueChange(value); setOpen(false);}} onGrainChange={setGrain} onVisibleDateChange={setVisibleDate}/>
+    </Popover>
+  </div>;
 }
 
 export function DateRangePicker(props: {
@@ -239,70 +194,13 @@ export function DateRangePicker(props: {
   const [open, setOpen] = useState(false);
   const [grain, setGrain] = useState<CalendarGrain>("month");
   const [visibleDate, setVisibleDate] = useState(props.value.start);
-  const dialogId = useId();
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  function close(): void {
-    setOpen(false);
-    queueMicrotask(() => triggerRef.current?.focus());
-  }
-
-  return (
-    <div data-ui-control="date-range-picker">
-      <HtmlDateField
-        type="date"
-        label={`${props.label} start`}
-        value={props.value.start}
-        onValueChange={(start) => props.onValueChange(orderedRange(start, props.value.end))}
-      />
-      <HtmlDateField
-        type="date"
-        label={`${props.label} end`}
-        value={props.value.end}
-        onValueChange={(end) => props.onValueChange(orderedRange(props.value.start, end))}
-      />
-      <button
-        ref={triggerRef}
-        type="button"
-        data-ui-control="command"
-        aria-expanded={open}
-        aria-controls={dialogId}
-        aria-label={`Choose ${props.label}`}
-        onClick={() => {
-          if (open) close();
-          else {
-            setVisibleDate(props.value.start);
-            setOpen(true);
-          }
-        }}
-      >
-        Choose dates
-      </button>
-      {open ? (
-        <div
-          id={dialogId}
-          role="dialog"
-          aria-label={props.label}
-          onKeyDown={(event) => {
-            if (event.key !== "Escape") return;
-            event.preventDefault();
-            close();
-          }}
-        >
-          <RangeCalendar
-            label={`${props.label} calendar`}
-            value={props.value}
-            grain={grain}
-            visibleDate={visibleDate}
-            commitOnArrow={false}
-            onValueChange={props.onValueChange}
-            onGrainChange={setGrain}
-            onVisibleDateChange={setVisibleDate}
-          />
-        </div>
-      ) : null}
-    </div>
-  );
+  return <div data-ui-control="date-range-picker">
+    <HtmlDateField type="date" label={`${props.label} start`} value={props.value.start} onValueChange={start => props.onValueChange(orderedRange(start, props.value.end))}/>
+    <HtmlDateField type="date" label={`${props.label} end`} value={props.value.end} onValueChange={end => props.onValueChange(orderedRange(props.value.start, end))}/>
+    <Popover label={`Choose ${props.label}`} trigger="Choose dates" open={open} onOpenChange={next => {if (next) setVisibleDate(props.value.start); setOpen(next);}}>
+      <RangeCalendar label={`${props.label} calendar`} value={props.value} grain={grain} visibleDate={visibleDate} commitOnArrow={false} onValueChange={props.onValueChange} onGrainChange={setGrain} onVisibleDateChange={setVisibleDate}/>
+    </Popover>
+  </div>;
 }
 
 function GrainSwitch(props: {

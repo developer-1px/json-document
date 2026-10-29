@@ -1,5 +1,7 @@
+@import "@interactive-os/json-document-ui-primitives-react/design-tokens.css";
+
 /* Sheet owns grid geometry and contextual controls; floatingSurface owns elevation. */
-[data-sheet-hand] { position: relative; font-size: 14px; line-height: 1.5; }
+[data-sheet-hand] { position: relative; display: grid; gap: var(--space-related); align-content: start; font-size: 14px; line-height: 1.5; }
 [data-sheet-hand] > [data-sheet-toolbar] {
   position: sticky;
   top: 8px;
@@ -9,9 +11,9 @@
   width: max-content;
   max-width: 100%;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: var(--space-related);
   padding: 4px;
-  margin: 0 0 8px;
+  
   opacity: 0;
   pointer-events: none;
 }

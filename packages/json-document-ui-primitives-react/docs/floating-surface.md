@@ -4,6 +4,7 @@
 
 ```tsx
 import { floatingSurface, Toolbar, Command } from "@interactive-os/json-document-ui-primitives-react";
+import "@interactive-os/json-document-ui-primitives-react/design-system.css";
 import "@interactive-os/json-document-ui-primitives-react/floating-surface.css";
 
 <Toolbar label="문서 도구" className={floatingSurface.control}>
@@ -14,6 +15,11 @@ import "@interactive-os/json-document-ui-primitives-react/floating-surface.css";
 Popover의 `panelClassName`에는 `floatingSurface.panel`을 전달합니다. ProductShell의 `toolbarPresentation="floating"`도 같은 표면을 소비합니다. CSS를 한 번 import하고 Host의 semantic color/radius/shadow tokens로 조정합니다. 투명도 감소 및 강제 색상 모드를 지원합니다. 위치 지정과 팝오버 dismiss/focus는 이 스타일 API가 소유하지 않습니다.
 
 [Site UI primitives catalog](/demo/ui-primitives#design-system-floating-controls)의 Floating controls Usage와 Source 등록에서 구현을 확인할 수 있습니다. Bear와 Calendar도 동일 API를 소비합니다.
+
+공통 디자인 CSS를 함께 소비한 Floating Toolbar는 기본 4px inset을 사용합니다. 일반 내용 패널의 간격은 Host가 기존 8/12/16px 안에서 조합하며 표면 효과를 복제하지 않습니다.
+
+Floating Toolbar와 ToolbarGroup의 직접 Popover 텍스트 트리거는 바깥 표면과
+테두리를 중복하지 않습니다. 공통 hover·focus와 Popover 동작은 유지합니다.
 
 ## WindowDock
 

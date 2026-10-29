@@ -1,13 +1,12 @@
+import { floatingSurface } from "./floating-surface.js";
 import {
-  useEffect,
-  useId,
-  useRef,
   useState,
-  type CSSProperties,
   type ReactNode,
 } from "react";
+import { Check as CheckIcon, ChevronDown } from "lucide-react";
 import { useListbox } from "./listbox.js";
 import type { ControlAffordanceProps } from "./control-affordance.js";
+import {usePopup} from "./use-popup.js";
 
 export type PopupChoiceOption<Id extends string = string> = {
   readonly id: Id;
@@ -35,12 +34,9 @@ export function PopupChoice<Id extends string>(props: {
   readonly classNames?: PopupChoiceClassNames;
   readonly disabled?: boolean;
 } & ControlAffordanceProps) {
-  const generatedId = useId();
-  const listboxId = props.id ?? `json-document-select-${generatedId.replaceAll(":", "")}`;
-  const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const listboxRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const popup = usePopup({open, onOpenChange: setOpen, id: props.id});
+  const {id: listboxId, triggerRef, panelRef: listboxRef, close} = popup;
   const [focusId, setFocusId] = useState(props.value);
   const selected = props.options.find((option) => option.id === props.value) ?? props.options[0];
   const enabled = props.options.filter((option) => !option.disabled);
@@ -60,24 +56,6 @@ export function PopupChoice<Id extends string>(props: {
     },
   });
 
-  useEffect(() => {
-    if (open) listboxRef.current?.focus();
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const dismissOutside = (event: PointerEvent) => {
-      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) close(false);
-    };
-    document.addEventListener("pointerdown", dismissOutside, true);
-    return () => document.removeEventListener("pointerdown", dismissOutside, true);
-  }, [open]);
-
-  function close(restoreFocus = true) {
-    setOpen(false);
-    if (restoreFocus) queueMicrotask(() => triggerRef.current?.focus());
-  }
-
   function openListbox() {
     if (props.disabled || enabled.length === 0) return;
     setFocusId(enabled.some((option) => option.id === props.value) ? props.value : enabled[0]!.id);
@@ -85,7 +63,7 @@ export function PopupChoice<Id extends string>(props: {
   }
 
   return (
-    <div ref={rootRef} className={props.classNames?.root} data-ui-control="choice" data-ui-presentation="popup" data-ui-affordance={props.affordance}>
+    <div ref={node => {popup.rootRef.current = node;}} onBlur={popup.onBlur} className={props.classNames?.root} data-ui-control="choice" data-ui-presentation="popup" data-ui-affordance={props.affordance}>
       <button
         ref={triggerRef}
         type="button"
@@ -95,7 +73,6 @@ export function PopupChoice<Id extends string>(props: {
         aria-expanded={open}
         disabled={props.disabled}
         className={props.classNames?.trigger}
-        style={unstyledButton}
         onClick={() => open ? close(false) : openListbox()}
         onKeyDown={(event) => {
           if (!open && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
@@ -105,23 +82,17 @@ export function PopupChoice<Id extends string>(props: {
         }}
       >
         {selected ? props.renderValue?.(selected) ?? selected.label : null}
+        <ChevronDown aria-hidden="true" size={16} data-ui-choice-chevron />
       </button>
       {open ? (
         <div
           ref={listboxRef}
           {...listbox.listboxProps}
           tabIndex={-1}
-          className={props.classNames?.listbox}
+          className={[floatingSurface.panel, props.classNames?.listbox].filter(Boolean).join(" ")}
           onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              event.preventDefault();
-              close();
-              return;
-            }
-            if (event.key === "Tab") {
-              close(false);
-              return;
-            }
+            popup.onKeyDown(event);
+            if (event.defaultPrevented) return;
             listbox.listboxProps.onKeyDown?.(event);
           }}
         >
@@ -137,9 +108,9 @@ export function PopupChoice<Id extends string>(props: {
                   focused && props.classNames?.focusedOption,
                   isSelected && props.classNames?.selectedOption,
                 )}
-                style={unstyledButton}
               >
                 {props.renderOption?.(option) ?? option.label}
+                <CheckIcon aria-hidden="true" size={16} data-ui-choice-check />
               </button>
             );
           })}
@@ -148,8 +119,6 @@ export function PopupChoice<Id extends string>(props: {
     </div>
   );
 }
-
-const unstyledButton: CSSProperties = { cursor: "pointer" };
 
 function classes(...values: ReadonlyArray<string | false | undefined>): string | undefined {
   const value = values.filter(Boolean).join(" ");

@@ -1,0 +1,99 @@
+:root {
+    /* Reference tokens are raw materials. Product styles consume semantic tokens below. */
+    --ref-color-paper: 255 255 255;
+    --ref-color-paper-warm: 251 248 242;
+    --ref-color-ink: 69 67 62;
+    --ref-color-ink-strong: 41 40 36;
+    --ref-color-pencil: 111 107 100;
+    --ref-color-pencil-light: 216 209 197;
+    --ref-color-line: 166 161 152;
+    --ref-color-line-soft: 232 227 219;
+    --ref-color-sage: 96 120 111;
+    --ref-color-impact: 222 109 85;
+    --ref-color-impact-ink: 159 73 55;
+    --ref-color-impact-soft: 255 243 238;
+    --ref-color-canvas-object-label: 255 248 242;
+    --ref-radius-2: 2px;
+    --ref-radius-10: 10px;
+
+    /* Semantic tokens name stable design roles, independent of the active theme. */
+    --color-background-canvas: var(--ref-color-paper);
+    --color-background-subtle: var(--ref-color-paper-warm);
+    --color-background-accent: var(--ref-color-impact);
+    --color-background-accent-subtle: var(--ref-color-impact-soft);
+    --color-background-action-primary: var(--ref-color-ink-strong);
+    --color-background-action-primary-hovered: var(--ref-color-ink);
+    --color-foreground-default: var(--ref-color-ink);
+    --color-foreground-strong: var(--ref-color-ink-strong);
+    --color-foreground-muted: var(--ref-color-pencil);
+    --color-foreground-disabled: var(--ref-color-pencil-light);
+    --color-foreground-inverse: var(--ref-color-paper);
+    --color-foreground-canvas-object: var(--ref-color-canvas-object-label);
+    --color-foreground-accent: var(--ref-color-impact-ink);
+    --color-foreground-success: var(--ref-color-sage);
+    --color-border-subtle: var(--ref-color-line-soft);
+    --color-border-default: var(--ref-color-line);
+    --color-border-accent: var(--ref-color-impact);
+    --color-border-action-primary: var(--ref-color-line);
+
+    --radius-tight: var(--ref-radius-2);
+    --radius-floating: 9999px;
+    --radius-control: var(--ref-radius-10);
+    --radius-surface: var(--ref-radius-10);
+
+    --shadow-surface: 0 2px 6px rgb(var(--ref-color-ink) / 0.03), 0 20px 56px rgb(var(--ref-color-ink) / 0.08);
+    --shadow-overlay: 0 4px 10px rgb(var(--ref-color-ink) / 0.04), 0 28px 72px rgb(var(--ref-color-ink) / 0.10);
+    --shadow-inset: inset 0 1px 2px rgb(var(--ref-color-ink) / 0.04);
+
+    /* Content/layout spacing has exactly three relationships; control metrics stay separate. */
+    --space-related: 0.5rem;
+    --space-group: 1rem;
+    --space-region: 2rem;
+    --space-layout-page-inline: var(--space-group);
+    --space-layout-page-inline-wide: var(--space-region);
+    --font-family-ui: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    --font-family-code: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --font-size-caption: 0.75rem;
+    --font-size-body: 0.875rem;
+    --font-size-title: 1rem;
+    --line-height-caption: 1rem;
+    --line-height-body: 1.5rem;
+    --line-height-title: 1.5rem;
+    --font-weight-normal: 400;
+    --font-weight-emphasis: 600;
+    /* Composed page content preserves its reading hierarchy, independently of controls. */
+    --font-size-content-title: 2.5rem;
+    --font-size-content-heading: 1.25rem;
+    --font-size-content-body: 1rem;
+    --font-size-content-value: var(--font-size-content-title);
+    --line-height-content-title: 1.2;
+    --line-height-content-heading: 1.4;
+    --line-height-content-body: 1.7;
+    --line-height-content-value: 1.3;
+    --letter-spacing-content-title: -0.03em;
+    --line-height-control: 1.25rem;
+    --control-height: 2.25rem;
+    --control-icon-size: 2rem;
+    --font-size-page-title: var(--font-size-title);
+    --line-height-page-title: var(--line-height-title);
+    --font-size-overline: var(--font-size-caption);
+    --font-size-code: var(--font-size-body);
+    --line-height-code: 1.55;
+    --letter-spacing-overline: normal;
+    --letter-spacing-page-title: normal;
+    --duration-interaction: 150ms;
+    --scale-control-pressed: 0.97;
+    --scale-content-active: 0.995;
+    --scale-content-dragging: 1.005;
+    --offset-content-dragging: -2px;
+
+    --jd-content-interaction-accent: rgb(var(--color-border-accent));
+    --jd-content-interaction-fill: rgb(var(--color-background-accent) / 0.07);
+    --jd-content-interaction-fill-active: rgb(var(--color-background-accent) / 0.12);
+    --jd-content-interaction-contour: rgb(var(--color-border-accent) / 0.58);
+    --jd-content-interaction-selection-fill: rgb(var(--color-foreground-default) / 0.025);
+    --jd-content-interaction-selection-contour: rgb(var(--color-foreground-muted) / 0.3);
+    --jd-content-interaction-shadow: var(--shadow-surface);
+    --jd-content-interaction-active-duration: 80ms;
+    --jd-content-interaction-settle-duration: 140ms;
+  }

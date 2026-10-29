@@ -1,0 +1,53 @@
+@import "@interactive-os/json-document-ui-primitives-react/design-tokens.css";
+
+/* Canonical layout of occurrence-bearing calendar surfaces, shared by Hosts. */
+.jd-calendar-month,.jd-calendar-time { min-width: 36rem; font-family: var(--font-family-ui); overflow: hidden; }
+.jd-calendar-month { min-width: 56rem; }
+.jd-calendar-seven,.jd-calendar-week { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); }
+.jd-calendar-seven,.jd-calendar-week,.jd-calendar-time-header { border-bottom: 1px solid rgb(var(--color-border-subtle)); }
+.jd-calendar-week,.jd-calendar-day { position: relative; }
+.jd-calendar-day { box-sizing: border-box; min-width: 0; min-height: 0; aspect-ratio: 1; padding: .25rem; border-right: 1px solid rgb(var(--color-border-subtle)); }
+.jd-calendar-meta,.jd-calendar-muted { font-size: 12px; color: rgb(var(--color-foreground-muted)); }
+.jd-calendar-meta { padding: .25rem; }
+.jd-calendar-number { font-size: 14px; }
+.jd-calendar-today { font-weight: 600; color: rgb(var(--color-foreground-accent)); }
+.jd-calendar-month-event,.jd-calendar-all-day-container { position: relative; z-index: 1; min-width: 0; }
+.jd-calendar-all-day-event { width: 100%; text-align: left; }
+.jd-calendar-month-timed { display: flex; gap: var(--space-related); width: 100%; text-align: left; }
+.jd-calendar-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jd-calendar-overflow { position: absolute; inset: .25rem; z-index: 2; display: flex; flex-direction: column; gap: var(--space-related); padding: var(--space-related); overflow: auto;  }
+
+.jd-calendar-time-header,.jd-calendar-time-viewport { display: grid; }
+.jd-calendar-column { display: flex; flex-direction: column; align-items: center; padding: .25rem; }
+.jd-calendar-all-day-cell { min-height: 2rem; border-left: 1px solid rgb(var(--color-border-subtle)); }
+.jd-calendar-all-day-container { padding: .25rem .125rem; box-sizing: border-box; }
+.jd-calendar-hour-gutter,.jd-calendar-time-cell { position: relative; overflow: hidden; }
+.jd-calendar-time-cell { border-left: 1px solid rgb(var(--color-border-subtle)); }
+.jd-calendar-anchor { pointer-events: none; position: absolute; top: 0; left: 0; }
+.jd-calendar-hour-label { position: absolute; right: .25rem; transform: translateY(-50%); font-size: 12px; color: rgb(var(--color-foreground-muted)); }
+.jd-calendar-slot,.jd-calendar-hour-rule,.jd-calendar-now { position: absolute; inset-inline: 0; pointer-events: none; }
+.jd-calendar-slot { background: rgb(var(--color-background-subtle)); }
+.jd-calendar-hour-rule { border-top: 1px solid rgb(var(--color-border-subtle)); }
+.jd-calendar-now { z-index: 2; border-top: 1px solid rgb(var(--color-foreground-accent)); }
+.jd-calendar-timed-container { position: absolute; z-index: 1; }
+.jd-calendar-timed-event { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; text-align: left; }
+.jd-calendar-inspector { display: grid; gap: var(--space-group); font-family: var(--font-family-ui); padding: var(--space-group); }
+.jd-calendar-inspector-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-related); }
+.jd-calendar-inspector-title { font-weight: 600; }
+.jd-calendar-actions { display: flex; gap: var(--space-related); }
+.jd-calendar-summary,.jd-calendar-details { font-size: 14px; }
+.jd-calendar-summary { color: rgb(var(--color-foreground-muted)); }
+.jd-calendar-details,.jd-calendar-field { display: grid; gap: var(--space-related); }
+
+/* Occurrence surfaces own drag context; handle presentation stays in UI primitives. */
+[data-calendar-move-surface="true"][data-ui-affordance="direct"] { cursor: grab; }
+[data-calendar-move-surface="true"][data-ui-affordance="direct"]:active { cursor: grabbing; }
+[data-ui-presentation="calendar-time-grid"][data-ui-affordance="content-control"]:hover { background: transparent; }
+:is(.jd-calendar-month-event, .jd-calendar-all-day-container, .jd-calendar-timed-container, .group\/event):is(:hover, :focus-within) [data-ui-primitive="resize-handle"] { opacity: 1; }
+
+/* One occurrence treatment across month, week and day. Color identifies the calendar. */
+:is(.jd-calendar-all-day-event, .jd-calendar-month-timed, .jd-calendar-timed-event) { position: relative; border: 0; background: rgb(var(--color-background-subtle)); color: rgb(var(--color-foreground-default)); border-radius: var(--radius-control); padding-inline: var(--space-related); font-size: var(--font-size-caption); line-height: var(--line-height-caption); }
+:is(.jd-calendar-all-day-event, .jd-calendar-month-timed, .jd-calendar-timed-event)::before { content: ""; position: absolute; inset-block: 0; left: 0; width: 2px; background: rgb(var(--color-foreground-muted)); }
+:is(.jd-calendar-all-day-event, .jd-calendar-month-timed, .jd-calendar-timed-event)[data-calendar-color="accent"] { background: rgb(var(--color-background-accent-subtle)); }
+:is(.jd-calendar-all-day-event, .jd-calendar-month-timed, .jd-calendar-timed-event)[data-calendar-color="accent"]::before { background: rgb(var(--color-border-accent)); }
+:is(.jd-calendar-all-day-event, .jd-calendar-month-timed, .jd-calendar-timed-event)[data-preview="true"] { opacity: .6; }

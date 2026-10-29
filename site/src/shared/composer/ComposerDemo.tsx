@@ -1,5 +1,6 @@
+import {Avatar, FileCard, RecordSummary, contentPresentation, fieldPresentation, floatingSurface} from "@interactive-os/json-document-ui-primitives-react";
 import { useCallback, useState, type ReactNode } from "react";
-import { AudioLines, Clock3, FileText, Image, Plus, Search, X } from "lucide-react";
+import { AudioLines, Clock3, FileText, Plus, Search, X } from "lucide-react";
 import type { JSONValue } from "@interactive-os/json-document";
 import { Command, FileDropRegion, Menu, Choice, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { formatFileSize } from "@interactive-os/json-document-file-intake";
@@ -72,50 +73,43 @@ export function ComposerDemo(props: {
   const onAction = useCallback(() => undefined, []);
   const renderComposerReference = useCallback((node: RichTextNode) => composer.renderReference(node, { className: "composer-atom" }), [composer.renderReference]);
   const addActions: ReadonlyArray<{ readonly id: string; readonly label: string; readonly content: ReactNode; readonly run: () => void }> = [
-    { id: "file", label: "파일 첨부", content: <><FileText aria-hidden="true" size={16} /><span><strong>파일 첨부</strong><small>이미지와 파일 정보를 첨부해요</small></span></>, run: composer.openFilePicker },
-    { id: "skill", label: "스킬", content: <><span>/</span><span><strong>스킬</strong><small>반복 작업을 빠르게 실행해요</small></span></>, run: () => composer.chooseTrigger("/") },
-    { id: "agent", label: "에이전트", content: <><span>@</span><span><strong>에이전트</strong><small>전문 에이전트와 함께 작업해요</small></span></>, run: () => composer.chooseTrigger("@") },
+    { id: "file", label: "파일 첨부", content: <RecordSummary leading={<FileText aria-hidden="true" size={16}/>} title="파일 첨부" summary="이미지와 파일 정보를 첨부해요"/>, run: composer.openFilePicker },
+    { id: "skill", label: "스킬", content: <RecordSummary leading={<span>/</span>} title="스킬" summary="반복 작업을 빠르게 실행해요"/>, run: () => composer.chooseTrigger("/") },
+    { id: "agent", label: "에이전트", content: <RecordSummary leading={<span>@</span>} title="에이전트" summary="전문 에이전트와 함께 작업해요"/>, run: () => composer.chooseTrigger("@") },
   ];
 
   return (
     <DemoPage documentation={(
       <PageHeader label="Hands" title={props.title ?? "Agent Chat Composer"} illustration="cursor">
-        {props.description ?? "Cstar Composer의 제품 TSX 구조와 시각 언어를 옮기고, 입력·atom·selection·history·clipboard를 JSON Document로 다시 연결했습니다."}
+        {props.description ?? "공용 UI 컴포넌트와 JSON Document의 입력·멘션·선택·실행 기록·클립보드를 조합합니다."}
       </PageHeader>
     )}>
-      <div className="composer-demo-stage">
+      <div className="composer-demo-layout"><div className="composer-demo-stage">
         <div className="composer-demo-copy">
-          <h2>무엇부터 시작해 볼까요?</h2>
-          <p>파일을 첨부하거나 <kbd>/</kbd> 스킬, <kbd>@</kbd> 에이전트를 함께 입력해 보세요.</p>
+          <h2 className={contentPresentation.title}>무엇부터 시작해 볼까요?</h2>
+          <p className={contentPresentation.body}>파일을 첨부하거나 <kbd>/</kbd> 스킬, <kbd>@</kbd> 에이전트를 함께 입력해 보세요.</p>
         </div>
 
         <FileDropRegion
-          className={`home-composer-single${composer.hasContent ? " home-composer-single-filled" : ""}`}
+          className={`${floatingSurface.panel} home-composer-single`}
           data-testid="agent-chat-composer"
           onFiles={composer.addWebFiles}
-          overlay={<div className="composer-dropzone-overlay"><div className="composer-dropzone-card"><strong>여기에 파일을 놓아주세요</strong><span>이미지와 문서를 Composer context에 첨부합니다.</span></div></div>}
+          overlay={<div className="composer-dropzone-overlay"><div className={`${floatingSurface.panel} composer-dropzone-card`}><strong>여기에 파일을 놓아주세요</strong><span>이미지와 문서를 Composer context에 첨부합니다.</span></div></div>}
           onPasteCapture={composer.handlePaste}
           onKeyDownCapture={composer.handleHistoryKeyDown}
         >
           {composer.attachments.length > 0 ? (
             <div className="composer-attachments" aria-label="첨부 파일">
               {composer.attachments.map((file) => (
-                <div className="composer-file" key={file.id}>
-                  {file.image ? <img className="composer-file-preview" src={file.image.source} alt={file.name} />
-                    : <span className="composer-file-ic" aria-hidden="true">{file.kind === "image" ? <Image size={16} /> : <FileText size={16} />}</span>}
-                  <span className="composer-file-info">
-                    <span className="composer-file-name">{file.name}</span>
-                    <span className="composer-file-size">{formatFileSize(file.size)}{file.image ? ` · ${file.image.width} × ${file.image.height}` : " · 파일 정보만"}</span>
-                  </span>
-                  <Command className="composer-file-remove" label={`${file.name} 제거`} onClick={() => composer.removeAttachment(file.id)}><X aria-hidden="true" size={16} /></Command>
-                </div>
+                <FileCard key={file.id} title={file.name} size={formatFileSize(file.size)} format={file.image ? `${file.image.width} × ${file.image.height}` : "파일 정보"} preview={file.image ? <img className="composer-file-preview" src={file.image.source} alt={file.name}/> : undefined} actions={<Command label={`${file.name} 제거`} onClick={() => composer.removeAttachment(file.id)}><X aria-hidden="true" size={16}/></Command>}/>
+
               ))}
             </div>
           ) : null}
 
           {composer.isPreparingAttachments ? <div className="composer-attachment-status">
             <span role="status">이미지를 준비하고 있습니다. 계속 입력할 수 있어요.</span>
-            <Command className="composer-icon-button" label="이미지 준비 취소" onClick={composer.cancelAttachments}><X aria-hidden="true" size={16} /></Command>
+            <Command label="이미지 준비 취소" onClick={composer.cancelAttachments}><X aria-hidden="true" size={16} /></Command>
           </div> : null}
           {composer.attachmentError ? <p className="composer-attachment-status" role="alert">{composer.attachmentError.code === "composer.clipboard.mixed-unsupported"
             ? "글과 이미지가 함께 있는 HTML 붙여넣기는 아직 지원하지 않습니다. 내용을 나누어 붙여넣어 주세요."
@@ -126,17 +120,18 @@ export function ComposerDemo(props: {
           <div className="composer-input-row">
             <Menu
               label="추가"
+              triggerPresentation="icon"
               trigger={<Plus aria-hidden="true" size={16} />}
               items={addActions}
               restoreFocusOnAction={false}
               onAction={(id) => addActions.find((action) => action.id === id)?.run()}
-              classNames={{ root: "composer-menu-root", trigger: "composer-icon-button", popup: "composer-layer composer-add-layer" }}
+              classNames={{ root: "composer-menu-root", popup: "composer-layer composer-add-layer" }}
             />
             <div className="composer-editor-wrap">
               <RichTextEditorSurface
                 as="div"
                 editor={composer.editor}
-                className="composer-input-box"
+                className={`${fieldPresentation.seamless} composer-input-box`}
                 aria-label="Agent Chat Composer"
                 data-testid="composer-editor"
                 elementRef={composer.editorElementRef}
@@ -157,23 +152,20 @@ export function ComposerDemo(props: {
                 const candidate = hostConfig.models.find((option) => option.id === id)?.value;
                 if (candidate) composer.selectModel(candidate);
               }}
-              renderValue={(option) => <>{option.label}⌄</>}
-              renderOption={(option) => <><strong>{option.label}</strong><small>{hostConfig.models.find((model) => model.id === option.id)?.description}</small></>}
-              classNames={{ root: "composer-select-root", trigger: "composer-model-pill", listbox: "composer-layer composer-model-layer", focusedOption: "selected" }}
+              renderOption={option => <RecordSummary title={option.label} summary={hostConfig.models.find(model => model.id === option.id)?.description}/>}
+              classNames={{ root: "composer-select-root", listbox: "composer-layer composer-model-layer" }}
             />
-            <Command className="composer-icon-button" label="음성 입력"><AudioLines aria-hidden="true" size={16} /></Command>
-            <Command kind="primary" label="전송 (Enter)" className={`composer-send-button${composer.canSubmit ? " is-active" : ""}`} disabled={!composer.canSubmit} onClick={composer.submit}>전송</Command>
+            <Command label="음성 입력"><AudioLines aria-hidden="true" size={16} /></Command>
+            <Command kind="primary" label="전송 (Enter)"  disabled={!composer.canSubmit} onClick={composer.submit}>전송</Command>
           </div>
 
           {composer.commandKind === "mention" ? (
-            <RichTextMentionSuggestions binding={composer.commandMenu} groupLabel="에이전트" className="composer-layer composer-command-layer" />
+            <RichTextMentionSuggestions binding={composer.commandMenu} groupLabel="에이전트" className="composer-command-layer" />
           ) : composer.commandKind === "skill" && composer.commandOpen ? (
-            <div {...composer.commandMenu.listboxProps} className="composer-layer composer-command-layer">
+            <div {...composer.commandMenu.listboxProps} className={`${floatingSurface.panel} json-document-suggestion-list composer-command-layer`}>
               {composer.commandMenu.items.map((item) => (
-                <SelectableItem as="button" selected={false} focus={item.id === composer.commandMenu.activeItem?.id} key={item.id} className={item.id === composer.commandMenu.activeItem?.id ? "selected" : ""} {...composer.commandMenu.optionProps(item)} onMouseDown={(event) => event.preventDefault()}>
-                  <span className="composer-command-icon skill">{item.iconText}</span>
-                  <span><strong>{item.label}</strong><small>{item.description}</small></span>
-                  <em>Skill</em>
+                <SelectableItem as="button" type="button" presentation="row" selected={false} focus={item.id === composer.commandMenu.activeItem?.id} key={item.id} {...composer.commandMenu.optionProps(item)} onMouseDown={(event) => event.preventDefault()}>
+                  <RecordSummary title={item.label} summary={item.description} leading={<Avatar name={item.label} fallback={item.iconText}/>}/>
                 </SelectableItem>
               ))}
             </div>
@@ -192,7 +184,7 @@ export function ComposerDemo(props: {
       <section className="composer-json-panel" aria-label="Canonical Composer JSON">
         <h2>Canonical Composer draft</h2>
         <JsonInspector label="Composer draft JSON" testId="composer-draft-json" value={composer.document.value} />
-      </section>
+      </section></div>
     </DemoPage>
   );
 }

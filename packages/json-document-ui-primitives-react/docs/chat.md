@@ -57,3 +57,6 @@ Codex CLI에 로그인한 환경에서 사이트 개발 서버를 실행하고 `
 `ChatActivity` renders transient work as three wave dots and a status label,
 without a message bubble. Import `chat-bubble.css`; reduced-motion users receive
 static dots. Only real assistant text belongs in `ChatBubble`.
+
+메시지 버블은 상하 8px·좌우 12px inset을 사용하며, 내용의 줄 수에 따라 높이가
+늘어납니다. 한 줄 본문 24px을 포함한 높이는 40px이고 최대 너비85%와 단어 줄바꿈은 유지합니다.

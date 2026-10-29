@@ -1,12 +1,50 @@
 {
   "extends": "../../tsconfig/library-react.json",
-  "compilerOptions": { "rootDir": "src", "outDir": "dist", "tsBuildInfoFile": "dist/.tsbuildinfo" },
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
   "references": [
-    { "path": "../json-document-sheet" },
-    { "path": "../json-document-file-intake" },
-    { "path": "../json-document-object-document" }, { "path": "../json-document-editing" },
-    { "path": "../json-document-affordance" }, { "path": "../json-document-web" },
-    { "path": "../json-document-react" }, { "path": "../json-document-ui-primitives-react" }
+    {
+      "path": "../json-document-sheet"
+    },
+    {
+      "path": "../json-document-file-intake"
+    },
+    {
+      "path": "../json-document-object-document"
+    },
+    {
+      "path": "../json-document-editing"
+    },
+    {
+      "path": "../json-document-affordance"
+    },
+    {
+      "path": "../json-document-web"
+    },
+    {
+      "path": "../json-document-react"
+    },
+    {
+      "path": "../json-document-ui-primitives-react"
+    },
+    {
+      "path": "../json-document-calendar"
+    },
+    {
+      "path": "../json-document-calendar-document"
+    },
+    {
+      "path": "../json-document-animation-react"
+    },
+    {
+      "path": "../json-document-database"
+    }
   ],
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
 }

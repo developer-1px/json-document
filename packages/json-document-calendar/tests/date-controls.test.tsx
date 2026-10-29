@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { afterEach, describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { useState } from "react";
 import {
   CalendarGrid,
@@ -291,6 +291,17 @@ describe("CalendarGrid and RangeCalendar", () => {
 });
 
 describe("DatePicker and DateRangePicker", () => {
+  test("empty date opens a calendar without inventing a selected value", async () => {
+    const user = userEvent.setup();
+    const change = vi.fn();
+    render(<DatePicker label="Empty date" value="" defaultVisibleDate="2026-10-01" onValueChange={change} />);
+    expect((screen.getByLabelText("Empty date") as HTMLInputElement).value).toBe("");
+    await user.click(screen.getByRole("button", {name: "Choose Empty date"}));
+    expect(screen.getByRole("gridcell", {name: "2026-10-01"}).getAttribute("aria-selected")).toBe("false");
+    expect(change).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("gridcell", {name: "2026-10-15"}));
+    expect(change).toHaveBeenCalledWith("2026-10-15");
+  });
   test("field and calendar commit the same date and Escape keeps the previous value", async () => {
     const user = userEvent.setup();
     function Harness() {

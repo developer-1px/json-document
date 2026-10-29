@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useState } from "react";
 import {
   createDocumentEditor,
@@ -17,7 +18,7 @@ import {
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../../shared/ui/inspector";
 import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../../shared/ui/styles";
+import { classes } from "../../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialDocument: BlockDocument = {
@@ -115,9 +116,9 @@ export function KeyboardAdapterLab() {
       tabIndex={0}
       {...clipboardSurface}
       onKeyDown={editing.getKeyDownHandler()}
-      className={classes("p-4", ui.surface.raised, ui.state.focus)}
+      className={classes("p-group", contentPresentation.focus)}
     >
-      <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>
+      <div className={classes("mb-related flex flex-wrap justify-between gap-related", contentPresentation.caption)}>
         <output aria-live="polite" data-testid="keyboard-announcement">{announcement}</output>
         <span data-testid="keyboard-history-state">
           revision {snapshot.revision} · {editor.selectedBlockIds.length} selected
@@ -126,17 +127,17 @@ export function KeyboardAdapterLab() {
         </span>
       </div>
 
-      <div className="grid gap-4">
-        <div className="grid gap-2">
+      <div className="grid gap-group">
+        <div className="grid gap-related">
           {document.blocks.map((block) => (
             <SelectableItem
               as="article"
               key={block.id}
               data-block-id={block.id}
-              className={classes("p-3", ui.surface.workspace)}
+              className={classes("p-related")}
               {...editingItemProps(editing.getItem(block.id))}
             >
-              <span className={ui.text.label}>{block.id}</span>
+              <span className={contentPresentation.caption}>{block.id}</span>
             </SelectableItem>
           ))}
         </div>

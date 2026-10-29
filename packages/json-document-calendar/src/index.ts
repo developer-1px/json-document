@@ -66,3 +66,4 @@ export type { CalendarHand, CalendarHandOptions, CalendarSelectionDragPreview } 
 export type { CalendarKeyboardOptions, CalendarKeyboardTarget } from "./use-calendar-keyboard.js";
 export type { CalendarPointerInteractions, CalendarPointerPolicy } from "./use-calendar-pointer-interactions.js";
 export type { CalendarViewportPositionOptions } from "./use-calendar-viewport-position.js";
+export { calendarPresentation } from "./calendar-presentation.js";

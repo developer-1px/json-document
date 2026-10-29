@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -38,9 +39,9 @@ import {
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
-import { Check, Command, GridCell, Toolbar, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
+import { Check, Command, GridCell, Toolbar, ToolbarGroup, floatingSurface, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 import type { InteractionHandleEvent } from "@interactive-os/json-document-affordance";
-import { DatabasePropertyControl } from "./database-property-control.js";
+import { DatabasePropertyControl, databasePropertyDisplay } from "./database-property-control.js";
 import type { ZodType } from "zod/v4";
 import type { JSONValue } from "@interactive-os/json-document";
 import { ArrowDown, ArrowUp, Minus, Plus, Redo2, Undo2 } from "lucide-react";
@@ -83,6 +84,8 @@ export interface DatabaseHandCellRenderProps<Row> {
 }
 
 export interface DatabaseHandPresentation {
+  readonly showRecordIds?: boolean;
+  readonly showPropertyTypes?: boolean;
   readonly propertyOrder?: ReadonlyArray<string>;
   readonly propertyVisibility?: Readonly<Record<string, boolean>>;
   readonly propertyWidths?: Readonly<Record<string, number>>;
@@ -102,7 +105,11 @@ export interface DatabaseHandContext {
 }
 
 interface DatabaseHandCommonProps<Row extends Record<string, unknown>> {
+  /** Delegate shortcuts to a parent document history when this Hand edits a projection. */
+  readonly onHistory?: (direction: "undo" | "redo") => void;
   readonly onSelectionChange?: (recordIds: ReadonlyArray<string>) => void;
+  /** Restore a shared single-record focus without reporting initialization as user selection. */
+  readonly selectedRecordId?: string | null;
   readonly onRecordOpen?: (record: Row) => void;
   readonly createRecord?: () => Row;
   readonly renderCell?: Readonly<Record<string, (props: DatabaseHandCellRenderProps<Row>) => ReactNode>>;
@@ -115,7 +122,7 @@ interface DatabaseHandCommonProps<Row extends Record<string, unknown>> {
   readonly loadingState?: ReactNode;
   readonly errorState?: (message: string) => ReactNode;
   readonly loading?: boolean;
-  readonly readOnly?: boolean;
+  readonly readOnly?: boolean | undefined;
   readonly className?: string;
   readonly style?: CSSProperties;
   readonly density?: "comfortable" | "compact";
@@ -292,9 +299,21 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
     .filter((id) => propertyVisibility[id] !== false)
     .map((id) => document.schema.properties.find((property) => property.id === id)!)
     .filter(Boolean);
-  const hiddenProperties = document.schema.properties.filter((property) => propertyVisibility[property.id] === false);
+  const hiddenProperties = props.features.columns ? document.schema.properties.filter((property) => propertyVisibility[property.id] === false) : [];
   const records = topology.recordIds.map((id) => document.records.find((record) => record.id === id)!).filter(Boolean);
   const focus = snapshot.selection.focus;
+  const notifiedSelection = useRef<{editor: DatabaseEditor; keys: string} | null>(null);
+  const visibleRecordKeys = topology.recordIds.join("\u0000");
+  const visiblePropertyKeys = topology.propertyIds.join("\u0000");
+  useLayoutEffect(() => {
+    const recordId = props.selectedRecordId;
+    const propertyId = topology.propertyIds[0];
+    if (recordId && propertyId && topology.recordIds.includes(recordId) && editor.snapshot.selection.focus?.recordId !== recordId) {
+      editor.dispatch({type: "selection.set", recordId, propertyId, mode: "replace"});
+    }
+    const keys = JSON.stringify([...new Set(editor.selectedCellsIn(topology).map(cell => cell.recordId))]);
+    notifiedSelection.current = {editor, keys};
+  }, [editor, props.selectedRecordId, visibleRecordKeys, visiblePropertyKeys]);
   const editing = useEditing<DatabaseSelection>({
     source: editor,
     selectedKeys: editor.selectedCellsIn(topology).map((cell) => gridPointKey(databaseGridPoint(cell))),
@@ -331,7 +350,10 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
 
   useEffect(() => {
     const selected = [...new Set(editor.selectedCellsIn(topology).map((cell) => cell.recordId))];
-    props.onSelectionChange?.(selected);
+    const keys = JSON.stringify(selected);
+    const previous = notifiedSelection.current;
+    notifiedSelection.current = {editor, keys};
+    if (previous?.editor === editor && previous.keys !== keys) props.onSelectionChange?.(selected);
   }, [editor, props.onSelectionChange, snapshot.selection, topology]);
 
   function announce(message: string) {
@@ -382,6 +404,8 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
   }
 
   function history(kind: "undo" | "redo") {
+    if (props.onHistory) { props.onHistory(kind); return; }
+    if (!props.features.history) return;
     const result = observe(editor[kind]());
     if (result.ok) emit({ origin: kind }, kind === "undo" ? "Undone" : "Redone");
   }
@@ -491,7 +515,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
       data-readonly={props.readOnly ? "true" : "false"}
       data-database-table-surface=""
     >
-      <Toolbar className="jd-database__toolbar" label="Database actions">
+      <Toolbar className="jd-database__toolbar" label="Database actions"><ToolbarGroup className="jd-database__toolbar-actions">
         {props.features.create && !props.readOnly ? <Command type="button" data-kind="primary" label={props.labels.newRecord} onClick={addRecord}><Plus aria-hidden="true" size={16} /></Command> : null}
         {props.features.delete && !props.readOnly ? <Command type="button" data-kind="danger" label={props.labels.deleteRecord} onClick={deleteSelected}><Minus aria-hidden="true" size={16} /></Command> : null}
         {props.features.history && !props.readOnly ? (
@@ -503,7 +527,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
         {props.features.filter || props.features.columns ? <DatabaseViewControls projection={view.projection} properties={document.schema.properties} disabled={props.readOnly ?? false} filter={props.features.filter} sort={false} group={false} columns={props.features.columns} onChange={(projection) => { const result = observe(editor.dispatch({ type: "view.configure", viewId: view.id, projection })); if (result.ok) props.onEmit({ origin: "view.configure" }); announce(result.ok ? "View updated" : result.code); }} /> : null}
         {props.toolbar}
         {props.renderToolbar?.(context)}
-        {announcement ? <output className="jd-database__announcement" aria-live="polite">{announcement}</output> : null}
+        </ToolbarGroup>{announcement ? <output className="jd-database__announcement" aria-live="polite">{announcement}</output> : null}
       </Toolbar>
 
       <div
@@ -547,7 +571,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                 >
                   <Command type="button" onClick={() => configure({ sort: nextDatabasePropertySort(sort, property.id) })}>
                     <span>{property.name}</span>
-                    <small>{property.type}{sortMark(sort, property.id)}</small>
+                    <small>{props.presentation?.showPropertyTypes !== false && property.type}{sortMark(sort, property.id)}</small>
                   </Command>
                   <DatabaseColumnResizeHandle
                     label={`${property.name} column width`}
@@ -560,7 +584,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
               {hiddenProperties.map((property) => (
                 <th key={property.id} scope="col" aria-label={`Show ${property.name}`} onClick={() => configure({ propertyVisibility: { ...propertyVisibility, [property.id]: true } })}>·</th>
               ))}
-              <th scope="col">Row</th>
+              {props.presentation?.showRecordIds !== false && <th scope="col">Row</th>}
             </tr>
           </thead>
           <tbody>
@@ -622,7 +646,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                   );
                 })}
                 {hiddenProperties.map((property) => <td key={property.id} />)}
-                <td>{record.id}</td>
+                {props.presentation?.showRecordIds !== false && <td>{record.id}</td>}
               </tr>
             ))}
           </tbody>
@@ -631,7 +655,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
         {headerMenu ? (() => {
           const property = document.schema.properties.find((candidate) => candidate.id === headerMenu.propertyId);
           if (!property) return null;
-          return <div role="menu" aria-label={`${property.name} property`} className="jd-database__column-menu" style={{ position: "fixed", left: headerMenu.x, top: headerMenu.y }}>
+          return <div role="menu" aria-label={`${property.name} property`} className={`${floatingSurface.panel} jd-database__column-menu`} style={{ position: "fixed", left: headerMenu.x, top: headerMenu.y }}>
             <Command type="button" role="menuitem" onClick={() => { configure({ propertyVisibility: { ...propertyVisibility, [property.id]: false } }); setHeaderMenu(null); }}>Hide</Command>
             {filterItems(property).map((item) => <Command key={String(item.value)} type="button" role="menuitem" onClick={() => { configure({ filter: { id: `${view.id}:filter`, propertyId: property.id, operator: "equals", value: item.value } }); setHeaderMenu(null); }}>Filter {item.label}</Command>)}
             {filter?.propertyId === property.id ? <Command type="button" role="menuitem" onClick={() => { configure({ filter: null }); setHeaderMenu(null); }}>Clear filter</Command> : null}
@@ -702,7 +726,9 @@ function DefaultCell(props: {
     props.finish();
     requestAnimationFrame(() => cell?.focus());
   }
-  if (props.readOnly || (!props.editing && !props.directEditing)) return <span className="jd-database__readonly">{String(value)}</span>;
+  if (props.readOnly || (!props.editing && !props.directEditing)) {
+    return <span className="jd-database__readonly">{databasePropertyDisplay(props.property, value)}</span>;
+  }
   return (
     <DatabasePropertyControl
       key={String(value)}

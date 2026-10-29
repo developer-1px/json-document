@@ -4,13 +4,37 @@
   "description": "Official React Calendar Hands for json-document interval editing.",
   "type": "module",
   "license": "MIT",
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "repository": { "type": "git", "url": "git+https://github.com/developer-1px/json-document.git", "directory": "packages/json-document-calendar" },
-  "publishConfig": { "access": "public", "provenance": true, "tag": "next" },
-  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "LICENSE"],
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/developer-1px/json-document.git",
+    "directory": "packages/json-document-calendar"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "next"
+  },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo",
+    "README.md",
+    "LICENSE",
+    "src/calendar-presentation.css",
+    "src/date-controls.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./calendar-presentation.css": "./src/calendar-presentation.css",
+    "./date-controls.css": "./src/date-controls.css"
+  },
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc -b tsconfig.json",

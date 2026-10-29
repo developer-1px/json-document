@@ -1,3 +1,5 @@
+import { ToolbarSeparator } from "@interactive-os/json-document-ui-primitives-react";
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useState } from "react";
 import { CopyPlus, Redo2, Trash2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
@@ -18,7 +20,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
 export function ObjectDemoRoute() {
@@ -73,7 +75,7 @@ export function ObjectDemoRoute() {
         illustration="peek"
         title="Object Demo"
         aside={(
-          <div className={classes("text-right", ui.text.meta)}>
+          <div className={classes("text-right", contentPresentation.caption)}>
             <div>{editor.selectedObjects.length} selected · revision {snapshot.revision}</div>
             <div aria-live="polite">{observation.announcement}</div>
           </div>
@@ -97,12 +99,12 @@ export function ObjectDemoRoute() {
                 <span aria-hidden="true" style={{ display: "inline-block", width: "0.75rem", height: "0.75rem", backgroundColor: color }} />
               </Command>
             ))}
-            <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+            <ToolbarSeparator />
             <Command label="Duplicate" disabled={editor.selectedObjects.length === 0}
               onClick={() => run({ type: "object.duplicate", objectIds: snapshot.selection.keys }, "Selection duplicated")}
             ><CopyPlus aria-hidden="true" size={16} /></Command>
             <Command label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></Command>
-            <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+            <ToolbarSeparator />
             <Command label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></Command>
             <Command label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
@@ -125,7 +127,7 @@ export function ObjectDemoRoute() {
             <SelectableItem
               key={object.id}
               data-object-id={object.id}
-              className={ui.interactive.planeItem}
+              className="absolute grid place-items-center"
               {...editingItemProps(editing.getItem(object.id))}
               style={{
                 left: object.x,
@@ -139,7 +141,7 @@ export function ObjectDemoRoute() {
               {object.label}
             </SelectableItem>
           ))}
-          <p className={classes("absolute bottom-3 left-3 mb-0", ui.text.meta)}>Click a box. Mod-click toggles. Mod+C/X/V uses the system clipboard.</p>
+          <p className={classes("absolute bottom-3 left-3 mb-0", contentPresentation.caption)}>Click a box. Mod-click toggles. Mod+C/X/V uses the system clipboard.</p>
         </section>
       </ProductShell>
     </DemoPage>

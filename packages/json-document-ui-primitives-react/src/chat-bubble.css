@@ -1,24 +1,26 @@
+@import "./design-tokens.css";
+
 /* Import once. Existing semantic tokens can be supplied by any Host. */
 [data-ui-chat-bubble] {
   box-sizing: border-box;
   width: fit-content;
   min-width: 0;
   max-width: 85%;
-  padding: 0.625rem 0.875rem;
-  border-radius: var(--radius-surface, 1rem);
+  padding: var(--space-related) var(--space-group);
+  border-radius: var(--radius-surface, 10px);
   background: rgb(var(--color-background-subtle, 251 248 242));
   color: rgb(var(--color-foreground-default, 69 67 62));
-  line-height: 1.5;
+  font-family: var(--font-family-ui, system-ui, sans-serif);
+  font-size: var(--font-size-body, 0.875rem);
+  line-height: var(--line-height-body, 1.5rem);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 [data-ui-chat-bubble="incoming"] {
-  margin-inline-end: auto;
-  border-end-start-radius: var(--radius-tight, 0.25rem);
+  align-self: flex-start; justify-self: start;
 }
 [data-ui-chat-bubble="outgoing"] {
-  margin-inline-start: auto;
-  border-end-end-radius: var(--radius-tight, 0.25rem);
+  align-self: flex-end; justify-self: end;
   background: rgb(var(--color-background-action-primary, 41 40 36));
   color: rgb(var(--color-foreground-inverse, 255 255 255));
 }
@@ -28,22 +30,24 @@
 [data-ui-chat-activity] {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: rgb(var(--color-foreground-secondary, 112 108 101));
-  font-size: 0.75rem;
+  gap: var(--space-related);
+  color: rgb(var(--color-foreground-muted, 111 107 100));
+  font-size: var(--font-size-caption, 0.75rem);
   min-height: 1.5rem;
 }
-[data-ui-chat-dots] { display: inline-flex; align-items: center; gap: 0.25rem; }
-[data-ui-chat-dots] > span {
+[data-ui-animation="wave-dots"] { display: inline-flex; align-items: center; gap: var(--space-related); }
+[data-ui-animation="wave-dots"] > [data-ui-animation="dot"] {
   width: 0.25rem; height: 0.25rem; border-radius: 50%; background: currentColor;
-  animation: chat-activity-wave 1.2s ease-in-out infinite;
+  animation: json-document-activity-wave 1.2s ease-in-out infinite;
 }
-[data-ui-chat-dots] > span:nth-child(2) { animation-delay: 0.15s; }
-[data-ui-chat-dots] > span:nth-child(3) { animation-delay: 0.3s; }
-@keyframes chat-activity-wave {
+[data-ui-animation="wave-dots"] > [data-ui-animation="dot"]:nth-child(2) { animation-delay: 0.15s; }
+[data-ui-animation="wave-dots"] > [data-ui-animation="dot"]:nth-child(3) { animation-delay: 0.3s; }
+@keyframes json-document-activity-wave {
   0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
   30% { transform: translateY(-0.2rem); opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-ui-chat-dots] > span { animation: none; opacity: 0.7; }
+  [data-ui-animation="wave-dots"] > [data-ui-animation="dot"] { animation: none; opacity: 0.7; }
 }
+
+[data-ui-animation="wave-dots"][data-ui-frame="bubble"] { padding: var(--space-related) var(--space-group); border-radius: var(--radius-surface); background: rgb(var(--color-background-subtle)); }

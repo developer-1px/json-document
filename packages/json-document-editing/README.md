@@ -355,3 +355,7 @@ advance it. Agent publication must still check that the live source matches.
 `projectCanvasHTML(object, html, bounds)` projects an older or reviewed source
 without mutating the live object's identity or authored viewport. Slides uses it
 with `CanvasHTMLObject` inside `AnnotationReview.renderContent`.
+
+## UI Builder
+
+[컴포넌트 기반 자유 배치 API](docs/ui-builder.md)와 [Usage · Source](/applications/ui-builder)를 제공합니다.

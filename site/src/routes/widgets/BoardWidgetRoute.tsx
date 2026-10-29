@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState, type KeyboardEventHandler, type PointerEvent, type ReactNode } from "react";
 import { createKanbanEditor, type KanbanCardDropTarget, type KanbanDocument } from "@interactive-os/json-document-editing";
 import { useEditing, useRestoreElementFocus } from "@interactive-os/json-document-react";
@@ -21,7 +22,7 @@ import {
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
 import { contentInteractionAttributes, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
@@ -176,7 +177,7 @@ export function BoardWidgetRoute() {
       widget={(
         <div
           ref={surface}
-          className="grid gap-3 sm:grid-cols-3"
+          className="grid gap-related sm:grid-cols-3"
           role="group"
           aria-label="Board columns"
           onPointerMove={handlePointerMove}
@@ -200,9 +201,9 @@ export function BoardWidgetRoute() {
                 role: "drop-target",
                 active: dragSnapshot.status === "dragging" && dragSnapshot.target?.columnId === column.id,
               })}
-              className={classes("grid content-start gap-2", ui.surface.workspace)}
+              className={classes("grid content-start gap-related")}
             >
-              <p className={classes("mb-0 mt-0", ui.text.label)}>{column.title}</p>
+              <p className={classes("mb-0 mt-0", contentPresentation.caption)}>{column.title}</p>
               <BoardListbox
                 label={column.title}
                 activeId={focusColumnId === column.id && focusKey !== null ? boardCardId(focusKey) : null}
@@ -216,9 +217,9 @@ export function BoardWidgetRoute() {
                   const offset = activeCardId === card.id ? dragPreview : null;
                   return (
                     <li role="none" key={card.id}>
-                      <SelectableItem
+                      <SelectableItem presentation="row"
                         as="div"
-                        className={classes("w-full text-left", ui.surface.selectableBlock)}
+                        className={classes("w-full text-left", contentPresentation.itemSummary)}
                         selected={option.selected}
                         focus={option.focus}
                         dragging={activeCardId === card.id}
@@ -266,7 +267,7 @@ function BoardListbox(props: {
       aria-label={props.label}
       {...activeDescendantContainerProps(props.activeId)}
       onKeyDown={props.onKeyDown}
-      className="m-0 grid min-h-[4rem] list-none gap-1 p-0"
+      className="m-0 grid min-h-[4rem] list-none gap-related p-0"
     >
       {props.children}
     </ul>

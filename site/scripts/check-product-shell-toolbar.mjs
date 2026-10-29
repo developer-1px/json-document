@@ -31,15 +31,15 @@ requireText(calendar, '<ToolbarRegion placement="center" label="Calendar view">'
 requireText(usage, '<ToolbarRegion placement="center" label="View">');
 
 const productShellConsumers = [...consumers, ...canvasConsumers].filter(([, source]) => source.includes("<ProductShell"));
-if (productShellConsumers.length !== 13) {
-  throw new Error(`ProductShell 소비자 분모가 달라졌습니다: expected=13 actual=${productShellConsumers.length}`);
+if (productShellConsumers.length !== 14) {
+  throw new Error(`ProductShell 소비자 분모가 달라졌습니다: expected=14 actual=${productShellConsumers.length}`);
 }
 for (const [path, source] of [...consumers, ...canvasConsumers, ...databaseConsumers]) {
   forbid(path, source, /\bProductApp\b/);
   forbid(path, source, /role=["']toolbar["']/);
 }
 
-console.log("Product shell/toolbar guard ok; owner, 13 shells, toolbar consumers, Calendar boundary, Usage, and source registration checked.");
+console.log("Product shell/toolbar guard ok; owner, 14 shells, toolbar consumers, Calendar boundary, Usage, and source registration checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

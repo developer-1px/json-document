@@ -1,7 +1,11 @@
-import { useCallback, useEffect, useId, useRef, type ReactNode, type CSSProperties, type Ref } from "react";
+import { useCallback, useEffect, useRef, type CSSProperties, type ReactNode, type Ref, type RefObject } from "react";
+import { floatingSurface } from "./floating-surface.js";
 import { Command } from "./controls.js";
+import { createPortal } from "react-dom";
+import {usePopup} from "./use-popup.js";
 
 export function Popover(props: {
+  readonly disabled?: boolean | undefined;
   readonly label: string;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
@@ -10,40 +14,26 @@ export function Popover(props: {
   readonly children: ReactNode;
   readonly className?: string;
   readonly panelClassName?: string;
+  /** Only outside interactions within this surface dismiss; omitted means the document. */
+  readonly dismissBoundary?: RefObject<HTMLElement | null> | undefined;
   /** Voice/pointer driven disclosure must not steal focus from the active surface. */
   readonly autoFocus?: boolean;
   readonly dismissOnOutsideInteraction?: boolean;
   readonly panelStyle?: CSSProperties;
   readonly panelRef?: Ref<HTMLDivElement>;
 }): ReactNode {
-  const id = `json-document-popover-${useId().replaceAll(":", "")}`;
-  const rootRef = useRef<HTMLSpanElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const popup = usePopup(props);
+  const {id, panelRef} = popup;
   const attachPanel = useCallback((node: HTMLDivElement | null) => {
     panelRef.current = node;
     if (typeof props.panelRef === "function") props.panelRef(node);
     else if (props.panelRef) props.panelRef.current = node;
-  }, [props.panelRef]);
-  useEffect(() => { if (props.open && props.autoFocus !== false) panelRef.current?.focus(); }, [props.open, props.autoFocus]);
-  useEffect(() => {
-    if (!props.open || props.dismissOnOutsideInteraction === false) return;
-    const dismissOutside = (event: PointerEvent) => {
-      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) props.onOpenChange(false);
-    };
-    document.addEventListener("pointerdown", dismissOutside, true);
-    return () => document.removeEventListener("pointerdown", dismissOutside, true);
-  }, [props.open, props.onOpenChange, props.dismissOnOutsideInteraction]);
-  const close = () => {
-    props.onOpenChange(false);
-    queueMicrotask(() => rootRef.current?.querySelector<HTMLButtonElement>("button")?.focus());
-  };
-  const triggerProps = { "aria-label": props.label, "aria-haspopup": "dialog", "aria-controls": id, "aria-expanded": props.open, onClick: () => props.onOpenChange(!props.open) } as const;
+  }, [panelRef, props.panelRef]);
+  const triggerProps = { disabled: props.disabled, "aria-label": props.label, "aria-haspopup": "dialog", "aria-controls": id, "aria-expanded": props.open, onClick: () => props.onOpenChange(!props.open) } as const;
   return (
-    <span ref={rootRef} className={props.className} data-ui-presentation="popover" onBlur={(event) => {
-      if (props.open && props.dismissOnOutsideInteraction !== false && event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) props.onOpenChange(false);
-    }}>
-      {props.triggerPresentation === "icon" ? <Command {...triggerProps} label={props.label}>{props.trigger}</Command> : <button type="button" {...triggerProps}>{props.trigger}</button>}
-      {props.open ? <div ref={attachPanel} style={props.panelStyle} id={id} role="dialog" aria-label={props.label} tabIndex={-1} className={props.panelClassName} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); } }}>{props.children}</div> : null}
+    <span ref={node => {popup.rootRef.current = node;}} className={props.className} data-ui-presentation="popover" onBlur={popup.onBlur}>
+      {props.triggerPresentation === "icon" ? <Command {...triggerProps} controlRef={popup.triggerRef} label={props.label}>{props.trigger}</Command> : <Command {...triggerProps} controlRef={popup.triggerRef}>{props.trigger}</Command>}
+      {props.open ? <div ref={attachPanel} style={props.panelStyle} id={id} role="dialog" aria-label={props.label} tabIndex={-1} className={[floatingSurface.panel, props.panelClassName].filter(Boolean).join(" ")} onKeyDown={popup.onKeyDown}>{props.children}</div> : null}
     </span>
   );
 }
@@ -55,9 +45,21 @@ export function Dialog(props: {
   readonly children: ReactNode;
   readonly className?: string;
   readonly presentation?: "modal" | "sheet";
+  readonly dismissBoundary?: RefObject<HTMLElement | null> | undefined;
+  /** Render against the viewport with this translation, independent of transformed ancestors. */
+  readonly viewportOffset?: {readonly x: number; readonly y: number} | undefined;
+  readonly inert?: boolean | undefined;
 }): ReactNode {
   const dialogRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!props.open || props.inert || !props.dismissBoundary) return;
+    const outside = (event: PointerEvent) => {
+      if (event.target instanceof Node && props.dismissBoundary?.current?.contains(event.target) && !dialogRef.current?.contains(event.target)) props.onOpenChange(false);
+    };
+    document.addEventListener("pointerdown", outside, true);
+    return () => document.removeEventListener("pointerdown", outside, true);
+  }, [props.open, props.inert, props.dismissBoundary, props.onOpenChange]);
   useEffect(() => {
     if (!props.open) return;
     returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -67,16 +69,17 @@ export function Dialog(props: {
     return () => queueMicrotask(() => returnFocusRef.current?.focus());
   }, [props.open]);
   if (!props.open) return null;
-  return (
-    <div role="presentation" data-ui-presentation="dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) props.onOpenChange(false); }}>
+  const overlay = (
+    <div role="presentation" inert={props.inert} data-ui-presentation="dialog-backdrop" style={props.dismissBoundary ? {pointerEvents: "none"} : undefined} onMouseDown={(event) => { if (event.target === event.currentTarget) props.onOpenChange(false); }}>
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={props.label}
         tabIndex={-1}
-        className={props.className}
+        className={[floatingSurface.panel, props.className].filter(Boolean).join(" ")}
         data-ui-presentation={props.presentation ?? "modal"}
+        style={{...(props.dismissBoundary ? {pointerEvents: "auto" as const} : {}), ...(props.viewportOffset && (props.viewportOffset.x || props.viewportOffset.y) ? {transform: `translate(${props.viewportOffset.x}px, ${props.viewportOffset.y}px)`} : {})}}
         onKeyDown={(event) => {
           if (event.key === "Escape") {
             event.preventDefault();
@@ -99,6 +102,7 @@ export function Dialog(props: {
       >{props.children}</div>
     </div>
   );
+  return props.viewportOffset && typeof document !== "undefined" ? createPortal(overlay, document.body) : overlay;
 }
 
 const focusableSelector = "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";

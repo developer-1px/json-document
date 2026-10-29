@@ -475,7 +475,8 @@ function configureView(
   });
 }
 
-function projectTable(document: DatabaseDocument, viewId: string): DatabaseTopology {
+/** Pure canonical search/filter/sort projection shared by Database and composed data surfaces. */
+export function projectDatabaseTable(document: DatabaseDocument, viewId: string): DatabaseTopology {
   const view = document.views.find((candidate) => candidate.id === viewId);
   if (!view) throw new Error(`Database view was not found: ${JSON.stringify(viewId)}.`);
   const propertyIds = view.projection.columns.filter((column) => column.visible).map((column) => column.propertyId);
@@ -520,7 +521,7 @@ function matchesRule(value: JSONValue | undefined, rule: DatabaseFilter): boolea
 function tableTopology(index: DatabaseIndex, viewId: string): DatabaseTopology {
   const cached = index.topologyByViewId.get(viewId);
   if (cached !== undefined) return cached;
-  const topology = projectTable(index.document, viewId);
+  const topology = projectDatabaseTable(index.document, viewId);
   index.validatedTopologies.add(topology);
   index.topologyByViewId.set(viewId, topology);
   return topology;

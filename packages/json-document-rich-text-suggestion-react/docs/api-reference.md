@@ -23,7 +23,7 @@ interface RichTextMentionAtomProps extends HTMLAttributes<HTMLSpanElement> {
 ## `RichTextMentionSuggestions`
 
 ```ts
-RichTextMentionSuggestions<Suggestion extends RichTextMentionSuggestion>({ binding, groupLabel, style, ...props }: RichTextMentionSuggestionsProps<Suggestion>): ReactNode
+RichTextMentionSuggestions<Suggestion extends RichTextMentionSuggestion>({ binding, groupLabel, style, className, ...props }: RichTextMentionSuggestionsProps<Suggestion>): ReactNode
 ```
 ## `RichTextMentionSuggestionsProps`
 

@@ -383,6 +383,11 @@ type CalendarPointerPolicy = {
   readonly onMonthPointerBegin?: () => void;
 };
 ```
+## `calendarPresentation`
+
+```ts
+const calendarPresentation: { readonly month: { root: string; headerRow: string; header: string; week: string; day: string; dayOutsidePeriod: string; dayNumber: string; today: string; eventContainer: string; allDayEvent: string; timedEvent: string; ... 4 more ...; overflowEventContainer: string; }; readonly time: { ...; }; readonly inspector: ...
+```
 ## `CalendarRenameInputBinding`
 
 ```ts
@@ -570,7 +575,7 @@ interface DateGridProps {
 ## `DatePicker`
 
 ```ts
-DatePicker(props: { readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; }): ReactNode
+DatePicker(props: { readonly label: string; readonly chooseLabel?: string; readonly value: string; readonly defaultVisibleDate?: string; readonly onValueChange: (value: string) => void; }): ReactNode
 ```
 ## `DateRangePicker`
 

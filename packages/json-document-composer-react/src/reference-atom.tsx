@@ -1,3 +1,4 @@
+import {Tag} from "@interactive-os/json-document-ui-primitives-react";
 import { COMPOSER_SKILL_NODE } from "@interactive-os/json-document-composer";
 import type { RichTextEditor, RichTextNode } from "@interactive-os/json-document-rich-text";
 import { RICH_TEXT_MENTION_NODE } from "@interactive-os/json-document-rich-text-suggestion";
@@ -16,9 +17,9 @@ export function ComposerReferenceAtom({ node, editor, ...props }: ComposerRefere
   if (kind === "mention") return <RichTextMentionAtom {...props} node={node} {...(editor === undefined ? {} : { editor })} data-composer-reference-kind="mention" />;
   const attrs = "attrs" in node ? node.attrs as { readonly label?: unknown } : {};
   const label = typeof attrs.label === "string" ? attrs.label : node.type;
-  return <span {...props} contentEditable={false} data-composer-reference-kind={kind} data-rich-text-node-id={node.id}>
+  return <Tag {...props} contentEditable={false} data-composer-reference-kind={kind} data-rich-text-node-id={node.id}>
     /{label}
-  </span>;
+  </Tag>;
 }
 
 function referenceKind(node: RichTextNode): "mention" | "skill" | null {

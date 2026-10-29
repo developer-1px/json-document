@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import type { ReactNode } from "react";
 import { DemoPage } from "../demo-workbench/DemoPage";
 import { CodeBlock } from "./code-block";
@@ -31,10 +32,10 @@ export function CatalogDemoPage(props: {
             illustration={props.illustration}
             title={props.title}
             aside={(
-              <div className={ui.code.install}>
-                <div className={ui.text.label}>Install</div>
+              <div className={classes(ui.code.install, "grid gap-related")}>
+                <div className={contentPresentation.caption}>Install</div>
                 <CodeBlock
-                  className="mt-2"
+                  
                   label="Install command"
                   language="shell"
                   linePrefix={<span aria-hidden="true" className={ui.code.prompt}>$ </span>}
@@ -47,11 +48,11 @@ export function CatalogDemoPage(props: {
             {props.description}
           </PageHeader>
 
-          <section aria-label={`Minimal ${props.title} code`} data-connector-connection>
-            <h2 className={classes("mb-2 mt-0", ui.text.heading)}>The connection</h2>
+          <section className="grid gap-related" aria-label={`Minimal ${props.title} code`} data-connector-connection>
+            <h2 className={contentPresentation.itemTitle}>The connection</h2>
             {codeBlocks.map((block, index) => (
               <CodeBlock
-                className={index === 0 ? undefined : "mt-3"}
+                
                 key={`${block.language}:${index}`}
                 language={block.language}
                 size="content"
@@ -59,11 +60,11 @@ export function CatalogDemoPage(props: {
               />
             ))}
             {props.connectionDescription ? (
-              <p className={classes("mb-0 mt-3", ui.text.meta)}>{props.connectionDescription}</p>
+              <p className={contentPresentation.caption}>{props.connectionDescription}</p>
             ) : null}
           </section>
 
-          <p className={classes("mb-3 mt-8", ui.text.label)}>Live demo</p>
+          <p className={contentPresentation.caption}>Live demo</p>
         </>
       )}
     >

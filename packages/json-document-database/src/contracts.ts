@@ -81,23 +81,4 @@ export function createDatabaseResource<Row extends DatabaseRow, Create = Partial
   return resource;
 }
 
-export function createDatabaseView(
-  id: string,
-  name: string,
-  propertyIds: ReadonlyArray<string>,
-  ownership: DatabaseTableView["ownership"] = "personal",
-): DatabaseTableView {
-  return {
-    id,
-    name,
-    ownership,
-    layout: "table",
-    projection: {
-      search: "",
-      filter: { id: `${id}:root`, conjunction: "and", items: [] },
-      sorts: [],
-      groups: [],
-      columns: propertyIds.map((propertyId) => ({ propertyId, visible: propertyId !== "id", width: null, pinned: null })),
-    },
-  };
-}
+export { createDatabaseView } from "@interactive-os/json-document-editing";

@@ -6,6 +6,11 @@ Object·Canvas 모델·검증·의미 연산·projection의 public entrypoint입
 
 > 이 문서는 `packages/json-document-object-document/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `arrangeUIComponents`
+
+```ts
+arrangeUIComponents(objects: readonly CanvasObject[], layoutId: UILayoutId, width: number): CanvasObject[]
+```
 ## `assertCanvasDocument`
 
 ```ts
@@ -25,6 +30,36 @@ assertObjectDocument(value: unknown): void
 
 ```ts
 assertObjectStyle(value: unknown): asserts value is Partial<ObjectStyle>
+```
+## `assertUIBuilderDocument`
+
+```ts
+assertUIBuilderDocument(value: unknown): asserts value is CanvasDocument
+```
+## `assertUIComponentBindings`
+
+```ts
+assertUIComponentBindings(value: unknown, targets: readonly UIBindingTarget[]): asserts value is readonly UIComponentBinding[]
+```
+## `assertUIComponentContent`
+
+```ts
+assertUIComponentContent(value: unknown): asserts value is UIComponentContent
+```
+## `assertUIComponentProperties`
+
+```ts
+assertUIComponentProperties(component: string, value: unknown): void
+```
+## `assertUIDomainCardMapping`
+
+```ts
+assertUIDomainCardMapping(props: Readonly<Record<string, unknown>>, fields: readonly { readonly id: string; readonly type: string; }[], fieldIds: readonly string[]): void
+```
+## `assertUIFlowLayout`
+
+```ts
+assertUIFlowLayout(value: unknown): asserts value is UIFlowLayout
 ```
 ## `CanvasDocument`
 
@@ -88,6 +123,11 @@ createCanvasObject(kind: Exclude<CanvasObjectKind, "path" | "image" | "embedded-
 ```ts
 createCanvasPath(points: ReadonlyArray<ObjectPoint>, style: { readonly color: string; readonly label: string; readonly strokeWidth: number; }): Extract<CanvasObjectDraft, { readonly kind: "path"; }>
 ```
+## `createUIComponentObject`
+
+```ts
+createUIComponentObject(component: UIComponentKind, position: Pick<ObjectBounds, "x" | "y">, content?: Partial<Pick<UIComponentContent, "detail" | "items" | "tone">> & { readonly text?: string; }): CanvasObjectDraft
+```
 ## `defaultObjectContainerPolicy`
 
 ```ts
@@ -120,6 +160,11 @@ layoutObjectDocument(document: ObjectDocument, options: ObjectLayoutOptions, pre
 ```ts
 layoutObjectText<Object extends ObjectDraft>(object: Object, measure?: ObjectTextMeasurer): Object
 ```
+## `mapUIComponentChildren`
+
+```ts
+mapUIComponentChildren(content: UIComponentContent, map: (id: string) => string | undefined): UIComponentContent
+```
 ## `ObjectBounds`
 
 ```ts
@@ -128,6 +173,14 @@ interface ObjectBounds {
   readonly y: number;
   readonly width: number;
   readonly height: number;
+}
+```
+## `ObjectCollisionGroup`
+
+```ts
+interface ObjectCollisionGroup {
+  readonly objectIds: readonly string[];
+  readonly gap: number;
 }
 ```
 ## `ObjectContainerLayout`
@@ -270,6 +323,16 @@ projectObjectText(object: DocumentObject): ObjectTextProjection | null
 ```ts
 readObjectStyle(objects: ReadonlyArray<DocumentObject>): ObjectStyleSelection
 ```
+## `resolveObjectCollisions`
+
+```ts
+resolveObjectCollisions(objects: readonly DocumentObject[], groups: readonly ObjectCollisionGroup[], anchoredIds: readonly string[]): readonly DocumentObject[]
+```
+## `resolveUIFlowLayout`
+
+```ts
+resolveUIFlowLayout(objects: readonly CanvasObject[], layout?: UIFlowLayout | null): UIFlowLayout
+```
 ## `serializeCanvasDocument`
 
 ```ts
@@ -279,4 +342,148 @@ serializeCanvasDocument(document: CanvasDocument): string
 
 ```ts
 transformObject<Object extends DocumentObject>(object: Object, transform: ObjectTransform): Object
+```
+## `uiBindingCatalog`
+
+```ts
+const uiBindingCatalog: readonly [{ readonly id: "value"; readonly label: "한 행의 값"; readonly description: "A field from the first row, or a specific record ID."; }, { readonly id: "list"; readonly label: "목록"; readonly description: "A field from all rows, up to 50 visible values."; }, { ...; }, { ...; }]
+```
+## `UIBindingMode`
+
+```ts
+type UIBindingMode = typeof uiBindingCatalog[number]["id"];
+```
+## `UIBindingTarget`
+
+```ts
+type UIBindingTarget = "text" | "detail" | "items" | "value";
+```
+## `uiBuilderComponentChildIds`
+
+```ts
+uiBuilderComponentChildIds(object: UIComponentObject): readonly string[]
+```
+## `uiComponentAuthoringCatalog`
+
+```ts
+const uiComponentAuthoringCatalog: ({ category: string; source: string; mapping: string; defaultProps: Record<string, JSONValue>; propertySchema: Readonly<Record<string, UIComponentPropertyRule>>; ... 8 more ...; description: "Page or section heading"; } | ... 16 more ... | { ...; })[]
+```
+## `UIComponentBinding`
+
+```ts
+interface UIComponentBinding extends Record<string, JSONValue> {
+  readonly target: UIBindingTarget;
+  readonly mode: UIBindingMode;
+  readonly tableId: string;
+  readonly fieldId: string;
+  readonly recordId: string;
+}
+```
+## `uiComponentCatalog`
+
+```ts
+const uiComponentCatalog: readonly ({ category: string; source: string; mapping: string; defaultProps: Record<string, JSONValue>; propertySchema: Readonly<Record<string, UIComponentPropertyRule>>; ... 8 more ...; description: "Page or section heading"; } | ... 16 more ... | { ...; })[]
+```
+## `uiComponentCompositionRecipes`
+
+```ts
+const uiComponentCompositionRecipes: readonly [{ readonly id: "execution-result"; readonly source: "packages/json-document-ui-primitives-react/src/content-card.tsx"; readonly components: readonly ["card", "text", "button"]; readonly description: "Independent execution result = ContentCard with real result body and optional follow-up actions. ResultPane...
+```
+## `UIComponentContent`
+
+```ts
+type UIComponentContent = Record<string, JSONValue> & {
+  readonly props?: Record<string, JSONValue>;
+  readonly childIds?: readonly string[];
+  readonly collection?: { readonly tableId: string; readonly fieldIds: readonly string[] };
+  readonly bindings?: readonly UIComponentBinding[];
+  readonly actionId?: string;
+  readonly pageId?: string;
+  readonly targetPageId?: string;
+  readonly value?: string | number | boolean;
+  readonly component: UIComponentKind;
+  readonly detail: string;
+  readonly items: readonly string[];
+  readonly tone: "default" | "accent" | "quiet";
+}
+```
+## `uiComponentDocumentType`
+
+```ts
+const uiComponentDocumentType: "ui-component/1"
+```
+## `UIComponentKind`
+
+```ts
+type UIComponentKind = typeof uiComponentCatalog[number]["id"];
+```
+## `UIComponentObject`
+
+```ts
+interface UIComponentObject extends ObjectDraft { readonly id: string; readonly kind: "embedded-document"; readonly documentType: string; readonly document: UIComponentContent; }
+```
+## `UIComponentPropertyRule`
+
+```ts
+type UIComponentPropertyRule = { readonly type: "string" | "number" | "boolean" | "strings" | "object" | "files"; readonly enum?: readonly string[] };
+```
+## `uiComponentSlotIds`
+
+```ts
+uiComponentSlotIds(content: UIComponentContent): readonly (string | undefined)[]
+```
+## `uiDesignCatalog`
+
+```ts
+const uiDesignCatalog: readonly [{ readonly id: "clean"; readonly label: "공통"; readonly description: "Shared typography, controls and minimal content hierarchy."; }]
+```
+## `UIDesignId`
+
+```ts
+type UIDesignId = typeof uiDesignCatalog[number]["id"];
+```
+## `uiDomainCardCatalog`
+
+```ts
+const uiDomainCardCatalog: readonly [{ readonly id: "person"; readonly label: "인물"; readonly api: "PersonCard"; readonly purpose: "이름과 역할로 사람을 식별하고 연락 맥락을 확인한다"; readonly required: readonly ["title"]; readonly roles: readonly ["title", "role", "organization", "contact", "status", "identifier"]; readonly reason: "이름·직무·소속은 간격으로 묶고 연락처는 구분선 아래 ...
+```
+## `uiDomainCardFieldRoles`
+
+```ts
+const uiDomainCardFieldRoles: any[]
+```
+## `UIDomainCardPresentation`
+
+```ts
+type UIDomainCardPresentation = typeof uiDomainCardCatalog[number]["id"];
+```
+## `UIFlowColumn`
+
+```ts
+interface UIFlowColumn extends Record<string, JSONValue> { readonly weight: number; readonly items: readonly UIFlowItem[]; }
+```
+## `UIFlowItem`
+
+```ts
+interface UIFlowItem extends Record<string, JSONValue> { readonly objectId: string; readonly size: "hug" | "fill"; }
+```
+## `UIFlowLayout`
+
+```ts
+interface UIFlowLayout extends Record<string, JSONValue> { readonly rows: readonly UIFlowRow[]; }
+```
+## `UIFlowRow`
+
+```ts
+interface UIFlowRow extends Record<string, JSONValue> { readonly columns: readonly UIFlowColumn[]; }
+```
+## `uiLayoutCatalog`
+
+```ts
+const uiLayoutCatalog: readonly [{ readonly id: "stack"; readonly label: "세로 흐름"; readonly description: "Read top to bottom: headings, copy, forms and content."; }, { readonly id: "grid"; readonly label: "카드 그리드"; readonly description: "Two columns for comparable content; headings span the width."; }, { ...; }]
+```
+## `UILayoutId`
+
+```ts
+type UILayoutId = typeof uiLayoutCatalog[number]["id"];
 ```

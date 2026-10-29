@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { Tabs } from "@interactive-os/json-document-ui-primitives-react";
@@ -60,8 +61,8 @@ export function DemoWorkbench(props: {
   }, [activeSource?.path, activeSourceText]);
 
   return (
-    <section className={classes("min-w-0", ui.product.frame, expanded && "fixed inset-3 z-50 overflow-auto bg-background-canvas shadow-overlay")} aria-label="Demo workbench" data-expanded={expanded || undefined}>
-      <div className={classes(ui.demoWorkbench.header, "flex items-center justify-between gap-2")}>
+    <section className={classes("min-w-0", expanded && "fixed inset-3 z-50 overflow-auto bg-background-canvas shadow-overlay")} aria-label="Demo workbench" data-expanded={expanded || undefined}>
+      <div className={classes(ui.demoWorkbench.header, "flex items-center justify-between gap-related")}>
         <Tabs
           className={ui.demoWorkbench.tabList}
           tabClassName={ui.demoWorkbench.tab}
@@ -93,15 +94,15 @@ export function DemoWorkbench(props: {
           aria-labelledby={`${id}-tab-${activeSourceIndex + 1}`}
           className={ui.demoWorkbench.panel}
         >
-          <div className="min-w-0 p-3">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <p className={classes("m-0 font-mono", ui.text.meta)}>{activeSource.path}</p>
+          <div className="grid min-w-0 gap-related p-related">
+            <div className="flex items-center justify-between gap-related">
+              <p className={classes("m-0 font-mono", contentPresentation.caption)}>{activeSource.path}</p>
               {activeSource.referencePath === undefined ? null : (
-                <ActionLink href={activeSource.referencePath} className={ui.text.meta}>API Reference</ActionLink>
+                <ActionLink href={activeSource.referencePath} className={contentPresentation.caption}>API Reference</ActionLink>
               )}
             </div>
             {activeSourceText === undefined ? (
-              <p className={classes("m-0 p-3", ui.text.meta)}>Loading source…</p>
+              <p className={classes("m-0 p-related", contentPresentation.caption)}>Loading source…</p>
             ) : (
               <ShikiSourceCodeBlock language={activeSource.language} source={activeSourceText} />
             )}

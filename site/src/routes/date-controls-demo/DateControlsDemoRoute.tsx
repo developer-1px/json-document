@@ -40,7 +40,7 @@ export function DateControlsDemoRoute() {
         HTML date, time, month, week, datetime-local 값과 APG 캘린더·범위 컨트롤입니다.
       </PageHeader>
     )}>
-      <div className="grid gap-4">
+      <div className="grid gap-group">
         <HtmlDateField type="date" label="Date" value={date} onValueChange={setDate} />
         <HtmlDateField type="time" label="Time" value={time} onValueChange={setTime} />
         <HtmlDateField type="datetime-local" label="DateTime" value={dateTime} onValueChange={setDateTime} />

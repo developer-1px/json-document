@@ -4,7 +4,7 @@ import type { CanvasDocument } from "@interactive-os/json-document-object-docume
 
 type View = { x: number; y: number; scale: number };
 /** View-only navigation; never writes document geometry, selection, or history. */
-export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean) {
+export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean, navigation: "free" | "fixed" = "free") {
   const [size, setSize] = useState({ width: document.width, height: document.height });
   const [view, setView] = useState<View>({ x: 0, y: 0, scale: 1 });
   const [hand, setHand] = useState(false);
@@ -35,6 +35,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
   };
   const [pointer] = useState(() => createWebPointerSession<{ x: number; y: number; view: View }>());
   const fitBounds = (left: number, top: number, right: number, bottom: number) => {
+    if (navigation === "fixed") return;
     const { size } = state.current;
     const scale = Math.max(0.05, Math.min(8, (size.width - 64) / Math.max(1, right - left), (size.height - 160) / Math.max(1, bottom - top)));
     updateView({ x: (left + right - size.width / scale) / 2, y: (top + bottom - size.height / scale) / 2, scale });
@@ -51,6 +52,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
       Math.max(...objects.map(o => o.x + o.width)), Math.max(...objects.map(o => o.y + o.height)));
   };
   const zoom = (factor: number, at = { x: state.current.size.width / 2, y: state.current.size.height / 2 }) => {
+    if (navigation === "fixed") return;
     updateView(current => {
       const scale = Math.max(0.05, Math.min(8, current.scale * factor));
       return { x: current.x + at.x / current.scale - at.x / scale, y: current.y + at.y / current.scale - at.y / scale, scale };
@@ -65,7 +67,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
       if (!width || !height) return;
       state.current.size = { width, height };
       setSize({ width, height });
-      if (initial) { fit(); initial = false; }
+      if (initial) { if (navigation !== "fixed") fit(); initial = false; }
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -83,7 +85,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
     svg.addEventListener("wheel", wheel, { passive: false });
     window.addEventListener("blur", release);
     return () => { if (frame.current !== null) cancelAnimationFrame(frame.current); if (settled.current !== null) clearTimeout(settled.current); frame.current = null; settled.current = null; svg.removeAttribute("data-canvas-navigating"); observer.disconnect(); svg.removeEventListener("wheel", wheel); window.removeEventListener("blur", release); release(); };
-  }, [enabled, surface, pointer]);
+  }, [enabled, surface, pointer, navigation]);
   const end = (event: PointerEvent<SVGSVGElement>, cancel = false) => {
     if (!pointer.getSnapshot()) return;
     event.stopPropagation();
@@ -92,13 +94,14 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
   };
   return {
     hand, setHand, fit, fitSelection, zoom, scale: view.scale,
+    bounds: { x: state.current.view.x, y: state.current.view.y, width: size.width / state.current.view.scale, height: size.height / state.current.view.scale },
     viewBox: `${state.current.view.x} ${state.current.view.y} ${size.width / state.current.view.scale} ${size.height / state.current.view.scale}`,
     panning: hand || space || dragging,
     cursor: dragging ? "grabbing" : hand || space ? "grab" : undefined,
     events: enabled ? {
       onPointerDownCapture(event: PointerEvent<SVGSVGElement>) {
         if (isWebEditableTarget(event.target) || !(event.button === 1 || event.button === 0 && (hand || space))) return;
-        event.preventDefault(); event.stopPropagation(); event.currentTarget.focus();
+        event.preventDefault(); event.stopPropagation(); event.currentTarget.focus({ preventScroll: true });
         pointer.begin(event.currentTarget, event.pointerId, { x: event.clientX, y: event.clientY, view: state.current.view });
         setDragging(true);
       },

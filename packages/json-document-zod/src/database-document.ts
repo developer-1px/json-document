@@ -1,5 +1,6 @@
 import { buildPointer, type JSONValue } from "@interactive-os/json-document";
 import {
+  createDatabaseView,
   acceptsDatabaseValue,
   defaultDatabaseValue,
   type DatabaseDocument,
@@ -112,19 +113,7 @@ export function databaseDocumentFromZod(
     value: {
       schema: { properties },
       records: translated,
-      views: [{
-        id: "table",
-        name: "All records",
-        ownership: "personal",
-        layout: "table",
-        projection: {
-          search: "",
-          filter: { id: "table:root", conjunction: "and", items: [] },
-          sorts: [],
-          groups: [],
-          columns: propertyOrder.map((propertyId) => ({ propertyId, visible: true, width: null, pinned: null })),
-        },
-      }],
+      views: [createDatabaseView("table", "All records", propertyOrder, "personal", {hiddenPropertyIds: []})],
     },
   };
 }

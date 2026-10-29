@@ -2,18 +2,52 @@
   "name": "@interactive-os/json-document-canvas",
   "version": "0.1.0-rc.0",
   "description": "Official React Canvas Hand for a fixed single-slide Object document.",
-  "type": "module", "license": "MIT", "sideEffects": ["**/*.css"],
-  "main": "./dist/index.js", "types": "./dist/index.d.ts",
-  "repository": { "type": "git", "url": "git+https://github.com/developer-1px/json-document.git", "directory": "packages/json-document-canvas" },
-  "publishConfig": { "access": "public", "provenance": true, "tag": "next" },
-  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "docs", "LICENSE", "src/canvas-hand.css"],
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }, "./canvas-hand.css": "./src/canvas-hand.css" },
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/developer-1px/json-document.git",
+    "directory": "packages/json-document-canvas"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "next"
+  },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo",
+    "README.md",
+    "docs",
+    "LICENSE",
+    "src/canvas-hand.css",
+    "src/ui-builder.css",
+    "src/ui-screen-edit-layer.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./canvas-hand.css": "./src/canvas-hand.css",
+    "./ui-builder.css": "./src/ui-builder.css",
+    "./ui-screen-edit-layer.css": "./src/ui-screen-edit-layer.css"
+  },
   "scripts": {
-    "build": "tsc -b tsconfig.json", "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
-    "typecheck": "tsc -p tsconfig.test.json --noEmit", "test": "vitest run --config vitest.config.ts",
+    "build": "tsc -b tsconfig.json",
+    "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
     "verify": "npm run typecheck && npm test && npm run build"
   },
-  "dependencies": { "lucide-react": "^1.33.0" },
+  "dependencies": {
+    "lucide-react": "^1.33.0"
+  },
   "peerDependencies": {
     "@interactive-os/json-document-sheet": ">=0.1.0-rc.0 <1",
     "@interactive-os/json-document-file-intake": ">=0.1.0-rc.0 <1",
@@ -24,15 +58,33 @@
     "@interactive-os/json-document-react": ">=0.1.0-rc.0 <1",
     "@interactive-os/json-document-ui-primitives-react": ">=0.1.0-rc.0 <1",
     "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "@interactive-os/json-document-calendar": ">=0.1.0-rc.0 <1",
+    "@interactive-os/json-document-calendar-document": ">=0.1.0-rc.0 <1",
+    "@interactive-os/json-document-animation-react": ">=0.1.0-rc.0 <1",
+    "@interactive-os/json-document-database": ">=0.1.0-rc.0 <1"
   },
   "devDependencies": {
     "@interactive-os/json-document-sheet": "*",
     "@interactive-os/json-document-file-intake": "*",
-    "@interactive-os/json-document-object-document": "*", "@interactive-os/json-document-editing": "*",
-    "@interactive-os/json-document-affordance": "*", "@interactive-os/json-document-web": "*",
-    "@interactive-os/json-document-react": "*", "@interactive-os/json-document-ui-primitives-react": "*",
-    "@testing-library/react": "^16.3.2", "@types/react": "^19.2.14", "@types/react-dom": "^19.2.3", "@vitejs/plugin-react": "^5.2.0",
-    "jsdom": "^29.1.1", "react": "^19.2.5", "react-dom": "^19.2.5", "typescript": "^5.0.0", "vitest": "^4.1.7"
+    "@interactive-os/json-document-object-document": "*",
+    "@interactive-os/json-document-editing": "*",
+    "@interactive-os/json-document-affordance": "*",
+    "@interactive-os/json-document-web": "*",
+    "@interactive-os/json-document-react": "*",
+    "@interactive-os/json-document-ui-primitives-react": "*",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "jsdom": "^29.1.1",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.7",
+    "@interactive-os/json-document-calendar": "*",
+    "@interactive-os/json-document-calendar-document": "*",
+    "@interactive-os/json-document-animation-react": "*",
+    "@interactive-os/json-document-database": "*"
   }
 }

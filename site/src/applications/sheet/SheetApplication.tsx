@@ -23,11 +23,11 @@ export function SheetApplication() {
   return <main className="sheet-application bg-background-canvas text-foreground-default">
     <header className="sheet-application-heading">
       <Toolbar label="시트 문서" className={floatingSurface.control}>
-        <Popover label="시트 설정" trigger={<FileSpreadsheet aria-hidden="true" size={18} />} triggerPresentation="icon" open={settingsOpen} onOpenChange={setSettingsOpen} panelClassName={`${floatingSurface.panel} w-64 p-4`}>
+        <Popover label="시트 설정" trigger={<FileSpreadsheet aria-hidden="true" size={18} />} triggerPresentation="icon" open={settingsOpen} onOpenChange={setSettingsOpen} panelClassName={`${floatingSurface.panel} w-64 p-group`}>
           <Field label="시트 이름" value={name} onValueChange={name => editor.dispatch({type:"sheet.rename",name})} />
         </Popover>
-        <span className="max-w-40 truncate px-2">{name}</span>
-        <span role="status" className="px-2 text-xs text-foreground-muted">{state === "saved" ? "이 브라우저에 저장됨" : state === "load-error" ? "저장된 시트를 읽지 못했습니다. 새 내용은 편집하면 저장됩니다." : state === "save-error" ? "저장하지 못했습니다" : "저장 전"}</span>
+        <span className="max-w-40 truncate px-related">{name}</span>
+        <span role="status" className="px-related text-xs text-foreground-muted">{state === "saved" ? "이 브라우저에 저장됨" : state === "load-error" ? "저장된 시트를 읽지 못했습니다. 새 내용은 편집하면 저장됩니다." : state === "save-error" ? "저장하지 못했습니다" : "저장 전"}</span>
         {(state === "save-error" || state === "load-error") && <Command label="저장 다시 시도" onClick={stored.save}><Save aria-hidden="true" size={16} /></Command>}
       </Toolbar>
     </header>

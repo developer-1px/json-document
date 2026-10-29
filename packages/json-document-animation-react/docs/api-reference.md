@@ -84,7 +84,7 @@ InfinityStroke(props: SpanProps): ReactNode
 ## `LoadingBar`
 
 ```ts
-LoadingBar(props: DivProps): ReactNode
+LoadingBar({ value, ...props }: DivProps & { readonly value?: number; }): ReactNode
 ```
 ## `MassOrb`
 
@@ -174,7 +174,7 @@ StreamingCaret(props: HTMLAttributes<HTMLSpanElement>): ReactNode
 ## `WaveDots`
 
 ```ts
-WaveDots(props: SpanProps & { readonly frame?: WaveFrame; }): ReactNode
+WaveDots({ announce, label, frame, children, ...props }: HTMLAttributes<HTMLSpanElement> & { readonly announce?: boolean; readonly label?: string; readonly frame?: "none" | "bubble"; }): ReactNode
 ```
 ## `WaveFrame`
 

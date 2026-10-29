@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import {
   useRef,
   useState,
@@ -13,7 +14,7 @@ import {
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
 import { Command, SelectableItem, Toolbar } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
@@ -104,13 +105,13 @@ export function ToolbarWidgetRoute() {
           aria-label="Order items"
           {...activeDescendantContainerProps(focusKey === null ? null : toolbarItemId(focusKey))}
           onKeyDown={editing.getKeyDownHandler()}
-          className={classes("m-0 grid list-none gap-1 p-0", ui.state.focus)}
+          className={classes("m-0 grid list-none gap-related p-0", contentPresentation.focus)}
         >
           {document.items.map((item) => (
-            <SelectableItem
+            <SelectableItem presentation="row"
               as="li"
               key={item.id}
-              className={classes("w-full text-left", ui.surface.selectableBlock)}
+              className={classes("w-full text-left", contentPresentation.itemSummary)}
               {...editingItemProps(editing.getItem(item.id))}
               {...activeDescendantItemProps(toolbarItemId(item.id))}
               {...projectWebWidgetState({

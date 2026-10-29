@@ -32,6 +32,10 @@ rectangle `containerLayout` persist ownership, direction, gap and padding.
 `planObjectOperation` accepts ObjectLayoutOptions so related text and container
 geometry commit atomically. The Canvas Usage and Source demonstrate these APIs.
 
+## UI Builder
+
+[컴포넌트 기반 자유 배치 API](docs/ui-component.md)와 [Usage · Source](/applications/ui-builder)를 제공합니다.
+
 ### Section placement
 
 `kind: "section"` is a named free-layout container. Its label appears above its

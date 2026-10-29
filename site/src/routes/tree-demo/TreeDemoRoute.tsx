@@ -1,3 +1,5 @@
+import { ToolbarSeparator } from "@interactive-os/json-document-ui-primitives-react";
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState } from "react";
 import { ChevronDown, ChevronRight, ClipboardPaste, Copy, Redo2, Scissors, Trash2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
@@ -23,7 +25,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialTree: TreeDocument = {
@@ -111,7 +113,7 @@ export function TreeDemoRoute() {
         illustration="branch"
         title="Tree"
         aside={(
-          <div className={classes("text-right", ui.text.meta)}>
+          <div className={classes("text-right", contentPresentation.caption)}>
             <div>{editor.selectedNodeIdsIn(topology).length} selected · revision {snapshot.revision}</div>
             <div aria-live="polite">{observation.announcement}</div>
           </div>
@@ -137,7 +139,7 @@ export function TreeDemoRoute() {
               <ClipboardPaste aria-hidden="true" size={16} />
             </Command>
             <Command label="Delete" onClick={() => run({ type: "selection.remove", topology }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></Command>
-            <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+            <ToolbarSeparator />
             <Command label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></Command>
             <Command label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
@@ -152,7 +154,7 @@ export function TreeDemoRoute() {
       >
         <section aria-label="Editable tree">
           <ul
-            className="m-0 grid list-none gap-1 p-0"
+            className="m-0 grid list-none gap-related p-0"
             tabIndex={0}
             {...clipboardSurface}
             onKeyDown={(event) => {
@@ -182,9 +184,9 @@ export function TreeDemoRoute() {
                         {row.expanded ? <ChevronDown aria-hidden="true" size={16} /> : <ChevronRight aria-hidden="true" size={16} />}
                       </Command>
                     ) : <span />}
-                    <SelectableItem
+                    <SelectableItem presentation="row"
                       data-node-id={row.id}
-                      className={classes("text-left", ui.surface.documentBlock)}
+                      className={classes("text-left", contentPresentation.itemSummary)}
                       {...editingItemProps(editing.getItem(row.id))}
                     >
                       {row.label}
@@ -194,7 +196,7 @@ export function TreeDemoRoute() {
               );
             })}
           </ul>
-          <p className={classes("mb-0 mt-3", ui.text.meta)}>Fold a branch to take it out of the visible line. Selection and clipboard read that line only.</p>
+          <p className={classes("mb-0 mt-related", contentPresentation.caption)}>Fold a branch to take it out of the visible line. Selection and clipboard read that line only.</p>
         </section>
       </ProductShell>
     </DemoPage>

@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useState, type DragEvent } from "react";
 import { Redo2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
@@ -24,7 +25,7 @@ import {
 import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialBoard: KanbanDocument = {
@@ -100,7 +101,7 @@ export function KanbanDemoRoute() {
       >
       <section
         aria-label="Kanban board"
-        className="grid gap-3 md:grid-cols-3"
+        className="grid gap-related md:grid-cols-3"
         tabIndex={0}
         onKeyDown={editing.getKeyDownHandler()}
       >
@@ -136,9 +137,9 @@ export function KanbanDemoRoute() {
                 },
               });
             }}
-            className="grid content-start gap-2 p-3"
+            className="grid content-start gap-related p-related"
           >
-            <h2 className={classes("mt-0", ui.text.title)}>{column.title}</h2>
+            <h2 className={classes("mt-0", contentPresentation.itemTitle)}>{column.title}</h2>
             {column.cardIds.map((cardId) => {
               const card = cards.get(cardId);
               if (!card) return null;
@@ -166,7 +167,7 @@ export function KanbanDemoRoute() {
                     setDraggingId(null);
                     dragSession.cancel();
                   }}
-                  className={classes("w-full p-3 text-left", ui.surface.documentBlock)}
+                  className={classes("w-full p-related text-left", contentPresentation.itemSummary)}
                 >
                   {card.title}
                 </SelectableItem>

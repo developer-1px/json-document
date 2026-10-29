@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState } from "react";
 import type { InteractionHandleEvent } from "@interactive-os/json-document-affordance";
 import {
@@ -6,7 +7,7 @@ import {
   ResizeHandle,
 } from "@interactive-os/json-document-ui-primitives-react";
 import { Inspector } from "../../../shared/ui/inspector";
-import { classes, ui } from "../../../shared/ui/styles";
+import { classes } from "../../../shared/ui/styles";
 import { interactionHandleRecipe } from "./interaction-handle-styles";
 
 export function InteractionHandleLab() {
@@ -36,9 +37,9 @@ export function InteractionHandleLab() {
   }
 
   return (
-    <section aria-label="Interaction handle surface" className={classes("relative min-h-[24rem] overflow-hidden p-5", ui.state.focus)}>
-      <p className={classes("m-0", ui.text.meta)}>Drag the grip, resize the edge, and move the control point.</p>
-      <div className="relative mt-5 h-64" data-testid="interaction-handle-stage">
+    <section aria-label="Interaction handle surface" className={classes("relative min-h-[24rem] overflow-hidden p-group", contentPresentation.focus)}>
+      <p className={classes("m-0", contentPresentation.caption)}>Drag the grip, resize the edge, and move the control point.</p>
+      <div className="relative mt-group h-64" data-testid="interaction-handle-stage">
         <div className={styles.card()} data-testid="drag-handle-card" style={{ transform: `translate(${drag.x}px, ${drag.y}px)` }}>
           <DragHandle
             label="Move card"
@@ -47,7 +48,7 @@ export function InteractionHandleLab() {
           >
             ⠿
           </DragHandle>
-          <span className={classes("ml-7", styles.label())}>DragHandle</span>
+          <span className={classes("ml-region", styles.label())}>DragHandle</span>
         </div>
 
         <div className={styles.resizePanel()} data-testid="resize-handle-panel" style={{ width }}>

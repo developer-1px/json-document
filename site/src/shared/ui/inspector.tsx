@@ -1,8 +1,9 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useEffect, useId, useState } from "react";
 import { X } from "lucide-react";
-import { DisclosureButton, Command, Tabs } from "@interactive-os/json-document-ui-primitives-react";
+import { DisclosureButton, Command, Popover, Tabs } from "@interactive-os/json-document-ui-primitives-react";
 import { JsonInspector, type JsonInspectorProps } from "./json-inspector";
-import { classes, ui } from "./styles";
+import { classes } from "./styles";
 
 export type InspectorItem = JsonInspectorProps;
 
@@ -20,15 +21,6 @@ export function Inspector(props: {
   const label = props.label ?? "Inspect editing state";
 
   useEffect(() => {
-    if (!open) return;
-    const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
-  }, [open]);
-
-  useEffect(() => {
     if (props.items.some((item) => item.testId === activeTestId)) return;
     setActiveTestId(props.items[0]?.testId ?? "");
   }, [activeTestId, props.items]);
@@ -37,38 +29,16 @@ export function Inspector(props: {
 
   const inline = props.placement === "inline";
 
-  return (
-    <div className={classes("min-w-0", props.className)} data-inspector>
-      <DisclosureButton
-        expanded={open}
-        controls={panelId}
-        onClick={() => setOpen((current) => !current)}
-      >
-        <span>{label}</span>
-        <span aria-hidden="true" className={ui.interactive.chevron}>⌄</span>
-      </DisclosureButton>
-
-      <aside
-        id={panelId}
-        hidden={!open}
-        style={open ? undefined : { display: "none" }}
-        aria-label={label}
-        className={inline
-          ? "mt-3 grid min-w-0 gap-3"
-          : classes(
-            "pointer-events-none fixed bottom-4 right-4 z-50 grid max-h-[calc(100vh-2rem)] w-[min(42rem,calc(100vw-2rem))] min-w-0 grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden p-3 [&_button]:pointer-events-auto",
-            ui.surface.overlay,
-          )}
-      >
-        {inline ? null : (
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <span className={ui.text.label}>Inspector</span>
+  const content = <>
+        {!inline && (
+          <div className="flex items-center justify-between gap-related">
+            <span className={contentPresentation.caption}>Inspector</span>
             <Command label="Close inspector" onClick={() => setOpen(false)}><X aria-hidden="true" size={16} /></Command>
           </div>
         )}
 
         <Tabs
-          className="mb-3 flex min-w-0 flex-wrap gap-1"
+          className="flex min-w-0 flex-wrap gap-related"
           label="Inspector values"
           value={props.items[activeIndex]!.testId}
           options={props.items.map((item) => ({ id: item.testId, label: item.label }))}
@@ -90,7 +60,14 @@ export function Inspector(props: {
             </div>
           ))}
         </div>
-      </aside>
-    </div>
-  );
+  </>;
+  if (!inline) return <Popover label={label} trigger={label} open={open} onOpenChange={setOpen}
+    className={props.className}
+    panelClassName="fixed top-auto left-auto bottom-4 right-4 z-50 grid min-w-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-related max-h-[calc(100vh-2rem)] w-[min(42rem,calc(100vw-2rem))] overflow-hidden p-group">
+    {content}
+  </Popover>;
+  return <div className={classes("grid min-w-0 gap-related", props.className)} data-inspector>
+    <DisclosureButton expanded={open} controls={panelId} onClick={() => setOpen(current => !current)}>{label}</DisclosureButton>
+    <div id={panelId} hidden={!open} className={open ? "grid min-w-0 gap-related" : undefined}>{content}</div>
+  </div>;
 }

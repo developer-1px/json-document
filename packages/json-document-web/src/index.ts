@@ -155,6 +155,9 @@ export {projectWebClientDeltaToElement} from "./element-coordinate.js";
 
 export {webKeyboardPlatform} from "./keyboard.js";
 export { measureWebText, type WebTextMeasurement } from "./text-measurement.js";
+export {openWebStoredDocument, type WebAsyncDocumentStorage, type WebAsyncStoredDocumentOptions} from "./stored-document.js";
+export {createWebIndexedDBStorage} from "./indexeddb-document-storage.js";
+export {downloadWebDocumentFile, readWebDocumentFile} from "./document-file.js";
 export { webCanvasHTMLAdapter, createWebHTMLArtifactSource } from "./html-artifact.js";
 export { editWebHTMLArtifactNode, type WebHTMLNodeChange } from "./html-artifact.js";
 export { bindWebHTMLArtifactEditing, type WebHTMLNodeSelection } from "./html-artifact-editing.js";
