@@ -19,3 +19,6 @@ playwright-report/
 
 # Local Canvas recovery files and session backups
 .local/canvas/
+
+# Local one-off profiling specs (also excluded by Playwright testIgnore)
+*.tmp.spec.ts
