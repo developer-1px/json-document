@@ -30,20 +30,17 @@ export function canonicalIconViolations(source, file = "source") {
   return violations;
 }
 
-const fixture = '<Command label="Undo">↶</Command>\nfunction CopyIcon() { return <svg />; }';
-if (canonicalIconViolations(fixture, "violation fixture").length !== 2) {
-  throw new Error("Canonical icon guard did not reject its violation fixture.");
-}
+export const message = "Static UI icons must consume lucide-react; character glyphs and consumer-local SVG icons are not canonical:";
 
-const violations = sourceRoots.flatMap(collect)
-  .flatMap((file) => canonicalIconViolations(fs.readFileSync(file, "utf8"), path.relative(repositoryRoot, file)));
+export default function check() {
+  const fixture = '<Command label="Undo">↶</Command>\nfunction CopyIcon() { return <svg />; }';
+  if (canonicalIconViolations(fixture, "violation fixture").length !== 2) {
+    throw new Error("Canonical icon guard did not reject its violation fixture.");
+  }
 
-if (violations.length > 0) {
-  console.error("Static UI icons must consume lucide-react; character glyphs and consumer-local SVG icons are not canonical:");
-  violations.forEach((violation) => console.error(`- ${violation}`));
-  process.exitCode = 1;
-} else {
-  console.log("Canonical icon guard ok; all static UI icon consumers use the Lucide source.");
+  const violations = sourceRoots.flatMap(collect)
+    .flatMap((file) => canonicalIconViolations(fs.readFileSync(file, "utf8"), path.relative(repositoryRoot, file)));
+  return violations;
 }
 
 function collect(directory) {

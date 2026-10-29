@@ -27,30 +27,26 @@ export function statePositionViolations(source, file = "source") {
     .map((match) => `${file}: ${match[0]}`);
 }
 
-const fixtureViolations = visualUtilityViolations(fs.readFileSync(violationFixture, "utf8"), "violation fixture");
-if (fixtureViolations.length === 0) {
-  throw new Error("UI language guard did not reject its violation fixture.");
-}
-const fixturePositionViolations = statePositionViolations(
-  fs.readFileSync(violationFixture, "utf8"),
-  "violation fixture",
-);
-if (fixturePositionViolations.length !== 1) {
-  throw new Error("UI language guard did not reject state-owned positioning.");
-}
+export const message = "UI language violations must move to src/shared/ui or an explicit route-owned *-styles.ts module:";
 
-const violations = sourceRoots.flatMap((root) => collect(path.join(siteRoot, root)))
-  .flatMap((file) => visualUtilityViolations(fs.readFileSync(file, "utf8"), path.relative(siteRoot, file)));
-const positionViolations = collectAllSources(path.join(siteRoot, "src"))
-  .flatMap((file) => statePositionViolations(fs.readFileSync(file, "utf8"), path.relative(siteRoot, file)));
+export default function check() {
+  const fixtureViolations = visualUtilityViolations(fs.readFileSync(violationFixture, "utf8"), "violation fixture");
+  if (fixtureViolations.length === 0) {
+    throw new Error("UI language guard did not reject its violation fixture.");
+  }
+  const fixturePositionViolations = statePositionViolations(
+    fs.readFileSync(violationFixture, "utf8"),
+    "violation fixture",
+  );
+  if (fixturePositionViolations.length !== 1) {
+    throw new Error("UI language guard did not reject state-owned positioning.");
+  }
 
-if (violations.length > 0 || positionViolations.length > 0) {
-  console.error("UI language violations must move to src/shared/ui or an explicit route-owned *-styles.ts module:");
-  violations.forEach((violation) => console.error(`- ${violation}`));
-  positionViolations.forEach((violation) => console.error(`- selection/focus styling must not own positioning: ${violation}`));
-  process.exitCode = 1;
-} else {
-  console.log(`UI language guard ok; violation fixture rejected (${fixtureViolations.length + fixturePositionViolations.length} findings).`);
+  const violations = sourceRoots.flatMap((root) => collect(path.join(siteRoot, root)))
+    .flatMap((file) => visualUtilityViolations(fs.readFileSync(file, "utf8"), path.relative(siteRoot, file)));
+  const positionViolations = collectAllSources(path.join(siteRoot, "src"))
+    .flatMap((file) => statePositionViolations(fs.readFileSync(file, "utf8"), path.relative(siteRoot, file)));
+  return [...violations, ...positionViolations.map((violation) => `selection/focus styling must not own positioning: ${violation}`)];
 }
 
 function collect(directory) {

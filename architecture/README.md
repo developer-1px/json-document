@@ -40,7 +40,10 @@ api-reference.md                │
 - `npm run test:architecture`: 소유자 누락·잘못된 public source·사이트 재정의·
   잘못된 소비 관계·private subpath·raw 소스의 오인에 대한 회귀 검사다.
 - `npm run docs:evaluate`: API 생성물과 위 검사, 문서 링크를 함께 검증한다.
-- 사이트 `check:canonical-modules`: 위 검사와 기존 Usage·Source 정본 검사를 실행한다.
+- 사이트 `check`(`typecheck`의 첫 단계): 위 검사와 사이트 guard(design token·UI 언어·
+  icon·Calendar Temporal·Document Type ledger)를 한 프로세스에서 실행한다. 정본 재구현
+  금지 목록은 `site/scripts/check-canonical-bans.mjs`의 선언적 배열(`files`·`pattern`·
+  `reason`) 하나에 모은다.
 
 정적 그래프에는 type import와 barrel re-export가 포함된다. API의 실제 실행,
 사용한 symbol의 최소 집합 또는 번들 크기를 뜻하지 않는다. Application의 목록을

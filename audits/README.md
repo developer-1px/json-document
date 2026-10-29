@@ -19,7 +19,7 @@ schema와 근거 source symbol을 기록합니다. 이 schema는 감사 입력�
    일치시킨다.
 5. nonconforming occurrence가 남아 있으면 후보 상태를 `audited-tbd`로 유지한다.
 
-Ledger 추가는 `npm run check:canonical-modules -w
+Ledger 추가는 `npm run check -w
 @interactive-os/json-document-site`로 검증합니다. Guard는 내비게이션 분모 불일치,
 누락된 source·symbol·passport field, 중복 occurrence, 잘못된 disposition과 성급한
 TBD 종료를 실패시킵니다.

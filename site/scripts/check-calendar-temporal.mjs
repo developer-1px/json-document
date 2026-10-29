@@ -19,36 +19,33 @@ export function calendarTemporalViolations(source, file = "source") {
   ));
 }
 
-const badFixture = fs.readFileSync(path.join(fixtureRoot, "calendar-temporal-violation.txt"), "utf8");
-const goodFixture = fs.readFileSync(path.join(fixtureRoot, "calendar-temporal-conforming.txt"), "utf8");
-const badViolations = calendarTemporalViolations(badFixture, "violation fixture");
-if (!forbidden.every(({ name }) => badViolations.some((violation) => violation.includes(`: ${name}:`)))) {
-  throw new Error(`Calendar Temporal guard did not reject every violation category (${badViolations.length} findings).`);
-}
-if (calendarTemporalViolations(goodFixture, "conforming fixture").length !== 0) {
-  throw new Error("Calendar Temporal guard rejected its conforming Temporal fixture.");
-}
+export const message = "Calendar civil date/time must use Temporal directly:";
 
-const files = [
-  ...collect(path.join(repositoryRoot, "packages/json-document-calendar-document/src"), /^calendar.*\.ts$/),
-  ...collect(path.join(repositoryRoot, "packages/json-document-editing/src"), /^calendar.*\.ts$/),
-  ...collect(path.join(repositoryRoot, "packages/json-document-calendar/src"), /\.[jt]sx?$/),
-  path.join(repositoryRoot, "packages/json-document-calendar/src/date-values.ts"),
-  path.join(repositoryRoot, "packages/json-document-calendar/src/date-controls.tsx"),
-  path.join(repositoryRoot, "packages/json-document-web/src/calendar-input.ts"),
-  ...collect(path.join(siteRoot, "src/routes/calendar-demo"), /\.[jt]sx?$/),
-];
-const violations = files.flatMap((file) => calendarTemporalViolations(
-  fs.readFileSync(file, "utf8"),
-  path.relative(repositoryRoot, file),
-));
+export default function check() {
+  const badFixture = fs.readFileSync(path.join(fixtureRoot, "calendar-temporal-violation.txt"), "utf8");
+  const goodFixture = fs.readFileSync(path.join(fixtureRoot, "calendar-temporal-conforming.txt"), "utf8");
+  const badViolations = calendarTemporalViolations(badFixture, "violation fixture");
+  if (!forbidden.every(({ name }) => badViolations.some((violation) => violation.includes(`: ${name}:`)))) {
+    throw new Error(`Calendar Temporal guard did not reject every violation category (${badViolations.length} findings).`);
+  }
+  if (calendarTemporalViolations(goodFixture, "conforming fixture").length !== 0) {
+    throw new Error("Calendar Temporal guard rejected its conforming Temporal fixture.");
+  }
 
-if (violations.length > 0) {
-  console.error("Calendar civil date/time must use Temporal directly:");
-  violations.forEach((violation) => console.error(`- ${violation}`));
-  process.exitCode = 1;
-} else {
-  console.log(`Calendar Temporal guard ok; ${files.length} runtime files checked; bad/good fixtures verified.`);
+  const files = [
+    ...collect(path.join(repositoryRoot, "packages/json-document-calendar-document/src"), /^calendar.*\.ts$/),
+    ...collect(path.join(repositoryRoot, "packages/json-document-editing/src"), /^calendar.*\.ts$/),
+    ...collect(path.join(repositoryRoot, "packages/json-document-calendar/src"), /\.[jt]sx?$/),
+    path.join(repositoryRoot, "packages/json-document-calendar/src/date-values.ts"),
+    path.join(repositoryRoot, "packages/json-document-calendar/src/date-controls.tsx"),
+    path.join(repositoryRoot, "packages/json-document-web/src/calendar-input.ts"),
+    ...collect(path.join(siteRoot, "src/routes/calendar-demo"), /\.[jt]sx?$/),
+  ];
+  const violations = files.flatMap((file) => calendarTemporalViolations(
+    fs.readFileSync(file, "utf8"),
+    path.relative(repositoryRoot, file),
+  ));
+  return violations;
 }
 
 function collect(directory, pattern) {

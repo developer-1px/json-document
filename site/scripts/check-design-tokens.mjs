@@ -38,29 +38,26 @@ export function designTokenViolations(source, file = "source", options = {}) {
   return violations;
 }
 
-const fixtureViolations = designTokenViolations(fs.readFileSync(fixture, "utf8"), "violation fixture");
-if (fixtureViolations.length !== 3) {
-  throw new Error(`Design token guard did not reject its fixture completely (${fixtureViolations.length}/3).`);
-}
+export const message = "Design token violations must use a semantic token or remain explicit content/layout data:";
 
-const files = collect(sourceRoot).filter((file) => file !== tokenDefinition);
-const violations = files.flatMap((file) => designTokenViolations(
-  fs.readFileSync(file, "utf8"),
-  path.relative(siteRoot, file),
-  { allowContentColors: contentDataFiles.has(file) },
-));
+export default function check() {
+  const fixtureViolations = designTokenViolations(fs.readFileSync(fixture, "utf8"), "violation fixture");
+  if (fixtureViolations.length !== 3) {
+    throw new Error(`Design token guard did not reject its fixture completely (${fixtureViolations.length}/3).`);
+  }
 
-const tailwindConfig = fs.readFileSync(path.join(siteRoot, "tailwind.config.cjs"), "utf8");
-for (const match of tailwindConfig.matchAll(/var\(--ref-[a-z0-9-]+\)/g)) {
-  violations.push(`tailwind.config.cjs: reference token exposed: ${match[0]}`);
-}
+  const files = collect(sourceRoot).filter((file) => file !== tokenDefinition);
+  const violations = files.flatMap((file) => designTokenViolations(
+    fs.readFileSync(file, "utf8"),
+    path.relative(siteRoot, file),
+    { allowContentColors: contentDataFiles.has(file) },
+  ));
 
-if (violations.length > 0) {
-  console.error("Design token violations must use a semantic token or remain explicit content/layout data:");
-  violations.forEach((violation) => console.error(`- ${violation}`));
-  process.exitCode = 1;
-} else {
-  console.log(`Design token guard ok; ${files.length} source files checked and violation fixture rejected.`);
+  const tailwindConfig = fs.readFileSync(path.join(siteRoot, "tailwind.config.cjs"), "utf8");
+  for (const match of tailwindConfig.matchAll(/var\(--ref-[a-z0-9-]+\)/g)) {
+    violations.push(`tailwind.config.cjs: reference token exposed: ${match[0]}`);
+  }
+  return violations;
 }
 
 function collect(directory) {
