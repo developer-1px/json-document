@@ -613,7 +613,7 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-sheet-document",
-    symbol: "sheetDocumentSchema",
+    symbol: "assertSheetDocument",
     sourcePath: "packages/json-document-sheet-document/src/schema.ts",
   },
   {
