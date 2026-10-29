@@ -48,3 +48,5 @@ export type {ControlAffordance, ControlAffordanceProps} from "./control-affordan
 export {contentInteractionAttributes, type ContentInteractionAttributes, type ContentInteractionInput} from "./content-interaction.js";
 
 export {RecordDetail, RecordContext, RecordFacts, type RecordDetailProps, type RecordContextProps, type RecordFact, SemanticIcon, StateIndicator, RecordSummary, MessageThread, ChangeComparison, type SemanticIconKind, type StateIndicatorState, type RecordSummaryProps, type ThreadMessage, type ComparedField} from "./record-affordances.js";
+export { WindowDock, type WindowDockItem, type WindowDockProps } from "./window-dock.js";
+export { EditingControls, type EditingControlsProps } from "./editing-controls.js";

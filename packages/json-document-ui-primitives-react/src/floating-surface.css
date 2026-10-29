@@ -18,3 +18,30 @@
   .json-document-floating-control,
   .json-document-floating-panel { background: Canvas; color: CanvasText; border-color: CanvasText; box-shadow: none; }
 }
+
+/* WindowDock owns responsive window layout; Hosts place the dock on the page. */
+[data-ui-window-dock] { pointer-events: none; display: flex; flex-direction: column; gap: 0.75rem; }
+[data-ui-dock-windows] { display: flex; justify-content: flex-end; align-items: flex-end; gap: 0.75rem; }
+[data-ui-dock-panel] { pointer-events: auto; width: min(22rem, 100%); min-width: 0; max-height: var(--window-dock-max-height, 65dvh); display: flex; flex-direction: column; padding: 0.75rem; gap: 0.75rem; font-size: 0.875rem; }
+[data-ui-dock-panel][hidden] { display: none; }
+[data-ui-dock-heading] { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-shrink: 0; font-size: 0.75rem; }
+[data-ui-dock-footer] { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
+[data-ui-dock-footer] > * { pointer-events: auto; }
+[data-ui-dock-titles] { display: flex; gap: 0.5rem; overflow-x: auto; min-width: 0; padding: 0.25rem; }
+[data-ui-window-dock] [data-ui-dock-titles] > button { width: auto; justify-content: flex-start; display: inline-flex; align-items: center; flex-shrink: 0; gap: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.75rem; white-space: nowrap; }
+[data-ui-dock-titles] > button[aria-expanded="true"] { color: rgb(var(--color-foreground-accent)); }
+[data-ui-dock-titles] [role="status"] { color: rgb(var(--color-foreground-secondary)); }
+
+/* Compact editing belongs to the shared control, independent of document zoom. */
+[data-ui-editing-controls] { display: flex; align-items: center; gap: 2px; padding: 4px; font-size: 14px; }
+[data-ui-editing-controls] button { min-height: 32px; }
+[data-ui-editing-controls] [data-ui-control="choice"] > button {
+  border: 0; background: transparent; box-shadow: none; padding: 6px 8px; gap: 6px;
+}
+[data-ui-editing-controls] [data-ui-control="choice"] > button:hover { background: rgb(var(--color-foreground-default) / 0.06); }
+[data-ui-editing-controls] [role="listbox"] { min-width: 132px; }
+[data-ui-editing-swatch] { display: inline-block; width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgb(var(--color-foreground-default) / 0.25); flex-shrink: 0; }
+[data-ui-editing-size] { display: inline-flex; gap: 6px; align-items: baseline; font-variant-numeric: tabular-nums; }
+[data-ui-editing-size] > span { color: rgb(var(--color-foreground-secondary)); font-size: 12px; }
+[data-ui-editing-option] { display: flex; align-items: center; gap: 12px; min-height: 28px; }
+[data-ui-editing-option] > :first-child:not([data-ui-editing-swatch]) { min-width: 24px; }

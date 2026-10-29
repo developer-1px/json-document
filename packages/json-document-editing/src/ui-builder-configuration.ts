@@ -13,7 +13,7 @@ export interface UIBuilderConnection {
 }
 export interface UIBuilderConfiguration {
   /** Reorder existing children without adding, removing or reparenting them. */
-  readonly childOrders?: readonly {readonly objectId: string; readonly slot: "childIds" | "toolbarIds" | "inspectorIds"; readonly objectIds: readonly string[]}[];
+  readonly childOrders?: readonly {readonly objectId: string; readonly slot: "childIds" | "toolbarIds" | "inspectorIds"; readonly objectIds: readonly string[]}[] | undefined;
   readonly connections?: readonly UIBuilderConnection[];
   readonly designId?: UIDesignId;
   readonly flow?: UIFlowLayout;

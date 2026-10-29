@@ -16,6 +16,7 @@ function demo(importer: () => Promise<unknown>, exportName: string, source: stri
 
 const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
   "/applications/ui-builder": demo(() => import("../applications/ui-builder/UIBuilderApplication"), "UIBuilderApplication", "applications/ui-builder/UIBuilderApplication.tsx"),
+  "/applications/agent-review": demo(() => import("../applications/agent-review/AgentReviewApplication"), "AgentReviewApplication", "applications/agent-review/AgentReviewApplication.tsx"),
   "/demo": demo(() => import("../routes/document-demo/DocumentDemoRoute"), "DocumentDemoRoute", "routes/document-demo/DocumentDemoRoute.tsx"),
   "/demo/topology": demo(() => import("../routes/editing-demos/TopologyDemoRoute"), "TopologyDemoRoute", "routes/editing-demos/TopologyDemoRoute.tsx"),
   "/demo/selection": demo(() => import("../routes/editing-demos/SelectionDemoRoute"), "SelectionDemoRoute", "routes/editing-demos/SelectionDemoRoute.tsx"),
@@ -23,6 +24,7 @@ const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
   "/demo/history": demo(() => import("../routes/editing-demos/HistoryDemoRoute"), "HistoryDemoRoute", "routes/editing-demos/HistoryDemoRoute.tsx"),
   "/demo/order": demo(() => import("../routes/order-demo/OrderDemoRoute"), "OrderDemoRoute", "routes/order-demo/OrderDemoRoute.tsx"),
   "/demo/object": demo(() => import("../routes/object-demo/ObjectDemoRoute"), "ObjectDemoRoute", "routes/object-demo/ObjectDemoRoute.tsx"),
+  "/applications/slides": demo(() => import("../applications/slides/SlidesApplication"), "SlidesApplication", "applications/slides/SlidesApplication.tsx"),
   "/applications/canvas": demo(() => import("../applications/canvas/CanvasApplication"), "CanvasApplication", "applications/canvas/CanvasApplication.tsx"),
   "/demo/sheet-views": demo(() => import("../routes/sheet-demo/SheetViewsDemoRoute"), "SheetViewsDemoRoute", "routes/sheet-demo/SheetViewsDemoRoute.tsx"),
   "/demo/sheet": demo(() => import("../routes/sheet-demo/SheetDemoRoute"), "SheetDemoRoute", "routes/sheet-demo/SheetDemoRoute.tsx"),

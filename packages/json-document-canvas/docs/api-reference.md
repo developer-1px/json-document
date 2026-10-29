@@ -28,6 +28,20 @@ interface CanvasCreationStyle {
   readonly stickyNoteColor?: string;
 }
 ```
+## `CanvasEditingCommands`
+
+```ts
+CanvasEditingCommands({ editor, objectIds, onUndo, onRedo, onDuplicate, onRemove, onResult }: { readonly editor: ObjectEditor; readonly objectIds?: readonly string[] | undefined; readonly onUndo?: () => void; readonly onRedo?: () => void; readonly onDuplicate?: () => void; readonly onRemove?: () => void; readonly onResult?: (result: { readonly ok: boolean; }) => void; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `CanvasEditTarget`
+
+```ts
+interface CanvasEditTarget {
+  readonly objectIds: readonly string[];
+  readonly nodeId?: string;
+  readonly label: string;
+}
+```
 ## `CanvasHand`
 
 ```ts
@@ -37,14 +51,16 @@ CanvasHand(props: CanvasHandProps): import("<repository>/node_modules/@types/rea
 
 ```ts
 interface CanvasHandProps {
-  /** Mounted HTML content above the same Canvas interaction surface. */
+  readonly onRequestEdit?: (target: CanvasEditTarget) => void;
+  /** Fill the host and navigate independently of document coordinates. */
+  readonly workspace?: boolean;
+  readonly collisionGroups?: readonly import("@interactive-os/json-document-object-document").ObjectCollisionGroup[];
+  /** Use the same Canvas interaction surface over mounted HTML content. */
   readonly screenOverlay?: {
     readonly width: number;
     readonly height: number;
-    readonly onObjectsChange: (objects: readonly CanvasObject[]) => void;
+    readonly onObjectsChange: (objects: readonly import("@interactive-os/json-document-object-document").CanvasObject[]) => void;
   };
-  /** Fill the host and navigate independently of document coordinates. */
-  readonly workspace?: boolean;
   /** Pixel-sized workspace with scrolling, without zoom or fit controls. */
   readonly navigation?: "free" | "fixed";
   readonly onViewportChange?: (bounds: import("@interactive-os/json-document-object-document").ObjectBounds) => void;
@@ -52,6 +68,8 @@ interface CanvasHandProps {
   readonly toolbarContent?: ReactNode;
   readonly documentControls?: boolean;
   readonly contentToolbar?: boolean;
+  /** Limit visible/selectable objects while retaining the full editor document. */
+  readonly objectIds?: readonly string[];
   readonly renderEmbedded?: (object: Extract<import("@interactive-os/json-document-object-document").CanvasObject, {kind: "embedded-document"}>) => ReactNode;
   readonly onEditEmbedded?: (objectId: string) => void;
   readonly editor: ObjectEditor;
@@ -62,6 +80,21 @@ interface CanvasHandProps {
   /** Optional policy instance; one profile per mounted Hand. */
   readonly selectProfile?: PlaneSelectProfile;
 }
+```
+## `CanvasHTMLObject`
+
+```ts
+CanvasHTMLObject({ object, editor, active, onDeactivate, onRequestEdit, geometryKey, review }: { readonly object: Extract<CanvasObject, { kind: "embedded-document"; }>; readonly editor: ObjectEditor; readonly geometryKey?: string; readonly review?: { readonly requests: readonly WebHTMLReviewRequest[]; readonly onRegions: (regions: Record<string, WebHTMLReviewRegion[]>) => void; }; readonly active: boolean; readonly onDeactivate: () => void; readonly onRequestEdit?: (target: CanvasEditTarget) => void; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `CanvasPages`
+
+```ts
+CanvasPages({ editor, selectedId, onSelect, onRequestEdit }: { readonly editor: ObjectEditor; readonly selectedId: string | null; readonly onSelect: (id: string) => void; readonly onRequestEdit: (target: CanvasEditTarget) => void; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `CanvasSection`
+
+```ts
+CanvasSection({ object, hideTitle }: { readonly object: Extract<CanvasObject, { kind: "section"; }>; readonly hideTitle?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
 ## `CanvasSheetObject`
 
@@ -83,21 +116,39 @@ createCanvasClipboardBinding(editor: ObjectEditor, policy: CanvasClipboardPolicy
 ```ts
 UIBuilderHand({ editor, toolbarContent, recordSelection }: { readonly editor: ObjectEditor; readonly toolbarContent?: ReactNode; readonly recordSelection?: UIBuilderRecordSelection; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
+## `UIBuilderScreenControls`
+
+```ts
+UIBuilderScreenControls({ editor, pageId, commands, contentEditing, onContentEditingChange }: { readonly editor: ObjectEditor; readonly pageId?: string; readonly commands?: boolean; readonly contentEditing?: boolean; readonly onContentEditingChange?: (open: boolean) => void; readonly recordSelection?: UIBuilderRecordSelection; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
 ## `UIComponentInteraction`
 
 ```ts
 interface UIComponentInteraction {
+  readonly editing?: boolean | undefined;
+  readonly dismissBoundary?: RefObject<HTMLElement | null> | undefined;
   readonly busy: boolean;
+  readonly actionUnavailableReason?: string | undefined;
   readonly selectedItem: number;
-  readonly onAction: () => void;
-  readonly onValueChange: (value: string | boolean) => void;
+  readonly recordIdentity?: string | undefined;
+  readonly onAction: (actionId?: string) => void;
+  readonly onNavigate: (pageId: string) => void;
+  readonly onPropsChange: (patch: Record<string, JSONValue>) => void;
+  readonly onSelectRecord: (recordId: string) => void;
+  readonly onCollectionChange: (document: DatabaseDocument) => void;
+  readonly onItemAction?: ((index: number) => void) | undefined;
+  readonly onResize?: ((delta: number, phase: "preview" | "commit") => void) | undefined;
+  readonly onHandle?: ((event: InteractionHandleEvent) => void) | undefined;
+  readonly onFiles?: ((files: readonly File[]) => void) | undefined;
+  readonly onAppendActivity?: ((text:string) => boolean | void) | undefined;
+  readonly onValueChange: (value: string | number | boolean) => boolean | void;
   readonly onSelectItem: (index: number) => void;
 }
 ```
 ## `UIComponentSurface`
 
 ```ts
-UIComponentSurface({ object, designId, issues, interaction, layout }: UIComponentSurfaceProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+UIComponentSurface({ object, designId, issues, interaction, inert, layout, renderChildren, collection }: UIComponentSurfaceProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
 ## `UIComponentSurfaceProps`
 
@@ -106,8 +157,12 @@ interface UIComponentSurfaceProps {
   readonly object: Extract<CanvasObject, {kind: "embedded-document"}>;
   readonly designId?: UIDesignId;
   readonly issues?: readonly string[];
-  readonly interaction?: UIComponentInteraction;
+  readonly interaction?: UIComponentInteraction | undefined;
+  /** Keep visual state while removing runtime controls from editing focus/input. */
+  readonly inert?: boolean;
   readonly layout?: "absolute" | "flow";
+  readonly renderChildren?: ((ids: readonly string[]) => ReactNode) | undefined;
+  readonly collection?: UIBuilderCollectionProjection | undefined;
 }
 ```
 ## `UIComponentView`
@@ -115,17 +170,6 @@ interface UIComponentSurfaceProps {
 ```ts
 UIComponentView(props: UIComponentSurfaceProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
-## `useCanvasHand`
-
-```ts
-useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile, activateEmbedded?: (objectId: string) => void): { setContainerLayout(id: string, layout: ObjectContainerLayout): EditingResult<...>; ... 26 more ...; surfaceProps: { ...; }; }
-```
-## `useCanvasViewport`
-
-```ts
-useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean, navigation?: "free" | "fixed"): { hand: boolean; setHand: React.Dispatch<React.SetStateAction<boolean>>; ... 8 more ...; events: { ...; } | { ...; }; }
-```
-
 ## `UIScreenEditBounds`
 
 ```ts
@@ -136,67 +180,35 @@ interface UIScreenEditBounds {
   readonly height: number;
 }
 ```
-
 ## `UIScreenEditLayer`
 
 ```ts
-UIScreenEditLayer(props: UIScreenEditLayerProps): React.JSX.Element
+UIScreenEditLayer({ object, editable, origin, children }: UIScreenEditLayerProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
-
 ## `UIScreenEditLayerProps`
-
-`useUIScreenEditTranslation(): {readonly x: number; readonly y: number}`은 현재
-컴포넌트의 누적 편집 변위를 반환한다. viewport에 렌더링하는 overlay도 같은 변위를
-사용하며 부모 transform을 중복 적용하지 않는다.
-[오버레이 Usage](/applications/ui-builder?example=catalog&page=catalog%3Acomposition)에서
-대화상자를 열고 디자인으로 전환해 기존 Canvas로 이동할 수 있다.
 
 ```ts
 interface UIScreenEditLayerProps {
   readonly editor: ObjectEditor;
   readonly object: CanvasObject;
   readonly editable: boolean;
-  /** 편집 진입 시 측정하고 세션 중 유지하는 실행 화면 좌표. */
-  readonly origin?: UIScreenEditBounds;
+  /** Measured runtime geometry at entry; stable throughout this edit session. */
+  readonly origin?: UIScreenEditBounds | undefined;
   readonly children: ReactNode;
 }
 ```
-
-## `UIBuilderScreenControls`
+## `useCanvasHand`
 
 ```ts
-UIBuilderScreenControls(props: {
-  readonly editor: ObjectEditor;
-  readonly pageId?: string;
-  readonly recordSelection?: UIBuilderRecordSelection;
-}): React.JSX.Element
+useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile, activateEmbedded?: (objectId: string) => void, objectIds?: readonly string[], collisionGroups?: readonly ObjectCollisionGroup[]): { ...; }
 ```
+## `useCanvasViewport`
 
-## CanvasEditingCommands
+```ts
+useCanvasViewport(surface: RefObject<SVGSVGElement | null>, document: CanvasDocument, enabled: boolean, navigation?: "free" | "fixed"): { hand: boolean; setHand: React.Dispatch<React.SetStateAction<boolean>>; ... 8 more ...; events: { ...; } | { ...; }; }
+```
+## `useUIScreenEditTranslation`
 
-`CanvasEditingCommands({editor, objectIds?, onUndo?, onRedo?, onDuplicate?, onRemove?, onResult?})`
-은 Canvas 및 UI Builder가 공유하는 편집 명령 표현이다. 기본 명령은 ObjectEditor의
-selection/history/Intent를 소비한다. CanvasHand는 기존 gesture 취소와 history 수명
-콜백을 주입한다. 별도의 선택 또는 history 모델을 만들지 않는다.
-
-## CanvasHand collisionGroups
-
-`collisionGroups?: readonly ObjectCollisionGroup[]`는 편집 중 충돌 해소 범위를
-지정한다. 그룹은 `objectIds`와 `gap`을 가진다. 기존 gesture 미리보기와 commit은
-`resolveObjectCollisions`를 공유한다. 지정하지 않으면 기존 자유 배치를 유지한다.
-[업무 피드 Usage](/applications/ui-builder?example=issue-feed&new=1)에서 검색창을
-같은 열의 필터 위로 이동하거나 높이를 늘리면 주변 요소가 밀린다.
-
-UIComponentSurface의 card 렌더러는 ObjectDocument의 actionCount 계약을 받아
-ContentCard의 본문과 actions에 자식을 한 번씩 전달합니다.
-record-list의 feed는 제목 외 역할을 실제 명시한 fieldId로만 렌더합니다.
-[실제 빌더 Usage](/applications/ui-builder?example=catalog).
-
-record-card는 UIComponentSurface의 collection projection을 기존 InquiryCard/TaskCard/ProductCard/ApprovalCard/ActivityCard/EvidenceCard에 전달합니다. 시각·행동을 Canvas에서 재구현하지 않습니다. [Usage](/applications/ui-builder?example=domain-cards).
-
-UIComponentSurface는 record-card의 보편 어포던스와 실제 checkbox 인디케이터, feed의 대상 아이콘/우선순위/인디케이터 및 group의 관계 간격을 정본 UI API에 연결합니다. [Usage](/applications/ui-builder?example=domain-cards).
-
-
-### 데이터 표현 어댑터
-
-number-field/Tag/TagGroup/TagPicker/DateRangeDisplay/RecordFacts/CommentComposer는 UI Primitives의 공개 API를 직접 렌더링한다. detail-list의 라벨·값 구조도 RecordFacts를 사용한다. people-picker는 props.people.items의 실제 ID를 보존한다. CommentComposer는 onAppendActivity 결과가 실패하면 초안을 유지하고, 유효한 대상·작성자가 없으면 비활성이다. 모델·검증·기록 추가는 Object Document/Editing이 소유한다. [Usage](/applications/ui-builder?example=catalog).
+```ts
+useUIScreenEditTranslation(): { readonly x: number; readonly y: number; }
+```

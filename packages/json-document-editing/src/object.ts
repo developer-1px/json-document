@@ -16,7 +16,7 @@ import { createEditingId, createEditingIdAllocator } from "./identity.js";
 import type { EditingHistoryOptions } from "./history.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
-  assertObjectDocument, planObjectOperation, transformObject, layoutObjectText, layoutObjectDocument, objectSubtreeIds, type ObjectLayoutOptions,
+  findVacantObjectBounds, assertObjectDocument, planObjectOperation, transformObject, layoutObjectText, layoutObjectDocument, objectSubtreeIds, type ObjectLayoutOptions,
   type DocumentObject, type ObjectDocument, type ObjectDraft, type ObjectOperation, type ObjectStyle,
 } from "@interactive-os/json-document-object-document";
 export type { DocumentObject, ObjectDocument } from "@interactive-os/json-document-object-document";
@@ -57,6 +57,8 @@ export interface ObjectPastePlacement {
 }
 
 export type ObjectIntent =
+  | { readonly type: "section.create"; readonly label: string; readonly width: number; readonly height: number; readonly color: string }
+  | { readonly type: "section.insert"; readonly sectionId: string; readonly objects: ReadonlyArray<ObjectDraft> }
   | { readonly type: "object.update"; readonly objectId: string; readonly changes: Partial<ObjectDraft> }
   | { readonly type: "object.reorder"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "object.create"; readonly object: ObjectDraft }
@@ -113,7 +115,10 @@ export function createObjectEditor(
     const current = document.value as ObjectDocument;
     const next = layoutObjectDocument(current, options);
     assertObjectDocument(next);
-    if (JSON.stringify(current) !== JSON.stringify(next)) document.commit([{ op: "replace", path: "", value: next }]);
+    if (JSON.stringify(current) !== JSON.stringify(next)) {
+      const planned = planObjectOperation(current, { type: "replace", document: next });
+      if (planned.ok) document.commit(planned.operations);
+    }
   }
   const initial = document.value as ObjectDocument;
   const createId = options.createId ?? (() => createEditingId("object"));
@@ -152,6 +157,25 @@ export function createObjectEditor(
   }
 
   function dispatch(intent: ObjectIntent): EditingResult<ObjectSelection> {
+    if (intent.type === "section.create" || intent.type === "section.insert") {
+      try {
+        const document = value();
+        const allocate = createEditingIdAllocator(document.objects.map(object => object.id), createId, "object");
+        if (intent.type === "section.create") {
+          const bounds = findVacantObjectBounds(document.objects, { x: 0, y: 0, width: intent.width, height: intent.height });
+          const section = { ...bounds, id: allocate(), kind: "section", label: intent.label, color: intent.color };
+          return apply({ type: "insert", objects: [section] }, selectionFor([section.id]), intent.type);
+        }
+        const section = document.objects.find(object => object.id === intent.sectionId && object.kind === "section");
+        if (!section) return failure("section.not-found");
+        if (!intent.objects.length) return failure("section.empty-insertion");
+        const objects = intent.objects.map(draft => layoutObjectText<DocumentObject>({ ...draft, id: allocate(), parentId: section.id,
+          x: section.x + draft.x, y: section.y + draft.y }, options.measureText));
+        if (objects.some(object => object.kind === "section" || object.x < section.x || object.y < section.y
+          || object.x + object.width > section.x + section.width || object.y + object.height > section.y + section.height)) return failure("section.out-of-bounds");
+        return apply({ type: "insert", objects }, selectionFor([section.id]), intent.type);
+      } catch (error) { return { ok: false, code: "section.invalid", reason: error instanceof Error ? error.message : String(error) }; }
+    }
     if (intent.type === "object.update") return apply({ type: "update", objectId: intent.objectId, changes: intent.changes }, session.snapshot.selection, intent.type);
     if (intent.type === "object.reorder") return apply({ type: "reorder", objectIds: intent.objectIds }, session.snapshot.selection, intent.type);
     if (intent.type === "object.create") {
@@ -284,7 +308,8 @@ export function createObjectEditor(
   function removeSelected(ids: ReadonlyArray<string>, origin = "selection.remove"): EditingResult<ObjectSelection> {
     const objects = value().objects;
     if (ids.length === 0) return failure("selection.empty");
-    const selectedIds = new Set(ids);
+    const sections = objects.filter(object => ids.includes(object.id) && object.kind === "section").map(object => object.id);
+    const selectedIds = new Set([...ids, ...objectSubtreeIds(objects, sections)]);
     if (ids.some((id) => !objects.some((object) => object.id === id))) return failure("selection.object-not-found");
     const indices = objects
       .map((object, index) => selectedIds.has(object.id) ? index : -1)

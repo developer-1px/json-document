@@ -6,7 +6,7 @@ import {contentPresentation} from "./content-presentation.js";
 /** One existing icon library, selected by meaning rather than arbitrary icon names or emoji. */
 const icons = {message:MessageSquare, task:ClipboardList, product:Package, change:GitCompareArrows, activity:History, result:FileText, person:UserRound, deadline:CalendarClock, source:BookOpen, complete:Check, running:CircleDashed, unread:Circle, overdue:AlertCircle, changed:CircleDot, link:Link, attachment:Paperclip, priority:ArrowUpDown, flag:Flag, event:CalendarDays, location:MapPin, participants:Users, email:Mail, file:FileText};
 export type SemanticIconKind = keyof typeof icons;
-export function SemanticIcon({kind, label}: {readonly kind: SemanticIconKind; readonly label?: string}): ReactNode {
+export function SemanticIcon({kind, label}: {readonly kind: SemanticIconKind; readonly label?: string | undefined}): ReactNode {
   const Icon = icons[kind];
   return <Icon data-ui-semantic-icon={kind} size={16} aria-hidden={label ? undefined : true} role={label ? "img" : undefined} aria-label={label}/>;
 }

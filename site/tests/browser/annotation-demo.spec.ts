@@ -119,7 +119,8 @@ test("Draw and Arrow reuse the same selection and comment flow", async ({ page }
   await expect(page.getByLabel("Resize drawing")).toBeVisible();
 
   await page.getByRole("button", { name: "Arrow" }).click();
-  await drag(page, box.x + 500, box.y + 400, box.x + 700, box.y + 260);
+  const arrowBox = await requiredBox(canvas);
+  await drag(page, arrowBox.x + arrowBox.width * 0.65, arrowBox.y + arrowBox.height * 0.65, arrowBox.x + arrowBox.width * 0.8, arrowBox.y + arrowBox.height * 0.4);
   expect((await structured(page)).annotations.map((item: any) => item.presentation.type)).toEqual(["stroke", "arrow"]);
 });
 
@@ -247,12 +248,75 @@ test("source tabs connect Annotation Usage to each canonical responsibility", as
   for (const [file, code, api] of [
     ["annotation-hand.tsx", "useInteractionHandle", "annotation"],
     ["annotation-output.ts", "export function useAnnotationOutput", "annotation"],
+    ["annotation-review.tsx", "export function AnnotationReview", "annotation"],
+    ["annotation-review-session.ts", "createAnnotationReviewSession", "editing"],
     ["annotation.ts", "transformAnnotationSelector", "editing"],
     ["annotation-selection.ts", "family.transition", "editing"],
     ["index.ts", "createKeySelectionFamily", "selection"],
   ]) {
-    await workbench.getByRole("tab", { name: file, exact: true }).click();
+    const matching = workbench.getByRole("tab", { name: file, exact: true });
+    if (file === "index.ts") {
+      for (const tab of await matching.all()) {
+        await tab.click();
+        if ((await workbench.getByRole("tabpanel").innerText()).includes("packages/json-document-selection/src/key/index.ts")) break;
+      }
+    } else await matching.click();
     await expect(workbench.getByRole("tabpanel").locator("pre")).toContainText(code!);
     await expect(workbench.getByRole("link", { name: "API Reference" })).toHaveAttribute("href", `/docs/api/${api}`);
   }
+});
+
+
+test("review Usage collapses completed work while retaining its conversation", async ({ page }) => {
+  await page.addInitScript(() => {
+    class SpeechMock {
+      onresult: any; onend: any;
+      constructor() { (window as any).speechMock = this; }
+      start() {} stop() { this.onend?.(); } abort() {}
+    }
+    (window as any).SpeechRecognition = SpeechMock;
+  });
+  await page.goto("/demo/annotation");
+  await page.getByRole("button", { name: "에이전트 첨삭 Usage", exact: true }).click();
+  const review = page.getByRole("region", { name: "첨삭 예제", exact: true });
+  await review.getByRole("application").click({ position: { x: 120, y: 100 } });
+  await page.getByRole("button", { name: "음성 첨삭 시작", exact: true }).click();
+  await page.evaluate(() => (window as any).speechMock.onresult({ results: [{ isFinal: true, 0: { transcript: "제목을 바꿔줘" } }] }));
+  await expect(review.frameLocator("iframe").locator("h1")).toHaveText("음성 첨삭이 반영된 문장입니다.");
+  await review.getByRole("button", { name: "확인 완료", exact: true }).click();
+  await expect(review.getByRole("application")).toBeVisible();
+  await expect(review.getByText("완료 기록 1", { exact: true })).toBeVisible();
+  await expect(review.getByLabel("내 요청", { exact: true })).toHaveCount(0);
+  await review.getByText("완료 기록 1", { exact: true }).click();
+  await review.locator(".annotation-following-history").getByRole("button", { name: /제목을 바꿔줘/ }).click();
+  await expect(review.getByLabel("내 요청", { exact: true })).toHaveText("제목을 바꿔줘");
+});
+
+test("review Usage consumes the located speech bubble and canonical Popover", async ({ page }) => {
+  await page.addInitScript(() => {
+    class SpeechMock {
+      onresult: any; onend: any;
+      constructor() { (window as any).speechMock = this; }
+      start() {} stop() { this.onend?.(); } abort() {}
+    }
+    (window as any).SpeechRecognition = SpeechMock;
+  });
+  await page.goto("/demo/annotation");
+  await page.getByRole("button", { name: "에이전트 첨삭 Usage", exact: true }).click();
+  await page.getByRole("application", { name: "첨삭 예제 표시" }).click({ position: { x: 80, y: 80 } });
+  await page.getByRole("button", { name: "음성 첨삭 시작", exact: true }).click();
+  await page.evaluate(() => (window as any).speechMock.onresult({ results: [{ isFinal: false, 0: { transcript: "제목을" } }] }));
+  await expect(page.getByLabel("말하는 중인 내 요청", { exact: true })).toHaveText("제목을");
+  await expect(page.getByRole("dialog", { name: "말하는 중인 첨삭", exact: true })).toBeVisible();
+  await page.evaluate(() => (window as any).speechMock.onresult({ results: [{ isFinal: true, 0: { transcript: "제목을 바꿔줘" } }] }));
+  await expect(page.frameLocator("iframe").locator("h1")).toHaveText("음성 첨삭이 반영된 문장입니다.");
+  const marker = page.getByRole("button", { name: "1 · 수정됨", exact: true });
+  await expect(marker).toBeVisible();
+  const close = page.getByRole("button", { name: "첨삭 접기", exact: true });
+  await close.focus();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "1 · 수정됨", exact: true })).toHaveCount(0);
+  await expect(marker).toBeFocused();
+  await marker.click();
+  await expect(page.getByLabel("내 요청", { exact: true })).toHaveText("제목을 바꿔줘");
 });

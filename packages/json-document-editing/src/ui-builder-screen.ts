@@ -1,6 +1,6 @@
 import type { JSONValue } from "@interactive-os/json-document";
-import { assertUIComponentContent, createUIComponentObject, resolveUIFlowLayout, uiBindingCatalog, uiComponentAuthoringCatalog, uiComponentCatalog, uiComponentCompositionRecipes, type UIComponentContent, type UIComponentObject, type UIFlowLayout } from "@interactive-os/json-document-object-document";
-import type { ObjectEditor } from "./object.js";
+import { assertUIComponentContent, createUIComponentObject, type CanvasObject, resolveUIFlowLayout, uiBindingCatalog, uiComponentAuthoringCatalog, uiComponentCatalog, uiComponentCompositionRecipes, type UIComponentContent, type UIComponentObject, type UIFlowLayout } from "@interactive-os/json-document-object-document";
+import type { ObjectDocument, ObjectEditor } from "./object.js";
 import { createUIBuilderEditor } from "./ui-builder.js";
 import { applyUIBuilderMaterials, readUIBuilderProject, type UIBuilderMaterialCommand } from "./ui-builder-materials.js";
 import { getUIBuilderPageObjects } from "./ui-builder-pages.js";
@@ -61,7 +61,7 @@ export function applyUIBuilderScreen(editor: ObjectEditor, plan: UIBuilderScreen
     }
     const prepared = readUIBuilderProject(staged.snapshot.value);
     const pageIds = new Set(getUIBuilderPageObjects(prepared, plan.pageId).map(object => object.id));
-    const others = prepared.objects.filter(object => !pageIds.has(object.id));
+    const others: readonly CanvasObject[] = prepared.objects.filter(object => !pageIds.has(object.id));
     const ids = new Set(others.map(object => object.id));
     const objects = plan.components.map(spec => {
       if (!spec || typeof spec.id !== "string" || !spec.id || ids.has(spec.id)) throw new Error("화면 요소 ID는 중복 없이 선언해 주세요.");
@@ -84,7 +84,7 @@ export function applyUIBuilderScreen(editor: ObjectEditor, plan: UIBuilderScreen
     const result = applyUIBuilderConfiguration(configured, {flow: plan.flow, pageId: plan.pageId});
     if (!result.ok) throw new Error(result.reason);
     if (editor.snapshot.value !== original) throw new Error("작성 중 문서가 바뀌었습니다. 최신 문맥에서 화면 계획을 다시 제출해 주세요.");
-    return editor.dispatch({type: "document.replace", document: configured.snapshot.value});
+    return editor.dispatch({type: "document.replace", document: configured.snapshot.value as ObjectDocument});
   } catch (error) { return {ok: false as const, reason: error instanceof Error ? error.message : "화면 계획을 확인해 주세요."}; }
 }
 

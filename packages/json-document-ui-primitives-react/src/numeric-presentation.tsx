@@ -3,7 +3,7 @@ import { contentPresentation } from "./content-presentation.js";
 
 type NumericPresentationProps = Omit<HTMLAttributes<HTMLSpanElement>, "children"> & {
   readonly value: number | null | undefined;
-  readonly locale?: string;
+  readonly locale?: string | undefined;
   readonly emptyLabel?: string;
 };
 

@@ -3,7 +3,7 @@ import {Field} from "./input-controls.js";
 import {Command} from "./controls.js";
 import {InlineAlert} from "./workflow-feedback.js";
 /** Draft is local; only explicit submit reaches the host command. Failed submissions retain text. */
-export function CommentComposer({label, onSubmit, submitLabel = "메모 남기기", identity = "default", disabled=false}: {readonly label: string; readonly onSubmit: (text: string) => Promise<void> | void; readonly submitLabel?: string; readonly identity?: string; readonly disabled?:boolean}): ReactNode {
+export function CommentComposer({label, onSubmit, submitLabel = "메모 남기기", identity = "default", disabled=false}: {readonly label: string; readonly onSubmit: (text: string) => Promise<void> | void; readonly submitLabel?: string | undefined; readonly identity?: string; readonly disabled?:boolean}): ReactNode {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const draft = drafts[identity] ?? "";
   const setDraft = (value: string) => setDrafts(previous => ({...previous, [identity]: value}));

@@ -1,11 +1,11 @@
-import { useEffect, useRef, type ReactNode, type RefObject } from "react";
+import { useCallback, useEffect, useRef, type CSSProperties, type ReactNode, type Ref, type RefObject } from "react";
 import { floatingSurface } from "./floating-surface.js";
 import { Command } from "./controls.js";
 import { createPortal } from "react-dom";
 import {usePopup} from "./use-popup.js";
 
 export function Popover(props: {
-  readonly disabled?: boolean;
+  readonly disabled?: boolean | undefined;
   readonly label: string;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
@@ -15,15 +15,25 @@ export function Popover(props: {
   readonly className?: string;
   readonly panelClassName?: string;
   /** Only outside interactions within this surface dismiss; omitted means the document. */
-  readonly dismissBoundary?: RefObject<HTMLElement | null>;
+  readonly dismissBoundary?: RefObject<HTMLElement | null> | undefined;
+  /** Voice/pointer driven disclosure must not steal focus from the active surface. */
+  readonly autoFocus?: boolean;
+  readonly dismissOnOutsideInteraction?: boolean;
+  readonly panelStyle?: CSSProperties;
+  readonly panelRef?: Ref<HTMLDivElement>;
 }): ReactNode {
   const popup = usePopup(props);
   const {id, panelRef} = popup;
+  const attachPanel = useCallback((node: HTMLDivElement | null) => {
+    panelRef.current = node;
+    if (typeof props.panelRef === "function") props.panelRef(node);
+    else if (props.panelRef) props.panelRef.current = node;
+  }, [panelRef, props.panelRef]);
   const triggerProps = { disabled: props.disabled, "aria-label": props.label, "aria-haspopup": "dialog", "aria-controls": id, "aria-expanded": props.open, onClick: () => props.onOpenChange(!props.open) } as const;
   return (
     <span ref={node => {popup.rootRef.current = node;}} className={props.className} data-ui-presentation="popover" onBlur={popup.onBlur}>
       {props.triggerPresentation === "icon" ? <Command {...triggerProps} controlRef={popup.triggerRef} label={props.label}>{props.trigger}</Command> : <Command {...triggerProps} controlRef={popup.triggerRef}>{props.trigger}</Command>}
-      {props.open ? <div ref={panelRef} id={id} role="dialog" aria-label={props.label} tabIndex={-1} className={[floatingSurface.panel, props.panelClassName].filter(Boolean).join(" ")} onKeyDown={popup.onKeyDown}>{props.children}</div> : null}
+      {props.open ? <div ref={attachPanel} style={props.panelStyle} id={id} role="dialog" aria-label={props.label} tabIndex={-1} className={[floatingSurface.panel, props.panelClassName].filter(Boolean).join(" ")} onKeyDown={popup.onKeyDown}>{props.children}</div> : null}
     </span>
   );
 }
@@ -35,10 +45,10 @@ export function Dialog(props: {
   readonly children: ReactNode;
   readonly className?: string;
   readonly presentation?: "modal" | "sheet";
-  readonly dismissBoundary?: RefObject<HTMLElement | null>;
+  readonly dismissBoundary?: RefObject<HTMLElement | null> | undefined;
   /** Render against the viewport with this translation, independent of transformed ancestors. */
-  readonly viewportOffset?: {readonly x: number; readonly y: number};
-  readonly inert?: boolean;
+  readonly viewportOffset?: {readonly x: number; readonly y: number} | undefined;
+  readonly inert?: boolean | undefined;
 }): ReactNode {
   const dialogRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);

@@ -24,7 +24,7 @@ export interface IssueRowProps {
   readonly leading?: ReactNode;
   readonly indicators?: ReactNode;
   readonly selected?: boolean;
-  readonly disabled?: boolean;
+  readonly disabled?: boolean | undefined;
   /** Collection membership is independent of the record currently opened in detail. */
   readonly selection?: IssueRowSelection;
   /** Independent commands stay outside the primary selection button. */

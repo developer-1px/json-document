@@ -1,4 +1,3 @@
-.canvas-application > aside { bottom: 6rem; }
-@media (max-width: 767px) {
-  .canvas-application > aside { bottom: 10rem; max-height: calc(100dvh - 15rem); overflow-y: auto; }
-}
+.canvas-chat-dock { position: fixed; left: 1rem; right: 1rem; bottom: 0.5rem; z-index: 40; --window-dock-max-height: min(65dvh, calc(100dvh - 8rem)); }
+[data-canvas-workspace="true"] > [data-ui-toolbar="product"][data-ui-presentation="floating"] { top: 1rem; bottom: auto; max-width: calc(100% - 10rem); }
+[data-canvas-workspace="true"] > [data-ui-toolbar="product"][data-ui-presentation="floating"] [data-ui-presentation="popover"] > [role="dialog"] { top: 100%; bottom: auto; margin-top: 0.5rem; margin-bottom: 0; }

@@ -1,3 +1,5 @@
+import { createObjectEditor, createCanvasEditorTools } from "@interactive-os/json-document-editing";
+import type { CollaborationParticipant } from "./workspace.js";
 import type { EditingHistory, EditingHistoryStatus } from "@interactive-os/json-document-editing";
 import { changeIdKey } from "./change.js";
 import type { HistoryRuntime, HistoryStatus } from "./types.js";
@@ -34,3 +36,14 @@ function editingStatus(status: HistoryStatus & { readonly canUndo: boolean; read
     revision: status.revision,
   });
 }
+
+/** Use the participant's observed document, selective history and publication lifecycle. */
+export function createCollaborationCanvasTools(participant: CollaborationParticipant, options: Parameters<typeof createObjectEditor>[1] = {}, htmlAdapter?: Parameters<typeof createCanvasEditorTools>[2]) {
+  const editor = createObjectEditor(participant.runtime.document, {
+    ...options, history: createCollaborationEditingHistory(participant.runtime),
+  });
+  return createCanvasEditorTools(editor, { read: () => { participant.observe(); return { collaboration: participant.runtime.replica.status() }; }, publish: participant.publish }, htmlAdapter);
+}
+
+export { createCollaborationCanvasReview } from "./canvas-review.js";
+export type { CollaborationCanvasReviewOptions } from "./canvas-review.js";

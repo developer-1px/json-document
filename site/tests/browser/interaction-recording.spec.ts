@@ -32,7 +32,7 @@ test("REC on Bear saves native events, source commits and undo evidence to an ag
   await page.getByRole("button", { name: "기록 종료" }).click();
   const receipt = await (await response).json();
   created.add(receipt.id);
-  await expect(page.getByRole("status")).toContainText("저장됨");
+  await expect(page.getByRole("complementary", { name: "입력 진단 기록" }).getByRole("status")).toContainText("저장됨");
   const recording = JSON.parse(await readFile(receipt.path, "utf8"));
   expect(recording.server.worktree).toBe(process.cwd());
   expect(recording.endedAt).toBeTruthy();
@@ -54,14 +54,14 @@ test("REC is available outside Bear and failed saves survive reload for automati
   await page.getByTestId("markdown-editor").click();
   await page.keyboard.insertText("재현");
   await page.getByRole("button", { name: "기록 종료" }).click();
-  await expect(page.getByRole("status")).toContainText("서버 저장 실패");
+  await expect(page.getByRole("complementary", { name: "입력 진단 기록" }).getByRole("status")).toContainText("서버 저장 실패");
   await expect(page.getByRole("button", { name: "JSON", exact: true })).toBeVisible();
   const pending = await page.evaluate(() => Object.keys(localStorage).filter(key => key.startsWith("json-document.interaction-recording.pending.")));
   expect(pending).toHaveLength(1);
   created.add(pending[0]!.split(".").at(-1)!);
   await page.unroute("**/__interaction-recordings");
   await page.reload();
-  await expect(page.getByRole("status")).toContainText("저장됨");
+  await expect(page.getByRole("complementary", { name: "입력 진단 기록" }).getByRole("status")).toContainText("저장됨");
   const stored = JSON.parse(await readFile(resolve(process.cwd(), `.artifacts/interaction-recordings/${[...created][0]}.json`), "utf8"));
   expect(stored.environment.initialPath).toBe("/demo/markdown-caret");
   expect(stored.records.some((record: any) => record.kind === "contenteditable.document-commit")).toBe(true);

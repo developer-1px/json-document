@@ -5,8 +5,8 @@ import {contentPresentation} from "./content-presentation.js";
 export interface FormFieldControlProps {
   readonly id: string;
   readonly required: boolean;
-  readonly "aria-describedby"?: string;
-  readonly "aria-invalid"?: true;
+  readonly "aria-describedby"?: string | undefined;
+  readonly "aria-invalid"?: true | undefined;
 }
 export interface FormFieldProps {
   readonly id?: string;

@@ -2,6 +2,7 @@ import { isJSONValue, type JSONValue } from "@interactive-os/json-document";
 import type { UIComponentObject } from "@interactive-os/json-document-object-document";
 import type { ObjectEditor } from "./object.js";
 import { acceptsDatabaseValue } from "./database-property-value.js";
+import { createEditingId } from "./identity.js";
 import { applyUIBuilderMaterials, readUIBuilderProject, type UIBuilderAction, type UIBuilderField } from "./ui-builder-materials.js";
 
 /** Declarative execution: a selected record enters a named skill; only declared fields may change. */
@@ -122,9 +123,9 @@ export function appendUIBuilderActivity(editor:ObjectEditor, composerId:string, 
     const target=project.objects.find(object=>object.id===targetId) as UIComponentObject | undefined;
     if (typeof actor!=="string" || !actor.trim() || target?.document.component!=="activity-feed") throw new Error("기록 대상과 작성자를 연결해 주세요.");
     const stored=target.document.props?.entries;
-    const entries=stored && typeof stored==="object" && !Array.isArray(stored) && Array.isArray(stored.items) ? stored.items : [];
+    const entries=stored && typeof stored==="object" && !Array.isArray(stored) && "items" in stored && Array.isArray(stored.items) ? stored.items : [];
     const now=new Date();
-    const entry={id:crypto.randomUUID(),actor,action:"메모를 남겼습니다.",dateTime:now.toISOString(),timeLabel:now.toLocaleString("ko-KR"),detail:body.trim()};
+    const entry={id:createEditingId("activity"),actor,action:"메모를 남겼습니다.",dateTime:now.toISOString(),timeLabel:now.toLocaleString("ko-KR"),detail:body.trim()};
     const next={...target,document:{...target.document,props:{...target.document.props,entries:{items:[...entries,entry]}}}};
     return editor.dispatch({type:"document.replace",document:{...project,objects:project.objects.map(object=>object.id===target.id?next:object)}});
   } catch(error) {return {ok:false as const,reason:error instanceof Error?error.message:String(error)};}

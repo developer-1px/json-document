@@ -51,8 +51,9 @@ final document is published. Root replacement still invalidates descendants,
 while moving a surviving container to root retains its descendant addresses.
 JSON-equal transitions remain notification-free under the JSONDocument contract.
 
-Data-only causal append reuses the previous materialization. Reordered histories
-and history controls still replay from the epoch base. Causal ancestry uses actor
+Causal append reuses accepted history decisions and materialized data. Recent
+common prefixes bound replay after concurrent reordering; older divergence falls
+back to the epoch base. Causal ancestry uses actor
 frontiers rather than recursive dependency walks. `benchmarks/runtime.mjs` measures
 both remote history ingest and the first subsequent edit by a new actor; no wire
 or checkpoint format changed.
@@ -299,3 +300,43 @@ again. Authoring is blocked while that actor has pending history, and a
 non-contiguous or non-causal retained lineage is rejected. A genuinely new
 writer must use a fresh actor ID; reuse cannot be detected until conflicting
 history is observed.
+
+[Observed participants and agent collaboration](docs/workspace.md) documents
+`createCollaborationWorkspace`, `createCollaborationCanvasTools`, stable-member
+location, publication diagnostics and checkpoint persistence.
+
+### History execution cost
+
+History queries and execution share a prepared transition keyed by causal graph
+revision. A new document/remote/history change invalidates that transition.
+When only history controls are appended to an unchanged data graph, materialization
+continues from the prior accepted history state instead of reprocessing all controls.
+Up to eight derived data states are retained for repeated undo/redo; these caches are
+not serialized and never replace the causal log. Appended data extends validated prefixes without reevaluating earlier controls: their
+targets and dependency checks concern causal ancestors, which a suffix cannot change.
+Up to eight recent materialization prefixes are retained for concurrent reordering;
+older divergence uses full replay. These bounded caches preserve remote convergence
+and dependency rejection.
+Acceptance resolvers remain deterministic functions of the candidate and ruleset.
+
+
+Run `node packages/json-document-collaboration/benchmarks/workspace.mjs` after building
+this package to measure joining agents, simultaneous edits published in reverse order,
+continued human edits, history, and checkpoint persistence. Set
+`PERF_WORKSPACE_CHANGES=20,100,1000` to vary history length. It checks the final result
+against a cold checkpoint replay; times are single samples, not latency percentiles.
+
+### Staged Canvas review
+
+`createCollaborationCanvasReview` (from `/editing`) creates a worker for
+`AnnotationReviewQueue`. Supply `workspace`, `queue`, `htmlAdapter`, a unique
+`createActorId`, and `execute({ task, signal, tools })`. The executor supplies its
+agent transport; this module owns source-chain validation, one-object write
+permissions, isolated staging, cancellation, no-op detection, the final source
+check and publication. Reading tools observe the staged revision. Edits cannot
+publish early, and a concurrent source change prevents publication.
+
+Slides is the production Usage: it supplies the LLM transport and prompt policy,
+then connects the returned worker to the queue. The UI consumes the same queue
+through `AnnotationReview`. This is sequential execution in one connected queue,
+not distributed worker coordination or a claim of conflict-free arbitrary HTML.

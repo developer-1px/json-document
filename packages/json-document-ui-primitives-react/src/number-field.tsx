@@ -7,13 +7,13 @@ export interface NumberFieldProps {
   readonly label: string;
   readonly value: number | null;
   readonly onValueChange: (value: number | null) => void;
-  readonly min?: number;
-  readonly max?: number;
+  readonly min?: number | undefined;
+  readonly max?: number | undefined;
   /** Maximum allowed fractional digits; currency/quantity policy belongs to the domain. */
-  readonly precision?: number;
-  readonly unit?: string;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
+  readonly precision?: number | undefined;
+  readonly unit?: string | undefined;
+  readonly required?: boolean | undefined;
+  readonly disabled?: boolean | undefined;
 }
 /** Exact numeric entry. Invalid drafts stay visible and never become NaN, zero, or rounded money. */
 export function NumberField({label,value,onValueChange,min,max,precision,unit,required=false,disabled}: NumberFieldProps): ReactNode {

@@ -1,9 +1,11 @@
+import { CanvasSection } from "./canvas-section.js";
 import { useEffect, useRef, type CSSProperties, type PointerEvent, type KeyboardEvent, type ReactNode } from "react";
 import { getObjectStyle, projectObjectText, type CanvasObject, type ObjectTextProjection } from "@interactive-os/json-document-object-document";
 import type { InteractionHandleEvent, ResizeEdge } from "@interactive-os/json-document-affordance";
 import { contentInteractionAttributes, Field, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 
 export function CanvasObjectView({ object, hideText = false, renderEmbedded }: { readonly object: CanvasObject; readonly hideText?: boolean; readonly renderEmbedded?: (object: Extract<CanvasObject,{kind:"embedded-document"}>) => ReactNode }): ReactNode {
+  if (object.kind === "section") return <CanvasSection object={object} hideTitle={hideText} />;
   if (object.kind === "embedded-document" && renderEmbedded) return renderEmbedded(object);
   const style = getObjectStyle(object);
   if (object.kind === "image") return <image href={object.source} x={object.x} y={object.y} width={object.width} height={object.height} preserveAspectRatio="none" />;
@@ -45,7 +47,7 @@ export function CanvasObjectTarget(props: {
   const binding = useInteractionHandle<SVGRectElement>({ descriptor: { kind: "drag" }, onHandle: props.onHandle });
   const { object } = props;
   return (
-    <rect {...(props.enabled ? binding.handleProps : {})} x={object.x} y={object.y} width={object.width} height={object.height}
+    <rect {...(props.enabled ? binding.handleProps : {})} x={object.x} y={object.y - (object.kind === "section" ? 32 : 0)} width={object.width} height={object.height + (object.kind === "section" ? 32 : 0)}
       fill="transparent" role="button" aria-label={object.label || object.kind} aria-pressed={props.selected}
       {...contentInteractionAttributes({ role: "content", selected: props.selected, dragging: binding.active })}
       tabIndex={props.enabled ? 0 : -1} data-canvas-object={object.id} data-kind={object.kind} data-container-id={typeof object.parentId === "string" ? object.parentId : undefined}

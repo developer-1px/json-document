@@ -78,3 +78,28 @@ Editor가 생성되기 전에 작성된 target은 알 수 없는 과거 Selectio
 Usage와 Source 탭은 공개 editor와 connection의 정본 구현으로 연결됩니다.
 API 타입은 [Collaboration API](/docs/api/collaboration)와
 [Editing API](/docs/api/editing)에 있습니다.
+
+## Usage: 실행 중인 문서에서 에이전트 분기
+
+`forkHistoryRuntime`은 이미 검증한 이력을 재생하지 않고 독립된 참여자 runtime을
+만듭니다. 원본과 같은 epoch·검증 규칙을 사용하며 각자의 수정은 명시적으로
+병합하기 전까지 상대 문서를 바꾸지 않습니다. actor ID마다 작성자는 하나여야 합니다.
+
+```ts
+import { createHistoryRuntime, forkHistoryRuntime } from
+  "@interactive-os/json-document-collaboration/history";
+
+const human = createHistoryRuntime({ title: "초안", color: "white" }, {
+  actorId: "human", epochId: "draft/v1",
+  ruleset: { id: "draft", digest: "1" },
+});
+const agent = forkHistoryRuntime(human, "agent-a");
+agent.document.commit([{ op: "replace", path: "/title", value: "제안" }]);
+human.document.commit([{ op: "replace", path: "/color", value: "blue" }]);
+human.replica.ingest(agent.replica.exportBundle());
+// human.document.value: { title: "제안", color: "blue" }
+```
+
+API 계약은 [Collaboration API reference](/docs/api/collaboration)에,
+정본 구현은 `packages/json-document-collaboration/src/create.ts`에 있습니다.
+외부 체크포인트는 이 API로 우회하지 않고 `restoreHistoryRuntime`으로 검증합니다.

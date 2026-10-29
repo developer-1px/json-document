@@ -30,7 +30,7 @@ export function InteractionRecordingControls() {
     return () => { current.dispose(); unsubscribe(); unbind(); };
   }, []);
   const start = () => { setLast(null); setSaved(null); recorder?.start(); };
-  return <aside data-interaction-recorder aria-label="입력 진단 기록" className={classes("fixed bottom-3 right-3 z-[100] flex max-w-[calc(100vw-1.5rem)] items-center gap-related px-related py-1", ui.frame.app)}>
+  return <aside data-interaction-recorder aria-label="입력 진단 기록" className={classes("fixed top-3 right-3 z-[100] flex max-w-[calc(100vw-1.5rem)] items-center gap-related px-related py-1", ui.frame.app)}>
     <Command preserveFocus className="px-related py-1"
       aria-label={recording ? "기록 종료" : "REC 기록 시작"} disabled={!recorder}
       onClick={recording ? () => recorder?.stop() : start}>

@@ -39,7 +39,7 @@ export function TaskCard({title,identifier,status,summary,assignee,due,priority,
     {children}
   </RecordDetail>;
 }
-export interface ProductCardProps extends DomainCardProps {readonly category?:ReactNode; readonly quantity?:{readonly value:number|null; readonly unit:string}; readonly price?:{readonly value:number|null; readonly currency:string}; readonly note?:ReactNode;}
+export interface ProductCardProps extends DomainCardProps {readonly category?:ReactNode; readonly quantity?:{readonly value:number|null; readonly unit:string} | undefined; readonly price?:{readonly value:number|null; readonly currency:string} | undefined; readonly note?:ReactNode;}
 /** One product's facts are paired values; multi-product comparison still belongs to the table. */
 export function ProductCard({title,identifier,status,category,quantity,price,note,children,actions}: ProductCardProps): ReactNode {
   return <ContentCard header={<Heading kind="product" title={title} identifier={identifier} status={status ?? (quantity?.value === 0 ? <StatusBadge>재고 없음</StatusBadge> : undefined)}/>} actions={actions}>
@@ -51,7 +51,7 @@ export function ProductCard({title,identifier,status,category,quantity,price,not
     <Body>{note}</Body>{children}
   </ContentCard>;
 }
-export interface ApprovalCardProps extends DomainCardProps {readonly change?:ReactNode; readonly comparison?:readonly ComparedField[]; readonly requester?:ReactNode; readonly requestedAt?:ReactNode; readonly changed?:boolean;}
+export interface ApprovalCardProps extends DomainCardProps {readonly change?:ReactNode; readonly comparison?:readonly ComparedField[] | undefined; readonly requester?:ReactNode; readonly requestedAt?:ReactNode; readonly changed?:boolean;}
 /** Actual before/after facts precede permitted decision controls. */
 export function ApprovalCard({title,identifier,status,change,comparison,requester,requestedAt,changed,children,actions}: ApprovalCardProps): ReactNode {
   return <RecordDetail actions={actions}>

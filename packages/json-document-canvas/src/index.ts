@@ -10,3 +10,8 @@ export { UIScreenEditLayer, useUIScreenEditTranslation, type UIScreenEditLayerPr
 export { UIBuilderScreenControls } from "./ui-builder-screen-controls.js";
 
 export { CanvasEditingCommands } from "./canvas-editing-commands.js";
+export { CanvasSection } from "./canvas-section.js";
+export { CanvasHTMLObject } from "./canvas-html-object.js";
+
+export type { CanvasEditTarget } from "./canvas-edit-target.js";
+export { CanvasPages } from "./canvas-pages.js";

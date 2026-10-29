@@ -267,6 +267,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-editing/src/sheet-text-clipboard.ts",
       "packages/json-document-editing/src/object.ts",
+      "packages/json-document-object-document/src/object-placement.ts",
       "packages/json-document-object-document/src/object-model.ts",
       "packages/json-document-object-document/src/object-style.ts",
       "packages/json-document-object-document/src/object-validation.ts",

@@ -10,22 +10,22 @@ import { UIComponentComposition } from "./ui-component-compositions.js";
 import { UIComponentCollection } from "./ui-component-collection.js";
 
 export interface UIComponentInteraction {
-  readonly editing?: boolean;
-  readonly dismissBoundary?: RefObject<HTMLElement | null>;
+  readonly editing?: boolean | undefined;
+  readonly dismissBoundary?: RefObject<HTMLElement | null> | undefined;
   readonly busy: boolean;
-  readonly actionUnavailableReason?: string;
+  readonly actionUnavailableReason?: string | undefined;
   readonly selectedItem: number;
-  readonly recordIdentity?: string;
+  readonly recordIdentity?: string | undefined;
   readonly onAction: (actionId?: string) => void;
   readonly onNavigate: (pageId: string) => void;
   readonly onPropsChange: (patch: Record<string, JSONValue>) => void;
   readonly onSelectRecord: (recordId: string) => void;
   readonly onCollectionChange: (document: DatabaseDocument) => void;
-  readonly onItemAction?: (index: number) => void;
-  readonly onResize?: (delta: number, phase: "preview" | "commit") => void;
-  readonly onHandle?: (event: InteractionHandleEvent) => void;
-  readonly onFiles?: (files: readonly File[]) => void;
-  readonly onAppendActivity?: (text:string) => boolean | void;
+  readonly onItemAction?: ((index: number) => void) | undefined;
+  readonly onResize?: ((delta: number, phase: "preview" | "commit") => void) | undefined;
+  readonly onHandle?: ((event: InteractionHandleEvent) => void) | undefined;
+  readonly onFiles?: ((files: readonly File[]) => void) | undefined;
+  readonly onAppendActivity?: ((text:string) => boolean | void) | undefined;
   readonly onValueChange: (value: string | number | boolean) => boolean | void;
   readonly onSelectItem: (index: number) => void;
 }
@@ -34,12 +34,12 @@ export interface UIComponentSurfaceProps {
   readonly object: Extract<CanvasObject, {kind: "embedded-document"}>;
   readonly designId?: UIDesignId;
   readonly issues?: readonly string[];
-  readonly interaction?: UIComponentInteraction;
+  readonly interaction?: UIComponentInteraction | undefined;
   /** Keep visual state while removing runtime controls from editing focus/input. */
   readonly inert?: boolean;
   readonly layout?: "absolute" | "flow";
-  readonly renderChildren?: (ids: readonly string[]) => ReactNode;
-  readonly collection?: UIBuilderCollectionProjection;
+  readonly renderChildren?: ((ids: readonly string[]) => ReactNode) | undefined;
+  readonly collection?: UIBuilderCollectionProjection | undefined;
 }
 /** Absolute editing wrapper over the same content surface used by auto-flow runtime. */
 export function UIComponentView(props: UIComponentSurfaceProps) {
@@ -58,7 +58,7 @@ export function UIComponentSurface({object, designId = "clean", issues = [], int
     {issues.length > 0 && <p className="ui-component-binding-error" role="status">{issues.join(" ")}</p>}
   </div>;
 }
-function ComponentContent({ text, content, interaction, renderChildren, collection }: { text: string; content: UIComponentContent; interaction: UIComponentInteraction | undefined; renderChildren?: (ids: readonly string[]) => ReactNode; collection?: UIBuilderCollectionProjection }): ReactNode {
+function ComponentContent({ text, content, interaction, renderChildren, collection }: { text: string; content: UIComponentContent; interaction: UIComponentInteraction | undefined; renderChildren?: ((ids: readonly string[]) => ReactNode) | undefined; collection?: UIBuilderCollectionProjection | undefined }): ReactNode {
   const args = {text, content, interaction};
   if (!(content.component === "disclosure" && content.childIds?.length)) {
     const control = renderUIComponentControl(args);

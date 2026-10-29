@@ -22,7 +22,7 @@ type FocusPreservingControl = {
 export function Command(
   props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title"> & FocusPreservingControl & ControlAffordanceProps & {
     readonly kind?: CommandKind;
-    readonly label?: string;
+    readonly label?: string | undefined;
     readonly rootClassName?: string;
     readonly controlRef?: Ref<HTMLButtonElement>;
   },

@@ -3,7 +3,7 @@ import { assertUIDomainCardMapping, uiBuilderComponentChildIds, assertUIComponen
 import type { UIBuilderRecordSelection } from "./ui-builder-runtime.js";
 import type { UIBuilderProject } from "./ui-builder-materials.js";
 
-export interface UIBuilderProjection { readonly object: UIComponentObject; readonly issues: readonly string[]; readonly collection?: UIBuilderCollectionProjection; readonly recordIds?: readonly string[]; readonly selectionMissing: boolean; }
+export interface UIBuilderProjection { readonly object: UIComponentObject; readonly issues: readonly string[]; readonly collection?: UIBuilderCollectionProjection | undefined; readonly recordIds?: readonly string[] | undefined; readonly selectionMissing: boolean; }
 const display = (value: unknown) => typeof value === "boolean" ? value ? "예" : "아니요" : String(value ?? "");
 /** Pure live projection. Stored fallback content, geometry and history are never rewritten. */
 export function resolveUIBuilderComponent(project: UIBuilderProject, object: UIComponentObject, selection: UIBuilderRecordSelection = {}, values: UIBuilderRuntimeValues = {}): UIBuilderProjection {
@@ -40,7 +40,8 @@ export function resolveUIBuilderComponent(project: UIBuilderProject, object: UIC
     else content.value = typeof value === "boolean" || typeof value === "number" || typeof value === "string" ? value : "";
   }
   if (content.actionId && !project.actions.some(a => a.id === content.actionId)) issues.push("연결한 액션을 찾을 수 없습니다.");
-  if (values[object.id] !== undefined) content.value = values[object.id];
+  const runtimeValue = values[object.id];
+  if (runtimeValue !== undefined) content.value = runtimeValue;
   if (content.component === "tabs" && Array.isArray(content.props?.pageIds)) {
     const pageIndex = content.props.pageIds.indexOf(content.pageId ?? project.activePageId);
     if (pageIndex >= 0 && content.items[pageIndex] !== undefined) content.value = content.items[pageIndex];

@@ -13,7 +13,7 @@ export function Check(props: {
   readonly checked: boolean;
   readonly indeterminate?: boolean;
   readonly onCheckedChange: (checked: boolean) => void;
-  readonly disabled?: boolean;
+  readonly disabled?: boolean | undefined;
   readonly className?: string;
 }): ReactNode {
   return (
@@ -36,7 +36,7 @@ type FieldBaseProps = {
   readonly value: string;
   readonly onValueChange: (value: string) => void;
   readonly presentation?: "standard" | "seamless";
-  readonly disabled?: boolean;
+  readonly disabled?: boolean | undefined;
   readonly placeholder?: string;
   readonly className?: string;
 };

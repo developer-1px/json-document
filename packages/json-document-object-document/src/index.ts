@@ -21,3 +21,4 @@ export { uiComponentAuthoringCatalog, uiComponentCompositionRecipes, assertUICom
 export type { UIComponentPropertyRule } from "./ui-component-catalog.js";
 
 export {uiDomainCardCatalog, uiDomainCardFieldRoles, assertUIDomainCardMapping, type UIDomainCardPresentation} from "./ui-domain-card.js";
+export { findVacantObjectBounds } from "./object-placement.js";

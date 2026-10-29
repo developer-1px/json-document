@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Pencil, Plus } from "lucide-react";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { getUIBuilderPageObjects, readUIBuilderProject, type ObjectEditor, type UIBuilderRecordSelection } from "@interactive-os/json-document-editing";
-import { assertUIBuilderDocument, assertUIComponentContent, createUIComponentObject, type UIComponentKind, type CanvasObject } from "@interactive-os/json-document-object-document";
+import { assertUIBuilderDocument, assertUIComponentContent, createUIComponentObject, type UIComponentKind, type UIComponentContent, type CanvasObject } from "@interactive-os/json-document-object-document";
 import { Choice, Command, Field, Popover, Toolbar, ToolbarGroup, floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
 import { CanvasEditingCommands } from "./canvas-editing-commands.js";
 
@@ -34,7 +34,7 @@ export function UIBuilderScreenControls({ editor, pageId, commands = true, conte
     const last = objects.at(-1);
     const created = createUIComponentObject(kind, { x: last?.x ?? 0, y: last ? last.y + last.height + 24 : 0 });
     if (created.kind !== "embedded-document") throw new Error("등록 컴포넌트를 확인해 주세요.");
-    report(editor.dispatch({ type: "object.create", object: { ...created, document: { ...created.document, pageId: currentPageId } } }));
+    report(editor.dispatch({ type: "object.create", object: { ...created, document: { ...(created.document as UIComponentContent), pageId: currentPageId } } }));
     setPalette(false);
   }
   const controls = <>

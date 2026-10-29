@@ -25,7 +25,7 @@ function UIComponentControl({text, content, interaction}: UIComponentAdapterProp
   const selected = options.find(option => option.label === content.value)?.id ?? (content.value === undefined ? options[0]?.id ?? "" : "");
   const stringValue = String(content.value ?? "");
   switch (content.component) {
-    case "button": return <Command kind={content.tone === "accent" ? "primary" : "secondary"} disabled={disabled || !!interaction?.actionUnavailableReason} title={interaction?.actionUnavailableReason} aria-description={interaction?.actionUnavailableReason} onClick={() => interaction?.onAction(content.actionId)}>{text}</Command>;
+    case "button": return <Command kind={content.tone === "accent" ? "primary" : "secondary"} disabled={disabled || !!interaction?.actionUnavailableReason} aria-description={interaction?.actionUnavailableReason} onClick={() => interaction?.onAction(content.actionId)}>{text}</Command>;
     case "page-link": return <Command disabled={disabled || !content.targetPageId} onClick={() => content.targetPageId && interaction?.onNavigate(content.targetPageId)}>{text}</Command>;
     case "input": return <FormField label={text} description={typeof p.description === "string" ? p.description : undefined} required={p.required === true}>{control=><Field {...control} label={text} value={stringValue} placeholder={content.detail} disabled={disabled} onValueChange={change}/>}</FormField>;
     case "editable-text": return <EditableText label={text} value={stringValue} identity={interaction?.recordIdentity} disabled={disabled} onCommit={change} />;

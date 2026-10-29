@@ -1,6 +1,7 @@
 import { linkPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { fieldPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
+import { AnnotationReviewUsage } from "./AnnotationReviewUsage";
 import { useState } from "react";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { Command, Popover, ProductShell, Tabs } from "@interactive-os/json-document-ui-primitives-react";
@@ -18,6 +19,7 @@ import { CodeBlock } from "../../shared/ui/code-block";
 const styles = annotationDemoRecipe();
 
 export function AnnotationDemoRoute() {
+  const [review, setReview] = useState(false);
   const [document] = useState(() => createJSONDocument(initialAnnotationDocument));
   const [editor] = useState(() => createAnnotationEditor(document));
   const [tool, setTool] = useState<AnnotationTool>("comment");
@@ -26,9 +28,11 @@ export function AnnotationDemoRoute() {
   const [announcement, setAnnouncement] = useState("클릭하거나 드래그해서 수정 코멘트를 남기세요.");
   const source = initialAnnotationDocument.sources[0]!;
   const state = useAnnotationOutput({ document, editor, sourceUrl: sitePath(source.src), rasterStyle: rasterStyle(), renderImage: output === "image" });
+  if (review) return <DemoPage documentation={<PageHeader illustration="cursor" title="Annotation Review Usage"><Command onClick={() => setReview(false)}>이미지 표시 예제</Command></PageHeader>}><AnnotationReviewUsage /></DemoPage>;
   return <DemoPage documentation={
     <PageHeader illustration="cursor" title="Annotation Hands Demo" aside={<p className={classes("m-0 text-right", contentPresentation.caption)} aria-live="polite">{announcement}</p>}>
       이미지 위에서 위치를 표시하고 수정 요청을 남겨 보세요.
+      <Command onClick={() => setReview(true)}>에이전트 첨삭 Usage</Command>
     </PageHeader>
   }>
     <ProductShell canvasClassName={styles.productCanvas()}>

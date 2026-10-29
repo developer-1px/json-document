@@ -6,7 +6,7 @@ export function Avatar({name, src, fallback}: {readonly name: string; readonly s
   const initials = name.trim().split(/\s+/).map(part => Array.from(part)[0]).slice(0, 2).join("");
   return <span data-ui-component="avatar" aria-label={name} role="img">{src && failedSource !== src ? <img src={src} alt="" onError={() => setFailedSource(src)} /> : <span aria-hidden="true">{fallback ?? (initials || "?")}</span>}</span>;
 }
-export function PersonIdentity({name, src}: {readonly name: string; readonly src?: string}): ReactNode {
+export function PersonIdentity({name, src}: {readonly name: string; readonly src?: string | undefined}): ReactNode {
   return <span data-ui-component="person-identity"><span aria-hidden="true"><Avatar name={name} src={src} /></span><span>{name}</span></span>;
 }
 export function PriorityIndicator({label, level}: {readonly label: string; readonly level: "low" | "normal" | "high"}): ReactNode {

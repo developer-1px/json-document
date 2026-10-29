@@ -46,6 +46,16 @@ assertUIComponentBindings(value: unknown, targets: readonly UIBindingTarget[]): 
 ```ts
 assertUIComponentContent(value: unknown): asserts value is UIComponentContent
 ```
+## `assertUIComponentProperties`
+
+```ts
+assertUIComponentProperties(component: string, value: unknown): void
+```
+## `assertUIDomainCardMapping`
+
+```ts
+assertUIDomainCardMapping(props: Readonly<Record<string, unknown>>, fields: readonly { readonly id: string; readonly type: string; }[], fieldIds: readonly string[]): void
+```
 ## `assertUIFlowLayout`
 
 ```ts
@@ -73,6 +83,7 @@ type CanvasObjectDraft = ObjectDraft & { readonly parentId?: string } & (
   | (CanvasTextFormat & { readonly kind: "text"; readonly fontSize: number; readonly widthMode?: "auto" | "fixed" })
   | (CanvasTextFormat & { readonly kind: "rectangle"; readonly containerLayout?: ObjectContainerLayout; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
   | (CanvasTextFormat & { readonly kind: "ellipse" | "sticky-note"; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
+  | { readonly kind: "section"; readonly textColor?: string }
   | { readonly kind: "path"; readonly points: ReadonlyArray<ObjectPoint>; readonly strokeWidth: number }
   | { readonly kind: "image"; readonly source: string }
   | { readonly kind: "embedded-document"; readonly documentType: string; readonly document: JSONValue }
@@ -81,7 +92,7 @@ type CanvasObjectDraft = ObjectDraft & { readonly parentId?: string } & (
 ## `CanvasObjectKind`
 
 ```ts
-type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "sticky-note" | "path" | "image" | "embedded-document";
+type CanvasObjectKind = "text" | "section" | "rectangle" | "ellipse" | "sticky-note" | "path" | "image" | "embedded-document";
 ```
 ## `CanvasTextFormat`
 
@@ -129,6 +140,11 @@ interface DocumentObject extends ObjectDraft {
   readonly id: string;
 }
 ```
+## `findVacantObjectBounds`
+
+```ts
+findVacantObjectBounds(objects: readonly DocumentObject[], requested: ObjectBounds, gap?: number): ObjectBounds
+```
 ## `getObjectStyle`
 
 ```ts
@@ -144,6 +160,11 @@ layoutObjectDocument(document: ObjectDocument, options: ObjectLayoutOptions, pre
 ```ts
 layoutObjectText<Object extends ObjectDraft>(object: Object, measure?: ObjectTextMeasurer): Object
 ```
+## `mapUIComponentChildren`
+
+```ts
+mapUIComponentChildren(content: UIComponentContent, map: (id: string) => string | undefined): UIComponentContent
+```
 ## `ObjectBounds`
 
 ```ts
@@ -152,6 +173,14 @@ interface ObjectBounds {
   readonly y: number;
   readonly width: number;
   readonly height: number;
+}
+```
+## `ObjectCollisionGroup`
+
+```ts
+interface ObjectCollisionGroup {
+  readonly objectIds: readonly string[];
+  readonly gap: number;
 }
 ```
 ## `ObjectContainerLayout`
@@ -294,6 +323,11 @@ projectObjectText(object: DocumentObject): ObjectTextProjection | null
 ```ts
 readObjectStyle(objects: ReadonlyArray<DocumentObject>): ObjectStyleSelection
 ```
+## `resolveObjectCollisions`
+
+```ts
+resolveObjectCollisions(objects: readonly DocumentObject[], groups: readonly ObjectCollisionGroup[], anchoredIds: readonly string[]): readonly DocumentObject[]
+```
 ## `resolveUIFlowLayout`
 
 ```ts
@@ -324,6 +358,16 @@ type UIBindingMode = typeof uiBindingCatalog[number]["id"];
 ```ts
 type UIBindingTarget = "text" | "detail" | "items" | "value";
 ```
+## `uiBuilderComponentChildIds`
+
+```ts
+uiBuilderComponentChildIds(object: UIComponentObject): readonly string[]
+```
+## `uiComponentAuthoringCatalog`
+
+```ts
+const uiComponentAuthoringCatalog: ({ category: string; source: string; mapping: string; defaultProps: Record<string, JSONValue>; propertySchema: Readonly<Record<string, UIComponentPropertyRule>>; ... 8 more ...; description: "Page or section heading"; } | ... 16 more ... | { ...; })[]
+```
 ## `UIComponentBinding`
 
 ```ts
@@ -338,14 +382,24 @@ interface UIComponentBinding extends Record<string, JSONValue> {
 ## `uiComponentCatalog`
 
 ```ts
-const uiComponentCatalog: readonly [{ readonly id: "heading"; readonly bindingTargets: readonly ["text"]; readonly label: "제목"; readonly width: 440; readonly height: 64; readonly text: "새로운 아이디어"; readonly detail: ""; readonly items: readonly []; readonly description: "Page or section heading"; }, ... 10 more ..., { ...; }]
+const uiComponentCatalog: readonly ({ category: string; source: string; mapping: string; defaultProps: Record<string, JSONValue>; propertySchema: Readonly<Record<string, UIComponentPropertyRule>>; ... 8 more ...; description: "Page or section heading"; } | ... 16 more ... | { ...; })[]
+```
+## `uiComponentCompositionRecipes`
+
+```ts
+const uiComponentCompositionRecipes: readonly [{ readonly id: "execution-result"; readonly source: "packages/json-document-ui-primitives-react/src/content-card.tsx"; readonly components: readonly ["card", "text", "button"]; readonly description: "Independent execution result = ContentCard with real result body and optional follow-up actions. ResultPane...
 ```
 ## `UIComponentContent`
 
 ```ts
 type UIComponentContent = Record<string, JSONValue> & {
+  readonly props?: Record<string, JSONValue>;
+  readonly childIds?: readonly string[];
+  readonly collection?: { readonly tableId: string; readonly fieldIds: readonly string[] };
   readonly bindings?: readonly UIComponentBinding[];
   readonly actionId?: string;
+  readonly pageId?: string;
+  readonly targetPageId?: string;
   readonly value?: string | number | boolean;
   readonly component: UIComponentKind;
   readonly detail: string;
@@ -368,6 +422,16 @@ type UIComponentKind = typeof uiComponentCatalog[number]["id"];
 ```ts
 interface UIComponentObject extends ObjectDraft { readonly id: string; readonly kind: "embedded-document"; readonly documentType: string; readonly document: UIComponentContent; }
 ```
+## `UIComponentPropertyRule`
+
+```ts
+type UIComponentPropertyRule = { readonly type: "string" | "number" | "boolean" | "strings" | "object" | "files"; readonly enum?: readonly string[] };
+```
+## `uiComponentSlotIds`
+
+```ts
+uiComponentSlotIds(content: UIComponentContent): readonly (string | undefined)[]
+```
 ## `uiDesignCatalog`
 
 ```ts
@@ -377,6 +441,21 @@ const uiDesignCatalog: readonly [{ readonly id: "clean"; readonly label: "공통
 
 ```ts
 type UIDesignId = typeof uiDesignCatalog[number]["id"];
+```
+## `uiDomainCardCatalog`
+
+```ts
+const uiDomainCardCatalog: readonly [{ readonly id: "person"; readonly label: "인물"; readonly api: "PersonCard"; readonly purpose: "이름과 역할로 사람을 식별하고 연락 맥락을 확인한다"; readonly required: readonly ["title"]; readonly roles: readonly ["title", "role", "organization", "contact", "status", "identifier"]; readonly reason: "이름·직무·소속은 간격으로 묶고 연락처는 구분선 아래 ...
+```
+## `uiDomainCardFieldRoles`
+
+```ts
+const uiDomainCardFieldRoles: any[]
+```
+## `UIDomainCardPresentation`
+
+```ts
+type UIDomainCardPresentation = typeof uiDomainCardCatalog[number]["id"];
 ```
 ## `UIFlowColumn`
 
@@ -408,65 +487,3 @@ const uiLayoutCatalog: readonly [{ readonly id: "stack"; readonly label: "세로
 ```ts
 type UILayoutId = typeof uiLayoutCatalog[number]["id"];
 ```
-
-## uiBuilderComponentChildIds
-
-`uiBuilderComponentChildIds(object: UIComponentObject): readonly string[]` — childIds와 shell의 toolbarIds/inspectorIds 참조를 반환한다. 일반 object subtree 연산과 UI 조합은 같은 참조 계약을 소비한다.
-
-## resolveObjectCollisions
-
-`resolveObjectCollisions(objects, groups: readonly ObjectCollisionGroup[], anchoredIds)`
-returns geometry with intersecting siblings pushed downward. Each group supplies
-`objectIds` and a nonnegative `gap`. Gesture anchors retain their positions; displaced
-compositions translate with their canonical subtrees. Unrelated groups and document
-content are unchanged. The function owns geometry only, not gestures or history.
-[UI Builder Usage](/applications/ui-builder?example=issue-feed&new=1) consumes it through
-`CanvasHand.collisionGroups` for both live preview and a single committed Undo unit.
-
-## Product record catalog
-
-`uiComponentCatalog` includes `status-badge`, `property-editor`, `result-panel`, and attached/floating `product-inspector`. Record list role props map title/summary/identifier/status/assignee/updatedAt fields. See [UI component contract](ui-component.md#product-record-roles).
-
-## Expanded product vocabulary
-
-`uiComponentCatalog`에 page-header/sidebar-navigation/avatar/person-identity/priority-indicator/date-display/empty-state/inline-alert/stepper/activity-feed/people-picker/filter-bar가 등록됐습니다. [공개 문서의 매핑](ui-component.md#additional-product-catalog)과 [통합 Usage](/demo/ui-primitives#design-system-product-workflow)를 참고하세요.
-
-## uiComponentSlotIds / mapUIComponentChildren
-
-```ts
-uiComponentSlotIds(content: UIComponentContent): readonly (string | undefined)[]
-mapUIComponentChildren(content: UIComponentContent, map: (id: string) => string | undefined): UIComponentContent
-```
-
-이름으로 연결한 작업 공간의 영역을 읽고, 복제/삭제에서 자식 참조를 변환한다. map이 undefined를 반환하면 해당 참조를 제거한다. 자세한 계약은 [UI Component](ui-component.md#작업-공간의-이름-참조)에 있다.
-
-### `card.props.actionCount`
-
-`card`의 childIds 끝 actionCount개를 ContentCard.actions에, 나머지를 본문에
-전달합니다. 기본은 0입니다. [계약](ui-component.md#그룹의-표면-선택)과
-[전체 빌더 Usage](/applications/ui-builder?example=catalog)에서 본문과 실제 페이지
-이동 행동을 확인할 수 있습니다. group/card/feed/inspector 선택은 같은 카탈로그의
-content-surface-choice recipe에 등록되어 있습니다.
-
-## `uiDomainCardCatalog` / `assertUIDomainCardMapping`
-
-```ts
-type UIDomainCardPresentation = "inquiry" | "task" | "product" | "approval" | "activity" | "result";
-assertUIDomainCardMapping(props: Readonly<Record<string, unknown>>, fields: readonly {id:string;type:string}[], fieldIds: readonly string[]): void;
-```
-
-`uiDomainCardCatalog`의 required/roles/purpose/reason과 `uiDomainCardFieldRoles`는
-같은 정본이며 props 스키마와 에이전트 조합 recipe에 함께 사용합니다.
-[계약](ui-component.md#선택-레코드의-도메인-카드),
-[Usage](/applications/ui-builder?example=domain-cards).
-
-record-card의 unread/completed/overdue/changedFieldId는 checkbox 사실, approval의
-before/afterFieldId는 실제 비교값입니다. record-list.itemKind/priorityFieldId와
-checkbox 인디케이터, group.relationship(related/group/region)도 정본 스키마에
-등록되어 있습니다. [계약](ui-component.md#경계와-상태-단서),
-[Usage](/applications/ui-builder?example=domain-cards).
-
-
-### 작성용 UI 카탈로그
-
-`uiComponentAuthoringCatalog`는 uiComponentCatalog에서 aliasOf가 있는 호환 ID를 제외한 파생 목록이다. 팔레트·신규 화면 생성·전체 컴포넌트 Usage는 이 목록을 사용한다. 저장된 문서 검증은 uiComponentCatalog 전체로 수행하므로 property-editor/result-panel의 기존 ID는 유효하다. aliasOf는 각각 record-facts/card를 가리킨다. [Usage](/applications/ui-builder?example=catalog), 소스 `src/ui-component-catalog.ts`.

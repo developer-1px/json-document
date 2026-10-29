@@ -322,7 +322,39 @@ that order. Undo/Redo restores both the document and the associated selection.
 문서 에이전트의 읽기·부분 수정 계약은 [Text editing tools](docs/text-tools.md)를 참고하세요.
 
 [Canvas agent tools](docs/canvas-tools.md) expose validated reads and edits over
-an existing ObjectEditor, sharing manual editing history.
+an existing ObjectEditor, using its history owner. Collaboration binds separate
+actor replicas and selective history through `createCollaborationCanvasTools`.
+
+### Annotation review queue
+
+`createAnnotationReviewQueue(initial?)` owns serial execution and persistent task
+state for annotations. `enqueue({id,annotation,source})` retains the source version
+and instruction. `connect(async (task, cancellation) => resultingSource)` starts one worker.
+Cancellation exposes `aborted` and `onAbort(listener)` without DOM types; a platform
+executor translates it to its native signal.
+Tasks transition queued → running → review/error; `accept(id)` records review,
+`retry(id,currentSource)` explicitly retries a failed task. The Host provides the
+agent and source-validation policy. Interrupted restored tasks become errors, never
+automatically replayed. `snapshot`/`subscribe` integrate with WebStoredDocument.
+Usage: [Slides](/applications/slides).
+
+### Review source session
+
+`createAnnotationReviewSession({ id, source, width, height }, initial?)` owns the
+frozen source and its annotations. It exposes `editor`, `snapshot`, `subscribe`
+and `advance(source)`, which starts a new review with cleared marks and selection.
+Restore validates the annotation document and source identity. Legacy Slides
+snapshots with `html` instead of `source` are accepted without losing marks.
+Pass the session to `createWebStoredDocument` for persistence, and to
+`AnnotationReview` for the complete review UI. The Annotation Usage exercises both.
+
+`AnnotationReviewQueue.sourceFor(task)` returns the expected source after earlier
+successful tasks on the same source. Errors and unrelated revision chains do not
+advance it. Agent publication must still check that the live source matches.
+
+`projectCanvasHTML(object, html, bounds)` projects an older or reviewed source
+without mutating the live object's identity or authored viewport. Slides uses it
+with `CanvasHTMLObject` inside `AnnotationReview.renderContent`.
 
 ## UI Builder
 

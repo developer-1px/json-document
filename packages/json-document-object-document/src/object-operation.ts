@@ -90,12 +90,37 @@ export function planObjectOperation(document: ObjectDocument, operation: ObjectO
     if (operation.type !== "remove") assertObjectDocument(result.value);
     const next = layoutObjectDocument(result.value as ObjectDocument, options, document);
     assertObjectDocument(next);
-    if (!jsonEqual(result.value, next) || options.measureText || options.containerPolicy || document.objects.some(object => object.parentId || object.containerLayout)) {
-      if (jsonEqual(document, next)) return { ok: true, operations: [] };
-      return { ok: true, operations: [{ op: "replace", path: "", value: next }] };
-    }
-    return { ok: true, operations };
+    return { ok: true, operations: diffObjectDocument(document, next) };
   } catch (error) {
     return { ok: false, code: "object.invalid", reason: error instanceof Error ? error.message : String(error) };
   }
+}
+
+/** Preserve object and field identities, including layout-derived changes. */
+function diffObjectDocument(before: ObjectDocument, after: ObjectDocument): JSONPatchOperation[] {
+  const patch: JSONPatchOperation[] = [];
+  const ids = before.objects.map(object => object.id);
+  const wanted = new Set(after.objects.map(object => object.id));
+  for (let index = ids.length - 1; index >= 0; index--) {
+    if (!wanted.has(ids[index]!)) { patch.push({ op: "remove", path: `/objects/${index}` }); ids.splice(index, 1); }
+  }
+  after.objects.forEach((object, index) => {
+    const from = ids.indexOf(object.id);
+    if (from < 0) {
+      patch.push({ op: "add", path: `/objects/${index}`, value: object }); ids.splice(index, 0, object.id);
+      return;
+    }
+    if (from !== index) {
+      patch.push({ op: "move", from: `/objects/${from}`, path: `/objects/${index}` });
+      ids.splice(from, 1); ids.splice(index, 0, object.id);
+    }
+    const previous = before.objects.find(item => item.id === object.id)!;
+    for (const key of Object.keys(previous)) if (!Object.hasOwn(object, key)) patch.push({ op: "remove", path: buildPointer(["objects", index, key]) });
+    for (const [key, value] of Object.entries(object)) {
+      if (!Object.hasOwn(previous, key) || !jsonEqual(previous[key]!, value)) patch.push({ op: Object.hasOwn(previous, key) ? "replace" : "add", path: buildPointer(["objects", index, key]), value });
+    }
+  });
+  for (const key of Object.keys(before)) if (key !== "objects" && !Object.hasOwn(after, key)) patch.push({ op: "remove", path: buildPointer([key]) });
+  for (const [key, value] of Object.entries(after)) if (key !== "objects" && (!Object.hasOwn(before, key) || !jsonEqual(before[key]!, value))) patch.push({ op: "add", path: buildPointer([key]), value });
+  return patch;
 }

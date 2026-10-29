@@ -1,5 +1,40 @@
 # @interactive-os/json-document-web
 
+## HTML/CSS artifact adapter
+
+`webCanvasHTMLAdapter.parse(html)` validates the supported inert HTML/CSS subset,
+returns the unchanged source and an index of `data-node-id` elements, and throws
+on unsupported input. IDs must be nonempty and unique; at least one is required.
+Limits are 250,000 source characters and 2,000 elements. Flex/Grid, CSS variables,
+gradients, shadows and inline CSS are preserved rather than flattened.
+
+`createWebHTMLArtifactSource(html)` builds a scoped iframe document. Consumers
+MUST render it in a sandbox without `allow-scripts`; do not insert the returned
+markup into the host DOM. Canvas uses `allow-same-origin` so trusted parent-owned
+event bindings can inspect elements; generated scripts remain disabled. The built-in
+CSP independently blocks scripts, network resources and external fonts.
+Active elements, event handlers, navigation URLs, foreign SVG/MathML and external
+images are rejected. Embedded PNG/JPEG/WebP and local fonts are supported.
+This is a supported-format intake contract, not a general HTML sanitizer.
+
+`editWebHTMLArtifactNode(html, nodeId, change)` applies escaped leaf text and/or
+explicit color, background-color and font-size overrides to the identified source
+node. It preserves sibling nodes and CSS rules. DOM serialization normalizes HTML
+syntax; it does not promise byte-preserving source formatting. Container text edits
+are rejected to avoid destroying child structure.
+
+`bindWebHTMLArtifactEditing(frame, options)` translates clicks, double-clicks,
+native plaintext editing and keyboard events into selection/text/history callbacks.
+It returns a disposer and never injects scripts. `WebHTMLNodeSelection` contains
+the stable ID, viewport-relative bounds and effective style. Only leaf text is
+directly editable; containers can be selected and styled. Enter/F2 starts text
+editing, Mod+Enter or blur commits, Escape cancels. Native text undo stays inside
+an active text edit; otherwise Mod+Z/Shift+Mod+Z route to the owner's history.
+
+Canvas rendering consumes this same API, including when opening saved JSON.
+`/widgets/canvas` demonstrates the public adapter together with Editing's
+`createCanvasHTML`; the Source view exposes both owning modules.
+
 ## Editing host ownership
 
 `isWebEditingHostTarget(root, target)` returns whether a DOM target belongs to
@@ -302,3 +337,13 @@ pixels. It accepts text, width, auto/fixed widthMode, fontSize and fontWeight an
 returns positive width/height, including explicit and trailing newlines. Canvas
 injects it as the ObjectEditor's `measureText` port; it does not own document or
 history state. Usage and Source are available through the Canvas API page.
+
+### Speech input
+
+`createWebSpeechInput({lang,onText,onInterim,onError,onEnd})` wraps Chrome's
+`webkitSpeechRecognition` (or unprefixed `SpeechRecognition`). Final results are
+emitted once; interim results replace a transient preview. `stop()` flushes the
+recognizer; `dispose()` aborts and ignores late results. Unsupported browsers return
+null. Recognition is started only by `start()`, normally from a user gesture.
+Chrome may use a network recognition service; this is not guaranteed offline STT.
+Usage: [Slides](/applications/slides), through `ChatComposer` speech input.

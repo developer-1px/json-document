@@ -53,7 +53,7 @@ export function UIBuilderRuntimeHand({editor, skills, selection: controlledSelec
     setFlowGap(Math.max(0, parseFloat(getComputedStyle(root.querySelector(".builder-flow-column") ?? root).rowGap) || 0));
     const previous = originLayouts.current[currentPageId] === objectMembership ? originPages.current[currentPageId] ?? {} : {};
     const measured: Record<string, UIScreenEditBounds> = {};
-    [...root.querySelectorAll<HTMLElement>(".builder-flow-item[data-ui-component-object]"), ...renderedChildren.current.values()].forEach(element => {
+    [...Array.from(root.querySelectorAll<HTMLElement>(".builder-flow-item[data-ui-component-object]")), ...renderedChildren.current.values()].forEach(element => {
       const objectId = element.dataset.uiComponentObject ?? element.dataset.uiChild!;
       if (previous[objectId]) return;
       const box = element.getBoundingClientRect();

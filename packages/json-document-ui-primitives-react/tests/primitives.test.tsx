@@ -518,3 +518,30 @@ describe("UI Primitives", () => {
     expect(onControl.mock.calls.map(([event]) => event.phase)).toEqual(["start", "cancel"]);
   });
 });
+
+test("an externally positioned voice Popover preserves focus while its message streams", async () => {
+  const user = userEvent.setup();
+  const panel = createRef<HTMLDivElement>();
+  function Example() {
+    const [open, setOpen] = useState(false);
+    const [text, setText] = useState("말하는 중");
+    return <><button onClick={() => setOpen(true)}>Start voice</button>
+      <Popover label="Voice note" trigger="Note" open={open} onOpenChange={setOpen} autoFocus={false} dismissOnOutsideInteraction={false} panelRef={panel} panelStyle={{ position: "fixed", left: 25 }}>
+        <button onClick={() => setText("말하는 중입니다")}>{text}</button>
+      </Popover></>;
+  }
+  render(<Example />);
+  const start = screen.getByRole("button", { name: "Start voice" });
+  await user.click(start);
+  expect(document.activeElement).toBe(start);
+  expect(panel.current).toBe(screen.getByRole("dialog", { name: "Voice note" }));
+  expect(panel.current?.style.left).toBe("25px");
+  await user.click(screen.getByRole("button", { name: "말하는 중" }));
+  expect(screen.getByRole("button", { name: "말하는 중입니다" })).toBeTruthy();
+  await user.click(start);
+  expect(screen.getByRole("dialog", { name: "Voice note" })).toBeTruthy();
+  await user.click(screen.getByRole("button", { name: "말하는 중입니다" }));
+  await user.keyboard("{Escape}");
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(document.activeElement).toBe(screen.getByRole("button", { name: "Voice note" }));
+});

@@ -6,7 +6,7 @@ import { Command } from "@interactive-os/json-document-ui-primitives-react";
 /** Canonical Object editing commands; Hands may inject their gesture cancellation lifecycle. */
 export function CanvasEditingCommands({ editor, objectIds, onUndo, onRedo, onDuplicate, onRemove, onResult }: {
   readonly editor: ObjectEditor;
-  readonly objectIds?: readonly string[];
+  readonly objectIds?: readonly string[] | undefined;
   readonly onUndo?: () => void;
   readonly onRedo?: () => void;
   readonly onDuplicate?: () => void;

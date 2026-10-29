@@ -9,6 +9,8 @@ const contentDataFiles = new Set([
   path.join(sourceRoot, "shared/demo-workbench/object-demo-document.ts"),
   // These colors are serialized artwork data, not application presentation tokens.
   path.join(sourceRoot, "shared/demo-workbench/canvas-demo-document.ts"),
+  path.join(sourceRoot, "shared/demo-workbench/slides-demo-document.ts"),
+  path.join(sourceRoot, "shared/demo-workbench/agent-review-demo-document.ts"),
 ]);
 const fixture = path.join(siteRoot, "scripts/fixtures/design-token-violation.tsx");
 

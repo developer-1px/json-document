@@ -22,6 +22,7 @@ export function getObjectStyle(object: DocumentObject): Partial<ObjectStyle> {
   switch (object.kind) {
     case "image": case "embedded-document": return {};
     case "text": return { color, ...text };
+    case "section": return { color, textColor: (object.textColor ?? "#253044") as string };
     case "rectangle": case "ellipse": case "sticky-note": return { color, ...text, textColor: (object.textColor ?? "#253044") as string, strokeColor: (object.strokeColor ?? "#000000") as string, strokeWidth: (object.strokeWidth ?? 0) as number };
     case "path": return { color, strokeWidth: object.strokeWidth as number };
     default: return { color };

@@ -16,6 +16,11 @@ activeDescendantContainerProps(activeId: string | null): Readonly<{ tabIndex: 0;
 ```ts
 activeDescendantItemProps(id: string): Readonly<{ id: string; }>
 ```
+## `bindWebHTMLArtifactEditing`
+
+```ts
+bindWebHTMLArtifactEditing(frame: { readonly contentDocument: unknown; readonly contentWindow: unknown; }, options: { readonly selectedId?: string; readonly onSelect: (selection: WebHTMLNodeSelection | null) => void; readonly onCommitText: (id: string, text: string) => boolean; readonly onEditingChange: (editing: boolean) => void; readonly onHistory: (action: "undo" | "redo") => void; readonly onExit: () => void; }): () => void
+```
 ## `calendarCommandFromWebKeyboardEvent`
 
 ```ts
@@ -87,6 +92,11 @@ createWebClipboardTextWriter(options?: { readonly clipboard?: WebClipboardTextPo
 ```ts
 createWebDragDropSession<Item, Target>(options?: WebDragDropSessionOptions<Item, Target>): WebDragDropSession<Item, Target>
 ```
+## `createWebHTMLArtifactSource`
+
+```ts
+createWebHTMLArtifactSource(html: string): string
+```
 ## `createWebIndexedDBStorage`
 
 ```ts
@@ -108,6 +118,11 @@ createWebKeyboardAdapter<Command>(options: { readonly keymap: WebKeymap<Command>
 
 ```ts
 createWebPointerSession<State>(options?: WebPointerSessionOptions<State>): WebPointerSession<State>
+```
+## `createWebSpeechInput`
+
+```ts
+createWebSpeechInput(options: { lang: string; onText: (text: string) => void; onInterim: (text: string) => void; onError: (code: string) => void; onEnd: () => void; Recognition?: WebSpeechRecognitionConstructor; }): { ...; }
 ```
 ## `createWebStoredDocument`
 
@@ -138,6 +153,11 @@ const documentClipboardCodec: WebClipboardCodec<DocumentClipboard>
 
 ```ts
 downloadWebDocumentFile(value: JSONValue, filename: string): void
+```
+## `editWebHTMLArtifactNode`
+
+```ts
+editWebHTMLArtifactNode(html: string, nodeId: string, change: WebHTMLNodeChange): string
 ```
 ## `fileCandidateFromWebFile`
 
@@ -208,6 +228,11 @@ kanbanCardDropTargetFromWebElement(element: WebKanbanTargetElement | null): Kanb
 
 ```ts
 lineBoundary(ids: ReadonlyArray<string>, edge: "start" | "end"): string | null
+```
+## `measureWebHTMLReview`
+
+```ts
+measureWebHTMLReview(documentValue: unknown, requests: readonly WebHTMLReviewRequest[]): Record<string, WebHTMLReviewRegion[]>
 ```
 ## `measureWebText`
 
@@ -463,6 +488,11 @@ interface WebCalendarKeyboardEvent {
   readonly ctrlKey?: boolean;
   readonly altKey?: boolean;
 }
+```
+## `webCanvasHTMLAdapter`
+
+```ts
+const webCanvasHTMLAdapter: CanvasHTMLAdapter
 ```
 ## `WebClientPoint`
 
@@ -766,6 +796,54 @@ interface WebHTMLNode {
   readonly childNodes: ArrayLike<WebHTMLNode>;
 }
 ```
+## `WebHTMLNodeChange`
+
+```ts
+interface WebHTMLNodeChange {
+  readonly text?: string;
+  readonly color?: string;
+  readonly backgroundColor?: string;
+  readonly fontSize?: number;
+}
+```
+## `WebHTMLNodeSelection`
+
+```ts
+interface WebHTMLNodeSelection {
+  readonly id: string;
+  readonly text: string;
+  readonly editableText: boolean;
+  readonly color: string;
+  readonly backgroundColor: string;
+  readonly fontSize: number;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+```
+## `WebHTMLReviewRegion`
+
+```ts
+interface WebHTMLReviewRegion {
+  readonly nodeId: string;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly kind: "target" | "added" | "changed" | "removed" | "page";
+}
+```
+## `WebHTMLReviewRequest`
+
+```ts
+interface WebHTMLReviewRequest {
+  readonly id: string;
+  readonly nodeIds: readonly string[];
+  readonly before?: string;
+  readonly after?: string;
+}
+```
 ## `WebJSONClipboardFormat`
 
 ```ts
@@ -973,6 +1051,31 @@ interface WebRasterReadSignal {
 type WebRasterSourceResult =
   | { readonly ok: true; readonly dataURL: string; readonly width: number; readonly height: number }
   | { readonly ok: false; readonly code: "raster.read-failed" | "raster.decode-failed" | "raster.cancelled"; readonly reason?: string };
+```
+## `WebSpeechRecognition`
+
+```ts
+interface WebSpeechRecognition {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((event: { results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null;
+  onerror: ((event: { error: string }) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+```
+## `webSpeechRecognitionConstructor`
+
+```ts
+webSpeechRecognitionConstructor(): WebSpeechRecognitionConstructor | undefined
+```
+## `WebSpeechRecognitionConstructor`
+
+```ts
+type WebSpeechRecognitionConstructor = new () => WebSpeechRecognition;
 ```
 ## `WebStoredDocument`
 

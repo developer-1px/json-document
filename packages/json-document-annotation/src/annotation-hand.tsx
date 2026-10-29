@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import { createGestureSession, type InteractionHandleEvent, type InteractionHandleDescriptor } from "@interactive-os/json-document-affordance";
 import {
   annotationResizeHandle,
@@ -55,12 +55,25 @@ export interface AnnotationHandClassNames {
 export interface AnnotationHandProps {
   readonly editor: AnnotationEditor;
   readonly sourceUrl: string;
+  /** SVG content below the annotation layer, for non-raster documents. */
+  readonly content?: ReactNode;
+  readonly onCommentEditingChange?: (editing: boolean) => void;
+  readonly onAnnotationCreated?: (annotation: Annotation) => void;
+  readonly onSubmitAnnotation?: (annotation: Annotation) => void;
+  readonly renderCommentComposer?: (options: { annotation: Annotation; submit: (instruction: string) => void; cancel: () => void }) => ReactNode;
+  /** Continuous review: pointing and ink feed the shared voice session without a composer. */
+  readonly following?: boolean;
+  /** Read-only annotation projection for a following surface, including persisted review tasks. */
+  readonly annotations?: ReadonlyArray<Annotation>;
+  readonly highlightedAnnotationId?: string;
+  readonly onPoint?: (point: AnnotationPoint) => void;
   readonly tool: AnnotationTool;
   readonly onToolChange: (tool: AnnotationTool) => void;
   readonly reactionShadow?: string;
   readonly createId: () => string;
   readonly classNames?: AnnotationHandClassNames;
   readonly enabledTools?: ReadonlyArray<AnnotationTool>;
+  readonly toolLabels?: Partial<Record<AnnotationTool, string>>;
   readonly labels?: AnnotationHandLabels;
   readonly rasterStyle: WebAnnotationRasterStyle;
   readonly onAnnouncement?: (message: string) => void;
@@ -85,7 +98,9 @@ export function AnnotationHand(props: AnnotationHandProps) {
   const [gestures] = useState(() => createGestureSession<Gesture>({ onBegin: rerender, onPreview: rerender, onCommit: rerender, onCancel: rerender }));
   const [pointer] = useState(() => createWebPointerSession<{ readonly active: true }>());
   const document = props.editor.snapshot.value as AnnotationDocument; const selectedId = props.editor.snapshot.selection.primaryId;
+  const displayedAnnotations = props.following ? props.annotations ?? document.annotations : document.annotations;
   const selected = document.annotations.find(({ id }) => id === selectedId) ?? null; const source = document.sources[0]!; const gesture = gestures.getActive();
+  useEffect(() => { props.onCommentEditingChange?.(selected !== null && editingId === selected.id); }, [editingId, selected?.id, props.onCommentEditingChange]);
   function rerender() { redraw((value) => value + 1); }
   function announce(message: string) { props.onAnnouncement?.(message); }
   function select(id: string | null) { props.editor.dispatch({ type: "selection.set", annotationId: id, mode: "replace" }); }
@@ -99,6 +114,7 @@ export function AnnotationHand(props: AnnotationHandProps) {
     gestures.begin(tool === "draw" ? { type: "draw", points: [point] } : { type: "create", tool, start: point, current: point });
   }
   function handleInteraction(interaction: InteractionHandleEvent, event: PointerEvent<SVGElement>, annotation: Annotation, type: "move" | "resize") {
+    if (interaction.phase === "start" && props.following) { props.onAnnotationCreated?.(annotation); return; }
     if (interaction.phase === "start") {
       if (type === "move") { setEditingId(null); setPreviewId(null); select(annotation.id); if (tool !== "select") return; }
       const start = eventPoint(event);
@@ -114,6 +130,7 @@ export function AnnotationHand(props: AnnotationHandProps) {
   }
   function pointerMove(event: PointerEvent<SVGSVGElement>) {
     const gesture = gestures.getActive();
+    if (props.following && gesture === null) { const point = eventPoint(event); if (point) props.onPoint?.(point); }
     if (gesture === null || pointer.getSnapshot()?.pointerId !== event.pointerId) return; const point = eventPoint(event); if (point === null) return;
     if (gesture.type === "draw") { const last = gesture.points[gesture.points.length - 1]; if (last && distance(last, point) >= 4) gestures.preview({ ...gesture, points: [...gesture.points, point] }); }
     else gestures.preview({ ...gesture, current: point });
@@ -125,8 +142,10 @@ export function AnnotationHand(props: AnnotationHandProps) {
   function commitActiveGesture() {
     const committed = gestures.commit(); if (committed === null) return;
     if (committed.type === "draw" || committed.type === "create") {
-      const annotation = committed.type === "draw" ? drawAnnotation(source.id, committed.points, props.createId) : createAnnotation(source.id, committed, props.createId);
-      if (annotation === null || !props.editor.dispatch({ type: "annotation.create", annotation }).ok) return; setTool("select");
+      const annotation = committed.type === "draw" ? (drawAnnotation(source.id, committed.points, props.createId) ?? (props.following ? createAnnotation(source.id, { type: "create", tool: "comment", start: committed.points[0]!, current: committed.points[0]! }, props.createId) : null)) : createAnnotation(source.id, committed, props.createId);
+      if (annotation === null || !props.editor.dispatch({ type: "annotation.create", annotation }).ok) return; if (!props.following) setTool("select");
+      props.onAnnotationCreated?.(annotation);
+      if (props.following) return;
       setEditingId(annotation.presentation.type === "reaction" ? null : annotation.id); announce(createdMessage(annotation)); return;
     }
     const dx = committed.current.x - committed.start.x; const dy = committed.current.y - committed.start.y;
@@ -161,23 +180,23 @@ export function AnnotationHand(props: AnnotationHandProps) {
   return <div className={classes.frame} style={{ aspectRatio: `${source.width} / ${source.height}`, "--annotation-accent": props.rasterStyle.stroke, "--annotation-reaction-shadow": props.reactionShadow ?? "none" } as CSSProperties}>
     <div className={classes.stage}>
       <svg aria-label={labels.canvas} className={classes.canvas} data-tool={tool} onKeyDown={keyDown} onPointerDown={canvasDown} onLostPointerCapture={(event) => cancel(event, "lost-capture")} onPointerCancel={(event) => cancel(event, "pointer-cancel")} onPointerMove={pointerMove} onPointerUp={pointerUp} role="application" tabIndex={0} viewBox={`0 0 ${source.width} ${source.height}`}>
-        <image href={props.sourceUrl} width={source.width} height={source.height} pointerEvents="none" />
-        {document.annotations.map((annotation, index) => <AnnotationShape key={annotation.id} annotation={project(annotation, gesture)} index={index + 1} selected={annotation.id === selectedId} onHandle={handleInteraction} onPreview={(visible) => setPreviewId(visible ? annotation.id : null)} />)}
+        {props.content ?? <image href={props.sourceUrl} width={source.width} height={source.height} pointerEvents="none" />}
+        {displayedAnnotations.map((annotation, index) => <AnnotationShape compact={props.following ?? false} key={annotation.id} annotation={project(annotation, gesture)} index={index + 1} selected={props.following ? annotation.id === props.highlightedAnnotationId : annotation.id === selectedId} onHandle={handleInteraction} onPreview={(visible) => setPreviewId(visible ? annotation.id : null)} />)}
         {gesture?.type === "create" ? <DraftShape gesture={gesture} /> : null}{gesture?.type === "draw" ? <Stroke points={gesture.points} draft /> : null}
       </svg>
-      {document.annotations.map((annotation, index) => gesture === null && previewId === annotation.id && annotation.body.instruction.trim() && editingId !== annotation.id ? <CommentPreview key={annotation.id} annotation={annotation} index={index + 1} source={source} className={classes.commentPreview} /> : null)}
-      {selected && editingId === selected.id ? <CommentComposer annotation={selected} index={document.annotations.indexOf(selected) + 1} source={source} classNames={classes} labels={labels} onCancel={() => cancelComment(selected)} onSave={(instruction) => saveComment(selected, instruction)} onSubmit={(instruction) => submitComment(selected, instruction)} /> : null}
+      {document.annotations.map((annotation, index) => !props.following && gesture === null && previewId === annotation.id && annotation.body.instruction.trim() && editingId !== annotation.id ? <CommentPreview key={annotation.id} annotation={annotation} index={index + 1} source={source} className={classes.commentPreview} /> : null)}
+      {!props.following && selected && editingId === selected.id ? props.renderCommentComposer ? props.renderCommentComposer({ annotation: selected, submit: instruction => submitComment(selected, instruction), cancel: () => cancelComment(selected) }) : <CommentComposer annotation={selected} index={document.annotations.indexOf(selected) + 1} source={source} classNames={classes} labels={labels} onCancel={() => cancelComment(selected)} onSave={(instruction) => saveComment(selected, instruction)} onSubmit={(instruction) => submitComment(selected, instruction)} /> : null}
     </div>
-    <Toolbar label={labels.tools} className={classes.toolDock}>
-      {annotationTools.filter(({ id }) => enabled.includes(id)).map(({ id, label, shortcut, icon: Icon }) => <Toggle key={id} label={label} tooltip={`${label} (${shortcut})`} pressed={tool === id} className={classes.dockButton} onClick={() => choose(id)}><Icon aria-hidden="true" size={16} /></Toggle>)}
+    <Toolbar label={labels.tools} className={classes.toolDock} hidden={props.following}>
+      {annotationTools.filter(({ id }) => enabled.includes(id)).map(({ id, label, shortcut, icon: Icon }) => <Toggle key={id} label={props.toolLabels?.[id] ?? label} tooltip={`${props.toolLabels?.[id] ?? label} (${shortcut})`} pressed={tool === id} className={classes.dockButton} onClick={() => choose(id)}><Icon aria-hidden="true" size={16} /></Toggle>)}
       <ToolbarSeparator className={classes.dockDivider} />
       <Command label={labels.deleteAnnotation} className={classes.dockButton} disabled={selected === null} onClick={remove}><Trash2 aria-hidden="true" size={16} /></Command>
-      <Command label={labels.downloadImage} className={classes.dockButton} onClick={() => void download()}><Download aria-hidden="true" size={16} /></Command>
+      {!props.content && <Command label={labels.downloadImage} className={classes.dockButton} onClick={() => void download()}><Download aria-hidden="true" size={16} /></Command>}
     </Toolbar>
   </div>;
 
   function saveComment(annotation: Annotation, instruction: string) { const value = instruction.trim(); if (annotation.body.instruction !== value) props.editor.dispatch({ type: "annotation.body.set", annotationId: annotation.id, instruction: value }); setTool("select"); announce("수정 요청을 추가했습니다."); }
-  function submitComment(annotation: Annotation, instruction: string) { saveComment(annotation, instruction); setEditingId(null); }
+  function submitComment(annotation: Annotation, instruction: string) { saveComment(annotation, instruction); setEditingId(null); props.onSubmitAnnotation?.({ ...annotation, body: { instruction: instruction.trim() } }); }
   function cancelComment(annotation: Annotation) { if (!annotation.body.instruction) props.editor.dispatch({ type: "annotation.delete", annotationId: annotation.id }); else select(null); setEditingId(null); }
 }
 
@@ -192,6 +211,7 @@ function CommentComposer(props: { annotation: Annotation; index: number; source:
 }
 function CommentPreview({ annotation, index, source, className }: { annotation: Annotation; index: number; source: AnnotationSource; className?: string | undefined }) { const dock = composerDock(annotation, source); return <div aria-label={`Comment ${index} preview`} className={className} role="tooltip" style={dockStyle(dock, source)}>{annotation.body.instruction}</div>; }
 function AnnotationShape(props: {
+  readonly compact: boolean;
   readonly annotation: Annotation;
   readonly index: number;
   readonly selected: boolean;
@@ -226,7 +246,7 @@ function AnnotationShape(props: {
       style={{ cursor: drag.cursor }}
     >
       {annotation.presentation.type === "marker" && selector.type === "point" ? (
-        <Badge index={props.index} point={selector} selected={props.selected} />
+        props.compact ? <circle cx={selector.x} cy={selector.y} r={props.selected ? 10 : 6} fill={accent} /> : <Badge index={props.index} point={selector} selected={props.selected} />
       ) : null}
       {annotation.presentation.type === "reaction" && selector.type === "point" ? (
         <Reaction point={selector} reaction={annotation.presentation.reaction} selected={props.selected} />
@@ -234,7 +254,7 @@ function AnnotationShape(props: {
       {annotation.presentation.type === "outline" && selector.type === "rectangle" ? (
         <>
           <rect {...common} {...selector} fill="transparent" />
-          {props.selected ? (
+          {props.selected && !props.compact ? (
             <AnnotationPointHandle
               aria-label="Resize rectangle"
               cx={selector.x + selector.width}
@@ -248,7 +268,7 @@ function AnnotationShape(props: {
       {annotation.presentation.type === "stroke" && selector.type === "path" ? (
         <>
           <Stroke points={selector.points} selected={props.selected} />
-          {props.selected ? (
+          {props.selected && !props.compact ? (
             <AnnotationPointHandle aria-label="Resize drawing" cx={bounds.x + bounds.width} cy={bounds.y + bounds.height} descriptor={{ kind: "resize", edge: "se", cursor: { idle: "nwse-resize" } }} onHandle={(interaction, event) => props.onHandle(interaction, event, annotation, "resize")} />
           ) : null}
         </>
@@ -256,7 +276,7 @@ function AnnotationShape(props: {
       {annotation.presentation.type === "arrow" && selector.type === "arrow" ? (
         <>
           <Arrow from={selector.from} to={selector.to} selected={props.selected} />
-          {props.selected ? (
+          {props.selected && !props.compact ? (
             <AnnotationPointHandle
               aria-label="Resize arrow"
               cx={selector.to.x}
@@ -267,7 +287,7 @@ function AnnotationShape(props: {
           ) : null}
         </>
       ) : null}
-      {annotation.presentation.type !== "marker" && annotation.presentation.type !== "reaction" ? (
+      {!props.compact && annotation.presentation.type !== "marker" && annotation.presentation.type !== "reaction" ? (
         <Badge index={props.index} point={bounds} selected={props.selected} />
       ) : null}
     </g>

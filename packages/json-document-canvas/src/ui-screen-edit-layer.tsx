@@ -13,7 +13,7 @@ export interface UIScreenEditLayerProps {
   readonly object: CanvasObject;
   readonly editable: boolean;
   /** Measured runtime geometry at entry; stable throughout this edit session. */
-  readonly origin?: UIScreenEditBounds;
+  readonly origin?: UIScreenEditBounds | undefined;
   readonly children: ReactNode;
 }
 

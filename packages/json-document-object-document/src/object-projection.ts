@@ -38,6 +38,7 @@ export interface ObjectTextProjection extends ObjectBounds, Pick<ObjectStyle, "f
 
 export function projectObjectText(object: DocumentObject): ObjectTextProjection | null {
   const style = getObjectStyle(object);
+  if (object.kind === "section") return { x: object.x, y: object.y - 32, width: object.width, height: 28, widthMode: "fixed", text: object.label, color: style.textColor ?? "#253044", fontSize: 16, fontWeight: 400, textAlign: "left", verticalAlign: "top" };
   if (style.fontSize === undefined) return null;
   const shape = object.kind === "rectangle" || object.kind === "ellipse";
   const padding = object.kind === "text" ? 0 : object.kind === "sticky-note" ? 16 : 12;
@@ -57,6 +58,7 @@ export function createCanvasObject(
   style: { readonly color: string; readonly label: string; readonly fontSize?: number; readonly textColor?: string },
 ): CanvasObjectDraft {
   const base = { ...bounds, width: Math.max(1, bounds.width), height: Math.max(1, bounds.height), color: style.color, label: style.label };
+  if (kind === "section") return { ...base, kind, ...(style.textColor === undefined ? {} : { textColor: style.textColor }) };
   return kind === "text" ? { ...base, kind, fontSize: style.fontSize ?? 32 } : {
     ...base, kind, ...(style.fontSize === undefined ? {} : { fontSize: style.fontSize }), ...(style.textColor === undefined ? {} : { textColor: style.textColor }),
   };

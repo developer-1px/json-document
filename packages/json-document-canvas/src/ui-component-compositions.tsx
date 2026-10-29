@@ -13,8 +13,8 @@ import type { UIComponentInteraction } from "./ui-component-view.js";
 export interface UIComponentCompositionProps {
   readonly text: string;
   readonly content: UIComponentContent;
-  readonly interaction?: UIComponentInteraction;
-  readonly renderChildren?: (ids: readonly string[]) => ReactNode;
+  readonly interaction?: UIComponentInteraction | undefined;
+  readonly renderChildren?: ((ids: readonly string[]) => ReactNode) | undefined;
   readonly collection?: ReactNode;
 }
 /** Composition adapters preserve the public primitive's focus, dismiss and pointer lifecycle. */
@@ -40,7 +40,7 @@ export function UIComponentComposition({text, content, interaction, renderChildr
     case "tag": return <Tag>{text}</Tag>;
     case "tag-group": return <TagGroup label={text} items={content.items.map((label,index)=>({id:String(index),label}))}/>;
     case "tag-picker": {
-      const options=properties.options && typeof properties.options === "object" && !Array.isArray(properties.options) ? properties.options.items : [];
+      const options=properties.options && typeof properties.options === "object" && !Array.isArray(properties.options) && "items" in properties.options ? properties.options.items : [];
       return <TagPicker label={text} options={Array.isArray(options) ? options.flatMap(option=>option && typeof option==="object" && !Array.isArray(option) && typeof option.id==="string" && typeof option.label==="string" ? [{id:option.id,label:option.label,disabled:option.disabled===true}] : []) : []} value={ids("selectedIds")} disabled={interaction?.busy || properties.disabled===true} onValueChange={selectedIds=>interaction?.onPropsChange({selectedIds:[...selectedIds]})}/>;
     }
     case "date-range-display": return <DateRangeDisplay start={typeof properties.start==="string"?properties.start:""} end={typeof properties.end==="string"?properties.end:""}/>;
@@ -51,11 +51,11 @@ export function UIComponentComposition({text, content, interaction, renderChildr
     case "inline-alert": return <InlineAlert title={text} tone={properties.tone === "error" || properties.tone === "success" ? properties.tone : "info"} actions={children}>{content.detail || undefined}</InlineAlert>;
     case "stepper": return <Stepper label={text} steps={content.items.map((label,index)=>({id:String(index),label,state:index < Number(properties.currentIndex ?? 0) ? "complete" : index === Number(properties.currentIndex ?? 0) ? "current" : "pending"}))} />;
     case "activity-feed": {
-      const entries = properties.entries && typeof properties.entries === "object" && !Array.isArray(properties.entries) ? properties.entries.items : [];
+      const entries = properties.entries && typeof properties.entries === "object" && !Array.isArray(properties.entries) && "items" in properties.entries ? properties.entries.items : [];
       return <ActivityFeed label={text} presentation={properties.presentation === "timeline" ? "timeline" : "list"} entries={Array.isArray(entries) ? entries.flatMap((entry,index)=>entry && typeof entry === "object" && !Array.isArray(entry) && typeof entry.actor === "string" && typeof entry.action === "string" && typeof entry.dateTime === "string" && typeof entry.timeLabel === "string" ? [{id:typeof entry.id === "string" ? entry.id : String(index),actor:entry.actor,action:entry.action,dateTime:entry.dateTime,timeLabel:entry.timeLabel,detail:typeof entry.detail === "string" ? entry.detail : undefined}] : []) : []} empty={<EmptyState title={text} description={content.detail || undefined} />} />;
     }
     case "people-picker": {
-      const candidates=properties.people && typeof properties.people==="object" && !Array.isArray(properties.people) ? properties.people.items : undefined;
+      const candidates=properties.people && typeof properties.people==="object" && !Array.isArray(properties.people) && "items" in properties.people ? properties.people.items : undefined;
       const people=Array.isArray(candidates) ? candidates.flatMap(person=>person && typeof person==="object" && !Array.isArray(person) && typeof person.id==="string" && typeof person.name==="string" ? [{id:person.id,name:person.name,src:typeof person.src==="string"?person.src:undefined,description:typeof person.description==="string"?person.description:undefined,disabled:person.disabled===true}] : []) : content.items.map(name=>({id:name,name}));
       return <PeoplePicker label={text} people={people} value={typeof content.value === "string" ? content.value : ""} disabled={interaction?.busy || properties.disabled === true} onValueChange={id=>interaction?.onValueChange(id)} />;
     }

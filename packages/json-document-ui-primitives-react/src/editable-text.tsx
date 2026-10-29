@@ -6,7 +6,7 @@ import { contentPresentation } from "./content-presentation.js";
 
 /** Reading is the default; a draft belongs to one record identity and commits only on save. */
 export function EditableText({label, value, identity, disabled = false, onCommit}: {
-  readonly label: string; readonly value: string; readonly identity?: string;
+  readonly label: string; readonly value: string; readonly identity?: string | undefined;
   readonly disabled?: boolean; readonly onCommit: (value: string) => boolean | void;
 }): ReactNode {
   const [editing, setEditing] = useState(false);

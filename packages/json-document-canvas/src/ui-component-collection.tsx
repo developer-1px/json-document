@@ -12,7 +12,7 @@ function formatCollectionFieldValue(field: DatabaseDocument["schema"]["propertie
 }
 
 /** Database owns table keyboard/cells/filter/sort; this adapter maps named fields and shared selection. */
-export function UIComponentCollection({text,content,projection,interaction,renderChildren}: {text:string; content:UIComponentContent; projection?:UIBuilderCollectionProjection; interaction?:UIComponentInteraction; renderChildren?: (ids: readonly string[]) => ReactNode}): ReactNode {
+export function UIComponentCollection({text,content,projection,interaction,renderChildren}: {text:string; content:UIComponentContent; projection?:UIBuilderCollectionProjection | undefined; interaction?:UIComponentInteraction | undefined; renderChildren?: ((ids: readonly string[]) => ReactNode) | undefined}): ReactNode {
   const [view, setView] = useState<DatabaseDocument["views"][number] | null>(null);
   if (!projection) return <p role="status">연결할 데이터 컬렉션을 선택하세요.</p>;
   if (content.component === "record-card") {

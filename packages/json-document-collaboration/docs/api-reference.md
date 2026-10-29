@@ -217,6 +217,8 @@ interface CollaborationMembership {
 interface CollaborationReplica {
   readonly epoch: CollaborationEpoch;
   status(): ReplicaStatus;
+  /** Current JSON Pointer of a stable member, or null when it is not visible. */
+  locate(memberId: MemberId): string | null;
   exportBundle(): CollaborationBundle;
   exportCheckpoint(): CollaborationCheckpoint;
   ingest(bundle: unknown): CollaborationIngestResult;
@@ -428,10 +430,43 @@ interface TextSpliceOperation {
 ## `@interactive-os/json-document-collaboration/history`
 
 아래 API는 package root가 아닌 이 subpath에서 import합니다.
+### `CollaborationParticipant`
+
+```ts
+interface CollaborationParticipant {
+  readonly runtime: HistoryRuntime;
+  /** Advance the observed frontier. Remote changes do not advance it implicitly. */
+  observe(): void;
+  /** Merge locally authored changes, then observe the merged result. */
+  publish(): { readonly ok: boolean; readonly code?: string; readonly collaboration: ReplicaStatus };
+}
+```
+### `CollaborationWorkspace`
+
+```ts
+interface CollaborationWorkspace {
+  readonly runtime: HistoryRuntime;
+  /** Checkpoint source, including history-only changes, suitable for durable storage. */
+  readonly snapshot: { readonly value: JSONValue };
+  subscribe(listener: () => void): () => void;
+  /** One cached replica per actor; the shared runtime's actor is reserved. */
+  participant(actorId: string): CollaborationParticipant;
+}
+```
+### `createCollaborationWorkspace`
+
+```ts
+createCollaborationWorkspace(runtime: HistoryRuntime, options: CollaborationRestoreOptions): CollaborationWorkspace
+```
 ### `createHistoryRuntime`
 
 ```ts
 createHistoryRuntime(initial: unknown, options: CollaborationRuntimeOptions): HistoryRuntime
+```
+### `forkHistoryRuntime`
+
+```ts
+forkHistoryRuntime(source: HistoryRuntime, actorId: string): HistoryRuntime
 ```
 ### `History`
 
@@ -682,6 +717,27 @@ interface TextSelection {
 ## `@interactive-os/json-document-collaboration/editing`
 
 아래 API는 package root가 아닌 이 subpath에서 import합니다.
+### `CollaborationCanvasReviewOptions`
+
+```ts
+interface CollaborationCanvasReviewOptions {
+  readonly workspace: CollaborationWorkspace;
+  readonly queue: AnnotationReviewQueue;
+  readonly htmlAdapter: CanvasHTMLAdapter;
+  readonly createActorId: () => string;
+  readonly execute: (request: { readonly task: AnnotationReviewTask; readonly signal: AbortSignal; readonly report: (response: string) => void; readonly tools: ReturnType<typeof createCollaborationCanvasTools> }) => Promise<void>;
+}
+```
+### `createCollaborationCanvasReview`
+
+```ts
+createCollaborationCanvasReview({ workspace, queue, htmlAdapter, createActorId, execute }: CollaborationCanvasReviewOptions): (task: AnnotationReviewTask, cancellation: AnnotationReviewCancellation, report?: (response: string) => void) => Promise<string>
+```
+### `createCollaborationCanvasTools`
+
+```ts
+createCollaborationCanvasTools(participant: CollaborationParticipant, options?: Parameters<typeof createObjectEditor>[1], htmlAdapter?: Parameters<typeof createCanvasEditorTools>[2]): { name: string; description: string; parameters: Record<...>; execute: (args: unknown) => unknown; }[]
+```
 ### `createCollaborationEditingHistory`
 
 ```ts

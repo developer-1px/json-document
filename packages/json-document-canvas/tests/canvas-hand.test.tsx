@@ -331,7 +331,7 @@ test("external selection changes supersede a pending preview without a stale sel
 test("every toolbar control shares icon, accessible name and canonical tooltip without losing state", () => {
   const { svg } = setup();
   const toolbar = within(screen.getByRole("toolbar", { name: "Canvas tools" }));
-  const labels = ["선택", "글자", "스티커 노트", "표", "사각형", "타원", "그리기", "실행 취소", "다시 실행", "복제", "삭제", "JSON"];
+  const labels = ["선택", "글자", "스티커 노트", "섹션", "표", "사각형", "타원", "그리기", "실행 취소", "다시 실행", "복제", "삭제", "JSON"];
   expect(toolbar.getAllByRole("button")).toHaveLength(labels.length);
   for (const label of labels) {
     const button = toolbar.getByRole("button", { name: label });
@@ -823,4 +823,18 @@ test("Korean physical tool keys update both toolbar selection and canvas cursor"
   expect(svg.getAttribute("data-tool")).toBe("rectangle");
   fireEvent.keyDown(svg, { key: "ㅅ", code: "KeyT", isComposing: true });
   expect(svg.getAttribute("data-tool")).toBe("rectangle");
+});
+
+test("translation previews skip document layout and commit once on drop", () => {
+  const { container, editor, commits, value } = setup(populated);
+  const layout = vi.spyOn(editor, "layoutDocument");
+  const target = container.querySelector('[data-canvas-object="b"]')!;
+  fireEvent.pointerDown(target, event(160, 60));
+  for (let i = 1; i <= 20; i++) fireEvent.pointerMove(window, event(160 + i, 60 + i));
+  expect(layout).not.toHaveBeenCalled();
+  expect(commits).not.toHaveBeenCalled();
+  expect(value()).toEqual(populated);
+  fireEvent.pointerUp(window, event(180, 80));
+  expect(commits).toHaveBeenCalledOnce();
+  expect(value().objects.find(object => object.id === "b")).toMatchObject({ x: 340, y: 140 });
 });

@@ -122,7 +122,7 @@ interface DatabaseHandCommonProps<Row extends Record<string, unknown>> {
   readonly loadingState?: ReactNode;
   readonly errorState?: (message: string) => ReactNode;
   readonly loading?: boolean;
-  readonly readOnly?: boolean;
+  readonly readOnly?: boolean | undefined;
   readonly className?: string;
   readonly style?: CSSProperties;
   readonly density?: "comfortable" | "compact";

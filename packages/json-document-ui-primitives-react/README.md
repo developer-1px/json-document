@@ -60,3 +60,5 @@ See the [Contextual controls API](docs/contextual-controls.md).
 페이지·계층 탐색·현재 위치·라우터 링크: [페이지와 탐색](docs/page-navigation.md).
 
 `CodeBlock` / `InlineCode` own the shared code surface and copy command; inject syntax with `renderLine`, document children/attributes with `children` / `preProps`, and the canonical selection binding with `codeRef`. `WaveDots` owns the shared activity dots used by `ChatActivity` and the animation package. See the package [API reference](docs/api-reference.md) and the live [Composer Usage](/demo/composer).
+
+- [Bounded editing and agent handoff — EditingControls](docs/editing-controls.md)

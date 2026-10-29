@@ -55,7 +55,7 @@ export type NavigationLinkRenderer = (item: NavigationItem, attributes: Omit<Anc
 export function SidebarNavigation({label, groups, currentId, onNavigate, renderLink, collapsed = false}: {
   readonly label: string;
   readonly groups: readonly NavigationGroup[];
-  readonly currentId?: string;
+  readonly currentId?: string | undefined;
   readonly onNavigate?: (id: string) => void;
   readonly renderLink?: NavigationLinkRenderer;
   readonly collapsed?: boolean;

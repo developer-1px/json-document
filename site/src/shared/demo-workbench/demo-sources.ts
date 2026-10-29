@@ -92,9 +92,28 @@ import uiBuilderScreenControlsSource from "../../../../packages/json-document-ca
 import uiBuilderEditingSource from "../../../../packages/json-document-editing/src/ui-builder.ts?raw";
 import uiComponentModelSource from "../../../../packages/json-document-object-document/src/ui-component.ts?raw";
 import objectCollisionLayoutSource from "../../../../packages/json-document-object-document/src/object-collision-layout.ts?raw";
+import webHTMLReviewSource from "../../../../packages/json-document-web/src/html-artifact-review.ts?raw";
+import annotationReviewPlanSource from "../../../../packages/json-document-editing/src/annotation-review-plan.ts?raw";
+import annotationFollowingSource from "../../../../packages/json-document-editing/src/annotation-following.ts?raw";
+import annotationFollowingUISource from "../../../../packages/json-document-annotation/src/annotation-following.tsx?raw";
+import annotationReviewCSSSource from "../../../../packages/json-document-annotation/src/annotation-review.css?raw";
+import collaborationCanvasReviewSource from "../../../../packages/json-document-collaboration/src/canvas-review.ts?raw";
+import annotationReviewSessionSource from "../../../../packages/json-document-editing/src/annotation-review-session.ts?raw";
+import annotationReviewUISource from "../../../../packages/json-document-annotation/src/annotation-review.tsx?raw";
+import annotationReviewSource from "../../../../packages/json-document-editing/src/annotation-review.ts?raw";
+import speechInputSource from "../../../../packages/json-document-web/src/speech-input.ts?raw";
+import composerSpeechInputSource from "../../../../packages/json-document-composer-react/src/speech-input.tsx?raw";
+import canvasPagesSource from "../../../../packages/json-document-canvas/src/canvas-pages.tsx?raw";
+import canvasEditTargetSource from "../../../../packages/json-document-canvas/src/canvas-edit-target.ts?raw";
+import canvasEditControlsSource from "../../../../packages/json-document-canvas/src/canvas-edit-controls.tsx?raw";
+import editingControlsSource from "../../../../packages/json-document-ui-primitives-react/src/editing-controls.tsx?raw";
 import objectContainerLayoutSource from "../../../../packages/json-document-object-document/src/object-container-layout.ts?raw";
 import objectTextLayoutSource from "../../../../packages/json-document-object-document/src/object-text-layout.ts?raw";
 import webTextMeasurementSource from "../../../../packages/json-document-web/src/text-measurement.ts?raw";
+import webHTMLArtifactSource from "../../../../packages/json-document-web/src/html-artifact.ts?raw";
+import webHTMLArtifactEditingSource from "../../../../packages/json-document-web/src/html-artifact-editing.ts?raw";
+import objectHTMLSource from "../../../../packages/json-document-editing/src/object-html.ts?raw";
+import canvasHTMLObjectSource from "../../../../packages/json-document-canvas/src/canvas-html-object.tsx?raw";
 import canvasToolsSource from "../../../../packages/json-document-editing/src/canvas-tools.ts?raw";
 import markdownSheetPresentationSource from "../../../../packages/json-document-markdown-react/src/markdown-sheet-presentation.tsx?raw";
 import sheetHandCssSource from "../../../../packages/json-document-sheet/src/sheet-hand.css?raw";
@@ -167,6 +186,8 @@ import canvasHandStyleSource from "../../../../packages/json-document-canvas/src
 import canvasContentToolbarSource from "../../../../packages/json-document-canvas/src/canvas-content-toolbar.tsx?raw";
 import canvasHandSource from "../../../../packages/json-document-canvas/src/canvas-hand.tsx?raw";
 import canvasInteractionSource from "../../../../packages/json-document-canvas/src/use-canvas-hand.ts?raw";
+import canvasSectionSource from "../../../../packages/json-document-canvas/src/canvas-section.tsx?raw";
+import objectPlacementSource from "../../../../packages/json-document-object-document/src/object-placement.ts?raw";
 import canvasObjectViewSource from "../../../../packages/json-document-canvas/src/canvas-object-view.tsx?raw";
 import canvasStyleControlsSource from "../../../../packages/json-document-canvas/src/canvas-style-controls.tsx?raw";
 import canvasClipboardSource from "../../../../packages/json-document-canvas/src/canvas-clipboard.ts?raw";
@@ -315,6 +336,8 @@ import contentEditableReactSource from "../../../../packages/json-document-conte
 import contentEditableLeaseSource from "../../../../packages/json-document-contenteditable/src/lease.ts?raw";
 import plainTextDOMSource from "../../../../packages/json-document-contenteditable/src/dom/plain-text.ts?raw";
 import textDOMIndexSource from "../../../../packages/json-document-contenteditable/src/dom/text-index.ts?raw";
+import windowDockSource from "../../../../packages/json-document-ui-primitives-react/src/window-dock.tsx?raw";
+import collaborationWorkspaceSource from "../../../../packages/json-document-collaboration/src/workspace.ts?raw";
 import collaborationCreateSource from "../../../../packages/json-document-collaboration/src/create.ts?raw";
 import collaborationEditingSource from "../../../../packages/json-document-collaboration/src/editing-index.ts?raw";
 import collaborationContentEditableSource from "../../../../packages/contenteditable-collaboration/src/lease.ts?raw";
@@ -412,6 +435,25 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-canvas/src/ui-builder-screen-controls.tsx", uiBuilderScreenControlsSource],
   ["packages/json-document-editing/src/ui-builder.ts", uiBuilderEditingSource],
   ["packages/json-document-object-document/src/ui-component.ts", uiComponentModelSource],
+  ["packages/json-document-editing/src/annotation-review-plan.ts", annotationReviewPlanSource],
+  ["packages/json-document-editing/src/annotation-following.ts", annotationFollowingSource],
+  ["packages/json-document-annotation/src/annotation-following.tsx", annotationFollowingUISource],
+  ["packages/json-document-annotation/src/annotation-review.css", annotationReviewCSSSource],
+  ["packages/json-document-web/src/html-artifact.ts", webHTMLArtifactSource],
+  ["packages/json-document-web/src/html-artifact-review.ts", webHTMLReviewSource],
+  ["packages/json-document-web/src/html-artifact-editing.ts", webHTMLArtifactEditingSource],
+  ["packages/json-document-editing/src/object-html.ts", objectHTMLSource],
+  ["packages/json-document-canvas/src/canvas-html-object.tsx", canvasHTMLObjectSource],
+  ["packages/json-document-canvas/src/canvas-pages.tsx", canvasPagesSource],
+  ["packages/json-document-annotation/src/annotation-review.tsx", annotationReviewUISource],
+  ["packages/json-document-editing/src/annotation-review-session.ts", annotationReviewSessionSource],
+  ["packages/json-document-collaboration/src/canvas-review.ts", collaborationCanvasReviewSource],
+  ["packages/json-document-editing/src/annotation-review.ts", annotationReviewSource],
+  ["packages/json-document-web/src/speech-input.ts", speechInputSource],
+  ["packages/json-document-composer-react/src/speech-input.tsx", composerSpeechInputSource],
+  ["packages/json-document-canvas/src/canvas-edit-target.ts", canvasEditTargetSource],
+  ["packages/json-document-canvas/src/canvas-edit-controls.tsx", canvasEditControlsSource],
+  ["packages/json-document-ui-primitives-react/src/window-dock.tsx", windowDockSource],
   ["packages/json-document-editing/src/canvas-tools.ts", canvasToolsSource],
   ["packages/json-document-editing/src/text-edit.ts", textEditSource],
   ["packages/json-document-editing/src/text-tools.ts", textToolsSource],
@@ -503,6 +545,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-canvas/src/canvas-hand.css", canvasHandStyleSource],
   ["packages/json-document-canvas/src/use-canvas-hand.ts", canvasInteractionSource],
   ["packages/json-document-canvas/src/canvas-object-view.tsx", canvasObjectViewSource],
+  ["packages/json-document-canvas/src/canvas-section.tsx", canvasSectionSource],
+  ["packages/json-document-object-document/src/object-placement.ts", objectPlacementSource],
   ["packages/json-document-canvas/src/canvas-style-controls.tsx", canvasStyleControlsSource],
   ["packages/json-document-canvas/src/canvas-clipboard.ts", canvasClipboardSource],
   ["packages/json-document-editing/src/canvas-clipboard.ts", canvasClipboardEditingSource],
@@ -625,6 +669,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/input-controls.tsx", uiInputControlsSource],
   ["packages/json-document-ui-primitives-react/src/presentations.tsx", uiPresentationsSource],
   ["packages/json-document-ui-primitives-react/src/contextual-controls.tsx", uiContextualControlsSource],
+  ["packages/json-document-ui-primitives-react/src/editing-controls.tsx", editingControlsSource],
   ["packages/json-document-ui-primitives-react/src/product-shell.tsx", uiProductShellSource],
   ["packages/json-document-ui-primitives-react/src/toolbar.tsx", uiToolbarSource],
   ["packages/json-document-ui-primitives-react/src/record-workspace.tsx", recordWorkspaceSource],
@@ -676,6 +721,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-contenteditable/src/dom/text-selection-geometry.ts", textSelectionGeometrySource],
   ["packages/json-document-contenteditable/src/dom/text-selection.css", textSelectionCSSSource],
   ["packages/json-document-contenteditable/src/dom/text-index.ts", textDOMIndexSource],
+  ["packages/json-document-collaboration/src/workspace.ts", collaborationWorkspaceSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
   ["packages/json-document-collaboration/src/editing-index.ts", collaborationEditingSource],
   ["packages/contenteditable-collaboration/src/lease.ts", collaborationContentEditableSource],
@@ -736,11 +782,15 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["packages/json-document-ui-builder/src/runtime-hand.tsx", ["packages/json-document-canvas/src/ui-screen-edit-layer.tsx", "packages/json-document-canvas/src/canvas-hand.tsx"]],
   ["packages/json-document-canvas/src/ui-screen-edit-layer.tsx", ["packages/json-document-canvas/src/ui-screen-edit-layer.css"]],
   ["packages/json-document-canvas/src/ui-builder-screen-controls.tsx", ["packages/json-document-canvas/src/canvas-editing-commands.tsx", "packages/json-document-canvas/src/ui-builder.css"]],
+  ["packages/json-document-annotation/src/annotation-review.tsx", ["packages/json-document-ui-primitives-react/src/chat-bubble.tsx", "packages/json-document-ui-primitives-react/src/chat-bubble.css", "packages/json-document-ui-primitives-react/src/presentations.tsx", "packages/json-document-annotation/src/annotation-review.css", "packages/json-document-annotation/src/annotation-following.tsx", "packages/json-document-editing/src/annotation-following.ts", "packages/json-document-annotation/src/annotation-hand.tsx", "packages/json-document-editing/src/annotation-review-session.ts", "packages/json-document-editing/src/annotation-review.ts"]],
+  ["packages/json-document-collaboration/src/canvas-review.ts", ["packages/json-document-collaboration/src/editing-index.ts", "packages/json-document-editing/src/annotation-review.ts"]],
+  ["packages/json-document-canvas/src/canvas-html-object.tsx", ["packages/json-document-web/src/html-artifact-review.ts", "packages/json-document-web/src/html-artifact.ts", "packages/json-document-web/src/html-artifact-editing.ts", "packages/json-document-editing/src/object-html.ts"]],
+  ["packages/json-document-editing/src/canvas-tools.ts", ["packages/json-document-editing/src/object-html.ts"]],
   ["packages/json-document-contenteditable/src/lease.ts", ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts"]],
   ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts", ["packages/json-document-contenteditable/src/dom/text-selection-geometry.ts", "packages/json-document-contenteditable/src/dom/text-selection.css"]],
   ["packages/json-document-editing/src/markdown-table.ts",["packages/json-document-editing/src/projected-sheet.ts"]],
   ["packages/json-document-editing/src/object-sheet.ts",["packages/json-document-editing/src/projected-sheet.ts", "packages/json-document-object-document/src/embedded-document.ts"]],
-  ["packages/json-document-canvas/src/canvas-hand.tsx",["packages/json-document-canvas/src/canvas-content-toolbar.tsx","packages/json-document-canvas/src/canvas-sheet-object.tsx", "packages/json-document-canvas/src/use-canvas-viewport.ts", "packages/json-document-canvas/src/canvas-hand.css", "packages/json-document-object-document/src/object-text-layout.ts", "packages/json-document-web/src/text-measurement.ts", "packages/json-document-object-document/src/object-container-layout.ts"]],
+  ["packages/json-document-canvas/src/canvas-hand.tsx",["packages/json-document-canvas/src/canvas-section.tsx", "packages/json-document-object-document/src/object-placement.ts","packages/json-document-canvas/src/canvas-content-toolbar.tsx","packages/json-document-canvas/src/canvas-sheet-object.tsx", "packages/json-document-canvas/src/use-canvas-viewport.ts", "packages/json-document-canvas/src/canvas-hand.css", "packages/json-document-object-document/src/object-text-layout.ts", "packages/json-document-web/src/text-measurement.ts", "packages/json-document-object-document/src/object-container-layout.ts"]],
 
   ["packages/json-document-sheet/src/sheet-hand.tsx", ["packages/json-document-sheet/src/sheet-hand.css","packages/json-document-sheet/src/sheet-axis-resize.tsx", "packages/json-document-sheet/src/sheet-range-selection.tsx", "packages/json-document-sheet/src/sheet-fill-handle.tsx"]],
   ["packages/json-document-editing/src/sheet-navigation.ts", ["packages/json-document-selection/src/interaction/grid-traversal.ts"]],
@@ -887,6 +937,18 @@ const registeredPublicUsages = [
   { packageName: "@interactive-os/json-document-object-document", symbol: "assertUIBuilderDocument", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
   { packageName: "@interactive-os/json-document-object-document", symbol: "createUIComponentObject", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
   { packageName: "@interactive-os/json-document-object-document", symbol: "uiBuilderComponentChildIds", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
+  ...["htmlEmbeddedDocumentType", "createCanvasHTML", "readCanvasHTML", "updateCanvasHTML"].map(symbol => ({ packageName: "@interactive-os/json-document-editing", symbol, sourcePath: "packages/json-document-editing/src/object-html.ts" })),
+  ...["webCanvasHTMLAdapter", "createWebHTMLArtifactSource", "editWebHTMLArtifactNode"].map(symbol => ({ packageName: "@interactive-os/json-document-web", symbol, sourcePath: "packages/json-document-web/src/html-artifact.ts" })),
+  { packageName: "@interactive-os/json-document-web", symbol: "measureWebHTMLReview", sourcePath: "packages/json-document-web/src/html-artifact-review.ts" },
+  { packageName: "@interactive-os/json-document-web", symbol: "bindWebHTMLArtifactEditing", sourcePath: "packages/json-document-web/src/html-artifact-editing.ts" },
+  { packageName: "@interactive-os/json-document-canvas", symbol: "CanvasHTMLObject", sourcePath: "packages/json-document-canvas/src/canvas-html-object.tsx" },
+  { packageName: "@interactive-os/json-document-canvas", symbol: "CanvasSection", sourcePath: "packages/json-document-canvas/src/canvas-section.tsx" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "findVacantObjectBounds", sourcePath: "packages/json-document-object-document/src/object-placement.ts" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "WindowDock", sourcePath: "packages/json-document-ui-primitives-react/src/window-dock.tsx" },
+  { packageName: "@interactive-os/json-document-collaboration/history", symbol: "createCollaborationWorkspace", sourcePath: "packages/json-document-collaboration/src/workspace.ts" },
+  { packageName: "@interactive-os/json-document-collaboration/history", symbol: "forkHistoryRuntime", sourcePath: "packages/json-document-collaboration/src/create.ts" },
+  { packageName: "@interactive-os/json-document-collaboration/history", symbol: "createHistoryRuntime", sourcePath: "packages/json-document-collaboration/src/create.ts" },
+  { packageName: "@interactive-os/json-document-collaboration/editing", symbol: "createCollaborationCanvasTools", sourcePath: "packages/json-document-collaboration/src/editing-index.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "moveText", sourcePath: "packages/json-document-editing/src/text-edit.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "applyTextEdit", sourcePath: "packages/json-document-editing/src/text-edit.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createCanvasEditorTools", sourcePath: "packages/json-document-editing/src/canvas-tools.ts" },
@@ -1107,6 +1169,17 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-composer/src/commands.ts",
   },
   { packageName: "@interactive-os/json-document-composer-react", symbol: "useComposer", sourcePath: "packages/json-document-composer-react/src/attachments.ts" },
+  { packageName: "@interactive-os/json-document-composer-react", symbol: "ChatComposer", sourcePath: "packages/json-document-composer-react/src/speech-input.tsx" },
+  { packageName: "@interactive-os/json-document-composer-react", symbol: "ChatComposer", sourcePath: "packages/json-document-web/src/speech-input.ts" },
+  { packageName: "@interactive-os/json-document-annotation", symbol: "AnnotationReview", sourcePath: "packages/json-document-annotation/src/annotation-review.tsx" },
+  { packageName: "@interactive-os/json-document-annotation", symbol: "AnnotationReviewGroup", sourcePath: "packages/json-document-annotation/src/annotation-review.tsx" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createAnnotationReviewSession", sourcePath: "packages/json-document-editing/src/annotation-review-session.ts" },
+  { packageName: "@interactive-os/json-document-collaboration/editing", symbol: "createCollaborationCanvasReview", sourcePath: "packages/json-document-collaboration/src/canvas-review.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "projectCanvasHTML", sourcePath: "packages/json-document-editing/src/object-html.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createAnnotationReviewPlanTool", sourcePath: "packages/json-document-editing/src/annotation-review-plan.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createAnnotationFollowing", sourcePath: "packages/json-document-editing/src/annotation-following.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createAnnotationReviewQueue", sourcePath: "packages/json-document-editing/src/annotation-review.ts" },
+  { packageName: "@interactive-os/json-document-canvas", symbol: "CanvasPages", sourcePath: "packages/json-document-canvas/src/canvas-pages.tsx" },
   ...(["CanvasHand", "useCanvasHand", "createCanvasClipboardBinding"] as const).map((symbol) => ({ packageName: "@interactive-os/json-document-canvas", symbol, sourcePath: "packages/json-document-canvas/src/canvas-clipboard.ts" })),
   { packageName: "@interactive-os/json-document-editing", symbol: "createCanvasClipboard", sourcePath: "packages/json-document-editing/src/canvas-clipboard.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createObjectPasteSession", sourcePath: "packages/json-document-editing/src/object-paste-session.ts" },
@@ -1578,6 +1651,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-calendar",
     symbol: "RangeCalendar",
     sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "EditingControls",
+    sourcePath: "packages/json-document-ui-primitives-react/src/editing-controls.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",

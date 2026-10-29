@@ -1,9 +1,10 @@
 import { createWebKeyboardAdapter, isWebEditableTarget } from "@interactive-os/json-document-web";
 import { useCanvasViewport } from "./use-canvas-viewport.js";
 import {CanvasSheetObject} from "./canvas-sheet-object.js";
-import {sheetEmbeddedDocumentType} from "@interactive-os/json-document-editing";
+import {sheetEmbeddedDocumentType, htmlEmbeddedDocumentType} from "@interactive-os/json-document-editing";
+import { CanvasHTMLObject } from "./canvas-html-object.js";
 import { useState, useEffect, useLayoutEffect, useRef, type KeyboardEvent, type CSSProperties, type ReactNode } from "react";
-import { Hand, Maximize, Minus, Plus, Braces, Circle, MousePointer2, Pencil, RectangleHorizontal, StickyNote, Type, Table2, type LucideIcon } from "lucide-react";
+import { Frame, Hand, Maximize, Minus, Plus, Braces, Circle, MousePointer2, Pencil, RectangleHorizontal, StickyNote, Type, Table2, type LucideIcon } from "lucide-react";
 import type { ObjectEditor } from "@interactive-os/json-document-editing";
 import type { PlaneSelectProfile } from "@interactive-os/json-document-affordance";
 import { serializeCanvasDocument } from "@interactive-os/json-document-object-document";
@@ -13,7 +14,10 @@ import { useCanvasHand, type CanvasCreationStyle, type CanvasTool } from "./use-
 import { CanvasContentToolbar } from "./canvas-content-toolbar.js";
 import { CanvasEditingCommands } from "./canvas-editing-commands.js";
 
+import type { CanvasEditTarget } from "./canvas-edit-target.js";
+
 export interface CanvasHandProps {
+  readonly onRequestEdit?: (target: CanvasEditTarget) => void;
   /** Fill the host and navigate independently of document coordinates. */
   readonly workspace?: boolean;
   readonly collisionGroups?: readonly import("@interactive-os/json-document-object-document").ObjectCollisionGroup[];
@@ -46,6 +50,7 @@ export interface CanvasHandProps {
 const tools: ReadonlyArray<{ readonly id: CanvasTool; readonly label: string; readonly icon: LucideIcon; readonly shortcut: string }> = [
   { id: "select", label: "선택", icon: MousePointer2, shortcut: "V" }, { id: "text", label: "글자", icon: Type, shortcut: "T" },
   { id: "sticky-note", label: "스티커 노트", icon: StickyNote, shortcut: "S" },
+  { id: "section", label: "섹션", icon: Frame, shortcut: "Shift-S" },
   { id:"table",label:"표",icon: Table2, shortcut: "Shift-T" },
   { id: "rectangle", label: "사각형", icon: RectangleHorizontal, shortcut: "R" }, { id: "ellipse", label: "타원", icon: Circle, shortcut: "O" }, { id: "path", label: "그리기", icon: Pencil, shortcut: "M" },
 ];
@@ -80,11 +85,12 @@ export function CanvasHand(props: CanvasHandProps) {
   const exitTable = () => {setEditingObject(null);hand.surface.current?.focus({ preventScroll: true });};
   const editObject = (object: typeof hand.objects[number]) => {
     if (object.kind === "embedded-document" && props.onEditEmbedded) { hand.select(object.id); props.onEditEmbedded(object.id); return; }
-    if(object.kind === "embedded-document" && object.documentType === sheetEmbeddedDocumentType) {hand.select(object.id);setEditingObject(object.id);}
+    if(object.kind === "embedded-document" && [sheetEmbeddedDocumentType, htmlEmbeddedDocumentType].includes(object.documentType)) {hand.select(object.id);setEditingObject(object.id);}
     else hand.editText(object.id);
   };
   const renderEmbedded = (object: Extract<typeof hand.objects[number],{kind:"embedded-document"}>) => props.renderEmbedded ? props.renderEmbedded(object) : object.documentType === sheetEmbeddedDocumentType
     ? <CanvasSheetObject object={object} editor={props.editor} active={editingObject === object.id} onDeactivate={exitTable} />
+    : object.documentType === htmlEmbeddedDocumentType ? <CanvasHTMLObject geometryKey={viewport.viewBox} {...(props.onRequestEdit ? { onRequestEdit: props.onRequestEdit } : {})} object={object} editor={props.editor} active={editingObject === object.id} onDeactivate={exitTable} />
     : <foreignObject x={object.x} y={object.y} width={object.width} height={object.height}><div role="status">지원하지 않는 문서: {object.documentType}</div></foreignObject>;
   useEffect(() => { if (props.workspace) hand.surface.current?.focus({ preventScroll: true }); }, [props.workspace, hand.surface]);
   const chooseTool = (tool: CanvasTool) => { viewport.setHand(false); hand.choose(tool); };
@@ -109,7 +115,7 @@ export function CanvasHand(props: CanvasHandProps) {
   const selectedKeys = new Set(hand.selection.keys);
   const copyOriginals = new Map(hand.copyOriginals.map((object) => [object.id, object]));
   const canvasSurface = (
-      <svg ref={hand.surface} {...hand.surfaceProps} {...viewport.events} onLostPointerCapture={event => { viewport.events.onLostPointerCapture?.(event); hand.surfaceProps.onLostPointerCapture(event); }} onPointerDownCapture={event => {viewport.events.onPointerDownCapture?.(event); if(editingObject && !(event.target as Element).closest("[data-canvas-sheet]")) setEditingObject(null);}} tabIndex={0} role="group" aria-label={props.label ?? "Canvas slide"}
+      <svg ref={hand.surface} {...hand.surfaceProps} {...viewport.events} onLostPointerCapture={event => { viewport.events.onLostPointerCapture?.(event); hand.surfaceProps.onLostPointerCapture(event); }} onPointerDownCapture={event => {viewport.events.onPointerDownCapture?.(event); if(editingObject && !(event.target as Element).closest('[data-canvas-sheet], [data-canvas-html], [data-canvas-html-controls], [role="dialog"]')) setEditingObject(null);}} tabIndex={0} role="group" aria-label={props.label ?? "Canvas slide"}
         aria-busy={hand.pastePending}
         data-canvas-slide="true" data-tool={hand.tool} data-canvas-mode={viewport.panning ? "hand" : hand.tool} viewBox={props.screenOverlay ? `0 0 ${Math.max(1, props.screenOverlay.width)} ${Math.max(1, props.screenOverlay.height)}` : props.workspace ? viewport.viewBox : `0 0 ${hand.document.width} ${hand.document.height}`} preserveAspectRatio="none"
         style={{ display: "block", width: "100%", aspectRatio: `${hand.document.width} / ${hand.document.height}`, touchAction: "none", userSelect: "none", overflow: "hidden", cursor: viewport.cursor ?? (hand.tool === "select" ? "default" : hand.tool === "text" ? "text" : "crosshair"), ...props.slideStyle, ...(props.workspace ? { height: "100%", aspectRatio: "auto" } : {}), ...(props.screenOverlay ? { position: "absolute", left: 0, top: 0, width: Math.max(1, props.screenOverlay.width), height: Math.max(1, props.screenOverlay.height), aspectRatio: "auto", overflow: "visible", zIndex: 1 } : {}) }}>
@@ -145,10 +151,10 @@ export function CanvasHand(props: CanvasHandProps) {
       <ToolbarGroup>
         <CanvasEditingCommands editor={props.editor} objectIds={props.objectIds} onUndo={() => hand.history("undo")} onRedo={() => hand.history("redo")} onDuplicate={() => hand.duplicate()} onRemove={hand.remove} />
       </ToolbarGroup>
-      {props.documentControls !== false && <Command label="JSON" onClick={() => { hand.commitText(); hand.cancel(); setJSON(json === null ? serializeCanvasDocument(props.editor.snapshot.value as typeof hand.document) : null); }}><Braces aria-hidden="true" size={16} /></Command>}
+      {props.documentControls !== false && !props.onRequestEdit && <Command label="JSON" onClick={() => { hand.commitText(); hand.cancel(); setJSON(json === null ? serializeCanvasDocument(props.editor.snapshot.value as typeof hand.document) : null); }}><Braces aria-hidden="true" size={16} /></Command>}
     </ToolbarGroup>}>
       {canvasSurface}
-      {props.contentToolbar !== false && hand.tool === "select" && !viewport.panning && <CanvasContentToolbar hand={hand} targetId={hand.selection.primaryKey} geometryKey={viewport.viewBox} />}
+      {props.contentToolbar !== false && hand.tool === "select" && !viewport.panning && !editingObject && <CanvasContentToolbar {...(props.onRequestEdit ? { onRequestEdit: props.onRequestEdit } : {})} hand={hand} targetId={hand.selection.primaryKey} geometryKey={viewport.viewBox} />}
       {hand.pastePending && <p role="status">붙여넣는 중… Escape로 취소</p>}
       {hand.error && <p role="alert">{hand.error}</p>}
       {json !== null && <section aria-label="Canvas JSON" className={props.workspace ? "canvas-workspace-json" : undefined}>
