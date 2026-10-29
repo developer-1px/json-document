@@ -62,6 +62,10 @@ const listbox = useListbox({
 
 `useListbox`는 enabled item의 Arrow/Home/End 이동, `textValue` typeahead,
 active-descendant ARIA, pointer active와 Enter/Space activation을 소유합니다.
+`onActiveChange`의 두 번째 인자 `{ reason }`은 이동의 원인(`keyboard`·`typeahead`·`pointer`)입니다. 활성 option을
+옆에 여는 Host는 keyboard·typeahead 이동만 따르고 지나가는 pointer는 무시할 수 있습니다. keyboard·typeahead로
+옮긴 option은 primitive가 보이는 범위로 스크롤합니다. `orientation: "grid"`는 줄 바꿈되는 tile 배치에서 ←→를 순서
+이동으로, ↑↓를 화면상 바로 위·아래 option으로 이동시킵니다(배치는 layout이 정하고 Host는 열 수를 넘기지 않습니다).
 `activeId`와 `selectedId`는 서로 독립이며 이동만으로 selection을 commit하지
 않습니다. `referenceProps`는 Composer처럼 DOM focus를 외부 editor에 유지하는
 경로에, `listboxProps`는 Choice처럼 listbox 자체가 focus를 받는 경로에 씁니다.

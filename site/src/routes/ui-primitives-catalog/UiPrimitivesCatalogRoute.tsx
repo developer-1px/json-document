@@ -45,6 +45,7 @@ import {
   ToolbarSeparator,
   useListbox,
   ValueInput,
+  type ListboxActiveChangeReason,
 } from "@interactive-os/json-document-ui-primitives-react";
 import { formatFileSize } from "@interactive-os/json-document-file-intake";
 import {
@@ -74,6 +75,14 @@ const commandItems = [
   { id: "save", textValue: "Save" },
   { id: "export", textValue: "Export" },
   { id: "archive", textValue: "Archive" },
+] as const;
+const tileItems = [
+  { id: "ada", textValue: "Ada" },
+  { id: "grace", textValue: "Grace" },
+  { id: "linus", textValue: "Linus" },
+  { id: "margaret", textValue: "Margaret" },
+  { id: "ken", textValue: "Ken" },
+  { id: "barbara", textValue: "Barbara" },
 ] as const;
 const modelOptions = [
   { id: "fast", label: "Fast" },
@@ -121,6 +130,19 @@ export function UiPrimitivesCatalogRoute() {
   const widthOrigin = useRef(width);
   const [control, setControl] = useState({ x: 40, y: 40 });
   const controlOrigin = useRef(control);
+  const [activeTile, setActiveTile] = useState<string | null>(tileItems[0]!.id);
+  const [selectedTile, setSelectedTile] = useState<string | null>(null);
+  const [tileMove, setTileMove] = useState<ListboxActiveChangeReason | null>(null);
+  const tiles = useListbox({
+    id: "design-system-tiles",
+    label: "People",
+    items: tileItems,
+    activeId: activeTile,
+    selectedId: selectedTile,
+    orientation: "grid",
+    onActiveChange: (id, change) => { setActiveTile(id); setTileMove(change.reason); },
+    onAction: setSelectedTile,
+  });
   const listbox = useListbox({
     id: "design-system-listbox",
     label: "Commands",
@@ -491,6 +513,27 @@ export function UiPrimitivesCatalogRoute() {
                   </SelectableItem>
                 ))}
               </ul>
+            </article>
+            <article className={styles.overlayScene()}>
+              <div>
+                <p className={styles.eyebrow()}>Grid listbox</p>
+                <h3 className={styles.cardTitle()}>Tiles walk by their layout</h3>
+              </div>
+              <p className={styles.bodyCopy()}>←→ follow the order, ↑↓ move to the tile above or below. The Host acts on keyboard moves, not a passing pointer.</p>
+              <div tabIndex={0} className={classes("grid grid-cols-3 gap-1", ui.state.focus)} {...tiles.listboxProps}>
+                {tileItems.map((item) => (
+                  <SelectableItem
+                    key={item.id}
+                    selected={selectedTile === item.id}
+                    focus={activeTile === item.id}
+                    className={styles.selectionItem()}
+                    {...tiles.optionProps(item)}
+                  >
+                    {item.textValue}
+                  </SelectableItem>
+                ))}
+              </div>
+              <p className={classes("m-0", ui.text.meta)} data-testid="design-system-tile-move">Last move: {tileMove ?? "none"}</p>
             </article>
           </div>
         </CatalogSection>

@@ -262,6 +262,64 @@ describe("UI Primitives", () => {
     expect((screen.getByRole("option", { name: "Blocked" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
+  test("listbox reports what moved the active option and brings keyboard moves into view", async () => {
+    const user = userEvent.setup();
+    const moves: [string | null, string][] = [];
+    const scrolled: string[] = [];
+    const items = [{ id: "a", textValue: "Alpha" }, { id: "b", textValue: "Beta" }, { id: "c", textValue: "Gamma" }];
+    function Harness() {
+      const [activeId, setActiveId] = useState<string | null>("a");
+      const listbox = useListbox({ id: "people", label: "People", items, activeId,
+        onActiveChange: (id, change) => { moves.push([id, change.reason]); setActiveId(id); }, onAction: () => undefined });
+      return <div tabIndex={0} {...listbox.listboxProps}>
+        {items.map((item) => <button key={item.id} {...listbox.optionProps(item)} ref={(element) => {
+          if (element) element.scrollIntoView = () => { scrolled.push(item.id); };
+        }}>{item.textValue}</button>)}
+      </div>;
+    }
+    render(<Harness />);
+    screen.getByRole("listbox", { name: "People" }).focus();
+    await user.keyboard("{ArrowDown}");
+    await user.keyboard("g");
+    await user.hover(screen.getByRole("option", { name: "Alpha" }));
+    await user.hover(screen.getByRole("option", { name: "Alpha" }));
+    expect(moves).toEqual([["b", "keyboard"], ["c", "typeahead"], ["a", "pointer"]]);
+    // The pointer rests where it already is; only keyboard and typing scroll.
+    expect(scrolled).toEqual(["b", "c"]);
+  });
+
+  test("a grid listbox walks ←→ in order and ↑↓ to the tile visually above or below", async () => {
+    const user = userEvent.setup();
+    const items = ["a", "b", "c", "d", "e"].map((id) => ({ id, textValue: id.toUpperCase() }));
+    // Three tiles a row: a b c / d e.
+    const place = (index: number) => ({ left: (index % 3) * 100, top: Math.floor(index / 3) * 40, width: 90, height: 30 });
+    function Harness() {
+      const [activeId, setActiveId] = useState<string | null>("b");
+      const listbox = useListbox({ id: "tiles", label: "Tiles", items, activeId, orientation: "grid", onActiveChange: setActiveId, onAction: () => undefined });
+      return <div tabIndex={0} {...listbox.listboxProps}>
+        {items.map((item, index) => <button key={item.id} {...listbox.optionProps(item)} ref={(element) => {
+          if (!element) return;
+          const box = place(index);
+          element.getBoundingClientRect = () => ({ ...box, right: box.left + box.width, bottom: box.top + box.height, x: box.left, y: box.top, toJSON: () => box }) as DOMRect;
+          element.scrollIntoView = () => undefined;
+        }}>{item.textValue}</button>)}
+      </div>;
+    }
+    render(<Harness />);
+    const listbox = screen.getByRole("listbox", { name: "Tiles" });
+    listbox.focus();
+    await user.keyboard("{ArrowDown}");
+    expect(listbox.getAttribute("aria-activedescendant")).toBe("tiles-option-e");
+    await user.keyboard("{ArrowDown}");
+    expect(listbox.getAttribute("aria-activedescendant")).toBe("tiles-option-e");
+    await user.keyboard("{ArrowLeft}");
+    expect(listbox.getAttribute("aria-activedescendant")).toBe("tiles-option-d");
+    await user.keyboard("{ArrowUp}");
+    expect(listbox.getAttribute("aria-activedescendant")).toBe("tiles-option-a");
+    await user.keyboard("{ArrowRight}{ArrowRight}");
+    expect(listbox.getAttribute("aria-activedescendant")).toBe("tiles-option-c");
+  });
+
   test("control primitives project their reusable button and state contracts", () => {
     render(
       <>

@@ -232,6 +232,18 @@ type InteractionHandleButtonProps<Descriptor extends InteractionHandleDescriptor
     readonly onHandle: (event: InteractionHandleEvent) => void;
   };
 ```
+## `ListboxActiveChange`
+
+```ts
+interface ListboxActiveChange {
+  readonly reason: ListboxActiveChangeReason;
+}
+```
+## `ListboxActiveChangeReason`
+
+```ts
+type ListboxActiveChangeReason = "keyboard" | "typeahead" | "pointer";
+```
 ## `ListboxBinding`
 
 ```ts
@@ -404,7 +416,10 @@ interface UseListboxOptions<Id extends string = string, Item extends ListboxItem
   readonly activeId: Id | null;
   readonly selectedId?: Id | null;
   readonly wrap?: boolean;
-  readonly onActiveChange: (id: Id | null) => void;
+  /** `vertical` (default): ↑↓ walk the options in order. `grid`: options laid out in rows (tiles that wrap); ←→ walk
+   *  them in order and ↑↓ move to the option visually above or below, as the layout places it. */
+  readonly orientation?: "vertical" | "grid";
+  readonly onActiveChange: (id: Id | null, change: ListboxActiveChange) => void;
   readonly onAction: (id: Id) => void;
 }
 ```
