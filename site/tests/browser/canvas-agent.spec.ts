@@ -24,7 +24,7 @@ test("Canvas applies agent edits with selective undo retained after reload", asy
     ];
     await route.fulfill({ contentType: "text/event-stream", body: events.map(event => `data: ${JSON.stringify(event)}\n\n`).join("") });
   });
-  await page.goto("/demo/canvas");
+  await page.goto("/applications/canvas");
   const input = page.getByRole("textbox", { name: "Canvas 편집 요청", exact: true });
   await input.click(); await page.keyboard.insertText("카드를 만들어줘"); await input.press("Enter");
   const objects = page.locator("[data-canvas-object]");

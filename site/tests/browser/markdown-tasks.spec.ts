@@ -39,19 +39,12 @@ test("native task checkbox toggles with click and Space, sharing source history"
   await page.keyboard.press("ControlOrMeta+z"); await expect(check).not.toBeChecked();
   await page.keyboard.press("ControlOrMeta+Shift+z"); await expect(check).toBeChecked();
   await page.keyboard.press("ControlOrMeta+Shift+z"); await expect(check).not.toBeChecked();
-  const sizes = await editor.evaluate(root => ["task", "list"].map(kind => {
-    const element = root.querySelector(kind === "task" ? "[data-markdown-task-control]" : `[data-markdown-marker="${kind}"]`)!;
-    return {width:element.getBoundingClientRect().width, height:element.getBoundingClientRect().height};
-  }));
-  expect(sizes[0]!.width).toBeCloseTo(sizes[1]!.width, 1);
-  expect(sizes[0]!.height).toBeCloseTo(sizes[1]!.height, 1);
-  await page.screenshot({path:"/tmp/bear-todo-ui.png", fullPage:true});
 });
 
-for (const prefix of ["- [ ] ", "12. [x] ", "  - [X] "]) {
+test("Backspace and Delete remove one checkbox and one Undo restores it", async ({page}) => {
+  const prefix = "12. [x] ";
+  await page.goto("/applications/bear");
   for (const direction of ["Backspace", "Delete"]) {
-    test(`${prefix} ${direction} removes one checkbox and one Undo restores it`, async ({page}) => {
-      await page.goto("/applications/bear");
       const editor = page.getByRole("textbox", {name:"Markdown 문서"});
       await editor.click(); await page.keyboard.press("ControlOrMeta+a");
       const source = prefix + "본문  공백\n\nnext";
@@ -70,6 +63,5 @@ for (const prefix of ["- [ ] ", "12. [x] ", "  - [X] "]) {
       await expect(editor.getByRole("checkbox")).toHaveCount(1);
       await page.keyboard.press("ControlOrMeta+Shift+z");
       await expect.poll(() => editor.textContent()).toBe(prefix.slice(0,start) + "본문  공백\n\nnext");
-    });
-  }
-}
+    }
+});

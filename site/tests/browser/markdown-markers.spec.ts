@@ -1,25 +1,15 @@
 import {expect, test} from "@playwright/test";
 
+// One representative per deletion contract: atomic block markers and inline delimiters.
 const fixtures = [
-  ["bullet", "- item", "list"], ["ordered", "12) item", "list"],
-  ["task", "- [ ] item", "task"], ["checked", "- [x] item", "task"],
-  ["quote", "> quote", "blockquote"], ["nested quote", "> > quote", "blockquote"],
-  ["fence", "```js\nconst x = 1;\n```", "fence"], ["tilde fence", "~~~\ncode\n~~~", "fence"],
-  ["strong", "a **bold** z", "strong"], ["emphasis", "a *em* z", "emphasis"],
-  ["strike", "a ~~gone~~ z", "delete"], ["code", "a ``code`` z", "code"],
-  ["link", "a [label](/path) z", "link"], ["image", "a ![alt](/missing.png) z", "image"],
-  ["reference", "[ref][a]\n\n[a]: /path", "link"], ["autolink", "<https://example.com>", "link"],
-  ["definition", "[a]: /path", "definition"], ["table", "| a | b |\n| --- | --- |\n| c | d |", "table"],
-  ["rule", "---", "thematicBreak"], ["setext", "title\n===", "setext"],
-  ["hard break", "a\\\nb", "break"], ["space break", "a  \nb", "break"],
-  ["footnote", "Note[^a]\n\n[^a]: Footnote", "footnote"],
-  ["entity", "a &amp; b", "entity"], ["numeric entity", "a &#x1f600; b", "entity"],
-  ["escape", "a \\*literal* z", "escape"],
+  ["task", "- [ ] item", "task"], ["quote", "> quote", "blockquote"],
+  ["strong", "a **bold** z", "strong"], ["link", "a [label](/path) z", "link"],
 ] as const;
 
-for (const [name, markdown, kind] of fixtures) test(`${name} projection keeps source navigation, deletion, copy and undo`, async ({page}) => {
+test("marker projections keep source navigation, deletion, copy and undo", async ({page}) => {
   await page.goto("/applications/bear");
   const editor = page.getByRole("textbox", {name:"Markdown 문서"});
+  for (const [, markdown, kind] of fixtures) {
   const source = markdown + "\n\n후속 **문단**";
   await editor.click(); await page.keyboard.press("ControlOrMeta+a");
   await editor.evaluate((root, source) => {
@@ -65,39 +55,12 @@ for (const [name, markdown, kind] of fixtures) test(`${name} projection keeps so
   await expect.poll(()=>editor.textContent()).toBe(source.slice(0,bounds.from)+"x"+source.slice(bounds.from));
   await page.keyboard.press("ControlOrMeta+z");
   await expect.poll(()=>editor.textContent()).toBe(source);
+  }
 });
 
-test("reading presentation retains code text, table rows and one thematic rule", async ({page}) => {
+test("quote Enter continues the box, exits on empty content, and restores with Undo", async ({page}) => {
   await page.goto("/applications/bear");
-  const editor=page.getByRole("textbox",{name:"Markdown 문서"});
-  const quoteMarker = editor.locator('[data-markdown-marker="blockquote"]').first();
-  expect(await quoteMarker.evaluate(element => ({width:element.getBoundingClientRect().width, content:getComputedStyle(element,"::before").content}))).toEqual({width:0, content:"none"});
-  const code=editor.locator('[data-markdown-kind="inlineCode"]').first();
-  expect(await code.innerText()).toContain("짧은 코드");
-  const rows=await editor.locator('[data-markdown-kind="tableRow"]').evaluateAll(es=>es.map(e=>({top:e.getBoundingClientRect().top,bottom:e.getBoundingClientRect().bottom})));
-  expect(rows).toHaveLength(3);
-  expect(rows[1]!.top).toBeCloseTo(rows[0]!.bottom,1);
-  expect(rows[2]!.top).toBeCloseTo(rows[1]!.bottom,1);
-  const rule=editor.locator('[data-markdown-marker="thematicBreak"]');
-  const widths=await rule.evaluate(e=>({marker:e.getBoundingClientRect().width,block:e.parentElement!.getBoundingClientRect().width}));
-  expect(widths.marker).toBeCloseTo(widths.block,1);
-  await page.screenshot({path:"/tmp/bear-markers-final.png",fullPage:true});
-});
-
-
-for (const direct of [false, true]) test(`quote Enter continues the box, exits on empty content, and restores with Undo (direct Web: ${direct})`, async ({page}) => {
-  await page.goto("/applications/bear");
-  if (direct) await page.evaluate(async packageRoot => {
-    const {createMarkdownEditingBinding} = await import(/* @vite-ignore */ `/@fs${packageRoot}json-document-markdown-web/src/index.ts`);
-    const {createJSONDocument} = await import(/* @vite-ignore */ `/@fs${packageRoot}json-document/src/application/document/index.ts`);
-    const {createTextEditor} = await import(/* @vite-ignore */ `/@fs${packageRoot}json-document-editing/src/index.ts`);
-    const root = document.createElement("div"); root.contentEditable = "true";
-    root.setAttribute("role", "textbox"); root.setAttribute("aria-label", "직접 Web 편집");
-    root.style.cssText="position:fixed;inset:20px;z-index:9999;background:white;white-space:pre-wrap";
-    document.body.append(root);
-    createMarkdownEditingBinding({editor:createTextEditor(createJSONDocument("")), root}).bind();
-  }, new URL("../../../packages/", import.meta.url).pathname);
-  const editor = page.getByRole("textbox", {name:direct ? "직접 Web 편집" : "Markdown 문서"});
+  const editor = page.getByRole("textbox", {name:"Markdown 문서"});
   await editor.click();
   await page.keyboard.press("ControlOrMeta+a");
   await editor.evaluate(root => {

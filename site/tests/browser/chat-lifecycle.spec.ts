@@ -13,7 +13,7 @@ test("Enter clears immediately, work is separate from bubbles, and the local con
       { type: "RUN_FINISHED", threadId: "saved-canvas-thread", runId: "one" },
     ].map(event => `data: ${JSON.stringify(event)}\n\n`).join("") });
   });
-  await page.goto("/demo/canvas");
+  await page.goto("/applications/canvas");
   const input = page.getByRole("textbox", { name: "Canvas 편집 요청", exact: true });
   await input.click(); await page.keyboard.insertText("요청 하나"); await input.press("Enter");
   await expect(page.getByRole("group", { name: "나", exact: true })).toHaveText("요청 하나");
@@ -34,7 +34,7 @@ test("Enter clears immediately, work is separate from bubbles, and the local con
 
 test("a failed request stays in the local conversation without an assistant error bubble", async ({ page }) => {
   await page.route("**/api/llm-agent/turn", route => route.fulfill({ status: 500, body: "offline" }));
-  await page.goto("/demo/canvas");
+  await page.goto("/applications/canvas");
   const input = page.getByRole("textbox", { name: "Canvas 편집 요청", exact: true });
   await input.click(); await page.keyboard.insertText("보존할 요청"); await input.press("Enter");
   await expect(page.getByRole("status").filter({ hasText: "요청을 완료하지 못했습니다" })).toBeVisible();

@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test("Object routes platform history shortcuts from its editing surface", async ({ page }) => {
+test("Object history shortcuts, native clipboard and duplicate share one editing surface", async ({ page }) => {
+  // Object routes platform history
+  {
   await page.goto("/demo/object");
   const note = page.getByRole("button", { name: "Note" });
   await note.click();
@@ -11,9 +13,9 @@ test("Object routes platform history shortcuts from its editing surface", async 
   await expect(note).toHaveCSS("background-color", "rgb(222, 109, 85)");
   await page.keyboard.press("ControlOrMeta+Shift+Z");
   await expect(note).toHaveCSS("background-color", "rgb(77, 106, 138)");
-});
-
-test("Object uses native clipboard and a separate canonical duplicate command", async ({ page }) => {
+  }
+  // Object uses native clipboard
+  {
   await page.goto("/demo/object");
   const note = page.getByRole("button", { name: "Note" });
   await note.click();
@@ -27,9 +29,12 @@ test("Object uses native clipboard and a separate canonical duplicate command", 
     .filter((object: { readonly label: string }) => object.label === "Note");
   expect(notes.map((object: { readonly x: number; readonly y: number }) => [object.x, object.y]))
     .toEqual([[24, 24], [48, 48], [72, 72]]);
+  }
 });
 
-test("Order repeated select-all and cancelled rename preserve selected items and document history", async ({ page }) => {
+test("Order select-all, typeahead, focus movement, rename and native clipboard", async ({ page }) => {
+  // Order repeated select-all
+  {
   await page.goto("/demo/order");
   const order = page.getByLabel("Editable order").locator("ol");
   await order.focus();
@@ -45,9 +50,9 @@ test("Order repeated select-all and cancelled rename preserve selected items and
   await expect(page.getByRole("button", { name: /Inbox/ })).toBeFocused();
   await expect(order.locator('[data-selected="true"]')).toHaveCount(4);
   await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeDisabled();
-});
-
-test("Order typeahead jumps to the matching label and Escape clears the buffer", async ({ page }) => {
+  }
+  // Order typeahead jumps
+  {
   await page.goto("/demo/order");
   await page.getByLabel("Editable order").locator("ol").focus();
   await page.keyboard.type("T");
@@ -55,9 +60,9 @@ test("Order typeahead jumps to the matching label and Escape clears the buffer",
   await page.keyboard.press("Escape");
   await page.keyboard.type("I");
   await expect(page.getByRole("button", { name: /Inbox/ })).toHaveAttribute("data-selected", "true");
-});
-
-test("Order moves focus without changing selection and renames the focused item", async ({ page }) => {
+  }
+  // Order moves focus without
+  {
   await page.goto("/demo/order");
   const order = page.getByLabel("Editable order").locator("ol");
   const inbox = page.getByRole("button", { name: /Inbox/ });
@@ -80,9 +85,9 @@ test("Order moves focus without changing selection and renames the focused item"
 
   await page.keyboard.press("ControlOrMeta+Z");
   await expect(page.getByRole("button", { name: /Today/ })).toBeVisible();
-});
-
-test("Order native copy and paste bypass typeahead", async ({ page }) => {
+  }
+  // Order native copy and paste
+  {
   await page.goto("/demo/order");
   const today = page.getByRole("button", { name: /Today/ });
   const later = page.getByRole("button", { name: /Later/ });
@@ -91,6 +96,7 @@ test("Order native copy and paste bypass typeahead", async ({ page }) => {
   await later.click();
   await page.keyboard.press("ControlOrMeta+V");
   await expect(page.getByRole("button", { name: /Today/ })).toHaveCount(2);
+  }
 });
 
 test("Document dogfoods caret and native double and triple click counts", async ({ page }) => {
@@ -103,7 +109,9 @@ test("Document dogfoods caret and native double and triple click counts", async 
   await expect(page.getByTestId("document-click-count")).toHaveText("click count 3");
 });
 
-test("Tree repeated select-all uses the collapsed visible topology", async ({ page }) => {
+test("Tree select-all, cut/undo and native clipboard follow the visible topology", async ({ page }) => {
+  // Tree repeated select-all
+  {
   await page.goto("/demo/tree");
   await page.getByRole("button", { name: "Collapse Fruit" }).click();
   const tree = page.getByLabel("Editable tree").locator("ul");
@@ -115,9 +123,9 @@ test("Tree repeated select-all uses the collapsed visible topology", async ({ pa
     await expect(page.getByRole("button", { name: "Apple", exact: true })).toHaveCount(0);
   }
   await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeDisabled();
-});
-
-test("Tree uses host visible order and restores a cut with undo", async ({ page }) => {
+  }
+  // Tree uses host visible order
+  {
   await page.goto("/demo/tree");
   await page.getByText("Inspect editing state", { exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Tree", exact: true })).toBeVisible();
@@ -135,15 +143,16 @@ test("Tree uses host visible order and restores a cut with undo", async ({ page 
   await page.getByLabel("Tree actions").getByRole("button", { name: "Undo" }).click();
   expect((await json(page, "tree-demo-document")).nodes.map((node: { readonly id: string }) => node.id))
     .toEqual(["fruit", "apple", "pear"]);
-});
-
-test("Tree composes native clipboard events with visible topology", async ({ page }) => {
+  }
+  // Tree composes native clipboard
+  {
   await page.goto("/demo/tree");
   await page.getByRole("button", { name: "Vegetables", exact: true }).click();
   await page.keyboard.press("ControlOrMeta+C");
   await page.getByRole("button", { name: "Fruit", exact: true }).click();
   await page.keyboard.press("ControlOrMeta+V");
   await expect(page.getByRole("button", { name: "Vegetables", exact: true })).toHaveCount(2);
+  }
 });
 
 test("Kanban moves a card to another column", async ({ page }) => {

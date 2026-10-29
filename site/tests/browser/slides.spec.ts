@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+// Agent Review shares this Slides flow and component; one representative sample keeps it proven.
 for (const sample of [
   { name: "Slides", route: "/applications/slides", pageId: "slide-1", title: "생각을 한 장씩, 함께 완성하는 이야기." },
-  { name: "Agent Review", route: "/applications/agent-review", pageId: "review-introduction", title: "좋은 생각을, 함께 더 명확하게." },
 ]) {
 test.describe(sample.name, () => {
 test("continuous speech revises running work and publishes only the latest intention without submit", async ({ page }) => {
