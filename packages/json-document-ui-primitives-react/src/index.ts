@@ -25,7 +25,7 @@ export type {
 } from "./surfaces.js";
 export { useListbox } from "./listbox.js";
 export type { ControlAffordance, ControlAffordanceProps } from "./control-affordance.js";
-export type { ListboxBinding, ListboxItem, UseListboxOptions } from "./listbox.js";
+export type { ListboxActiveChange, ListboxActiveChangeReason, ListboxBinding, ListboxItem, UseListboxOptions } from "./listbox.js";
 export { contentInteractionAttributes } from "./content-interaction.js";
 export type { ContentInteractionAttributes, ContentInteractionInput } from "./content-interaction.js";
 export {
