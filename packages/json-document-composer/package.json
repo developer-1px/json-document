@@ -34,7 +34,7 @@
     "@interactive-os/json-document-rich-text-suggestion": "*",
     "@interactive-os/json-document-rich-text": "*",
     "@types/node": "^25.9.0",
-    "typescript": "^5.0.0",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.7"
   }
 }

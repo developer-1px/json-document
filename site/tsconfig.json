@@ -4,7 +4,6 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "baseUrl": ".",
     "paths": {
       "@interactive-os/json-document-sheet": ["../packages/json-document-sheet/src/index.ts"],
       "@interactive-os/json-document-web/interaction-recording": ["../packages/json-document-web/src/interaction-recording-index.ts"],

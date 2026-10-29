@@ -42,7 +42,7 @@
   ],
   "scripts": {
     "dev": "npm run dev -w @interactive-os/json-document-site",
-    "build": "tsc -b tsconfig.build.json",
+    "build": "tsc -b tsconfig.build.json --builders 8",
     "build:clean": "tsc -b tsconfig.build.json --clean",
     "test": "npm test -w @interactive-os/json-document",
     "test:projects": "vitest run --config vitest.config.ts",
@@ -83,7 +83,9 @@
   },
   "devDependencies": {
     "jsonpath-js": "0.3.1",
-    "@playwright/test": "^1.60.0"
+    "@playwright/test": "^1.60.0",
+    "typescript": "^7.0.2",
+    "typescript-api": "npm:typescript@5.9.3"
   },
   "optionalDependencies": {
     "@esbuild/linux-x64": "0.27.7",

@@ -20,5 +20,5 @@
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": { "@interactive-os/json-document": "^3.0.0" },
-  "devDependencies": { "@interactive-os/json-document": "*", "typescript": "^5.0.0", "vitest": "^4.1.7" }
+  "devDependencies": { "@interactive-os/json-document": "*", "typescript": "^7.0.2", "vitest": "^4.1.7" }
 }

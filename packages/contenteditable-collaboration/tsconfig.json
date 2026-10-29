@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig/library-dom.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@interactive-os/json-document-collaboration": [
         "../json-document-collaboration/dist/index.d.ts"
