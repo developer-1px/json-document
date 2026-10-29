@@ -5,12 +5,13 @@ import type {
   Ref,
   TextareaHTMLAttributes,
 } from "react";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, Search as SearchIcon } from "lucide-react";
 import { Command } from "./controls.js";
 
 export function Check(props: {
   readonly label: string;
   readonly checked: boolean;
+  readonly indeterminate?: boolean;
   readonly onCheckedChange: (checked: boolean) => void;
   readonly disabled?: boolean;
   readonly className?: string;
@@ -20,6 +21,8 @@ export function Check(props: {
       type="checkbox"
       aria-label={props.label}
       checked={props.checked}
+      ref={element => {if (element) element.indeterminate = props.indeterminate ?? false;}}
+      aria-checked={props.indeterminate ? "mixed" : props.checked}
       disabled={props.disabled}
       className={props.className}
       data-ui-control="check"
@@ -79,18 +82,23 @@ export function Field(props: FieldProps): ReactNode {
 }
 
 export function Search(props: {
+  readonly inputProps?: Pick<InputHTMLAttributes<HTMLInputElement>, "onKeyDown" | "aria-controls" | "aria-activedescendant" | "disabled">;
   readonly label: string;
   readonly query: string;
   readonly onQueryChange: (query: string) => void;
   readonly results?: ReactNode;
+  readonly placeholder?: string;
   readonly className?: string;
   readonly inputClassName?: string;
 }): ReactNode {
   return (
     <search className={props.className} data-ui-control="search">
+      <SearchIcon aria-hidden="true" size={16} data-ui-search-icon />
       <input
+        {...props.inputProps}
         type="search"
         aria-label={props.label}
+        placeholder={props.placeholder ?? props.label}
         value={props.query}
         className={props.inputClassName}
         onChange={(event) => props.onQueryChange(event.currentTarget.value)}
@@ -138,3 +146,6 @@ export function ValueInput(props: {
     </div>
   );
 }
+
+/** Native form-library inputs share Field presentation without replacing their binding contract. */
+export const fieldPresentation = { standard: "json-document-field", checkbox: "json-document-check", seamless: "json-document-field json-document-field-seamless" } as const;

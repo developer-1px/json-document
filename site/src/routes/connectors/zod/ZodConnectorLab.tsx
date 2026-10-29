@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useState } from "react";
 import { createJSONDocument, type JSONPatchValidationResult } from "@interactive-os/json-document";
 import { useEditing, useReactConnector } from "@interactive-os/json-document-react";
@@ -5,7 +6,7 @@ import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 import { Inspector } from "../../../shared/ui/inspector";
 import { Command, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../../shared/ui/styles";
+import { classes } from "../../../shared/ui/styles";
 
 const profileSchema = z.object({
   profile: z.object({
@@ -45,11 +46,11 @@ export function ZodConnectorLab() {
   }
 
   return (
-    <section aria-label="Zod validation" className={classes("p-4", ui.surface.raised)}>
-      <div className="mb-4">
-        <p className={ui.text.label}>createZodValidator</p>
-        <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Validation boundary</h2>
-        <p className={classes("m-0", ui.text.meta)}>
+    <section aria-label="Zod validation" className={classes("p-group")}>
+      <div className="mb-group">
+        <p className={contentPresentation.caption}>createZodValidator</p>
+        <h2 className={classes("mb-related mt-related", contentPresentation.itemTitle)}>Validation boundary</h2>
+        <p className={classes("m-0", contentPresentation.caption)}>
           Try fewer than 3 characters, then a padded valid title. Invalid commits preserve the last canonical JSON; Zod trim output is never adopted.
         </p>
       </div>
@@ -58,7 +59,7 @@ export function ZodConnectorLab() {
         as="label"
         selected={title.getIsSelected()}
         focus={title.getIsFocus()}
-        className={classes("grid gap-1 p-2", ui.text.meta)}
+        className={classes("grid gap-related p-related", contentPresentation.caption)}
       >
         Profile title draft
         <Field
@@ -71,12 +72,12 @@ export function ZodConnectorLab() {
       <Command
         kind="primary"
         onClick={commitDraft}
-        className="mt-3"
+        className="mt-related"
       >
         Commit draft
       </Command>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <div className="mt-group grid gap-group lg:grid-cols-2">
         <JSONPanel label="Commit result" testId="zod-validation-result" value={result} />
         <JSONPanel label="Canonical JSON" testId="zod-document-json" value={value} />
       </div>

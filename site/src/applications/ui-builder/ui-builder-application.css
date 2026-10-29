@@ -1,1 +1,11 @@
 .ui-builder-application > aside { bottom: 3.5rem; }
+
+.ui-builder-application > aside[data-chat-expanded="false"] { width: min(20rem, calc(100vw - 2rem)); padding: var(--space-related); }
+
+/* A compact viewport gives the composer its own row, preserving access to the work surface. */
+@media (max-width: 720px) {
+  .ui-builder-application { display: flex; flex-direction: column; gap: var(--space-related); padding: 0 var(--space-group) 3.5rem; }
+  .ui-builder-application > .ui-builder-workspace { flex: 1; min-height: 0; height: auto; }
+  .ui-builder-application > aside,
+  .ui-builder-application > aside[data-chat-expanded="false"] { position: relative; bottom: auto; right: auto; width: auto; flex-shrink: 0;  }
+}

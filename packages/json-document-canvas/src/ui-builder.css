@@ -1,48 +1,35 @@
-.ui-builder-hand > [data-ui-toolbar="product"] { top: 1rem; bottom: auto; left: 4.5rem; transform: none; }
-.ui-builder-hand > [data-ui-toolbar="product"] [data-ui-presentation="popover"] > [role="dialog"] { top: 100%; bottom: auto; left: 0; right: auto; margin-top: 0.75rem; margin-bottom: 0; }
-.ui-builder-hand [data-ui-presentation="popover"] > button { display: inline-flex; align-items: center; gap: 0.5rem; }
-.ui-builder-palette { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; padding: 0.75rem; width: min(20rem, calc(100vw - 3rem)); }
-.ui-builder-palette > button { min-height: 2.75rem; text-align: left; }
-.ui-builder-properties { width: min(18rem, calc(100vw - 3rem)); padding: 0.75rem; }
-.ui-builder-property-fields { display: flex; flex-direction: column; gap: 0.75rem; }
-.ui-builder-property-fields > :is(input, textarea) { width: 100%; }
-.ui-builder-empty { position: absolute; top: 32%; left: 10%; pointer-events: none; color: rgb(var(--color-foreground-secondary)); }
-.ui-builder-empty h1 { font-size: 1rem; font-weight: 600; color: rgb(var(--color-foreground-default)); margin-bottom: 0.75rem; }
-.ui-builder-empty p { font-size: 0.875rem; line-height: 1.8; }
-/* Document content is distinct from the builder's editing controls. */
-.ui-component { width: 100%; height: 100%; overflow: hidden; color: rgb(var(--color-foreground-default)); font-size: 1rem; }
-.ui-component :is(h1, h2, p) { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-.ui-component h1 { font-size: 2.5rem; line-height: 1.2; font-weight: 600; letter-spacing: -0.03em; }
-.ui-component h2 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
-.ui-component p { line-height: 1.7; }
-.ui-component > button { width: 100%; height: 100%; font-size: 1rem; }
-.ui-component > label { display: flex; flex-direction: column; gap: 0.5rem; height: 100%; }
-.ui-component > label > :is(input, textarea) { width: 100%; flex: 1; min-height: 0; }
-.ui-component > label.ui-component-check { flex-direction: row; align-items: center; }
-.ui-component > label.ui-component-check > input { flex: none; width: 1.125rem; height: 1.125rem; }
-.ui-component > article { height: 100%; padding: 1.5rem; border: 1px solid rgb(var(--color-border-subtle)); border-radius: var(--radius-surface); background: rgb(var(--color-background-canvas)); }
-.ui-component > article > p { margin-top: 0.75rem; color: rgb(var(--color-foreground-secondary)); }
-.ui-component > section { padding: 0.5rem 0; }
-.ui-component strong { display: block; font-size: 2.5rem; font-weight: 600; line-height: 1.3; margin-top: 0.5rem; }
-.ui-component ul { margin: 0.75rem 0 0; padding-left: 1.5rem; line-height: 2; }
-.ui-component hr { border: 0; border-top: 1px solid rgb(var(--color-border-default)); margin: 0.75rem 0; }
-.ui-component[data-tone="quiet"] { color: rgb(var(--color-foreground-secondary)); }
-.ui-component[data-tone="accent"] { color: rgb(var(--color-foreground-accent)); }
-@media (max-width: 600px) { .ui-builder-empty { left: 1.5rem; top: 24%; } }
-.ui-component { position: relative; }
-.ui-component-binding-error { position: absolute; inset: auto 0 0; padding: 0.5rem; background: rgb(var(--color-background-canvas)); color: rgb(var(--color-foreground-danger, 170 40 40)); font-size: 0.75rem; line-height: 1.4; }
-.ui-component[data-design="soft"] > article { background: rgb(var(--color-background-subtle, 247 246 244)); border-color: transparent; }
-.ui-component[data-design="soft"] :is(h1, h2) { letter-spacing: -0.025em; }
-.ui-component[data-design="soft"] > section { padding: 1rem; background: rgb(var(--color-background-subtle, 247 246 244)); border-radius: var(--radius-surface); }
-.ui-component[data-design="bold"] :is(h1, h2, strong) { color: rgb(var(--color-foreground-accent)); }
-.ui-component[data-design="bold"] > article { border-color: rgb(var(--color-foreground-accent)); }
-.ui-component[data-design="bold"] h1 { font-size: 3rem; }
+@import "@interactive-os/json-document-ui-primitives-react/design-system.css";
 
-/* Published content hugs its contents; only the editor wrapper uses absolute dimensions. */
-.ui-component[data-layout="flow"] { height: auto; min-width: 0; overflow: visible; }
-.ui-component[data-layout="flow"] > :is(article, label, button) { height: auto; }
-.ui-component[data-layout="flow"] > button { min-height: 2.75rem; padding-inline: 1.25rem; white-space: normal; }
-.ui-component[data-layout="flow"] > label { width: 100%; }
-.ui-component[data-layout="flow"] > label > :is(input, textarea) { flex: none; }
+@import "./ui-screen-edit-layer.css";
+.ui-builder-hand > [data-ui-toolbar="product"] { top: 1rem; bottom: auto; left: 4.5rem; transform: none; }
+.ui-builder-hand > [data-ui-toolbar="product"] [data-ui-presentation="popover"] > [role="dialog"] { top: calc(100% + var(--space-related)); bottom: auto; left: 0; right: auto; }
+.ui-builder-hand [data-ui-presentation="popover"] > button { display: inline-flex; align-items: center; gap: var(--space-related); }
+.ui-builder-palette { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-related); padding: var(--space-group); width: min(20rem, calc(100vw - 3rem)); }
+.ui-builder-palette > button { min-height: 2.75rem; text-align: left; }
+.ui-builder-properties { width: min(18rem, calc(100vw - 3rem)); padding: var(--space-group); }
+.ui-builder-property-fields { display: flex; flex-direction: column; gap: var(--space-related); }
+.ui-builder-property-fields > :is(input, textarea) { width: 100%; }
+.ui-builder-empty { display: grid; gap: var(--space-related); position: absolute; top: 32%; left: 10%; pointer-events: none; color: rgb(var(--color-foreground-muted)); }
+.ui-builder-empty h1 { font-size: var(--font-size-title); font-weight: var(--font-weight-emphasis); color: rgb(var(--color-foreground-default));  }
+.ui-builder-empty p { font-size: var(--font-size-body); line-height: 1.8; }
+/* The builder owns placement only; content and control appearance comes from UI Primitives. */
+.ui-component { box-sizing: border-box; width: 100%; min-width: 0; height: 100%; overflow: hidden; position: relative; font-family: var(--font-family-ui); font-size: var(--font-size-body); line-height: var(--line-height-body); color: rgb(var(--color-foreground-default)); }
+.ui-component > button { max-width: 100%; }
+.ui-component > :is(label, .ui-component-choice-field) { display: flex; flex-direction: column; gap: var(--space-related); }
+.ui-component > label > :is(input, textarea) { width: 100%; }
+.ui-component > label.ui-component-check { flex-direction: row; align-items: center; }
+.ui-component[data-tone="quiet"] { color: rgb(var(--color-foreground-muted)); }
+.ui-component-binding-error { position: absolute; inset: auto 0 0; margin: 0; padding: var(--space-related); background: rgb(var(--color-background-canvas)); color: rgb(var(--color-foreground-accent)); font-size: var(--font-size-caption); line-height: var(--line-height-caption); }
+.ui-component[data-layout="flow"] { height: auto; overflow: visible; }
+.ui-component[data-layout="flow"] > :is(button, label, .ui-component-choice-field) { width: 100%; }
+.ui-component[data-component="page-link"][data-layout="flow"] > button { width: fit-content; }
 .ui-component[data-layout="flow"] textarea { min-height: 7rem; field-sizing: content; }
 .ui-component[data-layout="flow"] .ui-component-binding-error { position: static; }
+@media (max-width: 600px) { .ui-builder-empty { left: 1.5rem; top: 24%; } }
+
+.ui-component fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+
+.ui-builder-palette:has(.ui-builder-catalog-palette) { display: block; width: min(32rem, calc(100vw - 3rem)); }
+.ui-builder-catalog-palette { display: grid; gap: var(--space-related); }
+.ui-builder-catalog-entries { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-related); max-height: 55dvh; overflow: auto; }
+.ui-builder-catalog-entries > button { justify-content: flex-start; text-align: left; }

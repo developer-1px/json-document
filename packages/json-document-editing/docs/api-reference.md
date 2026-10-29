@@ -723,6 +723,8 @@ createUIBuilderEditor(value: CanvasDocument): ObjectEditor
 ```
 ## `createUIBuilderLayoutTools`
 
+Optional context는 `{pageId, selection, runtimeValues?}`다. 읽기 응답의 `rootObjectIds`는 최상위 배치 대상, `objects`는 중첩을 포함한 표시 콘텐츠, `collections`는 현재 검색·필터의 Database projection이다.
+
 ```ts
 createUIBuilderLayoutTools(editor: ObjectEditor): ({ name: string; description: string; parameters: { type: string; properties: Record<string, unknown>; required: string[]; additionalProperties: boolean; }; execute(): { ...; }; } | { ...; })[]
 ```
@@ -2129,7 +2131,7 @@ interface UIBuilderProject extends CanvasDocument {
 ## `UIBuilderProjection`
 
 ```ts
-interface UIBuilderProjection { readonly object: UIComponentObject; readonly issues: readonly string[]; }
+interface UIBuilderProjection { readonly object: UIComponentObject; readonly issues: readonly string[]; readonly collection?: UIBuilderCollectionProjection; readonly recordIds?: readonly string[]; readonly selectionMissing: boolean; }
 ```
 ## `UIBuilderRecordSelection`
 
@@ -2182,3 +2184,72 @@ interface UIBuilderTable extends Record<string, JSONValue> {
   readonly data: DatabaseDocument;
 }
 ```
+
+
+## UI Builder 등록·컬렉션·조합 API
+
+- `applyUIBuilderComponentConfiguration` / `createUIBuilderComponentConfigurationTools`: 승인된 props·자식·다중 필드 매핑의 정본 설정 API.
+- `projectDatabaseTable`: Database의 순수 검색·필터·정렬 투영. UI Builder 조회도 이 함수를 소비한다.
+- `resolveUIBuilderCollection` / `resolveUIBuilderTableData`: 컬렉션과 표시 행 ID를 투영한다.
+- `setUIBuilderComponentValue` / `commitUIBuilderCollection`: 입력·표 변경을 원본 데이터와 history에 반영한다.
+- `uiBuilderComponentChildIds` / `getUIBuilderRootObjects` / `assertUIBuilderComposition` / `duplicateUIBuilderComposition`: 조합의 참조·루트·유효성·복제 계약.
+
+`resolveUIBuilderCollection`의 projection은 `tableId`, `name`, `document`, `fieldIds`,
+`selectedRecordId`를 제공한다. `document`의 schema와 view columns는 모든 원본 필드를
+유지하고 표시 대상 밖의 필드는 숨긴다. `selectedRecordId`는 공유 선택의 행 ID이며
+표 adapter가 `DatabaseHand.selectedRecordId`로 연결한다. 표 초기화·외부 선택 복원은
+사용자 선택 콜백을 발생시키지 않는다.
+
+세부 계약은 [UI Builder 컴포넌트 카탈로그](ui-builder-component-catalog.md),
+Usage와 Source는 `/applications/ui-builder?example=catalog&new=1`에서 확인한다.
+
+## resolveUIBuilderActionPrerequisites
+
+`resolveUIBuilderActionPrerequisites(project, actionId, selection?)`는 실행할 레코드와 requiredFieldIds를 읽어 `{ok:true}` 또는 `{ok:false,reason}`을 반환한다. 상태를 변경하거나 스킬을 호출하지 않는다. 실제 실행과 UI command가 같은 필수 입력 판정을 소비한다. 필수 조건 충족이 등록 스킬의 실행 성공을 보장하지는 않는다.
+
+`UIBuilderConfiguration.childOrders`는 `{objectId, slot, objectIds}` 배열이며
+slot은 childIds/toolbarIds/inspectorIds다. `applyUIBuilderConfiguration`은 현재
+페이지의 기존 슬롯 구성원을 보존하는 순열만 허용하고 flow와 원자적으로 적용한다.
+`arrange_ui_builder`의 childOrders는 같은 계약을 사용하며 빈 배열은 기존 순서 보존이다.
+
+`read_ui_builder_layout`의 `executionContract`는 자유 편집 geometry를
+`intent-sketch`로, 실행 반영을 `responsive-flow`로 선언한다. 에이전트는 좌표를
+복사하지 않고 그룹·순서·강조·비중을 해석해 기존 JSON 문서의 flow를 수정한다.
+콘텐츠·데이터·바인딩·액션·실행 상태는 보존한다.
+
+`UIBuilderProjection.selectionMissing`는 현재 선택행을 필요로 하는 value binding,
+detail-list 또는 action이 선택 없이 표시되는지 알려줍니다. 고정 recordId와
+목록·집계는 현재 선택을 필요로 하지 않습니다. 저장 문서나 값은 변경하지 않습니다.
+
+## createUIBuilderRecordSelection
+
+`createUIBuilderRecordSelection(project): UIBuilderRecordSelection`는 테이블별 최초
+레코드 ID 또는 명시적 빈 선택을 만든다. 이후 필터나 데이터 변경이 암묵적인
+첫 행을 다른 행으로 해석하지 않도록 Workspace와 Runtime이 같은 factory를 소비한다.
+
+`UIBuilderCollectionProjection.selectionOutsideQuery?: boolean`은 선택한 원본
+레코드가 존재하지만 현재 query 결과에는 없는 상태다. 명시적 빈 선택이나 삭제된
+레코드를 필터 제외로 오인하지 않는다. UIBuilder의 컬렉션 Usage가 실제 조건일
+때만 안내하며 현재 선택을 다른 레코드로 변경하지 않는다.
+
+`createUIBuilderCatalogTools(editor, {dataPresentations?: readonly JSONValue[]})`는 Host가 주입한 표현 계약을 read catalog 응답에 포함합니다. 도메인 의미와 읽기/쓰기를 먼저 구분하며 React 구현을 소유하거나 자동 추론하지 않습니다. UI Primitives 소유 계약을 Host가 주입합니다.
+
+## applyUIBuilderScreen / createUIBuilderScreenTools
+
+```ts
+applyUIBuilderScreen(editor: ObjectEditor, plan: UIBuilderScreenPlan): ReturnType<ObjectEditor["dispatch"]> | {ok: false; reason: string}
+createUIBuilderScreenTools(editor: ObjectEditor, options?: {pageId?: string; dataPresentations?: readonly JSONValue[]}): readonly {name: string; description: string; parameters: object; execute(args: unknown): unknown}[]
+```
+
+`UIBuilderScreenPlan`은 pageId, materials(기존 UIBuilderMaterialCommand[]), components(id/text + 기존 UIComponentContent, pageId 제외), flow(UIFlowLayout)를 포함한다. 계획의 id는 자식 및 flow 참조에 사용한다. 하나의 요청에서 한 번 제출하며 실패·stale·재호출은 실제 문서를 변경하지 않는다. 상세 계약은 [UI Builder](ui-builder.md#화면-한-번-제출)에 있다.
+
+## uiBuilderContentStructure
+
+화면 콘텐츠를 관계별로 구조화하고 표현 이유에 따라 정본 UI를 선택하는 작성 지침 상수다. `createUIBuilderScreenTools` 문맥과 `read_ui_builder_catalogs` 응답이 같은 상수를 제공한다. 정책·도메인 모델 또는 자동 컴포넌트 판별기가 아니다. 상세 계약은 [UI Builder](ui-builder.md#콘텐츠-관계에서-ui-선택)에 있다.
+
+
+## UI Builder 기록 추가
+
+`appendUIBuilderActivity(editor, composerId, body)`는 `comment-composer`의 `props.targetId`가 가리키는 기존 `activity-feed`에 새 기록을 추가한다. `props.actor`는 작성자가 명시한 표시명이며 비어 있으면 거부한다. 새 ID와 실제 시각은 명령이 생성하고 기존 `entries.items`는 보존한다. 한 번의 document.replace로 undo 가능하다. 대상·본문·작성자 검증 실패 시 `{ok:false,reason}`를 반환하며 컴포저는 초안을 유지한다. 외부 서비스 호출이나 Database 행 생성 계약이 아니다.
+
+Usage: [빌더 카탈로그](/applications/ui-builder?example=catalog)의 입력·행동 페이지에서 메모 저장 후 같은 페이지의 작성한 기록을 확인한다. RuntimeHand는 이 공개 API를 호출하고 Canvas는 동일한 CommentComposer와 ActivityFeed를 렌더링한다. 소스: `packages/json-document-editing/src/ui-builder-runtime.ts`.

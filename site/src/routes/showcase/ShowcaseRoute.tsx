@@ -1,6 +1,7 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { ActionLink } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { pageDescriptor } from "../../app/page-descriptors";
 import { contentInteractionAttributes } from "@interactive-os/json-document-ui-primitives-react";
 
@@ -29,14 +30,14 @@ export function ShowcaseRoute() {
         See how the same headless editing contracts become three distinct products, then open any Demo and use it.
       </PageHeader>
 
-      <div className="grid gap-4 xl:grid-cols-3">
+      <div className="grid gap-group xl:grid-cols-3">
         {demos.map((demo, index) => (
-          <article key={demo.path} className={classes("flex min-h-[24rem] flex-col overflow-hidden", ui.surface.raised)}>
-            <div className={classes("flex-1 p-5", index === 1 ? ui.surface.workspace : ui.surface.inset)}>
-              <div className="mb-6 flex items-start justify-between gap-4">
-                <div>
-                  <p className={ui.text.label}>Complete editor</p>
-                  <h2 className={classes("mb-2 mt-1", ui.text.title)}>{demo.label}</h2>
+          <article key={demo.path} className={classes("flex min-h-[24rem] flex-col overflow-hidden")}>
+            <div className={"grid content-start gap-group flex-1 p-group"}>
+              <div className="flex items-start justify-between gap-group">
+                <div className="grid content-start gap-related">
+                  <p className={contentPresentation.caption}>Complete editor</p>
+                  <h2 className={classes("m-0", contentPresentation.itemTitle)}>{demo.label}</h2>
                 </div>
                 <img
                   src={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/illustrations/petite-cats/${demo.illustration}.png`}
@@ -49,8 +50,8 @@ export function ShowcaseRoute() {
               <ShowcasePreview kind={demo.kind} />
             </div>
 
-            <div className="p-5">
-              <p className={classes("mt-0", ui.text.body)}>{demo.description}</p>
+            <div className="grid content-start gap-group p-group">
+              <p className={classes("mt-0", contentPresentation.itemSummary)}>{demo.description}</p>
               <ActionLink to={demo.path} kind="prominent">Open {demo.label} Demo</ActionLink>
             </div>
           </article>
@@ -63,18 +64,18 @@ export function ShowcaseRoute() {
 function ShowcasePreview(props: { readonly kind: "document" | "sheet" | "database" }) {
   if (props.kind === "document") {
     return (
-      <div className={classes("overflow-hidden p-2", ui.surface.raised)} aria-hidden="true">
+      <div className={classes("overflow-hidden p-related")} aria-hidden="true">
         {["Write the first block", "Select a range", "Move it together"].map((text, index) => (
           <div
             key={text}
             className={classes(
               "grid grid-cols-[2rem_1fr] items-center",
-              ui.surface.documentBlock,
+              contentPresentation.itemSummary,
             )}
             {...contentInteractionAttributes({ role: "content", selected: index === 1 })}
           >
-            <span className={classes("py-3 text-center", ui.surface.documentIndex, ui.text.meta)}>{index + 1}</span>
-            <span className="px-3 py-3">{text}</span>
+            <span className={classes("py-related text-center", contentPresentation.caption, contentPresentation.caption)}>{index + 1}</span>
+            <span className="px-related py-related">{text}</span>
           </div>
         ))}
       </div>
@@ -83,12 +84,12 @@ function ShowcasePreview(props: { readonly kind: "document" | "sheet" | "databas
 
   if (props.kind === "sheet") {
     return (
-      <div className={classes("overflow-hidden", ui.surface.raised)} aria-hidden="true">
+      <div className={classes("overflow-hidden")} aria-hidden="true">
         <table className="w-full border-collapse">
           <thead>
             <tr>
               {["Task", "Status", "Owner"].map((heading) => (
-                <th key={heading} className={classes("px-2 py-2 text-left", ui.surface.gridHead, ui.text.meta)}>{heading}</th>
+                <th key={heading} className={classes("px-related py-related text-left", contentPresentation.tableHead, contentPresentation.caption)}>{heading}</th>
               ))}
             </tr>
           </thead>
@@ -98,7 +99,7 @@ function ShowcasePreview(props: { readonly kind: "document" | "sheet" | "databas
                 {row.map((cell, columnIndex) => (
                   <td
                     key={cell}
-                    className={classes("px-2 py-3", ui.surface.gridCell, ui.text.meta)}
+                    className={classes("px-related py-related", contentPresentation.tableCell, contentPresentation.caption)}
                     {...contentInteractionAttributes({ role: "content", selected: rowIndex < 2 && columnIndex < 2 })}
                   >
                     {cell}
@@ -113,14 +114,14 @@ function ShowcasePreview(props: { readonly kind: "document" | "sheet" | "databas
   }
 
   return (
-    <div className={classes("overflow-hidden", ui.surface.raised)} aria-hidden="true">
+    <div className={classes("overflow-hidden")} aria-hidden="true">
       <table className="w-full border-collapse">
         <thead>
           <tr>
             {[["Name", "title"], ["Status", "select"], ["Score", "number"]].map(([name, type]) => (
-              <th key={name} className={classes("px-2 py-2 text-left", ui.database.head)}>
+              <th key={name} className={classes("px-related py-related text-left", contentPresentation.tableHead)}>
                 <span className="block">{name}</span>
-                <span className={ui.database.type}>{type}</span>
+                <span className={contentPresentation.caption}>{type}</span>
               </th>
             ))}
           </tr>
@@ -128,7 +129,7 @@ function ShowcasePreview(props: { readonly kind: "document" | "sheet" | "databas
         <tbody>
           {[["Inbox", "Backlog", "8"], ["Review", "Doing", "5"], ["Ship", "Done", "13"]].map((row) => (
             <tr key={row[0]}>
-              {row.map((cell) => <td key={cell} className={classes("px-2 py-3", ui.database.cell, ui.text.meta)}>{cell}</td>)}
+              {row.map((cell) => <td key={cell} className={classes("px-related py-related", contentPresentation.tableCell, contentPresentation.caption)}>{cell}</td>)}
             </tr>
           ))}
         </tbody>

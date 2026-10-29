@@ -233,6 +233,23 @@ type DatabaseHandProps<Row extends Record<string, unknown>> = DatabaseHandCommon
   | DatabaseHandLegacySource<Row>
 );
 ```
+
+세 source profile 모두 다음 행 선택 계약을 지원한다.
+
+```ts
+readonly selectedRecordId?: string | null;
+readonly onSelectionChange?: (recordIds: ReadonlyArray<string>) => void;
+```
+
+`selectedRecordId`에 표시 중인 행 ID를 전달하면 첫 표시 필드로 행 포커스를 복원한다.
+문서 갱신으로 내부 editor가 재생성되거나 페이지가 다시 마운트되어도 같은 행을
+복원한다. `null`·미지정·현재 투영에 없는 ID는 다른 행을 강제로 선택하지 않는다.
+초기 선택과 외부 선택 복원은 `onSelectionChange`를 발생시키지 않는다. 사용자의
+행 선택 변경만 콜백으로 전달하므로 Host는 그 값을 공유 선택 상태에 저장할 수 있다.
+
+`features.columns: false`는 숨긴 열의 복원 표시도 생략한다. 읽기 전용 `select`
+셀은 저장된 option ID를 유지하면서 해당 option의 `name`을 표시한다.
+
 ## `DatabaseMutationContext`
 
 ```ts
@@ -381,3 +398,16 @@ interface DatabaseTableView extends Record<string, JSONValue> { readonly id: str
 ```ts
 useDatabase<Row extends DatabaseRow = DatabaseRow>(): DatabaseContextValue<Row>
 ```
+
+## 간격과 스타일 진입점
+
+`@interactive-os/json-document-database/styles.css`는 UI Primitives 정본 `design-system.css`를 가져옵니다. 독립 Host에서도 Record detail의 역할 레이블·제목은 `contentPresentation.group`의 8px gap을 사용합니다. 레이아웃 margin으로 보정하지 않습니다.
+
+
+DatabaseViewControls는 기존 projection 계약을 유지하면서 Popover, Command, Check와
+fieldPresentation을 조합합니다. 각 builder는 filter/sort/group/column의 도메인 결정을
+소유하고 focus·outside dismiss·Escape와 표면은 UI Primitives가 소유합니다.
+DatabasePropertyControl의 form은 standard, native text lease를 쓰는 cell은 seamless
+presentation을 소비합니다. 셀 높이와 구조적 선택은 DatabaseHand가 유지합니다.
+
+Database.RecordPanel은 ProductInspector를 비모달 dialog로 조합한다. draft·validation·submit은 Database가, Escape·초기 focus·복귀는 공용 Inspector가 소유한다. [공개 API 실제 Usage](/demo/database?profile=resource)는 인메모리 transport fixture의 업무 선택·저장·취소를 시연한다.

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import { PanelLeft, PanelLeftClose } from "lucide-react";
-import { DisclosureButton, Command, Popover, floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Popover, SidebarNavigation, linkPresentation, floatingSurface, type NavigationItem, type NavigationGroup } from "@interactive-os/json-document-ui-primitives-react";
 import { ActionLink } from "../../shared/ui/interactive";
-import { CatMenuMark, JsonDocumentWordmark } from "../../shared/ui/brand";
+import { JsonDocumentWordmark } from "../../shared/ui/brand";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   findSiteRoute,
@@ -13,7 +13,7 @@ import {
   useRouteMetadata,
   type SiteRoute,
 } from "../router";
-import { isNavBranch, rootNavRoutes, routeSection, visibleNavChildren } from "../breadcrumb";
+import { rootNavRoutes, routeSection, visibleNavChildren } from "../breadcrumb";
 import { siteSections } from "../site-layers";
 import { NavigationLayerIcon } from "../navigation-layer-icon";
 import { HomeRoute } from "../../routes/home/HomeRoute";
@@ -43,94 +43,61 @@ function AppShell() {
     setOpenSections((current) => current.has(activeSection.id) ? current : new Set([...current, activeSection.id]));
   }, [activeSection]);
 
-  const navigation = (
+  const navigationItem = (item: SiteRoute): NavigationItem => ({
+    id: item.path,
+    href: item.path,
+    label: item.label,
+    children: visibleNavChildren(item.path, route.path, siteRoutes).map(navigationItem),
+  });
+  const navigationGroups: NavigationGroup[] = [
+    {id: "root", items: rootNavRoutes(siteRoutes).map(navigationItem)},
+    ...siteSections.flatMap(section => {
+      const sectionRoutes = siteRoutes.filter(item => item.navigationGroup !== undefined && section.groups.includes(item.navigationGroup) && item.sidebar !== false);
+      if (!sectionRoutes.length) return [];
+      const landing = siteRoutes.find(item => item.path === section.path && item.navigationGroup === undefined);
+      return [{
+        id: section.id,
+        label: section.label,
+        icon: <NavigationLayerIcon section={section.id} />,
+        expanded: openSections.has(section.id),
+        onExpandedChange: (open: boolean) => setOpenSections(current => {
+          const next = new Set(current);
+          if (open) next.add(section.id); else next.delete(section.id);
+          return next;
+        }),
+        items: [
+          ...(landing ? [navigationItem(landing)] : []),
+          ...section.groups.flatMap(group => sectionRoutes.filter(item => {
+            if (item.navigationGroup !== group) return false;
+            const parent = siteRoutes.find(candidate => candidate.path === item.parentPath);
+            return parent?.navigationGroup !== group;
+          }).map(navigationItem)),
+        ],
+      }];
+    }),
+  ].filter(group => group.items.length > 0);
+
+  const navigation = (floating = false) => (
       <nav
         aria-label="Site navigation"
-        className={classes(route.chrome === "none" ? "w-64 max-w-[calc(100vw-2rem)]" : "shrink-0 md:sticky md:top-0 md:h-screen md:w-52 md:self-start md:overflow-y-auto", route.chrome !== "none" && ui.frame.navigation)}
+        className={classes(route.chrome === "none" ? "w-64 max-w-[calc(100vw-2rem)]" : "shrink-0 md:sticky md:top-0 md:h-screen md:w-52 md:self-start md:overflow-y-auto", !floating && route.chrome !== "none" && ui.frame.navigation)}
       >
-        <div className="flex items-start justify-between gap-1">
-          <ActionLink to="/" className={classes("flex min-w-0 flex-1 px-4 py-3", ui.frame.brand)}>
+        <div className="flex items-start justify-between gap-related">
+          <ActionLink to="/" className={classes("flex min-w-0 flex-1 px-group py-related", ui.frame.brand)}>
             <span className="sr-only">json-document</span>
             <JsonDocumentWordmark className="h-auto w-full max-w-40" />
           </ActionLink>
           {appChrome ? (
-            <Command label="Collapse navigation" className="mt-2 mr-1" onClick={() => setNavCollapsed(true)}>
+            <Command label="Collapse navigation" rootClassName="p-related" onClick={() => setNavCollapsed(true)}>
               <PanelLeftClose aria-hidden="true" size={16} />
             </Command>
           ) : null}
         </div>
-        <div className={ui.nav.menu}>
-          {rootNavRoutes(siteRoutes).map((item) => (
-            <ActionLink
-              key={item.path}
-              to={item.path}
-              activePath={route.path}
-              className={classes(ui.nav.item, ui.nav.current)}
-            >
-              {item.label}
-            </ActionLink>
-          ))}
-          {siteSections.map((section) => {
-            const sectionRoutes = siteRoutes.filter((item) =>
-              item.navigationGroup !== undefined
-              && section.groups.includes(item.navigationGroup)
-              && item.sidebar !== false
-            );
-            const landingRoute = siteRoutes.find((item) => item.path === section.path && item.navigationGroup === undefined);
-            const sectionLabelId = `site-navigation-${section.id}`;
-            const open = openSections.has(section.id);
-            if (sectionRoutes.length === 0) return null;
-            return (
-              <div
-                key={section.id}
-                role="group"
-                aria-label={section.label}
-                className="grid content-start"
-              >
-                <DisclosureButton
-                  className={classes(ui.nav.groupToggle, activeSection?.id === section.id ? ui.nav.groupActive : ui.nav.groupIdle)}
-                  expanded={open}
-                  controls={`${sectionLabelId}-list`}
-                  onClick={() => {
-                    setOpenSections((current) => {
-                      const next = new Set(current);
-                      if (next.has(section.id)) next.delete(section.id);
-                      else next.add(section.id);
-                      return next;
-                    });
-                  }}
-                >
-                  <span className="flex min-w-0 items-center gap-2">
-                    <NavigationLayerIcon section={section.id} className="shrink-0" />
-                    <span>{section.label}</span>
-                  </span>
-                  <span aria-hidden="true" className={classes(ui.interactive.chevron, ui.nav.chevron)}>⌄</span>
-                </DisclosureButton>
-                <ul
-                  id={`${sectionLabelId}-list`}
-                  className={ui.nav.panel}
-                  data-open={open ? "true" : undefined}
-                  hidden={!open}
-                >
-                  {open && landingRoute ? <NavItem item={landingRoute} currentPath={route.path} routes={siteRoutes} depth={0} /> : null}
-                  {open
-                    ? section.groups.flatMap((group) => {
-                      const groupRoutes = sectionRoutes.filter((item) => {
-                        if (item.navigationGroup !== group) return false;
-                        const parent = item.parentPath
-                          ? siteRoutes.find((candidate) => candidate.path === item.parentPath)
-                          : undefined;
-                        return parent?.navigationGroup !== group;
-                      });
-                      return groupRoutes.map((item) => (
-                        <NavItem key={item.path} item={item} currentPath={route.path} routes={siteRoutes} depth={0} />
-                      ));
-                    })
-                    : null}
-                </ul>
-              </div>
-            );
-          })}
+        <div className="px-related pb-related">
+          <SidebarNavigation label="페이지" currentId={route.path}
+            groups={navigationGroups}
+            renderLink={(item, attributes) => <ActionLink {...attributes} to={item.href} activePath={route.path}>{attributes.children}</ActionLink>}
+          />
         </div>
       </nav>
   );
@@ -140,8 +107,8 @@ function AppShell() {
     <Popover label="사이트 메뉴" trigger={<PanelLeft aria-hidden="true" size={16} />}
       triggerPresentation="icon" open={menuOpen} onOpenChange={setMenuOpen}
       className={classes(floatingSurface.control, "fixed left-4 top-4 z-40 p-1")}
-      panelClassName={classes(floatingSurface.panel, "absolute left-0 top-full mt-2 max-h-[calc(100dvh-5rem)] overflow-y-auto")}>
-      {navigation}
+      panelClassName={classes(floatingSurface.panel, "absolute left-0 top-[calc(100%+var(--space-related))] max-h-[calc(100dvh-5rem)] overflow-y-auto")}>
+      {navigation(true)}
     </Popover>
   </>;
 
@@ -149,32 +116,35 @@ function AppShell() {
     <div className={classes("flex min-h-screen flex-col md:flex-row", appChrome && "h-screen overflow-hidden", ui.frame.app)}>
       <a
         href="#main-content"
-        className={classes("sr-only z-50", ui.state.skipLink)}
+        className={classes(linkPresentation.action, "sr-only z-50 focus:not-sr-only focus:fixed focus:left-group focus:top-group")}
       >
         Skip to content
       </a>
+      <div className="flex shrink-0 items-center gap-related px-group py-related md:hidden">
+        <Popover label="사이트 메뉴" trigger={<PanelLeft aria-hidden="true" size={16} />}
+          triggerPresentation="icon" open={menuOpen} onOpenChange={setMenuOpen}
+          panelClassName="absolute left-0 top-[calc(100%+var(--space-related))] z-50 max-h-[calc(100dvh-5rem)] w-[min(20rem,calc(100vw-2rem))] overflow-auto p-related">
+          {navigation(true)}
+        </Popover>
+        <ActionLink to="/" className={classes("min-w-0 flex-1", ui.frame.brand)}>
+          <span className="sr-only">json-document</span><JsonDocumentWordmark className="h-auto w-40 max-w-full" />
+        </ActionLink>
+      </div>
+      <div className="hidden md:contents">
       {collapsed ? (
         <nav aria-label="Site navigation" className={classes(ui.frame.navigationRail, ui.frame.navigation)}>
           <Command label="Open navigation" onClick={() => setNavCollapsed(false)}>
             <PanelLeft aria-hidden="true" size={16} />
           </Command>
-          <div className={ui.nav.railMenu}>
-            {siteSections.map((section) => (
-              <ActionLink
-                key={section.id}
-                to={section.path}
-                activePath={route.path}
-                className={classes(ui.nav.railItem, ui.nav.current)}
-              >
-                <span className="sr-only">{section.label}</span>
-                <NavigationLayerIcon section={section.id} />
-              </ActionLink>
-            ))}
-          </div>
+          <SidebarNavigation label="사이트 섹션" collapsed currentId={activeSection?.id}
+            groups={[{id: "sections", items: siteSections.map(section => ({id: section.id, href: section.path, label: section.label, icon: <NavigationLayerIcon section={section.id} />}))}]}
+            renderLink={(item, attributes) => <ActionLink {...attributes} to={item.href}>{attributes.children}</ActionLink>}
+          />
         </nav>
       ) : (
-      navigation
+      navigation()
       )}
+      </div>
       <div id="main-content" className={classes("min-w-0 flex-1", appChrome && "flex min-h-0 flex-col overflow-hidden")}>
         <Outlet />
       </div>
@@ -182,38 +152,3 @@ function AppShell() {
   );
 }
 
-function NavItem(props: {
-  readonly item: SiteRoute;
-  readonly currentPath: string;
-  readonly routes: ReadonlyArray<SiteRoute>;
-  readonly depth: number;
-}) {
-  const children = visibleNavChildren(props.item.path, props.currentPath, props.routes);
-  const current = props.currentPath === props.item.path;
-  return (
-    <li className="grid content-start">
-      <ActionLink
-        to={props.item.path}
-        activePath={props.currentPath}
-        branch={isNavBranch(props.currentPath, props.item.path, props.routes)}
-        className={classes(props.depth === 0 ? ui.nav.item : ui.nav.child, ui.nav.current)}
-      >
-        <span className="grid size-4 shrink-0 place-items-center text-line-accent">{current ? <CatMenuMark /> : null}</span>
-        {props.item.label}
-      </ActionLink>
-      {children.length > 0 ? (
-        <ul className={ui.nav.list}>
-          {children.map((child) => (
-            <NavItem
-              key={child.path}
-              item={child}
-              currentPath={props.currentPath}
-              routes={props.routes}
-              depth={props.depth + 1}
-            />
-          ))}
-        </ul>
-      ) : null}
-    </li>
-  );
-}

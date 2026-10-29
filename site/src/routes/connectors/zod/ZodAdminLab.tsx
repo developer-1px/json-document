@@ -1,9 +1,10 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState } from "react";
 import { DatabaseHand } from "@interactive-os/json-document-database";
 import "@interactive-os/json-document-database/styles.css";
 import * as z from "zod/v4";
 import { Inspector } from "../../../shared/ui/inspector";
-import { classes, ui } from "../../../shared/ui/styles";
+import { classes } from "../../../shared/ui/styles";
 
 export const databaseTaskSchema = z.object({
   id: z.string(),
@@ -26,11 +27,11 @@ export function ZodDatabaseLab() {
   const [tasks, setTasks] = useState(initialTasks);
   const nextRecord = useRef(4);
   return (
-    <section aria-label="Zod database" className="grid gap-4">
-      <div className="grid gap-1">
-        <p className={ui.text.label}>DatabaseHand</p>
-        <h2 className={classes("mb-1 mt-1", ui.text.heading)}>The table is the workspace</h2>
-        <p className={classes("m-0", ui.text.meta)}>
+    <section aria-label="Zod database" className="grid gap-group">
+      <div className="grid gap-related">
+        <p className={contentPresentation.caption}>DatabaseHand</p>
+        <h2 className={classes("m-0", contentPresentation.itemTitle)}>The table is the workspace</h2>
+        <p className={classes("m-0", contentPresentation.caption)}>
           A Zod object schema and record array become a ready-to-use database. The host owns records; the Hand owns editing behavior.
         </p>
       </div>

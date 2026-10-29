@@ -74,3 +74,5 @@ interface RichTextRendererProps {
   readonly renderUnknown?: (value: unknown) => ReactNode;
 }
 ```
+
+읽기 codeBlock의 표면과 복사 명령은 UI Primitives의 CodeBlock을 조합한다. rich-text node attrs·children 및 useVirtualSelectionScope binding은 rich-text adapter가 유지한다. 별도의 코드 표면을 구현하지 않는다.

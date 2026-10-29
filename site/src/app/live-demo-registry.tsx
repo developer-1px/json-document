@@ -1,9 +1,10 @@
+import { InlineAlert, contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { pageDescriptors } from "./page-descriptors";
 import { ActionLink } from "../shared/ui/interactive";
 import { lazy, Suspense, useEffect, useRef, useState, type ComponentType } from "react";
 import { DemoEmbedProvider } from "../shared/demo-workbench/DemoPage";
 import { DemoProvider, DemoSurface } from "../shared/demo-workbench/DemoSurface";
-import { classes, ui } from "../shared/ui/styles";
+import { classes } from "../shared/ui/styles";
 
 type DemoModule = Record<string, ComponentType>;
 type LiveDemoDefinition = { readonly Component: ReturnType<typeof lazy>; readonly source: string };
@@ -63,7 +64,7 @@ const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
 
 export function LiveDemo({ path }: { readonly path: string }) {
   const definition = liveDemos[path];
-  if (!definition) return <p className={ui.state.error}>Unknown live demo: {path}</p>;
+  if (!definition) return <InlineAlert tone="error" title={`Unknown live demo: ${path}`} />;
   const Demo = definition.Component;
   const application = pageDescriptors.find(route => route.path === path && route.applicationSource);
   const rootRef = useRef<HTMLElement>(null);
@@ -82,15 +83,15 @@ export function LiveDemo({ path }: { readonly path: string }) {
   }, []);
 
   return (
-    <section ref={rootRef} aria-label={`Live demo: ${path}`} className={classes("my-4 min-h-16 min-w-0", ui.product.frame)} data-live-demo={path}>
+    <section ref={rootRef} aria-label={`Live demo: ${path}`} className={classes("min-h-16 min-w-0")} data-live-demo={path}>
       {visible ? (
-        <Suspense fallback={<p className={classes("m-0 p-4", ui.text.meta)}>Live demo 불러오는 중…</p>}>
+        <Suspense fallback={<p className={classes("m-0 p-group", contentPresentation.caption)}>Live demo 불러오는 중…</p>}>
           <DemoProvider demo={{ source: definition.source }}>
             {application ? <DemoSurface><ActionLink to={path}>{application.label} 앱 열기</ActionLink></DemoSurface>
               : <DemoEmbedProvider><Demo /></DemoEmbedProvider>}
           </DemoProvider>
         </Suspense>
-      ) : <p className={classes("m-0 p-4", ui.text.meta)}>Live demo</p>}
+      ) : <p className={classes("m-0 p-group", contentPresentation.caption)}>Live demo</p>}
     </section>
   );
 }

@@ -1,7 +1,5 @@
-import { MarkdownRenderer } from "@interactive-os/json-document-markdown-react";
 import { PageHeader } from "../../shared/ui/primitives";
-import { markdownContentComponents } from "../../shared/ui/markdown-content";
-import { classes, ui } from "../../shared/ui/styles";
+import { MarkdownContent } from "../../shared/ui/markdown-content";
 
 const streamed = `## Streaming Markdown
 
@@ -17,8 +15,8 @@ export function MarkdownDemoRoute() {
     <PageHeader label="Markdown · Usage" title="하나의 정본 renderer가 정적 문서와 스트림을 함께 다룹니다." illustration="terminal">
       canonical source를 바꾸지 않고 render projection만 복구하며, component renderer를 교체할 수 있습니다.
     </PageHeader>
-    <article className={classes("mx-auto w-full max-w-3xl p-6", ui.surface.raised)}>
-      <MarkdownRenderer className={ui.markdown.root} components={markdownContentComponents} content={streamed} streaming />
+    <article className="w-full max-w-3xl justify-self-center p-group">
+      <MarkdownContent content={streamed} streaming />
     </article>
   </>;
 }

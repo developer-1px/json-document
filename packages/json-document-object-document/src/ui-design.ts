@@ -1,7 +1,5 @@
-/** Closed visual recipes. Rendering maps these IDs to shared tokens, never user CSS. */
+/** One shared design system. Stored legacy recipes are normalized by the project reader. */
 export const uiDesignCatalog = [
-  {id: "clean", label: "기본", description: "Clear typography and quiet surfaces."},
-  {id: "soft", label: "부드럽게", description: "Muted surfaces, rounded cards and generous content spacing."},
-  {id: "bold", label: "선명하게", description: "Accent headings and prominent metric values."},
+  {id: "clean", label: "공통", description: "Shared typography, controls and minimal content hierarchy."},
 ] as const;
 export type UIDesignId = typeof uiDesignCatalog[number]["id"];

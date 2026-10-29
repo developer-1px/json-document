@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import {
   AuroraMass,
   BlobMass,
@@ -35,7 +36,7 @@ import "@interactive-os/json-document-animation-react/styles.css";
 import type { ReactNode } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { PageHeader } from "../../shared/ui/primitives";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { animationDemo } from "./animation-demo-styles";
 
 const styles = animationDemo();
@@ -43,8 +44,8 @@ const styles = animationDemo();
 function Specimen(props: { readonly title: string; readonly wide?: boolean; readonly mass?: boolean; readonly children: ReactNode }) {
   return (
     <section className={classes(styles.specimen(), props.wide ? styles.wide() : undefined)}>
-      <h2 className={ui.text.label}>{props.title}</h2>
-      <div className={classes(props.mass ? styles.massStage() : styles.stage(), ui.surface.raised)}>
+      <h2 className={contentPresentation.caption}>{props.title}</h2>
+      <div className={classes(props.mass ? styles.massStage() : styles.stage())}>
         {props.children}
       </div>
     </section>
@@ -195,12 +196,12 @@ export function AnimationDemoRoute() {
             <div className={styles.bar()}>
               <div className={styles.copy()}>
                 <Skeleton shape="avatar" />
-                <div className="grid flex-1 gap-2">
+                <div className="grid flex-1 gap-related">
                   <Skeleton className="w-1/3" />
                   <Skeleton className="w-2/3" />
                 </div>
               </div>
-              <div className="mt-3 grid gap-2">
+              <div className="mt-related grid gap-related">
                 <Skeleton shape="block" />
               </div>
             </div>
@@ -209,7 +210,7 @@ export function AnimationDemoRoute() {
             <StaggerLines className={styles.bar()} />
           </Specimen>
           <Specimen title="Shimmer" wide>
-            <Shimmer className={classes("h-12 w-full", ui.surface.workspace)} />
+            <Shimmer className={classes("h-12 w-full")} />
           </Specimen>
         </Group>
         <Group title="Identity rim">

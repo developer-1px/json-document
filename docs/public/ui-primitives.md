@@ -21,8 +21,9 @@ navigation, disclosure, menu와 direct-manipulation primitive를 제공합니다
 event 경계를 만족하는 외부 구현으로 교체할 수 있습니다.
 
 제품의 option 목록, permission, workflow, persistence와 브랜드 디자인은 이
-레이어가 소유하지 않습니다. 제품은 `data-ui-*` hook을 token에 연결할 수 있지만
-control의 의미·상태·focus·keyboard 계약을 다시 구현하지 않습니다.
+레이어가 소유하지 않습니다. 공통 control·content·surface의 외형은 이 패키지의
+정본 CSS를 소비합니다. 테마는 의미 토큰에서 조정하고, 제품은 위치·크기·조합만
+소유합니다. 같은 역할의 외형·상태·focus·keyboard 계약을 화면에서 다시 구현하지 않습니다.
 
 정본 구현: `packages/json-document-ui-primitives-react/src/controls.tsx`,
 `packages/json-document-ui-primitives-react/src/choice.tsx`,
@@ -288,3 +289,11 @@ Calendar field·grid·picker와 날짜 projection은
 [`@interactive-os/json-document-calendar` API](/docs/api/calendar)가 소유합니다.
 
 생성 대기의 시각 언어는 [Animation](animation.md)이 소유합니다.
+
+## 사이트 자체의 Usage
+
+이 문서의 제목은 PageHeader, 사이트 메뉴는 SidebarNavigation, 현재 위치는
+Breadcrumbs를 사용합니다. 본문·표·인용·이미지는 contentPresentation을 사용합니다.
+[페이지·탐색 공개 계약](../../packages/json-document-ui-primitives-react/docs/page-navigation.md)과
+[실제 디자인 시스템 Usage](/demo/ui-primitives#design-system-data-presentation)에서
+공통 셸과 카탈로그 내부의 표현을 함께 확인할 수 있습니다.

@@ -90,3 +90,5 @@ interface UseRichTextSuggestionOptions<Candidate extends RichTextSuggestionCandi
   readonly onAction: (candidate: Candidate, trigger: RichTextSuggestionTrigger) => void;
 }
 ```
+
+멘션의 의미·caret 인접 상태·삽입 binding은 이 패키지가 소유한다. 원자는 UI Primitives의 Tag, 추천은 floatingSurface.panel·SelectableItem row·RecordSummary·Avatar를 조합한다. 독자 inline border/radius/shadow/폰트·margin을 만들지 않는다. 크기·위치 className과 style은 Host 배치용이다. UI Primitives design-system.css가 필요하다. [실제 Usage](/demo/composer).

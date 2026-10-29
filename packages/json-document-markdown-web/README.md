@@ -15,3 +15,7 @@ See [API and lifecycle](docs/api.md) and [caret Usage](/demo/markdown-caret).
 
 The [historical strong-only benchmark](docs/performance.md) measures production input,
 selection mapping, DOM reconciliation, and retained text History.
+
+표현 스타일은 UI Primitives의 `design-tokens.css`를 가져와 콘텐츠 간격
+`related` 8px / `group` 16px / `region` 32px을 소비합니다. 글자·마커와
+애니메이션 도형 내부의 치수는 콘텐츠 배치 간격과 구분합니다.

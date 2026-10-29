@@ -371,7 +371,7 @@ interface UIComponentObject extends ObjectDraft { readonly id: string; readonly 
 ## `uiDesignCatalog`
 
 ```ts
-const uiDesignCatalog: readonly [{ readonly id: "clean"; readonly label: "기본"; readonly description: "Clear typography and quiet surfaces."; }, { readonly id: "soft"; readonly label: "부드럽게"; readonly description: "Muted surfaces, rounded cards and generous content spacing."; }, { ...; }]
+const uiDesignCatalog: readonly [{ readonly id: "clean"; readonly label: "공통"; readonly description: "Shared typography, controls and minimal content hierarchy."; }]
 ```
 ## `UIDesignId`
 
@@ -408,3 +408,65 @@ const uiLayoutCatalog: readonly [{ readonly id: "stack"; readonly label: "세로
 ```ts
 type UILayoutId = typeof uiLayoutCatalog[number]["id"];
 ```
+
+## uiBuilderComponentChildIds
+
+`uiBuilderComponentChildIds(object: UIComponentObject): readonly string[]` — childIds와 shell의 toolbarIds/inspectorIds 참조를 반환한다. 일반 object subtree 연산과 UI 조합은 같은 참조 계약을 소비한다.
+
+## resolveObjectCollisions
+
+`resolveObjectCollisions(objects, groups: readonly ObjectCollisionGroup[], anchoredIds)`
+returns geometry with intersecting siblings pushed downward. Each group supplies
+`objectIds` and a nonnegative `gap`. Gesture anchors retain their positions; displaced
+compositions translate with their canonical subtrees. Unrelated groups and document
+content are unchanged. The function owns geometry only, not gestures or history.
+[UI Builder Usage](/applications/ui-builder?example=issue-feed&new=1) consumes it through
+`CanvasHand.collisionGroups` for both live preview and a single committed Undo unit.
+
+## Product record catalog
+
+`uiComponentCatalog` includes `status-badge`, `property-editor`, `result-panel`, and attached/floating `product-inspector`. Record list role props map title/summary/identifier/status/assignee/updatedAt fields. See [UI component contract](ui-component.md#product-record-roles).
+
+## Expanded product vocabulary
+
+`uiComponentCatalog`에 page-header/sidebar-navigation/avatar/person-identity/priority-indicator/date-display/empty-state/inline-alert/stepper/activity-feed/people-picker/filter-bar가 등록됐습니다. [공개 문서의 매핑](ui-component.md#additional-product-catalog)과 [통합 Usage](/demo/ui-primitives#design-system-product-workflow)를 참고하세요.
+
+## uiComponentSlotIds / mapUIComponentChildren
+
+```ts
+uiComponentSlotIds(content: UIComponentContent): readonly (string | undefined)[]
+mapUIComponentChildren(content: UIComponentContent, map: (id: string) => string | undefined): UIComponentContent
+```
+
+이름으로 연결한 작업 공간의 영역을 읽고, 복제/삭제에서 자식 참조를 변환한다. map이 undefined를 반환하면 해당 참조를 제거한다. 자세한 계약은 [UI Component](ui-component.md#작업-공간의-이름-참조)에 있다.
+
+### `card.props.actionCount`
+
+`card`의 childIds 끝 actionCount개를 ContentCard.actions에, 나머지를 본문에
+전달합니다. 기본은 0입니다. [계약](ui-component.md#그룹의-표면-선택)과
+[전체 빌더 Usage](/applications/ui-builder?example=catalog)에서 본문과 실제 페이지
+이동 행동을 확인할 수 있습니다. group/card/feed/inspector 선택은 같은 카탈로그의
+content-surface-choice recipe에 등록되어 있습니다.
+
+## `uiDomainCardCatalog` / `assertUIDomainCardMapping`
+
+```ts
+type UIDomainCardPresentation = "inquiry" | "task" | "product" | "approval" | "activity" | "result";
+assertUIDomainCardMapping(props: Readonly<Record<string, unknown>>, fields: readonly {id:string;type:string}[], fieldIds: readonly string[]): void;
+```
+
+`uiDomainCardCatalog`의 required/roles/purpose/reason과 `uiDomainCardFieldRoles`는
+같은 정본이며 props 스키마와 에이전트 조합 recipe에 함께 사용합니다.
+[계약](ui-component.md#선택-레코드의-도메인-카드),
+[Usage](/applications/ui-builder?example=domain-cards).
+
+record-card의 unread/completed/overdue/changedFieldId는 checkbox 사실, approval의
+before/afterFieldId는 실제 비교값입니다. record-list.itemKind/priorityFieldId와
+checkbox 인디케이터, group.relationship(related/group/region)도 정본 스키마에
+등록되어 있습니다. [계약](ui-component.md#경계와-상태-단서),
+[Usage](/applications/ui-builder?example=domain-cards).
+
+
+### 작성용 UI 카탈로그
+
+`uiComponentAuthoringCatalog`는 uiComponentCatalog에서 aliasOf가 있는 호환 ID를 제외한 파생 목록이다. 팔레트·신규 화면 생성·전체 컴포넌트 Usage는 이 목록을 사용한다. 저장된 문서 검증은 uiComponentCatalog 전체로 수행하므로 property-editor/result-panel의 기존 ID는 유효하다. aliasOf는 각각 record-facts/card를 가리킨다. [Usage](/applications/ui-builder?example=catalog), 소스 `src/ui-component-catalog.ts`.

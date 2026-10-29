@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState } from "react";
 import { createDocumentEditor, type BlockDocument } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
@@ -9,7 +10,7 @@ import {
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
 import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import {
   editingCommandFromWebKeyboardStroke,
   applyAffordance,
@@ -79,13 +80,13 @@ export function DocumentWidgetRoute() {
           aria-label="Document blocks"
           {...activeDescendantContainerProps(focus === null ? null : documentItemId(focus.blockId))}
           onKeyDown={editing.getKeyDownHandler()}
-          className={classes("m-0 grid list-none gap-1 p-0", ui.state.focus)}
+          className={classes("m-0 grid list-none gap-related p-0", contentPresentation.focus)}
         >
           {document.blocks.map((block) => (
-            <SelectableItem
+            <SelectableItem presentation="row"
               as="li"
               key={block.id}
-              className={classes("w-full text-left", ui.surface.selectableBlock)}
+              className={classes("w-full text-left", contentPresentation.itemSummary)}
               {...editingItemProps(editing.getItem(block.id))}
               {...activeDescendantItemProps(documentItemId(block.id))}
               {...projectWebWidgetState({

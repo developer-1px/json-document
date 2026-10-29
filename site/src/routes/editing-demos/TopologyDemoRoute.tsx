@@ -1,8 +1,9 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { Inspector } from "../../shared/ui/inspector";
 import { Choice, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 import { topologyLabOrders, topologyLabRecords, useTopologyLab } from "./useTopologyLab";
 
@@ -16,19 +17,19 @@ export function TopologyDemoRoute() {
       </PageHeader>
 
     )}>
-      <div className="grid gap-4 lg:grid-cols-3">
-        <section className={classes("p-4", ui.surface.raised)} aria-labelledby="topology-input">
-          <p className={ui.text.label}>1 · 입력</p>
-          <h2 id="topology-input" className={classes("mb-2 mt-1", ui.text.heading)}>화면 순서 선택하기</h2>
-          <Choice presentation="inline" className="mb-3" label="Visible order" value={order} options={(Object.keys(topologyLabOrders) as ReadonlyArray<keyof typeof topologyLabOrders>).map((item) => ({ id: item, label: item }))} onValueChange={setOrder} />
-          <ol className="m-0 grid list-none gap-1 p-0">
+      <div className="grid gap-group lg:grid-cols-3">
+        <section className={classes("grid content-start gap-group p-group")} aria-labelledby="topology-input">
+          <div className="grid content-start gap-related"><p className={contentPresentation.caption}>1 · 입력</p>
+          <h2 id="topology-input" className={contentPresentation.itemTitle}>화면 순서 선택하기</h2></div>
+          <Choice presentation="inline" label="Visible order" value={order} options={(Object.keys(topologyLabOrders) as ReadonlyArray<keyof typeof topologyLabOrders>).map((item) => ({ id: item, label: item }))} onValueChange={setOrder} />
+          <ol className="m-0 grid list-none gap-related p-0">
             {topology.ids.map((id) => {
               const item = editing.getItem(id);
               return (
                 <li key={id}>
-                  <SelectableItem
+                  <SelectableItem presentation="row"
                     type="button"
-                    className={classes("w-full px-3 py-2", ui.surface.selectableBlock)}
+                    className={classes("w-full px-related py-related", contentPresentation.itemSummary)}
                     {...editingItemProps(item)}
                   >
                     {topologyLabRecords[id as keyof typeof topologyLabRecords]}
@@ -39,9 +40,9 @@ export function TopologyDemoRoute() {
           </ol>
         </section>
 
-        <section className={classes("p-4", ui.surface.raised)} aria-labelledby="topology-call">
-          <p className={ui.text.label}>2 · API 호출</p>
-          <h2 id="topology-call" className={classes("mb-2 mt-1", ui.text.heading)}>lineInterval(topology, anchor, focus)</h2>
+        <section className={classes("grid content-start gap-group p-group")} aria-labelledby="topology-call">
+          <div className="grid content-start gap-related"><p className={contentPresentation.caption}>2 · API 호출</p>
+          <h2 id="topology-call" className={contentPresentation.itemTitle}>lineInterval(topology, anchor, focus)</h2></div>
           <Inspector label="Inspect topology input" items={[
             { label: "topology", value: topology, testId: "topology-demo-topology", size: "compact" },
             {
@@ -53,13 +54,13 @@ export function TopologyDemoRoute() {
           ]} />
         </section>
 
-        <section className={classes("p-4", ui.surface.raised)} aria-labelledby="topology-result">
-          <p className={ui.text.label}>3 · 결과</p>
-          <h2 id="topology-result" className={classes("mb-2 mt-1", ui.text.heading)}>범위는 화면 순서를 따릅니다</h2>
+        <section className={classes("grid content-start gap-group p-group")} aria-labelledby="topology-result">
+          <div className="grid content-start gap-related"><p className={contentPresentation.caption}>3 · 결과</p>
+          <h2 id="topology-result" className={contentPresentation.itemTitle}>범위는 화면 순서를 따릅니다</h2></div>
           <Inspector label="Inspect interval" items={[
             { label: "interval", value: interval, testId: "topology-demo-interval", size: "compact" },
           ]} />
-          <p className={classes("mb-0 mt-3", ui.text.meta)}>
+          <p className={classes("mb-0 ", contentPresentation.caption)}>
             양 끝점은 그대로입니다. 화면이 넘긴 Topology가 그 사이에 놓일 항목을 결정합니다.
           </p>
         </section>

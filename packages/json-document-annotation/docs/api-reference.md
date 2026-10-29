@@ -97,3 +97,5 @@ const annotationTools: readonly [{ readonly id: "select"; readonly label: "Selec
 ```ts
 useAnnotationOutput(options: AnnotationOutputOptions): AnnotationOutput
 ```
+
+도구 dock은 UI Primitives의 Toolbar·Toggle·Command·ToolbarSeparator를 조합합니다. Host의 classNames는 배치·크기를 제공하고 기본 버튼과 표면의 외형은 정본을 소비합니다.

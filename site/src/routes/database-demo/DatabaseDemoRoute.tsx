@@ -1,3 +1,4 @@
+import {ResourceDatabaseUsage} from "./ResourceDatabaseUsage";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { PageHeader } from "../../shared/ui/primitives";
 import { DatabaseTableDemo } from "./DatabaseTableDemo";
@@ -9,7 +10,7 @@ export function DatabaseDemoRoute() {
             One canonical database, typed property editors, persistent view configuration, structural selection, and native text leases.
         </PageHeader>
     )}>
-          <DatabaseTableDemo />
+          {new URLSearchParams(window.location.search).get("profile") === "resource" ? <ResourceDatabaseUsage/> : <DatabaseTableDemo />}
     </DemoPage>
   );
 }

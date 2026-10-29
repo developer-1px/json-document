@@ -80,7 +80,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
     events: enabled ? {
       onPointerDownCapture(event: PointerEvent<SVGSVGElement>) {
         if (isWebEditableTarget(event.target) || !(event.button === 1 || event.button === 0 && (hand || space))) return;
-        event.preventDefault(); event.stopPropagation(); event.currentTarget.focus();
+        event.preventDefault(); event.stopPropagation(); event.currentTarget.focus({ preventScroll: true });
         pointer.begin(event.currentTarget, event.pointerId, { x: event.clientX, y: event.clientY, view: state.current.view });
         setDragging(true);
       },

@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
@@ -12,7 +13,7 @@ import {
   visiblePeriodLabel,
 } from "@interactive-os/json-document-calendar";
 import { Command } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { calendarDemoRecipe } from "./calendar-demo-styles";
 import { calendarControlAffordance } from "./calendar-control-affordances";
 
@@ -44,11 +45,11 @@ export function CalendarDemoNavigator(props: {
 
   return (
     <section aria-label="Jump to date" className={styles.yearMonth()}>
-      <div className="flex items-center justify-between gap-1">
+      <div className="flex items-center justify-between gap-related">
         <Command affordance={calendarControlAffordance("miniPrevious")} label="Previous month" onClick={() => setRailDate(addCalendarMonths(railDate, -1))}>
           <ChevronLeft aria-hidden="true" size={16} />
         </Command>
-        <span className={ui.text.meta}>{monthLabel}</span>
+        <span className={contentPresentation.caption}>{monthLabel}</span>
         <Command affordance={calendarControlAffordance("miniNext")} label="Next month" onClick={() => setRailDate(addCalendarMonths(railDate, 1))}>
           <ChevronRight aria-hidden="true" size={16} />
         </Command>
@@ -61,12 +62,12 @@ export function CalendarDemoNavigator(props: {
         today={props.today}
         rowClassName="grid grid-cols-7"
         columnHeaders={weekdays}
-        columnHeaderClassName={classes("text-center", ui.text.meta)}
+        columnHeaderClassName={classes("text-center", contentPresentation.caption)}
         cellAffordance={calendarControlAffordance("miniDate")}
         isDateSelected={(date) => date === props.visibleDate}
         getCellClassName={({ cell, selected, today }) => classes(
           styles.yearDay(),
-          cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
+          cell.inVisiblePeriod ? contentPresentation.itemSummary : contentPresentation.caption,
           (today || selected) && styles.todayMark(),
           busy?.has(cell.date) && !today && styles.yearDayBusy(),
         )}

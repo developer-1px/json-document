@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AlignCenter, AlignLeft, AlignRight, Bold, Check, Columns2, LayoutGrid, Rows2, Square, SquareDashed, type LucideIcon } from "lucide-react";
 import type { ObjectContainerLayout, ObjectStyle, ObjectStyleSelection } from "@interactive-os/json-document-object-document";
-import { Command, Field, Popover, Toggle, ToolbarGroup } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Field, Popover, Toggle, ToolbarGroup, contentPresentation, floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
 
 const colors = [
   ["검정", "#253044"], ["흰색", "#ffffff"], ["파랑", "#3b82f6"], ["빨강", "#ef4444"],
@@ -55,14 +55,14 @@ function StyleValue(props: {
     if (!value || (props.color && !CSS.supports("color", value))) { setError(props.color ? "유효한 색상을 입력하세요." : "값을 입력하세요."); return; }
     if (props.onApply(value)) setError(null);
   }
-  return <div className={props.color ? undefined : "canvas-style-number"}>
+  return <div className={`${contentPresentation.group}${props.color ? "" : " canvas-style-number"}`}>
     {props.color && <span>{props.label}</span>}
     {props.color && <ToolbarGroup label={`${props.label} 팔레트`} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)" }}>
       {colors.map(([label, color]) => <Toggle key={color} label={`${props.label}: ${label}`} pressed={props.value === color} onClick={() => { props.onApply(color); setDraft(color); setError(null); }}>
         {color === "transparent" ? <SquareDashed aria-hidden="true" size={16} /> : <Square aria-hidden="true" size={16} fill={color} stroke={color === "#ffffff" ? "currentColor" : color} />}
       </Toggle>)}
     </ToolbarGroup>}
-    <form style={{ display: "flex", gap: 4 }} onSubmit={(event) => { event.preventDefault(); apply(); }}>
+    <form style={{ display: "flex", gap: "var(--space-related)" }} onSubmit={(event) => { event.preventDefault(); apply(); }}>
       <Field label={props.label} value={draft} {...(props.value === null ? { placeholder: "혼합" } : {})} inputMode={props.color ? "text" : "decimal"}
         onKeyDown={(event) => { if (event.key === "Escape") { setDraft(props.value === null ? "" : String(props.value)); setError(null); if (!props.color) event.stopPropagation(); } if (event.nativeEvent.isComposing) { if (event.key === "Enter") event.preventDefault(); event.stopPropagation(); } }}
         aria-invalid={error !== null} onValueChange={(value) => { setDraft(value); setError(null); }} style={{ width: "100%", minWidth: 0 }} />
@@ -79,7 +79,7 @@ function ColorControl(props: {
 }) {
   const [open, setOpen] = useState(false);
   return <Popover label={props.label} open={open} onOpenChange={setOpen}
-    triggerPresentation="icon" panelClassName="canvas-style-panel"
+    triggerPresentation="icon" panelClassName={`${floatingSurface.panel} canvas-style-panel`}
     trigger={<Square aria-hidden="true" size={16} fill={props.value ?? "none"} stroke="currentColor" />}>
     <StyleValue key={props.value} {...props} color />
   </Popover>;

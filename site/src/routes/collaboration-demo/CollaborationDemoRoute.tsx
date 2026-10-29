@@ -1,3 +1,5 @@
+import { fieldPresentation } from "@interactive-os/json-document-ui-primitives-react";
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { RefreshCw } from "lucide-react";
 import { createTextRuntime } from "@interactive-os/json-document-collaboration/text";
@@ -7,7 +9,7 @@ import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { Inspector } from "../../shared/ui/inspector";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 
 const initial = { title: "여기에서 함께 편집해 보세요." };
 const ruleset = { id: "demo/collaboration", digest: "demo/collaboration/v1" } as const;
@@ -50,9 +52,9 @@ export function CollaborationDemoRoute() {
       </PageHeader>
     )}>
       <ProductShell>
-        <section className="grid gap-4 p-4" aria-label="Collaborative text surface">
-          <div className="flex items-center justify-between gap-3">
-            <p className={classes("m-0", ui.text.meta)}>로컬 입력과 원격 change가 같은 document로 수렴합니다.</p>
+        <section className="grid gap-group p-group" aria-label="Collaborative text surface">
+          <div className="flex items-center justify-between gap-related">
+            <p className={classes("m-0", contentPresentation.caption)}>로컬 입력과 원격 change가 같은 document로 수렴합니다.</p>
             <Command label="원격 변경 수신" onClick={receiveRemoteChange}><RefreshCw aria-hidden="true" size={16} /></Command>
           </div>
           <div
@@ -61,7 +63,7 @@ export function CollaborationDemoRoute() {
             suppressContentEditableWarning
             role="textbox"
             aria-label="Collaborative title"
-            className={ui.contenteditable.canvas}
+            className={classes("min-h-28 whitespace-pre-wrap", fieldPresentation.standard)}
           />
           <Inspector label="Inspect collaboration" items={[
             { label: "document", value: localValue, testId: "collaboration-document", size: "compact" },

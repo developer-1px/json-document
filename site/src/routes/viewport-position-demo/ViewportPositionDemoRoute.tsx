@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -6,7 +7,7 @@ import { createWebViewportPositionPorts } from "@interactive-os/json-document-we
 import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { PageHeader } from "../../shared/ui/primitives";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { runtimeMarkdownStreamFixture } from "./runtime-markdown-stream.fixture";
 import { viewportPositionDemoRecipe } from "./viewport-position-demo-styles";
 
@@ -127,35 +128,35 @@ export function ViewportPositionDemoRoute() {
 
   return (
     <DemoPage documentation={<PageHeader title="Viewport position" illustration="cursor">특정 오브젝트를 원하는 화면 위치로 보내고, 부족한 하단 scroll range를 임시로 만들며, 오브젝트가 화면을 벗어나면 함께 해제합니다.</PageHeader>}>
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_19rem]">
-        <section className={classes("p-4", ui.surface.raised)} aria-labelledby="viewport-title">
-          <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+      <div className="grid gap-group lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <section className={classes("p-group")} aria-labelledby="viewport-title">
+          <div className="mb-related flex flex-wrap items-end justify-between gap-related">
             <div>
-              <p className={ui.text.label}>Security-filtered production capture</p>
-              <h2 id="viewport-title" className={ui.text.heading}>Long-running agent response</h2>
+              <p className={contentPresentation.caption}>Security-filtered production capture</p>
+              <h2 id="viewport-title" className={contentPresentation.itemTitle}>Long-running agent response</h2>
             </div>
-            <p className={ui.text.meta}>{fixture.capture.sourceTextDeltaCount.toLocaleString()} deltas · {streamChunks.length} chunks</p>
+            <p className={contentPresentation.caption}>{fixture.capture.sourceTextDeltaCount.toLocaleString()} deltas · {streamChunks.length} chunks</p>
           </div>
           <div ref={viewportRef} data-testid="viewport" className={styles.viewport()}>
-            <div ref={contentRef} className="grid gap-4">
+            <div ref={contentRef} className="grid gap-group">
               <article className={styles.userEntry()}>
-                <p className={ui.text.label}>You</p>
+                <p className={contentPresentation.caption}>You</p>
                 <p className="text-sm leading-6">{previousExchange.request}</p>
               </article>
               <article className={styles.assistantEntry()}>
-                <p className={ui.text.label}>Assistant</p>
+                <p className={contentPresentation.caption}>Assistant</p>
                 <p className="text-sm leading-6">{previousExchange.response}</p>
               </article>
               {submitted ? (
                 <>
                   <article data-viewport-position-target-key={targetKey} className={styles.userEntry()}>
-                    <p className={ui.text.label}>You · submitted from captured run</p>
+                    <p className={contentPresentation.caption}>You · submitted from captured run</p>
                     <p className="text-sm leading-6">{fixture.request.text}</p>
                   </article>
                   <article className={styles.assistantEntry()}>
-                    <p className={ui.text.label}>Assistant · live response</p>
+                    <p className={contentPresentation.caption}>Assistant · live response</p>
                     {renderedText.length === 0
-                      ? <p className={ui.text.meta}>응답을 시작하는 중…</p>
+                      ? <p className={contentPresentation.caption}>응답을 시작하는 중…</p>
                       : <div className={styles.markdown()}><ReactMarkdown remarkPlugins={[remarkGfm]}>{renderedText}</ReactMarkdown></div>}
                   </article>
                   <div aria-hidden="true" data-viewport-position-tail-key={targetKey} className={styles.reserve()} />
@@ -166,8 +167,8 @@ export function ViewportPositionDemoRoute() {
             </div>
           </div>
         </section>
-        <aside className={classes("grid content-start gap-3 p-4", ui.surface.raised)} aria-labelledby="viewport-evidence">
-          <h2 id="viewport-evidence" className={ui.text.heading}>Runtime evidence</h2>
+        <aside className={classes("grid content-start gap-related p-group")} aria-labelledby="viewport-evidence">
+          <h2 id="viewport-evidence" className={contentPresentation.itemTitle}>Runtime evidence</h2>
           <dl className={styles.evidence()}>
             <div><dt>Completeness</dt><dd>{fixture.capture.completeness}</dd></div>
             <div><dt>Security</dt><dd>{fixture.capture.securityFilter}</dd></div>
@@ -175,11 +176,11 @@ export function ViewportPositionDemoRoute() {
             <div><dt>Dropped</dt><dd>{fixture.capture.droppedEntries}</dd></div>
           </dl>
           <Command onClick={submitCapturedPrompt}>{submitted ? "Replay captured response" : "Submit captured prompt"}</Command>
-          <p aria-live="polite" data-testid="viewport-status" className={ui.text.body}>{status}</p>
-          <p className={ui.text.meta}>position control: {owned ? "active" : "released"}</p>
-          <p className={ui.text.meta}>requested viewport offset: {requestedViewportOffset}px</p>
-          <p className={ui.text.meta}>temporary trailing range: <span data-testid="tail-range">{tailRange}px</span></p>
-          <p className={ui.text.meta}>chunk {chunkIndex}/{streamChunks.length}</p>
+          <p aria-live="polite" data-testid="viewport-status" className={contentPresentation.itemSummary}>{status}</p>
+          <p className={contentPresentation.caption}>position control: {owned ? "active" : "released"}</p>
+          <p className={contentPresentation.caption}>requested viewport offset: {requestedViewportOffset}px</p>
+          <p className={contentPresentation.caption}>temporary trailing range: <span data-testid="tail-range">{tailRange}px</span></p>
+          <p className={contentPresentation.caption}>chunk {chunkIndex}/{streamChunks.length}</p>
         </aside>
       </div>
     </DemoPage>

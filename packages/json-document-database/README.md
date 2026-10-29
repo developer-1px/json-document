@@ -72,3 +72,16 @@ Saved view는 Editing의 `DatabaseTableView.projection`으로 저장합니다. �
 UI 빌더 Usage(`/applications/ui-builder`)는 이 옵션으로 사용자 데이터에 집중한다.
 부모 문서의 투영으로 사용하는 경우 `onHistory(direction)`으로 표의 undo/redo 단축키를
 부모 문서에 위임한다. `features.history: false`는 로컬 표 history를 사용하지 않는다.
+
+`selectedRecordId`는 Host의 공유 행 선택을 표 포커스에 연결한다. 문서 변경이나
+페이지 재진입으로 내부 editor가 재생성되어도 표시 중인 같은 행을 복원한다.
+초기화·외부 복원은 `onSelectionChange`로 보고하지 않고 사용자 선택 변경만 보고한다.
+UI 빌더 Usage(`/applications/ui-builder?example=briefing-studio`)는 업무 선택을 결과
+페이지와 공유하므로 메모 수정·페이지 왕복 뒤에도 같은 업무를 유지한다.
+`features.columns: false`에서는 숨긴 열의 복원 표시도 생략하며 읽기 전용 선택 셀은
+저장 ID 대신 옵션 이름을 표시한다.
+
+Table presentation uses the shared UI tokens. Comfortable cells use a 24px line
+with 8px block inset (40px total); compact cells use 4px (32px total). Headers
+and cells share a 12px inline inset. Native text and select editors occupy the
+same cell height; the row boundary is outside that content height.

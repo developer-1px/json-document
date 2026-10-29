@@ -21,7 +21,7 @@ export function assertUIFlowLayout(value: unknown): asserts value is UIFlowLayou
       }
     }
   }
-  if (ids.size > 100) throw new Error("자동 흐름은 100개 요소까지 지원합니다.");
+  if (ids.size > 10000) throw new Error("프로젝트 자동 흐름은 10,000개 요소까지 지원합니다.");
 }
 /** Resolve deleted references and append new free-placed elements in reading order until the next AI apply. */
 export function resolveUIFlowLayout(objects: readonly CanvasObject[], layout: UIFlowLayout | null = null): UIFlowLayout {

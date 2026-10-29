@@ -31,3 +31,16 @@ test("renews the tool session while retaining recent context when the tool catal
   expect(next.sessionId).toBe("old"); expect(next.prompt).toBe("다시");
   expect(prepareAgentChatTurn({...session, toolSignature: first.toolSignature}, [{...tools[0]!, parameters: {type: "string"}}], "변경").sessionId).toBeNull();
 });
+
+test("retains actionable failure reasons and redacts credentials and server dumps", async () => {
+  const {agentChatErrorReason} = await import("../../src/app/agent-chat-session");
+  expect(agentChatErrorReason(new Error("Invalid schema for function page_changes: type is missing"))).toContain("type is missing");
+  expect(agentChatErrorReason(new Error("Invalid token Bearer secret-token api_key=secret-value at https://server.invalid/private"))).not.toMatch(/secret-token|secret-value|server.invalid/);
+  expect(agentChatErrorReason(new Error('{"server":"verbose dump"}'))).toBe("에이전트 연결 또는 도구 등록을 확인해 주세요.");
+  const values = new Map<string, string>();
+  const storage = () => ({getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => {values.set(key, value);}});
+  const session = createAgentChatSession("failure", storage); const off = session.connect();
+  session.source.update(() => ({sessionId: null, messages: [{prompt: "make", reply: "", state: "error", error: "Invalid schema: type is missing"}]}));
+  off();
+  expect((createAgentChatSession("failure", storage).source.snapshot.value as AgentChatSession).messages[0]?.error).toBe("Invalid schema: type is missing");
+});

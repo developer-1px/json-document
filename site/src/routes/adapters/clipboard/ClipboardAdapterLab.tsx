@@ -1,3 +1,5 @@
+import { fieldPresentation } from "@interactive-os/json-document-ui-primitives-react";
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useState } from "react";
 import {
   createDocumentEditor,
@@ -12,7 +14,7 @@ import {
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../../shared/ui/inspector";
 import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../../shared/ui/styles";
+import { classes } from "../../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialDocument: BlockDocument = {
@@ -56,15 +58,15 @@ export function ClipboardAdapterLab() {
       onCopy={clipboardSurface.onCopy}
       onCut={clipboardSurface.onCut}
       onPaste={clipboardSurface.onPaste}
-      className={classes("p-4", ui.surface.raised, ui.state.focus)}
+      className={classes("p-group", contentPresentation.focus)}
     >
-      <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>
+      <div className={classes("mb-related flex flex-wrap justify-between gap-related", contentPresentation.caption)}>
         <output aria-live="polite" data-testid="clipboard-announcement">{announcement}</output>
         <span>revision {snapshot.revision} · {editor.selectedBlockIds.length} selected</span>
       </div>
 
-      <div className="grid gap-4">
-        <div className="grid gap-2">
+      <div className="grid gap-group">
+        <div className="grid gap-related">
           {document.blocks.map((block) => {
             const item = editing.getItem(block.id);
             return (
@@ -72,10 +74,10 @@ export function ClipboardAdapterLab() {
               as="article"
               key={block.id}
               data-block-id={block.id}
-              className={classes("p-3", ui.surface.workspace)}
+              className={classes("p-related")}
               {...editingItemProps(item)}
             >
-              <label className={classes("grid gap-2", ui.text.label)}>
+              <label className={classes("grid gap-related", contentPresentation.caption)}>
                 {block.id}
                 <DocumentTextControl
                   aria-label={`${block.id} text`}
@@ -86,7 +88,7 @@ export function ClipboardAdapterLab() {
                     const result = editor.dispatch({ type: "text.replace", blockId: block.id, ...input });
                     setAnnouncement(result.ok ? "Native text input committed" : result.code);
                   }}
-                  className={classes("min-h-20 w-full", ui.field.control)}
+                  className={classes("min-h-20 w-full", fieldPresentation.standard)}
                 />
               </label>
             </SelectableItem>

@@ -1,3 +1,5 @@
+import { ToolbarSeparator } from "@interactive-os/json-document-ui-primitives-react";
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState, type KeyboardEvent } from "react";
 import { ClipboardPaste, Copy, Redo2, Scissors, Trash2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
@@ -32,7 +34,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { Command, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialOrder: OrderDocument = {
@@ -189,7 +191,7 @@ export function OrderDemoRoute() {
         illustration="cursor"
         title="Order Demo"
         aside={(
-          <div className={classes("text-right", ui.text.meta)}>
+          <div className={classes("text-right", contentPresentation.caption)}>
             <div>{editor.selectedItemIds.length} selected · revision {snapshot.revision}</div>
             <div aria-live="polite">{observation.announcement}</div>
           </div>
@@ -215,7 +217,7 @@ export function OrderDemoRoute() {
               <ClipboardPaste aria-hidden="true" size={16} />
             </Command>
             <Command label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></Command>
-            <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+            <ToolbarSeparator />
             <Command label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></Command>
             <Command label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
@@ -231,7 +233,7 @@ export function OrderDemoRoute() {
         <section aria-label="Editable order">
           <ol
             ref={orderRef}
-            className="m-0 grid list-none gap-1 p-0"
+            className="m-0 grid list-none gap-related p-0"
             tabIndex={-1}
             onKeyDown={onKeyDown}
             {...clipboardSurface}
@@ -251,12 +253,12 @@ export function OrderDemoRoute() {
                 className="w-full"
               />
             ) : (
-              <SelectableItem
+              <SelectableItem presentation="row"
                 key={item.id}
                 id={`order-item-${item.id}`}
                 data-item-id={item.id}
                 {...webFocusItemProps(item.id, focusId === item.id)}
-                className={classes("grid grid-cols-[2rem_1fr] text-left", ui.surface.documentBlock)}
+                className={classes("grid grid-cols-[2rem_1fr] text-left", contentPresentation.itemSummary)}
                 {...editingItemProps(editing.getItem(item.id))}
                 focus={focusId === item.id}
                 onFocus={() => focusSession.setFocus(item.id)}
@@ -266,12 +268,12 @@ export function OrderDemoRoute() {
                   renameSession.handlePointer(item.id, item.label, event.detail, event.timeStamp);
                 }}
               >
-                <span className={classes(ui.surface.documentIndex, ui.text.meta)}>{index + 1}</span>
+                <span className={classes(contentPresentation.caption, contentPresentation.caption)}>{index + 1}</span>
                 <span>{item.label}</span>
               </SelectableItem>
             ))}
           </ol>
-          <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes an item.</p>
+          <p className={classes("mb-0 mt-related", contentPresentation.caption)}>Shift-click selects a range. Mod-click adds or removes an item.</p>
         </section>
       </ProductShell>
     </DemoPage>

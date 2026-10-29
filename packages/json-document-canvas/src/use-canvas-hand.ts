@@ -1,7 +1,7 @@
 import {createCanvasSheet} from "@interactive-os/json-document-editing";
 import { useEffect, useMemo, useReducer, useRef, useState, type ClipboardEvent, type KeyboardEvent, type PointerEvent } from "react";
 import { commitAffordance, createGestureSession, createPlaneSelectProfile, resizeAffordance, type InteractionHandleEvent, type PlaneSelectProfile, type PlaneSelectSelection, type ResizeEdge } from "@interactive-os/json-document-affordance";
-import { objectSubtreeIds, assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, projectObjectText, readObjectStyle, transformObject, type ObjectContainerLayout, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint, type ObjectStyle } from "@interactive-os/json-document-object-document";
+import { resolveObjectCollisions, type ObjectCollisionGroup, objectSubtreeIds, assertCanvasDocument, createCanvasObject, createCanvasPath, parseCanvasDocument, projectObjectText, readObjectStyle, transformObject, type ObjectContainerLayout, type CanvasDocument, type CanvasObject, type CanvasObjectKind, type ObjectPoint, type ObjectStyle } from "@interactive-os/json-document-object-document";
 import type { EditingResult, ObjectEditor, ObjectIntent, ObjectSelection } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { routeWebClipboardEvent, createWebKeyboardAdapter, createWebPointerSession, isWebEditableTarget, projectWebClientPointToSVG, webSVGViewportFromElement } from "@interactive-os/json-document-web";
@@ -29,7 +29,7 @@ const keyboard = createWebKeyboardAdapter({ keySource: "code" });
 const commands = createWebKeyboardAdapter<"cancel">({ defaults: false, keymap: { Escape: "cancel" } });
 
 /** Owns Canvas interaction composition, never document or history state. */
-export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile, activateEmbedded?: (objectId: string) => void) {
+export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, selectProfile?: PlaneSelectProfile, activateEmbedded?: (objectId: string) => void, objectIds?: readonly string[], collisionGroups?: readonly ObjectCollisionGroup[]) {
   const snapshot = useEditingSnapshot(editor);
   const document = useMemo(() => { assertCanvasDocument(snapshot.value); return snapshot.value; }, [snapshot.value]);
   const surface = useRef<SVGSVGElement>(null);
@@ -91,7 +91,16 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
   }
 
   function dispatch(intent: ObjectIntent) { return report(editor.dispatch(intent)); }
-  function selectContext() { return { items: current().objects, selection: editor.snapshot.selection }; }
+  function commitTransform(keys: readonly string[], delta: Parameters<typeof transformObject>[1]) {
+    if (!collisionGroups?.length) return dispatch({type: "object.resize", objectIds: keys, dx: delta.dx, dy: delta.dy, dw: delta.dw ?? 0, dh: delta.dh ?? 0});
+    if (!delta.dx && !delta.dy && !delta.dw && !delta.dh) return;
+    const base = current();
+    const moving = new Set(objectSubtreeIds(base.objects, keys));
+    const targets = new Set(keys);
+    const next = base.objects.map(object => moving.has(object.id) ? transformObject(object, targets.has(object.id) ? delta : {dx: delta.dx, dy: delta.dy}) : object);
+    return dispatch({type: "document.replace", document: {...base, objects: resolveObjectCollisions(next, collisionGroups, keys)}});
+  }
+  function selectContext() { return { items: current().objects.filter(object => !objectIds || objectIds.includes(object.id)), selection: editor.snapshot.selection }; }
   function applySelection(selection: PlaneSelectSelection) {
     return dispatch({ type: "selection.set", objectIds: selection.keys, ...(selection.primaryKey === null ? {} : { primaryKey: selection.primaryKey }) });
   }
@@ -109,6 +118,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     if (!result || base !== current()) return;
     if (!applySelection(result.selection).ok || !result.translation) return;
     const { keys, dx, dy, operation } = result.translation;
+    if (operation !== "copy" && collisionGroups?.length) {commitTransform(keys, {dx, dy}); return;}
     dispatch(operation === "copy"
       ? { type: "object.duplicate", objectIds: keys, placement: { type: "offset", dx, dy } }
       : { type: "object.translate", objectIds: keys, dx, dy });
@@ -134,7 +144,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
 
   function choose(next: CanvasTool) {
     commitText(); cancel(); setTool(next); setError(null);
-    surface.current?.focus();
+    surface.current?.focus({ preventScroll: true });
   }
 
   function eventPoint(event: { readonly clientX: number; readonly clientY: number }): ObjectPoint | null {
@@ -180,7 +190,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
       }
     } else {
       const delta = transform(active);
-      if ("dw" in delta) dispatch({ type: "object.resize", objectIds: [active.object.id], dx: delta.dx, dy: delta.dy, dw: delta.dw, dh: delta.dh });
+      if ("dw" in delta) commitTransform([active.object.id], delta);
     }
   }
 
@@ -190,7 +200,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     const point = eventPoint(event);
     if (!point) return;
     event.preventDefault();
-    commitText(); cancel(); surface.current?.focus();
+    commitText(); cancel(); surface.current?.focus({ preventScroll: true });
     pointer.begin(event.currentTarget, event.pointerId, true);
     if (tool === "select") { beginSelect(point, null, event); return; }
     const base = current();
@@ -222,7 +232,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     const point = eventPoint(event);
     if (!point) return;
     if (interaction.phase === "start") {
-      commitText(); cancel(); surface.current?.focus();
+      commitText(); cancel(); surface.current?.focus({ preventScroll: true });
       if (type === "drag") { beginSelect(point, object.id, event); return; }
       const latest = current().objects.find((item) => item.id === object.id);
       if (latest) gestures.begin({ type, object: latest, start: point, point, edge, base: current(), selection: editor.snapshot.selection,
@@ -240,9 +250,9 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     }
   }
 
-  function remove() { commitText(); cancel(); dispatch({ type: "selection.remove" }); surface.current?.focus(); }
-  function duplicate(keys = editor.snapshot.selection.keys) { commitText(); cancel(); dispatch({ type: "object.duplicate", objectIds: keys }); surface.current?.focus(); }
-  function history(direction: "undo" | "redo") { commitText(); cancel(); report(editor[direction]()); surface.current?.focus(); }
+  function remove() { commitText(); cancel(); dispatch({ type: "selection.remove" }); surface.current?.focus({ preventScroll: true }); }
+  function duplicate(keys = editor.snapshot.selection.keys) { commitText(); cancel(); dispatch({ type: "object.duplicate", objectIds: keys }); surface.current?.focus({ preventScroll: true }); }
+  function history(direction: "undo" | "redo") { commitText(); cancel(); report(editor[direction]()); surface.current?.focus({ preventScroll: true }); }
   function setStyle(style: Partial<ObjectStyle>) { commitText(); cancel(); return dispatch({ type: "selection.style", style }); }
 
   function handleClipboard(operation: "copy" | "cut" | "paste", event: ClipboardEvent) {
@@ -272,7 +282,7 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
       if (selectedAction.type === "selection") applySelection(selectedAction.selection);
       else if (selectedAction.type === "delete") remove();
       else if (selectedAction.type === "duplicate") duplicate(selectedAction.keys);
-      else if (selectedAction.type === "translate") dispatch({ type: "object.translate", objectIds: selectedAction.keys, dx: selectedAction.dx, dy: selectedAction.dy });
+      else if (selectedAction.type === "translate") {if (collisionGroups?.length) commitTransform(selectedAction.keys, {dx: selectedAction.dx, dy: selectedAction.dy}); else dispatch({ type: "object.translate", objectIds: selectedAction.keys, dx: selectedAction.dx, dy: selectedAction.dy });}
       else if (selectedAction.type === "edit") {
         const object=current().objects.find(object=>object.id === selectedAction.key);
         if(object?.kind === "embedded-document") activateEmbedded?.(object.id);else editText(selectedAction.key);
@@ -296,7 +306,9 @@ export function useCanvasHand(editor: ObjectEditor, style: CanvasCreationStyle, 
     if (gesture?.type === "resize" && resizing.has(object.id) && object.id !== gesture.object.id) { const delta = transform(gesture); return transformObject(object, { dx: delta.dx, dy: delta.dy }); }
     return gesture?.type === "resize" && gesture.object.id === object.id ? transformObject(object, transform(gesture)) : object;
   });
-  const objects = editor.layoutDocument({ ...document, objects: laidOutObjects }).objects as ReadonlyArray<CanvasObject>;
+  const collisionTargets = translation?.operation !== "copy" ? translation?.keys ?? (gesture?.type === "resize" ? [gesture.object.id] : []) : [];
+  const collisionObjects = collisionGroups?.length && collisionTargets.length && (translation ? translation.dx !== 0 || translation.dy !== 0 : gesture?.type === "resize" && (gesture.point.x !== gesture.start.x || gesture.point.y !== gesture.start.y)) ? resolveObjectCollisions(laidOutObjects, collisionGroups, collisionTargets) : laidOutObjects;
+  const objects = editor.layoutDocument({ ...document, objects: collisionObjects }).objects.filter(object => !objectIds || objectIds.includes(object.id)) as ReadonlyArray<CanvasObject>;
   const copyOriginals = translation?.operation === "copy" ? document.objects.filter((object) => translating.has(object.id)) : [];
   const rawPreview = gesture && (gesture.type === "create" || gesture.type === "draw") ? createPreview(gesture) : null;
 

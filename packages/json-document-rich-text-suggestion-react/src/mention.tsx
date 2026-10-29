@@ -1,3 +1,4 @@
+import {Avatar, RecordSummary, SelectableItem, Tag, contentPresentation, floatingSurface} from "@interactive-os/json-document-ui-primitives-react";
 import type { RichTextEditor, RichTextNode, RichTextPoint } from "@interactive-os/json-document-rich-text";
 import {
   RICH_TEXT_MENTION_NODE,
@@ -7,7 +8,7 @@ import {
   type RichTextSuggestionTrigger,
 } from "@interactive-os/json-document-rich-text-suggestion";
 import { useRichTextSuggestion, type RichTextSuggestionBinding } from "./index.js";
-import { useSyncExternalStore, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
+import { useSyncExternalStore, type HTMLAttributes, type ReactNode } from "react";
 
 export interface RichTextMentionAtomProps extends HTMLAttributes<HTMLSpanElement> {
   readonly node: RichTextNode;
@@ -23,10 +24,10 @@ export function RichTextMentionAtom({ node, editor, renderIcon, style, ...props 
   const entityId = typeof attrs.entityId === "string" ? attrs.entityId : "";
   const label = typeof attrs.label === "string" ? attrs.label : node.type;
   const focused = editor === undefined ? false : mentionIsAdjacentToCaret(editor, node.id);
-  return <span {...props} contentEditable={false} data-rich-text-mention="" data-rich-text-node-id={node.id} data-focus={focused || undefined} style={{ ...mentionAtomStyle, ...(focused ? mentionAtomFocusedStyle : {}), ...style }}>
-    <span aria-hidden="true" style={mentionAtomIconStyle}>{renderIcon?.(entityId, label) ?? "@"}</span>
+  return <Tag {...props} contentEditable={false} data-rich-text-mention="" data-rich-text-node-id={node.id} data-focus={focused || undefined} style={style}>
+    <span aria-hidden="true">{renderIcon?.(entityId, label) ?? "@"}</span>
     <span>{label}</span>
-  </span>;
+  </Tag>;
 }
 
 export interface UseRichTextMentionSuggestionsOptions<Suggestion extends RichTextMentionSuggestion> {
@@ -55,21 +56,14 @@ export interface RichTextMentionSuggestionsProps<Suggestion extends RichTextMent
 }
 
 /** Renders the canonical mention candidate information hierarchy and interaction states. */
-export function RichTextMentionSuggestions<Suggestion extends RichTextMentionSuggestion>({ binding, groupLabel = "Agents", style, ...props }: RichTextMentionSuggestionsProps<Suggestion>): ReactNode {
+export function RichTextMentionSuggestions<Suggestion extends RichTextMentionSuggestion>({ binding, groupLabel = "Agents", style, className, ...props }: RichTextMentionSuggestionsProps<Suggestion>): ReactNode {
   if (!binding.open) return null;
-  return <div {...props} {...binding.listboxProps} data-rich-text-mention-suggestions="" style={{ ...suggestionSurfaceStyle, ...style }}>
-    <div role="presentation" style={suggestionGroupLabelStyle}>{groupLabel}</div>
-    <div role="presentation" style={suggestionScrollStyle}>
-      {binding.items.map((item) => {
-        const active = item.id === binding.activeItem?.id;
-        return <button key={item.id} {...binding.optionProps(item)} data-rich-text-mention-suggestion="" style={{ ...suggestionRowStyle, ...(active ? suggestionRowActiveStyle : {}), ...(item.disabled ? suggestionRowDisabledStyle : {}) }} title={item.description ?? item.label}>
-          {item.iconUrl ? <img src={item.iconUrl} alt="" aria-hidden="true" style={suggestionIconStyle} /> : <span aria-hidden="true" style={suggestionIconFallbackStyle}>{item.iconText ?? item.label.slice(0, 1).toLocaleUpperCase()}</span>}
-          <span style={suggestionTextStyle}>
-            <strong style={suggestionTitleStyle}>{item.label}</strong>
-            {item.description ? <small style={suggestionDescriptionStyle}>{item.description}</small> : null}
-          </span>
-        </button>;
-      })}
+  return <div {...props} {...binding.listboxProps} className={[floatingSurface.panel, "json-document-suggestion-list", className].filter(Boolean).join(" ")} data-rich-text-mention-suggestions="" style={style}>
+    <div role="presentation" className={contentPresentation.caption}>{groupLabel}</div>
+    <div role="presentation" className="json-document-suggestion-options">
+      {binding.items.map(item => <SelectableItem key={item.id} as="button" type="button" presentation="row" selected={false} focus={item.id === binding.activeItem?.id} {...binding.optionProps(item)} data-rich-text-mention-suggestion="" title={item.description ?? item.label}>
+        <RecordSummary title={item.label} summary={item.description} leading={<span aria-hidden="true"><Avatar name={item.label} src={item.iconUrl} fallback={item.iconText}/></span>}/>
+      </SelectableItem>)}
     </div>
   </div>;
 }
@@ -99,17 +93,3 @@ function samePath(left: ReadonlyArray<number>, right: ReadonlyArray<number>): bo
 function emptySubscribe(): () => void { return () => {}; }
 function zeroRevision(): number { return 0; }
 
-const mentionAtomStyle: CSSProperties = { display: "inline-flex", alignItems: "center", gap: 4, margin: "0 2px", padding: "1px 7px", borderRadius: 8, fontSize: 14, fontWeight: 650, lineHeight: "22px", userSelect: "all" };
-const mentionAtomFocusedStyle: CSSProperties = { background: "var(--color-background-subtle, #f2f3f5)", outline: "2px solid color-mix(in srgb, var(--color-foreground-accent, #3676e8) 28%, transparent)", outlineOffset: 1 };
-const mentionAtomIconStyle: CSSProperties = { display: "inline-grid", width: 16, height: 16, placeItems: "center", borderRadius: 4, fontWeight: 700 };
-const suggestionSurfaceStyle: CSSProperties = { boxSizing: "border-box", display: "grid", width: 360, maxWidth: "min(440px, calc(100vw - 24px))", padding: 4, border: "1px solid var(--color-border-subtle, #e4e6ea)", borderRadius: 14, background: "var(--color-background-canvas, #fff)", boxShadow: "var(--shadow-overlay, 0 12px 36px rgb(0 0 0 / 14%))" };
-const suggestionGroupLabelStyle: CSSProperties = { padding: "8px 10px 6px", color: "var(--color-foreground-muted, #73777f)", fontSize: 12, fontWeight: 600 };
-const suggestionScrollStyle: CSSProperties = { display: "grid", maxHeight: 384, overflowY: "auto" };
-const suggestionRowStyle: CSSProperties = { display: "flex", width: "100%", alignItems: "center", gap: 10, padding: "9px 10px", border: 0, borderRadius: 10, background: "transparent", color: "var(--color-foreground-strong, #202124)", textAlign: "left", cursor: "pointer" };
-const suggestionRowActiveStyle: CSSProperties = { background: "var(--color-background-subtle, #f2f3f5)", outline: "2px solid color-mix(in srgb, var(--color-foreground-accent, #3676e8) 20%, transparent)", outlineOffset: -2 };
-const suggestionRowDisabledStyle: CSSProperties = { cursor: "not-allowed", opacity: 0.56 };
-const suggestionIconStyle: CSSProperties = { width: 32, height: 32, flex: "0 0 32px", borderRadius: 9, objectFit: "cover" };
-const suggestionIconFallbackStyle: CSSProperties = { display: "grid", width: 32, height: 32, flex: "0 0 32px", placeItems: "center", borderRadius: 9, background: "var(--color-background-accent-subtle, #edf3ff)", color: "var(--color-foreground-accent, #3676e8)", fontWeight: 700 };
-const suggestionTextStyle: CSSProperties = { display: "grid", minWidth: 0, flex: 1 };
-const suggestionTitleStyle: CSSProperties = { overflow: "hidden", fontSize: 13, textOverflow: "ellipsis", whiteSpace: "nowrap" };
-const suggestionDescriptionStyle: CSSProperties = { marginTop: 2, overflow: "hidden", color: "var(--color-foreground-muted, #73777f)", fontSize: 11, textOverflow: "ellipsis", whiteSpace: "nowrap" };

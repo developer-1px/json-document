@@ -1,3 +1,4 @@
+import {CodeBlock} from "@interactive-os/json-document-ui-primitives-react";
 import {
   Children,
   createElement,
@@ -296,11 +297,7 @@ function ReadOnlyCodeBlock(props: {
     readAllText: () => richTextPlainText(props.node.content),
   });
   return (
-    <pre ref={selectionRef} {...props.attributes}>
-      <code {...(props.node.attrs.language === null ? {} : { className: `language-${props.node.attrs.language}` })}>
-        {props.children}
-      </code>
-    </pre>
+    <CodeBlock source={richTextPlainText(props.node.content)} language={props.node.attrs.language ?? undefined} codeRef={selectionRef} preProps={props.attributes} size="content">{props.children}</CodeBlock>
   );
 }
 

@@ -42,7 +42,8 @@
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
-    "@faker-js/faker": "^10.6.0"
+    "@faker-js/faker": "^10.6.0",
+    "lucide-react": "^1.33.0"
   },
   "peerDependencies": {
     "@interactive-os/json-document-editing": ">=0.1.0-rc.0 <1",

@@ -264,6 +264,19 @@ export { applyUIBuilderConfiguration } from "./ui-builder-configuration.js";
 export type { UIBuilderConnection, UIBuilderConfiguration } from "./ui-builder-configuration.js";
 export { createUIBuilderCatalogTools } from "./ui-builder-catalog-tools.js";
 
-export { assertUIBuilderActionExecution, setUIBuilderInput, executeUIBuilderAction, type UIBuilderActionExecution, type UIBuilderSkillRequest, type UIBuilderSkill, type UIBuilderSkillDefinition, type UIBuilderRecordSelection } from "./ui-builder-runtime.js";
+export { appendUIBuilderActivity, createUIBuilderRecordSelection, resolveUIBuilderActionPrerequisites, assertUIBuilderSkillContract, assertUIBuilderActionExecution, setUIBuilderInput, executeUIBuilderAction, type UIBuilderActionExecution, type UIBuilderSkillRequest, type UIBuilderSkill, type UIBuilderSkillDefinition, type UIBuilderRecordSelection } from "./ui-builder-runtime.js";
 export { createUIBuilderActionTools } from "./ui-builder-action-tools.js";
 export { createUIBuilderLayoutTools } from "./ui-builder-layout-tools.js";
+export { defaultUIBuilderPages, resolveUIBuilderPageId, getUIBuilderPageObjects, assertUIBuilderPages, applyUIBuilderPages, createUIBuilderPageTools } from "./ui-builder-pages.js";
+export type { UIBuilderPage, UIBuilderPageCommand } from "./ui-builder-pages.js";
+export { applyUIBuilderComponentConfiguration, createUIBuilderComponentConfigurationTools } from "./ui-builder-component-configuration.js";
+export type { UIBuilderComponentConfiguration } from "./ui-builder-component-configuration.js";
+
+export { projectDatabaseTable } from "./database.js";
+export { resolveUIBuilderCollection, resolveUIBuilderTableData, setUIBuilderComponentValue, commitUIBuilderCollection } from "./ui-builder-collections.js";
+export type { UIBuilderCollectionProjection, UIBuilderRuntimeValues } from "./ui-builder-collections.js";
+
+export { uiBuilderComponentChildIds, getUIBuilderRootObjects, assertUIBuilderComposition, duplicateUIBuilderComposition } from "./ui-builder-composition.js";
+
+export {uiBuilderContentStructure, applyUIBuilderScreen, createUIBuilderScreenTools} from "./ui-builder-screen.js";
+export type {UIBuilderScreenPlan} from "./ui-builder-screen.js";

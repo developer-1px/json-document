@@ -1,4 +1,4 @@
-import { classes, ui } from "./styles";
+import { classes } from "./styles";
 
 export function JsonDocumentWordmark(props: { readonly className?: string }) {
   return (
@@ -21,7 +21,7 @@ export function JsonDocumentWordmark(props: { readonly className?: string }) {
         <circle cx="15" cy="9" r="2.5" />
         <CatEyes />
       </g>
-      <path className={ui.accent.stroke} d="M137 34c7-1 14 0 21-1" fill="none" strokeLinecap="round" strokeWidth="4" />
+      <path className="stroke-background-accent" d="M137 34c7-1 14 0 21-1" fill="none" strokeLinecap="round" strokeWidth="4" />
     </svg>
   );
 }

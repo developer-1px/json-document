@@ -1,8 +1,7 @@
 import { type SiteNavigationGroup, type SiteRoute } from "./router";
-import { ChevronRight } from "lucide-react";
+import { Breadcrumbs } from "@interactive-os/json-document-ui-primitives-react";
 import { groupLandings, sectionForGroup, siteSections, type SiteSection } from "./site-layers";
 import { ActionLink } from "../shared/ui/interactive";
-import { ui } from "../shared/ui/styles";
 
 export type BreadcrumbCrumb = {
   readonly path: string;
@@ -66,25 +65,10 @@ export function SiteBreadcrumb(props: {
   const trail = breadcrumbTrail(props.route, props.routes);
   if (trail.length < 2) return null;
 
-  return (
-    <nav aria-label="Breadcrumb" className={ui.breadcrumb.nav}>
-      <ol className={ui.breadcrumb.list}>
-        {trail.map((crumb, index) => {
-          const current = index === trail.length - 1;
-          return (
-            <li key={`${crumb.path}:${crumb.label}`} className={ui.breadcrumb.item}>
-              {index > 0 ? <ChevronRight className={ui.breadcrumb.sep} aria-hidden="true" size={12} /> : null}
-              {current ? (
-                <span className={ui.breadcrumb.current} aria-current="page">{crumb.label}</span>
-              ) : (
-                <ActionLink to={crumb.path} className={ui.breadcrumb.link}>{crumb.label}</ActionLink>
-              )}
-            </li>
-          );
-        })}
-      </ol>
-    </nav>
-  );
+  return <Breadcrumbs
+    items={trail.map(crumb => ({id: crumb.path, label: crumb.label, href: crumb.path}))}
+    renderLink={(item, attributes) => <ActionLink {...attributes} to={item.href}>{attributes.children}</ActionLink>}
+  />;
 }
 
 export function routeGroup(

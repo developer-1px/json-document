@@ -1,3 +1,61 @@
+import resourceDatabaseUsageSource from "../../routes/database-demo/ResourceDatabaseUsage.tsx?raw";
+import canonicalCodeBlockSource from "../../../../packages/json-document-ui-primitives-react/src/code-block.tsx?raw";
+import popupLifecycleSource from "../../../../packages/json-document-ui-primitives-react/src/use-popup.ts?raw";
+import siteCatalogPageSource from "../ui/catalog-demo-page.tsx?raw";
+import sitePageHeaderSource from "../ui/primitives.tsx?raw";
+import siteNavigationSource from "../../app/routes/__root.tsx?raw";
+import siteBreadcrumbSource from "../../app/breadcrumb.tsx?raw";
+import siteMarkdownContentSource from "../ui/markdown-content.tsx?raw";
+import numberFieldSource from "../../../../packages/json-document-ui-primitives-react/src/number-field.tsx?raw";
+import formFieldSource from "../../../../packages/json-document-ui-primitives-react/src/form-field.tsx?raw";
+import basicAffordancesSpecimenSource from "../../routes/ui-primitives-catalog/BasicAffordancesSpecimen.tsx?raw";
+import tagsSource from "../../../../packages/json-document-ui-primitives-react/src/tags.tsx?raw";
+import recordAffordancesSource from "../../../../packages/json-document-ui-primitives-react/src/record-affordances.tsx?raw";
+import contentGroupSource from "../../../../packages/json-document-ui-primitives-react/src/content-group.tsx?raw";
+import domainCardsSource from "../../../../packages/json-document-ui-primitives-react/src/domain-cards.tsx?raw";
+import uiDomainCardSource from "../../../../packages/json-document-object-document/src/ui-domain-card.ts?raw";
+import uiRecordCardSource from "../../../../packages/json-document-canvas/src/ui-component-record-card.tsx?raw";
+import domainCardsSpecimenSource from "../../routes/ui-primitives-catalog/DomainCardsSpecimen.tsx?raw";
+import domainCardExampleSource from "../../applications/ui-builder/domain-card-example.ts?raw";
+import uiBuilderScreenSource from "../../../../packages/json-document-editing/src/ui-builder-screen.ts?raw";
+import numericPresentationSource from "../../../../packages/json-document-ui-primitives-react/src/numeric-presentation.tsx?raw";
+import dataPresentationPairSource from "../../routes/ui-primitives-catalog/DataPresentationPair.tsx?raw";
+import dataPresentationSource from "../../../../packages/json-document-ui-primitives-react/src/data-presentation.ts?raw";
+import fieldPresentationSource from "../../../../packages/json-document-ui-primitives-react/src/field-presentation.tsx?raw";
+import dataPresentationSpecimenSource from "../../routes/ui-primitives-catalog/DataPresentationSpecimen.tsx?raw";
+import contentCardSource from "../../../../packages/json-document-ui-primitives-react/src/content-card.tsx?raw";
+import productWorkflowSpecimenSource from "../../routes/ui-primitives-catalog/ProductWorkflowSpecimen.tsx?raw";
+import comment_composerSource from "../../../../packages/json-document-ui-primitives-react/src/comment-composer.tsx?raw";
+import people_pickerSource from "../../../../packages/json-document-ui-primitives-react/src/people-picker.tsx?raw";
+import workflow_historySource from "../../../../packages/json-document-ui-primitives-react/src/workflow-history.tsx?raw";
+import workflow_feedbackSource from "../../../../packages/json-document-ui-primitives-react/src/workflow-feedback.tsx?raw";
+import record_identitySource from "../../../../packages/json-document-ui-primitives-react/src/record-identity.tsx?raw";
+import filter_barSource from "../../../../packages/json-document-ui-primitives-react/src/filter-bar.tsx?raw";
+import page_navigationSource from "../../../../packages/json-document-ui-primitives-react/src/page-navigation.tsx?raw";
+import recordPresentationSource from "../../../../packages/json-document-ui-primitives-react/src/record-presentation.tsx?raw";
+import editableTextSource from "../../../../packages/json-document-ui-primitives-react/src/editable-text.tsx?raw";
+import recordWorkspaceSource from "../../../../packages/json-document-ui-primitives-react/src/record-workspace.tsx?raw";
+import builderCatalogModel from "../../../../packages/json-document-object-document/src/ui-component-catalog.ts?raw";
+import builderComponentConfig from "../../../../packages/json-document-editing/src/ui-builder-component-configuration.ts?raw";
+import builderCollections from "../../../../packages/json-document-editing/src/ui-builder-collections.ts?raw";
+import builderComposition from "../../../../packages/json-document-editing/src/ui-builder-composition.ts?raw";
+import builderControlsRenderer from "../../../../packages/json-document-canvas/src/ui-component-controls.tsx?raw";
+import builderFeedbackRenderer from "../../../../packages/json-document-canvas/src/ui-component-feedback.tsx?raw";
+import builderCompositionRenderer from "../../../../packages/json-document-canvas/src/ui-component-compositions.tsx?raw";
+import builderCollectionRenderer from "../../../../packages/json-document-canvas/src/ui-component-collection.tsx?raw";
+import builderPalette from "../../../../packages/json-document-canvas/src/ui-builder-component-palette.tsx?raw";
+import builderProjectLocation from "../../../../packages/json-document-ui-builder/src/project-location.ts?raw";
+import builderComponentConfigurationControls from "../../../../packages/json-document-ui-builder/src/component-configuration-controls.tsx?raw";
+import builderCalendarPresentation from "../../../../packages/json-document-calendar/src/calendar-presentation.ts?raw";
+import builderCalendarPresentationCSS from "../../../../packages/json-document-calendar/src/calendar-presentation.css?raw";
+import issueWorkbenchUsage from "../../applications/ui-builder/issue-workbench-example.ts?raw";
+import builderFullCatalogUsage from "../../applications/ui-builder/full-catalog-example.ts?raw";
+import builderDomainExamplesSource from "../../applications/ui-builder/domain-examples.ts?raw";
+import builderPageControlsSource from "../../../../packages/json-document-ui-builder/src/page-controls.tsx?raw";
+import builderPagesSource from "../../../../packages/json-document-editing/src/ui-builder-pages.ts?raw";
+import designTokensSource from "../../../../packages/json-document-ui-primitives-react/src/design-tokens.css?raw";
+import designSystemSource from "../../../../packages/json-document-ui-primitives-react/src/design-system.css?raw";
+import contentPresentationSource from "../../../../packages/json-document-ui-primitives-react/src/content-presentation.ts?raw";
 import builderCanonical0 from "../../../../packages/json-document-object-document/src/ui-binding.ts?raw";
 import builderCanonical1 from "../../../../packages/json-document-object-document/src/ui-design.ts?raw";
 import builderCanonical2 from "../../../../packages/json-document-object-document/src/ui-layout.ts?raw";
@@ -27,8 +85,13 @@ import builderMaterialToolsSource from "../../../../packages/json-document-editi
 import uiBuilderStyleSource from "../../../../packages/json-document-canvas/src/ui-builder.css?raw";
 import uiComponentViewSource from "../../../../packages/json-document-canvas/src/ui-component-view.tsx?raw";
 import uiBuilderHandSource from "../../../../packages/json-document-canvas/src/ui-builder-hand.tsx?raw";
+import uiScreenEditLayerSource from "../../../../packages/json-document-canvas/src/ui-screen-edit-layer.tsx?raw";
+import canvasEditingCommandsSource from "../../../../packages/json-document-canvas/src/canvas-editing-commands.tsx?raw";
+import uiScreenEditLayerStyleSource from "../../../../packages/json-document-canvas/src/ui-screen-edit-layer.css?raw";
+import uiBuilderScreenControlsSource from "../../../../packages/json-document-canvas/src/ui-builder-screen-controls.tsx?raw";
 import uiBuilderEditingSource from "../../../../packages/json-document-editing/src/ui-builder.ts?raw";
 import uiComponentModelSource from "../../../../packages/json-document-object-document/src/ui-component.ts?raw";
+import objectCollisionLayoutSource from "../../../../packages/json-document-object-document/src/object-collision-layout.ts?raw";
 import objectContainerLayoutSource from "../../../../packages/json-document-object-document/src/object-container-layout.ts?raw";
 import objectTextLayoutSource from "../../../../packages/json-document-object-document/src/object-text-layout.ts?raw";
 import webTextMeasurementSource from "../../../../packages/json-document-web/src/text-measurement.ts?raw";
@@ -126,11 +189,14 @@ import calendarSelectionSource from "../../../../packages/json-document-editing/
 import calendarSelectionMoveSource from "../../../../packages/json-document-editing/src/calendar-selection-move.ts?raw";
 import calendarValidationSource from "../../../../packages/json-document-calendar-document/src/calendar-validation.ts?raw";
 import calendarEventLabelSource from "../../../../packages/json-document-calendar/src/calendar-event-label.ts?raw";
+import dateControlsStyleSource from "../../../../packages/json-document-calendar/src/date-controls.css?raw";
 import dateControlsSource from "../../../../packages/json-document-calendar/src/date-controls.tsx?raw";
 import dateGridSource from "../../../../packages/json-document-calendar/src/date-grid.tsx?raw";
 import calendarMonthGridSource from "../../../../packages/json-document-calendar/src/calendar-month-grid.tsx?raw";
 import calendarTimeGridSource from "../../../../packages/json-document-calendar/src/calendar-time-grid.tsx?raw";
 import calendarEventInspectorSource from "../../../../packages/json-document-calendar/src/calendar-event-inspector.tsx?raw";
+import animationStylesSource from "../../../../packages/json-document-animation-react/styles.css?raw";
+import elapsedTimeSource from "../../../../packages/json-document-ui-primitives-react/src/elapsed-time.tsx?raw";
 import animationSource from "../../../../packages/json-document-animation-react/src/animations.tsx?raw";
 import markdownRendererSource from "../../../../packages/json-document-markdown-react/src/MarkdownRenderer.tsx?raw";
 import markdownEditingSource from "../../../../packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx?raw";
@@ -191,6 +257,7 @@ import interactionHandleSource from "../../../../packages/json-document-affordan
 import contentInteractionAffordanceSource from "../../../../packages/json-document-affordance/src/content-interaction.ts?raw";
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
 import databasePropertyValueSource from "../../../../packages/json-document-editing/src/database-property-value.ts?raw";
+import databaseStylesSource from "../../../../packages/json-document-database/styles.css?raw";
 import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
 import annotationSelectionSource from "../../../../packages/json-document-editing/src/annotation-selection.ts?raw";
 import annotationOutputSource from "../../../../packages/json-document-annotation/src/annotation-output.ts?raw";
@@ -294,6 +361,24 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-object-document/src/ui-binding.ts", builderCanonical0],
   ["packages/json-document-object-document/src/ui-design.ts", builderCanonical1],
   ["packages/json-document-object-document/src/ui-layout.ts", builderCanonical2],
+  ["applications/ui-builder/issue-workbench-example.ts", issueWorkbenchUsage],
+  ["applications/ui-builder/full-catalog-example.ts", builderFullCatalogUsage],
+  ["packages/json-document-object-document/src/ui-component-catalog.ts", builderCatalogModel],
+  ["packages/json-document-editing/src/ui-builder-component-configuration.ts", builderComponentConfig],
+  ["packages/json-document-editing/src/ui-builder-collections.ts", builderCollections],
+  ["packages/json-document-editing/src/ui-builder-composition.ts", builderComposition],
+  ["packages/json-document-canvas/src/ui-component-controls.tsx", builderControlsRenderer],
+  ["packages/json-document-canvas/src/ui-component-feedback.tsx", builderFeedbackRenderer],
+  ["packages/json-document-canvas/src/ui-component-compositions.tsx", builderCompositionRenderer],
+  ["packages/json-document-canvas/src/ui-component-collection.tsx", builderCollectionRenderer],
+  ["packages/json-document-canvas/src/ui-builder-component-palette.tsx", builderPalette],
+  ["packages/json-document-ui-builder/src/project-location.ts", builderProjectLocation],
+  ["packages/json-document-ui-builder/src/component-configuration-controls.tsx", builderComponentConfigurationControls],
+  ["packages/json-document-calendar/src/calendar-presentation.ts", builderCalendarPresentation],
+  ["packages/json-document-calendar/src/calendar-presentation.css", builderCalendarPresentationCSS],
+  ["applications/ui-builder/domain-examples.ts", builderDomainExamplesSource],
+  ["packages/json-document-ui-builder/src/page-controls.tsx", builderPageControlsSource],
+  ["packages/json-document-editing/src/ui-builder-pages.ts", builderPagesSource],
   ["packages/json-document-editing/src/ui-builder-bindings.ts", builderCanonical3],
   ["packages/json-document-editing/src/ui-builder-configuration.ts", builderCanonical4],
   ["packages/json-document-editing/src/ui-builder-catalog-tools.ts", builderCanonical5],
@@ -321,6 +406,10 @@ const registeredUsageSources = new Map<string, string>([
 
   ["packages/json-document-canvas/src/ui-component-view.tsx", uiComponentViewSource],
   ["packages/json-document-canvas/src/ui-builder-hand.tsx", uiBuilderHandSource],
+  ["packages/json-document-canvas/src/ui-screen-edit-layer.tsx", uiScreenEditLayerSource],
+  ["packages/json-document-canvas/src/canvas-editing-commands.tsx", canvasEditingCommandsSource],
+  ["packages/json-document-canvas/src/ui-screen-edit-layer.css", uiScreenEditLayerStyleSource],
+  ["packages/json-document-canvas/src/ui-builder-screen-controls.tsx", uiBuilderScreenControlsSource],
   ["packages/json-document-editing/src/ui-builder.ts", uiBuilderEditingSource],
   ["packages/json-document-object-document/src/ui-component.ts", uiComponentModelSource],
   ["packages/json-document-editing/src/canvas-tools.ts", canvasToolsSource],
@@ -373,6 +462,39 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-object-document/src/object-operation.ts", objectOperationSource],
   ["packages/json-document-object-document/src/object-projection.ts", objectProjectionSource],
   ["packages/json-document-object-document/src/object-container-layout.ts", objectContainerLayoutSource],
+  ["packages/json-document-object-document/src/object-collision-layout.ts", objectCollisionLayoutSource],
+  ["packages/json-document-ui-primitives-react/src/record-presentation.tsx", recordPresentationSource],
+  ["packages/json-document-ui-primitives-react/src/data-presentation.ts", dataPresentationSource],
+  ["packages/json-document-ui-primitives-react/src/numeric-presentation.tsx", numericPresentationSource],
+  ["packages/json-document-ui-primitives-react/src/number-field.tsx", numberFieldSource],
+  ["packages/json-document-ui-primitives-react/src/form-field.tsx", formFieldSource],
+  ["routes/ui-primitives-catalog/BasicAffordancesSpecimen.tsx", basicAffordancesSpecimenSource],
+  ["packages/json-document-ui-primitives-react/src/tags.tsx", tagsSource],
+  ["packages/json-document-editing/src/ui-builder-screen.ts", uiBuilderScreenSource],
+  ["packages/json-document-ui-primitives-react/src/field-presentation.tsx", fieldPresentationSource],
+  ["routes/ui-primitives-catalog/DataPresentationSpecimen.tsx", dataPresentationSpecimenSource],
+  ["routes/ui-primitives-catalog/DataPresentationPair.tsx", dataPresentationPairSource],
+  ["packages/json-document-ui-primitives-react/src/content-card.tsx", contentCardSource],
+  ["packages/json-document-ui-primitives-react/src/domain-cards.tsx", domainCardsSource],
+  ["packages/json-document-ui-primitives-react/src/record-affordances.tsx", recordAffordancesSource],
+  ["packages/json-document-ui-primitives-react/src/content-group.tsx", contentGroupSource],
+  ["packages/json-document-object-document/src/ui-domain-card.ts", uiDomainCardSource],
+  ["packages/json-document-canvas/src/ui-component-record-card.tsx", uiRecordCardSource],
+  ["routes/ui-primitives-catalog/DomainCardsSpecimen.tsx", domainCardsSpecimenSource],
+  ["applications/ui-builder/domain-card-example.ts", domainCardExampleSource],
+  ["routes/ui-primitives-catalog/ProductWorkflowSpecimen.tsx", productWorkflowSpecimenSource],
+  ["packages/json-document-ui-primitives-react/src/comment-composer.tsx", comment_composerSource],
+  ["packages/json-document-ui-primitives-react/src/people-picker.tsx", people_pickerSource],
+  ["packages/json-document-ui-primitives-react/src/workflow-history.tsx", workflow_historySource],
+  ["packages/json-document-ui-primitives-react/src/workflow-feedback.tsx", workflow_feedbackSource],
+  ["packages/json-document-ui-primitives-react/src/record-identity.tsx", record_identitySource],
+  ["packages/json-document-ui-primitives-react/src/filter-bar.tsx", filter_barSource],
+  ["packages/json-document-ui-primitives-react/src/page-navigation.tsx", page_navigationSource],
+  ["shared/ui/primitives.tsx", sitePageHeaderSource],
+  ["shared/ui/catalog-demo-page.tsx", siteCatalogPageSource],
+  ["app/routes/__root.tsx", siteNavigationSource],
+  ["app/breadcrumb.tsx", siteBreadcrumbSource],
+  ["shared/ui/markdown-content.tsx", siteMarkdownContentSource],
   ["packages/json-document-object-document/src/object-text-layout.ts", objectTextLayoutSource],
   ["packages/json-document-web/src/text-measurement.ts", webTextMeasurementSource],
   ["packages/json-document-canvas/src/canvas-hand.tsx", canvasHandSource],
@@ -401,11 +523,14 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-calendar-document/src/calendar-validation.ts", calendarValidationSource],
   ["packages/json-document-calendar/src/calendar-event-label.ts", calendarEventLabelSource],
   ["packages/json-document-calendar/src/date-controls.tsx", dateControlsSource],
+  ["packages/json-document-calendar/src/date-controls.css", dateControlsStyleSource],
   ["packages/json-document-calendar/src/date-grid.tsx", dateGridSource],
   ["packages/json-document-calendar/src/calendar-month-grid.tsx", calendarMonthGridSource],
   ["packages/json-document-calendar/src/calendar-time-grid.tsx", calendarTimeGridSource],
   ["packages/json-document-calendar/src/calendar-event-inspector.tsx", calendarEventInspectorSource],
+  ["packages/json-document-ui-primitives-react/src/elapsed-time.tsx", elapsedTimeSource],
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
+  ["packages/json-document-animation-react/styles.css", animationStylesSource],
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-markdown-react/src/MarkdownEditingSurface.tsx", markdownEditingSource],
   ["packages/json-document-markdown-web/src/editing-binding.ts", markdownBindingSource],
@@ -480,6 +605,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
   ["packages/json-document-editing/src/database-property-value.ts", databasePropertyValueSource],
   ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
+  ["packages/json-document-database/styles.css", databaseStylesSource],
   ["packages/json-document-annotation/src/annotation-hand.tsx", annotationHandSource],
   ["packages/json-document-annotation/src/annotation-output.ts", annotationOutputSource],
   ["packages/json-document-editing/src/annotation-selection.ts", annotationSelectionSource],
@@ -501,8 +627,16 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/contextual-controls.tsx", uiContextualControlsSource],
   ["packages/json-document-ui-primitives-react/src/product-shell.tsx", uiProductShellSource],
   ["packages/json-document-ui-primitives-react/src/toolbar.tsx", uiToolbarSource],
+  ["packages/json-document-ui-primitives-react/src/record-workspace.tsx", recordWorkspaceSource],
+  ["packages/json-document-ui-primitives-react/src/editable-text.tsx", editableTextSource],
   ["packages/json-document-ui-primitives-react/src/floating-surface.ts", floatingSurfaceSource],
+  ["packages/json-document-ui-primitives-react/src/design-tokens.css", designTokensSource],
+  ["packages/json-document-ui-primitives-react/src/design-system.css", designSystemSource],
+  ["packages/json-document-ui-primitives-react/src/content-presentation.ts", contentPresentationSource],
   ["packages/json-document-ui-primitives-react/src/listbox.ts", uiListboxSource],
+  ["routes/database-demo/ResourceDatabaseUsage.tsx", resourceDatabaseUsageSource],
+  ["packages/json-document-ui-primitives-react/src/code-block.tsx", canonicalCodeBlockSource],
+  ["packages/json-document-ui-primitives-react/src/use-popup.ts", popupLifecycleSource],
   ["packages/json-document-ui-primitives-react/src/chat-bubble.tsx", chatBubbleSource],
   ["packages/json-document-ui-primitives-react/src/chat-bubble.css", chatBubbleCSSSource],
   ["packages/json-document-composer-react/src/chat-composer.tsx", chatComposerSource],
@@ -557,10 +691,51 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
-  ["applications/ui-builder/UIBuilderApplication.tsx", ["packages/json-document-object-document/src/ui-flow.ts", "packages/json-document-object-document/src/ui-binding.ts", "packages/json-document-object-document/src/ui-design.ts", "packages/json-document-object-document/src/ui-layout.ts", "packages/json-document-editing/src/ui-builder-bindings.ts", "packages/json-document-editing/src/ui-builder-configuration.ts", "packages/json-document-editing/src/ui-builder-catalog-tools.ts", "packages/json-document-editing/src/ui-builder-action-tools.ts", "packages/json-document-editing/src/ui-builder-layout-tools.ts", "packages/json-document-editing/src/ui-builder-runtime.ts", "packages/json-document-ui-builder/src/action-execution-fields.tsx", "packages/json-document-ui-builder/src/arrange-control.tsx", "packages/json-document-ui-builder/src/binding-inspector.tsx", "packages/json-document-ui-builder/src/catalog-controls.tsx", "packages/json-document-ui-builder/src/runtime-hand.tsx", "packages/json-document-ui-builder/src/storage-controls.tsx", "packages/json-document-web/src/indexeddb-document-storage.ts", "packages/json-document-web/src/document-file.ts"]],
-  ["packages/json-document-ui-builder/src/ui-builder-workspace.tsx", ["packages/json-document-ui-builder/src/materials-hand.tsx", "packages/json-document-ui-builder/src/schema-fields.tsx", "packages/json-document-ui-builder/src/ui-builder-workspace.css", "packages/json-document-editing/src/ui-builder-materials.ts", "packages/json-document-editing/src/database-view.ts"]],
+  ["routes/connectors/a2ui/A2uiConnectorDemoRoute.tsx", ["app/a2ui-streaming-document/A2uiSurface.tsx", "packages/json-document-ui-primitives-react/src/chat-bubble.tsx", "packages/json-document-ui-primitives-react/src/chat-bubble.css"]],
+  ["packages/json-document-animation-react/src/animations.tsx", ["packages/json-document-ui-primitives-react/src/chat-bubble.tsx", "packages/json-document-ui-primitives-react/src/chat-bubble.css"]],
+  ["packages/json-document-rich-text-suggestion-react/src/mention.tsx", ["packages/json-document-ui-primitives-react/src/tags.tsx", "packages/json-document-ui-primitives-react/src/record-identity.tsx", "packages/json-document-ui-primitives-react/src/record-affordances.tsx", "packages/json-document-ui-primitives-react/src/design-system.css"]],
+  ["routes/database-demo/DatabaseDemoRoute.tsx", ["routes/database-demo/ResourceDatabaseUsage.tsx", "packages/json-document-database/src/database-hands.tsx", "packages/json-document-ui-primitives-react/src/product-shell.tsx"]],
+  ["packages/json-document-ui-primitives-react/src/code-block.tsx", ["packages/json-document-ui-primitives-react/src/design-system.css", "packages/json-document-ui-primitives-react/src/controls.tsx"]],
+  ["packages/json-document-ui-primitives-react/src/presentations.tsx", ["packages/json-document-ui-primitives-react/src/use-popup.ts", "packages/json-document-ui-primitives-react/src/floating-surface.css"]],
+  ["packages/json-document-ui-primitives-react/src/menu.tsx", ["packages/json-document-ui-primitives-react/src/use-popup.ts", "packages/json-document-ui-primitives-react/src/floating-surface.css"]],
+  ["packages/json-document-ui-primitives-react/src/select.tsx", ["packages/json-document-ui-primitives-react/src/use-popup.ts", "packages/json-document-ui-primitives-react/src/listbox.ts"]],
+  ["shared/ui/code-block.tsx", ["packages/json-document-ui-primitives-react/src/code-block.tsx", "packages/json-document-ui-primitives-react/src/design-system.css"]],
+  ["routes/connectors/react-hook-form/ReactHookFormConnectorDemoRoute.tsx", ["shared/ui/catalog-demo-page.tsx", "app/routes/__root.tsx", "app/breadcrumb.tsx"]],
+  ["packages/json-document-ui-primitives-react/src/form-field.tsx", ["packages/json-document-ui-primitives-react/src/design-system.css", "packages/json-document-ui-primitives-react/src/content-presentation.ts"]],
+  ["packages/json-document-canvas/src/ui-component-controls.tsx", ["packages/json-document-ui-primitives-react/src/form-field.tsx", "packages/json-document-ui-primitives-react/src/number-field.tsx", "packages/json-document-ui-primitives-react/src/input-controls.tsx", "packages/json-document-ui-primitives-react/src/controls.tsx", "packages/json-document-ui-primitives-react/src/choice.tsx", "packages/json-document-calendar/src/date-controls.tsx"]],
+  ["packages/json-document-ui-primitives-react/src/number-field.tsx", ["packages/json-document-ui-primitives-react/src/form-field.tsx", "packages/json-document-ui-primitives-react/src/input-controls.tsx"]],
+  ["packages/json-document-ui-primitives-react/src/record-presentation.tsx", ["packages/json-document-ui-primitives-react/src/input-controls.tsx", "packages/json-document-ui-primitives-react/src/controls.tsx", "packages/json-document-ui-primitives-react/src/record-affordances.tsx", "packages/json-document-ui-primitives-react/src/design-system.css"]],
+  ["routes/ui-primitives-catalog/BasicAffordancesSpecimen.tsx", ["packages/json-document-ui-primitives-react/src/form-field.tsx", "packages/json-document-ui-primitives-react/src/input-controls.tsx", "packages/json-document-ui-primitives-react/src/number-field.tsx", "packages/json-document-ui-primitives-react/src/record-presentation.tsx", "packages/json-document-ui-primitives-react/src/record-affordances.tsx", "packages/json-document-ui-primitives-react/src/menu.tsx", "packages/json-document-ui-primitives-react/src/choice.tsx"]],
+  ["packages/json-document-ui-primitives-react/src/record-affordances.tsx", ["packages/json-document-ui-primitives-react/src/chat-bubble.tsx", "packages/json-document-ui-primitives-react/src/chat-bubble.css", "packages/json-document-ui-primitives-react/src/design-system.css"]],
+  ["packages/json-document-ui-primitives-react/src/content-group.tsx", ["packages/json-document-ui-primitives-react/src/content-presentation.ts", "packages/json-document-ui-primitives-react/src/design-system.css"]],
+  ["packages/json-document-ui-primitives-react/src/domain-cards.tsx", ["packages/json-document-ui-primitives-react/src/record-identity.tsx", "packages/json-document-ui-primitives-react/src/numeric-presentation.tsx", "packages/json-document-ui-primitives-react/src/content-group.tsx","packages/json-document-ui-primitives-react/src/record-affordances.tsx", "packages/json-document-ui-primitives-react/src/workflow-history.tsx","packages/json-document-ui-primitives-react/src/content-card.tsx", "packages/json-document-ui-primitives-react/src/page-navigation.tsx", "packages/json-document-ui-primitives-react/src/record-presentation.tsx", "packages/json-document-ui-primitives-react/src/design-system.css"]],
+  ["routes/ui-primitives-catalog/DomainCardsSpecimen.tsx", ["packages/json-document-ui-primitives-react/src/toolbar.tsx", "packages/json-document-ui-primitives-react/src/content-group.tsx", "packages/json-document-ui-primitives-react/src/record-affordances.tsx","packages/json-document-ui-primitives-react/src/domain-cards.tsx"]],
+  ["applications/ui-builder/domain-card-example.ts", ["packages/json-document-object-document/src/ui-domain-card.ts", "packages/json-document-canvas/src/ui-component-record-card.tsx", "packages/json-document-ui-primitives-react/src/domain-cards.tsx"]],
+  ["packages/json-document-ui-primitives-react/src/editable-text.tsx", ["packages/json-document-ui-primitives-react/src/field-presentation.tsx", "packages/json-document-ui-primitives-react/src/input-controls.tsx", "packages/json-document-ui-primitives-react/src/controls.tsx", "packages/json-document-ui-primitives-react/src/design-system.css"]],
+  ["packages/json-document-ui-primitives-react/src/record-workspace.tsx", ["packages/json-document-ui-primitives-react/src/design-system.css"]],
+  ["packages/json-document-calendar/src/calendar-month-grid.tsx", ["packages/json-document-calendar/src/calendar-presentation.ts", "packages/json-document-calendar/src/calendar-presentation.css"]],
+  ["shared/ui/catalog-demo-page.tsx", ["shared/ui/primitives.tsx"]],
+  ["shared/ui/primitives.tsx", ["packages/json-document-ui-primitives-react/src/page-navigation.tsx"]],
+  ["app/routes/__root.tsx", ["packages/json-document-ui-primitives-react/src/page-navigation.tsx", "app/breadcrumb.tsx"]],
+  ["app/breadcrumb.tsx", ["packages/json-document-ui-primitives-react/src/page-navigation.tsx"]],
+  ["shared/ui/markdown-content.tsx", ["packages/json-document-ui-primitives-react/src/content-presentation.ts"]],
+  ["packages/json-document-ui-primitives-react/src/page-navigation.tsx", ["packages/json-document-ui-primitives-react/src/controls.tsx", "packages/json-document-ui-primitives-react/src/content-presentation.ts", "packages/json-document-ui-primitives-react/src/design-system.css"]],
+  ["packages/json-document-ui-primitives-react/src/toolbar.tsx", ["packages/json-document-ui-primitives-react/src/design-system.css", "packages/json-document-ui-primitives-react/src/design-tokens.css"]],
+  ["packages/json-document-calendar/src/date-controls.tsx", ["packages/json-document-calendar/src/date-grid.tsx", "packages/json-document-calendar/src/date-controls.css", "packages/json-document-ui-primitives-react/src/input-controls.tsx"]],
+  ["packages/json-document-ui-primitives-react/src/input-controls.tsx", ["packages/json-document-ui-primitives-react/src/design-system.css", "packages/json-document-ui-primitives-react/src/design-tokens.css"]],
+  ["packages/json-document-ui-primitives-react/src/content-presentation.ts", ["packages/json-document-ui-primitives-react/src/design-system.css", "packages/json-document-ui-primitives-react/src/design-tokens.css"]],
+  ["packages/json-document-canvas/src/use-canvas-hand.ts", ["packages/json-document-object-document/src/object-collision-layout.ts"]],
+  ["routes/ui-primitives-catalog/UiPrimitivesCatalogRoute.tsx", ["shared/ui/primitives.tsx", "app/routes/__root.tsx", "shared/ui/markdown-content.tsx", "routes/ui-primitives-catalog/BasicAffordancesSpecimen.tsx", "packages/json-document-ui-primitives-react/src/elapsed-time.tsx","packages/json-document-animation-react/src/animations.tsx", "packages/json-document-animation-react/styles.css","routes/ui-primitives-catalog/DomainCardsSpecimen.tsx","packages/json-document-ui-primitives-react/src/content-card.tsx", "packages/json-document-ui-primitives-react/src/product-shell.tsx", "packages/json-document-ui-primitives-react/src/design-system.css", "routes/ui-primitives-catalog/DataPresentationSpecimen.tsx", "routes/ui-primitives-catalog/ProductWorkflowSpecimen.tsx", "packages/json-document-ui-primitives-react/src/record-presentation.tsx"]],
+  ["routes/ui-primitives-catalog/DataPresentationPair.tsx", ["packages/json-document-ui-primitives-react/src/field-presentation.tsx", "packages/json-document-ui-primitives-react/src/toolbar.tsx", "packages/json-document-ui-primitives-react/src/controls.tsx", "packages/json-document-ui-primitives-react/src/numeric-presentation.tsx", "packages/json-document-ui-primitives-react/src/design-system.css", "packages/json-document-calendar/src/date-controls.tsx"]],
+  ["routes/ui-primitives-catalog/DataPresentationSpecimen.tsx", ["packages/json-document-ui-primitives-react/src/page-navigation.tsx", "packages/json-document-ui-primitives-react/src/content-group.tsx", "packages/json-document-ui-primitives-react/src/record-affordances.tsx","packages/json-document-ui-primitives-react/src/numeric-presentation.tsx", "routes/ui-primitives-catalog/DataPresentationPair.tsx", "packages/json-document-ui-primitives-react/src/data-presentation.ts", "packages/json-document-ui-primitives-react/src/field-presentation.tsx", "packages/json-document-ui-primitives-react/src/record-identity.tsx", "packages/json-document-calendar/src/date-controls.tsx"]],
+  ["routes/ui-primitives-catalog/ProductWorkflowSpecimen.tsx", ["packages/json-document-ui-primitives-react/src/record-workspace.tsx", "packages/json-document-ui-primitives-react/src/record-affordances.tsx", "packages/json-document-ui-primitives-react/src/record-presentation.tsx", "packages/json-document-ui-primitives-react/src/content-group.tsx", "packages/json-document-ui-primitives-react/src/toolbar.tsx", "packages/json-document-ui-primitives-react/src/controls.tsx", "packages/json-document-ui-primitives-react/src/design-system.css", "packages/json-document-ui-primitives-react/src/page-navigation.tsx", "packages/json-document-ui-primitives-react/src/filter-bar.tsx", "packages/json-document-ui-primitives-react/src/record-identity.tsx", "packages/json-document-ui-primitives-react/src/workflow-feedback.tsx", "packages/json-document-ui-primitives-react/src/workflow-history.tsx", "packages/json-document-ui-primitives-react/src/people-picker.tsx", "packages/json-document-ui-primitives-react/src/comment-composer.tsx"]],
+  ["applications/ui-builder/UIBuilderApplication.tsx", ["applications/ui-builder/domain-card-example.ts","packages/json-document-editing/src/ui-builder-screen.ts", "applications/ui-builder/issue-workbench-example.ts", "applications/ui-builder/issue-feed-example.ts", "applications/ui-builder/issue-feed-skills.ts", "applications/ui-builder/full-catalog-example.ts", "packages/json-document-object-document/src/ui-component-catalog.ts", "packages/json-document-editing/src/ui-builder-component-configuration.ts", "packages/json-document-editing/src/ui-builder-collections.ts", "packages/json-document-editing/src/ui-builder-composition.ts", "packages/json-document-canvas/src/ui-component-controls.tsx", "packages/json-document-canvas/src/ui-component-feedback.tsx", "packages/json-document-canvas/src/ui-component-compositions.tsx", "packages/json-document-canvas/src/ui-component-collection.tsx", "packages/json-document-canvas/src/ui-builder-component-palette.tsx", "packages/json-document-ui-builder/src/project-location.ts", "packages/json-document-ui-builder/src/component-configuration-controls.tsx", "packages/json-document-calendar/src/calendar-presentation.ts", "packages/json-document-calendar/src/calendar-presentation.css", "applications/ui-builder/briefing-studio-example.ts", "applications/ui-builder/domain-examples.ts", "packages/json-document-editing/src/ui-builder-pages.ts", "packages/json-document-ui-primitives-react/src/content-presentation.ts", "packages/json-document-object-document/src/ui-flow.ts", "packages/json-document-object-document/src/ui-binding.ts", "packages/json-document-object-document/src/ui-design.ts", "packages/json-document-object-document/src/ui-layout.ts", "packages/json-document-editing/src/ui-builder-bindings.ts", "packages/json-document-editing/src/ui-builder-configuration.ts", "packages/json-document-editing/src/ui-builder-catalog-tools.ts", "packages/json-document-editing/src/ui-builder-action-tools.ts", "packages/json-document-editing/src/ui-builder-layout-tools.ts", "packages/json-document-editing/src/ui-builder-runtime.ts", "packages/json-document-ui-builder/src/action-execution-fields.tsx", "packages/json-document-ui-builder/src/arrange-control.tsx", "packages/json-document-ui-builder/src/binding-inspector.tsx", "packages/json-document-ui-builder/src/catalog-controls.tsx", "packages/json-document-ui-builder/src/runtime-hand.tsx", "packages/json-document-canvas/src/ui-builder-screen-controls.tsx", "packages/json-document-ui-builder/src/storage-controls.tsx", "packages/json-document-web/src/indexeddb-document-storage.ts", "packages/json-document-web/src/document-file.ts"]],
+  ["packages/json-document-ui-builder/src/ui-builder-workspace.tsx", ["packages/json-document-ui-builder/src/page-controls.tsx", "packages/json-document-editing/src/ui-builder-pages.ts", "packages/json-document-ui-builder/src/materials-hand.tsx", "packages/json-document-ui-builder/src/schema-fields.tsx", "packages/json-document-ui-builder/src/ui-builder-workspace.css", "packages/json-document-editing/src/ui-builder-materials.ts", "packages/json-document-editing/src/database-view.ts"]],
   ["packages/json-document-editing/src/ui-builder-material-tools.ts", ["packages/json-document-editing/src/ui-builder-materials.ts", "packages/json-document-editing/src/database-view.ts"]],
-  ["packages/json-document-canvas/src/ui-builder-hand.tsx", ["packages/json-document-canvas/src/ui-builder.css", "packages/json-document-canvas/src/ui-component-view.tsx"]],
+  ["packages/json-document-canvas/src/ui-builder-hand.tsx", ["packages/json-document-canvas/src/ui-builder-screen-controls.tsx", "packages/json-document-canvas/src/ui-builder.css", "packages/json-document-canvas/src/ui-component-view.tsx"]],
+  ["packages/json-document-ui-builder/src/runtime-hand.tsx", ["packages/json-document-canvas/src/ui-screen-edit-layer.tsx", "packages/json-document-canvas/src/canvas-hand.tsx"]],
+  ["packages/json-document-canvas/src/ui-screen-edit-layer.tsx", ["packages/json-document-canvas/src/ui-screen-edit-layer.css"]],
+  ["packages/json-document-canvas/src/ui-builder-screen-controls.tsx", ["packages/json-document-canvas/src/canvas-editing-commands.tsx", "packages/json-document-canvas/src/ui-builder.css"]],
   ["packages/json-document-contenteditable/src/lease.ts", ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts"]],
   ["packages/json-document-contenteditable/src/dom/text-selection-overlay.ts", ["packages/json-document-contenteditable/src/dom/text-selection-geometry.ts", "packages/json-document-contenteditable/src/dom/text-selection.css"]],
   ["packages/json-document-editing/src/markdown-table.ts",["packages/json-document-editing/src/projected-sheet.ts"]],
@@ -578,15 +753,29 @@ const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
   ["routes/markdown-caret/MarkdownCaretRoute.tsx", ["app/interaction-recording/InteractionRecordingControls.tsx"]],
   ["packages/json-document-editing/src/text.ts", ["packages/json-document-editing/src/session.ts"]],
   ["packages/json-document-editing/src/session.ts", ["packages/json-document-editing/src/history-patch.ts"]],
-  ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
+  ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx", "packages/json-document-database/styles.css"]],
 ]);
 const registeredPublicUsages = [
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "Breadcrumbs", sourcePath: "packages/json-document-ui-primitives-react/src/page-navigation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "BreadcrumbItem", sourcePath: "packages/json-document-ui-primitives-react/src/page-navigation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "linkPresentation", sourcePath: "packages/json-document-ui-primitives-react/src/page-navigation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "PageHeaderProps", sourcePath: "packages/json-document-ui-primitives-react/src/page-navigation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "NavigationLinkRenderer", sourcePath: "packages/json-document-ui-primitives-react/src/page-navigation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "fieldPresentation", sourcePath: "packages/json-document-ui-primitives-react/src/input-controls.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "contentPresentation", sourcePath: "packages/json-document-ui-primitives-react/src/content-presentation.ts" },
   { packageName: "@interactive-os/json-document-object-document", symbol: "assertUIFlowLayout", sourcePath: "packages/json-document-object-document/src/ui-flow.ts" },
   { packageName: "@interactive-os/json-document-object-document", symbol: "resolveUIFlowLayout", sourcePath: "packages/json-document-object-document/src/ui-flow.ts" },
   { packageName: "@interactive-os/json-document-canvas", symbol: "UIComponentSurface", sourcePath: "packages/json-document-canvas/src/ui-component-view.tsx" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "applyUIBuilderComponentConfiguration", sourcePath: "packages/json-document-editing/src/ui-builder-component-configuration.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderComponentConfigurationTools", sourcePath: "packages/json-document-editing/src/ui-builder-component-configuration.ts" },
+  { packageName: "@interactive-os/json-document-ui-builder", symbol: "resolveUIBuilderProjectLocation", sourcePath: "packages/json-document-ui-builder/src/project-location.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "applyUIBuilderPages", sourcePath: "packages/json-document-editing/src/ui-builder-pages.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderPageTools", sourcePath: "packages/json-document-editing/src/ui-builder-pages.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderCatalogTools", sourcePath: "packages/json-document-editing/src/ui-builder-catalog-tools.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderActionTools", sourcePath: "packages/json-document-editing/src/ui-builder-action-tools.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderLayoutTools", sourcePath: "packages/json-document-editing/src/ui-builder-layout-tools.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "resolveUIBuilderActionPrerequisites", sourcePath: "packages/json-document-editing/src/ui-builder-runtime.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderRecordSelection", sourcePath: "packages/json-document-editing/src/ui-builder-runtime.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "applyUIBuilderMaterials", sourcePath: "packages/json-document-editing/src/ui-builder-materials.ts" },
   { packageName: "@interactive-os/json-document-ui-builder", symbol: "UIBuilderStorageControls", sourcePath: "packages/json-document-ui-builder/src/storage-controls.tsx" },
   { packageName: "@interactive-os/json-document-ui-builder", symbol: "UIBuilderRuntimeHand", sourcePath: "packages/json-document-ui-builder/src/runtime-hand.tsx" },
@@ -596,15 +785,108 @@ const registeredPublicUsages = [
   { packageName: "@interactive-os/json-document-web", symbol: "readWebDocumentFile", sourcePath: "packages/json-document-web/src/document-file.ts" },
   { packageName: "@interactive-os/json-document-canvas", symbol: "UIComponentView", sourcePath: "packages/json-document-canvas/src/ui-component-view.tsx" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createDatabaseView", sourcePath: "packages/json-document-editing/src/database-view.ts" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "EditableText", sourcePath: "packages/json-document-ui-primitives-react/src/editable-text.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "RecordWorkspace", sourcePath: "packages/json-document-ui-primitives-react/src/record-workspace.tsx" },
   { packageName: "@interactive-os/json-document-ui-builder", symbol: "UIBuilderWorkspace", sourcePath: "packages/json-document-ui-builder/src/ui-builder-workspace.tsx" },
   { packageName: "@interactive-os/json-document-ui-builder", symbol: "createFakerSampleGenerator", sourcePath: "packages/json-document-ui-builder/src/faker-samples.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderMaterialTools", sourcePath: "packages/json-document-editing/src/ui-builder-material-tools.ts" },
   { packageName: "@interactive-os/json-document-canvas", symbol: "UIBuilderHand", sourcePath: "packages/json-document-canvas/src/ui-builder-hand.tsx" },
+  { packageName: "@interactive-os/json-document-canvas", symbol: "CanvasEditingCommands", sourcePath: "packages/json-document-canvas/src/canvas-editing-commands.tsx" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "resolveObjectCollisions", sourcePath: "packages/json-document-object-document/src/object-collision-layout.ts" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "PageHeader", sourcePath: "packages/json-document-ui-primitives-react/src/page-navigation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "SidebarNavigation", sourcePath: "packages/json-document-ui-primitives-react/src/page-navigation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "FilterBar", sourcePath: "packages/json-document-ui-primitives-react/src/filter-bar.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "Avatar", sourcePath: "packages/json-document-ui-primitives-react/src/record-identity.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "PersonIdentity", sourcePath: "packages/json-document-ui-primitives-react/src/record-identity.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "PriorityIndicator", sourcePath: "packages/json-document-ui-primitives-react/src/record-identity.tsx" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "uiComponentSlotIds", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "mapUIComponentChildren", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "uiBuilderContentStructure", sourcePath: "packages/json-document-editing/src/ui-builder-screen.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "applyUIBuilderScreen", sourcePath: "packages/json-document-editing/src/ui-builder-screen.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderScreenTools", sourcePath: "packages/json-document-editing/src/ui-builder-screen.ts" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "NumberField", sourcePath: "packages/json-document-ui-primitives-react/src/number-field.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "NumberFieldProps", sourcePath: "packages/json-document-ui-primitives-react/src/number-field.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "DateRangeDisplay", sourcePath: "packages/json-document-ui-primitives-react/src/record-identity.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "Tag", sourcePath: "packages/json-document-ui-primitives-react/src/tags.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "TagGroup", sourcePath: "packages/json-document-ui-primitives-react/src/tags.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "TagPicker", sourcePath: "packages/json-document-ui-primitives-react/src/tags.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "TagOption", sourcePath: "packages/json-document-ui-primitives-react/src/tags.tsx" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "uiComponentAuthoringCatalog", sourcePath: "packages/json-document-object-document/src/ui-component-catalog.ts" },
+  { packageName: "@interactive-os/json-document-editing", symbol: "appendUIBuilderActivity", sourcePath: "packages/json-document-editing/src/ui-builder-runtime.ts" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "QuantityDisplay", sourcePath: "packages/json-document-ui-primitives-react/src/numeric-presentation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "MoneyDisplay", sourcePath: "packages/json-document-ui-primitives-react/src/numeric-presentation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "DateDisplay", sourcePath: "packages/json-document-ui-primitives-react/src/record-identity.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "EmptyState", sourcePath: "packages/json-document-ui-primitives-react/src/workflow-feedback.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "InlineAlert", sourcePath: "packages/json-document-ui-primitives-react/src/workflow-feedback.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ExecutionFeedback", sourcePath: "packages/json-document-ui-primitives-react/src/workflow-feedback.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "CodeBlockProps", sourcePath: "packages/json-document-ui-primitives-react/src/code-block.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "CodeBlock", sourcePath: "packages/json-document-ui-primitives-react/src/code-block.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "InlineCode", sourcePath: "packages/json-document-ui-primitives-react/src/code-block.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "WaveDots", sourcePath: "packages/json-document-ui-primitives-react/src/chat-bubble.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "Toast", sourcePath: "packages/json-document-ui-primitives-react/src/workflow-feedback.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "Stepper", sourcePath: "packages/json-document-ui-primitives-react/src/workflow-history.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ActivityFeed", sourcePath: "packages/json-document-ui-primitives-react/src/workflow-history.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "PeoplePicker", sourcePath: "packages/json-document-ui-primitives-react/src/people-picker.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "CommentComposer", sourcePath: "packages/json-document-ui-primitives-react/src/comment-composer.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "SemanticIcon", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "StateIndicator", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "RecordDetail", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "RecordContext", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "RecordFacts", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "RecordDetailProps", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "RecordContextProps", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "RecordFact", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "RecordSummary", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "MessageThread", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ChangeComparison", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "SemanticIconKind", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "StateIndicatorState", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "RecordSummaryProps", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ThreadMessage", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ComparedField", sourcePath: "packages/json-document-ui-primitives-react/src/record-affordances.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ContentGroup", sourcePath: "packages/json-document-ui-primitives-react/src/content-group.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ContentRelationship", sourcePath: "packages/json-document-ui-primitives-react/src/content-group.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ElapsedTime", sourcePath: "packages/json-document-ui-primitives-react/src/elapsed-time.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "PersonCard", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "EventCard", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "FileCard", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "PersonCardProps", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "EventCardProps", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "FileCardProps", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "InquiryCard", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "TaskCard", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ProductCard", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ApprovalCard", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ActivityCard", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "EvidenceCard", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "DomainCardProps", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "InquiryCardProps", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "TaskCardProps", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ProductCardProps", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ApprovalCardProps", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ActivityCardProps", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "EvidenceCardProps", sourcePath: "packages/json-document-ui-primitives-react/src/domain-cards.tsx" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "uiDomainCardCatalog", sourcePath: "packages/json-document-object-document/src/ui-domain-card.ts" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "uiDomainCardFieldRoles", sourcePath: "packages/json-document-object-document/src/ui-domain-card.ts" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "assertUIDomainCardMapping", sourcePath: "packages/json-document-object-document/src/ui-domain-card.ts" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "UIDomainCardPresentation", sourcePath: "packages/json-document-object-document/src/ui-domain-card.ts" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ContentCard", sourcePath: "packages/json-document-ui-primitives-react/src/content-card.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "dataPresentationCatalog", sourcePath: "packages/json-document-ui-primitives-react/src/data-presentation.ts" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "getDataPresentation", sourcePath: "packages/json-document-ui-primitives-react/src/data-presentation.ts" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "FieldPresentation", sourcePath: "packages/json-document-ui-primitives-react/src/field-presentation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "StatusBadge", sourcePath: "packages/json-document-ui-primitives-react/src/record-presentation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "IssueRow", sourcePath: "packages/json-document-ui-primitives-react/src/record-presentation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "PropertyEditor", sourcePath: "packages/json-document-ui-primitives-react/src/record-presentation.tsx" },
+  { packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "ResultPanel", sourcePath: "packages/json-document-ui-primitives-react/src/record-presentation.tsx" },
+  { packageName: "@interactive-os/json-document-canvas", symbol: "UIScreenEditLayer", sourcePath: "packages/json-document-canvas/src/ui-screen-edit-layer.tsx" },
+  { packageName: "@interactive-os/json-document-canvas", symbol: "useUIScreenEditTranslation", sourcePath: "packages/json-document-canvas/src/ui-screen-edit-layer.tsx" },
+  { packageName: "@interactive-os/json-document-canvas", symbol: "UIBuilderScreenControls", sourcePath: "packages/json-document-canvas/src/ui-builder-screen-controls.tsx" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderTools", sourcePath: "packages/json-document-editing/src/ui-builder.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createUIBuilderEditor", sourcePath: "packages/json-document-editing/src/ui-builder.ts" },
   { packageName: "@interactive-os/json-document-object-document", symbol: "uiComponentCatalog", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
   { packageName: "@interactive-os/json-document-object-document", symbol: "assertUIBuilderDocument", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
   { packageName: "@interactive-os/json-document-object-document", symbol: "createUIComponentObject", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
+  { packageName: "@interactive-os/json-document-object-document", symbol: "uiBuilderComponentChildIds", sourcePath: "packages/json-document-object-document/src/ui-component.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "moveText", sourcePath: "packages/json-document-editing/src/text-edit.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "applyTextEdit", sourcePath: "packages/json-document-editing/src/text-edit.ts" },
   { packageName: "@interactive-os/json-document-editing", symbol: "createCanvasEditorTools", sourcePath: "packages/json-document-editing/src/canvas-tools.ts" },
@@ -1149,7 +1431,7 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-calendar/src/calendar-event-inspector.tsx",
   },
   {
-    packageName: "@interactive-os/json-document-ui-primitives-react",
+    packageName: "@interactive-os/json-document-calendar",
     symbol: "CalendarGrid",
     sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
@@ -1278,22 +1560,22 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-animation-react/src/animations.tsx",
   })),
   {
-    packageName: "@interactive-os/json-document-ui-primitives-react",
+    packageName: "@interactive-os/json-document-calendar",
     symbol: "HtmlDateField",
     sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
   {
-    packageName: "@interactive-os/json-document-ui-primitives-react",
+    packageName: "@interactive-os/json-document-calendar",
     symbol: "DatePicker",
     sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
   {
-    packageName: "@interactive-os/json-document-ui-primitives-react",
+    packageName: "@interactive-os/json-document-calendar",
     symbol: "DateRangePicker",
     sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
   {
-    packageName: "@interactive-os/json-document-ui-primitives-react",
+    packageName: "@interactive-os/json-document-calendar",
     symbol: "RangeCalendar",
     sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
@@ -1338,7 +1620,7 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-calendar/src/date-values.ts",
   },
   {
-    packageName: "@interactive-os/json-document-ui-primitives-react",
+    packageName: "@interactive-os/json-document-calendar",
     symbol: "shiftVisibleDate",
     sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
@@ -1956,6 +2238,12 @@ const registeredPublicUsages = [
     symbol,
     sourcePath: "packages/json-document-ui-primitives-react/src/input-controls.tsx",
   })),
+  {packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "FormField", sourcePath: "packages/json-document-ui-primitives-react/src/form-field.tsx"},
+  {packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "FormFieldProps", sourcePath: "packages/json-document-ui-primitives-react/src/form-field.tsx"},
+  {packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "FormFieldControlProps", sourcePath: "packages/json-document-ui-primitives-react/src/form-field.tsx"},
+  {packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "IssueRowSelection", sourcePath: "packages/json-document-ui-primitives-react/src/record-presentation.tsx"},
+  {packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "MenuProps", sourcePath: "packages/json-document-ui-primitives-react/src/menu.tsx"},
+
   ...(["Popover", "Dialog"] as const).map((symbol) => ({
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol,

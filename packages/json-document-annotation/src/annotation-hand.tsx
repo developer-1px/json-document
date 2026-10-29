@@ -11,7 +11,7 @@ import {
   type AnnotationSource,
 } from "@interactive-os/json-document-editing";
 import { createWebKeyboardAdapter, createWebPointerSession, projectWebClientPointToSVG, renderWebAnnotationRaster, webSVGViewportFromElement, type WebAnnotationRasterStyle } from "@interactive-os/json-document-web";
-import { Command, Field, Toggle, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Field, Toggle, Toolbar, ToolbarSeparator, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 import { ArrowUpRight, Download, MessageSquare, MousePointer2, Pencil, SendHorizontal, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
 
 export type AnnotationTool = "select" | "comment" | "draw" | "arrow" | "like" | "dislike";
@@ -168,12 +168,12 @@ export function AnnotationHand(props: AnnotationHandProps) {
       {document.annotations.map((annotation, index) => gesture === null && previewId === annotation.id && annotation.body.instruction.trim() && editingId !== annotation.id ? <CommentPreview key={annotation.id} annotation={annotation} index={index + 1} source={source} className={classes.commentPreview} /> : null)}
       {selected && editingId === selected.id ? <CommentComposer annotation={selected} index={document.annotations.indexOf(selected) + 1} source={source} classNames={classes} labels={labels} onCancel={() => cancelComment(selected)} onSave={(instruction) => saveComment(selected, instruction)} onSubmit={(instruction) => submitComment(selected, instruction)} /> : null}
     </div>
-    <nav aria-label={labels.tools} className={classes.toolDock}>
+    <Toolbar label={labels.tools} className={classes.toolDock}>
       {annotationTools.filter(({ id }) => enabled.includes(id)).map(({ id, label, shortcut, icon: Icon }) => <Toggle key={id} label={label} tooltip={`${label} (${shortcut})`} pressed={tool === id} className={classes.dockButton} onClick={() => choose(id)}><Icon aria-hidden="true" size={16} /></Toggle>)}
-      <span className={classes.dockDivider} aria-hidden="true" />
+      <ToolbarSeparator className={classes.dockDivider} />
       <Command label={labels.deleteAnnotation} className={classes.dockButton} disabled={selected === null} onClick={remove}><Trash2 aria-hidden="true" size={16} /></Command>
       <Command label={labels.downloadImage} className={classes.dockButton} onClick={() => void download()}><Download aria-hidden="true" size={16} /></Command>
-    </nav>
+    </Toolbar>
   </div>;
 
   function saveComment(annotation: Annotation, instruction: string) { const value = instruction.trim(); if (annotation.body.instruction !== value) props.editor.dispatch({ type: "annotation.body.set", annotationId: annotation.id, instruction: value }); setTool("select"); announce("수정 요청을 추가했습니다."); }

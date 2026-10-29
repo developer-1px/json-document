@@ -1,3 +1,7 @@
+import { floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
+import { fieldPresentation } from "@interactive-os/json-document-ui-primitives-react";
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
+import "@interactive-os/json-document-calendar/calendar-presentation.css";
 import { useRef, useState, type ReactNode } from "react";
 import { ArrowUp, CalendarDays, ChevronLeft, ChevronRight, Clock3, Pencil, Repeat2, Sparkles, Trash2 } from "lucide-react";
 import { Temporal } from "@js-temporal/polyfill";
@@ -52,7 +56,7 @@ import {
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
 import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { CalendarDemoNavigator } from "./calendar-demo-navigator";
 import { calendarSearchDefaults } from "./calendar-search";
 import { calendarDemoRecipe } from "./calendar-demo-styles";
@@ -275,24 +279,24 @@ export function CalendarDemoRoute(props: {
         rootFill: "flex min-h-0 flex-1 flex-col",
         stickyHeader: classes("grid", styles.weekSticky()),
         columnHeader: styles.weekHead(),
-        weekday: ui.text.meta,
-        dayNumber: classes(styles.dayNumber(), ui.text.body),
+        weekday: contentPresentation.caption,
+        dayNumber: classes(styles.dayNumber(), contentPresentation.itemSummary),
         today: styles.weekToday(),
-        allDayLabel: classes("whitespace-nowrap px-1 py-1.5 text-right text-foreground-muted/70", ui.text.meta),
+        allDayLabel: classes("whitespace-nowrap px-1 py-1.5 text-right text-foreground-muted/70", contentPresentation.caption),
         allDayCell: classes("min-h-8", styles.weekCell()),
-        allDayEventContainer: "group/event relative z-10 mx-0.5 my-1",
+        allDayEventContainer: "group/event relative z-10 p-related",
         allDayEvent: styles.allDayEvent(),
         resizeAllDayEnd: styles.resizeEdgeVertical(),
         timeViewport: "grid",
         timeViewportFill: styles.weekHours(),
         hourGutter: "relative overflow-hidden",
         viewportAnchor: "pointer-events-none absolute left-0 top-0",
-        hourLabel: classes(styles.hourLabel(), ui.text.meta),
+        hourLabel: classes(styles.hourLabel(), contentPresentation.caption),
         timeCell: classes("overflow-hidden", styles.weekCell()),
         selectedSlot: styles.selectedSlot(),
         hourRule: styles.hourRule(),
         nowLine: styles.nowLine(),
-        creationTimeHint: classes(styles.creationTimeHint(), ui.text.meta),
+        creationTimeHint: classes(styles.creationTimeHint(), contentPresentation.caption),
         timedEventContainer: "group/event absolute z-10 p-0.5",
         timedEvent: styles.timedEvent(),
         eventTitle: styles.timedEventTitle(),
@@ -325,13 +329,13 @@ export function CalendarDemoRoute(props: {
         canvasClassName={classes("relative", embedded ? "overflow-x-auto" : "overflow-hidden")}
         toolbarLabel="Calendar controls"
         toolbar={pointerGestureActive ? null : (
-          <ToolbarLayout className="gap-1" style={{ gridTemplateColumns: "auto auto auto" }}>
+          <ToolbarLayout className="gap-related" style={{ gridTemplateColumns: "auto auto auto" }}>
             <ToolbarRegion placement="start" label="Calendar navigation">
               <ToolbarGroup label="Period navigation">
                 <Command affordance={calendarControlAffordance("periodPrevious")} label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
                   <ChevronLeft aria-hidden="true" size={16} />
                 </Command>
-                <Command affordance={calendarControlAffordance("today")} className={styles.todayAction()} onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</Command>
+                <Command affordance={calendarControlAffordance("today")} onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</Command>
                 <Command affordance={calendarControlAffordance("periodNext")} label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
                   <ChevronRight aria-hidden="true" size={16} />
                 </Command>
@@ -351,11 +355,6 @@ export function CalendarDemoRoute(props: {
                 onValueChange={setView}
                 classNames={{
                   root: styles.viewChoiceRoot(),
-                  trigger: styles.viewChoiceTrigger(),
-                  listbox: styles.viewChoiceListbox(),
-                  option: styles.viewChoiceOption(),
-                  focusedOption: styles.viewChoiceOptionFocused(),
-                  selectedOption: styles.viewChoiceOptionSelected(),
                 }}
               />
             </ToolbarRegion>
@@ -372,7 +371,7 @@ export function CalendarDemoRoute(props: {
                     <span className={styles.sidebarHint()}><CalendarDays aria-hidden="true" size={16} /></span>
                     {context.visible.includes("sources") ? (
                       <nav aria-label="Calendars" className={styles.sidebar()}>
-                        <p className={ui.text.label}>Calendars</p>
+                        <p className={contentPresentation.caption}>Calendars</p>
                         {calendars.map((calendar) => (
                           <Toggle
                             affordance={calendarControlAffordance("sourceToggle")}
@@ -408,7 +407,7 @@ export function CalendarDemoRoute(props: {
       >
         <div className="relative flex h-full min-h-0 min-w-0 flex-col">
           <div className={styles.controlLayer()}>
-            {errorCode === null ? null : <p role="alert" className={classes("absolute bottom-20 left-4 right-4 m-0", ui.text.meta)}>
+            {errorCode === null ? null : <p role="alert" className={classes("absolute bottom-20 left-4 right-4 m-0", contentPresentation.caption)}>
               변경하지 못했습니다. 선택과 입력을 확인한 뒤 다시 시도하세요. ({errorCode})
             </p>}
             {eventInspectorVisible ? <CalendarEventInspector
@@ -432,17 +431,17 @@ export function CalendarDemoRoute(props: {
                 recurrenceInterval: calendarControlAffordance("recurrenceInterval"),
               }}
               classNames={{
-                root: classes(styles.inspector(), ui.surface.overlay),
+                root: classes(styles.inspector(), floatingSurface.panel),
                 header: styles.inspectorHeader(),
                 title: styles.inspectorTitle(),
-                titleInput: ui.field.seamless,
+                titleInput: fieldPresentation.seamless,
                 actions: styles.inspectorActions(),
                 summary: styles.eventSummary(),
                 details: styles.detailsEditor(),
                 field: styles.field(),
-                fieldLabel: ui.text.label,
+                fieldLabel: contentPresentation.caption,
                 toggle: classes(styles.calendarToggle(), "w-auto px-0"),
-                numberInput: ui.field.control,
+                numberInput: fieldPresentation.standard,
               }}
               labels={{
                 inspector: "Event",
@@ -488,12 +487,12 @@ export function CalendarDemoRoute(props: {
                 data-ui-affordance={calendarControlAffordance("composerInput")}
                 aria-label="Ask about your calendar"
                 aria-describedby="calendar-composer-preview-note"
-                className={styles.composerInput()}
+                className={classes("min-w-0 flex-1", fieldPresentation.seamless)}
                 placeholder="Ask about your calendar…"
                 readOnly
               />
               <span id="calendar-composer-preview-note" className="sr-only">Visual preview only. AI commands are not available in this demo.</span>
-              <Command affordance={calendarControlAffordance("composerSend")} disabled label="AI commands unavailable" className={styles.composerSend()}>
+              <Command affordance={calendarControlAffordance("composerSend")} disabled label="AI commands unavailable">
                 <ArrowUp aria-hidden="true" size={16} />
               </Command>
             </div>}
@@ -503,8 +502,8 @@ export function CalendarDemoRoute(props: {
             view === "day" || view === "week"
               ? "flex min-h-0 flex-col overflow-hidden"
               : view === "month"
-                ? "overflow-auto pt-16"
-                : "overflow-auto px-4 pt-16",
+                ? "overflow-auto pt-region"
+                : "overflow-auto px-group pt-region",
           )}>
             <p className={styles.periodHeading()}>{visiblePeriodLabel(view, visibleDate, {
               dateStyle: "named",
@@ -533,24 +532,24 @@ export function CalendarDemoRoute(props: {
                   overflowEvent: calendarControlAffordance("overflowEvent"),
                 }}
                 classNames={{
-                  root: "min-w-[36rem]",
+                  root: "jd-calendar-month",
                   headerRow: "grid grid-cols-7",
                   header: styles.monthHead(),
                   week: styles.monthWeek(),
                   day: styles.monthDay(),
-                  dayInPeriod: ui.text.body,
-                  dayOutsidePeriod: ui.text.meta,
+                  dayInPeriod: contentPresentation.itemSummary,
+                  dayOutsidePeriod: contentPresentation.caption,
                   dayOverflow: "z-20",
-                  dayNumber: classes(styles.dayNumber(), ui.text.body),
+                  dayNumber: classes(styles.dayNumber(), contentPresentation.itemSummary),
                   today: styles.todayMark(),
                   laneSpacer: "shrink-0",
-                  moreDisclosure: classes(styles.monthMore(), ui.text.meta),
-                  overflow: classes(styles.monthOverflow(), ui.surface.overlay),
-                  overflowDate: classes("px-1 text-left", styles.quietAction(), ui.text.body),
+                  moreDisclosure: classes(styles.monthMore(), contentPresentation.caption),
+                  overflow: classes(styles.monthOverflow(), floatingSurface.panel),
+                  overflowDate: classes("px-1 text-left", contentPresentation.itemSummary),
                   eventContainer: "group/event relative z-10 min-w-0 w-full",
                   allDayEvent: styles.monthAllDay(),
                   timedEvent: styles.monthTimed(),
-                  eventTitle: classes("min-w-0 truncate", ui.text.meta),
+                  eventTitle: classes("min-w-0 truncate", contentPresentation.caption),
                   eventTime: styles.eventTime(),
                   resizeEnd: styles.resizeEdgeVertical(),
                 }}
@@ -565,7 +564,7 @@ export function CalendarDemoRoute(props: {
               />
             ) : null}
             {view === "year" ? (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+              <div className="grid grid-cols-2 gap-group sm:grid-cols-3 md:grid-cols-4">
                 {yearMonths.map((monthStart, index) => (
                   <section
                     key={monthStart}
@@ -574,7 +573,7 @@ export function CalendarDemoRoute(props: {
                   >
                     <Command
                       affordance={calendarControlAffordance("yearMonth")}
-                      className={classes("text-left", styles.quietAction(), ui.text.body)}
+                      className={classes("text-left", contentPresentation.itemSummary)}
                       onClick={() => setLocation("month", monthStart)}
                     >
                       {months[index]}
@@ -587,12 +586,12 @@ export function CalendarDemoRoute(props: {
                       today={today}
                       rowClassName="grid grid-cols-7"
                       columnHeaders={weekdays.map((name) => ({ label: name, content: name.slice(0, 1) }))}
-                      columnHeaderClassName={classes("text-center", ui.text.meta)}
+                      columnHeaderClassName={classes("text-center", contentPresentation.caption)}
                       cellAffordance={calendarControlAffordance("yearDate")}
                       isDateSelected={() => false}
                       getCellClassName={({ cell, today: isToday }) => classes(
                         styles.yearDay(),
-                        cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
+                        cell.inVisiblePeriod ? contentPresentation.itemSummary : contentPresentation.caption,
                         isToday ? styles.todayMark() : null,
                         yearBusyDates?.has(cell.date) && !isToday && styles.yearDayBusy(),
                       )}

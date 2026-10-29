@@ -27,10 +27,17 @@ module.exports = {
         "line-action-primary": "rgb(var(--color-border-action-primary) / <alpha-value>)",
       },
       spacing: {
+        related: "var(--space-related)",
+        group: "var(--space-group)",
+        region: "var(--space-region)",
         "layout-page": "var(--space-layout-page-inline)",
         "layout-page-wide": "var(--space-layout-page-inline-wide)",
       },
+      fontFamily: { sans: ["var(--font-family-ui)"], mono: ["var(--font-family-code)"] },
       fontSize: {
+        xs: ["var(--font-size-caption)", "var(--line-height-caption)"],
+        sm: ["var(--font-size-body)", "var(--line-height-body)"],
+        base: ["var(--font-size-title)", "var(--line-height-title)"],
         "page-title": ["var(--font-size-page-title)", "var(--line-height-page-title)"],
         overline: "var(--font-size-overline)",
         code: ["var(--font-size-code)", "var(--line-height-code)"],

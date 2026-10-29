@@ -1,0 +1,6 @@
+import { expect,it } from "vitest";
+import { readFileSync } from "node:fs";
+import ts from "typescript";
+import { uiComponentCatalog } from "../src/ui-component.js";
+const aliases: Readonly<Record<string,string>>={Command:"button",Choice:"select",Check:"checkbox",Field:"input",DisclosureButton:"disclosure",FileDropRegion:"file-drop",HtmlDateField:"date-field",CalendarMonthGrid:"calendar-month",CalendarTimeGrid:"calendar-time",CalendarEventInspector:"calendar-event-inspector"};
+it("all public visual exports are registered rather than silently omitted",()=>{const registered=new Set<string>(uiComponentCatalog.map(entry=>entry.id));for(const pkg of ["json-document-ui-primitives-react","json-document-calendar","json-document-animation-react"]){const path=new URL(`../../${pkg}/src/index.ts`,import.meta.url);const source=ts.createSourceFile(path.pathname,readFileSync(path,"utf8"),ts.ScriptTarget.Latest,true);for(const node of source.statements){if(!ts.isExportDeclaration(node)||node.isTypeOnly||!node.exportClause||!ts.isNamedExports(node.exportClause))continue;for(const element of node.exportClause.elements){const name=element.name.text;if(element.isTypeOnly||!/^([A-Z])/.test(name))continue;const id=aliases[name]??name.replace(/([a-z0-9])([A-Z])/g,"$1-$2").toLowerCase();expect(registered.has(id),`${pkg}.${name} must have a registered adapter`).toBe(true);}}}});

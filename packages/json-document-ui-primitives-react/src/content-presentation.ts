@@ -1,0 +1,20 @@
+/** Content hierarchy for composed pages; control typography is a separate role. Import design-system.css once. */
+export const contentPresentation = {
+  title: "json-document-content-title",
+  heading: "json-document-content-heading",
+  itemTitle: "json-document-content-item-title",
+  itemSummary: "json-document-content-item-summary",
+  value: "json-document-content-value",
+  body: "json-document-content-body",
+  caption: "json-document-content-caption",
+  group: "json-document-content-group",
+  list: "json-document-content-list",
+  table: "json-document-content-table",
+  tableViewport: "json-document-content-table-viewport",
+  tableHead: "json-document-content-table-head",
+  tableCell: "json-document-content-table-cell",
+  quote: "json-document-content-quote",
+  image: "json-document-content-image",
+  focus: "json-document-content-focus",
+  divider: "json-document-content-divider",
+} as const;

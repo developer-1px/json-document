@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState } from "react";
 import {
   createSheetEditor,
@@ -13,7 +14,7 @@ import {
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import {
   editingCommandFromWebKeyboardStroke,
   applyAffordance,
@@ -88,12 +89,12 @@ export function GridWidgetRoute() {
           aria-label="Sheet cells"
           {...activeDescendantContainerProps(focus === null ? null : gridCellId(focus.rowId, focus.columnId))}
           onKeyDown={editing.getKeyDownHandler()}
-          className={classes("w-full", ui.surface.table, ui.state.focus)}
+          className={classes("w-full", contentPresentation.table, contentPresentation.focus)}
         >
           <thead>
             <tr>
               {document.columns.map((column) => (
-                <th key={column.id} scope="col" className={classes("px-3 py-2 text-left", ui.surface.gridHead, ui.text.meta)}>
+                <th key={column.id} scope="col" className={classes("px-related py-related text-left", contentPresentation.tableHead, contentPresentation.caption)}>
                   {column.label}
                 </th>
               ))}
@@ -108,7 +109,7 @@ export function GridWidgetRoute() {
                   return <SelectableItem
                     as="td"
                     key={column.id}
-                    className={classes("px-3 py-2", ui.surface.gridCell, ui.text.body)}
+                    className={classes("px-related py-related", contentPresentation.tableCell, contentPresentation.itemSummary)}
                     {...webGridCellAddressProps(point)}
                     {...editingItemProps(cell)}
                     {...activeDescendantItemProps(gridCellId(row.id, column.id))}

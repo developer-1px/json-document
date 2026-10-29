@@ -1,5 +1,6 @@
 import type { DocumentObject, ObjectDocument } from "./object-model.js";
 import { layoutObjectText, type ObjectTextMeasurer } from "./object-text-layout.js";
+import { uiBuilderComponentChildIds, uiComponentDocumentType, type UIComponentObject } from "./ui-component.js";
 
 export interface ObjectContainerPolicy { readonly overlapThreshold: number }
 export type ObjectContainerLayout = {
@@ -20,7 +21,12 @@ export function objectSubtreeIds(objects: ReadonlyArray<DocumentObject>, ids: Re
   let changed = true;
   while (changed) {
     changed = false;
-    for (const object of objects) if (typeof object.parentId === "string" && result.has(object.parentId) && !result.has(object.id)) { result.add(object.id); changed = true; }
+    for (const object of objects) {
+      if (typeof object.parentId === "string" && result.has(object.parentId) && !result.has(object.id)) { result.add(object.id); changed = true; }
+      if (result.has(object.id) && object.kind === "embedded-document" && object.documentType === uiComponentDocumentType) {
+        for (const id of uiBuilderComponentChildIds(object as UIComponentObject)) if (!result.has(id) && objects.some(child => child.id === id)) {result.add(id); changed = true;}
+      }
+    }
   }
   return [...result];
 }

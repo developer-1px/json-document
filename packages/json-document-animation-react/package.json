@@ -4,7 +4,9 @@
   "description": "Canonical wait-animation visuals for json-document Hosts: shimmer, skeleton, caret, dots, orb, and sweep.",
   "type": "module",
   "license": "MIT",
-  "sideEffects": ["*.css"],
+  "sideEffects": [
+    "*.css"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {
@@ -12,10 +14,23 @@
     "url": "git+https://github.com/developer-1px/json-document.git",
     "directory": "packages/json-document-animation-react"
   },
-  "publishConfig": { "access": "public", "provenance": true, "tag": "next" },
-  "files": ["dist", "!dist/.tsbuildinfo", "styles.css", "README.md", "LICENSE"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "next"
+  },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo",
+    "styles.css",
+    "README.md",
+    "LICENSE"
+  ],
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./styles.css": "./styles.css"
   },
   "scripts": {
@@ -26,7 +41,10 @@
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run typecheck && npm test && npm run build"
   },
-  "peerDependencies": { "react": "^18.0.0 || ^19.0.0" },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "@interactive-os/json-document-ui-primitives-react": ">=0.1.0-rc.0 <1"
+  },
   "devDependencies": {
     "@testing-library/react": "^16.3.2",
     "@vitejs/plugin-react": "^5.2.0",
@@ -36,6 +54,7 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "typescript": "^5.0.0",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.7",
+    "@interactive-os/json-document-ui-primitives-react": "*"
   }
 }

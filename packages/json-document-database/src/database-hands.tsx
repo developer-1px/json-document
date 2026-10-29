@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import { ArrowLeft, ArrowRight, ArrowUpDown, Check, Columns3, ListFilter, Minus, Plus, RefreshCw, X } from "lucide-react";
 import { databaseValueFromText } from "@interactive-os/json-document-editing";
-import { Check as CheckControl, Command, ToolbarGroup } from "@interactive-os/json-document-ui-primitives-react";
+import { Check as CheckControl, Command, ToolbarGroup, Search, ProductInspector, fieldPresentation, contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { DatabaseHand, type DatabaseHandCellRenderProps } from "./database-hand.js";
 import { DatabaseProvider, useDatabase, type DatabaseProviderProps } from "./database-context.js";
 import { DatabasePropertyControl } from "./database-property-control.js";
@@ -64,7 +64,7 @@ export function DatabaseViewToolbar() {
     <ToolbarGroup className="jd-database__toolbar-group" label="Database view">
       <label>
         <span className="jd-database__sr-only">Active view</span>
-        <select
+        <select className={fieldPresentation.standard}
           aria-label="Active view"
           value={view.id}
           onChange={(event) => {
@@ -75,13 +75,9 @@ export function DatabaseViewToolbar() {
           {database.views.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
         </select>
       </label>
-      <input
-        type="search"
-        aria-label="Search records"
-        placeholder="Search records…"
-        value={view.projection.search}
-        disabled={!canConfigure}
-        onChange={(event) => database.setView({ ...view, projection: { ...view.projection, search: event.currentTarget.value } })}
+      <Search label="Search records" placeholder="Search records…" query={view.projection.search}
+        onQueryChange={(search) => database.setView({...view, projection: {...view.projection, search}})}
+        inputProps={{disabled: !canConfigure}}
       />
       <DatabaseViewControls projection={view.projection} properties={properties} disabled={!canConfigure} onChange={(next) => database.setView({ ...view, projection: next })} />
       {database.capabilities.saveView && view.ownership !== "locked" ? (
@@ -116,15 +112,10 @@ export function DatabaseRecordPanel() {
   const row = database.activeRow;
   const properties = resourceProperties(database.resource.schema).filter((property) => property.id !== "id");
   const [draft, setDraft] = useState<Record<string, unknown>>({});
-  const restoreFocus = useRef<HTMLElement | null>(null);
   const identity = row === null ? null : database.resource.getRowId(row);
   useEffect(() => {
     if (row !== null || database.isCreating) {
-      restoreFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       setDraft(database.isCreating ? database.resource.createDraft() as Record<string, unknown> : {});
-    } else {
-      restoreFocus.current?.focus();
-      restoreFocus.current = null;
     }
   }, [database.isCreating, database.resource, row]);
   if (row === null && !database.isCreating) return null;
@@ -137,13 +128,7 @@ export function DatabaseRecordPanel() {
   }
 
   return (
-      <section className="jd-database__record" role="dialog" aria-labelledby="jd-database-record-title" onKeyDown={(event) => {
-        if (event.key === "Escape") database.closeRecord();
-      }}>
-        <header>
-          <div><small>{identity === null ? "Create" : "Record detail"}</small><h2 id="jd-database-record-title">{identity ?? "New record"}</h2></div>
-          <Command type="button" autoFocus label="Close record" onClick={database.closeRecord}><X aria-hidden="true" size={16} /></Command>
-        </header>
+      <ProductInspector className="jd-database__record" role="dialog" aria-label={identity ?? "New record"} heading={identity ?? "New record"} onClose={database.closeRecord} closeLabel="Close record">
         <form onSubmit={submit}>
           {properties.map((property) => (
             <label key={property.id}>
@@ -152,9 +137,9 @@ export function DatabaseRecordPanel() {
               {database.status.fieldErrors?.[property.id] ? <small role="alert">{database.status.fieldErrors[property.id]}</small> : null}
             </label>
           ))}
-          <footer><Command type="button" onClick={database.closeRecord}>Cancel</Command><Command type="submit" data-kind="primary">Save record</Command></footer>
+          <footer><Command type="button" onClick={database.closeRecord}>Cancel</Command><Command type="submit" kind="primary">Save record</Command></footer>
         </form>
-      </section>
+      </ProductInspector>
   );
 }
 
@@ -180,7 +165,7 @@ export function DatabaseWorkspace<Row extends DatabaseRow, Create = Partial<Row>
 export function DatabasePagination() {
   const database = useDatabase();
   if (!database.nextCursor) return null;
-  return <Command className="jd-database__more" type="button" onClick={() => void database.loadMore()}>Load more</Command>;
+  return <div className="jd-database__pagination"><Command className="jd-database__more" type="button" onClick={() => void database.loadMore()}>Load more</Command></div>;
 }
 
 function resourceProperties(schema: Parameters<typeof databaseDocumentFromZod>[0]) {

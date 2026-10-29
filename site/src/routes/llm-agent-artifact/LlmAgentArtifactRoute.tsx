@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { EventType, type AGUIEvent } from "@ag-ui/core";
 import { ArrowUp, Plus, Square } from "lucide-react";
-import { Command, Field } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Field, SelectableItem, EmptyState, InlineAlert, ChatActivity, floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
 import { listLlmAgentSessions, readLlmAgentSession, streamLlmAgentTurn, type LlmAgentMessage, type LlmAgentSession } from "../../app/llm-agent-api";
 import { createA2uiStreamingDocumentEngine, type A2uiStreamingDocument } from "@interactive-os/json-document-a2ui";
 import { A2UI_PROJECTION_ERROR_TEXT, A2uiSurface, a2uiCatalogPolicy, createAgUiA2uiAdapter, type AgUiA2uiAdapter } from "../../app/a2ui-streaming-document";
@@ -160,24 +160,24 @@ export function LlmAgentArtifactRoute() {
       <aside className="llm-agent-sessions" aria-label="채팅 목록">
         <div className="llm-agent-sessions-header"><strong>채팅</strong><Command label="새 채팅" onClick={() => selectSession(null)}><Plus aria-hidden="true" size={16} /></Command></div>
         <nav aria-label="저장된 채팅">
-          {sessions.map((session) => <Command key={session.id} className={session.id === sessionId ? "active" : undefined} onClick={() => selectSession(session.id)}>{session.preview || "새 채팅"}</Command>)}
+          {sessions.map((session) => <SelectableItem type="button" presentation="row" selected={session.id === sessionId} key={session.id} onClick={() => selectSession(session.id)}>{session.preview || "새 채팅"}</SelectableItem>)}
         </nav>
       </aside>
       <div className="llm-agent-main">
       <header className="llm-agent-app-header"><strong>LLM Agent</strong><span>{sessionId ? sessionId.slice(0, 8) : "Local Codex"}</span></header>
       <section className="llm-agent-chat" aria-busy={historyPending} aria-label="대화" ref={chatRef}>
-        {historyPending ? <p className="llm-agent-state">대화를 불러오는 중…</p> : !document.surfaces[CHAT_SURFACE_ID] ? <div className="llm-agent-empty"><h1>무엇을 도와드릴까요?</h1><p>로컬 Codex와 대화를 시작하세요.</p></div> : <>
+        {historyPending ? <ChatActivity label="대화를 불러오는 중…"/> : !document.surfaces[CHAT_SURFACE_ID] ? <div className="llm-agent-empty"><EmptyState title="무엇을 도와드릴까요?" description="로컬 Codex와 대화를 시작하세요."/></div> : <>
           <A2uiSurface document={document} markdown={MarkdownContent} surfaceId={CHAT_SURFACE_ID} />
           {Object.keys(document.surfaces).filter((id) => id !== CHAT_SURFACE_ID).map((id) => <A2uiSurface document={document} key={id} markdown={MarkdownContent} surfaceId={id} />)}
         </>}
       </section>
-      <form className="llm-agent-input" onSubmit={submit}>
-        <Field controlRef={inputRef} multiline label="메시지" placeholder="메시지를 입력하세요" value={input} onValueChange={setInput} onKeyDown={handleKeyDown} rows={1} />
+      <form className={`${floatingSurface.control} llm-agent-input`} onSubmit={submit}>
+        <Field controlRef={inputRef} multiline presentation="seamless" label="메시지" placeholder="메시지를 입력하세요" value={input} onValueChange={setInput} onKeyDown={handleKeyDown} rows={1} />
         {pending
           ? <Command label="중단" onClick={stopTurn} type="button"><Square aria-hidden="true" fill="currentColor" size={14} /></Command>
           : <Command kind="primary" label="전송" disabled={!input.trim() || historyPending} type="submit"><ArrowUp aria-hidden="true" size={18} /></Command>}
       </form>
-      {error ? <p className="llm-agent-error" role="alert">{error}</p> : null}
+      {error ? <div className="llm-agent-error"><InlineAlert tone="error" title="요청을 완료하지 못했습니다.">{error}</InlineAlert></div> : null}
       </div>
     </div>
   );

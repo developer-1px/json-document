@@ -1,3 +1,5 @@
+import { fieldPresentation } from "@interactive-os/json-document-ui-primitives-react";
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useState, type FocusEvent, type ReactNode } from "react";
 import { ArrowDownWideNarrow, ClipboardPaste, Columns3, Copy, EyeOff, ListFilter, PaintBucket, Redo2, Scissors, Undo2 } from "lucide-react";
 import {
@@ -28,7 +30,7 @@ import {
 import { CodeBlock } from "../../../shared/ui/code-block";
 import { Inspector } from "../../../shared/ui/inspector";
 import { Command, SelectableItem, Toggle, Toolbar, ToolbarSeparator } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../../shared/ui/styles";
+import { classes } from "../../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialSheet: SheetDocument = {
@@ -129,9 +131,9 @@ export function TanStackTableConnectorLab() {
     <section
       aria-label="TanStack Table editing"
       {...clipboardSurface}
-      className={classes("p-4", ui.surface.raised)}
+      className={classes("p-group")}
     >
-      <Toolbar className="mb-3 gap-2" label="TanStack view and editing actions">
+      <Toolbar className="mb-related gap-related" label="TanStack view and editing actions">
         <Control label="Ready rows" icon={<ListFilter aria-hidden="true" size={16} />} active={columnFilters.length > 0} onClick={() => setColumnFilters((current) => current.length === 0 ? [{ id: "status", value: "Ready" }] : [])} />
         <Control label="Score descending" icon={<ArrowDownWideNarrow aria-hidden="true" size={16} />} active={sorting.length > 0} onClick={() => setSorting((current) => current.length === 0 ? [{ id: "score", desc: true }] : [])} />
         <Control label="Score first" icon={<Columns3 aria-hidden="true" size={16} />} active={columnOrder[0] === "score"} onClick={() => setColumnOrder((current) => current[0] === "score" ? ["name", "status", "score"] : ["score", "name", "status"])} />
@@ -148,19 +150,19 @@ export function TanStackTableConnectorLab() {
         <Control label="Redo" icon={<Redo2 aria-hidden="true" size={16} />} disabled={commands.redo.disabled} onClick={() => run(binding.redo, "Redone")} />
       </Toolbar>
 
-      <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>
+      <div className={classes("mb-related flex flex-wrap justify-between gap-related", contentPresentation.caption)}>
         <output aria-live="polite">{announcement}</output>
         <output data-testid="tanstack-topology">{JSON.stringify(binding.topology(table))}</output>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-group">
         <div className="overflow-auto">
-          <table role="grid" aria-label="TanStack project sheet" aria-multiselectable="true" className={classes("w-full min-w-[30rem]", ui.surface.table, ui.text.body)}>
+          <table role="grid" aria-label="TanStack project sheet" aria-multiselectable="true" className={classes("w-full min-w-[30rem]", contentPresentation.table, contentPresentation.itemSummary)}>
             <thead>
               {table.getHeaderGroups().map((group) => (
                 <tr key={group.id}>
                   {group.headers.map((header) => (
-                    <th key={header.id} scope="col" className={classes("px-3 py-2 text-left", ui.surface.gridHead, ui.text.heading)}>
+                    <th key={header.id} scope="col" className={classes("px-related py-related text-left", contentPresentation.tableHead, contentPresentation.itemTitle)}>
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
@@ -186,7 +188,7 @@ export function TanStackTableConnectorLab() {
                           role: "gridcell",
                           selected: item.getIsSelected(),
                         })}
-                        className={classes("p-0", ui.surface.gridCell)}
+                        className={classes("p-0", contentPresentation.tableCell)}
                         {...editingItemProps(item)}
                       >
                           <input
@@ -194,7 +196,7 @@ export function TanStackTableConnectorLab() {
                             defaultValue={jsonCellText(value)}
                             key={jsonCellText(value)}
                             onBlur={(event) => commitCell(event, row.id, cell.column.id, value)}
-                            className={classes("w-full min-w-0", ui.field.seamless)}
+                            className={classes("w-full min-w-0", fieldPresentation.seamless)}
                           />
                       </SelectableItem>
                     );
@@ -203,7 +205,7 @@ export function TanStackTableConnectorLab() {
               ))}
             </tbody>
           </table>
-          <CodeBlock className="mt-3" language="text" size="compact" source={clipboard?.text ?? "Clipboard is empty"} testId="tanstack-clipboard" />
+          <CodeBlock className="mt-related" language="text" size="compact" source={clipboard?.text ?? "Clipboard is empty"} testId="tanstack-clipboard" />
         </div>
 
         <Inspector label="Inspect TanStack Table state" items={[

@@ -1,9 +1,15 @@
+import {createJSONDocument} from "@interactive-os/json-document";
+import {createTextEditor} from "@interactive-os/json-document-editing";
+import {MarkdownEditingSurface} from "@interactive-os/json-document-markdown-react";
+import { ToolbarSeparator } from "@interactive-os/json-document-ui-primitives-react";
+import { fieldPresentation } from "@interactive-os/json-document-ui-primitives-react";
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useState } from "react";
 import { Undo2 } from "lucide-react";
 import { Command, Choice, contentInteractionAttributes, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { artifactViewerRecipe } from "./artifact-viewer-styles";
 
 type ArtifactKind = "md" | "ppt" | "sheet";
@@ -30,9 +36,9 @@ export function ArtifactViewerRoute() {
         toolbar={(
           <>
             <Choice presentation="inline" label="Artifact 선택" value={active} options={artifacts.map((candidate) => ({ id: candidate.kind, label: candidate.label }))} onValueChange={setActive} />
-            <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <span className={ui.text.meta}>{artifact.name} · mock artifact</span>
-            <Command label="Undo" className="ml-auto"><Undo2 aria-hidden="true" size={16} /></Command>
+            <ToolbarSeparator />
+            <span className={contentPresentation.caption}>{artifact.name} · mock artifact</span>
+            <Command label="Undo" disabled><Undo2 aria-hidden="true" size={16} /></Command>
           </>
         )}
         inspector={<Composer artifactName={artifact.name} />}
@@ -44,7 +50,7 @@ export function ArtifactViewerRoute() {
       </ProductShell>
 
       <section className={styles.futureMap()} aria-labelledby="viewer-model-title">
-        <h2 id="viewer-model-title" className={ui.text.section}>목표와 완료 조건 · TBD</h2>
+        <h2 id="viewer-model-title" className={contentPresentation.itemTitle}>목표와 완료 조건 · TBD</h2>
         <ol>
           <li><strong>현재</strong><span>한 Host chrome에서 콘텐츠 모양을 전환하는 시각 가설을 확인합니다.</span></li>
           <li><strong>목표</strong><span>Document Type과 Hands를 연결해 콘텐츠를 편집하고 선택·History를 복원합니다.</span></li>
@@ -63,9 +69,9 @@ function Composer({ artifactName }: { readonly artifactName: string }) {
         <span>@Agent</span>
         <span>#{artifactName}</span>
       </div>
-      <Field label="Agent에게 이어서 요청" value={request} onValueChange={setRequest} className={ui.field.control} placeholder="이 artifact에서 무엇을 바꿀까요?" />
-      <Command kind="primary">Send</Command>
-      <p className={classes("col-span-full m-0", ui.text.meta)}>
+      <Field label="Agent에게 이어서 요청" value={request} onValueChange={setRequest} className={fieldPresentation.standard} placeholder="이 artifact에서 무엇을 바꿀까요?" />
+      <Command kind="primary" disabled>Send</Command>
+      <p className={classes("col-span-full m-0", contentPresentation.caption)}>
         Composer와 Mention은 agent에게 지시와 artifact context를 건네는 Hands입니다.
       </p>
     </section>
@@ -73,21 +79,16 @@ function Composer({ artifactName }: { readonly artifactName: string }) {
 }
 
 function MarkdownArtifact() {
-  return (
-    <article className={styles.document()} aria-label="Markdown artifact mock">
-      <p className={ui.text.label}>LAUNCH BRIEF · AUGUST 2026</p>
-      <h2 contentEditable suppressContentEditableWarning>Artifacts should stay useful after generation.</h2>
-      <p contentEditable suppressContentEditableWarning>
-        The agent made the first draft. Keep writing—this is a document, not a frozen answer.
-      </p>
-      <h3 className={ui.text.heading}>What changes</h3>
-      <ul>
-        <li>One shared artifact for the person and the agent</li>
-        <li>Familiar editing hands instead of a bespoke product UI</li>
-        <li>Every accepted change goes through the same Core</li>
-      </ul>
-    </article>
-  );
+  const [editor] = useState(() => createTextEditor(createJSONDocument({content: `## Artifacts should stay useful after generation.
+
+The agent made the first draft. Keep writing—this is a document, not a frozen answer.
+
+### What changes
+
+- One shared artifact for the person and the agent
+- Familiar editing hands instead of a bespoke product UI
+- Every accepted change goes through the same Core`}), "/content"));
+  return <MarkdownEditingSurface editor={editor} className={styles.document()} aria-label="Markdown artifact"/>;
 }
 
 function PresentationArtifact() {
@@ -95,14 +96,14 @@ function PresentationArtifact() {
     <div className={styles.presentation()} aria-label="Presentation artifact mock">
       <div className={styles.filmstrip()} aria-label="Slide filmstrip">
         {[1, 2, 3].map((number) => (
-          <SelectableItem key={number} selected={number === 2} className={ui.surface.selectableBlock}>
+          <SelectableItem presentation="row" key={number} selected={number === 2} className={contentPresentation.itemSummary}>
             {number}
           </SelectableItem>
         ))}
       </div>
       <article className={styles.slide()}>
-        <p className={ui.text.label}>02 / 03 · FROM OUTPUT TO TOOL</p>
-        <h2>Generation is only the first move.</h2>
+        <header className="grid content-start gap-related"><p className={contentPresentation.caption}>02 / 03 · FROM OUTPUT TO TOOL</p>
+        <h2>Generation is only the first move.</h2></header>
         <div>
           <span>Agent creates</span><span>Human shapes</span><span>Together, it ships</span>
         </div>
@@ -121,13 +122,13 @@ function SheetArtifact() {
   ];
   return (
     <div className={styles.sheet()} aria-label="Spreadsheet artifact mock">
-      <p className={classes("m-0 px-2 py-1", ui.text.meta)}>fx&nbsp;&nbsp;=COUNTIF(C2:C5, “Ready”)</p>
+      <p className={classes("m-0 px-related py-1", contentPresentation.caption)}>fx&nbsp;&nbsp;=COUNTIF(C2:C5, “Ready”)</p>
       <div className={styles.grid()} role="grid" aria-label="Launch plan">
         {cells.flatMap((row, rowIndex) => row.map((cell, columnIndex) => (
           <div
             key={`${rowIndex}-${columnIndex}`}
             role={rowIndex === 0 ? "columnheader" : "gridcell"}
-            className={classes(rowIndex === 0 ? ui.surface.gridHead : ui.surface.gridCell, styles.cell())}
+            className={classes(rowIndex === 0 ? contentPresentation.tableHead : contentPresentation.tableCell, styles.cell())}
             {...(rowIndex === 0 ? {} : contentInteractionAttributes({ role: "content", selected: rowIndex === 2 && columnIndex === 2 }))}
           >{cell}</div>
         )))}

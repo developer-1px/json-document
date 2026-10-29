@@ -38,7 +38,7 @@ export function ChatComposer<Model extends string, Suggestion extends ComposerHo
           renderExtension={(node) => composer.renderReference(node)}
           data-ui-chat-composer-input=""
         />
-        <Command type="submit" preserveFocus aria-label={submitLabel} disabled={!composer.canSubmit}
+        <Command type="submit" preserveFocus label={submitLabel} disabled={!composer.canSubmit}
           aria-busy={composer.isSubmitting} data-ui-chat-composer-send="">
           <ArrowUp aria-hidden="true" size={18} />
         </Command>

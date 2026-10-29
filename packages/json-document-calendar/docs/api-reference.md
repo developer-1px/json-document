@@ -570,7 +570,7 @@ interface DateGridProps {
 ## `DatePicker`
 
 ```ts
-DatePicker(props: { readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; }): ReactNode
+DatePicker(props: { readonly label: string; readonly chooseLabel?: string; readonly value: string; readonly defaultVisibleDate?: string; readonly onValueChange: (value: string) => void; }): ReactNode
 ```
 ## `DateRangePicker`
 
@@ -661,3 +661,25 @@ type VisiblePeriodLabelOptions = {
   readonly dateStyle?: "iso" | "named";
 };
 ```
+
+## calendarPresentation
+
+월 일정·시간 일정·일정 상세의 canonical classNames를 제공한다. `calendar-presentation.css`를 함께 소비한다. UI Builder 전체 카탈로그 Usage에서 공개 calendar API와 함께 사용한다.
+
+## Calendar presentation styles
+
+Import `@interactive-os/json-document-calendar/date-controls.css` for the public
+date selection controls. Dates are square and native fields use the shared36px
+control height. [Date control Usage](/demo/ui-primitives#design-system-date-and-time).
+
+Import `@interactive-os/json-document-calendar/calendar-presentation.css` with
+`calendarPresentation` for occurrence grids. Month days are1:1; the minimum
+month width preserves the date, three event lanes and more disclosure.
+[Month Usage](/demo/calendar) uses the same geometry.
+
+
+calendarPresentation의 month/time 일정 표현은 동일한 정본 occurrence CSS를 사용합니다.
+Host는 위치·기간·표시할 이벤트만 선택하고 일정의 색·곡률·본문 타이포그래피를
+재구현하지 않습니다. source 색은 data-calendar-color, 임시 일정은 data-preview로 전달합니다.
+일정의 드래그 맥락과 resize handle의 표시 조건은 calendar-presentation.css가,
+handle 자체의 모양과 focus는 UI Primitives가 소유합니다.

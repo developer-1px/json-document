@@ -48,6 +48,9 @@ export async function streamLlmAgentTurn(options: {
       forwardedProps: options.mode ? { mode: options.mode } : {},
     } satisfies RunAgentInput),
     signal: options.signal,
+  }).catch(cause => {
+    if (options.signal?.aborted) throw cause;
+    throw new Error("AI에 연결하지 못했습니다. 연결 상태를 확인한 뒤 다시 시도하세요.");
   });
   if (!response.ok || !response.body) throw new Error(await response.text());
   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();

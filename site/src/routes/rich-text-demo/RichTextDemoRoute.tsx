@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useState } from "react";
 import { CornerDownLeft, Redo2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
@@ -17,7 +18,7 @@ import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { Command, SelectableItem, Toolbar, ToolbarSpacer } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { richTextRecipe } from "./rich-text-styles";
 import { collectRichTextDemoNodeIds, findRichTextDemoTextNode } from "./richTextDemoQuery";
 import { useRichTextDemoCommands } from "./useRichTextDemoCommands";
@@ -165,13 +166,13 @@ export function RichTextDemoRoute() {
         label="Draft reference implementation"
         title="Rich Text Lab"
         illustration="patch"
-        aside={<div className={ui.text.meta}>revision {snapshot.revision} · {commands.undo.disabled ? "clean" : "undo ready"}</div>}
+        aside={<div className={contentPresentation.caption}>revision {snapshot.revision} · {commands.undo.disabled ? "clean" : "undo ready"}</div>}
       >
         DOM은 입력 경계일 뿐입니다. 아래 편집은 Rich Text intent, Selection mapping, EditingSession과 atomic JSON Patch를 차례로 통과합니다.
       </PageHeader>
 
     )}>
-      <Toolbar className={classes("mb-3 gap-2 p-2", ui.surface.workspace)} label="Rich Text history">
+      <Toolbar className={classes("gap-related p-related")} label="Rich Text history">
         <Command preserveFocus kind="primary" onClick={applySampleIntent}>Apply sample intent</Command>
         <Command preserveFocus label="Undo" onClick={() => runHistory("undo")} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></Command>
         <Command preserveFocus label="Redo" onClick={() => runHistory("redo")} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></Command>
@@ -181,30 +182,30 @@ export function RichTextDemoRoute() {
           collaboration.local.replica.ingest(collaboration.remote.replica.exportBundle());
         }}>원격 변경 수신</Command>}
         <ToolbarSpacer />
-        <span className={ui.text.meta} aria-live="polite">last: {lastAction}</span>
+        <span className={contentPresentation.caption} aria-live="polite">last: {lastAction}</span>
       </Toolbar>
 
-      <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="group" aria-label="Official Rich Text intent proofs">
-        <span className={ui.text.meta}>Schema-aware intent proofs</span>
+      <div className={classes("flex flex-wrap items-center gap-related p-related")} role="group" aria-label="Official Rich Text intent proofs">
+        <span className={contentPresentation.caption}>Schema-aware intent proofs</span>
         <Command preserveFocus label="Toggle strong" onClick={toggleStrong}><strong>B</strong></Command>
         <Command preserveFocus label="Set heading" onClick={setHeading}>H</Command>
         <Command preserveFocus label="Insert hard break" onClick={insertHardBreak}><CornerDownLeft aria-hidden="true" size={16} /></Command>
         <Command preserveFocus label="Set code attrs" onClick={updateCodeAttrs}>{`{}`}</Command>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
-        <section className={classes("p-4", ui.surface.raised)} aria-labelledby="rich-text-surface-label">
-          <p className={ui.text.label}>Official semantic rendering + editable DOM lease</p>
-          <h2 id="rich-text-surface-label" className={classes("mb-3 mt-1", ui.text.heading)}>Canonical document</h2>
+      <div className="grid gap-group xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
+        <section className={classes("grid content-start gap-group p-group")} aria-labelledby="rich-text-surface-label">
+          <div className="grid content-start gap-related"><p className={contentPresentation.caption}>Official semantic rendering + editable DOM lease</p>
+          <h2 id="rich-text-surface-label" className={contentPresentation.itemTitle}>Canonical document</h2></div>
           <RichTextEditorSurface
             editor={editor}
             onAction={onSurfaceAction}
             spellCheck={false}
             aria-label="Rich Text 편집기"
             data-testid="rich-text-editor"
-            className={classes(richTextStyles.editor(), ui.state.focus)}
+            className={classes(richTextStyles.editor(), contentPresentation.focus)}
           />
-          <ol className="mt-3 m-0 grid list-none gap-1 p-0" aria-label="Rich Text blocks">
+          <ol className="m-0 grid list-none gap-related p-0" aria-label="Rich Text blocks">
             {(snapshot.value as RichTextDocument).content.map((block) => {
               const ids = collectRichTextDemoNodeIds(block);
               const selected = ids.some((id) => editing.getItem(id).getIsSelected());
@@ -214,11 +215,11 @@ export function RichTextDemoRoute() {
                 .find((value) => value !== null) ?? null;
               return (
                 <li key={block.id}>
-                  <SelectableItem
+                  <SelectableItem presentation="row"
                     type="button"
                     selected={selected}
                     focus={focused}
-                    className={classes("w-full px-3 py-2", ui.surface.selectableBlock)}
+                    className={classes("w-full px-related py-related", contentPresentation.itemSummary)}
                     onClick={editing.getItem(block.id).getPressHandler()}
                   >
                     {block.type} · {block.id}
@@ -228,11 +229,11 @@ export function RichTextDemoRoute() {
               );
             })}
           </ol>
-          <p className={classes("mb-0 mt-3", ui.text.meta)}>
+          <p className={classes("mb-0 ", contentPresentation.caption)}>
             입력·삭제, Enter block split, IME composition, DOM Selection 복원, structured/HTML/plain Clipboard와 undo/redo가 모두 Official Rich Text intent 경로에 연결됩니다.
           </p>
-          <section className={classes("mt-3 p-3", ui.surface.inset)} aria-label="Read-only Rich Text code projection">
-            <p className={classes("mb-2 mt-0", ui.text.label)}>Read-only code projection</p>
+          <section className={classes("grid content-start gap-related p-related")} aria-label="Read-only Rich Text code projection">
+            <p className={classes("mt-0", contentPresentation.caption)}>Read-only code projection</p>
             <RichTextRenderer document={{ ...document, content: readOnlyCodeBlocks }} />
             <output className="sr-only" data-testid="rich-text-code-plain-text">
               {richTextPlainText(readOnlyCodeBlocks)}

@@ -49,6 +49,32 @@ test("all catalog components render and narrow screens keep chat usable", async 
   const chat = (await page.getByRole("complementary", { name: "UI 디자인 도우미" }).boundingBox())!;
   expect(chat.x).toBeGreaterThanOrEqual(0); expect(chat.x + chat.width).toBeLessThanOrEqual(390);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  const content = page.locator('.ui-component');
+  const commonFont = await page.getByRole('tab', {name:'화면',exact:true}).evaluate(el=>getComputedStyle(el).fontFamily);
+  expect(await content.evaluateAll(els=>els.map(el=>getComputedStyle(el).fontFamily))).toEqual(Array(12).fill(commonFont));
+  await expect(content.locator('h1').first()).toHaveCSS('font-size','40px');
+  await expect(content.locator('h2').first()).toHaveCSS('font-size','20px');
+  await expect(content.locator('strong').first()).toHaveCSS('font-size','40px');
+  await expect(content.locator('article')).toHaveCSS('border-top-width','0px');
+  await expect(content.locator('article')).toHaveCSS('box-shadow','none');
+  // A shared token change must reach both editor controls and the composed page.
+  await page.addStyleTag({content:':root { --radius-control: 18px; --font-size-body: 15px; }'});
+  const checkControls = async () => {
+    for (const kind of ['button','input','textarea','select','tabs']) {
+      const control = page.locator(`.ui-component[data-component="${kind}"]`).locator('button,input,textarea').first();
+      await expect(control).toHaveCSS('border-top-left-radius',kind === 'tabs' ? '0px' : '18px');
+      await expect(control).toHaveCSS('font-size','15px');
+    }
+  };
+  await checkControls();
+  await expect(page.getByRole('button',{name:'문서 보관',exact:true})).toHaveCSS('border-top-left-radius','18px');
+  await page.getByRole('tab',{name:'실행',exact:true}).click();
+  await checkControls();
+  // Changing control typography must not flatten the composed page's hierarchy.
+  await expect(content.locator('h1').first()).toHaveCSS('font-size','40px');
+  await expect(content.locator('h2').first()).toHaveCSS('font-size','20px');
+  await expect(content.locator('strong').first()).toHaveCSS('font-size','40px');
+  await expect(page.getByRole('button',{name:'보내기',exact:true})).toHaveCSS('border-top-left-radius','18px');
 });
 
 test("agent protocol applies a catalog batch, shares undo, and reports real failures", async ({ page }) => {

@@ -1,8 +1,11 @@
+@import "@interactive-os/json-document-ui-primitives-react/design-tokens.css";
+
 :root { color: #182230; background: #fff; font-family: ui-sans-serif, system-ui, sans-serif; }
-body { margin: 0; }
-main { width: min(1120px, calc(100% - 32px)); margin: 40px auto; }
-h1 { margin-bottom: 4px; font-size: 24px; }
-main > p { margin-top: 0; color: #667085; }
+body { margin: 0; display: grid; justify-items: center; padding: var(--space-region); }
+main { width: min(1120px, 100%); min-width: 0; display: grid; align-content: start; gap: var(--space-region); }
+main > header { display: grid; gap: var(--space-related); }
+main > header p { margin: 0; color: #667085; }
+h1 { margin: 0; font-size: 24px; }
 .company-database { --jd-db-accent: #6750d8; }
 .failure-controls { display: contents; }
 .failure-controls output { color: #667085; font-size: 12px; }

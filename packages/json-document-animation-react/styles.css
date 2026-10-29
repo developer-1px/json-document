@@ -1,5 +1,8 @@
+@import "@interactive-os/json-document-ui-primitives-react/chat-bubble.css";
+@import "@interactive-os/json-document-ui-primitives-react/design-tokens.css";
+
 [data-ui-animation] {
-  --jd-animation-dim: color-mix(in srgb, currentColor 48%, transparent);
+  --jd-animation-dim: color-mix(in srgb, currentColor 72%, transparent);
   --jd-animation-bright: color-mix(in srgb, currentColor 92%, white 18%);
   --jd-animation-muted: color-mix(in srgb, currentColor 12%, transparent);
   --jd-animation-highlight: color-mix(in srgb, currentColor 38%, white 55%);
@@ -21,8 +24,7 @@
 
 [data-ui-animation="shimmer-text"] {
   display: inline-block;
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  font-weight: var(--font-weight-normal);
   background-image:
     linear-gradient(
       90deg,
@@ -80,13 +82,13 @@
 [data-ui-skeleton="line"] {
   height: 0.85em;
   width: 100%;
-  border-radius: 6px;
+  border-radius: var(--radius-control);
 }
 
 [data-ui-skeleton="block"] {
   height: 5.5rem;
   width: 100%;
-  border-radius: 10px;
+  border-radius: var(--radius-surface);
 }
 
 [data-ui-skeleton="avatar"] {
@@ -98,7 +100,7 @@
 
 [data-ui-animation="stagger-lines"] {
   display: grid;
-  gap: 0.55rem;
+  gap: var(--space-related);
   width: 100%;
 }
 
@@ -106,7 +108,7 @@
   display: block;
   height: 0.75em;
   width: var(--width, 100%);
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   opacity: 0;
   animation: jd-animation-fade-in 0.55s ease forwards;
   animation-delay: var(--delay, 0s);
@@ -120,37 +122,14 @@
   display: inline-block;
   width: 2px;
   height: 1.05em;
-  margin-left: 0.18em;
+  margin: 0;
   vertical-align: -0.15em;
   border-radius: 1px;
   background: currentColor;
   animation: jd-animation-caret var(--jd-animation-caret) step-end infinite;
 }
 
-[data-ui-animation="wave-dots"],
-[data-ui-animation="morse"] {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4em;
-}
-
-[data-ui-animation="wave-dots"][data-ui-frame="bubble"] {
-  gap: 0.45em;
-  padding: 0.7rem 0.95rem;
-  border-radius: 1.1rem 1.1rem 1.1rem 0.35rem;
-  background: color-mix(in srgb, currentColor 8%, transparent);
-}
-
-[data-ui-animation="dot"] {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  background: currentColor;
-  animation: jd-animation-wave 1.35s ease-in-out infinite alternate;
-}
-
-[data-ui-animation="dot"]:nth-child(2) { animation-delay: 0.15s; }
-[data-ui-animation="dot"]:nth-child(3) { animation-delay: 0.3s; }
+[data-ui-animation="morse"] { display: inline-flex; align-items: center; gap: 0.4em; }
 
 [data-ui-animation="wave-grid"] {
   display: grid;
@@ -277,24 +256,25 @@
   inset: 0 auto 0 0;
   width: 38%;
   border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    currentColor 55%,
-    color-mix(in srgb, currentColor 20%, white)
-  );
+  background: currentColor;
   animation: jd-animation-bar var(--jd-animation-place) ease-in-out infinite;
 }
 
 [data-ui-animation="progress-ring"] {
   display: inline-block;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
   border-radius: 50%;
-  background: conic-gradient(currentColor 0 28%, transparent 28% 100%);
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
+  background: conic-gradient(currentColor 0 24%, var(--jd-animation-muted) 24% 100%);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1.5px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1.5px));
   animation: jd-animation-spin var(--jd-animation-spin) linear infinite;
+}
+
+[data-ui-animation="loading-bar"][data-ui-progress="determinate"] > [data-ui-animation="loading-fill"] {
+  animation: none;
+  transform: none;
 }
 
 [data-ui-animation="dual-rings"] {
@@ -453,8 +433,8 @@
     color-mix(in srgb, currentColor 48%, transparent) 320deg,
     currentColor 360deg
   );
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1.5px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1.5px));
 }
 
 [data-ui-animation="comet-tip"] {
@@ -680,10 +660,7 @@
   50% { opacity: 0; }
 }
 
-@keyframes jd-animation-wave {
-  0% { transform: translateY(0.12em); opacity: 0.35; }
-  100% { transform: translateY(-0.14em); opacity: 0.92; }
-}
+
 
 @keyframes jd-animation-cell {
   0%, 100% { transform: scaleY(0.35); opacity: 0.28; }

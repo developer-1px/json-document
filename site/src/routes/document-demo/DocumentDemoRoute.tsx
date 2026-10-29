@@ -1,3 +1,6 @@
+import { ToolbarSeparator } from "@interactive-os/json-document-ui-primitives-react";
+import { fieldPresentation } from "@interactive-os/json-document-ui-primitives-react";
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState } from "react";
 import { ArrowDown, ArrowUp, ClipboardPaste, Copy, CopyPlus, Plus, Redo2, Scissors, Trash2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
@@ -33,7 +36,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { Command, Toggle, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialDocument: BlockDocument = {
@@ -150,7 +153,7 @@ export function DocumentDemoRoute() {
           illustration="clipboard"
           title="Document"
           aside={(
-          <div className={classes("text-right", ui.text.meta)}>
+          <div className={classes("text-right", contentPresentation.caption)}>
             <div>{editor.selectedBlockIds.length} selected · revision {snapshot.revision}</div>
             <div aria-live="polite">{observation.announcement}</div>
             <div data-testid="document-click-count">click count {lastClickCount}</div>
@@ -167,12 +170,12 @@ export function DocumentDemoRoute() {
               <Command label="Duplicate" onClick={() => run(() => dispatchIntent({ type: "selection.duplicate" }), "Selection duplicated")}><CopyPlus aria-hidden="true" size={16} /></Command>
               <Command label="Move up" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: -1 }), "Selection moved up")}><ArrowUp aria-hidden="true" size={16} /></Command>
               <Command label="Move down" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: 1 }), "Selection moved down")}><ArrowDown aria-hidden="true" size={16} /></Command>
-              <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+              <ToolbarSeparator />
               <Command label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></Command>
               <Command label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></Command>
               <Command label="Paste" onClick={pasteSelection} disabled={!clipboard}><ClipboardPaste aria-hidden="true" size={16} /></Command>
               <Command label="Delete" onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></Command>
-              <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+              <ToolbarSeparator />
               <Command label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></Command>
               <Command label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></Command>
             </>
@@ -222,25 +225,25 @@ export function DocumentDemoRoute() {
                 }
                 if (!event.defaultPrevented) editing.getKeyDownHandler()(event);
               }}
-              className={ui.state.focus}
+              className={contentPresentation.focus}
             >
               {document.blocks.length === 0 ? (
-                <Command kind="primary" className="p-8" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</Command>
+                <Command kind="primary" className="p-region" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</Command>
               ) : document.blocks.map((block, index) => {
                 const item = editing.getItem(block.id);
                 return (
-                <SelectableItem
+                <SelectableItem presentation="row"
                   as="article"
                   key={block.id}
                   data-block-id={block.id}
-                  className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
+                  className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", contentPresentation.itemSummary)}
                   {...editingItemProps(item)}
                 >
                   <Toggle
                     pressed={item.getIsSelected()}
                     presentation="chip"
                     aria-label={`Select block ${index + 1}`}
-                    className={classes(ui.surface.documentIndex, ui.text.meta)}
+                    className={classes(contentPresentation.caption, contentPresentation.caption)}
                   >{index + 1}</Toggle>
                   <DocumentTextControl
                     aria-label={`Block ${index + 1} text`}
@@ -255,13 +258,13 @@ export function DocumentDemoRoute() {
                     onClickCount={setLastClickCount}
                     onTextInput={(next) => dispatchIntent({ type: "text.replace", blockId: block.id, ...next })}
                     rows={Math.max(1, Math.ceil(block.text.length / 64))}
-                    className={classes("min-h-12 resize-none", ui.field.seamless)}
+                    className={classes("min-h-12 resize-none", fieldPresentation.seamless)}
                   />
                 </SelectableItem>
                 );
               })}
             </div>
-            <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
+            <p className={classes("mb-0 mt-related", contentPresentation.caption)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
           </section>
         </ProductShell>
     </DemoPage>

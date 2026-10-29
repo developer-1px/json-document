@@ -1,3 +1,4 @@
+import { contentPresentation } from "@interactive-os/json-document-ui-primitives-react";
 import { useRef, useState, type KeyboardEvent } from "react";
 import { createOrderEditor, type OrderDocument } from "@interactive-os/json-document-editing";
 import { editingItemProps, useEditing } from "@interactive-os/json-document-react";
@@ -7,7 +8,7 @@ import {
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
 import { SelectableItem, useListbox } from "@interactive-os/json-document-ui-primitives-react";
-import { classes, ui } from "../../shared/ui/styles";
+import { classes } from "../../shared/ui/styles";
 import {
   editingCommandFromWebKeyboardStroke,
   applyAffordance,
@@ -95,12 +96,12 @@ export function ListboxWidgetRoute() {
           aria-multiselectable="true"
           tabIndex={0}
           onKeyDown={onKeyDown}
-          className={classes("m-0 grid list-none gap-1 p-0", ui.state.focus)}
+          className={classes("m-0 grid list-none gap-related p-0", contentPresentation.focus)}
         >
           {document.items.map((item) => (
-            <SelectableItem
+            <SelectableItem presentation="row"
               key={item.id}
-              className={classes("w-full text-left", ui.surface.selectableBlock)}
+              className={classes("w-full text-left", contentPresentation.itemSummary)}
               {...editingItemProps(editing.getItem(item.id))}
               {...listbox.optionProps({ id: item.id, textValue: item.label })}
               {...projectWebWidgetState({

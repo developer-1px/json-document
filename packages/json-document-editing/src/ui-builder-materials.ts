@@ -1,3 +1,5 @@
+import { assertUIBuilderComposition } from "./ui-builder-composition.js";
+import { assertUIBuilderPages, defaultUIBuilderPages, type UIBuilderPage } from "./ui-builder-pages.js";
 import { isJSONValue, type JSONValue } from "@interactive-os/json-document";
 import { assertUIBuilderDocument, assertUIFlowLayout, type UIFlowLayout, uiDesignCatalog, type UIDesignId, type CanvasDocument } from "@interactive-os/json-document-object-document";
 import type { DatabaseDocument, DatabaseProperty, DatabaseRecord } from "./database.js";
@@ -26,6 +28,8 @@ export type UIBuilderAction = Record<string, JSONValue> & {
   readonly outputs: readonly DatabaseProperty[];
 }
 export interface UIBuilderProject extends CanvasDocument {
+  readonly pages: readonly UIBuilderPage[];
+  readonly activePageId: string;
   readonly designId: UIDesignId;
   readonly flow: UIFlowLayout | null;
   readonly tables: readonly UIBuilderTable[];
@@ -62,7 +66,8 @@ function fields(value: unknown, sample: boolean): asserts value is readonly UIBu
 /** Legacy canvas-only documents acquire empty catalogs without losing objects. */
 export function readUIBuilderProject(value: unknown): UIBuilderProject {
   assertUIBuilderDocument(value);
-  const project = { ...value, flow: value.flow === undefined ? null : value.flow, designId: value.designId === undefined ? "clean" : value.designId, tables: value.tables === undefined ? [] : value.tables, actions: value.actions === undefined ? [] : value.actions } as UIBuilderProject;
+  const pages = value.pages === undefined ? defaultUIBuilderPages() : value.pages;
+  const project = { ...value, pages, activePageId: value.activePageId === undefined && Array.isArray(pages) ? (pages[0] as UIBuilderPage | undefined)?.id : value.activePageId, flow: value.flow === undefined ? null : value.flow, designId: value.designId === undefined || value.designId === "soft" || value.designId === "bold" ? "clean" : value.designId, tables: value.tables === undefined ? [] : value.tables, actions: value.actions === undefined ? [] : value.actions } as UIBuilderProject;
   assertUIBuilderProject(project);
   return project;
 }
@@ -72,7 +77,9 @@ export function assertUIBuilderProject(value: unknown): asserts value is UIBuild
   const project = value as UIBuilderProject;
   if (!uiDesignCatalog.some(entry => entry.id === project.designId)) throw new Error("등록된 디자인을 선택해 주세요.");
   if (project.flow !== null) assertUIFlowLayout(project.flow);
+  assertUIBuilderPages(project);
   unique(project.tables); unique(project.actions);
+  assertUIBuilderComposition(project);
   for (const table of project.tables) {
     named(table); fields(table.fields, true);
     if (!table.fields.length || !object(table.data) || !object(table.data.schema) || !Array.isArray(table.data.records) || !Array.isArray(table.data.views) || table.data.views.length !== 1) throw new Error("테이블 스키마가 필요합니다.");
