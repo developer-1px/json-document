@@ -1,4 +1,5 @@
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
+import { availableParallelism } from "node:os";
 import { join, normalize } from "node:path";
 
 import {
@@ -45,6 +46,45 @@ function runOptionalScript(script) {
     }
     console.log(`[workspace:${script}] ${library.manifest.name}`);
     run("npm", ["run", script, "--workspace", library.manifest.name]);
+  }
+}
+
+// Whole-workspace verification: one parallel build, parallel test type checks, one vitest run.
+async function verifyAll() {
+  for (const library of libraries) {
+    if (library.manifest.scripts?.["layers:check"] !== undefined) run("npm", ["run", "layers:check", "--workspace", library.manifest.name]);
+  }
+  run("npm", ["run", "build"]);
+  const tsc = join(repositoryRoot, "node_modules/.bin/tsc");
+  const checks = libraries.flatMap((library) => (library.manifest.scripts?.typecheck ?? "")
+    .split("&&").map((command) => command.trim()).filter(Boolean)
+    .map((command) => {
+      const [binary, ...args] = command.split(/\s+/);
+      if (binary !== "tsc") throw new Error(`${library.directory}: typecheck must only run tsc: ${command}`);
+      return { library, args };
+    }));
+  const failures = [];
+  const queue = [...checks];
+  await Promise.all(Array.from({ length: availableParallelism() }, async () => {
+    for (let check = queue.shift(); check !== undefined; check = queue.shift()) {
+      const output = await new Promise((resolve) => {
+        const child = spawn(tsc, check.args, { cwd: join(repositoryRoot, check.library.directory), env: process.env });
+        let text = "";
+        child.stdout.on("data", (chunk) => { text += chunk; });
+        child.stderr.on("data", (chunk) => { text += chunk; });
+        child.on("close", (status) => resolve({ status, text }));
+      });
+      if (output.status !== 0) failures.push(`[workspace:typecheck] ${check.library.manifest.name}: tsc ${check.args.join(" ")}\n${output.text}`);
+    }
+  }));
+  if (failures.length > 0) {
+    failures.forEach((failure) => console.error(failure));
+    process.exit(1);
+  }
+  console.log(`[workspace:typecheck] ok: ${checks.length} configs`);
+  run("npm", ["exec", "vitest", "--", "run", "--config", "vitest.config.ts", "--project", "!site"]);
+  for (const library of libraries) {
+    if (library.manifest.scripts?.["smoke:package"] !== undefined) run("npm", ["run", "smoke:package", "--workspace", library.manifest.name]);
   }
 }
 
@@ -118,7 +158,7 @@ function checkWorkspaceContract() {
 
 const command = process.argv[2];
 if (command === "check") checkWorkspaceContract();
-else if (command === "verify") runOptionalScript("verify");
+else if (command === "verify") process.argv.length > 3 ? runOptionalScript("verify") : await verifyAll();
 else if (command === "pack") packLibraries();
 else if (command === "build-dependencies") buildDependencies();
 else if (command === "list") console.log(topologicalLibraries().map(({ manifest }) => manifest.name).join("\n"));
