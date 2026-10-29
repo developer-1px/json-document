@@ -167,6 +167,31 @@ type DragHandleProps = Omit<InteractionHandleButtonProps<DragHandleDescriptor>, 
   readonly descriptor?: DragHandleDescriptor;
 };
 ```
+## `EditingControls`
+
+```ts
+EditingControls({ label, choices, actions, onRequestEdit, requestLabel, children }: EditingControlsProps): ReactNode
+```
+## `EditingControlsProps`
+
+```ts
+interface EditingControlsProps {
+  readonly label: string;
+  readonly choices?: ReadonlyArray<{
+    readonly id: string;
+    readonly label: string;
+    readonly value: string;
+    readonly options: ReadonlyArray<ChoiceOption>;
+    readonly renderValue?: (option: ChoiceOption) => ReactNode;
+    readonly renderOption?: (option: ChoiceOption) => ReactNode;
+    readonly onValueChange: (value: string) => void;
+  }>;
+  readonly actions?: ReadonlyArray<{ readonly id: string; readonly label: string; readonly disabled?: boolean; readonly onSelect: () => void }>;
+  readonly onRequestEdit?: () => void;
+  readonly requestLabel?: string;
+  readonly children?: ReactNode;
+}
+```
 ## `Field`
 
 ```ts
@@ -249,7 +274,7 @@ type MenuItem = {
 ## `Popover`
 
 ```ts
-Popover(props: { readonly label: string; readonly open: boolean; readonly onOpenChange: (open: boolean) => void; readonly trigger: ReactNode; readonly triggerPresentation?: "label" | "icon"; readonly children: ReactNode; readonly className?: string; readonly panelClassName?: string; }): ReactNode
+Popover(props: { readonly label: string; readonly open: boolean; readonly onOpenChange: (open: boolean) => void; readonly trigger: ReactNode; readonly triggerPresentation?: "label" | "icon"; readonly children: ReactNode; readonly className?: string; readonly panelClassName?: string; readonly autoFocus?: boolean; readonly dismissOnOutsideInteraction?: boolean; readonly panelStyle?: CSSProperties; readonly panelRef?: Ref<HTMLDivElement>; }): ReactNode
 ```
 ## `ProductCanvas`
 
@@ -387,4 +412,36 @@ interface UseListboxOptions<Id extends string = string, Item extends ListboxItem
 
 ```ts
 ValueInput(props: { readonly label: string; readonly value: number; readonly min: number; readonly max: number; readonly step?: number; readonly onValueChange: (value: number) => void; readonly presentation: "continuous" | "stepped"; readonly disabled?: boolean; readonly className?: string; }): ReactNode
+```
+## `WindowDock`
+
+```ts
+WindowDock({ label, items, activeId, activationKey, onActivate, onClose, action, notice, className }: WindowDockProps): ReactNode
+```
+## `WindowDockItem`
+
+```ts
+interface WindowDockItem {
+  readonly id: string;
+  readonly title: string;
+  readonly status?: string;
+  readonly content: ReactNode;
+}
+```
+## `WindowDockProps`
+
+```ts
+interface WindowDockProps {
+  readonly label: string;
+  readonly items: ReadonlyArray<WindowDockItem>;
+  /** A newly activated item opens without closing other requested windows. */
+  readonly activeId: string;
+  /** Change to reopen the active window even when its id did not change. */
+  readonly activationKey?: string;
+  readonly onActivate: (id: string) => void;
+  readonly onClose?: (id: string) => void;
+  readonly action?: ReactNode;
+  readonly notice?: ReactNode;
+  readonly className?: string;
+}
 ```

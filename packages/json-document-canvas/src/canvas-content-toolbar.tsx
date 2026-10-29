@@ -4,12 +4,15 @@ import { useAnchoredFloatingPosition } from "@interactive-os/json-document-react
 import { ContextualControls, Toolbar, floatingSurface } from "@interactive-os/json-document-ui-primitives-react";
 import type { useCanvasHand } from "./use-canvas-hand.js";
 import { CanvasStyleControls } from "./canvas-style-controls.js";
+import { CanvasEditControls } from "./canvas-edit-controls.js";
+import type { CanvasEditTarget } from "./canvas-edit-target.js";
 
 /** Content formatting shares selection commands with the Hand and contextual lifecycle with UI primitives. */
-export function CanvasContentToolbar({ hand, targetId, geometryKey }: {
+export function CanvasContentToolbar({ hand, targetId, geometryKey, onRequestEdit }: {
   readonly hand: ReturnType<typeof useCanvasHand>;
   readonly targetId: string | null;
   readonly geometryKey: string;
+  readonly onRequestEdit?: (target: CanvasEditTarget) => void;
 }) {
   const target = hand.objects.find(object => object.id === targetId);
   const selected = target !== undefined && hand.selection.keys.includes(target.id);
@@ -23,16 +26,19 @@ export function CanvasContentToolbar({ hand, targetId, geometryKey }: {
     position.anchorRef(element);
   }, [hand.surface, targetId, position.anchorRef]);
   if (!target) return null;
-  const value = readObjectStyle(hand.objects.filter(object => hand.selection.keys.includes(object.id)));
-  if (Object.keys(value).length === 0) return null;
+  const value = target.kind === "embedded-document" ? {} : readObjectStyle(hand.objects.filter(object => hand.selection.keys.includes(object.id)));
+  if (Object.keys(value).length === 0 && !onRequestEdit) return null;
   return <ContextualControls selected={selected} editing={hand.draft?.id === target.id}
     capabilities={[{ id: "format", phases: ["selected", "editing"] }]}>
     {context => context.visible.includes("format") && <div ref={position.floatingRef} style={{ ...position.style, zIndex: 30 }} data-canvas-content-toolbar={target.id}>
-      <Toolbar label="콘텐츠 서식" className={floatingSurface.control}>
-        <CanvasStyleControls key={JSON.stringify(hand.selection)} value={value}
-          onStyle={hand.setStyle}
-          {...(target.kind === "rectangle" && target.containerLayout ? { containerLayout: target.containerLayout, onContainerLayout: layout => hand.setContainerLayout(target.id, layout) } : {})} />
-      </Toolbar>
+      {onRequestEdit ? <CanvasEditControls value={value} onStyle={hand.setStyle}
+        onRequestEdit={() => {
+          hand.commitText();
+          onRequestEdit({ objectIds: [...hand.selection.keys], label: hand.selection.keys.length > 1 ? `${hand.selection.keys.length}개 항목` : target.label || "선택한 항목" });
+        }} /> : <Toolbar label="콘텐츠 서식" className={floatingSurface.control}>
+          <CanvasStyleControls key={JSON.stringify(hand.selection)} value={value} onStyle={hand.setStyle}
+            {...(target.kind === "rectangle" && target.containerLayout ? { containerLayout: target.containerLayout, onContainerLayout: layout => hand.setContainerLayout(target.id, layout) } : {})} />
+        </Toolbar>}
     </div>}
   </ContextualControls>;
 }

@@ -113,6 +113,44 @@
     "applicationSource": "site/src/app/routes/applications/canvas.tsx"
   },
   {
+    "path": "/applications/slides",
+    "label": "Slides",
+    "title": "Slides - json-document",
+    "description": "원문에 교정 표시와 지시를 남기면 에이전트가 순서대로 수정하는 첨삭 작업 공간입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications",
+    "chrome": "none",
+    "modulePaths": [
+      "/docs/api/object-document",
+      "/docs/api/editing",
+      "/docs/api/canvas",
+      "/docs/api/affordance",
+      "/docs/api/web",
+      "/docs/api/ui-primitives-react",
+      "/docs/api/annotation"
+    ],
+    "applicationSource": "site/src/app/routes/applications/slides.tsx"
+  },
+  {
+    "path": "/applications/agent-review",
+    "label": "Agent Review",
+    "title": "함께 고치기 - json-document",
+    "description": "대상 지정·음성 지시·에이전트 실행·변경 확인을 연결하는 독립 첨삭 실험 공간입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications",
+    "chrome": "none",
+    "modulePaths": [
+      "/docs/api/object-document",
+      "/docs/api/editing",
+      "/docs/api/canvas",
+      "/docs/api/affordance",
+      "/docs/api/web",
+      "/docs/api/ui-primitives-react",
+      "/docs/api/annotation"
+    ],
+    "applicationSource": "site/src/app/routes/applications/agent-review.tsx"
+  },
+  {
     "path": "/applications/sheet",
     "label": "Sheet",
     "title": "Sheet",
@@ -613,12 +651,14 @@
     "description": "@interactive-os/json-document-ui-primitives-react의 전체 public API입니다.",
     "language": "ko",
     "documentIncludes": [
-      "packages/json-document-ui-primitives-react/docs/popover.md"
+      "packages/json-document-ui-primitives-react/docs/popover.md",
+      "packages/json-document-ui-primitives-react/docs/floating-surface.md"
     ],
     "module": {
       "packageName": "@interactive-os/json-document-ui-primitives-react",
       "usagePaths": [
-        "/demo/ui-primitives"
+        "/demo/ui-primitives",
+        "/applications/canvas"
       ]
     },
     "parentPath": "/docs/ui-primitives"
@@ -822,9 +862,13 @@
     "module": {
       "packageName": "@interactive-os/json-document-collaboration",
       "usagePaths": [
-        "/docs/collaboration"
+        "/docs/collaboration",
+        "/applications/canvas"
       ]
     },
+    "documentIncludes": [
+      "packages/json-document-collaboration/docs/workspace.md"
+    ],
     "parentPath": "/docs/collaboration"
   },
   {

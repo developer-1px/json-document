@@ -311,7 +311,7 @@
     "positions": [
       "Hands"
     ],
-    "responsibility": "Raster annotation 도구·선택·제스처·UI 조합",
+    "responsibility": "Annotation 표시·지시 입력·실행 결과 검토·다음 첨삭 UI 조합",
     "entrypoint": "packages/json-document-annotation/src/index.ts",
     "subpaths": [],
     "referencePath": "packages/json-document-annotation/docs/api-reference.md"

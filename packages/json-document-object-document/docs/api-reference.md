@@ -48,6 +48,7 @@ type CanvasObjectDraft = ObjectDraft & { readonly parentId?: string } & (
   | (CanvasTextFormat & { readonly kind: "text"; readonly fontSize: number; readonly widthMode?: "auto" | "fixed" })
   | (CanvasTextFormat & { readonly kind: "rectangle"; readonly containerLayout?: ObjectContainerLayout; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
   | (CanvasTextFormat & { readonly kind: "ellipse" | "sticky-note"; readonly textColor?: string; readonly strokeColor?: string; readonly strokeWidth?: number })
+  | { readonly kind: "section"; readonly textColor?: string }
   | { readonly kind: "path"; readonly points: ReadonlyArray<ObjectPoint>; readonly strokeWidth: number }
   | { readonly kind: "image"; readonly source: string }
   | { readonly kind: "embedded-document"; readonly documentType: string; readonly document: JSONValue }
@@ -56,7 +57,7 @@ type CanvasObjectDraft = ObjectDraft & { readonly parentId?: string } & (
 ## `CanvasObjectKind`
 
 ```ts
-type CanvasObjectKind = "text" | "rectangle" | "ellipse" | "sticky-note" | "path" | "image" | "embedded-document";
+type CanvasObjectKind = "text" | "section" | "rectangle" | "ellipse" | "sticky-note" | "path" | "image" | "embedded-document";
 ```
 ## `CanvasTextFormat`
 
@@ -98,6 +99,11 @@ const defaultObjectContainerPolicy: ObjectContainerPolicy
 interface DocumentObject extends ObjectDraft {
   readonly id: string;
 }
+```
+## `findVacantObjectBounds`
+
+```ts
+findVacantObjectBounds(objects: readonly DocumentObject[], requested: ObjectBounds, gap?: number): ObjectBounds
 ```
 ## `getObjectStyle`
 

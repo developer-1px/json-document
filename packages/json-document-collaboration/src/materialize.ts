@@ -33,12 +33,21 @@ interface MaterializedHistoryState {
   readonly appliedHistoryKeys: ReadonlySet<string>;
 }
 
+interface MaterializationPrefix {
+  readonly ordered: ReadonlyArray<CollaborationChange>;
+  readonly materialized: MaterializedDocument;
+}
+
 export interface MaterializedDocument {
   readonly tree: TreeState;
   readonly value: JSONValue;
   readonly conflicts: ReadonlyArray<CollaborationConflict>;
   readonly suppressed: ReadonlyArray<SuppressedChange>;
   readonly history: MaterializedHistoryState;
+  /** Bounded validated data variants for incremental replay; never serialized. */
+  readonly replays?: Map<string, DataReplay>;
+  /** Recent validated prefixes; snapshots never recursively retain prefixes. */
+  readonly prefixes?: ReadonlyArray<MaterializationPrefix>;
 }
 
 export function materializeChanges(
@@ -50,31 +59,95 @@ export function materializeChanges(
     readonly materialized: MaterializedDocument;
   },
 ): MaterializedDocument {
+  const suppliedPrevious = previous;
+  const matchesPrefix = (candidate: MaterializationPrefix) => candidate.ordered.length <= ordered.length
+    && candidate.ordered.every((change, index) => change === ordered[index]);
+  if (previous && !matchesPrefix(previous)) {
+    previous = previous.materialized.prefixes?.find(matchesPrefix);
+  }
+  const prefixes: MaterializationPrefix[] = [];
+  if (suppliedPrevious) {
+    const { prefixes: older, ...snapshot } = suppliedPrevious.materialized;
+    prefixes.push({ ordered: suppliedPrevious.ordered, materialized: snapshot }, ...(older ?? []).slice(0, 7));
+  }
   const isAncestor = createAncestry(ordered);
   const changes = new Map(
     ordered.map((change) => [changeIdKey(change.changeId), change]),
   );
-  const disabledByTarget = new Map<string, ChangeId>();
-  const appliedUndoTargets = new Map<string, ChangeId>();
-  const appliedHistoryKeys = new Set<string>();
-  const historySuppressed: SuppressedChange[] = [];
-  // Only a data-only, unchanged prefix can be reused. Reordering or any history
-  // control may change earlier acceptance decisions and must replay from base.
-  const prefix = previous !== undefined
+  const unchangedPrefix = previous !== undefined
     && previous.ordered.length <= ordered.length
-    && previous.ordered.every((change, index) => change === ordered[index])
-    && ordered.every((change) => classifyHistoryChange(change).kind === "none")
-    ? previous : undefined;
-  let replay = replayDataChanges(
-    initialTree,
-    ordered,
-    disabledByTarget,
-    validate,
-    isAncestor,
-    prefix,
-  );
+    && previous.ordered.every((change, index) => change === ordered[index]);
+  // Earlier controls inspect only causally preceding targets and dependencies.
+  // A topological suffix cannot change those decisions, even when it adds data:
+  // data acceptance is evaluated forward, before later changes are applied.
+  const acceptedPrefix = unchangedPrefix ? previous : undefined;
+  const historyOnlySuffix = acceptedPrefix !== undefined && ordered.slice(acceptedPrefix.ordered.length)
+    .every(change => classifyHistoryChange(change).kind !== "none");
+  const prior = acceptedPrefix?.materialized;
+  const disabledByTarget = new Map<string, ChangeId>(prior?.history.disabledByTarget);
+  const appliedUndoTargets = new Map<string, ChangeId>(prior?.history.appliedUndoTargets);
+  const appliedHistoryKeys = new Set<string>(prior?.history.appliedHistoryKeys);
+  const isHistoryKey = (key: string) => {
+    const change = changes.get(key);
+    return change !== undefined && classifyHistoryChange(change).kind !== "none";
+  };
+  const historySuppressed: SuppressedChange[] = prior?.suppressed.filter(row => isHistoryKey(changeIdKey(row.changeId))) ?? [];
+  const prefix = acceptedPrefix && prior ? {
+    ordered: acceptedPrefix.ordered,
+    materialized: { ...prior, suppressed: prior.suppressed.filter(row => !isHistoryKey(changeIdKey(row.changeId))) },
+  } : undefined;
+  // Speculative availability checks warm this bounded memo without changing causal state.
+  const replays = historyOnlySuffix ? prior?.replays ?? new Map<string, DataReplay>() : new Map<string, DataReplay>();
+  const replayKey = (disabled: ReadonlyMap<string, ChangeId>) => JSON.stringify([...disabled.keys()].sort());
+  const remember = (key: string, value: DataReplay) => {
+    replays.delete(key); replays.set(key, value);
+    if (replays.size > 8) replays.delete(replays.keys().next().value!);
+    return value;
+  };
+  // Reuse a validated data prefix only for an identical disabled-target variant.
+  // A newly disabled old target requires another cached variant or a cold replay.
+  const previousKeys = acceptedPrefix ? new Set(acceptedPrefix.ordered.map(change => changeIdKey(change.changeId))) : undefined;
+  const replayData = (disabled: ReadonlyMap<string, ChangeId>) => {
+    const oldDisabled = previousKeys && new Map([...disabled].filter(([key]) => previousKeys.has(key)));
+    const cached = oldDisabled && previous?.materialized.replays?.get(replayKey(oldDisabled));
+    let alternatePrefix: MaterializationPrefix | undefined;
+    if (!cached) for (const candidate of prior?.prefixes ?? []) {
+      if (!matchesPrefix(candidate)) continue;
+      const keys = new Set(candidate.ordered.map(change => changeIdKey(change.changeId)));
+      const relevant = new Map([...disabled].filter(([key]) => keys.has(key)));
+      const key = replayKey(relevant);
+      const variant = candidate.materialized.replays?.get(key);
+      if (variant) {
+        alternatePrefix = { ordered: candidate.ordered, materialized: {
+          ...candidate.materialized, ...variant,
+          history: { ...candidate.materialized.history, appliedKeys: variant.appliedKeys },
+        } };
+      } else if (key === replayKey(candidate.materialized.history.disabledByTarget)) alternatePrefix = candidate;
+      if (alternatePrefix) break;
+    }
+    const cachedPrefix = cached && previous ? {
+      ordered: previous.ordered,
+      materialized: { ...previous.materialized, ...cached, history: { ...previous.materialized.history, appliedKeys: cached.appliedKeys } },
+    } : prefix && replayKey(disabled) === replayKey(prior!.history.disabledByTarget) ? prefix
+      : alternatePrefix ? {
+        ordered: alternatePrefix.ordered,
+        materialized: { ...alternatePrefix.materialized,
+          suppressed: alternatePrefix.materialized.suppressed.filter(row => !isHistoryKey(changeIdKey(row.changeId))) },
+      } : undefined;
+    return replayDataChanges(initialTree, ordered, disabled, validate, isAncestor, cachedPrefix);
+  };
+  let replay: DataReplay = prior && historyOnlySuffix ? {
+    tree: prior.tree, value: prior.value, conflicts: prior.conflicts,
+    suppressed: prior.suppressed.filter(row => !isHistoryKey(changeIdKey(row.changeId))),
+    appliedKeys: prior.history.appliedKeys,
+  } : replayData(disabledByTarget);
+  remember(replayKey(disabledByTarget), replay);
+  const replayWith = (disabled: ReadonlyMap<string, ChangeId>) => {
+    const key = replayKey(disabled);
+    return remember(key, replays.get(key) ?? replayData(disabled));
+  };
 
-  for (const change of ordered) {
+  for (const change of ordered.slice(acceptedPrefix?.ordered.length ?? 0)) {
     const historyChange = classifyHistoryChange(change);
     if (historyChange.kind === "none") continue;
     if (historyChange.kind === "invalid") {
@@ -109,13 +182,7 @@ export function materializeChanges(
 
       const candidateDisabled = new Map(disabledByTarget);
       candidateDisabled.set(targetKey, freezeChangeId(change.changeId));
-      const candidate = replayDataChanges(
-        initialTree,
-        ordered,
-        candidateDisabled,
-        validate,
-        isAncestor,
-      );
+      const candidate = replayWith(candidateDisabled);
       const dependency = newlySuppressedAppliedChange(
         replay,
         candidate,
@@ -178,13 +245,7 @@ export function materializeChanges(
 
     const candidateDisabled = new Map(disabledByTarget);
     candidateDisabled.delete(targetKey);
-    const candidate = replayDataChanges(
-      initialTree,
-      ordered,
-      candidateDisabled,
-      validate,
-      isAncestor,
-    );
+    const candidate = replayWith(candidateDisabled);
     const dependency = newlySuppressedAppliedChange(
       replay,
       candidate,
@@ -223,6 +284,8 @@ export function materializeChanges(
       - (orderByKey.get(changeIdKey(right.changeId)) ?? Number.MAX_SAFE_INTEGER)
     ));
   return {
+    replays,
+    prefixes,
     tree: replay.tree,
     value: replay.value,
     conflicts: replay.conflicts,

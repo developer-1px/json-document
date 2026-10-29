@@ -4,7 +4,9 @@
   "description": "Official React Annotation Hand for json-document.",
   "type": "module",
   "license": "MIT",
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/annotation-review.css"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {
@@ -27,11 +29,12 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./annotation-review.css": "./dist/annotation-review.css"
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc -b tsconfig.json",
+    "build": "npm run clean && tsc -b tsconfig.json && cp src/annotation-review.css dist/annotation-review.css",
     "test": "vitest run --config vitest.config.ts",
     "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
@@ -43,7 +46,11 @@
     "@interactive-os/json-document-ui-primitives-react": ">=0.1.0-rc.0 <1",
     "@interactive-os/json-document-web": ">=0.1.0-rc.0 <1",
     "lucide-react": "^1.33.0",
-    "@interactive-os/json-document": ">=3.0.0-rc.0 <4"
+    "@interactive-os/json-document": ">=3.0.0-rc.0 <4",
+    "@interactive-os/json-document-composer": ">=0.1.0-rc.0 <1",
+    "@interactive-os/json-document-composer-react": ">=0.1.0-rc.0 <1",
+    "@interactive-os/json-document-rich-text": ">=0.1.0-rc.0 <1",
+    "@interactive-os/json-document-react": ">=0.1.0-rc.0 <1"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0"
@@ -61,6 +68,10 @@
     "react-dom": "^19.2.5",
     "typescript": "^5.0.0",
     "vitest": "^4.1.7",
-    "@interactive-os/json-document": "*"
+    "@interactive-os/json-document": "*",
+    "@interactive-os/json-document-composer": "*",
+    "@interactive-os/json-document-composer-react": "*",
+    "@interactive-os/json-document-rich-text": "*",
+    "@interactive-os/json-document-react": "*"
   }
 }

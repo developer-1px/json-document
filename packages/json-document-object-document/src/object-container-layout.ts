@@ -25,6 +25,13 @@ export function objectSubtreeIds(objects: ReadonlyArray<DocumentObject>, ids: Re
   return [...result];
 }
 
+function containsBounds(parent: DocumentObject, child: DocumentObject): boolean {
+  const epsilon = Number.EPSILON * 16 * Math.max(1, Math.abs(parent.x), Math.abs(parent.y), parent.width, parent.height, Math.abs(child.x), Math.abs(child.y));
+  return child.x >= parent.x - epsilon && child.y >= parent.y - epsilon
+    && child.x + child.width <= parent.x + parent.width + epsilon
+    && child.y + child.height <= parent.y + parent.height + epsilon;
+}
+
 function overlap(child: DocumentObject, parent: DocumentObject) {
   const width = Math.max(0, Math.min(child.x + child.width, parent.x + parent.width) - Math.max(child.x, parent.x));
   const height = Math.max(0, Math.min(child.y + child.height, parent.y + parent.height) - Math.max(child.y, parent.y));
@@ -64,18 +71,23 @@ export function layoutObjectDocument(document: ObjectDocument, options: ObjectLa
     return object;
   });
   if (policy) {
-    const newBoxes = objects.some(o => o.kind === "rectangle" && !before.has(o.id));
+    const byId = new Map(objects.map(object => [object.id, object]));
+    const newBoxes = objects.some(o => (o.kind === "rectangle" || o.kind === "section") && (!before.has(o.id)
+      || ["x", "y", "width", "height"].some(key => before.get(o.id)![key] !== o[key])));
     objects = objects.map(object => {
       const old = before.get(object.id);
       const parentMoved = typeof object.parentId === "string" && before.has(object.parentId) && (() => {
-        const a = before.get(object.parentId)!; const b = objects.find(o => o.id === a.id)!;
+        const a = before.get(object.parentId)!; const b = byId.get(a.id)!;
         return a.x !== b.x || a.y !== b.y;
       })();
+      const explicitParent = !old && typeof object.parentId === "string" ? byId.get(object.parentId) : undefined;
+      if (explicitParent && explicitParent.kind !== "section") return object;
       // Explicit child movement may reparent; ancestor movement retains ownership.
-      if (old && !newBoxes && (parentMoved || old.x === object.x && old.y === object.y)) return object;
-      const candidates = objects.filter(parent => parent.id !== object.id && parent.kind === "rectangle" && parent.width * parent.height > object.width * object.height && overlap(object, parent) >= policy.overlapThreshold);
+      if (old && (parentMoved || !newBoxes && ["x", "y", "width", "height"].every(key => old[key] === object[key]))) return object;
+      const candidates = objects.filter(parent => parent.id !== object.id && (parent.kind === "rectangle" && object.kind !== "section" || parent.kind === "section") && parent.width * parent.height > object.width * object.height && (parent.kind === "section" ? containsBounds(parent, object) : overlap(object, parent) >= policy.overlapThreshold)
+        && (!explicitParent || parent.id === explicitParent.id || containsBounds(explicitParent, parent)));
       candidates.sort((a, b) => overlap(object, b) - overlap(object, a) || a.width * a.height - b.width * b.height || Number(b.id === object.parentId) - Number(a.id === object.parentId) || a.id.localeCompare(b.id));
-      const parent = candidates[0];
+      const parent = candidates[0] ?? explicitParent;
       if (parent?.id === object.parentId) return object;
       const { parentId: _, ...rest } = object;
       return parent ? { ...rest, parentId: parent.id } as DocumentObject : rest as DocumentObject;
@@ -85,12 +97,17 @@ export function layoutObjectDocument(document: ObjectDocument, options: ObjectLa
   const shift = (id: string, dx: number, dy: number) => {
     for (const key of objectSubtreeIds([...map.values()], [id])) { const object = map.get(key)!; map.set(key, { ...object, x: object.x + dx, y: object.y + dy }); }
   };
+  const childrenByParent = new Map<string, string[]>();
+  for (const object of objects) if (typeof object.parentId === "string") {
+    const children = childrenByParent.get(object.parentId) ?? [];
+    children.push(object.id); childrenByParent.set(object.parentId, children);
+  }
   const visiting = new Set<string>(), done = new Set<string>();
   const flow = (id: string) => {
     if (done.has(id)) return;
     if (visiting.has(id)) throw new TypeError("Container hierarchy must not contain cycles.");
     visiting.add(id);
-    const childIds = objects.filter(o => o.parentId === id).map(o => o.id);
+    const childIds = childrenByParent.get(id) ?? [];
     childIds.forEach(flow);
     let parent = map.get(id)!;
     const children = childIds.map(key => map.get(key)!);

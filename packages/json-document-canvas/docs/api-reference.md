@@ -28,6 +28,15 @@ interface CanvasCreationStyle {
   readonly stickyNoteColor?: string;
 }
 ```
+## `CanvasEditTarget`
+
+```ts
+interface CanvasEditTarget {
+  readonly objectIds: readonly string[];
+  readonly nodeId?: string;
+  readonly label: string;
+}
+```
 ## `CanvasHand`
 
 ```ts
@@ -37,6 +46,7 @@ CanvasHand(props: CanvasHandProps): import("<repository>/node_modules/@types/rea
 
 ```ts
 interface CanvasHandProps {
+  readonly onRequestEdit?: (target: CanvasEditTarget) => void;
   /** Fill the host and navigate independently of document coordinates. */
   readonly workspace?: boolean;
   readonly editor: ObjectEditor;
@@ -47,6 +57,21 @@ interface CanvasHandProps {
   /** Optional policy instance; one profile per mounted Hand. */
   readonly selectProfile?: PlaneSelectProfile;
 }
+```
+## `CanvasHTMLObject`
+
+```ts
+CanvasHTMLObject({ object, editor, active, onDeactivate, onRequestEdit, geometryKey, review }: { readonly object: Extract<CanvasObject, { kind: "embedded-document"; }>; readonly editor: ObjectEditor; readonly geometryKey?: string; readonly review?: { readonly requests: readonly WebHTMLReviewRequest[]; readonly onRegions: (regions: Record<string, WebHTMLReviewRegion[]>) => void; }; readonly active: boolean; readonly onDeactivate: () => void; readonly onRequestEdit?: (target: CanvasEditTarget) => void; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `CanvasPages`
+
+```ts
+CanvasPages({ editor, selectedId, onSelect, onRequestEdit }: { readonly editor: ObjectEditor; readonly selectedId: string | null; readonly onSelect: (id: string) => void; readonly onRequestEdit: (target: CanvasEditTarget) => void; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `CanvasSection`
+
+```ts
+CanvasSection({ object, hideTitle }: { readonly object: Extract<CanvasObject, { kind: "section"; }>; readonly hideTitle?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
 ## `CanvasSheetObject`
 

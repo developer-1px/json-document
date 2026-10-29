@@ -20,6 +20,18 @@
     },
     {
       "path": "../json-document-web"
+    },
+    {
+      "path": "../json-document-composer"
+    },
+    {
+      "path": "../json-document-composer-react"
+    },
+    {
+      "path": "../json-document-rich-text"
+    },
+    {
+      "path": "../json-document-react"
     }
   ],
   "include": [

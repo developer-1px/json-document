@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, type ReactNode, type CSSProperties, type Ref } from "react";
 import { Command } from "./controls.js";
 
 export function Popover(props: {
@@ -10,19 +10,29 @@ export function Popover(props: {
   readonly children: ReactNode;
   readonly className?: string;
   readonly panelClassName?: string;
+  /** Voice/pointer driven disclosure must not steal focus from the active surface. */
+  readonly autoFocus?: boolean;
+  readonly dismissOnOutsideInteraction?: boolean;
+  readonly panelStyle?: CSSProperties;
+  readonly panelRef?: Ref<HTMLDivElement>;
 }): ReactNode {
   const id = `json-document-popover-${useId().replaceAll(":", "")}`;
   const rootRef = useRef<HTMLSpanElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { if (props.open) panelRef.current?.focus(); }, [props.open]);
+  const attachPanel = useCallback((node: HTMLDivElement | null) => {
+    panelRef.current = node;
+    if (typeof props.panelRef === "function") props.panelRef(node);
+    else if (props.panelRef) props.panelRef.current = node;
+  }, [props.panelRef]);
+  useEffect(() => { if (props.open && props.autoFocus !== false) panelRef.current?.focus(); }, [props.open, props.autoFocus]);
   useEffect(() => {
-    if (!props.open) return;
+    if (!props.open || props.dismissOnOutsideInteraction === false) return;
     const dismissOutside = (event: PointerEvent) => {
       if (event.target instanceof Node && !rootRef.current?.contains(event.target)) props.onOpenChange(false);
     };
     document.addEventListener("pointerdown", dismissOutside, true);
     return () => document.removeEventListener("pointerdown", dismissOutside, true);
-  }, [props.open, props.onOpenChange]);
+  }, [props.open, props.onOpenChange, props.dismissOnOutsideInteraction]);
   const close = () => {
     props.onOpenChange(false);
     queueMicrotask(() => rootRef.current?.querySelector<HTMLButtonElement>("button")?.focus());
@@ -30,10 +40,10 @@ export function Popover(props: {
   const triggerProps = { "aria-label": props.label, "aria-haspopup": "dialog", "aria-controls": id, "aria-expanded": props.open, onClick: () => props.onOpenChange(!props.open) } as const;
   return (
     <span ref={rootRef} className={props.className} data-ui-presentation="popover" onBlur={(event) => {
-      if (props.open && event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) props.onOpenChange(false);
+      if (props.open && props.dismissOnOutsideInteraction !== false && event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) props.onOpenChange(false);
     }}>
       {props.triggerPresentation === "icon" ? <Command {...triggerProps} label={props.label}>{props.trigger}</Command> : <button type="button" {...triggerProps}>{props.trigger}</button>}
-      {props.open ? <div ref={panelRef} id={id} role="dialog" aria-label={props.label} tabIndex={-1} className={props.panelClassName} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); } }}>{props.children}</div> : null}
+      {props.open ? <div ref={attachPanel} style={props.panelStyle} id={id} role="dialog" aria-label={props.label} tabIndex={-1} className={props.panelClassName} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); } }}>{props.children}</div> : null}
     </span>
   );
 }

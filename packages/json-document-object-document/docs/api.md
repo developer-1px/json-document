@@ -137,3 +137,12 @@ Canvas slice 범위 밖입니다. 이 RC 프로파일은 독립 구현 간 Stabl
 Editing의 `createCanvasSheet` / `createObjectSheetEditor`가 `sheet/1` payload 모델과 부모 History 연결을 소유합니다. Canvas는 `CanvasSheetObject`로 동일 SheetHand를 SVG 안에 조합합니다. 내장 문서는 객체 복제·Clipboard·JSON 직렬화·변형에서도 유지됩니다. 알 수 없는 documentType은 payload를 보존하며, 소비자가 지원 여부를 표시합니다.
 
 생성 중 한 축만 움직인 드래그도 처리할 수 있도록 `createCanvasEmbeddedDocument`는 유한한 너비·높이를 최소 1 layout 단위로 보정합니다. 일반 도형 생성과 같은 규칙이며, 저장 문서 검증의 양수 조건과 비유한 좌표 거부는 유지합니다.
+
+### Identity-preserving operation plans
+
+`planObjectOperation` emits object-ID-preserving moves and changed field patches,
+including layout-derived geometry and parent changes. Reordering does not replace
+the `objects` array, and normal layout does not replace the document root. Related
+changes remain one atomic patch. This lets Collaboration retain stable members
+when agents update different fields or edit an object concurrently with a reorder.
+Replacing a nested field value remains an atomic replacement of that field.

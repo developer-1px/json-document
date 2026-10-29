@@ -11,12 +11,33 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
   const [space, setSpace] = useState(false);
   const [dragging, setDragging] = useState(false);
   const state = useRef({ size, view, document });
-  state.current = { size, view, document };
+  state.current.document = document;
+  const frame = useRef<number | null>(null);
+  const settled = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The camera updates the surface directly; React observes it only after navigation settles.
+  // Document, selection, layout and history never run on the wheel/pointer frame path.
+  const updateView = (next: View | ((current: View) => View)) => {
+    state.current.view = typeof next === "function" ? next(state.current.view) : next;
+    const svg = surface.current;
+    if (!svg) return;
+    svg.setAttribute("data-canvas-navigating", "true");
+    if (frame.current === null) frame.current = requestAnimationFrame(() => {
+      frame.current = null;
+      const { view, size } = state.current;
+      svg.setAttribute("viewBox", `${view.x} ${view.y} ${size.width / view.scale} ${size.height / view.scale}`);
+    });
+    if (settled.current !== null) clearTimeout(settled.current);
+    settled.current = setTimeout(() => {
+      settled.current = null;
+      svg.removeAttribute("data-canvas-navigating");
+      setView(state.current.view);
+    }, 100);
+  };
   const [pointer] = useState(() => createWebPointerSession<{ x: number; y: number; view: View }>());
   const fitBounds = (left: number, top: number, right: number, bottom: number) => {
     const { size } = state.current;
     const scale = Math.max(0.05, Math.min(8, (size.width - 64) / Math.max(1, right - left), (size.height - 160) / Math.max(1, bottom - top)));
-    setView({ x: (left + right - size.width / scale) / 2, y: (top + bottom - size.height / scale) / 2, scale });
+    updateView({ x: (left + right - size.width / scale) / 2, y: (top + bottom - size.height / scale) / 2, scale });
   };
   const fit = () => {
     const { document } = state.current;
@@ -30,7 +51,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
       Math.max(...objects.map(o => o.x + o.width)), Math.max(...objects.map(o => o.y + o.height)));
   };
   const zoom = (factor: number, at = { x: state.current.size.width / 2, y: state.current.size.height / 2 }) => {
-    setView(current => {
+    updateView(current => {
       const scale = Math.max(0.05, Math.min(8, current.scale * factor));
       return { x: current.x + at.x / current.scale - at.x / scale, y: current.y + at.y / current.scale - at.y / scale, scale };
     });
@@ -56,12 +77,12 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
       if (event.ctrlKey || event.metaKey) {
         const rect = svg.getBoundingClientRect();
         zoom(Math.exp(-event.deltaY * unit * 0.01), { x: event.clientX - rect.left, y: event.clientY - rect.top });
-      } else setView(current => ({ ...current, x: current.x + event.deltaX * unit / current.scale, y: current.y + event.deltaY * unit / current.scale }));
+      } else updateView(current => ({ ...current, x: current.x + event.deltaX * unit / current.scale, y: current.y + event.deltaY * unit / current.scale }));
     };
     const release = () => { setSpace(false); setDragging(false); const active = pointer.getSnapshot(); if (active) pointer.cancel(active.pointerId); };
     svg.addEventListener("wheel", wheel, { passive: false });
     window.addEventListener("blur", release);
-    return () => { observer.disconnect(); svg.removeEventListener("wheel", wheel); window.removeEventListener("blur", release); release(); };
+    return () => { if (frame.current !== null) cancelAnimationFrame(frame.current); if (settled.current !== null) clearTimeout(settled.current); frame.current = null; settled.current = null; svg.removeAttribute("data-canvas-navigating"); observer.disconnect(); svg.removeEventListener("wheel", wheel); window.removeEventListener("blur", release); release(); };
   }, [enabled, surface, pointer]);
   const end = (event: PointerEvent<SVGSVGElement>, cancel = false) => {
     if (!pointer.getSnapshot()) return;
@@ -71,7 +92,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
   };
   return {
     hand, setHand, fit, fitSelection, zoom, scale: view.scale,
-    viewBox: `${view.x} ${view.y} ${size.width / view.scale} ${size.height / view.scale}`,
+    viewBox: `${state.current.view.x} ${state.current.view.y} ${size.width / state.current.view.scale} ${size.height / state.current.view.scale}`,
     panning: hand || space || dragging,
     cursor: dragging ? "grabbing" : hand || space ? "grab" : undefined,
     events: enabled ? {
@@ -86,7 +107,7 @@ export function useCanvasViewport(surface: RefObject<SVGSVGElement | null>, docu
         if (!active || active.pointerId !== event.pointerId) return;
         event.stopPropagation();
         const base = active.state;
-        setView({ ...base.view, x: base.view.x - (event.clientX - base.x) / base.view.scale, y: base.view.y - (event.clientY - base.y) / base.view.scale });
+        updateView({ ...base.view, x: base.view.x - (event.clientX - base.x) / base.view.scale, y: base.view.y - (event.clientY - base.y) / base.view.scale });
       },
       onPointerUpCapture: (event: PointerEvent<SVGSVGElement>) => end(event),
       onPointerCancelCapture: (event: PointerEvent<SVGSVGElement>) => end(event, true),

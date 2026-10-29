@@ -49,7 +49,10 @@ interface ResolvedHistoryState {
 }
 
 export function createHistory(state: RuntimeState): History {
+  let resolvedRevision = -1;
+  let resolvedState: ResolvedHistoryState;
   function resolveHistoryState(): ResolvedHistoryState {
+    if (resolvedRevision === state.graphRevision) return resolvedState;
     let undoTarget: ChangeId | null = null;
     let undoDepth = 0;
     let latestOwnDataIndex = -1;
@@ -103,7 +106,8 @@ export function createHistory(state: RuntimeState): History {
       }
     }
 
-    return {
+    resolvedRevision = state.graphRevision;
+    return resolvedState = {
       status: Object.freeze({
         undoTarget,
         redoTarget,
@@ -115,7 +119,7 @@ export function createHistory(state: RuntimeState): History {
     };
   }
 
-  function prepareHistoryChange(
+  function computeHistoryChange(
     direction: "undo" | "redo",
   ): PreparedHistoryResult {
     if (state.evaluatingValidation) {
@@ -178,6 +182,7 @@ export function createHistory(state: RuntimeState): History {
       state.initialTree,
       nextGraph.ordered,
       state.materializeValidation,
+      { ordered: state.graph.ordered, materialized: state.materialized },
     );
     const controlKey = changeIdKey(changeId);
     if (!nextMaterialized.history.appliedHistoryKeys.has(controlKey)) {
@@ -204,6 +209,20 @@ export function createHistory(state: RuntimeState): History {
         ),
       },
     };
+  }
+
+  // Availability checks and execution share one prepared transition per revision.
+  let preparedRevision = -1;
+  const preparedChanges = new Map<"undo" | "redo", PreparedHistoryResult>();
+  function prepareHistoryChange(direction: "undo" | "redo"): PreparedHistoryResult {
+    if (state.evaluatingValidation) return computeHistoryChange(direction);
+    if (preparedRevision !== state.graphRevision) {
+      preparedRevision = state.graphRevision;
+      preparedChanges.clear();
+    }
+    let prepared = preparedChanges.get(direction);
+    if (!prepared) { prepared = computeHistoryChange(direction); preparedChanges.set(direction, prepared); }
+    return prepared;
   }
 
   function commitHistoryChange(

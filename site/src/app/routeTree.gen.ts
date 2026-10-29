@@ -14,9 +14,11 @@ import { Route as PageRouteImport } from "./routes/_page";
 import { Route as PageDemosRouteImport } from "./routes/_page/demos";
 import { Route as PageEditorsRouteImport } from "./routes/_page/editors";
 import { Route as PageViewerRouteImport } from "./routes/_page/viewer";
+import { Route as ApplicationsAgentReviewRouteImport } from "./routes/applications/agent-review";
 import { Route as ApplicationsBearRouteImport } from "./routes/applications/bear";
 import { Route as ApplicationsCanvasRouteImport } from "./routes/applications/canvas";
 import { Route as ApplicationsSheetRouteImport } from "./routes/applications/sheet";
+import { Route as ApplicationsSlidesRouteImport } from "./routes/applications/slides";
 import { Route as PageAdaptersIndexRouteImport } from "./routes/_page/adapters/index";
 import { Route as PageAdaptersClipboardRouteImport } from "./routes/_page/adapters/clipboard";
 import { Route as PageAdaptersContenteditableRouteImport } from "./routes/_page/adapters/contenteditable";
@@ -210,6 +212,11 @@ const PageViewerRoute = PageViewerRouteImport.update({
   path: "/viewer",
   getParentRoute: () => PageRoute,
 } as any);
+const ApplicationsAgentReviewRoute = ApplicationsAgentReviewRouteImport.update({
+  id: "/applications/agent-review",
+  path: "/applications/agent-review",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const ApplicationsBearRoute = ApplicationsBearRouteImport.update({
   id: "/applications/bear",
   path: "/applications/bear",
@@ -223,6 +230,11 @@ const ApplicationsCanvasRoute = ApplicationsCanvasRouteImport.update({
 const ApplicationsSheetRoute = ApplicationsSheetRouteImport.update({
   id: "/applications/sheet",
   path: "/applications/sheet",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const ApplicationsSlidesRoute = ApplicationsSlidesRouteImport.update({
+  id: "/applications/slides",
+  path: "/applications/slides",
   getParentRoute: () => rootRouteImport,
 } as any);
 const PageAdaptersIndexRoute = PageAdaptersIndexRouteImport.update({
@@ -1125,9 +1137,11 @@ export interface FileRoutesByFullPath {
   "/demos": typeof PageDemosRoute;
   "/editors": typeof PageEditorsRoute;
   "/viewer": typeof PageViewerRoute;
+  "/applications/agent-review": typeof ApplicationsAgentReviewRoute;
   "/applications/bear": typeof ApplicationsBearRoute;
   "/applications/canvas": typeof ApplicationsCanvasRoute;
   "/applications/sheet": typeof ApplicationsSheetRoute;
+  "/applications/slides": typeof ApplicationsSlidesRoute;
   "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
@@ -1302,9 +1316,11 @@ export interface FileRoutesByTo {
   "/demos": typeof PageDemosRoute;
   "/editors": typeof PageEditorsRoute;
   "/viewer": typeof PageViewerRoute;
+  "/applications/agent-review": typeof ApplicationsAgentReviewRoute;
   "/applications/bear": typeof ApplicationsBearRoute;
   "/applications/canvas": typeof ApplicationsCanvasRoute;
   "/applications/sheet": typeof ApplicationsSheetRoute;
+  "/applications/slides": typeof ApplicationsSlidesRoute;
   "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
@@ -1481,9 +1497,11 @@ export interface FileRoutesById {
   "/_page/demos": typeof PageDemosRoute;
   "/_page/editors": typeof PageEditorsRoute;
   "/_page/viewer": typeof PageViewerRoute;
+  "/applications/agent-review": typeof ApplicationsAgentReviewRoute;
   "/applications/bear": typeof ApplicationsBearRoute;
   "/applications/canvas": typeof ApplicationsCanvasRoute;
   "/applications/sheet": typeof ApplicationsSheetRoute;
+  "/applications/slides": typeof ApplicationsSlidesRoute;
   "/_page/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/_page/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/_page/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
@@ -1660,9 +1678,11 @@ export interface FileRouteTypes {
     | "/demos"
     | "/editors"
     | "/viewer"
+    | "/applications/agent-review"
     | "/applications/bear"
     | "/applications/canvas"
     | "/applications/sheet"
+    | "/applications/slides"
     | "/adapters/clipboard"
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
@@ -1837,9 +1857,11 @@ export interface FileRouteTypes {
     | "/demos"
     | "/editors"
     | "/viewer"
+    | "/applications/agent-review"
     | "/applications/bear"
     | "/applications/canvas"
     | "/applications/sheet"
+    | "/applications/slides"
     | "/adapters/clipboard"
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
@@ -2015,9 +2037,11 @@ export interface FileRouteTypes {
     | "/_page/demos"
     | "/_page/editors"
     | "/_page/viewer"
+    | "/applications/agent-review"
     | "/applications/bear"
     | "/applications/canvas"
     | "/applications/sheet"
+    | "/applications/slides"
     | "/_page/adapters/clipboard"
     | "/_page/adapters/contenteditable"
     | "/_page/adapters/keyboard"
@@ -2191,9 +2215,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   PageRoute: typeof PageRouteWithChildren;
+  ApplicationsAgentReviewRoute: typeof ApplicationsAgentReviewRoute;
   ApplicationsBearRoute: typeof ApplicationsBearRoute;
   ApplicationsCanvasRoute: typeof ApplicationsCanvasRoute;
   ApplicationsSheetRoute: typeof ApplicationsSheetRoute;
+  ApplicationsSlidesRoute: typeof ApplicationsSlidesRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -2233,6 +2259,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageViewerRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/applications/agent-review": {
+      id: "/applications/agent-review";
+      path: "/applications/agent-review";
+      fullPath: "/applications/agent-review";
+      preLoaderRoute: typeof ApplicationsAgentReviewRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     "/applications/bear": {
       id: "/applications/bear";
       path: "/applications/bear";
@@ -2252,6 +2285,13 @@ declare module "@tanstack/react-router" {
       path: "/applications/sheet";
       fullPath: "/applications/sheet";
       preLoaderRoute: typeof ApplicationsSheetRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/applications/slides": {
+      id: "/applications/slides";
+      path: "/applications/slides";
+      fullPath: "/applications/slides";
+      preLoaderRoute: typeof ApplicationsSlidesRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/_page/adapters/": {
@@ -3788,9 +3828,11 @@ const PageRouteWithChildren = PageRoute._addFileChildren(PageRouteChildren);
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PageRoute: PageRouteWithChildren,
+  ApplicationsAgentReviewRoute: ApplicationsAgentReviewRoute,
   ApplicationsBearRoute: ApplicationsBearRoute,
   ApplicationsCanvasRoute: ApplicationsCanvasRoute,
   ApplicationsSheetRoute: ApplicationsSheetRoute,
+  ApplicationsSlidesRoute: ApplicationsSlidesRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

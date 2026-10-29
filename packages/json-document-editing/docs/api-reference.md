@@ -41,6 +41,11 @@ interface AnnotationDocument extends Record<string, JSONValue> { readonly profil
 ```ts
 interface AnnotationEditor { readonly snapshot: EditingSnapshot<AnnotationSelection>; dispatch(intent: AnnotationIntent): EditingResult<AnnotationSelection>; undo(): EditingResult<AnnotationSelection>; redo(): EditingResult<AnnotationSelection>; subscribe(listener: () => void): () => void }
 ```
+## `AnnotationFollowing`
+
+```ts
+type AnnotationFollowing = ReturnType<typeof createAnnotationFollowing>;
+```
 ## `AnnotationIntent`
 
 ```ts
@@ -71,6 +76,80 @@ type AnnotationPresentation =
 
 ```ts
 annotationResizeHandle(selector: AnnotationSelector): "end" | "south-east" | null
+```
+## `AnnotationReviewCancellation`
+
+```ts
+interface AnnotationReviewCancellation {
+  readonly aborted: boolean;
+  onAbort(listener: () => void): () => void;
+}
+```
+## `AnnotationReviewDocument`
+
+```ts
+interface AnnotationReviewDocument extends AnnotationDocument {
+  readonly source: string;
+}
+```
+## `AnnotationReviewQueue`
+
+```ts
+type AnnotationReviewQueue = ReturnType<typeof createAnnotationReviewQueue>;
+```
+## `AnnotationReviewQueueOptions`
+
+```ts
+interface AnnotationReviewQueueOptions {
+  /** One coordinator prepares tasks serially before execution. */
+  readonly prepare?: AnnotationReviewWorker;
+  /** Independent sources may execute in parallel; each source remains ordered. */
+  readonly concurrency?: number;
+}
+```
+## `AnnotationReviewSession`
+
+```ts
+type AnnotationReviewSession = ReturnType<typeof createAnnotationReviewSession>;
+```
+## `AnnotationReviewSessionOptions`
+
+```ts
+interface AnnotationReviewSessionOptions {
+  readonly id: string;
+  readonly source: string;
+  readonly width: number;
+  readonly height: number;
+}
+```
+## `AnnotationReviewState`
+
+```ts
+interface AnnotationReviewState extends Record<string, JSONValue> {
+  readonly tasks: readonly AnnotationReviewTask[];
+}
+```
+## `AnnotationReviewTask`
+
+```ts
+interface AnnotationReviewTask extends Record<string, JSONValue> {
+  readonly id: string;
+  readonly annotation: Annotation;
+  readonly source: string;
+  readonly request: string;
+  readonly response: string;
+  readonly plan: string;
+  readonly annotationIds: readonly string[];
+  readonly targetNodeIds: readonly string[];
+  readonly state: "queued" | "planning" | "running" | "review" | "accepted" | "reverted" | "error";
+  readonly result: string;
+  readonly error: string;
+}
+```
+## `AnnotationReviewWorker`
+
+```ts
+type AnnotationReviewWorker = (task: AnnotationReviewTask, signal: AnnotationReviewCancellation, report: (response: string, targetNodeIds?: readonly string[]) => void) => Promise<string>;
 ```
 ## `AnnotationSelection`
 
@@ -566,6 +645,32 @@ interface CanvasClipboardOptions {
   readonly contentGap?: number;
 }
 ```
+## `CanvasEditorToolsLifecycle`
+
+```ts
+interface CanvasEditorToolsLifecycle {
+  /** Refresh this editor's observed replica only on an explicit model read. */
+  read(): void | { readonly collaboration: unknown };
+  /** Publish a successful local change and return its merged outcome. */
+  publish(): { readonly ok: boolean; readonly code?: string; readonly collaboration?: unknown };
+}
+```
+## `CanvasHTMLAdapter`
+
+```ts
+interface CanvasHTMLAdapter {
+  parse(html: string): { readonly html: string; readonly nodes: readonly { readonly id: string; readonly tag: string; readonly text: string }[] };
+}
+```
+## `CanvasHTMLDocument`
+
+```ts
+interface CanvasHTMLDocument extends Record<string, JSONValue> {
+  readonly html: string;
+  readonly viewportWidth: number;
+  readonly viewportHeight: number;
+}
+```
 ## `clampTextSelection`
 
 ```ts
@@ -575,6 +680,26 @@ clampTextSelection(value: string, selection: TextSelection): TextSelection
 
 ```ts
 createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>, options?: EditingHistoryOptions): AnnotationEditor
+```
+## `createAnnotationFollowing`
+
+```ts
+createAnnotationFollowing(queue: AnnotationReviewQueue, createId: () => string): { readonly draft: { readonly annotation: Annotation; readonly text: string; }; ... 6 more ...; reset(): void; }
+```
+## `createAnnotationReviewPlanTool`
+
+```ts
+createAnnotationReviewPlanTool(availableNodeIds?: readonly string[]): { tool: { name: string; description: string; parameters: { type: string; properties: { targetNodeIds: { type: string; items: { type: string; }; description: string; }; instruction: { ...; }; reply: { ...; }; }; required: string[]; additionalProperties: boolean; }; execute(args: unknown): { ...; } | ... 1 more ... | { ...; }; }; read(): { ...; }; }
+```
+## `createAnnotationReviewQueue`
+
+```ts
+createAnnotationReviewQueue(initial?: unknown): { ...; }
+```
+## `createAnnotationReviewSession`
+
+```ts
+createAnnotationReviewSession(options: AnnotationReviewSessionOptions, initial?: unknown): { editor: import("<repository>/packages/json-document-editing/src/annotation").AnnotationEditor; readonly snapshot: { ...; }; subscribe: (listener: () => void) => () => void; advance(source: string): void; }
 ```
 ## `createCalendarEditor`
 
@@ -589,7 +714,12 @@ createCanvasClipboard(content: CanvasClipboardContent, options: CanvasClipboardO
 ## `createCanvasEditorTools`
 
 ```ts
-createCanvasEditorTools(editor: ObjectEditor): { name: string; description: string; parameters: Record<string, unknown>; execute: (args: unknown) => unknown; }[]
+createCanvasEditorTools(editor: ObjectEditor, lifecycle?: CanvasEditorToolsLifecycle, htmlAdapter?: CanvasHTMLAdapter): { name: string; description: string; parameters: Record<string, unknown>; execute: (args: unknown) => unknown; }[]
+```
+## `createCanvasHTML`
+
+```ts
+createCanvasHTML(html: string, bounds: ObjectBounds, label: string, adapter: CanvasHTMLAdapter): import("<repository>/packages/json-document-object-document/src/object-model").ObjectDraft & { ...; } & { ...; }
 ```
 ## `createCanvasSheet`
 
@@ -1188,6 +1318,11 @@ interface GridTopology {
   readonly columnIds: ReadonlyArray<string>;
 }
 ```
+## `htmlEmbeddedDocumentType`
+
+```ts
+const htmlEmbeddedDocumentType: "html/css/1"
+```
 ## `interpretCalendarAllDayPointer`
 
 ```ts
@@ -1352,6 +1487,8 @@ interface ObjectEditor {
 
 ```ts
 type ObjectIntent =
+  | { readonly type: "section.create"; readonly label: string; readonly width: number; readonly height: number; readonly color: string }
+  | { readonly type: "section.insert"; readonly sectionId: string; readonly objects: ReadonlyArray<ObjectDraft> }
   | { readonly type: "object.update"; readonly objectId: string; readonly changes: Partial<ObjectDraft> }
   | { readonly type: "object.reorder"; readonly objectIds: ReadonlyArray<string> }
   | { readonly type: "object.create"; readonly object: ObjectDraft }
@@ -1546,6 +1683,11 @@ previewCalendarTimeGrid(events: ReadonlyArray<CalendarEvent>, release: CalendarT
 ```ts
 projectCalendarOccurrences(events: ReadonlyArray<CalendarEvent>, rangeStart: string, rangeEnd: string): ReadonlyArray<CalendarOccurrence>
 ```
+## `projectCanvasHTML`
+
+```ts
+projectCanvasHTML<T extends DocumentObject>(object: T, html: string, bounds: ObjectBounds): T & { document: { html: string; viewportWidth: number; viewportHeight: number; }; x: number; y: number; width: number; height: number; }
+```
 ## `ProjectedSheetOptions`
 
 ```ts
@@ -1579,6 +1721,11 @@ projectSheetGrid(document: SheetDocument, order?: SheetViewOptions): SheetGrid
 
 ```ts
 projectTreeVisibility(nodes: ReadonlyArray<TreeNode>, expandedIds: ReadonlySet<string>): TreeVisibility
+```
+## `readCanvasHTML`
+
+```ts
+readCanvasHTML(object: DocumentObject): CanvasHTMLDocument | null
 ```
 ## `SheetAvailability`
 
@@ -1979,4 +2126,9 @@ interface TreeVisibilityRow extends TreeNode {
   readonly hasChildren: boolean;
   readonly expanded: boolean;
 }
+```
+## `updateCanvasHTML`
+
+```ts
+updateCanvasHTML(editor: ObjectEditor, objectId: string, before: string, html: string, adapter: CanvasHTMLAdapter): import("<repository>/packages/json-document-editing/src/session").EditingResult<import("<repository>/packages/json-document-editing/src/object").ObjectSelection>
 ```
