@@ -3,11 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node ../scripts/generate-api-reference.mjs",
     "dev": "vite --host 127.0.0.1",
     "dev:codex": "vite --host 127.0.0.1",
     "dev:mock": "VITE_LLM_BACKEND=mock vite --host 127.0.0.1",
+    "prebuild": "node ../scripts/generate-api-reference.mjs",
     "build": "vite build",
     "preview": "vite preview",
+    "pretest": "node ../scripts/generate-api-reference.mjs",
     "test": "vitest run --config vitest.config.ts",
     "check": "node scripts/check-all.mjs",
     "typecheck": "node scripts/check-all.mjs && tsc -p tsconfig.json --noEmit"
