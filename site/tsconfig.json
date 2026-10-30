@@ -31,6 +31,7 @@
       "@interactive-os/json-document-rich-text-suggestion": ["../packages/json-document-rich-text-suggestion/src/index.ts"],
       "@interactive-os/json-document-rich-text-suggestion-react": ["../packages/json-document-rich-text-suggestion-react/src/index.ts"],
       "@interactive-os/json-document-file-intake": ["../packages/json-document-file-intake/src/index.ts"],
+      "@interactive-os/json-document-ui-recipes": ["../packages/json-document-ui-recipes/src/index.ts"],
       "@interactive-os/json-document-composer": ["../packages/json-document-composer/src/index.ts"],
       "@interactive-os/json-document-composer-react": ["../packages/json-document-composer-react/src/index.ts"],
       "@interactive-os/json-document-rich-text-web": ["../packages/json-document-rich-text-web/src/index.ts"],

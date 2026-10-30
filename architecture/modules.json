@@ -419,5 +419,16 @@
     "entrypoint": "packages/json-document-sheet-document/src/index.ts",
     "subpaths": [],
     "referencePath": "packages/json-document-sheet-document/docs/api-reference.md"
+  },
+  {
+    "packageName": "@interactive-os/json-document-ui-recipes",
+    "sourceDirectory": "packages/json-document-ui-recipes",
+    "positions": [
+      "UI Primitives"
+    ],
+    "responsibility": "UI 레시피 규격: 수렴 근거·해부·행동 규칙과 conformance vector",
+    "entrypoint": "packages/json-document-ui-recipes/src/index.ts",
+    "subpaths": [],
+    "referencePath": "packages/json-document-ui-recipes/docs/api-reference.md"
   }
 ]

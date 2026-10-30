@@ -36,6 +36,7 @@
     { "path": "./packages/json-document-collaboration" },
     { "path": "./packages/contenteditable-collaboration" },
     { "path": "./packages/json-document-sheet" },
-    { "path": "./packages/json-document-sheet-document" }
+    { "path": "./packages/json-document-sheet-document" },
+    { "path": "./packages/json-document-ui-recipes" }
   ]
 }

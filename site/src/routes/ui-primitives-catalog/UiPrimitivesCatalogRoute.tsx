@@ -46,6 +46,7 @@ import {
   ValueInput,
 } from "@interactive-os/json-document-ui-primitives-react";
 import { formatFileSize } from "@interactive-os/json-document-file-intake";
+import { recipeSpecs } from "@interactive-os/json-document-ui-recipes";
 import {
   ArrowLeft,
   ChevronDown,
@@ -641,6 +642,15 @@ export function UiPrimitivesCatalogRoute() {
               </span>
             </Motion>
           </div>
+        </CatalogSection>
+        <CatalogSection title="UI recipes" description="Converged views with their behaviour rules; a Host runs each recipe's conformance vectors on its own UI.">
+          {recipeSpecs.map(({ recipe, vectors }) => (
+            <div key={recipe.id}>
+              <h3 className={classes("m-0", ui.text.heading)}>{recipe.name}</h3>
+              <p className={classes("m-0", ui.text.meta)}>{recipe.evidence.map((evidence) => evidence.product).join(" · ")} · {vectors.cases.length} cases</p>
+              <ul>{recipe.rules.map((rule) => <li key={rule.id}><code>{rule.id}</code> {rule.statement}</li>)}</ul>
+            </div>
+          ))}
         </CatalogSection>
       </div>
     </PageFrame>

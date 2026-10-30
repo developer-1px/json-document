@@ -94,6 +94,11 @@ Do not create a detached API catalog that moves documentation away from its
 owning module. Names and documentation navigation MUST make the responsibility
 and its position discoverable.
 
+`@interactive-os/json-document-ui-recipes` is specification data (recipes and
+conformance vectors), not behaviour: a recipe rule is implemented and verified in a
+Host first, and moves to an owning behaviour package only when a second Host
+extracts it into a canonical module.
+
 ### Smells and prohibited final owners
 
 - `Etc`, `utils`, `helpers`, `common`, `misc`, and anonymous route-local code

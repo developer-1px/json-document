@@ -175,6 +175,7 @@ import { Route as PageDocsApiSheetRouteImport } from "./routes/_page/docs/api/sh
 import { Route as PageDocsApiSheetDocumentRouteImport } from "./routes/_page/docs/api/sheet-document";
 import { Route as PageDocsApiTanstackTableRouteImport } from "./routes/_page/docs/api/tanstack-table";
 import { Route as PageDocsApiUiPrimitivesReactRouteImport } from "./routes/_page/docs/api/ui-primitives-react";
+import { Route as PageDocsApiUiRecipesRouteImport } from "./routes/_page/docs/api/ui-recipes";
 import { Route as PageDocsApiWebRouteImport } from "./routes/_page/docs/api/web";
 import { Route as PageDocsApiZodRouteImport } from "./routes/_page/docs/api/zod";
 import { Route as PageDocsCollaborationIndexRouteImport } from "./routes/_page/docs/collaboration/index";
@@ -1061,6 +1062,11 @@ const PageDocsApiUiPrimitivesReactRoute =
     path: "/docs/api/ui-primitives-react",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsApiUiRecipesRoute = PageDocsApiUiRecipesRouteImport.update({
+  id: "/docs/api/ui-recipes",
+  path: "/docs/api/ui-recipes",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsApiWebRoute = PageDocsApiWebRouteImport.update({
   id: "/docs/api/web",
   path: "/docs/api/web",
@@ -1283,6 +1289,7 @@ export interface FileRoutesByFullPath {
   "/docs/api/sheet-document": typeof PageDocsApiSheetDocumentRoute;
   "/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
   "/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
+  "/docs/api/ui-recipes": typeof PageDocsApiUiRecipesRoute;
   "/docs/api/web": typeof PageDocsApiWebRoute;
   "/docs/api/zod": typeof PageDocsApiZodRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
@@ -1460,6 +1467,7 @@ export interface FileRoutesByTo {
   "/docs/api/sheet-document": typeof PageDocsApiSheetDocumentRoute;
   "/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
   "/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
+  "/docs/api/ui-recipes": typeof PageDocsApiUiRecipesRoute;
   "/docs/api/web": typeof PageDocsApiWebRoute;
   "/docs/api/zod": typeof PageDocsApiZodRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
@@ -1639,6 +1647,7 @@ export interface FileRoutesById {
   "/_page/docs/api/sheet-document": typeof PageDocsApiSheetDocumentRoute;
   "/_page/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
   "/_page/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
+  "/_page/docs/api/ui-recipes": typeof PageDocsApiUiRecipesRoute;
   "/_page/docs/api/web": typeof PageDocsApiWebRoute;
   "/_page/docs/api/zod": typeof PageDocsApiZodRoute;
   "/_page/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
@@ -1818,6 +1827,7 @@ export interface FileRouteTypes {
     | "/docs/api/sheet-document"
     | "/docs/api/tanstack-table"
     | "/docs/api/ui-primitives-react"
+    | "/docs/api/ui-recipes"
     | "/docs/api/web"
     | "/docs/api/zod"
     | "/docs/collaboration/history"
@@ -1995,6 +2005,7 @@ export interface FileRouteTypes {
     | "/docs/api/sheet-document"
     | "/docs/api/tanstack-table"
     | "/docs/api/ui-primitives-react"
+    | "/docs/api/ui-recipes"
     | "/docs/api/web"
     | "/docs/api/zod"
     | "/docs/collaboration/history"
@@ -2173,6 +2184,7 @@ export interface FileRouteTypes {
     | "/_page/docs/api/sheet-document"
     | "/_page/docs/api/tanstack-table"
     | "/_page/docs/api/ui-primitives-react"
+    | "/_page/docs/api/ui-recipes"
     | "/_page/docs/api/web"
     | "/_page/docs/api/zod"
     | "/_page/docs/collaboration/history"
@@ -3360,6 +3372,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiUiPrimitivesReactRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/api/ui-recipes": {
+      id: "/_page/docs/api/ui-recipes";
+      path: "/docs/api/ui-recipes";
+      fullPath: "/docs/api/ui-recipes";
+      preLoaderRoute: typeof PageDocsApiUiRecipesRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/api/web": {
       id: "/_page/docs/api/web";
       path: "/docs/api/web";
@@ -3592,6 +3611,7 @@ interface PageRouteChildren {
   PageDocsApiSheetDocumentRoute: typeof PageDocsApiSheetDocumentRoute;
   PageDocsApiTanstackTableRoute: typeof PageDocsApiTanstackTableRoute;
   PageDocsApiUiPrimitivesReactRoute: typeof PageDocsApiUiPrimitivesReactRoute;
+  PageDocsApiUiRecipesRoute: typeof PageDocsApiUiRecipesRoute;
   PageDocsApiWebRoute: typeof PageDocsApiWebRoute;
   PageDocsApiZodRoute: typeof PageDocsApiZodRoute;
   PageDocsCollaborationHistoryRoute: typeof PageDocsCollaborationHistoryRoute;
@@ -3768,6 +3788,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsApiSheetDocumentRoute: PageDocsApiSheetDocumentRoute,
   PageDocsApiTanstackTableRoute: PageDocsApiTanstackTableRoute,
   PageDocsApiUiPrimitivesReactRoute: PageDocsApiUiPrimitivesReactRoute,
+  PageDocsApiUiRecipesRoute: PageDocsApiUiRecipesRoute,
   PageDocsApiWebRoute: PageDocsApiWebRoute,
   PageDocsApiZodRoute: PageDocsApiZodRoute,
   PageDocsCollaborationHistoryRoute: PageDocsCollaborationHistoryRoute,

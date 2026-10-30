@@ -4,6 +4,7 @@ import { DocumentationPage } from "./DocumentationPage";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   sheetDocumentApi: "braces",
+  uiRecipesApi: "braces",
   quickStart: "terminal",
   modules: "braces",
   handsSupport: "cursor",

@@ -2092,5 +2092,21 @@
       ]
     },
     "parentPath": "/docs/document-types"
+  },
+  {
+    "path": "/docs/api/ui-recipes",
+    "label": "API · UI Recipes",
+    "title": "UI Recipes API - json-document",
+    "description": "UI 레시피의 해부·행동 규칙과 conformance vector를 코드로 제공합니다.",
+    "language": "ko",
+    "documentIncludes": [
+      "packages/json-document-ui-recipes/docs/api.md"
+    ],
+    "module": {
+      "packageName": "@interactive-os/json-document-ui-recipes",
+      "usagePaths": [
+        "/demo/ui-primitives"
+      ]
+    }
   }
 ]
