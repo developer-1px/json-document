@@ -17,7 +17,7 @@ test.each(Object.values(docPages).filter((page) => page.path.startsWith("/docs/a
   async (page) => {
     window.history.pushState(null, "", page.path);
     render(<App />);
-    // 35 lazy API routes load in one worker; the default 1s wait fails under load, not on behavior.
+    // 34 lazy API routes load in one worker; the default 1s wait fails under load, not on behavior.
     await waitFor(() => expect(document.title).toBe(page.title), { timeout: 10_000 });
     expect(await screen.findByRole("heading", { level: 1, name: page.title.replace(/ - json-document$/, "") })).toBeTruthy();
     const firstSymbol = /^## `([^`]+)`/m.exec(page.source)?.[1];

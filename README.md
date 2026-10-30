@@ -19,8 +19,10 @@ stateless JSON Patch
 ```
 
 로컬 전용 사용자는 Core만 설치합니다. 협업으로 전환해도 편집기가 받는
-`JSONDocument` 포트는 바뀌지 않고, causal merge와 native-input DOM lease만
-독립 package로 추가합니다.
+`JSONDocument` 포트는 바뀌지 않고, causal merge만 독립 package로
+추가합니다. native-input DOM lease는 `@interactive-os/json-document-contenteditable`가
+소유하며, `createContentEditableBinding`의 `text` 옵션에 collaboration
+`text` runtime을 넘기면 협업 문자열도 같은 lease를 씁니다.
 
 공식 사이트: https://developer-1px.github.io/json-document/
 
@@ -96,7 +98,6 @@ unsubscribe();
 | [packages/json-document-zod](packages/json-document-zod) | Zod object를 Database document로, Zod issue를 JSON Pointer 진단으로 번역하는 Connector |
 | [packages/json-document-tanstack-table](packages/json-document-tanstack-table) | TanStack Table visible model을 Sheet 편집 topology로 번역하는 Connector |
 | [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal collaboration engine |
-| [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional native-input DOM lease |
 | [site](site) | 공개 문서와 Document·Sheet·Database demo, structural Selection Lab |
 
 v3 Kernel인 `@interactive-os/json-document`는 dependency-free Core로 남습니다.

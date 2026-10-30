@@ -128,7 +128,6 @@ export const docPages = {
   richTextWebApi: docPage("/docs/api/rich-text-web"),
   richTextReactApi: docPage("/docs/api/rich-text-react"),
   collaborationApi: docPage("/docs/api/collaboration"),
-  contenteditableCollaborationApi: docPage("/docs/api/contenteditable-collaboration"),
   topology: docPage("/docs/topology"),
   selection: docPage("/docs/selection"),
   history: docPage("/docs/history"),

@@ -275,10 +275,11 @@ row/column model을 Sheet topology로 번역해 정렬·필터·column ordering 
 cell edit, rectangular multi-range selection, selection fill과 clipboard가 화면
 순서를 따르게 하는 공식 Connector다.
 `@interactive-os/json-document-collaboration`은 같은 canonical JSON Document을
-제공하는 independently versioned, transport-free collaboration engine이고,
-`@interactive-os/json-document-contenteditable-collaboration`은 collaborative
-string을 위한 optional native-input DOM lease다. 두 companion을 사용해도
-Core Root API와 editor가 받는 `JSONDocument` port는 바뀌지 않는다.
+제공하는 independently versioned, transport-free collaboration engine이다.
+Collaborative string의 native-input DOM lease는
+`@interactive-os/json-document-contenteditable`의 `createContentEditableBinding`에
+collaboration `text` runtime을 `text` 옵션으로 넘겨 얻는다. 두 companion을
+사용해도 Core Root API와 editor가 받는 `JSONDocument` port는 바뀌지 않는다.
 
 Editing companion, Adapter, Connector와 Host는 공개 package contract만 입력으로
 받는다. Collaboration companion은 transport, authentication, presence,

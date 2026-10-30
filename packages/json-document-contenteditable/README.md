@@ -30,6 +30,13 @@ This Draft revision requires the Web peer's `isWebEditingHostTarget` capability.
 For selection-restoring history and literal source clipboard, pass the optional
 `TextEditor` to `createContentEditableBinding`. See [editing integration](docs/editing.md).
 
+For a shared string, pass the `@interactive-os/json-document-collaboration/text`
+runtime as the optional `text` port: `createContentEditableBinding({ document, text, pointer, root })`.
+The lease then captures a causal basis before native input and commits a
+capture-relative splice, so a concurrent remote edit merges instead of failing
+as `text_source_stale`. After composition ends, one trailing rebase reconciles the
+selection against merged text without authoring a second change.
+
 For source intervals displayed as one visual unit, use `createTextProjectionDOMAdapter`.
 Its [projection contract](docs/editing.md#원문-구간의-시각적-투영) preserves source editing while aligning caret edges to the displayed element.
 

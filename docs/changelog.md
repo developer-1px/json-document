@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Removed `@interactive-os/json-document-contenteditable-collaboration`. Its
+  IME-safe lease over a collaboration text runtime is now the `text` option of
+  `createContentEditableBinding` in `@interactive-os/json-document-contenteditable`.
 - Added canonical wait-animation visuals: mono and spectrum shimmer text,
   wave dots and Claude-style wave grid, streaming caret, pulsing markers,
   morse beats, loading bar, progress ring, staggered skeleton lines, and

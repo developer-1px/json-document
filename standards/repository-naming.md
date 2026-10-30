@@ -166,7 +166,7 @@ reconciliation을 소유하므로 일반 patch validation과 합치지 않는다
 | Canonical term | 정의 |
 | --- | --- |
 | DOM adapter | Platform DOM state를 observe, render, restore하는 경계 |
-| contenteditable adapter | 한 contenteditable root와 collaborative text를 연결하는 adapter |
+| contenteditable adapter | 한 contenteditable root와 local 또는 collaborative string을 연결하는 adapter |
 | native-input DOM lease | Model ingestion은 계속하면서 browser에 DOM mutation ownership을 임시로 맡기고 model-to-DOM rendering만 유예하는 상태 |
 | composition session | W3C IME composition lifecycle |
 
@@ -327,7 +327,7 @@ JSONDocumentCommitResult
 CollaborationCheckpoint
 ReplicaStatus
 TextPlanResult
-ContentEditableAdapter
+ContentEditableBinding
 ```
 
 Package 이름과 subpath가 이미 namespace이면 타입 이름에서 반복하지 않는다.
@@ -642,12 +642,6 @@ identifier에는 canonical vocabulary만 사용한다.
 | --- | --- | --- |
 | keep | `Text`, `TextSelection`, `TextObservation`, `TextCapture`, `TextCaptureResult`, `TextPlan`, `TextPlanResult`, `TextCommitResult`, `TextRuntime`, `TextRestoreResult`, `createTextRuntime`, `restoreTextRuntime` | Subpath namespace와 capture/plan/commit 책임이 일치 |
 
-### Contenteditable package
-
-| Decision | Current public exports | Canonical rule |
-| --- | --- | --- |
-| keep | `ContentEditableAdapter`, `ContentEditableOptions`, `ContentEditableResult`, `createContentEditableAdapter`, `TextDOMAdapter`, `DOMObservation`, `plainTextDOMAdapter` | Package namespace와 DOM Adapter 책임이 일치 |
-
 ### Web Platform adapter package
 
 | Decision | Current public exports | Canonical rule |
@@ -781,13 +775,6 @@ Text subpath
 ├─ TextPlanResult
 ├─ TextCommitResult
 └─ TextRuntime
-
-Contenteditable package
-├─ TextDOMAdapter
-├─ DOMObservation
-├─ ContentEditableOptions
-├─ ContentEditableResult
-└─ ContentEditableAdapter
 
 Adapter packages
 ├─ Web Platform

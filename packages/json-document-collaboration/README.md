@@ -207,8 +207,9 @@ needs a new wire protocol, every materializing participant must install that
 separate protocol; an unconfigured base document must never pretend it can
 resolve opaque commands.
 
-Native-input DOM leasing is likewise separate in
-`@interactive-os/json-document-contenteditable-collaboration`. It continues
+Native-input DOM leasing likewise stays out of this package. The lease is
+`@interactive-os/json-document-contenteditable`: pass this package's `text`
+runtime as the `text` option of `createContentEditableBinding`. It continues
 ingesting model Changes during composition and gates only rendering for the
 leased surface.
 

@@ -112,10 +112,6 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-contenteditable/src/index.ts"),
     },
     {
-      find: "@interactive-os/json-document-contenteditable-collaboration",
-      replacement: sourceFile("packages/contenteditable-collaboration/src/index.ts"),
-    },
-    {
       find: "@interactive-os/json-document-collaboration/history",
       replacement: sourceFile("packages/json-document-collaboration/src/history-index.ts"),
     },

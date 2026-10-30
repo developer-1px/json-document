@@ -35,7 +35,6 @@
     "packages/json-document-rich-text-web",
     "packages/json-document-rich-text-react",
     "packages/json-document-collaboration",
-    "packages/contenteditable-collaboration",
     "site",
     "packages/json-document-sheet",
     "packages/json-document-sheet-document"

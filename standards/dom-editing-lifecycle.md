@@ -46,11 +46,12 @@ Public identifier와 phase의 canonical mapping은 다음과 같다.
 | Package | Public entry | DOM boundary | Model commit |
 | --- | --- | --- | --- |
 | `packages/json-document-contenteditable` | `createContentEditableBinding`, `ContentEditable` | `TextDOMAdapter.observe/render/restoreSelection` | `JSONDocument.commit`의 string `replace` |
-| `packages/contenteditable-collaboration` | `createContentEditableAdapter` | `TextDOMAdapter.observe/render/restoreSelection` | `TextRuntime.capture -> plan -> commit` |
+| `packages/json-document-contenteditable` with `text` port | `createContentEditableBinding({ text })` | `TextDOMAdapter.observe/render/restoreSelection` | `ContentEditableTextPort.capture -> plan -> commit` (collaboration `TextRuntime`) |
 | `packages/json-document-rich-text-web` | `createRichTextContentEditableBinding` | `readRichTextDOMSelection`, `restoreRichTextDOMSelection`, scoped DOM text observation | `RichTextEditor.dispatch`의 semantic intent |
 
-`Binding`과 `Adapter`라는 public 이름은 기존 package contract를 보존한다. 이
-문서는 세 구현을 하나의 TypeScript interface로 합치지 않는다.
+Local string과 collaborative text는 같은 `createContentEditableBinding`을 쓰고
+`text` port 유무로 commit 경로만 갈린다. 이 문서는 세 경로를 하나의
+TypeScript interface로 합치지 않는다.
 
 ## 공통 lifecycle
 
@@ -102,7 +103,7 @@ bind
 
 - Plain local·collaboration string은 `beforeinput` 또는 `compositionstart`에서
   native-input DOM lease를 연다.
-- Collaboration은 lease를 열기 전에 `TextRuntime.capture`로 causal basis를
+- `text` port가 있으면 lease를 열기 전에 `text.capture`로 causal basis를
   고정한다.
 - Rich Text는 일반 `beforeinput`을 semantic intent로 처리하지만 composition은
   browser가 선택한 scoped DOM element를 직접 바꾸게 한다.
@@ -156,7 +157,7 @@ bind
 
 ## Event ownership
 
-| Event | Local string Binding | Collaborative text Adapter | Rich Text Binding |
+| Event | Local string Binding | Collaborative text Binding (`text` port) | Rich Text Binding |
 | --- | --- | --- | --- |
 | `beforeinput` | Lease 시작; browser mutation 허용 | Capture와 lease 시작; browser mutation 허용 | 지원 intent는 prevent하고 semantic dispatch; composition input은 browser에 맡김 |
 | `input` | Non-composition DOM observation commit; composition tail은 추가 commit 없이 latest render | Non-composition plan/commit; composition tail selection reconcile | Ending composition DOM이 final인지 재검사 |
@@ -168,7 +169,7 @@ bind
 | `cut` | Native mutation이 `beforeinput/input` lifecycle로 commit됨 | Native mutation이 capture/plan/commit됨 | Clipboard payload 작성 후 Rich Text selection cut dispatch |
 | `paste` | Native mutation이 `beforeinput/input` lifecycle로 commit됨 | Native mutation이 capture/plan/commit됨 | Structured > HTML > plain priority로 semantic paste dispatch |
 | `blur` | Active lease cancel과 latest render | Active lease/tail cancel과 latest render | Binding-level blur handler 없음; host/renderer가 focus policy 소유 |
-| `keydown` | Binding이 command policy를 소유하지 않음 | Adapter가 command policy를 소유하지 않음 | Backspace/Delete와 native history를 semantic intent로 intercept하고 뒤따르는 동일 deletion `beforeinput`을 중복 처리하지 않음 |
+| `keydown` | Binding이 command policy를 소유하지 않음 | Binding이 command policy를 소유하지 않음 | Backspace/Delete와 native history를 semantic intent로 intercept하고 뒤따르는 동일 deletion `beforeinput`을 중복 처리하지 않음 |
 
 Clipboard event와 뒤따르는 `beforeinput`이 모두 오는 browser에서도 한 사용자
 작업을 두 번 commit하지 않아야 한다. Rich Text clipboard binding은 clipboard
@@ -199,10 +200,10 @@ beforeinput/compositionstart
 
 ```text
 beforeinput/compositionstart
-`-- TextRuntime.capture(pointer)
+`-- text.capture(pointer)
     `-- browser DOM mutation
-        `-- TextRuntime.plan(capture, observation)
-            `-- TextRuntime.commit(plan)
+        `-- text.plan(capture, observation)
+            `-- text.commit(plan)
                 `-- rebase/tail selection
                     `-- render latest materialized text
 ```

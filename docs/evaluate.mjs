@@ -136,9 +136,6 @@ const surfaces = {
   webReadme: read("packages/json-document-web/README.md"),
   contenteditableReadme: read("packages/json-document-contenteditable/README.md"),
   collaborationReadme: read("packages/json-document-collaboration/README.md"),
-  contenteditableCollaborationReadme: read(
-    "packages/contenteditable-collaboration/README.md",
-  ),
   llms: read("docs/public/llms.txt"),
   ...publicDocs,
 };
@@ -218,10 +215,8 @@ for (const [, path] of editingSession.matchAll(/\]\(([^)]+)\)/g)) {
 
 for (const token of [
   "packages/json-document-contenteditable",
-  "packages/contenteditable-collaboration",
   "packages/json-document-rich-text-web",
   "createContentEditableBinding",
-  "createContentEditableAdapter",
   "createRichTextContentEditableBinding",
   "beforeinput",
   "compositionstart",
