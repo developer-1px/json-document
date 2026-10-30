@@ -40,9 +40,6 @@
   "peerDependencies": {
     "@interactive-os/json-document": "^3.0.0"
   },
-  "dependencies": {
-    "zod": "^4.0.0"
-  },
   "devDependencies": {
     "@interactive-os/json-document": "*",
     "@types/node": "^25.9.0",

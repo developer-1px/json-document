@@ -8,7 +8,7 @@ IME-safe native-input DOM lease for
 `@interactive-os/json-document-collaboration/text`.
 
 The adapter binds one collaborative string pointer to one contenteditable
-root. Collaboration ingestion and the six-member document model always update
+root. Collaboration ingestion and the five-member document model always update
 immediately. While the browser owns native input or IME composition, only
 rendering back into that root is delayed.
 

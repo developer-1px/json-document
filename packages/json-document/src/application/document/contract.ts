@@ -49,18 +49,6 @@ export type ReadResult =
       readonly pointer?: Pointer;
     };
 
-export type QueryResult =
-  | {
-      readonly ok: true;
-      readonly query: string;
-      readonly pointers: ReadonlyArray<Pointer>;
-    }
-  | {
-      readonly ok: false;
-      readonly code: string;
-      readonly reason?: string;
-    };
-
 export type JSONPatchResult =
   | {
       readonly ok: true;
@@ -81,7 +69,6 @@ export type JSONDocumentCommitResult =
 export interface JSONDocument {
   readonly value: JSONValue;
   at(pointer: Pointer): ReadResult;
-  query(jsonPath: string): QueryResult;
   validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONPatchValidationResult;

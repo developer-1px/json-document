@@ -1756,7 +1756,7 @@ const sheetClipboardFormat: { mimeType: "application/vnd.interactive-os.sheet+js
 ## `SheetColumn`
 
 ```ts
-type SheetColumn = z.infer<typeof sheetColumnSchema>;
+type SheetColumn = { readonly id: string; readonly label: string; readonly [extension: string]: JSONValue };
 ```
 ## `sheetColumnLabel`
 
@@ -1766,7 +1766,7 @@ sheetColumnLabel(index: number): string
 ## `SheetDocument`
 
 ```ts
-type SheetDocument = z.infer<typeof sheetDocumentSchema>;
+type SheetDocument = { readonly columns: readonly SheetColumn[]; readonly rows: readonly SheetRow[]; readonly [extension: string]: JSONValue };
 ```
 ## `SheetEditor`
 
@@ -1879,7 +1879,7 @@ interface SheetRange extends Record<string, JSONValue> {
 ## `SheetRow`
 
 ```ts
-type SheetRow = z.infer<typeof sheetRowSchema>;
+type SheetRow = { readonly id: string; readonly cells: { readonly [columnId: string]: JSONValue }; readonly [extension: string]: JSONValue };
 ```
 ## `SheetSelection`
 

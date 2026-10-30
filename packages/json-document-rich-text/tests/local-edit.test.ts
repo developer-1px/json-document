@@ -263,7 +263,6 @@ describe("Official Rich Text local edit costs", () => {
     const document = {
       get value() { return inner.value; },
       at: inner.at.bind(inner),
-      query: inner.query.bind(inner),
       validatePatch: inner.validatePatch.bind(inner),
       subscribe: inner.subscribe.bind(inner),
       commit(operations: Parameters<typeof inner.commit>[0], options?: Parameters<typeof inner.commit>[1]) {

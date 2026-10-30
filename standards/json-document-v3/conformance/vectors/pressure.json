@@ -141,16 +141,6 @@
             "notificationCount": 1
           }
         }
-      ],
-      "queries": [
-        {
-          "jsonPath": "$.rows[*].id",
-          "expect": {
-            "ok": true,
-            "query": "$.rows[*].id",
-            "pointers": ["/rows/0/id", "/rows/1/id", "/rows/2/id"]
-          }
-        }
       ]
     },
     {
@@ -284,16 +274,6 @@
               }
             },
             "notificationCount": 1
-          }
-        }
-      ],
-      "queries": [
-        {
-          "jsonPath": "$.doc.blocks[*].text",
-          "expect": {
-            "ok": true,
-            "query": "$.doc.blocks[*].text",
-            "pointers": ["/doc/blocks/0/text"]
           }
         }
       ]

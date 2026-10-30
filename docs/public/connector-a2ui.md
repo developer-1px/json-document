@@ -1,6 +1,6 @@
 # A2UI Connector
 
-`@interactive-os/json-document-a2ui`는 A2UI v0.9 계열의 메시지와 JSONL을 JSONDocument로 연결하는 선택적 Connector입니다. Core의 six-member 계약에는 A2UI나 RxJS 의존성을 추가하지 않습니다.
+`@interactive-os/json-document-a2ui`는 A2UI v0.9 계열의 메시지와 JSONL을 JSONDocument로 연결하는 선택적 Connector입니다. Core의 five-member 계약에는 A2UI나 RxJS 의존성을 추가하지 않습니다.
 
 ## Usage
 

@@ -53,7 +53,7 @@ import {
 ```
 
 Root는 React, Zod, selection, clipboard, history, DOM을 import하지 않는다.
-공개 Root는 정확히 다음 25개 symbol이다.
+공개 Root는 정확히 다음 24개 symbol이다.
 
 ```txt
 values
@@ -66,7 +66,7 @@ types
   JSONChangeMetadata, JSONDocument, JSONDocumentOptions
   JSONDocumentCommitOptions, JSONDocumentCommitResult
   JSONPatchOperation, JSONPatchResult, JSONValue, Pointer
-  QueryResult, ReadResult
+  ReadResult
 ```
 
 구현 내부 경로를 import하지 않는다. Root에 새 edit verb, schema provider object,
@@ -77,26 +77,25 @@ React hook, host service를 추가하지 않는다.
 ```txt
 stateless JSON Patch
   |-> local implementation -----\
-  |                               > same six-member JSON Document
+  |                               > same five-member JSON Document
   `-> collaboration engine -----/    |-> optional headless editing
                                      |-> optional history/text authoring
                                      `-> optional native-input DOM lease
 ```
 
-Core의 표준 JSON 책임은 JSON value, RFC 6901 JSON Pointer, RFC 9535 JSONPath,
+Core의 표준 JSON 책임은 JSON value, RFC 6901 JSON Pointer,
 RFC 6902 JSON Patch와 Result 의미를 다룬다. JSON Document는 현재 document
 value와 change notification을 연결한다.
 
 Canonical concept와 identifier 문법은
 `standards/repository-naming.md`가 정의한다.
 
-`JSONDocument`의 필수 member는 정확히 여섯 개다.
+`JSONDocument`의 필수 member는 정확히 다섯 개다.
 
 ```ts
 interface JSONDocument {
   readonly value: JSONValue;
   at(pointer: Pointer): ReadResult;
-  query(jsonPath: string): QueryResult;
   validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONPatchValidationResult;
@@ -142,21 +141,10 @@ if (document.validatePatch(operations).ok) {
 notification을 만들지 않는다. 재진입 commit도 모든 subscriber가 같은 인과
 순서로 받아야 하며 한 listener의 예외가 다른 listener 전달을 막으면 안 된다.
 
-## Patch, Pointer, JSONPath
+## Patch, Pointer
 
-JSONPath는 검색 전용이다. `query(jsonPath)`가 반환한 Pointer를 JSON Patch의
-`path` 또는 `from`에 사용한다. JSONPath 문자열을 mutation target으로 쓰지
-않는다.
-
-Root document Pointer는 빈 문자열 `""`이다. Array append는 `/items/-`다.
-
-```ts
-const result = document.query("$.items[*].id");
-
-if (result.ok) {
-  result.pointers;
-}
-```
+JSON Patch의 `path`와 `from`은 JSON Pointer만 받는다. Root document Pointer는
+빈 문자열 `""`이다. Array append는 `/items/-`다.
 
 ## Pure applyPatch
 
@@ -219,7 +207,7 @@ applied JSON Patch에 명시한다.
 ## Result 규칙
 
 Public Result는 boolean `ok` discriminant를 가진다. Failure는 stable string
-`code`를 가진다. Expected read, query, patch, commit failure를 exception으로만
+`code`를 가진다. Expected read, patch, commit failure를 exception으로만
 표현하지 않는다.
 
 Consumer는 exact key 집합이나 exhaustive error-code union에 의존하지 않는다.
@@ -228,7 +216,7 @@ Minor release에서 optional diagnostic field와 새 code가 추가될 수 있�
 ## Adapter, Connector와 companion
 
 Core package는 root entrypoint만 공개한다. Selection, clipboard, history는
-optional editing companion이 여섯-member `JSONDocument` 위에서 조합한다.
+optional editing companion이 다섯-member `JSONDocument` 위에서 조합한다.
 DOM-free selection state와 semantic interaction은
 `@interactive-os/json-document-selection` companion이 key, range, mask family로
 제공한다. Topology는 문서·표시 순서의 owner가, geometry 관찰과 physical input

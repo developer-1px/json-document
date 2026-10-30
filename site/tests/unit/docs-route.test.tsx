@@ -76,7 +76,7 @@ describe("documentation routes", () => {
 
     await user.click(nav.getByRole("link", { name: "JSON Document" }));
     await waitFor(() => expect(document.title).toBe("JSON Document Protocol - json-document"));
-    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("로컬·협업 구현이 공유하는 여섯 member의 JSONDocument 계약과 JSON 표준 연산 API를 설명합니다.");
+    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("로컬·협업 구현이 공유하는 다섯 member의 JSONDocument 계약과 JSON 표준 연산 API를 설명합니다.");
     expect(await screen.findByRole("heading", { level: 1, name: "JSON Document Protocol" }, { timeout: 10000 })).toBeTruthy();
     expect(within(nav.getByRole("group", { name: "시작하기" })).getByRole("link", { name: "소개" }).getAttribute("aria-current")).toBeNull();
     expect(nav.getByRole("link", { name: "JSON Document" }).getAttribute("aria-current")).toBe("page");

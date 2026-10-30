@@ -5,13 +5,12 @@
   "documentMembers": [
     "value",
     "at",
-    "query",
     "validatePatch",
     "commit",
     "subscribe"
   ],
   "coverage": {
-    "runtime": 15,
+    "runtime": 14,
     "static": 6,
     "deferred": 0
   },
@@ -41,18 +40,16 @@
       "members": [
         "value",
         "at",
-        "query",
         "validatePatch",
         "commit",
         "subscribe"
       ]
     },
     {
-      "id": "pointer-read-and-jsonpath-query",
+      "id": "pointer-read",
       "kind": "read",
       "requirements": [
         "JD3-ADDRESS-001",
-        "JD3-QUERY-001",
         "JD3-RESULT-001"
       ],
       "at": [
@@ -78,26 +75,6 @@
             "ok": false,
             "code": "path_not_found",
             "pointer": "/items/9"
-          }
-        }
-      ],
-      "query": [
-        {
-          "jsonPath": "$.items[*].id",
-          "expect": {
-            "ok": true,
-            "query": "$.items[*].id",
-            "pointers": [
-              "/items/0/id",
-              "/items/1/id"
-            ]
-          }
-        },
-        {
-          "jsonPath": "$.items[",
-          "expect": {
-            "ok": false,
-            "code": "invalid_query"
           }
         }
       ]
@@ -276,7 +253,7 @@
       }
     },
     {
-      "id": "jsonpath-is-not-a-mutation-target",
+      "id": "non-pointer-path-is-not-a-mutation-target",
       "kind": "commit",
       "requirements": [
         "JD3-ADDRESS-001",

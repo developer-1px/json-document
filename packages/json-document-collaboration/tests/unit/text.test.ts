@@ -45,7 +45,6 @@ describe("@interactive-os/json-document-collaboration/text", () => {
     expect(Object.keys(shared.document).sort()).toEqual([
       "at",
       "commit",
-      "query",
       "subscribe",
       "validatePatch",
       "value",

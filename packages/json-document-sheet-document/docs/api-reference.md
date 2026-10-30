@@ -6,10 +6,20 @@
 
 > 이 문서는 `packages/json-document-sheet-document/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `assertSheetColumn`
+
+```ts
+assertSheetColumn(value: unknown, path?: string): asserts value is SheetColumn
+```
 ## `assertSheetDocument`
 
 ```ts
 assertSheetDocument(value: unknown): asserts value is SheetDocument
+```
+## `assertSheetRow`
+
+```ts
+assertSheetRow(value: unknown, path?: string): asserts value is SheetRow
 ```
 ## `createSheetColumn`
 
@@ -40,35 +50,20 @@ createSheetRow(document: SheetDocument): SheetRow
 ## `SheetColumn`
 
 ```ts
-type SheetColumn = z.infer<typeof sheetColumnSchema>;
+type SheetColumn = { readonly id: string; readonly label: string; readonly [extension: string]: JSONValue };
 ```
 ## `sheetColumnLabel`
 
 ```ts
 sheetColumnLabel(index: number): string
 ```
-## `sheetColumnSchema`
-
-```ts
-const sheetColumnSchema: z.ZodReadonly<z.ZodObject<{ id: z.ZodString; label: z.ZodString; }, z.core.$catchall<z.ZodCustom<JSONValue, JSONValue>>>>
-```
 ## `SheetDocument`
 
 ```ts
-type SheetDocument = z.infer<typeof sheetDocumentSchema>;
-```
-## `sheetDocumentSchema`
-
-```ts
-const sheetDocumentSchema: z.ZodReadonly<z.ZodObject<{ columns: z.ZodReadonly<z.ZodArray<z.ZodReadonly<z.ZodObject<{ id: z.ZodString; label: z.ZodString; }, z.core.$catchall<z.ZodCustom<JSONValue, JSONValue>>>>>>; rows: z.ZodReadonly<...>; }, z.core.$catchall<...>>>
+type SheetDocument = { readonly columns: readonly SheetColumn[]; readonly rows: readonly SheetRow[]; readonly [extension: string]: JSONValue };
 ```
 ## `SheetRow`
 
 ```ts
-type SheetRow = z.infer<typeof sheetRowSchema>;
-```
-## `sheetRowSchema`
-
-```ts
-const sheetRowSchema: z.ZodReadonly<z.ZodObject<{ id: z.ZodString; cells: z.ZodReadonly<z.ZodRecord<z.ZodString, z.ZodCustom<JSONValue, JSONValue>>>; }, z.core.$catchall<z.ZodCustom<JSONValue, JSONValue>>>>
+type SheetRow = { readonly id: string; readonly cells: { readonly [columnId: string]: JSONValue }; readonly [extension: string]: JSONValue };
 ```

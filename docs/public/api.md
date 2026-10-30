@@ -1,6 +1,6 @@
 # JSON Document Protocol
 
-`JSONDocument`는 값·주소·검증·원자적 변경·관찰의 여섯 member를 갖는 공통
+`JSONDocument`는 값·주소·검증·원자적 변경·관찰의 다섯 member를 갖는 공통
 계약입니다. 로컬 구현과 [Collaboration](collaboration.md)이 같은 계약을
 제공합니다. Core v3의 Stable 계약과 현재 TypeScript API를 작업별로 정리합니다.
 package 전체 시그니처는 [JSON Document API](../../packages/json-document/docs/api-reference.md)에 있습니다.
@@ -24,7 +24,6 @@ const document = createJSONDocument({
 interface JSONDocument {
   readonly value: JSONValue;
   at(pointer: Pointer): ReadResult;
-  query(jsonPath: string): QueryResult;
   validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONPatchValidationResult;
@@ -72,21 +71,6 @@ if (result.ok) {
 ```
 
 주소가 없거나 Pointer 문법이 잘못되면 실패 결과가 돌아옵니다.
-
-## 여러 위치 찾기
-
-`query(jsonPath)`는 JSONPath와 일치하는 위치를 Pointer 배열로 돌려줍니다.
-
-```ts
-const result = document.query("$..cards[?(@.status=='todo')]");
-
-if (result.ok) {
-  console.log(result.pointers);
-}
-```
-
-찾은 값을 바꿀 때는 결과의 Pointer를 JSON Patch `path`나 `from`에
-사용합니다.
 
 ## Pointer 만들고 추적하기
 
@@ -299,7 +283,6 @@ type Failure = {
 | 한 위치 읽기 | `document.at(pointer)` | `ReadResult` |
 | snapshot에서 한 위치 읽기 | `readPointer(value, pointer)` | `ReadResult` |
 | JSON 값 검사 | `isJSONValue(value)` | boolean/type guard |
-| 여러 위치 찾기 | `document.query(jsonPath)` | `QueryResult` |
 | patch 검사 | `document.validatePatch(operations)` | `JSONPatchValidationResult` |
 | 상태 변경 | `document.commit(operations, options?)` | `JSONDocumentCommitResult` |
 | 변경 구독 | `document.subscribe(listener)` | unsubscribe function |
@@ -310,7 +293,7 @@ type Failure = {
 
 ## 공개 export
 
-Package root는 다음 25개 symbol을 공개합니다.
+Package root는 다음 24개 symbol을 공개합니다.
 
 ```txt
 values
@@ -323,7 +306,7 @@ types
   JSONAppliedChange, JSONPatchResult, JSONDocumentCommitResult
   JSONPatchValidationResult, JSONChangeMetadata
   JSONDocumentOptions, JSONDocumentCommitOptions
-  ReadResult, QueryResult, JSONDocument
+  ReadResult, JSONDocument
 ```
 
 Selection, Clipboard, History와 Intent는

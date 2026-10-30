@@ -122,12 +122,6 @@ for (const size of sizes) {
     const result = structuralDocument.commit([...appended, ...removed]);
     return result.ok && result.change.applied.length === batchSize * 2;
   });
-
-  const queryDocument = createJSONDocument(initial);
-  measure("query direct item", () => {
-    const result = queryDocument.query(`$.items[${middle}].id`);
-    return result.ok && result.pointers[0] === `/items/${middle}/id`;
-  });
 }
 
 if (leafCommits.length > 1) {

@@ -39,7 +39,7 @@ describe("@interactive-os/json-document-collaboration", () => {
     );
   });
 
-  test("exposes the canonical six-member JSON Document API", () => {
+  test("exposes the canonical five-member JSON Document API", () => {
     const shared = runtime("actor-a");
 
     expect(Object.keys(shared).sort()).toEqual([
@@ -49,7 +49,6 @@ describe("@interactive-os/json-document-collaboration", () => {
     expect(Object.keys(shared.document).sort()).toEqual([
       "at",
       "commit",
-      "query",
       "subscribe",
       "validatePatch",
       "value",

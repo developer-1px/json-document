@@ -30,7 +30,7 @@ describe("public documentation contract", () => {
   });
 
   test("accepts the exact published llms source against the canonical Core contract", () => {
-    expect(symbolCount).toBe(25);
+    expect(symbolCount).toBe(24);
     for (const symbol of publicContract.root.values) expect(llms).toContain(symbol);
     expect(findings(llms)).toEqual([]);
   });
@@ -38,7 +38,7 @@ describe("public documentation contract", () => {
   test.each([
     ["old Root symbol count", llms.replace(`${symbolCount}개 symbol`, "21개 symbol")],
     ["missing v3 title", llms.replace("# json-document v3", "# json-document")],
-    ["missing six-member contract", llms.replace("`JSONDocument`의 필수 member는 정확히 여섯 개다", "JSON Document")],
+    ["missing five-member contract", llms.replace("`JSONDocument`의 필수 member는 정확히 다섯 개다", "JSON Document")],
     ["missing companion boundary", llms.replace("## Adapter, Connector와 companion", "## Integrations")],
     ["missing migration boundary", llms.replaceAll("@interactive-os/editable", "retired editor")],
   ])("rejects %s", (_name, source) => {

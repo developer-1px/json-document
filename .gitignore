@@ -22,3 +22,6 @@ playwright-report/
 
 # Local one-off profiling specs (also excluded by Playwright testIgnore)
 *.tmp.spec.ts
+
+# Output of npm run measure:closure
+closure-report.json

@@ -1,11 +1,9 @@
 import {
-  JSONPathSyntaxError,
   applyOwnedProtocolPatch,
   applyProtocolPatch,
   cloneJsonSerializable,
   jsonEqual,
   parsePointer,
-  queryJSONPath,
   readAt,
   readPointer,
   type JSONAppliedChange,
@@ -16,7 +14,6 @@ import {
   type JSONPatchOperation,
   type JSONPatchResult,
   type JSONValue,
-  type QueryResult,
   type ReadResult,
 } from "../../foundation/protocol/index.js";
 
@@ -27,7 +24,6 @@ interface JSONDocumentStateOptions {
 interface JSONDocumentState {
   readonly value: JSONValue;
   at(pointer: string): ReadResult;
-  query(jsonPath: string): QueryResult;
   validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONPatchValidationResult;
@@ -82,24 +78,6 @@ export function createJSONDocumentState(
     },
     at(pointer: string): ReadResult {
       return readPointer(state, pointer);
-    },
-    query(jsonPath: string): QueryResult {
-      try {
-        return Object.freeze({
-          ok: true,
-          query: jsonPath,
-          pointers: Object.freeze(queryJSONPath(jsonPath, state)),
-        });
-      } catch (error) {
-        if (error instanceof JSONPathSyntaxError) {
-          return Object.freeze({
-            ok: false,
-            code: "invalid_query",
-            reason: error.message,
-          });
-        }
-        throw error;
-      }
     },
     validatePatch(
       operations: ReadonlyArray<JSONPatchOperation>,

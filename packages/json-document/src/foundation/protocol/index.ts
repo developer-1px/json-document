@@ -17,7 +17,6 @@ export type {
   JSONPatchOperation,
   JSONPatchResult,
   JSONValue,
-  QueryResult,
   ReadResult,
 } from "./contract.js";
 
@@ -25,10 +24,6 @@ export {
   cloneJsonSerializable,
   jsonEqual,
 } from "../json/index.js";
-export {
-  JSONPathSyntaxError,
-  query as queryJSONPath,
-} from "../jsonpath/index.js";
 export {
   appendSegment,
   buildPointer,

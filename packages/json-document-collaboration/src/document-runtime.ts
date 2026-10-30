@@ -134,9 +134,6 @@ export function createDocumentRuntime(state: RuntimeState): JSONDocument {
     at(pointer: string) {
       return state.documentStore.at(pointer);
     },
-    query(jsonPath: string) {
-      return state.documentStore.query(jsonPath);
-    },
     validatePatch(
       operations: ReadonlyArray<JSONPatchOperation>,
     ): JSONPatchValidationResult {

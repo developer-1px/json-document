@@ -3,6 +3,7 @@
   "version": "0.1.0-rc.0",
   "description": "Canonical resilient streaming Markdown projection and React renderer for json-document surfaces.",
   "type": "module",
+  "sideEffects": false,
   "license": "MIT",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -1,10 +1,10 @@
 import {expect,test} from "vitest";
-import {createSheetDocument,sheetDocumentSchema,assertSheetDocument} from "../src/index.js";
+import {createSheetDocument,assertSheetDocument,assertSheetColumn,assertSheetRow} from "../src/index.js";
 
 test("schema retains legacy IDs, JSON cells and extensions without adding a discriminator",()=>{
  const legacy={name:"기존 표",columns:[{id:"c0",label:"A",width:120}],rows:[{id:"r0",height:32,cells:{c0:{nested:[null,0,false]}}}]};
- expect(sheetDocumentSchema.parse(legacy)).toEqual(legacy);expect(()=>assertSheetDocument(legacy)).not.toThrow();
- const created=createSheetDocument({rows:2,columns:3});expect(sheetDocumentSchema.safeParse(created).success).toBe(true);
+ expect(()=>assertSheetDocument(legacy)).not.toThrow();expect(legacy).toEqual({name:"기존 표",columns:[{id:"c0",label:"A",width:120}],rows:[{id:"r0",height:32,cells:{c0:{nested:[null,0,false]}}}]});
+ const created=createSheetDocument({rows:2,columns:3});expect(()=>assertSheetDocument(created)).not.toThrow();
  expect(created.rows[0]!.cells).not.toBe(created.rows[1]!.cells);
 });
 test.each([
@@ -21,11 +21,10 @@ test("creation validates counts and sizes",()=>{
  expect(createSheetDocument({rows:0,columns:0})).toEqual({rows:[],columns:[]});
 });
 
-test("partial row and column schemas enforce the same size constraints as a document",async()=>{
- const {sheetRowSchema,sheetColumnSchema}=await import("../src/index.js");
+test("partial row and column assertions enforce the same size constraints as a document",()=>{
  for(const size of [-1,0,NaN,Infinity,"large"]){
   const column={id:"a",label:"A",width:size},row={id:"r",cells:{a:""},height:size};
-  expect(sheetColumnSchema.safeParse(column).success).toBe(false);expect(sheetDocumentSchema.safeParse({columns:[column],rows:[]}).success).toBe(false);
-  expect(sheetRowSchema.safeParse(row).success).toBe(false);expect(sheetDocumentSchema.safeParse({columns:[{id:"a",label:"A"}],rows:[row]}).success).toBe(false);
+  expect(()=>assertSheetColumn(column)).toThrow();expect(()=>assertSheetDocument({columns:[column],rows:[]})).toThrow();
+  expect(()=>assertSheetRow(row)).toThrow();expect(()=>assertSheetDocument({columns:[{id:"a",label:"A"}],rows:[row]})).toThrow();
  }
 });

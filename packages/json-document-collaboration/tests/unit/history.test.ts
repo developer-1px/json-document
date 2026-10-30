@@ -60,7 +60,6 @@ describe("@interactive-os/json-document-collaboration/history", () => {
     expect(Object.keys(shared.document).sort()).toEqual([
       "at",
       "commit",
-      "query",
       "subscribe",
       "validatePatch",
       "value",

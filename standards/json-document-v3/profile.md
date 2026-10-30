@@ -19,7 +19,7 @@ naming grammar는
 conformance vector, 언어별 binding, reference implementation 순서다.
 reference implementation의 현재 동작은 상위 계약을 덮어쓸 수 없다.
 
-stateless JSON Patch은 JSON value, JSON Pointer, JSONPath, JSON Patch와 result의
+stateless JSON Patch은 JSON value, JSON Pointer, JSON Patch와 result의
 의미만 정의한다. JSON Document은 그 protocol을 현재 문서에 연결하는 stateful
 port다. Selection, history와 clipboard는 optional companion이 조합하고, DOM과
 framework lifecycle은 Host adapter 또는 independently versioned Connector가
@@ -29,7 +29,7 @@ JSON Document과 조합한다.
 stateless JSON Patch -> JSON Document -> host adapter
 ```
 
-## Canonical 여섯-member JSON Document
+## Canonical 다섯-member JSON Document
 
 아래 TypeScript는 root package가 공개하는 application-owned 구조 계약이다.
 
@@ -38,7 +38,6 @@ interface JSONDocument {
   readonly value: JSONValue;
 
   at(pointer: Pointer): ReadResult;
-  query(jsonPath: string): QueryResult;
   validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONPatchValidationResult;
@@ -50,7 +49,7 @@ interface JSONDocument {
 }
 ```
 
-`at`은 정확한 주소 한 곳을 읽고, `query`는 여러 주소를 찾는다.
+`at`은 정확한 주소 한 곳을 읽는다.
 `validatePatch`는 같은 mutation을 실행하지 않고 검증하며, `commit`만 core
 state를 바꾼다.
 `subscribe`는 이미 전달된 변경만 전달한다.
@@ -69,16 +68,15 @@ JSON이 아니거나 validation에 거부되면 TypeScript reference binding은
 | JD3-GOV-001 | 구현체와 binding은 외부 표준, versioned normative profile, machine-readable conformance vector의 의미를 MUST 준수해야 한다. reference implementation의 우연한 동작은 이 계약을 변경할 수 없다. |
 | JD3-DATA-001 | document state, patch payload, protocol metadata는 RFC 8259 JSON data여야 하며 `undefined`, function, symbol, cyclic reference 같은 host value를 MUST NOT 포함해야 한다. |
 | JD3-DATA-002 | 공개 snapshot과 입력 reference는 격리되어야 한다. consumer가 이전 `value`, initial value, patch payload를 변경해 committed state를 바꿀 수 있어서는 안 된다. 같은 revision의 object identity 재사용은 MAY 허용하지만 계약은 아니다. |
-| JD3-DOCUMENT-001 | 호환 JSON Document은 `value`, `at`, `query`, `validatePatch`, `commit`, `subscribe`를 정확한 필수 member로 제공해야 한다. 추가 member는 MAY 제공하지만 여섯 member의 의미를 바꾸거나 portable consumer의 전제가 되어서는 안 된다. |
-| JD3-ADDRESS-001 | 정확한 주소와 mutation target은 RFC 6901 JSON Pointer여야 한다. JSONPath를 mutation target으로 받아들이면 안 되며 query 결과는 Pointer로 정규화해야 한다. |
-| JD3-QUERY-001 | `query`는 RFC 9535 JSONPath를 받아 document를 바꾸지 않고 deterministic한 Pointer 배열 또는 stable error code를 포함한 실패 result를 반환해야 한다. |
+| JD3-DOCUMENT-001 | 호환 JSON Document은 `value`, `at`, `validatePatch`, `commit`, `subscribe`를 정확한 필수 member로 제공해야 한다. 추가 member는 MAY 제공하지만 다섯 member의 의미를 바꾸거나 portable consumer의 전제가 되어서는 안 된다. |
+| JD3-ADDRESS-001 | 정확한 주소와 mutation target은 RFC 6901 JSON Pointer여야 한다. JSON Pointer가 아닌 주소 표현을 mutation target으로 받아들이면 안 된다. |
 | JD3-PATCH-001 | mutation은 RFC 6902 operation의 ordered batch여야 한다. 순수 patch 적용과 `commit`은 전체 batch를 순서대로 적용하거나 아무것도 적용하지 않아야 하며 성공 시 실제 적용된 canonical operation 순서를 보존해야 한다. |
 | JD3-PATCH-002 | Pure Patch 연산은 schema provider, UI framework, mutable session 없이 실행 가능해야 한다. validation, history, selection과 change notification은 이 순수 연산과 조합하되 그 의미를 바꾸면 안 된다. |
 | JD3-VALIDATION-001 | `validatePatch`는 state와 subscriber를 바꾸지 않고 `commit`과 같은 JSON, Pointer, Patch, validation 의미를 사용해야 한다. state와 validation rule이 사이에 변하지 않았다면 성공한 probe와 같은 입력의 commit이 같은 검증 원인으로 실패하면 안 된다. |
 | JD3-COMMIT-001 | `commit`은 JSON Document의 유일한 stateful mutation primitive여야 하고 local operation을 동기적·원자적으로 notify해야 한다. expected input failure는 throw나 rejected Promise가 아니라 result이며 partial state나 partial applied patch를 노출하면 안 된다. |
 | JD3-COMMIT-002 | 성공한 `commit`은 `JSONAppliedChange`를 담은 `JSONDocumentCommitResult`를 반환해야 한다. 그 change는 실제 적용된 canonical operation과 JSON-safe metadata만 포함하며 post-commit value는 `value`에서 읽는다. |
 | JD3-NOTIFICATION-001 | state-changing commit은 같은 인과 순서의 operation과 metadata를 가진 value-equivalent `JSONAppliedChange`를 subscriber마다 정확히 한 번 전달해야 한다. object identity는 계약이 아니다. 재진입 commit도 모든 subscriber에게 같은 순서로 전달해야 한다. 한 listener의 예외는 다른 listener 전달을 막거나 `commit` 밖으로 전파되거나 성공 result를 바꾸면 안 된다. 실패와 state-equivalent no-op은 notification을 만들면 안 되며 unsubscribe 이후에는 notification을 전달하면 안 된다. |
-| JD3-RESULT-001 | public result는 boolean `ok` discriminant를 가져야 하고 실패는 stable string `code`를 가져야 한다. expected read, query, validation, commit failure를 예외로만 표현해서는 안 된다. |
+| JD3-RESULT-001 | public result는 boolean `ok` discriminant를 가져야 하고 실패는 stable string `code`를 가져야 한다. expected read, validation, commit failure를 예외로만 표현해서는 안 된다. |
 | JD3-RESULT-002 | consumer는 모르는 result field와 error code를 일반적으로 처리할 수 있어야 한다. minor release는 기존 required field나 code의 의미를 바꾸면 안 되지만 optional field와 새 code는 MAY 추가할 수 있으므로 exact `Object.keys` 집합은 계약이 아니다. |
 | JD3-SCHEMA-001 | JSON Document이 validation rule을 구성하면 initial state와 commit candidate를 notification 전에 검사해야 한다. 이 boundary는 provider-neutral이어야 하며 `_zod`, provider issue, private schema object를 JSON Document 적합성에 요구하면 안 된다. 제약 없는 validation는 MAY 허용한다. Validation callback은 같은 JSON Document의 `validatePatch`나 `commit`을 재진입해서는 안 되며, binding은 그런 호출을 failure로 차단해 state와 change notification을 보존해야 한다. |
 | JD3-SCHEMA-002 | import나 initial parse는 commit 전에 명시적으로 값을 변환할 수 있다. commit-time validation는 candidate를 몰래 변환하면 안 되며 normalization이 필요하면 최종 value를 만드는 operation이 applied change에 명시되어야 한다. |
@@ -86,7 +84,7 @@ JSON이 아니거나 validation에 거부되면 TypeScript reference binding은
 | JD3-HOST-001 | rendering, DOM focus, geometry, keyboard policy, system clipboard, filesystem, network, formula engine, CRDT와 OT는 host 또는 extension이 소유해야 하며 Core JSON Document의 필수 data나 member가 되어서는 안 된다. |
 | JD3-CONFORMANCE-001 | conformance는 public factory 또는 injected harness만 사용하는 machine-readable black-box vector로 성공, 실패, atomicity, immutability, probe/commit parity, change notification을 검증해야 한다. private source path, provider object, 특정 dist layout을 요구하면 안 된다. |
 | JD3-CONFORMANCE-002 | 이 profile을 stable이라고 선언하려면 같은 suite가 reference implementation과 최소 한 개의 독립 구현을 통과하고 form, table/data-grid, outliner/tree, rich text, storage/collaboration의 다섯 pressure vertical에서 같은 제약이 확인되어야 한다. |
-| JD3-BINDING-001 | Kernel package export와 TypeScript declaration은 언어별 binding contract이며 보편 protocol과 별도로 versioning해야 한다. v3 Kernel package는 root entrypoint와 25개 Kernel symbol만 공개하고 runtime·peer dependency 없이 빌드되어야 한다. public JSON Document declaration은 application-owned structural contract여야 하고 removed session, framework binding, implementation runtime alias나 private declaration path를 노출하면 안 된다. Framework와 schema integration은 독립 Connector package에서 versioning할 수 있다. |
+| JD3-BINDING-001 | Kernel package export와 TypeScript declaration은 언어별 binding contract이며 보편 protocol과 별도로 versioning해야 한다. v3 Kernel package는 root entrypoint와 24개 Kernel symbol만 공개하고 runtime·peer dependency 없이 빌드되어야 한다. public JSON Document declaration은 application-owned structural contract여야 하고 removed session, framework binding, implementation runtime alias나 private declaration path를 노출하면 안 된다. Framework와 schema integration은 독립 Connector package에서 versioning할 수 있다. |
 
 ## Result 초안
 
@@ -149,13 +147,13 @@ unknown code를 허용하는 forward-compatibility fixture를 포함한다.
 
 ## Conformance artifact
 
-black-box suite는 여섯-member JSON Document, pure Patch, Pointer, 외부 RFC
+black-box suite는 다섯-member JSON Document, pure Patch, Pointer, 외부 RFC
 conformance corpus의 public-root binding을 서로 분리한다.
 
 | Artifact | 책임 |
 | --- | --- |
 | `standards/json-document-v3/conformance/vectors/json-document.json` | provider object가 없는 machine-readable 입력과 기대값 |
-| `standards/json-document-v3/conformance/suites/json-document.ts` | 여섯 member만 아는 injected harness runner |
+| `standards/json-document-v3/conformance/suites/json-document.ts` | 다섯 member만 아는 injected harness runner |
 | `packages/json-document/tests/conformance/json-document.test.ts` | public root factory reference binding |
 | `standards/json-document-v3/conformance/vectors/protocol.json` | schema-free pure Patch 입력과 기대값 |
 | `standards/json-document-v3/conformance/suites/protocol.ts` | `applyPatch`만 아는 injected harness runner |
@@ -165,13 +163,11 @@ conformance corpus의 public-root binding을 서로 분리한다.
 | `packages/json-document/tests/conformance/pointer.test.ts` | 여섯 public Pointer helper의 root binding |
 | `standards/json-document-v3/conformance/suites/rfc6902.ts` | vendored RFC 6902 corpus를 실행하는 provider-neutral runner |
 | `packages/json-document/tests/conformance/rfc6902.test.ts` | public root `applyPatch`의 전체 RFC 6902 corpus binding |
-| `standards/json-document-v3/conformance/suites/jsonpath.ts` | vendored RFC 9535 CTS를 `query`와 `at`으로 검증하는 runner |
-| `packages/json-document/tests/conformance/jsonpath.test.ts` | public root JSON Document의 전체 RFC 9535 CTS binding |
 | `standards/json-document-v3/conformance/vectors/foundation.json` | Core public primitive의 array index·equality 및 JSON boundary fixture |
 | `standards/json-document-v3/conformance/vectors/pressure.json` | form, table/data-grid, outliner/tree, rich text, storage/collaboration 시나리오 |
-| `standards/json-document-v3/conformance/suites/pressure.ts` | 여섯 member만으로 다섯 vertical을 실행하는 injected runner |
-| `standards/json-document-v3/implementations/independent/json-document.ts` | reference runtime을 import하지 않는 독립 6-member test implementation |
-| `standards/json-document-v3/implementations/independent/conformance.test.ts` | 독립 구현에 JSON Document, pressure, protocol, RFC 6902, RFC 9535 전체 suite를 주입하는 binding |
+| `standards/json-document-v3/conformance/suites/pressure.ts` | 다섯 member만으로 다섯 vertical을 실행하는 injected runner |
+| `standards/json-document-v3/implementations/independent/json-document.ts` | reference runtime을 import하지 않는 독립 5-member test implementation |
+| `standards/json-document-v3/implementations/independent/conformance.test.ts` | 독립 구현에 JSON Document, pressure, protocol, RFC 6902 전체 suite를 주입하는 binding |
 | `packages/json-document-collaboration/tests/conformance/json-document.test.ts` | collaboration public root에 같은 두 suite를 주입하는 추가 binding |
 
 suite가 export하는 structural type은 test harness 내부 계약이며 package public
@@ -180,18 +176,15 @@ export가 아니다. Vendored RFC 6902 corpus 112건 중 110건을 실행한다.
 member만 남아 public operation object로는 그 입력을 표현할 수 없어, 각 fixture에
 명시적인 `disabledReason`을 기록한다.
 
-21개 요구사항의 현재 증거 상태는 runtime 15개, static 6개, deferred 0개다.
+20개 요구사항의 현재 증거 상태는 runtime 14개, static 6개, deferred 0개다.
 schema-free `applyPatch`와 validation transform identity는 reference와 독립
 구현에서 같은 vector로 검증한다. 같은 JSON Document suite와 pressure suite는
 reference와 독립 구현을 모두 통과하며, collaboration public binding도 같은
 다섯 vertical을 통과한다. collaboration 구현은 Core protocol을 조합하므로
 독립 구현 수에는 포함하지 않는다.
 
-독립 구현은 reference parser/evaluator를 재사용하지 않는다. JSONPath는 test-only
-`jsonpath-js@0.3.1`의 public parser/evaluator와 독립적인 RFC 9535 §2.4 함수
-타입 검사로 구성한다. document가 비어 있어도 잘못된 함수 식을 거절해야 한다.
-전체 703개 CTS와 RFC 6902 실행 대상 110개를 reference와 독립 구현 모두에
-적용한다. 이는 저장소 내부의 두 구현에 대한 적합성 증거이며, 외부 팀의
+독립 구현은 reference parser/evaluator를 재사용하지 않는다. RFC 6902 실행
+대상 110개를 reference와 독립 구현 모두에 적용한다. 이는 저장소 내부의 두 구현에 대한 적합성 증거이며, 외부 팀의
 독립 채택·상호운용 실험이 이루어졌다는 주장은 아니다.
 
 ## Durability primitive boundary
@@ -212,13 +205,13 @@ array-property 분류만 공통 leaf에 두고, parity test가 untrusted boundar
 
 ## Package binding
 
-`@interactive-os/json-document`는 root entrypoint 하나와 25개 symbol을
-공개한다. `JSONDocument`의 canonical member는 여섯 개다.
+`@interactive-os/json-document`는 root entrypoint 하나와 24개 symbol을
+공개한다. `JSONDocument`의 canonical member는 다섯 개다.
 
 ```txt
 values  12
-types  13
-total  25
+types  12
+total  24
 ```
 
 `isJSONValue`와 `readPointer`는 JSON 값 검증과 주소 조회의 stateless TypeScript

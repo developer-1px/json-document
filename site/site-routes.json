@@ -297,7 +297,7 @@
     "label": "JSON Document",
     "title": "JSON Document Protocol - json-document",
     "heading": "JSON Document Protocol",
-    "description": "로컬·협업 구현이 공유하는 여섯 member의 JSONDocument 계약과 JSON 표준 연산 API를 설명합니다.",
+    "description": "로컬·협업 구현이 공유하는 다섯 member의 JSONDocument 계약과 JSON 표준 연산 API를 설명합니다.",
     "language": "ko",
     "navigationGroup": "JSON Document",
     "documentSource": "docs/public/api.md"
@@ -1752,19 +1752,6 @@
     "documentSource": "docs/public/affordance-typeahead.md"
   },
   {
-    "path": "/docs/affordance/activate",
-    "label": "Activate",
-    "title": "Activate - json-document",
-    "heading": "Activate",
-    "description": "클릭·Enter·Space로 대상의 기본 동작을 실행하는 손입니다.",
-    "language": "ko",
-    "navigationGroup": "Affordance",
-    "relatedDemoPath": "/applications/canvas",
-    "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance",
-    "documentSource": "docs/public/affordance-activate.md"
-  },
-  {
     "path": "/docs/affordance/cancel",
     "label": "Escape",
     "title": "Escape - json-document",
@@ -1776,19 +1763,6 @@
     "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance",
     "documentSource": "docs/public/affordance-cancel.md"
-  },
-  {
-    "path": "/docs/affordance/fold",
-    "label": "Expand/Collapse",
-    "title": "Expand/Collapse - json-document",
-    "heading": "Expand/Collapse",
-    "description": "나무에서 왼쪽은 접고 오른쪽은 펼치는 손을 붙입니다.",
-    "language": "ko",
-    "navigationGroup": "Affordance",
-    "relatedDemoPath": "/widgets/tree",
-    "relatedDemoLabel": "증명 열기",
-    "parentPath": "/docs/affordance",
-    "documentSource": "docs/public/affordance-fold.md"
   },
   {
     "path": "/docs/affordance/history",
@@ -2060,14 +2034,6 @@
     "title": "Canvas proof - json-document",
     "description": "같은 Canvas Hand를 샘플 슬라이드와 Selection 관찰 UI에 조합합니다.",
     "parentPath": "/docs/affordance/drag",
-    "sidebar": false
-  },
-  {
-    "path": "/widgets/tree",
-    "label": "Tree proof",
-    "title": "Tree proof - json-document",
-    "description": "A tree reads the visible hierarchical line from Tree selection.",
-    "parentPath": "/docs/affordance/fold",
     "sidebar": false
   },
   {

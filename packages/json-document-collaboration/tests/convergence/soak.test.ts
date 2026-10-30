@@ -1,10 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 import {
-  compactCollaborationCheckpoint,
   type CollaborationBundle,
   type CollaborationChange,
-  type CollaborationRulesetIdentity,
 } from "../../src/index.js";
 import {
   createHistoryRuntime,
@@ -138,46 +136,6 @@ function runCase(seed: number): void {
     ).toEqual(stableHistory(runtimes[index] as HistoryRuntime));
   }
 
-  const checkpoint = checkpoints[0];
-  if (checkpoint === undefined) {
-    throw new Error(`seed ${seed}: canonical checkpoint is missing`);
-  }
-  const nextRuleset: CollaborationRulesetIdentity = {
-    id: ruleset.id,
-    digest: `${ruleset.digest}/compacted`,
-  };
-  const compacted = compactCollaborationCheckpoint(checkpoint, {
-    mode: "new-epoch",
-    nextEpochId: `task-board-soak/${seed}/v3`,
-    nextRuleset,
-  });
-  if (!compacted.ok) {
-    throw new Error(
-      `seed ${seed}: compaction failed: `
-      + `${compacted.code}: ${compacted.reason}`,
-    );
-  }
-  expect(compacted.report.discardedChanges).toBeGreaterThan(0);
-  expect(compacted.checkpoint.payload.changes).toEqual([]);
-
-  const compactedRestore = restoreHistoryRuntime(
-    compacted.checkpoint,
-    {
-      actorId: "post-compaction",
-      ruleset: nextRuleset,
-    },
-  );
-  if (!compactedRestore.ok) {
-    throw new Error(
-      `seed ${seed}: compacted restore failed: `
-      + `${compactedRestore.code}: ${compactedRestore.reason}`,
-    );
-  }
-  expect(
-    compactedRestore.runtime.document.value,
-    `seed ${seed}: compacted document`,
-  ).toEqual(runtimes[0]?.document.value);
-  expect(compactedRestore.runtime.replica.status().pending).toEqual([]);
 }
 
 function authorRandomCommand(

@@ -2,12 +2,10 @@ import { createJSONDocument } from "@interactive-os/json-document";
 import { describe, expect, it } from "vitest";
 import {
   createRichTextEditor,
-  renderRichText,
   type RichTextDocument,
   type RichTextMark,
   type RichTextNode,
   type RichTextParagraph,
-  type RichTextRenderAdapter,
   type RichTextSelection,
   type RichTextText,
 } from "../src/index.js";
@@ -200,20 +198,6 @@ describe("Official Rich Text editor", () => {
     expect((forwardDocument.value as RichTextDocument).content[0]).toMatchObject({
       content: [{ id: "forward-text-a" }, { id: "forward-atom" }, { id: "forward-text-b" }],
     });
-  });
-
-  it("renders the canonical tree through a target-neutral adapter", () => {
-    const adapter: RichTextRenderAdapter<string> = {
-      document: (_node, children) => `<article>${children.join("")}</article>`,
-      text: (node) => node.text,
-      node: (node, children) => `<${node.type}>${children.join("")}</${node.type}>`,
-      mark: (mark, children) => `<${mark.type}>${children.join("")}</${mark.type}>`,
-      unknown: () => "?",
-    };
-
-    expect(renderRichText(initial, adapter).output).toBe(
-      "<article><heading><strong>Rich</strong></heading><paragraph>Text</paragraph></article>",
-    );
   });
 
   it("splits a block at Enter and restores the caret with undo", () => {

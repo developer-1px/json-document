@@ -259,11 +259,6 @@ parseWebClipboardHTML(html: string): WebHTMLClipboardContent | null
 ```ts
 parseWebHTMLFragment(html: string): WebHTMLFragment | null
 ```
-## `pressInteractionFromWeb`
-
-```ts
-pressInteractionFromWeb(input: WebPressInput): WebPressInteraction | null
-```
 ## `projectWebClientDeltaToElement`
 
 ```ts
@@ -949,32 +944,6 @@ interface WebPointTargetElement {
 interface WebPointTargetRoot<Element extends WebPointTargetElement = WebPointTargetElement> {
   querySelectorAll(selector: string): ArrayLike<Element>;
 }
-```
-## `WebPressInput`
-
-```ts
-type WebPressInput = {
-  readonly type: string;
-  readonly key?: string;
-  readonly button?: number;
-  readonly detail?: number;
-  readonly repeat?: boolean;
-  readonly defaultPrevented?: boolean;
-};
-```
-## `WebPressInteraction`
-
-```ts
-type WebPressInteraction =
-  | { readonly phase: "start" | "end"; readonly source: "keyboard"; readonly key: "Enter" | "Space" }
-  | { readonly phase: "start" | "end"; readonly source: "pointer" }
-  | { readonly phase: "cancel"; readonly source: "keyboard" | "pointer" }
-  | { readonly phase: "activation"; readonly source: "pointer" | "virtual" };
-```
-## `WebPressSource`
-
-```ts
-type WebPressSource = "keyboard" | "pointer" | "virtual";
 ```
 ## `WebRasterFile`
 

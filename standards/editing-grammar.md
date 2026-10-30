@@ -8,7 +8,7 @@ Stable admission이나 외부 상호운용성을 주장하지 않는다.
 ## 목표와 범위
 
 오랫동안 정착한 편집 문법을 구현과 제품이 바뀌어도 유지되는 계약으로 만든다.
-작은 Core는 장기간 약속할 수 있는 의미만 소유한다. JSON Document의 여섯
+작은 Core는 장기간 약속할 수 있는 의미만 소유한다. JSON Document의 다섯
 member와 편집 문법의 크기는 서로 다른 문제다.
 
 기반 계약은 여러 편집 정책을 수용하고, **기본 Profile은 사람들이 익숙한 편집
@@ -83,7 +83,7 @@ Apple의 [1992년 Macintosh Human Interface Guidelines](https://www.vintageapple
 같은 명령 어휘가 반복된다. 전자는 역사적 제품 지침, 후자는 Windows 7 시대의
 플랫폼 지침이다. 오래된 공통 어휘의 근거이며 모든 동작이 30년간 동일했다는
 증명은 아니다. 사람의 편집 관습에서 도출하는 것은 관찰 가능한 의미다. Core의
-여섯 member, JSON Patch 표현, package 구조가 그 관습의 유일한 구현이라는
+다섯 member, JSON Patch 표현, package 구조가 그 관습의 유일한 구현이라는
 결론은 나오지 않는다.
 
 다음 표는 현재 구현의 표본이다. 링크는 각 책임의 구현으로 연결된다. 마지막

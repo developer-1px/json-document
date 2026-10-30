@@ -80,13 +80,11 @@ const publicDocs = {
   uiPrimitives: read("docs/public/ui-primitives.md"),
   animation: read("docs/public/animation.md"),
   affordanceSelect: read("docs/public/affordance-select.md"),
-  affordanceFold: read("docs/public/affordance-fold.md"),
   affordanceDrag: read("docs/public/affordance-drag.md"),
   affordanceHistory: read("docs/public/affordance-history.md"),
   affordanceFocus: read("docs/public/affordance-focus.md"),
   affordanceCaret: read("docs/public/affordance-caret.md"),
   affordanceTypeahead: read("docs/public/affordance-typeahead.md"),
-  affordanceActivate: read("docs/public/affordance-activate.md"),
   affordanceCancel: read("docs/public/affordance-cancel.md"),
   affordanceDelete: read("docs/public/affordance-delete.md"),
   affordanceRename: read("docs/public/affordance-rename.md"),
@@ -280,7 +278,6 @@ for (const [name, source] of Object.entries(surfaces)) {
     "domain/pointer",
     "foundation/patch",
     "foundation/json",
-    "foundation/jsonpath",
     "foundation/pointer",
   ]) {
     if (source.includes(token)) {
