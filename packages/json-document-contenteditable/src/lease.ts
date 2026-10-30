@@ -11,6 +11,7 @@ import type {
 } from "./types.js";
 
 interface ActiveLease {
+  capture: unknown;
   phase: "native" | "composing";
   nativeFallback: ReturnType<typeof setTimeout> | null;
   readonly value: string;
@@ -34,6 +35,7 @@ export function createContentEditableBinding({
   pointer,
   root,
   editor,
+  text,
   insertBreak = (editor) => editor.insert("\n"),
   indent,
   selectionRendering = "native",
@@ -44,6 +46,7 @@ export function createContentEditableBinding({
   let activeLease: ActiveLease | null = null;
   let trailingComposition = false;
   let trailingTimer: ReturnType<typeof setTimeout> | null = null;
+  let trailingBasis: { capture: unknown; value: string; selection: TextSelection | null } | null = null;
   let renderedDocument: RenderedDocument | null = null;
   let bound = false;
   let disposeSelection: (() => void) | undefined;
@@ -109,11 +112,20 @@ export function createContentEditableBinding({
     if (trailingTimer !== null) clearTimeout(trailingTimer);
     trailingTimer = null;
     trailingComposition = false;
+    trailingBasis = null;
   };
 
-  const finishTrailing = (): void => {
+  const finishTrailing = (): ContentEditableBindingResult => {
+    const basis = trailingBasis;
     clearTrailing();
-    renderLatest(undefined, true);
+    if (text && basis) {
+      // Rebase the composed selection through anything merged meanwhile; the value itself is unchanged.
+      const planned = text.plan(basis.capture, { value: basis.value, ...(basis.selection === null ? {} : { selection: basis.selection }) });
+      const committed = planned.ok ? text.commit(planned.plan) : planned;
+      renderLatest(committed.ok ? committed.selection : basis.selection, true);
+      return committed.ok ? RENDERED : failure(committed.code, committed.reason);
+    }
+    return renderLatest(undefined, true);
   };
 
   const clearActiveLease = (): void => {
@@ -122,7 +134,7 @@ export function createContentEditableBinding({
     activeLease = null;
   };
 
-  const commitObservation = (): ContentEditableBindingResult => {
+  const commitObservation = (composition = false): ContentEditableBindingResult => {
     const lease = activeLease;
     if (lease === null) return NO_CHANGE;
     if (lease.nativeFallback !== null) {
@@ -130,6 +142,23 @@ export function createContentEditableBinding({
       lease.nativeFallback = null;
     }
     const observation = dom.observe(root);
+    if (text) {
+      const planned = text.plan(lease.capture, { value: observation.value, ...(observation.selection === null ? {} : { selection: observation.selection }) });
+      const committed = planned.ok ? text.commit(planned.plan) : planned;
+      clearActiveLease();
+      if (!committed.ok) {
+        // A composition's trailing render follows from compositionend; otherwise restore the DOM now.
+        if (!composition) renderLatest(observation.selection, true);
+        return failure(committed.code, committed.reason);
+      }
+      if (composition) {
+        const captured = text.capture(pointer);
+        trailingBasis = captured.ok ? { capture: captured.capture, value: readString().value, selection: committed.selection } : null;
+      } else {
+        renderLatest(committed.selection, true);
+      }
+      return Object.freeze({ ok: true, kind: "committed" as const, changeId: committed.changeId, didChangeDocument: committed.didChangeDocument, selection: committed.selection });
+    }
     const current = readString();
     if (!current.available) {
       clearActiveLease();
@@ -180,7 +209,7 @@ export function createContentEditableBinding({
     event: Event,
   ): ContentEditableBindingResult => {
     if (trailingComposition) {
-      clearTrailing();
+      if (text) finishTrailing(); else clearTrailing();
     }
     if (activeLease !== null) {
       if (phase === "composing") {
@@ -205,7 +234,17 @@ export function createContentEditableBinding({
       const selection = currentDOMSelection();
       if (selection) editor.select(selection);
     }
-    activeLease = { phase, nativeFallback: null, value: current.value, lineBreakAfterComposition: null };
+    let capture: unknown = null;
+    if (text) {
+      const captured = text.capture(pointer);
+      if (!captured.ok) {
+        if (event.cancelable) event.preventDefault();
+        renderLatest(undefined, true);
+        return failure(captured.code, captured.reason);
+      }
+      capture = captured.capture;
+    }
+    activeLease = { phase, nativeFallback: null, value: current.value, lineBreakAfterComposition: null, capture };
     if (phase === "native") {
       const lease = activeLease;
       lease.nativeFallback = setTimeout(() => {
@@ -388,7 +427,7 @@ export function createContentEditableBinding({
     if (event.type === "compositionend") {
       if (trailingComposition || activeLease === null) return NO_CHANGE;
       activeLease.phase = "composing";
-      const result = commitObservation();
+      const result = commitObservation(true);
       trailingComposition = true;
       trailingTimer = setTimeout(finishTrailing, 0);
       return result;
@@ -396,8 +435,8 @@ export function createContentEditableBinding({
 
     if (event.type === "input") {
       if (trailingComposition) {
-        finishTrailing();
-        return NO_CHANGE;
+        const result = finishTrailing();
+        return text ? result : NO_CHANGE;
       }
       if (activeLease?.phase === "composing") {
         const input = event as InputEvent;
