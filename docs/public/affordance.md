@@ -64,14 +64,12 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Select](affordance-select.md) | `pointerSelect`, `planeHitAffordance`, `resolveAffordanceKey`, `editingCommandFromWebKeyboardStroke` | 클릭, 이미 고른 집합 유지, Shift 범위, Mod 토글, 화살표 |
 | [Typeahead](affordance-typeahead.md) | `typeaheadAffordance` | 인쇄 글쇠 prefix 점프 |
 | [Escape](affordance-cancel.md) | `escapeAffordance` | 제스처 `cancel`, 그다음 선택 `clear` |
-| [Expand/Collapse](affordance-fold.md) | `treeAffordance` | 나무 왼쪽 접힘, 오른쪽 펼침 |
 | [Undo](affordance-history.md) | `historyAffordance` | Mod+Z, Mod+Shift+Z |
 | [Nudge](affordance-nudge.md) | `nudgeAffordance` | 화살표 한 단위, Shift 큰 단위 |
 | [Drag](affordance-drag.md) | `dragAffordance`, `keyboardDragAffordance`, `commitAffordance`, `createCanvasGestureSession` | 대상 이동, 키보드 잡기·놓기, Canvas gesture preview/commit/cancel |
 | [Marquee](affordance-marquee.md) | `marqueeAffordance`, `commitAffordance` | 빈 곳에서 사각형으로 여러 대상 |
 | [Pan](affordance-pan.md) | `panAffordance` | Space+드래그, grab |
 | [Snap](affordance-snap.md) | `snapAffordance` | 그리드·가이드, 수정 키로 해제 |
-| [Press / Activate](affordance-activate.md) | `pressAffordance`, `activateAffordance` | custom Press lifecycle, native activation |
 | [Delete](affordance-delete.md) | `deleteAffordance` | Delete, Backspace |
 | [Hover](affordance-hover.md) | `hoverAffordance` | 평면 윤곽, 툴팁 지연 |
 | [Contextual](affordance-contextual.md) | `contextualAffordance` | rest·approach·selected·editing에 따른 shy control 출현 |
@@ -194,7 +192,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | --- | --- | --- | --- |
 | Delete / Backspace | 고른 집합 삭제 | 안정 | [닫힘](affordance-delete.md) |
 | 오른쪽 클릭 | 컨텍스트 메뉴. 선택은 유지 | 안정 | [닫힘](affordance-context-menu.md) |
-| Enter / 더블클릭 | 그룹이면 한 단계 들어가기, 텍스트면 편집. 납작한 평면은 no-op | 안정 | [닫힘](affordance-activate.md) |
+| Enter / 더블클릭 | 그룹이면 한 단계 들어가기, 텍스트면 편집. 납작한 평면은 no-op | 안정 | [닫힘](affordance-double-click.md) |
 | 잠긴 객체 | 일반 click으로 안 집어짐 | 안정 | [닫힘](affordance-forbid.md) |
 | 호버 하이라이트 | 집기 전에 윤곽만 | 떠오름 | [닫힘](affordance-hover.md) |
 
@@ -206,7 +204,7 @@ CSS UI 4 `<cursor-predefined>`는 이 집합이 끝입니다. 새 커서 이름�
 | 커서 | 손 |
 | --- | --- |
 | `auto`, `default`, `none` | 호스트·UA 기본. 이 층이 새 문법을 열지 않음 |
-| `pointer` | [Activate](affordance-activate.md) |
+| `pointer` | native control의 activation. 브라우저가 소유하고 이 층은 손을 더하지 않음 |
 | `text`, `vertical-text` | [Caret](affordance-caret.md) |
 | `cell`, `crosshair` | [Marquee](affordance-marquee.md), [Select](affordance-select.md) |
 | `context-menu` | [Context menu](affordance-context-menu.md) |

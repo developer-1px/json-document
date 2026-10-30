@@ -63,7 +63,7 @@ export function taskBoardInitialValue(): JSONValue {
 }
 
 /**
- * A product-shaped consumer which knows only the six-member JSONDocument
+ * A product-shaped consumer which knows only the five-member JSONDocument
  * contract. Provider construction, collaboration, transport, and history stay
  * outside this module.
  */
@@ -82,12 +82,22 @@ export function createTaskBoardHost(document: JSONDocument): TaskBoardHost {
     });
   };
 
-  const lanePointer = (laneId: string): string | null => (
-    parentPointerForValue(document, "$.lanes[*].id", laneId)
-  );
-  const cardPointer = (cardId: string): string | null => (
-    parentPointerForValue(document, "$.lanes[*].cards[*].id", cardId)
-  );
+  const lanePointer = (laneId: string): string | null => {
+    const index = taskBoardSnapshot(document.value).lanes.findIndex(
+      (lane) => lane.id === laneId,
+    );
+    return index === -1 ? null : `/lanes/${index}`;
+  };
+  const cardPointer = (cardId: string): string | null => {
+    const lanes = taskBoardSnapshot(document.value).lanes;
+    for (let laneIndex = 0; laneIndex < lanes.length; laneIndex += 1) {
+      const cardIndex = lanes[laneIndex]!.cards.findIndex(
+        (card) => card.id === cardId,
+      );
+      if (cardIndex !== -1) return `/lanes/${laneIndex}/cards/${cardIndex}`;
+    }
+    return null;
+  };
 
   return Object.freeze({
     snapshot(): TaskBoardSnapshot {
@@ -168,22 +178,6 @@ export function createTaskBoardHost(document: JSONDocument): TaskBoardHost {
       return document.subscribe(listener);
     },
   });
-}
-
-function parentPointerForValue(
-  document: JSONDocument,
-  jsonPath: string,
-  expected: string,
-): string | null {
-  const query = document.query(jsonPath);
-  if (!query.ok) return null;
-  for (const pointer of query.pointers) {
-    const result = document.at(pointer);
-    if (result.ok && result.value === expected) {
-      return pointer.slice(0, pointer.lastIndexOf("/"));
-    }
-  }
-  return null;
 }
 
 function taskBoardSnapshot(value: JSONValue): TaskBoardSnapshot {

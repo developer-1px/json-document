@@ -1,5 +1,3 @@
-import { JSONPathJS } from "jsonpath-js";
-import { validateQueryTypes } from "./query-types.js";
 import type { ProtocolPatchResult } from "../../conformance/suites/protocol.js";
 import type {
   JSONPatchOperation,
@@ -11,7 +9,6 @@ import type {
   JSONDocumentCommitOptions,
   JSONDocumentCommitResult,
   JSONDocumentMetadata,
-  JSONDocumentQueryResult,
   JSONDocumentReadResult,
 } from "../../conformance/suites/json-document.js";
 
@@ -84,24 +81,6 @@ export function createIndependentJSONDocument(
         return failed.code === "invalid_pointer"
           ? Object.freeze({ ...failed, pointer })
           : Object.freeze({ ...failed, pointer });
-      }
-    },
-    query(jsonPath: string): JSONDocumentQueryResult {
-      try {
-        return Object.freeze({
-          ok: true,
-          query: jsonPath,
-          pointers: Object.freeze(queryPointers(state, jsonPath)),
-        });
-      } catch (error) {
-        const failed = failureFrom(error);
-        return Object.freeze({
-          ok: false,
-          code: failed.code === "invalid_query"
-            ? failed.code
-            : "invalid_query",
-          ...(failed.reason === undefined ? {} : { reason: failed.reason }),
-        });
       }
     },
     validatePatch(
@@ -527,14 +506,6 @@ function parseArrayIndex(segment: string): number | null {
   if (!/^(0|[1-9]\d*)$/.test(segment)) return null;
   const index = Number(segment);
   return Number.isSafeInteger(index) ? index : null;
-}
-
-function queryPointers(value: JSONValue, query: string): string[] {
-  const expression = new JSONPathJS(query);
-  validateQueryTypes(expression.rootNode);
-  return expression.pathSegments(value as Parameters<JSONPathJS["pathSegments"]>[0]).map(({ segments }) => (
-    segments.reduce<string>((pointer, segment) => appendPointer(pointer, String(segment)), "")
-  ));
 }
 
 function createChange(

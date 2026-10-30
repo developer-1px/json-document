@@ -1,8 +1,8 @@
 # json-document
 
-JSON을 읽고, 찾고, 고치고, 구독하는 작은 API입니다.
+JSON을 읽고, 고치고, 구독하는 작은 API입니다.
 
-주소는 JSON Pointer, 검색은 JSONPath, 변경은 JSON Patch입니다.
+주소는 JSON Pointer, 변경은 JSON Patch입니다.
 
 v3 표준 상태는 Stable입니다. 현재 source release version은 `3.0.0`이며 npm에는
 아직 배포되지 않았습니다. reference와 독립 구현이 같은 conformance suite를
@@ -49,13 +49,12 @@ if (validation.ok) {
 }
 ```
 
-Document의 필수 member는 여섯 개뿐입니다.
+Document의 필수 member는 다섯 개뿐입니다.
 
 | Member | 책임 |
 | --- | --- |
 | `value` | immutable current document value |
 | `at(pointer)` | 정확한 JSON Pointer 한 곳 읽기 |
-| `query(jsonPath)` | JSONPath를 Pointer 배열로 환원 |
 | `validatePatch(operations)` | state를 바꾸지 않는 patch validation |
 | `commit(operations, options?)` | 유일한 stateful mutation |
 | `subscribe(listener)` | change notification 구독 |
@@ -119,12 +118,12 @@ types
   JSONAppliedChange, JSONPatchResult, JSONDocumentCommitResult
   JSONPatchValidationResult, JSONChangeMetadata
   JSONDocumentOptions, JSONDocumentCommitOptions
-  ReadResult, QueryResult, JSONDocument
+  ReadResult, JSONDocument
 ```
 
 `JSONDocument`는 application-owned structural contract입니다. Selection,
 history와 clipboard는 optional editing companion이 조합하고, framework binding은
-독립 Connector가 이 여섯 member를 사용합니다. Root package는 `/session`이나
+독립 Connector가 이 다섯 member를 사용합니다. Root package는 `/session`이나
 `/react` subpath를 공개하지 않습니다.
 
 ## 순수 core
@@ -151,7 +150,7 @@ if (isJSONValue(input)) {
 ```
 
 실행 가능한 Usage와 구현 source는 site의 `/connectors/react`에서 확인할 수
-있습니다. 이 stateless API는 `JSONDocument`의 여섯 멤버를 늘리지 않습니다.
+있습니다. 이 stateless API는 `JSONDocument`의 다섯 멤버를 늘리지 않습니다.
 
 `applyPatch`는 schema, session, UI 없이 ordered atomic JSON Patch를 적용합니다.
 
@@ -202,7 +201,7 @@ body satisfies string;
 
 ## 생태계와 Host 경계
 
-Form, data-grid, outliner, rich text, persistence/collaboration extension은 여섯
+Form, data-grid, outliner, rich text, persistence/collaboration extension은 다섯
 member `JSONDocument`를 포트로 받습니다. 문서 고유 모델·의미 연산·Projection은
 Document Type, 선택·작업·History는 Editing, 플랫폼 입력과 DOM lifecycle은
 Adapter의 책임입니다. 이 기능을 Core나 Host에 재구현하지 않습니다.

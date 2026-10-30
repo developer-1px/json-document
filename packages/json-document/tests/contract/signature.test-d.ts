@@ -18,7 +18,6 @@ import {
   type JSONPatchValidationResult,
   type JSONValue,
   type Pointer,
-  type QueryResult,
   type ReadResult,
 } from "@interactive-os/json-document";
 
@@ -32,7 +31,7 @@ type Expect<T extends true> = T;
 type DocumentMembers = keyof JSONDocument;
 type _DocumentMembersAreExact = Expect<Equal<
   DocumentMembers,
-  "value" | "at" | "query" | "validatePatch" | "commit" | "subscribe"
+  "value" | "at" | "validatePatch" | "commit" | "subscribe"
 >>;
 
 interface Row {
@@ -61,7 +60,6 @@ document.commit(operations, {
   metadata: { origin: "signature" },
 }) satisfies JSONDocumentCommitResult;
 document.at("/id") satisfies ReadResult;
-document.query("$.id") satisfies QueryResult;
 document.subscribe((change: JSONAppliedChange) => {
   change.applied satisfies ReadonlyArray<JSONPatchOperation>;
 }) satisfies () => void;

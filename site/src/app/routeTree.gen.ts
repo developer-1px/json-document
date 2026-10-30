@@ -112,11 +112,9 @@ import { Route as PageWidgetsDocumentRouteImport } from "./routes/_page/widgets/
 import { Route as PageWidgetsGridRouteImport } from "./routes/_page/widgets/grid";
 import { Route as PageWidgetsListboxRouteImport } from "./routes/_page/widgets/listbox";
 import { Route as PageWidgetsToolbarRouteImport } from "./routes/_page/widgets/toolbar";
-import { Route as PageWidgetsTreeRouteImport } from "./routes/_page/widgets/tree";
 import { Route as PageConnectorsZodIndexRouteImport } from "./routes/_page/connectors/zod/index";
 import { Route as PageConnectorsZodValidateRouteImport } from "./routes/_page/connectors/zod/validate";
 import { Route as PageDocsAffordanceIndexRouteImport } from "./routes/_page/docs/affordance/index";
-import { Route as PageDocsAffordanceActivateRouteImport } from "./routes/_page/docs/affordance/activate";
 import { Route as PageDocsAffordanceCancelRouteImport } from "./routes/_page/docs/affordance/cancel";
 import { Route as PageDocsAffordanceCaretRouteImport } from "./routes/_page/docs/affordance/caret";
 import { Route as PageDocsAffordanceContextMenuRouteImport } from "./routes/_page/docs/affordance/context-menu";
@@ -127,7 +125,6 @@ import { Route as PageDocsAffordanceDoubleClickRouteImport } from "./routes/_pag
 import { Route as PageDocsAffordanceDragRouteImport } from "./routes/_page/docs/affordance/drag";
 import { Route as PageDocsAffordanceDropRouteImport } from "./routes/_page/docs/affordance/drop";
 import { Route as PageDocsAffordanceFocusRouteImport } from "./routes/_page/docs/affordance/focus";
-import { Route as PageDocsAffordanceFoldRouteImport } from "./routes/_page/docs/affordance/fold";
 import { Route as PageDocsAffordanceForbidRouteImport } from "./routes/_page/docs/affordance/forbid";
 import { Route as PageDocsAffordanceHandlesRouteImport } from "./routes/_page/docs/affordance/handles";
 import { Route as PageDocsAffordanceHistoryRouteImport } from "./routes/_page/docs/affordance/history";
@@ -715,11 +712,6 @@ const PageWidgetsToolbarRoute = PageWidgetsToolbarRouteImport.update({
   path: "/widgets/toolbar",
   getParentRoute: () => PageRoute,
 } as any);
-const PageWidgetsTreeRoute = PageWidgetsTreeRouteImport.update({
-  id: "/widgets/tree",
-  path: "/widgets/tree",
-  getParentRoute: () => PageRoute,
-} as any);
 const PageConnectorsZodIndexRoute = PageConnectorsZodIndexRouteImport.update({
   id: "/connectors/zod/",
   path: "/connectors/zod/",
@@ -736,12 +728,6 @@ const PageDocsAffordanceIndexRoute = PageDocsAffordanceIndexRouteImport.update({
   path: "/docs/affordance/",
   getParentRoute: () => PageRoute,
 } as any);
-const PageDocsAffordanceActivateRoute =
-  PageDocsAffordanceActivateRouteImport.update({
-    id: "/docs/affordance/activate",
-    path: "/docs/affordance/activate",
-    getParentRoute: () => PageRoute,
-  } as any);
 const PageDocsAffordanceCancelRoute =
   PageDocsAffordanceCancelRouteImport.update({
     id: "/docs/affordance/cancel",
@@ -796,11 +782,6 @@ const PageDocsAffordanceDropRoute = PageDocsAffordanceDropRouteImport.update({
 const PageDocsAffordanceFocusRoute = PageDocsAffordanceFocusRouteImport.update({
   id: "/docs/affordance/focus",
   path: "/docs/affordance/focus",
-  getParentRoute: () => PageRoute,
-} as any);
-const PageDocsAffordanceFoldRoute = PageDocsAffordanceFoldRouteImport.update({
-  id: "/docs/affordance/fold",
-  path: "/docs/affordance/fold",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsAffordanceForbidRoute =
@@ -1229,7 +1210,6 @@ export interface FileRoutesByFullPath {
   "/widgets/grid": typeof PageWidgetsGridRoute;
   "/widgets/listbox": typeof PageWidgetsListboxRoute;
   "/widgets/toolbar": typeof PageWidgetsToolbarRoute;
-  "/widgets/tree": typeof PageWidgetsTreeRoute;
   "/adapters/": typeof PageAdaptersIndexRoute;
   "/applications/": typeof PageApplicationsIndexRoute;
   "/connectors/": typeof PageConnectorsIndexRoute;
@@ -1237,7 +1217,6 @@ export interface FileRoutesByFullPath {
   "/docs/": typeof PageDocsIndexRoute;
   "/widgets/": typeof PageWidgetsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
-  "/docs/affordance/activate": typeof PageDocsAffordanceActivateRoute;
   "/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
   "/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
   "/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
@@ -1248,7 +1227,6 @@ export interface FileRoutesByFullPath {
   "/docs/affordance/drag": typeof PageDocsAffordanceDragRoute;
   "/docs/affordance/drop": typeof PageDocsAffordanceDropRoute;
   "/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
-  "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
   "/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
@@ -1408,7 +1386,6 @@ export interface FileRoutesByTo {
   "/widgets/grid": typeof PageWidgetsGridRoute;
   "/widgets/listbox": typeof PageWidgetsListboxRoute;
   "/widgets/toolbar": typeof PageWidgetsToolbarRoute;
-  "/widgets/tree": typeof PageWidgetsTreeRoute;
   "/adapters": typeof PageAdaptersIndexRoute;
   "/applications": typeof PageApplicationsIndexRoute;
   "/connectors": typeof PageConnectorsIndexRoute;
@@ -1416,7 +1393,6 @@ export interface FileRoutesByTo {
   "/docs": typeof PageDocsIndexRoute;
   "/widgets": typeof PageWidgetsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
-  "/docs/affordance/activate": typeof PageDocsAffordanceActivateRoute;
   "/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
   "/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
   "/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
@@ -1427,7 +1403,6 @@ export interface FileRoutesByTo {
   "/docs/affordance/drag": typeof PageDocsAffordanceDragRoute;
   "/docs/affordance/drop": typeof PageDocsAffordanceDropRoute;
   "/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
-  "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
   "/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
@@ -1589,7 +1564,6 @@ export interface FileRoutesById {
   "/_page/widgets/grid": typeof PageWidgetsGridRoute;
   "/_page/widgets/listbox": typeof PageWidgetsListboxRoute;
   "/_page/widgets/toolbar": typeof PageWidgetsToolbarRoute;
-  "/_page/widgets/tree": typeof PageWidgetsTreeRoute;
   "/_page/adapters/": typeof PageAdaptersIndexRoute;
   "/_page/applications/": typeof PageApplicationsIndexRoute;
   "/_page/connectors/": typeof PageConnectorsIndexRoute;
@@ -1597,7 +1571,6 @@ export interface FileRoutesById {
   "/_page/docs/": typeof PageDocsIndexRoute;
   "/_page/widgets/": typeof PageWidgetsIndexRoute;
   "/_page/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
-  "/_page/docs/affordance/activate": typeof PageDocsAffordanceActivateRoute;
   "/_page/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
   "/_page/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
   "/_page/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
@@ -1608,7 +1581,6 @@ export interface FileRoutesById {
   "/_page/docs/affordance/drag": typeof PageDocsAffordanceDragRoute;
   "/_page/docs/affordance/drop": typeof PageDocsAffordanceDropRoute;
   "/_page/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
-  "/_page/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/_page/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
   "/_page/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/_page/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
@@ -1770,7 +1742,6 @@ export interface FileRouteTypes {
     | "/widgets/grid"
     | "/widgets/listbox"
     | "/widgets/toolbar"
-    | "/widgets/tree"
     | "/adapters/"
     | "/applications/"
     | "/connectors/"
@@ -1778,7 +1749,6 @@ export interface FileRouteTypes {
     | "/docs/"
     | "/widgets/"
     | "/connectors/zod/validate"
-    | "/docs/affordance/activate"
     | "/docs/affordance/cancel"
     | "/docs/affordance/caret"
     | "/docs/affordance/context-menu"
@@ -1789,7 +1759,6 @@ export interface FileRouteTypes {
     | "/docs/affordance/drag"
     | "/docs/affordance/drop"
     | "/docs/affordance/focus"
-    | "/docs/affordance/fold"
     | "/docs/affordance/forbid"
     | "/docs/affordance/handles"
     | "/docs/affordance/history"
@@ -1949,7 +1918,6 @@ export interface FileRouteTypes {
     | "/widgets/grid"
     | "/widgets/listbox"
     | "/widgets/toolbar"
-    | "/widgets/tree"
     | "/adapters"
     | "/applications"
     | "/connectors"
@@ -1957,7 +1925,6 @@ export interface FileRouteTypes {
     | "/docs"
     | "/widgets"
     | "/connectors/zod/validate"
-    | "/docs/affordance/activate"
     | "/docs/affordance/cancel"
     | "/docs/affordance/caret"
     | "/docs/affordance/context-menu"
@@ -1968,7 +1935,6 @@ export interface FileRouteTypes {
     | "/docs/affordance/drag"
     | "/docs/affordance/drop"
     | "/docs/affordance/focus"
-    | "/docs/affordance/fold"
     | "/docs/affordance/forbid"
     | "/docs/affordance/handles"
     | "/docs/affordance/history"
@@ -2129,7 +2095,6 @@ export interface FileRouteTypes {
     | "/_page/widgets/grid"
     | "/_page/widgets/listbox"
     | "/_page/widgets/toolbar"
-    | "/_page/widgets/tree"
     | "/_page/adapters/"
     | "/_page/applications/"
     | "/_page/connectors/"
@@ -2137,7 +2102,6 @@ export interface FileRouteTypes {
     | "/_page/docs/"
     | "/_page/widgets/"
     | "/_page/connectors/zod/validate"
-    | "/_page/docs/affordance/activate"
     | "/_page/docs/affordance/cancel"
     | "/_page/docs/affordance/caret"
     | "/_page/docs/affordance/context-menu"
@@ -2148,7 +2112,6 @@ export interface FileRouteTypes {
     | "/_page/docs/affordance/drag"
     | "/_page/docs/affordance/drop"
     | "/_page/docs/affordance/focus"
-    | "/_page/docs/affordance/fold"
     | "/_page/docs/affordance/forbid"
     | "/_page/docs/affordance/handles"
     | "/_page/docs/affordance/history"
@@ -2945,13 +2908,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageWidgetsToolbarRouteImport;
       parentRoute: typeof PageRoute;
     };
-    "/_page/widgets/tree": {
-      id: "/_page/widgets/tree";
-      path: "/widgets/tree";
-      fullPath: "/widgets/tree";
-      preLoaderRoute: typeof PageWidgetsTreeRouteImport;
-      parentRoute: typeof PageRoute;
-    };
     "/_page/connectors/zod/": {
       id: "/_page/connectors/zod/";
       path: "/connectors/zod";
@@ -2971,13 +2927,6 @@ declare module "@tanstack/react-router" {
       path: "/docs/affordance";
       fullPath: "/docs/affordance/";
       preLoaderRoute: typeof PageDocsAffordanceIndexRouteImport;
-      parentRoute: typeof PageRoute;
-    };
-    "/_page/docs/affordance/activate": {
-      id: "/_page/docs/affordance/activate";
-      path: "/docs/affordance/activate";
-      fullPath: "/docs/affordance/activate";
-      preLoaderRoute: typeof PageDocsAffordanceActivateRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/affordance/cancel": {
@@ -3048,13 +2997,6 @@ declare module "@tanstack/react-router" {
       path: "/docs/affordance/focus";
       fullPath: "/docs/affordance/focus";
       preLoaderRoute: typeof PageDocsAffordanceFocusRouteImport;
-      parentRoute: typeof PageRoute;
-    };
-    "/_page/docs/affordance/fold": {
-      id: "/_page/docs/affordance/fold";
-      path: "/docs/affordance/fold";
-      fullPath: "/docs/affordance/fold";
-      preLoaderRoute: typeof PageDocsAffordanceFoldRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/affordance/forbid": {
@@ -3564,7 +3506,6 @@ interface PageRouteChildren {
   PageWidgetsGridRoute: typeof PageWidgetsGridRoute;
   PageWidgetsListboxRoute: typeof PageWidgetsListboxRoute;
   PageWidgetsToolbarRoute: typeof PageWidgetsToolbarRoute;
-  PageWidgetsTreeRoute: typeof PageWidgetsTreeRoute;
   PageAdaptersIndexRoute: typeof PageAdaptersIndexRoute;
   PageApplicationsIndexRoute: typeof PageApplicationsIndexRoute;
   PageConnectorsIndexRoute: typeof PageConnectorsIndexRoute;
@@ -3572,7 +3513,6 @@ interface PageRouteChildren {
   PageDocsIndexRoute: typeof PageDocsIndexRoute;
   PageWidgetsIndexRoute: typeof PageWidgetsIndexRoute;
   PageConnectorsZodValidateRoute: typeof PageConnectorsZodValidateRoute;
-  PageDocsAffordanceActivateRoute: typeof PageDocsAffordanceActivateRoute;
   PageDocsAffordanceCancelRoute: typeof PageDocsAffordanceCancelRoute;
   PageDocsAffordanceCaretRoute: typeof PageDocsAffordanceCaretRoute;
   PageDocsAffordanceContextMenuRoute: typeof PageDocsAffordanceContextMenuRoute;
@@ -3583,7 +3523,6 @@ interface PageRouteChildren {
   PageDocsAffordanceDragRoute: typeof PageDocsAffordanceDragRoute;
   PageDocsAffordanceDropRoute: typeof PageDocsAffordanceDropRoute;
   PageDocsAffordanceFocusRoute: typeof PageDocsAffordanceFocusRoute;
-  PageDocsAffordanceFoldRoute: typeof PageDocsAffordanceFoldRoute;
   PageDocsAffordanceForbidRoute: typeof PageDocsAffordanceForbidRoute;
   PageDocsAffordanceHandlesRoute: typeof PageDocsAffordanceHandlesRoute;
   PageDocsAffordanceHistoryRoute: typeof PageDocsAffordanceHistoryRoute;
@@ -3738,7 +3677,6 @@ const PageRouteChildren: PageRouteChildren = {
   PageWidgetsGridRoute: PageWidgetsGridRoute,
   PageWidgetsListboxRoute: PageWidgetsListboxRoute,
   PageWidgetsToolbarRoute: PageWidgetsToolbarRoute,
-  PageWidgetsTreeRoute: PageWidgetsTreeRoute,
   PageAdaptersIndexRoute: PageAdaptersIndexRoute,
   PageApplicationsIndexRoute: PageApplicationsIndexRoute,
   PageConnectorsIndexRoute: PageConnectorsIndexRoute,
@@ -3746,7 +3684,6 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsIndexRoute: PageDocsIndexRoute,
   PageWidgetsIndexRoute: PageWidgetsIndexRoute,
   PageConnectorsZodValidateRoute: PageConnectorsZodValidateRoute,
-  PageDocsAffordanceActivateRoute: PageDocsAffordanceActivateRoute,
   PageDocsAffordanceCancelRoute: PageDocsAffordanceCancelRoute,
   PageDocsAffordanceCaretRoute: PageDocsAffordanceCaretRoute,
   PageDocsAffordanceContextMenuRoute: PageDocsAffordanceContextMenuRoute,
@@ -3757,7 +3694,6 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAffordanceDragRoute: PageDocsAffordanceDragRoute,
   PageDocsAffordanceDropRoute: PageDocsAffordanceDropRoute,
   PageDocsAffordanceFocusRoute: PageDocsAffordanceFocusRoute,
-  PageDocsAffordanceFoldRoute: PageDocsAffordanceFoldRoute,
   PageDocsAffordanceForbidRoute: PageDocsAffordanceForbidRoute,
   PageDocsAffordanceHandlesRoute: PageDocsAffordanceHandlesRoute,
   PageDocsAffordanceHistoryRoute: PageDocsAffordanceHistoryRoute,

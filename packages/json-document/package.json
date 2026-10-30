@@ -25,7 +25,6 @@
     "json",
     "json-patch",
     "json-pointer",
-    "jsonpath",
     "document",
     "editor",
     "headless",

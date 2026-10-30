@@ -25,7 +25,7 @@ export function validateLlmsContract(source, fail) {
   for (const [pattern, requirement] of [
     [/^# json-document v3$/m, "v3 title"],
     [new RegExp(`공개 Root는 정확히 다음 ${rootSymbolCount}개 symbol`), `${rootSymbolCount} Root symbols`],
-    [/`JSONDocument`의 필수 member는 정확히 여섯 개다/, "six-member JSONDocument contract"],
+    [/`JSONDocument`의 필수 member는 정확히 다섯 개다/, "five-member JSONDocument contract"],
     [/## Adapter, Connector와 companion/, "Adapter, Connector and companion boundary"],
     [/@interactive-os\/editable/, "migration boundary for @interactive-os/editable"],
   ]) {

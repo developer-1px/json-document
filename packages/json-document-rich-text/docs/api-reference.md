@@ -56,12 +56,6 @@ isRichTextText(node: RichTextNode | RichTextDocument): node is RichTextText
 ```ts
 normalizeRichText(value: unknown, options?: { readonly schema?: RichTextSchema; readonly createId?: () => RichTextNodeId; readonly inputOwnership?: "detached" | "borrowed"; }): RichTextNormalizationResult
 ```
-## `renderRichText`
-
-```ts
-renderRichText<Output>(document: RichTextDocument, adapter: RichTextRenderAdapter<Output>): RichTextRenderResult<Output>
-renderRichText<Output>(document: RichTextDocument, schema: RichTextSchema | null, adapter: RichTextRenderAdapter<Output>): RichTextRenderResult<Output>
-```
 ## `RICH_TEXT_CLIPBOARD_MIME`
 
 ```ts
@@ -419,40 +413,6 @@ type RichTextPoint =
       readonly offset: number;
       readonly affinity: RichTextAffinity;
     } & Readonly<Record<string, JSONValue>>);
-```
-## `RichTextRenderAdapter`
-
-```ts
-interface RichTextRenderAdapter<Output> {
-  document(document: RichTextDocument, children: readonly Output[]): Output;
-  text(node: RichTextText): Output;
-  node(node: Exclude<RichTextNode, RichTextText>, children: readonly Output[]): Output;
-  mark(mark: RichTextMark, children: readonly Output[]): Output;
-  unknown(value: JSONValue): Output;
-}
-```
-## `RichTextRenderDiagnostic`
-
-```ts
-interface RichTextRenderDiagnostic {
-  readonly code: RichTextRenderDiagnosticCode;
-  readonly reason: string;
-  readonly nodeId?: string;
-  readonly markType?: string;
-}
-```
-## `RichTextRenderDiagnosticCode`
-
-```ts
-type RichTextRenderDiagnosticCode = "rich-text.unsafe-link" | "rich-text.unknown-node" | "rich-text.unknown-mark";
-```
-## `RichTextRenderResult`
-
-```ts
-interface RichTextRenderResult<Output> {
-  readonly output: Output;
-  readonly diagnostics: ReadonlyArray<RichTextRenderDiagnostic>;
-}
 ```
 ## `RichTextSchema`
 

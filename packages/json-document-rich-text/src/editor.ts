@@ -127,7 +127,6 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
   const document: JSONDocument = {
     get value() { return options.document.value; },
     at: (path) => options.document.at(path),
-    query: (path) => options.document.query(path),
     validatePatch: (operations) => options.document.validatePatch(operations),
     commit(operations, commitOptions) {
       previousDocument = readRichTextDocument(options.document, pointer);

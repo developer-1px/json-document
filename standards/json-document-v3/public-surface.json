@@ -25,8 +25,6 @@
     "pointerBinding": "packages/json-document/tests/conformance/pointer.test.ts",
     "rfc6902Suite": "standards/json-document-v3/conformance/suites/rfc6902.ts",
     "rfc6902Binding": "packages/json-document/tests/conformance/rfc6902.test.ts",
-    "jsonPathSuite": "standards/json-document-v3/conformance/suites/jsonpath.ts",
-    "jsonPathBinding": "packages/json-document/tests/conformance/jsonpath.test.ts",
     "foundationVectors": "standards/json-document-v3/conformance/vectors/foundation.json",
     "pressureVectors": "standards/json-document-v3/conformance/vectors/pressure.json",
     "pressureSuite": "standards/json-document-v3/conformance/suites/pressure.ts",
@@ -40,7 +38,6 @@
     "JD3-DATA-002",
     "JD3-DOCUMENT-001",
     "JD3-ADDRESS-001",
-    "JD3-QUERY-001",
     "JD3-PATCH-001",
     "JD3-PATCH-002",
     "JD3-VALIDATION-001",
@@ -60,7 +57,6 @@
   "documentMembers": [
     "value",
     "at",
-    "query",
     "validatePatch",
     "commit",
     "subscribe"

@@ -50,7 +50,6 @@ type JSONChangeMetadata = Readonly<Record<string, JSONValue>>;
 interface JSONDocument {
   readonly value: JSONValue;
   at(pointer: Pointer): ReadResult;
-  query(jsonPath: string): QueryResult;
   validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONPatchValidationResult;
@@ -156,21 +155,6 @@ parsePointer(pointer: Pointer): string[]
 
 ```ts
 type Pointer = string;
-```
-## `QueryResult`
-
-```ts
-type QueryResult =
-  | {
-      readonly ok: true;
-      readonly query: string;
-      readonly pointers: ReadonlyArray<Pointer>;
-    }
-  | {
-      readonly ok: false;
-      readonly code: string;
-      readonly reason?: string;
-    };
 ```
 ## `readPointer`
 

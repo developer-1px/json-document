@@ -24,8 +24,7 @@ TypeScript API와 내부 identifier는 canonical term만 사용한다.
 낮은 순위의 이름이 높은 순위의 이름을 대체하려면 이유를 기록해야 한다.
 
 Normative anchor는 RFC 8259 JSON, RFC 6901 JSON Pointer, RFC 6902 JSON
-Patch, RFC 9535 JSONPath와 W3C DOM·Input Events·UI Events·composition
-용어다.
+Patch와 W3C DOM·Input Events·UI Events·composition 용어다.
 
 협업 영역의 de-facto anchor는 change, dependency, change DAG, head,
 conflict, replica, materialized view, checkpoint, compaction, relative
@@ -38,8 +37,7 @@ position, text splice, adapter와 transport-agnostic engine이다.
 | Canonical term | 정의 | 포함하지 않는 것 |
 | --- | --- | --- |
 | JSON value | RFC 8259와 호환되는 document data | Runtime state, DOM state, protocol envelope |
-| JSON Pointer | RFC 6901에 따라 한 위치를 식별하는 주소 | JSONPath query, collaboration identity |
-| JSONPath | RFC 9535에 따라 여러 위치를 찾는 query | Mutation target |
+| JSON Pointer | RFC 6901에 따라 한 위치를 식별하는 주소 | collaboration identity |
 | JSON Patch | RFC 6902 ordered operation batch | Merge Patch, semantic operation |
 | Patch application | JSON value에 JSON Patch를 원자적으로 적용하는 stateless 연산 | Stateful commit, notification, collaboration |
 
@@ -599,7 +597,7 @@ identifier에는 canonical vocabulary만 사용한다.
 
 | Decision | Current public exports | Canonical rule |
 | --- | --- | --- |
-| keep | `JSONValue`, `Pointer`, `JSONPatchOperation`, `JSONAppliedChange`, `JSONPatchResult`, `JSONDocument`, `JSONDocumentOptions`, `JSONDocumentCommitOptions`, `JSONDocumentCommitResult`, `JSONPatchValidationResult`, `ReadResult`, `QueryResult` | Standard JSON 또는 책임 suffix와 일치 |
+| keep | `JSONValue`, `Pointer`, `JSONPatchOperation`, `JSONAppliedChange`, `JSONPatchResult`, `JSONDocument`, `JSONDocumentOptions`, `JSONDocumentCommitOptions`, `JSONDocumentCommitResult`, `JSONPatchValidationResult`, `ReadResult` | Standard JSON 또는 책임 suffix와 일치 |
 | keep | `createJSONDocument`, `applyPatch`, `parsePointer`, `tryParsePointer`, `buildPointer`, `parentPointer`, `appendSegment`, `trackPointer` | Function verb grammar와 일치 |
 | merge | `JSONChangeMetadata` | Applied change의 metadata이며 별도 domain concept를 만들지 않음 |
 
@@ -630,7 +628,7 @@ identifier에는 canonical vocabulary만 사용한다.
 | keep | `CollaborationEpoch`, `CollaborationEpochParent`, `CollaborationMember`, `CollaborationMembership`, `CollaborationRulesetIdentity` | Lifecycle과 membership 책임이 명확 |
 | keep | `CollaborationIngestSuccess`, `CollaborationIngestFailure`, `CollaborationIngestResult` | Result variant grammar와 일치 |
 | keep | `CollaborationRuntime`, `CollaborationRuntimeOptions`, `CollaborationRestoreOptions`, `CollaborationRestoreResult`, `CollaborationCompactionOptions`, `CollaborationCompactionReport`, `CollaborationCompactionResult`, `CollaborationReplica`, `ReplicaStatus`, `CollaborationValidation` | Runtime/Options/Result/Report/Replica/Status grammar와 일치 |
-| keep | `createCollaborationRuntime`, `restoreCollaborationRuntime`, `compactCollaborationCheckpoint` | Function verb grammar와 일치 |
+| keep | `createCollaborationRuntime`, `restoreCollaborationRuntime` | Function verb grammar와 일치 |
 
 ### History subpath
 

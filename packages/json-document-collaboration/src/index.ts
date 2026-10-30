@@ -1,4 +1,3 @@
-export { compactCollaborationCheckpoint } from "./compact.js";
 export { createCollaborationRuntime } from "./create.js";
 export { restoreCollaborationRuntime } from "./restore.js";
 export type {

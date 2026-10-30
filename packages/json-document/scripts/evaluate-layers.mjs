@@ -17,7 +17,6 @@ const allowedLayerSeams = new Map([
     "domain->foundation",
     new Set([
       "foundation/json/index.ts",
-      "foundation/jsonpath/index.ts",
       "foundation/protocol/index.ts",
     ]),
   ],

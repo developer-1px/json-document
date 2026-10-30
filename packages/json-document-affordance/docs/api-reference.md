@@ -6,11 +6,6 @@
 
 > 이 문서는 `packages/json-document-affordance/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
-## `activateAffordance`
-
-```ts
-activateAffordance(input: WebPressInteraction | Extract<AffordanceHand, { readonly type: "press"; }> | null): AffordancePreview
-```
 ## `AffordanceCommit`
 
 ```ts
@@ -404,11 +399,6 @@ createViewportPositionSession<Key>(options: ViewportPositionOptions<Key>): Viewp
 
 ```ts
 deleteAffordance(input: Partial<WebKeyboardStroke>): AffordancePreview
-```
-## `disclosureAffordance`
-
-```ts
-disclosureAffordance(input: { readonly key: string; readonly expanded: boolean; }): AffordancePreview
 ```
 ## `dragAffordance`
 
@@ -854,26 +844,6 @@ type Point = {
 ```ts
 pointerSelect(modifiers: { readonly shiftKey?: boolean; readonly metaKey?: boolean; readonly ctrlKey?: boolean; }): AffordancePreview
 ```
-## `pressAffordance`
-
-```ts
-pressAffordance(interaction: WebPressInteraction | null, state: PressAffordanceState, options?: { readonly disabled?: boolean; }): PressAffordanceResult
-```
-## `PressAffordanceResult`
-
-```ts
-type PressAffordanceResult = AffordancePreview & {
-  readonly state: PressAffordanceState;
-};
-```
-## `PressAffordanceState`
-
-```ts
-type PressAffordanceState =
-  | { readonly status: "idle" }
-  | { readonly status: "active"; readonly source: "pointer" }
-  | { readonly status: "active"; readonly source: "keyboard"; readonly key: "Enter" | "Space" };
-```
 ## `Rect`
 
 ```ts
@@ -967,32 +937,6 @@ snapAffordance(point: Point, options: { readonly grid: number; readonly disable?
 
 ```ts
 storedResizeValue(value: number, bounds: ResizeBounds): number
-```
-## `treeAffordance`
-
-```ts
-treeAffordance(command: { readonly type: "move"; readonly direction: TreeMoveDirection; }, node: TreeFoldNode): AffordancePreview
-```
-## `TreeAffordance`
-
-```ts
-type TreeAffordance =
-  | { readonly type: "expand" }
-  | { readonly type: "collapse" }
-  | { readonly type: "move"; readonly direction: TreeMoveDirection };
-```
-## `TreeFoldNode`
-
-```ts
-type TreeFoldNode = {
-  readonly expanded: boolean;
-  readonly hasChildren: boolean;
-};
-```
-## `TreeMoveDirection`
-
-```ts
-type TreeMoveDirection = "up" | "down" | "left" | "right" | "previous" | "next";
 ```
 ## `typeaheadAffordance`
 

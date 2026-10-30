@@ -11,7 +11,7 @@ release, 모든 Hands의 admission 또는 독립 Editing 구현 간 상호운용
 소유한다. 아래 **해야 한다 / 안 된다**는 이 계약의 필수 조건이다.
 
 - 문서 값·주소·검증·commit·알림은 [JSONDocument v3](json-document-v3/profile.md)가
-  소유한다. 여섯 member의 의미를 그대로 소비하며 객체 reference 동일성을 요구하지 않는다.
+  소유한다. 다섯 member의 의미를 그대로 소비하며 객체 reference 동일성을 요구하지 않는다.
 - 선택 family의 전이는 [Selection](../packages/json-document-selection/README.md),
   도메인의 유효한 연산과 다음 선택은 각 editor가 소유한다.
 - 입력·IME·DOM lease는 [DOM lifecycle](dom-editing-lifecycle.md), 책임의 배치는

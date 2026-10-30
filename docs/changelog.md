@@ -32,6 +32,10 @@
   canonical Rich Text instruction, mention and skill atoms, attachment context,
   native clipboard, IME, and local history.
 - Made the Rich Text React renderer honor editor pointers below the JSON root.
+- Removed the JSONPath `query` member from the JSON Document contract. The
+  canonical `JSONDocument` has five members (`value`, `at`, `validatePatch`,
+  `commit`, `subscribe`); the RFC 9535 conformance suite, vendored CTS corpus
+  and `jsonpath-js` test dependency are gone.
 
 All notable changes to the active v3 packages are documented here. Earlier
 source and release history remains available from Git commits and version tags.

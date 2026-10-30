@@ -83,7 +83,6 @@
     "test:architecture": "node --test scripts/architecture-drift.test.mjs"
   },
   "devDependencies": {
-    "jsonpath-js": "0.3.1",
     "@playwright/test": "^1.60.0",
     "typescript": "^7.0.2",
     "typescript-api": "npm:typescript@5.9.3"

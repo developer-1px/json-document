@@ -18,7 +18,7 @@
 
 ```text
 Foundation
-├─ JSON Document ─ value / at / query / validatePatch / commit / subscribe
+├─ JSON Document ─ value / at / validatePatch / commit / subscribe
 │  └─ Local 또는 Collaboration 구현
 ├─ Document Types ─ model / schema / invariants / operations / projections
 │  └─ 후보별 owner 수렴과 계약 확정 · TBD
@@ -49,7 +49,7 @@ Adapter와 Connector는 서로의 선행 계층이 아닙니다. 필요한 플�
 
 | 경계 | 현재 계약 | 목표와 남은 일 |
 | --- | --- | --- |
-| JSON Document | 여섯 member와 JSON 표준 연산; Core v3 Stable | UI·장르별 edit verb를 Core에 추가하지 않음 |
+| JSON Document | 다섯 member와 JSON 표준 연산; Core v3 Stable | UI·장르별 edit verb를 Core에 추가하지 않음 |
 | Document Type | 의미·모델·유효성·연산·Projection이라는 책임 경계 | 후보별 canonical owner와 공개 계약의 수렴 · TBD |
 | Editing | Intent → EditingPlan → Session.apply → commit → EditingSnapshot | Hands별 필수 행동과 조합 적합성의 동결 · TBD |
 | Collaboration | 같은 document 계약과 base → History → Text profile | 각 profile의 지원 범위로 사용; 모든 Hands의 협업 보장과 구별 |

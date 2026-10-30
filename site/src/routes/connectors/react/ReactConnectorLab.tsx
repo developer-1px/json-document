@@ -101,7 +101,7 @@ function JSONDocumentSubscriptionLab() {
       <div className="mb-4">
         <p className={ui.text.label}>useReactConnector</p>
         <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Document subscription</h2>
-        <p className={classes("m-0", ui.text.meta)}>A React view follows the six-member JSON Document through its public subscription.</p>
+        <p className={classes("m-0", ui.text.meta)}>A React view follows the five-member JSON Document through its public subscription.</p>
       </div>
 
       <label className={classes("grid gap-1", ui.text.meta)}>

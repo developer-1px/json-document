@@ -100,11 +100,7 @@ export type {
   ViewportPositionSnapshot,
 } from "./viewport-position.js";
 export type { Point, Rect, ResizeEdge } from "./drag.js";
-export { disclosureAffordance, treeAffordance } from "./fold.js";
-export type { TreeAffordance, TreeFoldNode, TreeMoveDirection } from "./fold.js";
 export { historyAffordance } from "./history.js";
-export { pressAffordance } from "./press.js";
-export type { PressAffordanceResult, PressAffordanceState } from "./press.js";
 export type {
   HistoryAffordance,
   HistoryAffordanceMap,
@@ -137,7 +133,6 @@ export type {
   SelectOperation,
 } from "./result.js";
 export {
-  activateAffordance,
   caretAffordance,
   caretCursor,
   clickCountAffordance,

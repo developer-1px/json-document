@@ -241,8 +241,6 @@ const pointerSuite = read(manifest.conformance.pointerSuite);
 const pointerBinding = read(manifest.conformance.pointerBinding);
 const rfc6902Suite = read(manifest.conformance.rfc6902Suite);
 const rfc6902Binding = read(manifest.conformance.rfc6902Binding);
-const jsonPathSuite = read(manifest.conformance.jsonPathSuite);
-const jsonPathBinding = read(manifest.conformance.jsonPathBinding);
 const foundationVectors = json(manifest.conformance.foundationVectors);
 const pressureVectors = json(manifest.conformance.pressureVectors);
 const pressureSuite = read(manifest.conformance.pressureSuite);
@@ -456,7 +454,6 @@ for (const pattern of [
   /createIndependentJSONDocument/,
   /runJSONDocumentConformance\(independentHarness\)/,
   /runPressureConformance\(independentHarness\)/,
-  /runJSONPathConformance\(/,
   /runRFC6902Conformance\(independentPatchHarness\)/,
   /runProtocolConformance\(independentPatchHarness\)/,
 ]) {
@@ -493,16 +490,6 @@ assertPublicBinding(
   rfc6902Binding,
   /applyPatch[\s\S]*runRFC6902Conformance/,
 );
-assertGenericSuite(
-  "RFC 9535 suite",
-  jsonPathSuite,
-  /JSONPathHarness[\s\S]*runJSONPathConformance/,
-);
-assertPublicBinding(
-  "RFC 9535 binding",
-  jsonPathBinding,
-  /createJSONDocument[\s\S]*runJSONPathConformance/,
-);
 
 if (failures.length > 0) {
   console.error(
@@ -511,6 +498,6 @@ if (failures.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    `json-document standardization ok: 1 entrypoint, ${exportCount} exports, 6 JSON Document members, 0 runtime peers`,
+    `json-document standardization ok: 1 entrypoint, ${exportCount} exports, 5 JSON Document members, 0 runtime peers`,
   );
 }

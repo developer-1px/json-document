@@ -3,14 +3,14 @@
 json-document는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는
 implementation-neutral JSON 편집 API와 headless JSON Document입니다.
 
-v3 root는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 합니다. 브라우저
+v3 root는 JSON, JSON Pointer, JSON Patch만 전제로 합니다. 브라우저
 플랫폼 계약은 공식 Adapter로, React와 Zod 같은 외부 생태계는 independently
 versioned 공식 Connector로 제공합니다.
 
 ```txt
 stateless JSON Patch
   |-> local implementation -----\
-  |                               > same six-member JSON Document
+  |                               > same five-member JSON Document
   `-> collaboration engine -----/    |-> optional headless editing
                                      |-> optional official Adapters
                                      |-> optional official Connectors
@@ -48,7 +48,7 @@ console.log(document.at("/cards/0/title")); // { ok: true, ... }
 unsubscribe();
 ```
 
-읽기(`value`, `at`, `query`), 검사(`validatePatch`), 적용(`commit`),
+읽기(`value`, `at`), 검사(`validatePatch`), 적용(`commit`),
 구독(`subscribe`)이 계약의 전부입니다. 전체 시그니처는
 [docs/public/api.md](docs/public/api.md)에 있습니다.
 
@@ -116,7 +116,7 @@ persistence 인스턴스 주입을 소유합니다. 재사용 모델·연산·�
 v3 Kernel이 제공하는 최소 계약:
 
 - immutable document value
-- JSON Pointer read와 JSONPath query
+- JSON Pointer read
 - state를 바꾸지 않는 `validatePatch`
 - ordered atomic JSON Patch commit
 - canonical applied change notification

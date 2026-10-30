@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vitest";
 import {
-  activateAffordance,
   applyAffordance,
   caretAffordance,
   caretCursor,
@@ -23,7 +22,6 @@ import {
   focusAffordance,
   planeHitAffordance,
   pointerSelect,
-  pressAffordance,
   renameAffordance,
   hoverAffordance,
   marqueeAffordance,
@@ -33,7 +31,6 @@ import {
   resolveAffordanceKey,
   selectAllAffordance,
   snapAffordance,
-  treeAffordance,
   createBoardDragSession,
   createCanvasGestureSession,
   createGestureSession,
@@ -44,7 +41,7 @@ import {
   wheelAffordance,
   zoomAffordance,
 } from "../src/index.js";
-import { createWebKeyboardAdapter, pressInteractionFromWeb } from "@interactive-os/json-document-web";
+import { createWebKeyboardAdapter } from "@interactive-os/json-document-web";
 
 describe("Affordance sessions", () => {
   test("owns drag, resize, and control handle descriptor, cursor, delta, and lifecycle semantics", () => {
@@ -254,80 +251,6 @@ describe("editingCommandFromWebKeyboardStroke", () => {
   });
 });
 
-describe("pressAffordance", () => {
-  test("owns start, end, cancel, disabled, and native activation without persistent ARIA state", () => {
-    const start = pressAffordance(
-      pressInteractionFromWeb({ type: "keydown", key: " " }),
-      { status: "idle" },
-    );
-    expect(start).toEqual({
-      hand: { type: "press", phase: "start", source: "keyboard", key: "Space" },
-      state: { status: "active", source: "keyboard", key: "Space" },
-    });
-
-    const repeated = pressAffordance(
-      pressInteractionFromWeb({ type: "keydown", key: " ", repeat: true }),
-      start.state,
-    );
-    expect(repeated).toEqual({ hand: null, state: start.state });
-
-    const end = pressAffordance(
-      pressInteractionFromWeb({ type: "keyup", key: " " }),
-      repeated.state,
-    );
-    expect(end).toEqual({
-      hand: { type: "press", phase: "end", source: "keyboard", key: "Space" },
-      state: { status: "idle" },
-    });
-
-    expect(pressAffordance(
-      pressInteractionFromWeb({ type: "blur" }),
-      start.state,
-    )).toEqual({
-      hand: { type: "press", phase: "cancel", source: "keyboard", key: "Space" },
-      state: { status: "idle" },
-    });
-
-    const pointerStart = pressAffordance(
-      pressInteractionFromWeb({ type: "pointerdown", button: 0 }),
-      { status: "idle" },
-    );
-    expect(pressAffordance(
-      pressInteractionFromWeb({ type: "pointerleave" }),
-      pointerStart.state,
-    )).toEqual({
-      hand: { type: "press", phase: "cancel", source: "pointer" },
-      state: { status: "idle" },
-    });
-    expect(pressAffordance(
-      pressInteractionFromWeb({ type: "keydown", key: "Enter" }),
-      { status: "idle" },
-      { disabled: true },
-    )).toEqual({ hand: null, state: { status: "idle" } });
-    expect(pressAffordance(
-      pressInteractionFromWeb({ type: "click", detail: 0 }),
-      { status: "idle" },
-    )).toEqual({ hand: { type: "activate" }, state: { status: "idle" } });
-  });
-
-  test("maps normalized native and completed custom Press to activation once", () => {
-    expect(activateAffordance(pressInteractionFromWeb({ type: "keydown", key: "Enter" })).hand)
-      .toEqual({ type: "activate" });
-    expect(activateAffordance(pressInteractionFromWeb({ type: "keyup", key: "Enter" })).hand).toBeNull();
-    expect(activateAffordance(pressInteractionFromWeb({ type: "keydown", key: " " })).hand).toBeNull();
-    expect(activateAffordance(pressInteractionFromWeb({ type: "keyup", key: " " })).hand)
-      .toEqual({ type: "activate" });
-    expect(activateAffordance({ type: "press", phase: "start", source: "keyboard", key: "Enter" }).hand)
-      .toEqual({ type: "activate" });
-    expect(activateAffordance({ type: "press", phase: "end", source: "keyboard", key: "Space" }).hand)
-      .toEqual({ type: "activate" });
-    expect(activateAffordance({ type: "press", phase: "end", source: "pointer" }).hand)
-      .toEqual({ type: "activate" });
-    expect(activateAffordance(pressInteractionFromWeb({ type: "click", detail: 0 })).hand)
-      .toEqual({ type: "activate" });
-  });
-});
-
 describe("resolveAffordanceKey", () => {
   test("closes the conventional keymap without a host override", () => {
     const hands: unknown[] = [];
@@ -353,22 +276,6 @@ describe("resolveAffordanceKey", () => {
       { type: "redo" },
       { type: "delete" },
     ]);
-  });
-});
-
-describe("treeAffordance", () => {
-  test("uses right to expand a collapsed parent and left to collapse an expanded parent", () => {
-    expect(treeAffordance({ type: "move", direction: "right" }, { expanded: false, hasChildren: true }).hand).toEqual({
-      type: "expand",
-    });
-    expect(treeAffordance({ type: "move", direction: "left" }, { expanded: true, hasChildren: true }).hand).toEqual({
-      type: "collapse",
-    });
-    expect(treeAffordance({ type: "move", direction: "right" }, { expanded: true, hasChildren: true }).hand).toEqual({
-      type: "move",
-      direction: "right",
-      operation: "replace",
-    });
   });
 });
 
@@ -786,19 +693,6 @@ describe("forbiddenCursor", () => {
     expect(forbiddenCursor({ allowed: false }).cursor).toBe("not-allowed");
     expect(forbiddenCursor({ allowed: false, dropping: true }).cursor).toBe("no-drop");
     expect(forbiddenCursor({ allowed: true, dropping: true }).cursor).toBe("move");
-  });
-});
-
-describe("activateAffordance and clickCountAffordance", () => {
-  test("Enter and primary click activate; detail 2 is a double-click", () => {
-    expect(activateAffordance(pressInteractionFromWeb({ type: "keydown", key: "Enter" })).hand).toEqual({ type: "activate" });
-    expect(activateAffordance(pressInteractionFromWeb({ type: "click", button: 0, detail: 1 })).hand).toEqual({ type: "activate" });
-    expect(clickCountAffordance(2).hand).toEqual({ type: "click", count: 2 });
-    const hands: string[] = [];
-    applyAffordance(activateAffordance(pressInteractionFromWeb({ type: "click", button: 0, detail: 2 })), {
-      hand: (hand) => hands.push(hand.type),
-    });
-    expect(hands).toEqual(["activate"]);
   });
 });
 

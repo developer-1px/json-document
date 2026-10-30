@@ -16,7 +16,6 @@ export {
 } from "./clipboard.js";
 export { selectionOperationFromModifiers } from "./modifiers.js";
 export { isWebEditableTarget, isWebEditingHostTarget, textInputFromControl, textSelectionFromControl } from "./input.js";
-export { pressInteractionFromWeb } from "./press.js";
 export { focusWebItem, webFocusItemProps } from "./focus-item.js";
 export { findWebGridCell, webGridCellAddressProps } from "./grid-cell.js";
 export { createWebDragDropSession } from "./drag-drop-session.js";
@@ -100,11 +99,6 @@ export type {
   WebKeyboardStroke,
   WebKeymap,
 } from "./keyboard.js";
-export type {
-  WebPressInput,
-  WebPressInteraction,
-  WebPressSource,
-} from "./press.js";
 export type {
   WebDragDropCancelReason,
   WebDragDropSession,

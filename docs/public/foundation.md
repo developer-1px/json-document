@@ -5,9 +5,9 @@ Foundation은 Application, Artifact와 Hands가 공유하는 기반 계약입니
 
 ## JSON Document Protocol
 
-`JSONDocument`는 `value`, `at`, `query`, `validatePatch`, `commit`,
-`subscribe`의 여섯 member를 제공합니다. 주소는 JSON Pointer, 검색은 JSONPath,
-변경은 JSON Patch로 표현합니다. Core v3의 Stable 계약이며 화면과 장르별
+`JSONDocument`는 `value`, `at`, `validatePatch`, `commit`, `subscribe`의
+다섯 member를 제공합니다. 주소는 JSON Pointer, 변경은 JSON Patch로
+표현합니다. Core v3의 Stable 계약이며 화면과 장르별
 편집 기능을 포함하지 않습니다. [JSON Document Protocol](api.md)에서 호출과
 실패·관찰 의미를 봅니다.
 

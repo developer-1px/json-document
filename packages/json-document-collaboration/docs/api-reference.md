@@ -285,11 +285,6 @@ type CollaborationValidation = (
   candidate: JSONValue,
 ) => JSONPatchValidationResult;
 ```
-## `compactCollaborationCheckpoint`
-
-```ts
-compactCollaborationCheckpoint(input: unknown, options: CollaborationCompactionOptions): CollaborationCompactionResult
-```
 ## `ContainerNodeId`
 
 ```ts

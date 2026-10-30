@@ -3,7 +3,7 @@
 React contenteditable root bound to one local `JSONDocument` string pointer.
 
 The component owns the editable root and a native-input DOM lease. Collaboration
-ingestion is not required. Commits use the six-member `document` port. Schema,
+ingestion is not required. Commits use the five-member `document` port. Schema,
 marks, atoms, toolbar, and product chrome stay outside this package.
 
 ```tsx

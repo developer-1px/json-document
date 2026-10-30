@@ -125,7 +125,7 @@
       }
     },
     {
-      "id": "jsonpath-is-not-a-patch-target",
+      "id": "non-pointer-path-is-not-a-patch-target",
       "kind": "patch",
       "requirements": [
         "JD3-ADDRESS-001",

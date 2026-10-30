@@ -52,14 +52,6 @@ export type JSONDocumentReadResult =
   | { readonly ok: true; readonly path: string; readonly value: JSONValue }
   | JSONDocumentFailureResult;
 
-export type JSONDocumentQueryResult =
-  | {
-      readonly ok: true;
-      readonly query: string;
-      readonly pointers: ReadonlyArray<string>;
-    }
-  | JSONDocumentFailureResult;
-
 export type JSONDocumentCommitResult =
   | (JSONDocumentSuccessResult & { readonly change: JSONDocumentChange })
   | JSONDocumentFailureResult;
@@ -67,7 +59,6 @@ export type JSONDocumentCommitResult =
 export interface JSONDocument {
   readonly value: JSONValue;
   at(pointer: string): JSONDocumentReadResult;
-  query(jsonPath: string): JSONDocumentQueryResult;
   validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONDocumentValidationResult;
@@ -101,10 +92,6 @@ interface ReadVector extends VectorBase {
   readonly kind: "read";
   readonly at: ReadonlyArray<{
     readonly pointer: string;
-    readonly expect: ExpectedObject;
-  }>;
-  readonly query: ReadonlyArray<{
-    readonly jsonPath: string;
     readonly expect: ExpectedObject;
   }>;
 }
@@ -315,9 +302,6 @@ function runReadVector(
   const observation = observe(document);
   for (const row of vector.at) {
     expectRequired(document.at(row.pointer), row.expect);
-  }
-  for (const row of vector.query) {
-    expectRequired(document.query(row.jsonPath), row.expect);
   }
   expect(document.value).toEqual(before);
   expect(observation.changes).toEqual([]);

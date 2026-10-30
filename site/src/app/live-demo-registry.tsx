@@ -58,7 +58,6 @@ const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
   "/widgets/grid": demo(() => import("../routes/widgets/GridWidgetRoute"), "GridWidgetRoute", "routes/widgets/GridWidgetRoute.tsx"),
   "/widgets/document": demo(() => import("../routes/widgets/DocumentWidgetRoute"), "DocumentWidgetRoute", "routes/widgets/DocumentWidgetRoute.tsx"),
   "/widgets/canvas": demo(() => import("../routes/widgets/CanvasWidgetRoute"), "CanvasWidgetRoute", "routes/widgets/CanvasWidgetRoute.tsx"),
-  "/widgets/tree": demo(() => import("../routes/widgets/TreeWidgetRoute"), "TreeWidgetRoute", "routes/widgets/TreeWidgetRoute.tsx"),
   "/widgets/board": demo(() => import("../routes/widgets/BoardWidgetRoute"), "BoardWidgetRoute", "routes/widgets/BoardWidgetRoute.tsx"),
 };
 

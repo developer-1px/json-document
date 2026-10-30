@@ -57,11 +57,3 @@ export type ReadResult =
       readonly value: JSONValue;
     }
   | JSONPatchFailure;
-
-export type QueryResult =
-  | {
-      readonly ok: true;
-      readonly query: string;
-      readonly pointers: ReadonlyArray<Pointer>;
-    }
-  | JSONPatchFailure;

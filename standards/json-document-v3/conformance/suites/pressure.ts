@@ -34,10 +34,6 @@ interface PressureVertical {
     readonly pointer: string;
     readonly expect: ExpectedObject;
   }>;
-  readonly queries?: ReadonlyArray<{
-    readonly jsonPath: string;
-    readonly expect: ExpectedObject;
-  }>;
 }
 
 interface PressureManifest {
@@ -85,9 +81,6 @@ function runVertical(
 
   for (const read of vertical.reads ?? []) {
     expect(document.at(read.pointer)).toMatchObject(read.expect);
-  }
-  for (const query of vertical.queries ?? []) {
-    expect(document.query(query.jsonPath)).toMatchObject(query.expect);
   }
 
   if (vertical.replay === true) {

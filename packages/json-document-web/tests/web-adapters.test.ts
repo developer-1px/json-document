@@ -37,7 +37,6 @@ import {
   moveGridPoint,
   moveLinePoint,
   kanbanCardDropTargetFromWebElement,
-  pressInteractionFromWeb,
   projectWebWidgetState,
   projectWebClientPointToSVG,
   readWebRasterFile,
@@ -538,33 +537,7 @@ describe("Web interaction sessions", () => {
   });
 });
 
-describe("Web Press and ARIA Adapters", () => {
-  test("normalizes keyboard, pointer, cancellation, and native activation facts", () => {
-    expect(pressInteractionFromWeb({ type: "keydown", key: "Enter" })).toEqual({
-      phase: "start", source: "keyboard", key: "Enter",
-    });
-    expect(pressInteractionFromWeb({ type: "keyup", key: " " })).toEqual({
-      phase: "end", source: "keyboard", key: "Space",
-    });
-    expect(pressInteractionFromWeb({ type: "keydown", key: "Enter", repeat: true })).toBeNull();
-    expect(pressInteractionFromWeb({ type: "pointerdown", button: 0 })).toEqual({
-      phase: "start", source: "pointer",
-    });
-    expect(pressInteractionFromWeb({ type: "pointercancel" })).toEqual({
-      phase: "cancel", source: "pointer",
-    });
-    expect(pressInteractionFromWeb({ type: "pointerleave" })).toEqual({
-      phase: "cancel", source: "pointer",
-    });
-    expect(pressInteractionFromWeb({ type: "click", detail: 0 })).toEqual({
-      phase: "activation", source: "virtual",
-    });
-    expect(pressInteractionFromWeb({ type: "click", detail: 1 })).toEqual({
-      phase: "activation", source: "pointer",
-    });
-    expect(pressInteractionFromWeb({ type: "click", button: 2 })).toBeNull();
-  });
-
+describe("Web ARIA Adapters", () => {
   test("projects persistent role state without confusing transient press with ARIA", () => {
     expect(projectWebWidgetState({ role: "button" })).toEqual({ role: "button" });
     expect(projectWebWidgetState({ role: "button", pressed: true })).toEqual({

@@ -24,6 +24,5 @@ export type {
   JSONPatchValidationResult,
   JSONValue,
   Pointer,
-  QueryResult,
   ReadResult,
 } from "./contract.js";

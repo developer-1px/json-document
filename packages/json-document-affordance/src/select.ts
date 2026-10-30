@@ -3,7 +3,6 @@ import {
   createWebKeyboardAdapter,
   selectionOperationFromModifiers,
   type WebKeyboardCommand,
-  type WebPressInteraction,
   type WebKeyboardStroke,
 } from "@interactive-os/json-document-web";
 import {
@@ -226,21 +225,6 @@ export function renameAffordance(input:
   if (input.key === "F2") return { hand: { type: "rename", action: "begin" } };
   if (input.key === "Enter") return { hand: { type: "rename", action: "commit" } };
   if (input.key === "Escape") return { hand: { type: "rename", action: "cancel" } };
-  return { hand: null };
-}
-
-export function activateAffordance(
-  input: WebPressInteraction | Extract<AffordanceHand, { readonly type: "press" }> | null,
-): AffordancePreview {
-  if (input === null) return { hand: null };
-  if (input.phase === "activation") return { hand: { type: "activate" } };
-  if (input.source === "pointer" && input.phase === "end") return { hand: { type: "activate" } };
-  if (input.source === "keyboard" && "key" in input && (
-    (input.key === "Enter" && input.phase === "start")
-    || (input.key === "Space" && input.phase === "end")
-  )) {
-    return { hand: { type: "activate" } };
-  }
   return { hand: null };
 }
 
