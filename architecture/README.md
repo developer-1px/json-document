@@ -4,7 +4,8 @@
 문서 소유 위치를 등록한다. URL·메뉴 순서·Usage는 소유하지 않는다. 사이트는
 `site/route-registry.mjs`에서 이 등록과 `site/site-routes.json`을 합성한다.
 같은 책임을 사이트에서 다시 정의하면 실패한다. API 문서는 owning package의
-`docs/api-reference.md`에 생성한다. `docs/api-reference/packages.mjs`는 생성기에
+`docs/api-reference.md`에 생성하며 커밋하지 않는다(`npm run docs:api`, 사이트 dev·build·test와
+`check:architecture`·`docs:evaluate`·`pack:libraries`가 먼저 생성한다). `docs/api-reference/packages.mjs`는 생성기에
 이 등록을 연결하며 별도 책임 목록을 유지하지 않는다.
 
 ```text

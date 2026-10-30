@@ -25,3 +25,6 @@ playwright-report/
 
 # Output of npm run measure:closure
 closure-report.json
+
+# Generated from dist types by scripts/generate-api-reference.mjs (npm run docs:api); not committed
+packages/*/docs/api-reference.md

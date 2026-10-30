@@ -8,7 +8,7 @@ import { validateLlmsContract, validatePublicPackageReferences } from "./public-
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 
 for (const args of [
-  ["scripts/generate-api-reference.mjs", "--check"],
+  ["scripts/generate-api-reference.mjs"],
   ["scripts/check-architecture-drift.mjs"],
   ["--test", "docs/api-reference/packages.test.mjs", "site/scripts/route-checks.test.mjs", "scripts/architecture-drift.test.mjs"],
 ]) {
