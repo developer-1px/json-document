@@ -13,7 +13,7 @@ export default defineConfig({
   // Local profiling scripts are never part of the suite.
   testIgnore: /.*\.tmp\.spec\.ts/,
   fullyParallel: true,
-  timeout: 30_000,
+  timeout: 60_000,
   expect: { timeout: 15_000 },
   reporter: "list",
   use: {

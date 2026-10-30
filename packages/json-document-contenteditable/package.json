@@ -65,6 +65,7 @@
     "typescript": "^7.0.2",
     "vitest": "^4.1.7",
     "@interactive-os/json-document-editing": "*",
-    "@interactive-os/json-document-affordance": "*"
+    "@interactive-os/json-document-affordance": "*",
+    "@interactive-os/json-document-collaboration": "*"
   }
 }

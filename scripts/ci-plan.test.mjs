@@ -15,7 +15,6 @@ test("문서 변경은 문서·사이트와 최소 browser smoke만 선택한다
   assert.deepEqual(plan.packageWorkspaces, []);
   assert.deepEqual(plan.browserSpecs, [
     "site/tests/browser/live-demo-docs.spec.ts",
-    "site/tests/browser/site-shell.spec.ts",
   ]);
 });
 
@@ -32,7 +31,7 @@ test("패키지 변경은 역방향 소비자와 관련 browser spec을 선택�
     "site/tests/browser/connectors/react-hook-form.spec.ts",
     "site/tests/browser/connectors/zod.spec.ts",
     "site/tests/browser/database-demo.spec.ts",
-    "site/tests/browser/site-shell.spec.ts",
+    "site/tests/browser/live-demo-docs.spec.ts",
   ]);
 });
 
@@ -65,7 +64,7 @@ test("사이트 route는 대응 browser spec을 선택한다", () => {
   assert.equal(plan.site, true);
   assert.deepEqual(plan.browserSpecs, [
     "site/tests/browser/connectors/ajv.spec.ts",
-    "site/tests/browser/site-shell.spec.ts",
+    "site/tests/browser/live-demo-docs.spec.ts",
   ]);
 });
 
@@ -83,7 +82,7 @@ test("사이트 단위 테스트 변경은 browser 전체 검사로 확대하지
 
   assert.equal(plan.full, false);
   assert.equal(plan.site, true);
-  assert.deepEqual(plan.browserSpecs, ["site/tests/browser/site-shell.spec.ts"]);
+  assert.deepEqual(plan.browserSpecs, ["site/tests/browser/live-demo-docs.spec.ts"]);
 });
 
 test("main 계획은 현재 전체 품질 검사를 요구한다", () => {

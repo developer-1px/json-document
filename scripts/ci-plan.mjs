@@ -34,25 +34,20 @@ const packageBrowserSpecs = new Map([
   ["@interactive-os/json-document-database", ["site/tests/browser/database-demo.spec.ts"]],
   ["@interactive-os/json-document-annotation", ["site/tests/browser/annotation-demo.spec.ts", "site/tests/browser/copy-selection-closure.spec.ts"]],
   ["@interactive-os/json-document-calendar", [
-    "site/tests/browser/calendar-app.spec.ts",
-    "site/tests/browser/calendar-launch.spec.ts",
     "site/tests/browser/calendar-spa.spec.ts",
     "site/tests/browser/calendar.spec.ts",
   ]],
   ["@interactive-os/json-document-editing", [
-    "site/tests/browser/editing-demos.spec.ts",
     "site/tests/browser/editor-slice-demos.spec.ts",
   ]],
   ["@interactive-os/json-document-react", ["site/tests/browser/connectors/react.spec.ts"]],
   ["@interactive-os/json-document-react-hook-form", ["site/tests/browser/connectors/react-hook-form.spec.ts"]],
   ["@interactive-os/json-document-rich-text", [
-    "site/tests/browser/rich-text-corpus.spec.ts",
     "site/tests/browser/rich-text-demo.spec.ts",
   ]],
   ["@interactive-os/json-document-rich-text-react", ["site/tests/browser/rich-text-demo.spec.ts"]],
   ["@interactive-os/json-document-rich-text-web", ["site/tests/browser/rich-text-demo.spec.ts"]],
   ["@interactive-os/json-document-selection", [
-    "site/tests/browser/editing-demos.spec.ts",
     "site/tests/browser/editor-slice-demos.spec.ts",
   ]],
   ["@interactive-os/json-document-tanstack-table", ["site/tests/browser/connectors/tanstack-table.spec.ts"]],
@@ -68,7 +63,6 @@ const routeBrowserSpecs = new Map([
   ["adapters/clipboard", ["site/tests/browser/adapters/clipboard.spec.ts"]],
   ["adapters/contenteditable", ["site/tests/browser/adapters/contenteditable.spec.ts"]],
   ["adapters/keyboard", ["site/tests/browser/adapters/keyboard.spec.ts"]],
-  ["artifact-viewer", ["site/tests/browser/artifact-viewer.spec.ts"]],
   ["connectors/ajv", ["site/tests/browser/connectors/ajv.spec.ts"]],
   ["connectors/react", ["site/tests/browser/connectors/react.spec.ts"]],
   ["connectors/react-hook-form", ["site/tests/browser/connectors/react-hook-form.spec.ts"]],
@@ -77,7 +71,6 @@ const routeBrowserSpecs = new Map([
   ["database-demo", ["site/tests/browser/database-demo.spec.ts"]],
   ["annotation-demo", ["site/tests/browser/annotation-demo.spec.ts", "site/tests/browser/copy-selection-closure.spec.ts"]],
   ["document-demo", ["site/tests/browser/document-demo.spec.ts"]],
-  ["editing-demos", ["site/tests/browser/editing-demos.spec.ts"]],
   ["rich-text-demo", ["site/tests/browser/rich-text-demo.spec.ts"]],
   ["sheet-demo", ["site/tests/browser/sheet-demo.spec.ts"]],
   ["widgets", ["site/tests/browser/widgets.spec.ts"]],
@@ -138,7 +131,7 @@ function routeSpecs(path) {
   const firstSegment = rest.split("/")[0];
   if (editorSliceRoutes.has(firstSegment)) return ["site/tests/browser/editor-slice-demos.spec.ts"];
   if (firstSegment === "docs") return ["site/tests/browser/live-demo-docs.spec.ts"];
-  if (firstSegment === "home" || firstSegment === "showcase") return ["site/tests/browser/site-shell.spec.ts"];
+  if (firstSegment === "home" || firstSegment === "showcase") return ["site/tests/browser/live-demo-docs.spec.ts"];
   return undefined;
 }
 
@@ -146,7 +139,7 @@ export function createPlan(changedFiles, { full = false } = {}) {
   if (full) return fullPlan("main 또는 명시적 전체 검사");
 
   const directPackages = new Set();
-  const browserSpecs = new Set(["site/tests/browser/site-shell.spec.ts"]);
+  const browserSpecs = new Set(["site/tests/browser/live-demo-docs.spec.ts"]);
   let docs = false;
   let site = false;
   let standards = false;

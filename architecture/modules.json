@@ -387,18 +387,6 @@
     "referencePath": "packages/json-document-collaboration/docs/api-reference.md"
   },
   {
-    "packageName": "@interactive-os/json-document-contenteditable-collaboration",
-    "sourceDirectory": "packages/contenteditable-collaboration",
-    "positions": [
-      "Adapter",
-      "Collaboration"
-    ],
-    "responsibility": "협업 문자열과 native DOM 입력 lease 연결",
-    "entrypoint": "packages/contenteditable-collaboration/src/index.ts",
-    "subpaths": [],
-    "referencePath": "packages/contenteditable-collaboration/docs/api-reference.md"
-  },
-  {
     "packageName": "@interactive-os/json-document-sheet",
     "sourceDirectory": "packages/json-document-sheet",
     "positions": [

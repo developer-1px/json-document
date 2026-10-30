@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { RefreshCw } from "lucide-react";
 import { createTextRuntime } from "@interactive-os/json-document-collaboration/text";
-import { createContentEditableAdapter } from "@interactive-os/json-document-contenteditable-collaboration";
+import { createContentEditableBinding } from "@interactive-os/json-document-contenteditable";
 import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { Inspector } from "../../shared/ui/inspector";
@@ -33,7 +33,7 @@ export function CollaborationDemoRoute() {
   useEffect(() => {
     const root = rootRef.current;
     if (root === null) return;
-    return createContentEditableAdapter({ runtime: local, pointer: "/title", root }).bind();
+    return createContentEditableBinding({ document: local.document, text: local.text, pointer: "/title", root }).bind();
   }, [local]);
 
   function receiveRemoteChange() {

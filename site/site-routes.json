@@ -872,20 +872,6 @@
     "parentPath": "/docs/collaboration"
   },
   {
-    "path": "/docs/api/contenteditable-collaboration",
-    "label": "API · Collaborative Contenteditable",
-    "title": "Contenteditable Collaboration API - json-document",
-    "description": "@interactive-os/json-document-contenteditable-collaboration의 전체 public API입니다.",
-    "language": "ko",
-    "module": {
-      "packageName": "@interactive-os/json-document-contenteditable-collaboration",
-      "usagePaths": [
-        "/docs/collaboration"
-      ]
-    },
-    "parentPath": "/docs/adapters"
-  },
-  {
     "path": "/docs/collaboration",
     "label": "Collaboration",
     "title": "Collaboration - json-document",

@@ -19,7 +19,6 @@ on:
       - "json-document-web-v*"
       - "json-document-contenteditable-v*"
       - "json-document-collaboration-v*"
-      - "json-document-contenteditable-collaboration-v*"
 
 permissions:
   contents: read

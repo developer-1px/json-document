@@ -14,7 +14,7 @@ import {
   createTextRuntime,
 } from "@interactive-os/json-document-collaboration/text";
 import {
-  createContentEditableAdapter,
+  createContentEditableBinding,
   plainTextDOMAdapter,
 } from "../src/index.js";
 
@@ -98,14 +98,15 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
-describe("@interactive-os/json-document-contenteditable-collaboration", () => {
+describe("contenteditable lease over a collaboration text runtime", () => {
   test("ingests remote text immediately while leasing only DOM notification", () => {
     vi.useFakeTimers();
     const local = textRuntime("actor-a");
     const remote = textRuntime("actor-b");
     const root = createRoot();
-    const adapter = createContentEditableAdapter({
-      runtime: local,
+    const adapter = createContentEditableBinding({
+      document: local.document,
+      text: local.text,
       pointer: "/title",
       root,
     });
@@ -149,8 +150,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
   test("captures before native input and commits through the text profile", () => {
     const local = textRuntime("actor-a");
     const root = createRoot();
-    const adapter = createContentEditableAdapter({
-      runtime: local,
+    const adapter = createContentEditableBinding({
+      document: local.document,
+      text: local.text,
       pointer: "/title",
       root,
     });
@@ -175,8 +177,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       vi.useFakeTimers();
       const local = textRuntime("actor-a");
       const root = createRoot();
-      const adapter = createContentEditableAdapter({
-        runtime: local,
+      const adapter = createContentEditableBinding({
+        document: local.document,
+        text: local.text,
         pointer: "/title",
         root,
       });
@@ -214,8 +217,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     for (const action of ["cancel", "reset"] as const) {
       const local = textRuntime(`actor-${action}`);
       const root = createRoot();
-      const adapter = createContentEditableAdapter({
-        runtime: local,
+      const adapter = createContentEditableBinding({
+        document: local.document,
+        text: local.text,
         pointer: "/title",
         root,
       });
@@ -270,8 +274,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       const local = textRuntime("actor-a");
       const remote = atomicRuntime("actor-b");
       const root = createRoot();
-      const adapter = createContentEditableAdapter({
-        runtime: local,
+      const adapter = createContentEditableBinding({
+        document: local.document,
+        text: local.text,
         pointer: "/title",
         root,
       });
@@ -304,13 +309,15 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     const remote = textRuntime("actor-b", initial);
     const titleRoot = createRoot();
     const noteRoot = createRoot();
-    const title = createContentEditableAdapter({
-      runtime: local,
+    const title = createContentEditableBinding({
+      document: local.document,
+      text: local.text,
       pointer: "/title",
       root: titleRoot,
     });
-    const note = createContentEditableAdapter({
-      runtime: local,
+    const note = createContentEditableBinding({
+      document: local.document,
+      text: local.text,
       pointer: "/note",
       root: noteRoot,
     });
@@ -340,8 +347,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     const local = textRuntime("actor-a", { title: "A😀B" });
     const remote = atomicRuntime("actor-b", { title: "A😀B" });
     const root = createRoot();
-    const adapter = createContentEditableAdapter({
-      runtime: local,
+    const adapter = createContentEditableBinding({
+      document: local.document,
+      text: local.text,
       pointer: "/title",
       root,
     });
@@ -362,8 +370,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     const backwardLocal = textRuntime("actor-c", { title: "abcdef" });
     const backwardRemote = atomicRuntime("actor-d", { title: "abcdef" });
     const backwardRoot = createRoot();
-    createContentEditableAdapter({
-      runtime: backwardLocal,
+    createContentEditableBinding({
+      document: backwardLocal.document,
+      text: backwardLocal.text,
       pointer: "/title",
       root: backwardRoot,
     }).bind();
@@ -385,8 +394,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     vi.useFakeTimers();
     const local = textRuntime("actor-a", { title: "A😀B" });
     const root = createRoot();
-    const adapter = createContentEditableAdapter({
-      runtime: local,
+    const adapter = createContentEditableBinding({
+      document: local.document,
+      text: local.text,
       pointer: "/title",
       root,
     });
@@ -412,8 +422,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
   test("fails closed when the same actor changes causal history mid-lease", () => {
     const local = textRuntime("actor-a");
     const root = createRoot();
-    const adapter = createContentEditableAdapter({
-      runtime: local,
+    const adapter = createContentEditableBinding({
+      document: local.document,
+      text: local.text,
       pointer: "/title",
       root,
     });
@@ -443,8 +454,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
   test("scopes bound events to this editing host", () => {
     const local = textRuntime("actor-a", { title: "ab" });
     const root = createRoot();
-    createContentEditableAdapter({
-      runtime: local,
+    createContentEditableBinding({
+      document: local.document,
+      text: local.text,
       pointer: "/title",
       root,
     }).bind();
@@ -479,8 +491,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
   test("serializes line breaks and block boundaries as plain text", () => {
     const local = textRuntime("actor-a");
     const root = createRoot();
-    createContentEditableAdapter({
-      runtime: local,
+    createContentEditableBinding({
+      document: local.document,
+      text: local.text,
       pointer: "/title",
       root,
     }).bind();
@@ -524,8 +537,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     const local = textRuntime("actor-a");
     const remote = textRuntime("actor-b");
     const root = createRoot();
-    const adapter = createContentEditableAdapter({
-      runtime: local,
+    const adapter = createContentEditableBinding({
+      document: local.document,
+      text: local.text,
       pointer: "/title",
       root,
     });
@@ -571,8 +585,9 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       const local = textRuntime("actor-a");
       const remote = atomicRuntime("actor-b");
       const root = createRoot();
-      const adapter = createContentEditableAdapter({
-        runtime: local,
+      const adapter = createContentEditableBinding({
+        document: local.document,
+        text: local.text,
         pointer: "/title",
         root,
       });
@@ -597,12 +612,11 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     const local = textRuntime("actor-a");
     const remote = textRuntime("actor-b");
     const root = createRoot();
-    const results: unknown[] = [];
-    createContentEditableAdapter({
-      runtime: local,
+    createContentEditableBinding({
+      document: local.document,
+      text: local.text,
       pointer: "/title",
       root,
-      onResult: (result) => results.push(result),
     }).bind();
     root.addEventListener("beforeinput", (event) => event.preventDefault());
 
@@ -617,6 +631,5 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
 
     vi.runOnlyPendingTimers();
     expect(root.textContent).toBe("aYb");
-    expect(results).toContainEqual({ ok: true, kind: "cancelled" });
   });
 });

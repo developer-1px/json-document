@@ -243,7 +243,6 @@ import windowDockSource from "../../../../packages/json-document-ui-primitives-r
 import collaborationWorkspaceSource from "../../../../packages/json-document-collaboration/src/workspace.ts?raw";
 import collaborationCreateSource from "../../../../packages/json-document-collaboration/src/create.ts?raw";
 import collaborationEditingSource from "../../../../packages/json-document-collaboration/src/editing-index.ts?raw";
-import collaborationContentEditableSource from "../../../../packages/contenteditable-collaboration/src/lease.ts?raw";
 import ajvSource from "../../../../packages/json-document-ajv/src/index.ts?raw";
 import a2uiSource from "../../../../packages/json-document-a2ui/src/index.ts?raw";
 import reactHookFormSource from "../../../../packages/json-document-react-hook-form/src/index.ts?raw";
@@ -529,7 +528,6 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-collaboration/src/workspace.ts", collaborationWorkspaceSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
   ["packages/json-document-collaboration/src/editing-index.ts", collaborationEditingSource],
-  ["packages/contenteditable-collaboration/src/lease.ts", collaborationContentEditableSource],
   ["packages/json-document-ajv/src/index.ts", ajvSource],
   ["packages/json-document-a2ui/src/index.ts", a2uiSource],
   ["packages/json-document-react-hook-form/src/index.ts", reactHookFormSource],
@@ -1437,11 +1435,6 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-collaboration/text",
     symbol: "createTextRuntime",
     sourcePath: "packages/json-document-collaboration/src/create.ts",
-  },
-  {
-    packageName: "@interactive-os/json-document-contenteditable-collaboration",
-    symbol: "createContentEditableAdapter",
-    sourcePath: "packages/contenteditable-collaboration/src/lease.ts",
   },
   {
     packageName: "@interactive-os/json-document-ajv",

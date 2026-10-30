@@ -260,7 +260,6 @@ Core는 [v3 profile](json-document-v3/profile.md), Editing의 상태·관찰·�
 | `packages/json-document-rich-text-web` | Adapter family | clipboard와 contenteditable 책임 file, root facade 유지 |
 | `packages/json-document-rich-text-react` | Composite Connector | React render surface와 render store 책임 분리 유지 |
 | `packages/json-document-collaboration` | Profiled runtime | root/history/text public entry와 책임 module 유지; profile 의미를 합치지 않음 |
-| `packages/contenteditable-collaboration` | Composite Adapter | lease, DOM adapter, public type 책임 분리 유지 |
 
 ## 정본 예시
 

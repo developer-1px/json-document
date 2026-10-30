@@ -112,7 +112,6 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   richTextWebApi: "cursor",
   richTextReactApi: "connector",
   collaborationApi: "branch",
-  contenteditableCollaborationApi: "connector",
   topology: "branch",
   selection: "cursor",
   history: "branch",
