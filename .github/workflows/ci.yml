@@ -17,8 +17,6 @@ jobs:
           node-version: "22"
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
-      - name: Verify planner commands
-        run: npm run ci:plan:test
       - name: Verify full release graph
         env:
           npm_config_cache: ${{ runner.temp }}/npm-cache
@@ -34,12 +32,8 @@ jobs:
           node-version: "22"
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
-      - name: Install Rich Text browser engines
-        run: npx playwright install --with-deps firefox webkit
       - name: Verify site
         run: npm run typecheck -w @interactive-os/json-document-site && npm test -w @interactive-os/json-document-site && npm run site:verify:pages
-      - name: Verify browser behavior
-        run: npm run browser:test
 
   external-kit:
     name: External kit

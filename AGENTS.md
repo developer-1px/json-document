@@ -16,6 +16,8 @@ An absent remote check must not be reported as a pass.
 Pull requests do not automatically run full CI. Main pushes run the Pages
 build/deploy workflow; release tags retain package verification on a clean
 runner. Full CI and the extended collaboration soak are manual workflows.
+Browser E2E (`npm run browser:test`) is local-only: run it before handing off
+browser-facing changes, but it is not a CI gate.
 Do not wait for automatic PR checks or routinely dispatch manual CI to recreate
 the removed gate. Use remote full verification when deliberately requested.
 
